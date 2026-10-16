@@ -68,12 +68,15 @@ function loadCases() {
   return cases;
 }
 
-// Splits the browser tape's steps so a `sbs-NNNNNN` capture follows every
-// `every` presentations from the start label on; the original tape is the
-// source-only prelude plus the same commands (see paired-game.mjs).
-function densify(caseData) {
+// Splits a tape's steps so a `sbs-NNNNNN` capture follows every `every`
+// presentations from the start label on (from the first presentation without
+// one). The original replays the case's own `tape` when it has one: the
+// source-only prelude plus the shared commands (see paired-game.mjs), or its
+// own keys where a case lets each game fight separately (stage-exit). Its
+// footage starts at the bootstrap boundary, the browser tape's first frame.
+function densify(actions, label) {
   const tape = [];
-  let recording = !startLabel, presentation = 0, index = 0;
+  let recording = !label, presentation = 0, index = 0;
   const capture = () => tape.push({ type: 'capture', label: `sbs-${String(index++).padStart(6, '0')}` });
   const steps = frames => {
     while (frames > 0) {
@@ -84,17 +87,23 @@ function densify(caseData) {
     }
   };
   if (recording) capture();
-  for (const action of caseData.pairedTape) {
+  for (const action of actions) {
     if (action.type === 'step') steps(action.frames);
     else {
       tape.push(action);
-      if (action.type === 'capture' && action.label === startLabel && !recording) { recording = true; capture(); }
+      if (action.type === 'capture' && action.label === label && !recording) { recording = true; presentation = 0; capture(); }
     }
   }
   steps(extra);
-  assert.ok(index > 1, `Start label ${startLabel} never appears in the tape`);
-  const prelude = caseData.bootstrap?.sourceOnlyPrelude ?? [];
-  return { browser: tape, native: [...prelude, ...tape], frames: index };
+  assert.ok(index > 1, `Start label ${label} never appears in the tape`);
+  return { tape, frames: index };
+}
+
+function tapes(caseData) {
+  const browser = densify(caseData.pairedTape, startLabel);
+  const native = densify(caseData.tape ?? [...(caseData.bootstrap?.sourceOnlyPrelude ?? []), ...caseData.pairedTape],
+    startLabel ?? caseData.bootstrap?.boundaryLabel);
+  return { browser: browser.tape, native: native.tape, frames: Math.max(browser.frames, native.frames) };
 }
 
 async function nativeFrames(caseData, tape, directory) {
@@ -156,7 +165,7 @@ async function compose(caseData, directory, frames, title) {
   const filter = [
     `[0:v]scale=960:540,tpad=stop_mode=clone:stop=-1[l]`, `[1:v]scale=960:540,tpad=stop_mode=clone:stop=-1[r]`,
     `[l][r]hstack=inputs=2,pad=1920:600:0:60:color=0x111111,${banner('Original Rebirth', 20)},${banner(`Browser port ${sha}`, 980)},`
-      + `drawtext=fontfile=${FONT}:text='${text(caption)}':x=(w-tw)/2:y=34:fontsize=18:fontcolor=0xbbbbbb,trim=end_frame=${frames},format=yuv420p[v]`,
+      + `drawtext=fontfile=${FONT}:text='${text(caption)}':x=w-tw-20:y=18:fontsize=18:fontcolor=0xbbbbbb,trim=end_frame=${frames},format=yuv420p[v]`,
   ].join(';');
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(fps), '-i', left, '-framerate', String(fps), '-i', right,
     '-filter_complex', filter, '-map', '[v]', '-r', String(fps), '-c:v', 'libx264', '-crf', '23', '-preset', 'veryfast', '-movflags', '+faststart', video],
@@ -202,16 +211,16 @@ if (reelInput) {
       rmSync(directory, { recursive: true, force: true });
       mkdirSync(directory, { recursive: true });
       writeFileSync(join(directory, 'case.json'), JSON.stringify(caseData) + '\n');
-      const tapes = densify(caseData);
-      console.log(`${id}: ${tapes.frames} frame pairs, seed ${caseData.seed}`);
+      const plan = tapes(caseData);
+      console.log(`${id}: ${plan.frames} frame pairs, seed ${caseData.seed}`);
       const [native, port] = await Promise.all([
-        nativeFrames(caseData, tapes.native, join(directory, 'original')),
-        browserFrames(browser, server, caseData, tapes.browser, join(directory, 'port')),
+        nativeFrames(caseData, plan.native, join(directory, 'original')),
+        browserFrames(browser, server, caseData, plan.browser, join(directory, 'port')),
       ]);
       const counted = side => existsSync(side) ? readdirSync(side).filter(name => name.startsWith('sbs-')).length : 0;
-      const result = { id, seed: caseData.seed, frames: tapes.frames, native, port,
+      const result = { id, seed: caseData.seed, frames: plan.frames, native, port,
         nativeFrames: counted(join(directory, 'original', 'frames')), portFrames: counted(join(directory, 'port')) };
-      if (result.nativeFrames && result.portFrames) result.video = await compose(caseData, directory, tapes.frames, flag('--title', id));
+      if (result.nativeFrames && result.portFrames) result.video = await compose(caseData, directory, plan.frames, flag('--title', id));
       if (!keepFrames) {
         rmSync(join(directory, 'port'), { recursive: true, force: true });
         rmSync(join(directory, 'original', 'frames'), { recursive: true, force: true });

@@ -1,0 +1,8016 @@
+{
+  "schema": 1,
+  "specs": [
+    "dingle"
+  ],
+  "discovery": {
+    "rooms": {
+      "seedsTried": 0
+    },
+    "dingle": {
+      "seedsTried": 775,
+      "rejectedCounts": {
+        "other-boss": 672,
+        "no-quiet-path": 102
+      },
+      "rejectedAfterPlanning": [],
+      "originalValidated": true
+    }
+  },
+  "failures": [],
+  "cases": [
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "dingle-random-0",
+        "description": "Walk 3 rooms into Dingle (copy) and fight",
+        "systems": [
+          "enemies-bosses",
+          "damage-pipeline",
+          "room-connectivity",
+          "projectile-physics"
+        ],
+        "randomized": true
+      },
+      "seed": "DV02XJWW",
+      "seedValue": 285406815,
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 2184569263,
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "First Title frame0/f32 white fade .975; cutscene is not implemented by the browser"
+      },
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "v",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "v",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "2",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "2",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-80"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-100"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-120"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-140"
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "capture",
+          "label": "route-160"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-180"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-200"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 16
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "capture",
+          "label": "route-220"
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 14
+        },
+        {
+          "type": "capture",
+          "label": "route-240"
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-260"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-280"
+        },
+        {
+          "type": "step",
+          "frames": 14
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-300"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-320"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-340"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-360"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-380"
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "capture",
+          "label": "route-400"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "route-420"
+        },
+        {
+          "type": "step",
+          "frames": 201
+        },
+        {
+          "type": "capture",
+          "label": "boss-room-arrival"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-120"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-122"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-124"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-126"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-128"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-130"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-132"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-134"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-136"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-138"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-140"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-142"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-144"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-146"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-148"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-150"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-152"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-154"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-156"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-158"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-160"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-162"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-164"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-166"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-168"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-170"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-172"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-174"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-176"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-178"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-180"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-182"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-184"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-186"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-188"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-190"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-192"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-194"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-196"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-198"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-200"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-202"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-204"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-206"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-208"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-210"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-212"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-214"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-216"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-218"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-220"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-120"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-122"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-124"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-126"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-128"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-130"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-132"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-134"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-136"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-138"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-140"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-142"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-144"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-146"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-148"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-150"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-152"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-154"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-156"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-158"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-160"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-162"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-164"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-166"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-168"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-170"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-172"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-174"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-176"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-178"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-180"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-120"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-120"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-120"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-60"
+        }
+      ],
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "v",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "v",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "2",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "2",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-80"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-100"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-120"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-140"
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "capture",
+          "label": "route-160"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-180"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-200"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 16
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "capture",
+          "label": "route-220"
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "a",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 14
+        },
+        {
+          "type": "capture",
+          "label": "route-240"
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-260"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-280"
+        },
+        {
+          "type": "step",
+          "frames": 14
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-300"
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "route-320"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "route-340"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-360"
+        },
+        {
+          "type": "step",
+          "frames": 20
+        },
+        {
+          "type": "capture",
+          "label": "route-380"
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 10
+        },
+        {
+          "type": "capture",
+          "label": "route-400"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 4
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "route-420"
+        },
+        {
+          "type": "step",
+          "frames": 201
+        },
+        {
+          "type": "capture",
+          "label": "boss-room-arrival"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-120"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-122"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-124"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-126"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-128"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-130"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-132"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-134"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-136"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-138"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-140"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-142"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-144"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-146"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-148"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-150"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-152"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-154"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-156"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-158"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-160"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-162"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-164"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-166"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-168"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-170"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-172"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-174"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-176"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-178"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-180"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-182"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-184"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-186"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-188"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-190"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-192"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-194"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-196"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-198"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-200"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-202"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-204"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-206"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-208"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-210"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-212"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-214"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-216"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-218"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-scene-220"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-120"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-122"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-124"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-126"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-128"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-130"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-132"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-134"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-136"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-138"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-140"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-142"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-144"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-146"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-148"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-150"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-152"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-154"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-156"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-158"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-160"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-162"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-164"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-166"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-168"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-170"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-172"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-174"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-176"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-178"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot0-180"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot1-120"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot2-120"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-60"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-62"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-64"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-66"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-68"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-70"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-72"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-74"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-76"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-78"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-80"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-82"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-84"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-86"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-88"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-90"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-92"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-94"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-96"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-98"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-100"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-102"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-104"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-106"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-108"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-110"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-112"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-114"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-116"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-118"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-shoot3-120"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-2"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-4"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-6"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-8"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-10"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-12"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-14"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-16"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-18"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-20"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-22"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-24"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-26"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-28"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-30"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-32"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-34"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-36"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-38"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-40"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-42"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-44"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-46"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-48"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-50"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-52"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-54"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-56"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-58"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "boss-idle-60"
+        }
+      ],
+      "comparisons": {
+        "fullFrameRGBA": "strict diagnostic at every paired capture; no tolerance",
+        "state": "source title/fader clocks, player motion, pause/controller, red HP/damage countdown and active tear/bomb counts",
+        "completeOriginalStateParity": false
+      },
+      "entity": {
+        "type": 261,
+        "variant": 0,
+        "shape": [
+          13,
+          7
+        ],
+        "slot": 2,
+        "boss": true,
+        "rooms": [
+          6,
+          7,
+          9,
+          0
+        ],
+        "routeFrames": 621,
+        "selection": {
+          "entropy": "OS random",
+          "discoveryAttempts": 775
+        },
+        "specs": [
+          "dingle"
+        ]
+      }
+    }
+  ]
+}
