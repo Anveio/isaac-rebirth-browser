@@ -52,6 +52,8 @@ mod technology;
 mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 mod contact_candidates;
+mod controlled_knife_homing;
+mod target_eligibility;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -713,6 +715,11 @@ pub struct State {
     /// tiny flies at live positions in the next actor pass.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tear_partition: Vec<u32>,
+    ///Previous source4545D0 query membership; a missing restore has no owner.
+    ///Explicit continuation preserves known membership; missing legacy data
+    ///stays unknown until its actual rebuild, never a default empty query.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) knife_query_partition: Option<contact_candidates::QuerySnapshot>,
     #[serde(default)]
     pub lasers: Vec<lasers::Laser>,
     #[serde(default)]
@@ -934,6 +941,7 @@ impl Game {
                 next_effect: 1,
                 sprite_effects: Vec::new(),
                 tear_partition: Vec::new(),
+                knife_query_partition: Some(contact_candidates::QuerySnapshot::empty()),
                 lasers: Vec::new(),
                 knives: Vec::new(),
                 attack_runtime: attack_runtime::AttackRuntime::default(),
@@ -1648,6 +1656,8 @@ impl Game {
                 self.special_room_assets.as_deref().map(Vec::as_slice),
             )?
         };
+        //Neither fresh Level nor a reused manager owns empty query buckets.
+        self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
@@ -2043,7 +2053,9 @@ impl Game {
                 // keep free pickup Init/Collect rules (no shop placeholder).
                 // Other special contexts retain typed selectors until their
                 // prices, pools and replacements are admitted.
-                let pickup = if selector.entity_type == 5 && selector.variant == 60 {
+                let pickup = if selector.entity_type == 5 && matches!(selector.variant, 70 | 300) {
+                    Pickup::from_pocket_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 60 {
                     chests::from_locked_selector(next, selector, true, &self.state)?
                 } else if selector.entity_type == 5 && selector.variant == 50 {
                     chests::from_source_selector(next, selector, true, &self.state)?
@@ -2796,6 +2808,18 @@ impl Game {
             epic_fetus::retire_full(&mut self.state);
             explosion_effects::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
+            //454DF0: after fenced actors, inactive31E Uninit/registered
+            //unlink and stable manager compaction precede455292->4545D0.
+            //Retain the prior snapshot throughout those actor callbacks;
+            //only the real rebuild below replaces it for the next phase.
+            controlled_knife_homing::unlink_removed_targets(&mut self.state);
+            npcs::unlink_removed(&mut self.state.room.npcs);
+            self.state.room.npcs.retain(|npc| !npc.removed);
+            self.state.actor_scheduler.retain(|actor| {
+                actor.kind != actors::ActorKind::Npc
+                    || self.state.room.npcs.iter().any(|npc| npc.id == actor.id)
+            });
+            controlled_knife_homing::rebuild_partition(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             bombs::player_contacts(&mut self.state)?;
@@ -2901,6 +2925,7 @@ impl Game {
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
         self.state.room.pickups.retain(|pickup| !pickup.removed);
+        controlled_knife_homing::unlink_removed_targets(&mut self.state);
         npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
         self.state.familiars.retain(|familiar| !familiar.removed);
@@ -3027,6 +3052,8 @@ impl Game {
             coins: self.state.inventory.coins,
         })?;
         self.state.stage_seed = stage_seed;
+        //Neither fresh Level nor a reused manager owns empty query buckets.
+        self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];

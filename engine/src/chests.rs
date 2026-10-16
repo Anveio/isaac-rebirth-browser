@@ -245,6 +245,7 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
                 game_update,
                 &birth,
                 inputs.regular_subtypes,
+                inputs.pocket_subtypes,
             )?;
             births.push(birth);
             Ok(())
@@ -266,6 +267,7 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
 pub(crate) struct OpeningInputs {
     double_loot: bool,
     regular_subtypes: crate::pickups::RegularSubtypeInputs,
+    pocket_subtypes: crate::pickups::PocketSubtypeInputs,
 }
 
 ///508FE0 first queries21, then one/two actual slots (508FC0 Have139), then
@@ -323,6 +325,7 @@ fn opening_inputs(state: &State) -> Result<OpeningInputs, OpenFrontier> {
     Ok(OpeningInputs {
         double_loot: items.owned_counts[199] > 0,
         regular_subtypes: crate::pickups::RegularSubtypeInputs::from_state(state),
+        pocket_subtypes: crate::pickups::PocketSubtypeInputs::from_state(state),
     })
 }
 
@@ -544,6 +547,7 @@ fn open_bounded_chest(
                 game_update,
                 &birth,
                 inputs.regular_subtypes,
+                inputs.pocket_subtypes,
             )?;
             births.push(birth);
             Ok(())
@@ -645,32 +649,29 @@ fn admit_child(
     game_update: u32,
     birth: &LootBirth,
     regular_inputs: crate::pickups::RegularSubtypeInputs,
+    pocket_inputs: crate::pickups::PocketSubtypeInputs,
 ) -> Result<(), String> {
-    // Rare child50/60 sprite scaling, pills and trinkets have separate Init
-    // callbacks. Their exact factory inputs stay in Chest.loot_births; they
-    // never become invented authored groups or substitute regular actors.
-    if birth.sprite_scale_multiplier.is_some() || !matches!(birth.variant, 10 | 20 | 30 | 40) {
+    //Rare scaled50/60 and trinket350 retain their independent Init owners.
+    //Pocket70/300 now shares the room/reentry/drop resolver; every caller
+    //retains its actual seed, scatter velocity and scheduler admission order.
+    if birth.sprite_scale_multiplier.is_some() || !matches!(birth.variant, 10 | 20 | 30 | 40 | 70 | 300) {
         return Ok(());
     }
-    let Some(subtype) = crate::pickups::regular_subtype_with_inputs(
-        birth.variant,
-        0,
-        birth.spawn_seed,
-        regular_inputs,
-    )?
-    else {
-        return Ok(());
-    };
     let id = *next_pickup;
-    let mut pickup = Pickup::spawn(
-        id,
-        birth.variant,
-        crate::pickups::definition_subtype(birth.variant, subtype),
-        birth.position,
-        true,
-    )?;
-    pickup.subtype = subtype;
-    pickup.initialize_spawn_seed(birth.spawn_seed)?;
+    let mut pickup = if matches!(birth.variant, 70 | 300) {
+        let Some(pickup) = Pickup::from_pocket_parts(id, birth.variant, 0, birth.spawn_seed,
+            birth.position, true, pocket_inputs)? else { return Ok(()) };
+        pickup
+    } else {
+        let Some(subtype) = crate::pickups::regular_subtype_with_inputs(
+            birth.variant, 0, birth.spawn_seed, regular_inputs,
+        )? else { return Ok(()) };
+        let mut pickup = Pickup::spawn(id, birth.variant,
+            crate::pickups::definition_subtype(birth.variant, subtype), birth.position, true)?;
+        pickup.subtype = subtype;
+        pickup.initialize_spawn_seed(birth.spawn_seed)?;
+        pickup
+    };
     pickup.velocity = birth.velocity;
     pickup.birth_game_update = game_update;
     *next_pickup = id.checked_add(1).ok_or("Chest child identity exhausted")?;

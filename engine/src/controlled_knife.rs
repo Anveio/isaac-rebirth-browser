@@ -18,6 +18,7 @@ pub(crate) fn advance(
     room: &Grid,
     game_age: u32,
     countable_total: i32,
+    homing: crate::controlled_knife_homing::Step,
     mut form_satellites: impl FnMut(&Knife) -> Result<(), String>,
 ) -> Result<bool, String> {
     if phase == Phase::Skipped {
@@ -69,6 +70,8 @@ pub(crate) fn advance(
     }
     //47360A writes Layer0+22 only; preserve the independently ownedY flip.
     knife.sprite.layer_flips.entry(0).or_insert([false, false])[0] = knife.sprite.rotation > 0.0;
+    //473615..4736ED: steering/target registration precedes room clamp.
+    crate::controlled_knife_homing::apply(knife, homing)?;
     //5C7E50 with all four margins zero precedes the empty-room return test.
     knife.position = room.clamp_room(knife.position, 0.0);
     //47374F..474967 traverses4A0 before empty-room return steering.
@@ -82,7 +85,7 @@ pub(crate) fn advance(
     //owner.474CCF/DA8 accepts slow motion or a positive current velocity dot.
     if countable_total <= 0
         && knives::squared_length(toward_parent) > 10_000.0
-        && (velocity_squared < f32::from_bits(0x3dcc_cccd)
+        && (knives::squared_length(knife.velocity) < f32::from_bits(0x3dcc_cccd)
             || knife.velocity.x * toward_parent.x + knife.velocity.y * toward_parent.y > 0.0)
         && knife.current_friction != 0.0
     {

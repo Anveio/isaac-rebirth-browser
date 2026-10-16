@@ -44,6 +44,98 @@ pub struct Definition {
 }
 
 include!(concat!(env!("OUT_DIR"), "/pickup_catalog.rs"));
+include!(concat!(env!("OUT_DIR"), "/card_catalog.rs"));
+
+/// GetCard5817A0 uses an independent temporary RNG35. Unlock filtering keeps
+/// ascending configuration order and falls back once to all forty card IDs.
+/// Neither the run ItemPool state nor the shared MT stream is sampled.
+pub(crate) fn random_card(seed: u32, achievements: &[bool], suits: bool, runes: bool) -> Result<u32, String> {
+    if seed == 0 || achievements.len() != 179 {
+        return Err("GetCard requires its actual nonzero seed and 179 achievement bytes".into());
+    }
+    let mut rng = crate::items::Rng::new(seed, [5, 9, 7]);
+    let (first, last) = if rng.bounded(25) == 0 {
+        (36, 40)
+    } else if rng.bounded(10) == 0 && runes {
+        (28, 35)
+    } else if rng.bounded(5) == 0 && suits {
+        (23, 27)
+    } else {
+        (1, 22)
+    };
+    let eligible = |id: &u32| {
+        let achievement = CARD_ACHIEVEMENTS[*id as usize];
+        achievement < 0 || achievements.get(achievement as usize).copied() == Some(true)
+    };
+    let mut candidates: Vec<u32> = (first..=last).filter(eligible).collect();
+    if candidates.is_empty() {
+        candidates = (1..=40).filter(eligible).collect();
+    }
+    if candidates.is_empty() {
+        return Err("GetCard has no unlocked authored card".into());
+    }
+    Ok(candidates[rng.bounded(candidates.len() as u32) as usize])
+}
+
+///Independent actual Have operands and the selected profile's unlock bytes.
+///The same Init core serves room admission, chest children and later drops;
+///a missing unrelated property never vetoes an explicit resolved family.
+#[derive(Clone, Copy)]
+pub(crate) struct PocketSubtypeInputs {
+    little_baggy: Option<bool>,
+    starter_deck: Option<bool>,
+    achievements: Option<[bool; 179]>,
+}
+impl PocketSubtypeInputs {
+    pub(crate) fn from_state(state: &crate::State) -> Self {
+        let items = state.player.entity_source
+            .filter(|source| source.entity_type == 1 && source.variant == 0)
+            .and(state.player_items.as_ref());
+        Self {
+            little_baggy: items.and_then(|owner| owner.owned_counts.get(252)).map(|count| *count > 0),
+            starter_deck: items.and_then(|owner| owner.owned_counts.get(251)).map(|count| *count > 0),
+            achievements: state.profiles.get(usize::from(state.profile).wrapping_sub(1))
+                .and_then(|profile| profile.achievements.as_slice().try_into().ok()),
+        }
+    }
+}
+
+///The actual preconversion runs once, even for explicit subtypes. Card300
+///reads252 then251 only on its positive branch; Pill70 reads251 directly.
+///The conversion jumps to the selected resolver without restarting the
+///modifier prelude. Unknown reached inputs never become neutral counts.
+fn source_pocket_selection(variant: u32, subtype: u32, spawn_seed: u32,
+    inputs: PocketSubtypeInputs) -> Result<Option<(u32, u32)>, String> {
+    let mut variant = variant;
+    let mut subtype = subtype;
+    if variant == 300 {
+        let Some(baggy) = inputs.little_baggy else { return Ok(None) };
+        if baggy {
+            let Some(deck) = inputs.starter_deck else { return Ok(None) };
+            if !deck { variant = 70; subtype = 0; }
+        }
+    } else if variant == 70 {
+        let Some(deck) = inputs.starter_deck else { return Ok(None) };
+        if deck { variant = 300; subtype = 0; }
+    } else {
+        return Ok(None);
+    }
+    if subtype == 0 {
+        if spawn_seed == 0 { return Err("Pocket Init requires its actual nonzero spawn seed".into()); }
+        let raw = crate::room_spawns::next35(spawn_seed);
+        subtype = if variant == 70 {
+            //581950 is incoming unsigned seed%9+1 and owns no RNG.
+            raw % 9 + 1
+        } else {
+            let Some(achievements) = inputs.achievements else { return Ok(None) };
+            random_card(raw, &achievements, true, true)?
+        };
+    }
+    Ok(match (variant, subtype) {
+        (70, 1..=9) | (300, 1..=40) => Some((variant, subtype)),
+        _ => None,
+    })
+}
 
 /// Direct Pickup.Init4ff1e0 Have operands. Each property is independent:
 /// missing actual Player/count ownership is unknown, never a neutral count.
@@ -215,10 +307,12 @@ pub(crate) fn regular_subtype_with_inputs(
 /// them, they use the bomb pickup's temporary visual definition, so every
 /// definition lookup for a live pickup resolves its subtype here.
 pub(crate) fn definition_subtype(variant: u32, subtype: u32) -> u32 {
-    if variant == 40 && matches!(subtype, 3 | 5) {
-        1
-    } else {
-        subtype
+    match (variant, subtype) {
+        (40, 3 | 5) | (300, 1..=22) => 1,
+        (300, 23..=27 | 36..=40) => 2,
+        (300, 28..=31) => 3,
+        (300, 32..=35) => 4,
+        _ => subtype,
     }
 }
 
@@ -333,7 +427,29 @@ impl Pickup {
     /// Ordinary admitted pickups use the common free ground-motion branch.
     /// Collectible home return and Chest callbacks keep their own owners.
     pub(crate) fn has_regular_physics(&self) -> bool {
-        matches!(self.variant, 10 | 20 | 30 | 40)
+        matches!(self.variant, 10 | 20 | 30 | 40 | 70 | 300)
+    }
+
+    ///Free natural Card/Pill Init uses the canonical preconversion and pool
+    ///resolver. A card keeps its actual ID after Base selects its art family.
+    pub(crate) fn from_pocket_selector(id: u32, selector: &crate::room_spawns::SpawnSelector,
+        appear: bool, state: &crate::State) -> Result<Option<Self>, String> {
+        if selector.entity_type != 5 || !matches!(selector.variant, 70 | 300) || state.challenge_id == 33 {
+            return Ok(None);
+        }
+        Self::from_pocket_parts(id, u32::from(selector.variant), u32::from(selector.subtype),
+            selector.spawn_seed, selector.position, appear, PocketSubtypeInputs::from_state(state))
+    }
+
+    ///Actual Game.Spawn inputs reach this same resolver without manufacturing
+    ///an authored Room selector or consuming any extra shared seed/draw.
+    pub(crate) fn from_pocket_parts(id: u32, variant: u32, subtype: u32, spawn_seed: u32,
+        position: WorldVector, appear: bool, inputs: PocketSubtypeInputs) -> Result<Option<Self>, String> {
+        let Some((variant, subtype)) = source_pocket_selection(variant, subtype, spawn_seed, inputs)?
+            else { return Ok(None) };
+        let mut pickup = Self::spawn(id, variant, subtype, position, appear)?;
+        pickup.initialize_spawn_seed(spawn_seed)?;
+        Ok(Some(pickup))
     }
 
     /// Concrete room admission for the supported fresh normal Isaac families.
@@ -495,7 +611,7 @@ impl Pickup {
             spritesheet_item_id: visual,
             position,
             presented_position: position,
-            anchor_position: if matches!(variant, 10 | 20 | 30 | 40) {
+            anchor_position: if matches!(variant, 10 | 20 | 30 | 40 | 70 | 300) {
                 WorldVector { x: 0.0, y: 0.0 }
             } else {
                 position
@@ -523,7 +639,7 @@ impl Pickup {
             birth_game_update: 0,
             charge: 0,
             touched: false,
-            regular_collision: matches!(variant, 10 | 20 | 30 | 40).then_some(RegularCollision {
+            regular_collision: matches!(variant, 10 | 20 | 30 | 40 | 70 | 300).then_some(RegularCollision {
                 grid_collision_class: 5,
                 entity_collision_class: if animation == "Idle" { 4 } else { 0 },
             }),
@@ -838,16 +954,23 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
     let mut admitted = Vec::with_capacity(records.len());
     let mut handles = BTreeSet::new();
     for record in records {
-        if !matches!(record.variant, 10 | 20 | 30 | 40) || !handles.insert(record.handle) {
+        if !matches!(record.variant, 10 | 20 | 30 | 40 | 70 | 300) || !handles.insert(record.handle) {
             return Err("invalid saved regular pickup record".into());
         }
         // Saved subtype is concrete. Fresh normal Isaac has no modifier that
         // rerolls it; initializing temporary RNG35 consumes no output here.
-        let subtype = regular_subtype(record.variant, record.subtype, record.spawn_seed)?;
+        let (variant, subtype) = if matches!(record.variant, 70 | 300) {
+            let Some(selected) = source_pocket_selection(record.variant, record.subtype, record.spawn_seed,
+                PocketSubtypeInputs::from_state(state))?
+                else { return Err("saved Pocket Init reached an unowned replacement input".into()) };
+            selected
+        } else {
+            (record.variant, regular_subtype(record.variant, record.subtype, record.spawn_seed)?)
+        };
         let mut pickup = Pickup::spawn(
             record.handle,
-            record.variant,
-            definition_subtype(record.variant, subtype),
+            variant,
+            subtype,
             record.position,
             false,
         )?;
