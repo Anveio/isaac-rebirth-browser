@@ -386,6 +386,10 @@ pub struct RunIntroduction {
     /// HUD::ShowItemText 5732c0 title on the shared ui_streak sprite.
     #[serde(default = "stage_title")]
     pub title: String,
+    /// HUD5732C0's second authored line. Empty stage/miniboss subtitles
+    /// retain the existing serialized shape and presentation.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub subtitle: String,
     /// The stage name (Level::ShowName 585500) rather than a later banner
     /// such as the miniboss VS text, which restarts the same streak clock.
     #[serde(default = "stage_streak")]
@@ -403,7 +407,30 @@ impl RunIntroduction {
             age: 0,
             active,
             title: stage_title(),
+            subtitle: String::new(),
             stage: true,
+        }
+    }
+
+    ///505D7F..505DE9 takes the current collectible config's name and
+    ///description before the Pickup pose and deferred AddCollectible queue.
+    pub(crate) fn collectible(config: &items::CollectibleDefinition) -> Self {
+        Self {
+            age: 0,
+            active: true,
+            title: config.name.into(),
+            subtitle: config.description.into(),
+            stage: false,
+        }
+    }
+
+    ///54F920 -> HUD572600 -> Sprite40F9F0 advances the shared streak
+    ///before the Game pause/transition guards. One Full is one authored
+    ///frame; age keeps its existing half-frame presentation unit.
+    fn advance_full(&mut self) {
+        if self.active {
+            self.age += 2;
+            self.active = self.age < 140;
         }
     }
 }
@@ -2144,8 +2171,10 @@ impl Game {
             epic_fetus::restore_fast_positions(&mut self.state)?;
             explosion_effects::restore_fast_positions(&mut self.state)?;
         }
-        //54F938 precedes every GameFull popup/transition/age guard.
+        //54F920's shared HUD streak precedes54F938 and every later
+        //GameFull popup/transition/pause guard. Fast has no HUD update.
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            self.state.run_introduction.advance_full();
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
             }
@@ -2175,10 +2204,6 @@ impl Game {
             .run_tick
             .checked_add(1)
             .ok_or("run tick counter exhausted")?;
-        if self.state.run_introduction.active {
-            self.state.run_introduction.age += 1;
-            self.state.run_introduction.active = self.state.run_introduction.age < 140;
-        }
         // Game::Update54f9da: an active StageTransition replaces the whole
         // full Game update, and fast550760 freezes the Room as well.
         if self.state.stage_transition.active() {
@@ -2896,6 +2921,7 @@ impl Game {
             age: 0,
             active: true,
             title: format!("{player} VS {}", descriptor.template.name),
+            subtitle: String::new(),
             stage: false,
         };
     }
