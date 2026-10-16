@@ -40,6 +40,12 @@ const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'pai
   archiveBrowserEvidence: true })
   : { status: 'fail', cases: [] };
 
+// Cases whose port keys were recorded closed-loop (stage-exit fights) only
+// replay the recorded game on the build that recorded them.
+const build = paired.build?.sha256;
+const stale = scenario => scenario.portRecordedBuild && build && scenario.portRecordedBuild !== build
+  ? { recordedBuild: scenario.portRecordedBuild, build } : undefined;
+
 const requireKey = flag('--require-from-case');
 const cases = scenarios.cases.map((scenario, index) => {
   const directory = resolve(output, 'paired', `${String(index).padStart(2, '0')}-${scenario.scenario.id}`);
@@ -64,7 +70,7 @@ const cases = scenarios.cases.map((scenario, index) => {
     checks: report.checks?.length || 0, failures: failed(report.checks),
     diagnostics: report.diagnostics?.length || 0, diagnosticFailures: failed(report.diagnostics),
     error: report.error || child.error?.message || (child.status ? child.stderr.trim().split('\n').at(-1) : undefined),
-    report: target,
+    report: target, staleRecording: stale(scenario),
   };
 });
 
@@ -75,5 +81,6 @@ const status = paired.status === 'pass' && !helperFailures.length && cases.every
 writeJson(resolve(output, 'report.json'), { schema: 1, status, pairedStatus: paired.status, helperFailures, cases });
 for (const item of cases) console.log(`${item.status}: ${item.id} (${item.failures}/${item.checks} checks failed)${item.error ? ` ${item.error}` : ''}`);
 for (const failure of helperFailures) console.log(`fail: ${JSON.stringify(failure)}`);
+for (const item of cases.filter(item => item.staleRecording)) console.log(`warning: ${item.id} replays port keys recorded on build ${item.staleRecording.recordedBuild.slice(0, 12)} against build ${build.slice(0, 12)}; its result does not compare the two builds — rerun without --scenarios`);
 console.log(JSON.stringify({ status, report: resolve(output, 'report.json') }));
 process.exitCode = status === 'pass' ? 0 : 1;

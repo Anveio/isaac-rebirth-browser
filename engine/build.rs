@@ -132,13 +132,29 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
         .expect("pickup definitions missing")
     {
         let actor = pickup["actor"].as_str().expect("pickup actor missing");
+        let drop_id = actors[actor]["Events"].as_array().and_then(|events| {
+            events
+                .iter()
+                .find(|event| event["Name"] == "DropSound")
+                .and_then(|event| event["Id"].as_u64())
+        });
         let mut clips = String::new();
         for animation in actors[actor]["Animations"]
             .as_array()
             .expect("authored pickup actor missing")
         {
+            let drop_sound = drop_id
+                .and_then(|id| {
+                    animation["Triggers"].as_array().and_then(|triggers| {
+                        triggers
+                            .iter()
+                            .find(|trigger| trigger["EventId"] == id)
+                            .and_then(|trigger| trigger["AtFrame"].as_u64())
+                    })
+                })
+                .map_or("None".to_string(), |frame| format!("Some({frame})"));
             clips.push_str(&format!(
-                "Clip {{ name: {:?}, frames: {}, looping: {} }},",
+                "Clip {{ name: {:?}, frames: {}, looping: {}, drop_sound: {drop_sound} }},",
                 animation["Name"]
                     .as_str()
                     .expect("pickup clip name missing"),
@@ -187,6 +203,22 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
         "pub const CHEST_DROP_SOUND_FRAME: u32 = {drop_frame};\n"
     ));
     output
+}
+
+/// ItemConfig57BFA0 reads the authored card/rune achievement word. Card IDs
+/// remain separate from the four entities2.xml visual families.
+fn card_catalog(xml: &str) -> String {
+    let mut achievements = [None; 41];
+    for tag in xml.split("<card ").skip(1).chain(xml.split("<rune ").skip(1)) {
+        let head = &tag[..tag.find('>').expect("card tag end")];
+        let id: usize = attribute(head, "id").expect("card id").parse().expect("card id integer");
+        assert!(id < achievements.len() && achievements[id].is_none(), "invalid authored card id");
+        achievements[id] = Some(attribute(head, "achievement")
+            .map_or(-1, |value| value.parse::<i32>().expect("card achievement integer")));
+    }
+    assert!(achievements.iter().all(Option::is_some), "incomplete authored card catalogue");
+    let values: Vec<_> = achievements.into_iter().map(Option::unwrap).collect();
+    format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\n")
 }
 
 /// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
@@ -947,6 +979,13 @@ fn main() {
         pickup_catalog(&pickups, &animations, &xml),
     )
     .expect("write pickup catalog");
+    let pockets = resources.join("pocketitems.xml");
+    println!("cargo:rerun-if-changed={}", pockets.display());
+    fs::write(
+        output.join("card_catalog.rs"),
+        card_catalog(&fs::read_to_string(pockets).expect("read authored pocket configuration")),
+    )
+    .expect("write authored card catalogue");
     let audio_path = manifest.parent().unwrap().join("web/audio-data.json");
     println!("cargo:rerun-if-changed={}", audio_path.display());
     let audio: Value = serde_json::from_str(

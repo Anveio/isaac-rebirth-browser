@@ -74,12 +74,20 @@ The runner rebuilds `dist/` when `web/` or `engine/` sources are newer than it
 (use `--no-build` to skip). It always builds the native `floor` generator,
 which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
-and one log per suite. A failing suite prints its replay command:
+and one log per suite. Every runner on the host shares a cap on concurrent suites (one per 6 GB
+of memory, at least one; override with `E2E_HOST_SLOTS`), so overlapping runs
+queue rather than crash Chromium renderers. A failing suite prints its replay command:
 
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
+
+A replay compares builds only when both games get the same keys. Stage-exit
+cases also carry port fight keys recorded closed-loop against one production
+build (`portRecordedBuild`); replayed on another build they feed stale keys to
+a different game, and the suite prints a warning. To compare such builds, run
+the suite fresh on each.
 
 ### Keeping a cited case
 
@@ -137,7 +145,9 @@ case report gains an `mtDraws` entry from
 order by wrapper kind and update counter, and reports the first divergence
 with native return addresses and port source sites. Everything before that
 point used the same stream positions. The diagnostic never changes a case
-status. Drivers that launch the original themselves (traversal, items and
+status. A case whose games play their own keys from a capture on
+(its first `pairedIndependent` scope, e.g. stage-exit's fight) is compared only
+up to that capture; the report's `independentAfter` names it. Drivers that launch the original themselves (traversal, items and
 similar) do not support it yet.
 
 ### Original wall cache draws
