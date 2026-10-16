@@ -1,7 +1,6 @@
 [
   {
     "out": "regression-new-run-resets-stage.json",
-    "at": 302,
     "extend": 0,
     "stages": [
       [
@@ -26,7 +25,6 @@
   },
   {
     "out": "coverage-monstro-kill.json",
-    "at": 422,
     "stages": [
       [
         "npc:20"
@@ -38,7 +36,6 @@
   },
   {
     "out": "coverage-larry-segments.json",
-    "at": 1678,
     "stages": [
       [
         "npc:19"
@@ -51,7 +48,6 @@
   },
   {
     "out": "coverage-gemini-kill.json",
-    "at": 139,
     "stages": [
       [
         "npc:79"
@@ -63,7 +59,6 @@
   },
   {
     "out": "regression-restart-walks-on.json",
-    "at": 230,
     "final_extend": 10,
     "stages": [
       [
@@ -87,7 +82,6 @@
   },
   {
     "out": "regression-random-run-exit-menu-character.json",
-    "at": 16,
     "final_extend": 30,
     "stages": [
       [

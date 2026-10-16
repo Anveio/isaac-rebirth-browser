@@ -1,11 +1,13 @@
 # Build context for antithesis/Dockerfile (BuildKit reads this file in place
 # of the root .dockerignore): only the engine build's inputs, without local
 # build output. tools/dst/sync-context.py (run by npm run test:dst) adds each
-# input Cargo records that this list drops.
+# input Cargo records that this list drops; tools/build-wasm.sh is the
+# shipped WASM's own build script.
 *
 !engine
 engine/target
 engine/dst/target
+!tools/build-wasm.sh
 !tools/foundation/item-catalog.py
 !tools/foundation/port-npc-animations.txt
 !web/*.json
