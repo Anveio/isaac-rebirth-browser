@@ -76,7 +76,20 @@ which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
 and one log per suite. Every runner on the host shares a cap on concurrent suites (one per 6 GB
 of memory, at least one; override with `E2E_HOST_SLOTS`), so overlapping runs
-queue rather than crash Chromium renderers. A failing suite prints its replay command:
+queue rather than crash Chromium renderers.
+
+Updated runners require Linux `flock` (util-linux). They atomically publish a
+complete PID/start-time record in the existing `slot-N` namespace, so older
+frozen runners recognize active updated runners. Persistent `slot-N.mutex`
+sidecars serialize updated clients; do not remove them while a runner is active.
+
+Quiesce old runners when upgrading concurrent runs. An unmodified old stale-file
+reaper can read a dead record and later unlink an updated runner's live
+replacement. The new mutex cannot serialize that old cleanup code; ordinary
+mixed-client ownership is compatible, but this stale-reaper interleaving remains
+unsafe until the old runners have stopped.
+
+A failing suite prints its replay command:
 
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
