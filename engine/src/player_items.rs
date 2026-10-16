@@ -752,6 +752,22 @@ pub(crate) fn add_collectible(
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
     crate::pockets::note_modifier_grant(owner, id);
+    //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,
+    //after permanent increment/source unlock checks and before effects.
+    //The membership result is captured now, never reconstructed from counts
+    //or reread after later effects. Raw first metadata is independently absent.
+    let acquisition_variant = state.player.entity_source.map(|source| source.variant);
+    let previously_acquired = match acquisition_variant {
+        Some(0) => state.acquisition_history.as_mut()
+            .map(|history| history.seen_or_insert(id as i32, None)),
+        Some(_) => None,
+        None => {
+            //An unknown branch may have inserted. Retaining an exact set
+            //would falsely claim absence for this and future membership reads.
+            state.acquisition_history = None;
+            None
+        }
+    };
     //Actual48 independently preserves D28/D44/13BC/13C0 on its
     //closed common path. This input history gives no stage or caller role.
     let keep_cupid_move_speed = id == 48
@@ -958,9 +974,12 @@ pub(crate) fn add_collectible(
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;
     }
-    if [81, 133, 134, 145, 187, 212].contains(&id) {
-        // The 52CC90 producer needs its actual 576BB0 guard. Current item
-        // counts cannot reconstruct these transformation history counters.
+    let transformation_tail_skipped = acquisition_variant.is_some_and(|variant| variant != 0)
+        || previously_acquired == Some(true);
+    if [81, 133, 134, 145, 187, 212].contains(&id) && !transformation_tail_skipped {
+        //52D0D3..DE skips credit for nonzero variants or already-seen IDs.
+        //The first/unknown-acquisition counter/helper path remains unowned;
+        //a duplicate never restores an absent counter or repeats credit.
         state.player.transformation_counts = None;
     }
     crate::player_costume118::on_collectible_added(state, id);

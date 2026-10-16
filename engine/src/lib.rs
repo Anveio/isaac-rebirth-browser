@@ -7,6 +7,7 @@
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
+pub mod acquisition_history;
 pub mod active_items;
 pub mod actors;
 pub mod ambience;
@@ -655,6 +656,10 @@ pub struct State {
     pub music: music::MusicState,
     pub run_seed_value: u32,
     pub run_seeds: Option<seed::RunSeeds>,
+    /// Actual Game+8BA0, independent from counts and RunSeeds. Absent legacy
+    /// history stays unknown until a reached constructor or Stop clears it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acquisition_history: Option<acquisition_history::AcquisitionHistory>,
     pub item_pools: Option<items::ItemPools>,
     pub player_items: Option<player_items::PlayerItems>,
     pub player_animation: player_animation::PlayerAnimation,
@@ -885,6 +890,8 @@ impl Game {
                 music: music::MusicState::default(),
                 run_seed_value: initial_seed,
                 run_seeds: None,
+                // Game553DB5 ->576AC0 owns the initially empty history.
+                acquisition_history: Some(acquisition_history::AcquisitionHistory::default()),
                 item_pools: None,
                 player_items: None,
                 player_animation: player_animation::PlayerAnimation::default(),
@@ -2285,6 +2292,8 @@ impl Game {
             shake.reset_duration();
         }
         self.state.source_cache_run_flags = Some(0);
+        // Stop54F571 ->576B70 follows the actual Save copy above.
+        self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
         self.state.run_admission.initial_fade = 0.0;
         self.state.run_quit.fade_alpha = 0.0;
         self.state.run_quit.system_pending = false;
@@ -2313,6 +2322,9 @@ impl Game {
             //5949a0 sees old Systemstate2 before either deferred dispatch,
             // including2->2 Restart, and54f588 clears the shared Info owner.
             // NewRun54eb20 itself has no clear; delay remains unchanged.
+            // The same Stop54F571 clears history for both deferred requests.
+            // NewRun itself never reconstructs unknown history from counts.
+            self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
             self.state.information_animation.clear();
             match request {
                 player_death::Request::Restart => {
