@@ -986,11 +986,17 @@ impl Game {
                 }
                 for _ in 0..count {
                     let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
+                    let room_before = self.state.current_room;
                     self.tick(timestamp_millis)?;
                     // Room render 5d1a70 runs its light pass on every presented
-                    // gameplay frame, after that frame's updates.
+                    // gameplay frame, after that frame's updates. The frame
+                    // that changes rooms renders the entered room twice (the
+                    // native trace shows two back-to-back passes there).
                     if presented && self.state.screen == Screen::Playing {
                         room_lights::present(&mut self.state);
+                        if self.state.current_room != room_before {
+                            room_lights::present(&mut self.state);
+                        }
                     }
                 }
             }
