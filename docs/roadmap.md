@@ -83,7 +83,7 @@ Counts of open bugs are as of the last full review.
 | [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
-| [Pocket items](#pocket-items) | Missing | None | 0 |
+| [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill and held Save; effects incomplete | 0 |
 | [Special rooms and economy](#special-rooms-and-economy) | Partial | Treasure, secret, curse rooms; shop room without sales | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
@@ -344,9 +344,24 @@ actives. Bulk item imports are owned by the user's import workflow.
 Rebirth scope: 33 cards, 8 runes, 28 pill effects, identification, per-run
 pill colours, drop and swap.
 
-Port: none.
+Port: partial. Public runtime owns Card/Pill Init, canonical chest/procedural
+consumers, two held records and HUD, collection/refused-contact response,
+capacity spill and held-pocket Save. The canonical Magic 8 Ball Card world
+producer is public; selected scalar/RNG/Card endpoints pass on the current
+qualified artifact. This does not implement general Card/Pill effects.
 
-Next: pocket slot and HUD, then pills (per-run mapping already seeded).
+Evidence: the current public-WASM Node AL regression passes 9,349 selected
+functional checks against its independent Original capture (AL retains 12 unavailable obligations
+and unreached SAME-v1 AD0 refresh). Separated fixed-phase0 and retained recorded-0
+each pass 29,385 checks with zero failures and 11 unavailable obligations
+(428c4301/c0022b06). Initial2 closed exit 0, so three of eleven cases are
+complete and eight remain mandatory; DOM/rendering, audible backend
+and PCM equality are unavailable in this Node result. Pocket coverage does
+not qualify basic coin/key/bomb/chest scenarios.
+
+Next: complete the remaining durable cases, 251/252 world/held conversions,
+Battery90, actual equipped effects/identification and complete save/Continue
+restoration, with real callback and audio evidence kept separate.
 
 No open bugs.
 
