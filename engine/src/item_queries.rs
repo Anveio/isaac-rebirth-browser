@@ -1,7 +1,10 @@
 //! Provenance for the canonical Player query stores, not another inventory.
 //! Reached queries return Unknown after unimplemented writes; a later cache
 //! request, empty-looking store or current loadout cannot recover history.
-use crate::{items, phase::Phase, player_items::PlayerItems, weapon_plan::PrimaryWeaponC08, PlayerEntitySource, State};
+use crate::{
+    items, phase::Phase, player_items::PlayerItems, weapon_plan::PrimaryWeaponC08,
+    PlayerEntitySource, State,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -51,7 +54,10 @@ pub struct TemporaryQueryKey {
 
 impl TemporaryQueryKey {
     fn collectible(id: u32) -> Option<Self> {
-        Some(Self { config_kind: u32::from(items::definition(id)?.kind), item_id: id })
+        Some(Self {
+            config_kind: u32::from(items::definition(id)?.kind),
+            item_id: id,
+        })
     }
 }
 
@@ -106,12 +112,12 @@ impl ItemQueryHistory {
         writer_pc: u32,
     ) {
         self.temporary_unknown_inputs.extend(keys.iter().copied());
-        let frontier = self.temporary_evaluation.get_or_insert_with(|| {
-            TemporaryEvaluationFrontier {
-                possible_cache_mask: Some(0),
-                writer_pcs: BTreeSet::new(),
-            }
-        });
+        let frontier =
+            self.temporary_evaluation
+                .get_or_insert_with(|| TemporaryEvaluationFrontier {
+                    possible_cache_mask: Some(0),
+                    writer_pcs: BTreeSet::new(),
+                });
         frontier.possible_cache_mask = match (frontier.possible_cache_mask, possible_cache_mask) {
             (Some(old), Some(new)) => Some(old | new),
             _ => None,
@@ -120,13 +126,16 @@ impl ItemQueryHistory {
     }
 
     pub(crate) fn temporary_key_known(&self, config_kind: u32, item_id: u32) -> bool {
-        self.temporary_records && !self.temporary_unknown_inputs.contains(&TemporaryQueryKey {
-            config_kind, item_id,
-        })
+        self.temporary_records
+            && !self.temporary_unknown_inputs.contains(&TemporaryQueryKey {
+                config_kind,
+                item_id,
+            })
     }
 
     pub(crate) fn temporary_collectible_known(&self, id: u32) -> bool {
-        items::definition(id).is_some_and(|config| self.temporary_key_known(u32::from(config.kind), id))
+        items::definition(id)
+            .is_some_and(|config| self.temporary_key_known(u32::from(config.kind), id))
     }
 
     ///Called only at the full Player531E44 D18/Evaluate boundary. A possible
@@ -151,18 +160,22 @@ impl ItemQueryHistory {
             self.primary_c08 = false;
         }
     }
-
 }
 
 ///An actual350 factory attempt has no body/contact owner yet. Its possible
 ///later kind2 queue/held write makes only trinket-query completeness unknown.
 ///No contact, held value, cache request or effect is fabricated here.
 pub(crate) fn note_unrepresented_trinket_spawn(state: &mut State) {
-    if let Some(history) = state.player_items.as_mut()
-        .and_then(|owner| owner.query_history.as_mut()) {
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
         history.trinket_slots = false;
-        history.unresolved_effects.insert(0x4ff1e0,
-            "Unsupported350 Init/body may reach canonical trinket queue/held collection".into());
+        history.unresolved_effects.insert(
+            0x4ff1e0,
+            "Unsupported350 Init/body may reach canonical trinket queue/held collection".into(),
+        );
     }
 }
 
@@ -172,9 +185,17 @@ pub(crate) fn note_room_placement(state: &mut State) {
     let Some(owner) = state.player_items.as_ref() else {
         return;
     };
-    let initialized = owner.query_history.as_ref().map(|_| state.player.initialized_3074);
+    let initialized = owner
+        .query_history
+        .as_ref()
+        .map(|_| state.player.initialized_3074);
     let plan = RoomTemporaryWritePlan::read(
-        AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None),
+        AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
         initialized,
         i32::from(state.player.hp),
         state.player.soul_hp,
@@ -182,19 +203,30 @@ pub(crate) fn note_room_placement(state: &mut State) {
         None,
         state.weapon_admission.source_player_type,
     );
-    let Some(history) = state.player_items.as_mut().and_then(|owner| owner.query_history.as_mut()) else {
+    let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    else {
         return;
     };
     for writer in plan.writes {
-        let Some(keys) = writer.ids.iter().copied().map(TemporaryQueryKey::collectible)
-            .collect::<Option<Vec<_>>>() else {
-                history.forget_unowned_effect();
-                continue;
-            };
+        let Some(keys) = writer
+            .ids
+            .iter()
+            .copied()
+            .map(TemporaryQueryKey::collectible)
+            .collect::<Option<Vec<_>>>()
+        else {
+            history.forget_unowned_effect();
+            continue;
+        };
         history.note_temporary_writer(&keys, Some(writer.possible_cache_mask), writer.writer_pc);
     }
     for effect in plan.unresolved {
-        history.unresolved_effects.insert(effect.pc, effect.law.to_owned());
+        history
+            .unresolved_effects
+            .insert(effect.pc, effect.law.to_owned());
     }
 }
 
@@ -218,10 +250,26 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
     let Some(owner) = state.player_items.as_ref() else {
         return;
     };
-    let queries = AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None);
-    let deferred = owner.query_history.as_ref().and_then(|history| history.temporary_evaluation.as_ref())
-        .map(|frontier| frontier.possible_cache_mask.map(|mask| scalar_evaluation_footprint(queries, mask)));
-    let Some(history) = state.player_items.as_mut().and_then(|owner| owner.query_history.as_mut()) else {
+    let queries = AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
+    let deferred = owner
+        .query_history
+        .as_ref()
+        .and_then(|history| history.temporary_evaluation.as_ref())
+        .map(|frontier| {
+            frontier
+                .possible_cache_mask
+                .map(|mask| scalar_evaluation_footprint(queries, mask))
+        });
+    let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    else {
         return;
     };
     if let Some(mask) = deferred {
@@ -238,7 +286,12 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
     let Some(owner) = state.player_items.as_ref() else {
         return;
     };
-    let queries = AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None);
+    let queries = AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
     //These are source515F40's only direct CF8-mutated IDs. Other TEMP
     //records (including45) do not imply either of these reached branches.
     let possible_taurus = queries.temporary_present(299) != Some(false);
@@ -248,7 +301,11 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
         Some(_) => false,
     };
     let taurus_cache_mask = scalar_evaluation_footprint(queries, 0x10);
-    let Some(history) = state.player_items.as_mut().and_then(|owner| owner.query_history.as_mut()) else {
+    let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    else {
         return;
     };
     if possible_taurus_cache {
@@ -293,7 +350,9 @@ fn advance_known_temporary_expiry(state: &mut State) {
     }
     for id in expired {
         //5E3EF0 erases the actual record before its517580 removal effect.
-        owner.temporary_collectibles.retain(|record| record.item_id != id);
+        owner
+            .temporary_collectibles
+            .retain(|record| record.item_id != id);
         let Some(config) = items::definition(id) else {
             history.note_temporary_writer(&[], None, 0x5e3ef0);
             continue;
@@ -304,8 +363,13 @@ fn advance_known_temporary_expiry(state: &mut State) {
             //costume/health/audio effects.517580 has no direct E1C/CF8/C08
             //store. Keep its frontier without erasing unrelated output
             //facts; config-mask evaluation remains deferred to531E44.
-            history.unresolved_effects.insert(0x517580,
-                format!("Unimplemented removal effect for config kind{} id{}", config.kind, id));
+            history.unresolved_effects.insert(
+                0x517580,
+                format!(
+                    "Unimplemented removal effect for config kind{} id{}",
+                    config.kind, id
+                ),
+            );
             if id == 282 {
                 //5177A3..7BA is the sole direct immediateEvaluate here.
                 history.invalidate_cached_footprint(0x80);
@@ -320,26 +384,36 @@ fn advance_known_temporary_expiry(state: &mut State) {
 ///must union both paths; this does not change the existing health implementation.
 pub(crate) fn before_damage_queries(state: &mut State, health_units: u8, flags: u32) -> bool {
     let normal_source_context = state.weapon_admission.source_player_type == Some(0)
-        && state.player.entity_source.is_some_and(|source| {
-            source.entity_type == 1 && source.variant == 0
-        });
+        && state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0);
     if !normal_source_context {
-        if let Some(history) = state.player_items.as_mut()
-            .and_then(|owner| owner.query_history.as_mut()) {
+        if let Some(history) = state
+            .player_items
+            .as_mut()
+            .and_then(|owner| owner.query_history.as_mut())
+        {
             history.forget_unowned_effect();
-            history.unresolved_effects.insert(0x52b080,
-                "Unowned Player entity/character damage callback".into());
+            history.unresolved_effects.insert(
+                0x52b080,
+                "Unowned Player entity/character damage callback".into(),
+            );
         }
         return false;
     }
     let Some(owner) = state.player_items.as_ref() else {
         return false;
     };
-    let queries = AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None);
+    let queries = AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
     //Read certainty before recording313 uncertainty. A possible refusal
     //alone cannot prune the possible ordinary path and its later writers.
-    let certain_shield = flags & 0x20 == 0
-        && queries.temporary_present(313) == Some(true);
+    let certain_shield = flags & 0x20 == 0 && queries.temporary_present(313) == Some(true);
     let shield = DamageQueryWritePlan::after_immunity_before_shield(queries, flags);
     let possible_shield = shield.possible_shield_refusal;
     apply_damage_query_plan(state, shield);
@@ -349,12 +423,20 @@ pub(crate) fn before_damage_queries(state: &mut State, health_units: u8, flags: 
     let Some(owner) = state.player_items.as_ref() else {
         return false;
     };
-    let health_known = owner.query_history.as_ref()
+    let health_known = owner
+        .query_history
+        .as_ref()
         .is_some_and(|history| history.damage_health_known);
     let plan = DamageQueryWritePlan::before_health_store(
-        AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None),
+        AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
         health_known.then_some(i32::from(state.player.hp)),
-        health_known.then_some(state.player.soul_hp), Some(i32::from(health_units)),
+        health_known.then_some(state.player.soul_hp),
+        Some(i32::from(health_units)),
     );
     !apply_damage_query_plan(state, plan)
 }
@@ -366,14 +448,22 @@ pub(crate) fn after_damage_queries(state: &mut State, normal_source_path: bool) 
     let Some(owner) = state.player_items.as_ref() else {
         return;
     };
-    let health_known = owner.query_history.as_ref()
+    let health_known = owner
+        .query_history
+        .as_ref()
         .is_some_and(|history| history.damage_health_known);
     let plan = DamageQueryWritePlan::after_health_store(
-        AppearanceQueries::new(owner, state.weapon_cache.primary, state.player.entity_source, None),
+        AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
         health_known.then_some(i32::from(state.player.hp)),
         health_known.then_some(state.player.soul_hp),
         state.weapon_admission.source_player_type,
-        health_known.then_some(state.player.dead), None,
+        health_known.then_some(state.player.dead),
+        None,
     );
     apply_damage_query_plan(state, plan);
 }
@@ -381,7 +471,11 @@ pub(crate) fn after_damage_queries(state: &mut State, normal_source_path: bool) 
 ///Apply only query/cache uncertainty at these actual source boundaries.
 ///Random-choice and cosmetic frontiers do not erase unrelated inputs.
 fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> bool {
-    let Some(history) = state.player_items.as_mut().and_then(|owner| owner.query_history.as_mut()) else {
+    let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    else {
         return true;
     };
     let mut unowned_use = false;
@@ -397,11 +491,17 @@ fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> boo
             history.damage_health_known = false;
         }
         let key = TemporaryQueryKey {
-            config_kind: u32::from(write.config_kind), item_id: write.item_id,
+            config_kind: u32::from(write.config_kind),
+            item_id: write.item_id,
         };
         history.note_temporary_writer(&[key], write.possible_cache_mask, write.writer_pc);
-        history.unresolved_effects.insert(write.writer_pc,
-            format!("{:?}: unimplemented CF8 writer kind{} id{}", write.boundary, write.config_kind, write.item_id));
+        history.unresolved_effects.insert(
+            write.writer_pc,
+            format!(
+                "{:?}: unimplemented CF8 writer kind{} id{}",
+                write.boundary, write.config_kind, write.item_id
+            ),
+        );
     }
     if plan.possible_trinket20_removal {
         history.trinket_slots = false;
@@ -413,8 +513,10 @@ fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> boo
             history.forget_unowned_effect();
             unowned_use = true;
         }
-        history.unresolved_effects.insert(effect.pc,
-            format!("{:?}/{:?}: {}", effect.boundary, effect.kind, effect.law));
+        history.unresolved_effects.insert(
+            effect.pc,
+            format!("{:?}/{:?}: {}", effect.boundary, effect.kind, effect.law),
+        );
     }
     unowned_use
 }
@@ -468,7 +570,9 @@ impl<'a> AppearanceQueries<'a> {
         if !self.temporary_present(id)? {
             return Some(0);
         }
-        self.owner.temporary_collectibles.iter()
+        self.owner
+            .temporary_collectibles
+            .iter()
             .find(|record| record.item_id == id)
             .map(|record| record.count)
     }
@@ -504,7 +608,11 @@ impl<'a> AppearanceQueries<'a> {
         let config = items::definition(id)?;
         Some(
             matches!(config.kind, 1 | 3 | 4)
-                && self.owner.temporary_collectibles.iter().any(|record| record.item_id == id),
+                && self
+                    .owner
+                    .temporary_collectibles
+                    .iter()
+                    .any(|record| record.item_id == id),
         )
     }
 
@@ -514,7 +622,9 @@ impl<'a> AppearanceQueries<'a> {
         if !self.temporary_present(id)? {
             return Some(None);
         }
-        self.owner.temporary_collectibles.iter()
+        self.owner
+            .temporary_collectibles
+            .iter()
             .find(|record| record.item_id == id)
             .map(|record| Some(record.cooldown))
     }
@@ -523,10 +633,7 @@ impl<'a> AppearanceQueries<'a> {
     ///Have21, capacity and the ordinary scan independently. Positive held,
     ///queued-kind2 and Paper emulation remain the canonical350 owner's work.
     pub(crate) fn has_trinket(self, id: u32) -> Option<bool> {
-        if id == 0
-            || !self.history()?.trinket_slots
-            || self.owner.trinket_slots != [0, 0]
-        {
+        if id == 0 || !self.history()?.trinket_slots || self.owner.trinket_slots != [0, 0] {
             return None;
         }
         //508FC0 reaches ordinaryHave139 even though both empty slots prove
@@ -627,7 +734,9 @@ impl RoomTemporaryWritePlan {
         //the source-config union is0x47F, so it does not include weapon100.
         if queries.have(191) != Some(false) {
             plan.write(
-                &[1, 2, 3, 5, 6, 46, 53, 110, 115, 143, 150, 201, 261, 257, 259, 317, 237, 245],
+                &[
+                    1, 2, 3, 5, 6, 46, 53, 110, 115, 143, 150, 201, 261, 257, 259, 317, 237, 245,
+                ],
                 0x47f,
                 0x510e24,
             );
@@ -645,15 +754,11 @@ impl RoomTemporaryWritePlan {
                 law: "possible variant0 low-health blood1000/7 branch before Have299; no CF8 footprint assigned",
             });
         }
-        if queries.have(299) != Some(false)
-            && room_byte_1 != Some(0)
-        {
+        if queries.have(299) != Some(false) && room_byte_1 != Some(0) {
             plan.write(&[299], 0x10, 0x510e3f);
         }
 
-        if queries.have(122) != Some(false)
-            && queries.temporary_present(122) != Some(true)
-        {
+        if queries.have(122) != Some(false) && queries.temporary_present(122) != Some(true) {
             //510420→5102F0 is the costume/config path, not a health
             //grant. Its full transitive costume footprint is separate.
             //Until that footprint is independently closed, the source
@@ -679,7 +784,6 @@ impl RoomTemporaryWritePlan {
         });
     }
 }
-
 
 // Source-only pure footprint for Player52B080. Include beside the canonical
 // AppearanceQueries; this does not execute damage, random draws, effects or
@@ -736,13 +840,15 @@ impl DamageQueryWritePlan {
     //52B23B..52B260 already checked normal signedBF8, positive amount and
     //the earlier immunity predicates. No pickup/main-animation guard is
     //among those checks. The313 branch may mutate CF8 and returnfalse.
-    pub(crate) fn after_immunity_before_shield(
-        queries: AppearanceQueries<'_>,
-        flags: u32,
-    ) -> Self {
+    pub(crate) fn after_immunity_before_shield(queries: AppearanceQueries<'_>, flags: u32) -> Self {
         let mut plan = Self::default();
         if flags & 0x20 == 0 && queries.temporary_present(313) != Some(false) {
-            plan.write(DamageQueryBoundary::AfterImmunityBeforeShield, 1, 313, 0x52b298);
+            plan.write(
+                DamageQueryBoundary::AfterImmunityBeforeShield,
+                1,
+                313,
+                0x52b298,
+            );
             plan.possible_shield_refusal = true;
             plan.foreign(DamageQueryBoundary::AfterImmunityBeforeShield, DamageForeignEffectKind::ShieldRefusal, 0x52b2bf,
                 "313 removal precedes costume5102F0/BF8 store and false return; no admitted health callback is reached on that branch");
@@ -764,14 +870,22 @@ impl DamageQueryWritePlan {
         if queries.has_trinket(40) != Some(false) {
             //57BEC0 is the TRINKET getter. This is not collectible40.
             plan.temporary.push(DamageTemporaryWriteFrontier {
-                boundary: B, config_kind: 2, item_id: 40,
-                possible_cache_mask: Some(1), writer_pc: 0x52b8b2,
+                boundary: B,
+                config_kind: 2,
+                item_id: 40,
+                possible_cache_mask: Some(1),
+                writer_pc: 0x52b8b2,
             });
             plan.foreign(B, DamageForeignEffectKind::RandomAdmission, 0x52b864, "trinket40 shared random admission is unimplemented; configKind2/cooldown from actual trinket40");
         }
         if queries.has_trinket(48) != Some(false) {
             plan.use_effect(B, 35, 0x52b94a);
-            plan.foreign(B, DamageForeignEffectKind::RandomAdmission, 0x52b8f2, "trinket48 shared random admission; Info30 and nested Use35 only after result0");
+            plan.foreign(
+                B,
+                DamageForeignEffectKind::RandomAdmission,
+                0x52b8f2,
+                "trinket48 shared random admission; Info30 and nested Use35 only after result0",
+            );
         }
         if queries.have(162) != Some(false) {
             //Actual162 is Celtic Cross. The record is58, with cooldown
@@ -787,11 +901,14 @@ impl DamageQueryWritePlan {
         if queries.have(117) != Some(false) {
             plan.foreign(B, DamageForeignEffectKind::ConfigCostume, 0x52c2d9, "117 TEMP writer precedes costume5102F0; transitive costume effects remain separate");
         }
-        if queries.has_trinket(8) != Some(false)
-            && queries.temporary_present(93) != Some(true)
-        {
+        if queries.has_trinket(8) != Some(false) && queries.temporary_present(93) != Some(true) {
             plan.use_effect(B, 93, 0x52bc38);
-            plan.foreign(B, DamageForeignEffectKind::RandomAdmission, 0x52bc03, "trinket8 own2A54 random admission precedes TEMP93 absence and Use93");
+            plan.foreign(
+                B,
+                DamageForeignEffectKind::RandomAdmission,
+                0x52bc03,
+                "trinket8 own2A54 random admission precedes TEMP93 absence and Use93",
+            );
         }
         if queries.have(262) != Some(false) {
             let crosses_two = match (red_hp, soul_hp, damage_units) {
@@ -803,7 +920,12 @@ impl DamageQueryWritePlan {
             };
             if crosses_two != Some(false) {
                 plan.use_effect(B, 35, 0x52bcd2);
-                plan.foreign(B, DamageForeignEffectKind::NestedUse, 0x52bc68, "262 checks actual pre-health signed HP sum crossing2 before Info31 and Use35");
+                plan.foreign(
+                    B,
+                    DamageForeignEffectKind::NestedUse,
+                    0x52bc68,
+                    "262 checks actual pre-health signed HP sum crossing2 before Info31 and Use35",
+                );
             }
         }
         if queries.have(301) != Some(false) {
@@ -811,7 +933,12 @@ impl DamageQueryWritePlan {
         }
         if queries.have(303) != Some(false) {
             plan.write(B, 3, 58, 0x52bd50);
-            plan.foreign(B, DamageForeignEffectKind::RandomAdmission, 0x52bd3a, "Have303 own2714 random admission; result0 alone adds TEMP58");
+            plan.foreign(
+                B,
+                DamageForeignEffectKind::RandomAdmission,
+                0x52bd3a,
+                "Have303 own2714 random admission; result0 alone adds TEMP58",
+            );
         }
         if queries.have(157) != Some(false) {
             plan.write(B, 1, 157, 0x52c245);
@@ -838,7 +965,8 @@ impl DamageQueryWritePlan {
             (Some(red), None) if red != 2 => Some(false),
             _ => None,
         };
-        if dead != Some(true) && whore_gate != Some(false)
+        if dead != Some(true)
+            && whore_gate != Some(false)
             && queries.have(122) != Some(false)
             && queries.temporary_present(122) != Some(true)
         {
@@ -867,12 +995,11 @@ impl DamageQueryWritePlan {
         if low_health_cluster == Some(false) && queries.have(328) == Some(false) {
             return plan;
         }
-        if queries.has_trinket(33) != Some(false)
-            && queries.temporary_present(100) != Some(true)
-        {
+        if queries.has_trinket(33) != Some(false) && queries.temporary_present(100) != Some(true) {
             plan.write(B, 4, 100, 0x52cc49);
         }
-        if dead != Some(true) && queries.have(142) != Some(false)
+        if dead != Some(true)
+            && queries.have(142) != Some(false)
             && queries.temporary_present(142) != Some(false)
         {
             plan.write(B, 1, 142, 0x52cc0e);
@@ -887,9 +1014,17 @@ impl DamageQueryWritePlan {
         plan
     }
 
-    fn write(&mut self, boundary: DamageQueryBoundary, config_kind: u8, item_id: u32, writer_pc: u32) {
+    fn write(
+        &mut self,
+        boundary: DamageQueryBoundary,
+        config_kind: u8,
+        item_id: u32,
+        writer_pc: u32,
+    ) {
         self.temporary.push(DamageTemporaryWriteFrontier {
-            boundary, config_kind, item_id,
+            boundary,
+            config_kind,
+            item_id,
             possible_cache_mask: items::definition(item_id)
                 .filter(|config| config.kind == config_kind)
                 .map(|config| config.cache_flags),
@@ -905,7 +1040,18 @@ impl DamageQueryWritePlan {
             "nested Use522250 has mandatory config record insertion at522380; costume511060/effect/child callbacks are separate, not completed by this plan");
     }
 
-    fn foreign(&mut self, boundary: DamageQueryBoundary, kind: DamageForeignEffectKind, pc: u32, law: &'static str) {
-        self.foreign_effects.push(DamageForeignEffectFrontier { boundary, kind, pc, law });
+    fn foreign(
+        &mut self,
+        boundary: DamageQueryBoundary,
+        kind: DamageForeignEffectKind,
+        pc: u32,
+        law: &'static str,
+    ) {
+        self.foreign_effects.push(DamageForeignEffectFrontier {
+            boundary,
+            kind,
+            pc,
+            law,
+        });
     }
 }

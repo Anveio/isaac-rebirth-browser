@@ -286,7 +286,8 @@ pub fn admit_selector(
             if let Some(coverage) = &mut room.ordinary_placement {
                 coverage.invalidate(crate::ordinary_placement::Frontier::Factory {
                     entity_type: u32::from(selector.entity_type),
-                    variant: u32::from(selector.variant), subtype: u32::from(selector.subtype),
+                    variant: u32::from(selector.variant),
+                    subtype: u32::from(selector.subtype),
                 });
             }
             let _primary = shared.next_u32();

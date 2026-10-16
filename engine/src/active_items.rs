@@ -58,9 +58,17 @@ fn discharge(state: &mut State) -> Result<(), String> {
 }
 
 pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), String> {
-    if state.public_actions.active_triggered && controls_enabled
-        && state.player_items.as_ref().is_none_or(|owner| !matches!(owner.active_id, 0 | 45)) {
-        crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::ActiveEffects);
+    if state.public_actions.active_triggered
+        && controls_enabled
+        && state
+            .player_items
+            .as_ref()
+            .is_none_or(|owner| !matches!(owner.active_id, 0 | 45))
+    {
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::ActiveEffects,
+        );
     }
     //Only empty active0 and the closed45 leaf exclude the D30 reset/random
     //writers in522250 here. A requested untracked active loses this input
@@ -116,11 +124,18 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
     //529600 can dispatch another active through positiveTrinket4.
     //The actual known-empty held/queue query closes that producer;
     //unknown/positive trinket history does not create a CF8 proof.
-    let query_stores_preserved = state.player.entity_source.is_some_and(|source| {
-        source.entity_type == 1 && source.variant == 0
-    }) && crate::item_queries::AppearanceQueries::new(
-        owner, state.weapon_cache.primary, state.player.entity_source, None,
-    ).has_trinket(4) == Some(false);
+    let query_stores_preserved = state
+        .player
+        .entity_source
+        .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        && crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .has_trinket(4)
+            == Some(false);
     let owner = state.player_items.as_mut().expect("checked owner");
     if !query_stores_preserved {
         if let Some(history) = &mut owner.query_history {

@@ -31,7 +31,10 @@ impl GridCallbackOutcome {
     /// Retain a non-controller callback gap without invalidating C18 history.
     pub(crate) fn record_frontier(&self, state: &mut State, caller: &str) {
         if let Some(channel) = self.frontier() {
-            crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::GridEffects);
+            crate::ordinary_placement::invalidate(
+                state,
+                crate::ordinary_placement::Frontier::GridEffects,
+            );
             state.weapon_admission.unadmitted_controller.get_or_insert(
                 crate::weapon_plan::UnadmittedController {
                     primary: state.weapon_cache.primary.numeric(),

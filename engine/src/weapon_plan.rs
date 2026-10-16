@@ -299,74 +299,78 @@ impl ColorReadPlan {
     }
 
     fn read_ccc(appearance: AppearanceQueries<'_>) -> Option<AttackColor> {
-        Some(if appearance.have(115)? || appearance.temporary_present(115)? {
-            Self::tint([1.5, 2.0, 2.0, 0.5])
-        } else if appearance.have(103)? || appearance.have(305)? {
-            Self::byte_offsets([0.4, 0.97, 0.5, 1.0], [0, 150, 0])
-        } else if appearance.have(104)? {
-            Self::byte_offsets([1.0, 0.4, 0.13, 1.0], [30, 0, 0])
-        } else if appearance.have(89)? {
-            Self::byte_offsets([3.0, 3.0, 3.0, 1.0], [150, 150, 150])
-        } else if appearance.have(69)? {
-            Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
-        } else if appearance.have(6)? || appearance.temporary_present(6)? {
-            Self::byte_offsets([0.2, 1.0, 0.0, 1.0], [255, 255, 0])
-        } else if appearance.have(3)?
-            || appearance.temporary_present(3)?
-            || appearance.temporary_present(192)?
-            || appearance.homing_variant()?
-        {
-            Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [90, 0, 180])
-        } else if appearance.have(200)? {
-            Self::byte_offsets([0.4, 0.0, 0.0, 1.0], [180, 0, 180])
-        } else if appearance.have(132)? {
-            Self::tint([0.1, 0.1, 0.1, 1.0])
-        } else {
-            AttackColor::WHITE
-        })
+        Some(
+            if appearance.have(115)? || appearance.temporary_present(115)? {
+                Self::tint([1.5, 2.0, 2.0, 0.5])
+            } else if appearance.have(103)? || appearance.have(305)? {
+                Self::byte_offsets([0.4, 0.97, 0.5, 1.0], [0, 150, 0])
+            } else if appearance.have(104)? {
+                Self::byte_offsets([1.0, 0.4, 0.13, 1.0], [30, 0, 0])
+            } else if appearance.have(89)? {
+                Self::byte_offsets([3.0, 3.0, 3.0, 1.0], [150, 150, 150])
+            } else if appearance.have(69)? {
+                Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
+            } else if appearance.have(6)? || appearance.temporary_present(6)? {
+                Self::byte_offsets([0.2, 1.0, 0.0, 1.0], [255, 255, 0])
+            } else if appearance.have(3)?
+                || appearance.temporary_present(3)?
+                || appearance.temporary_present(192)?
+                || appearance.homing_variant()?
+            {
+                Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [90, 0, 180])
+            } else if appearance.have(200)? {
+                Self::byte_offsets([0.4, 0.0, 0.0, 1.0], [180, 0, 180])
+            } else if appearance.have(132)? {
+                Self::tint([0.1, 0.1, 0.1, 1.0])
+            } else {
+                AttackColor::WHITE
+            },
+        )
     }
 
     fn read_ca0(appearance: AppearanceQueries<'_>) -> Option<AttackColor> {
-        Some(if appearance.have(149)? && appearance.primary()? != PrimaryWeaponC08::DrFetus {
-            Self::tint([0.5, 0.9, 0.4, 1.0])
-        } else if appearance.have(182)? {
-            Self::tint([1.5, 2.0, 2.0, 1.0])
-        } else if appearance.have(115)?
-            || appearance.temporary_present(115)?
-            || appearance.have(159)?
-            || appearance.have(185)?
-        {
-            Self::tint([1.5, 2.0, 2.0, 0.5])
-        } else if appearance.have(132)? {
-            Self::tint([0.2, 0.09, 0.065, 1.0])
-        } else if appearance.have(104)? {
-            Self::tint([0.9, 0.3, 0.08, 1.0])
-        } else if appearance.have(69)? {
-            Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
-        } else if appearance.have(6)? || appearance.temporary_present(6)? {
-            Self::byte_offsets([1.0, 1.0, 0.0, 1.0], [45, 15, 0])
-        } else if appearance.have(3)?
-            || appearance.temporary_present(3)?
-            || appearance.temporary_present(192)?
-            || appearance.homing_variant()?
-        {
-            Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [71, 0, 116])
-        } else if appearance.have(310)? {
-            Self::tint([0.2, 0.2, 0.2, 1.0])
-        } else if appearance.have(221)? {
-            //42F500 copies these f32 offsets directly;42F510 is not reached.
-            AttackColor {
-                tint: [1.0, 1.0, 0.8, 1.0],
-                source_middle: [0.0; 4],
-                offsets: [0.1, 0.1, 0.1],
-            }
-        } else if appearance.have(336)? {
-            Self::tint([0.5, 0.25, 0.1, 0.9])
-        } else if appearance.have(330)? {
-            Self::tint([1.5, 2.0, 2.0, 1.0])
-        } else {
-            AttackColor::WHITE
-        })
+        Some(
+            if appearance.have(149)? && appearance.primary()? != PrimaryWeaponC08::DrFetus {
+                Self::tint([0.5, 0.9, 0.4, 1.0])
+            } else if appearance.have(182)? {
+                Self::tint([1.5, 2.0, 2.0, 1.0])
+            } else if appearance.have(115)?
+                || appearance.temporary_present(115)?
+                || appearance.have(159)?
+                || appearance.have(185)?
+            {
+                Self::tint([1.5, 2.0, 2.0, 0.5])
+            } else if appearance.have(132)? {
+                Self::tint([0.2, 0.09, 0.065, 1.0])
+            } else if appearance.have(104)? {
+                Self::tint([0.9, 0.3, 0.08, 1.0])
+            } else if appearance.have(69)? {
+                Self::byte_offsets([0.33, 0.18, 0.18, 1.0], [66, 40, 40])
+            } else if appearance.have(6)? || appearance.temporary_present(6)? {
+                Self::byte_offsets([1.0, 1.0, 0.0, 1.0], [45, 15, 0])
+            } else if appearance.have(3)?
+                || appearance.temporary_present(3)?
+                || appearance.temporary_present(192)?
+                || appearance.homing_variant()?
+            {
+                Self::byte_offsets([0.4, 0.15, 0.38, 1.0], [71, 0, 116])
+            } else if appearance.have(310)? {
+                Self::tint([0.2, 0.2, 0.2, 1.0])
+            } else if appearance.have(221)? {
+                //42F500 copies these f32 offsets directly;42F510 is not reached.
+                AttackColor {
+                    tint: [1.0, 1.0, 0.8, 1.0],
+                    source_middle: [0.0; 4],
+                    offsets: [0.1, 0.1, 0.1],
+                }
+            } else if appearance.have(336)? {
+                Self::tint([0.5, 0.25, 0.1, 0.9])
+            } else if appearance.have(330)? {
+                Self::tint([1.5, 2.0, 2.0, 1.0])
+            } else {
+                AttackColor::WHITE
+            },
+        )
     }
 
     ///42F450 establishes the middle/offset zeroes;42F480 changes tint only.
