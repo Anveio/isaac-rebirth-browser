@@ -12,6 +12,10 @@
 // --take names rooms whose collectible pedestals (5.100 with an item) the
 // player walks onto, picking each up, before leaving them.
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
+// --idle FRAMES holds no keys for FRAMES after the last doorway settles, before
+// the arrival checkpoint: entering through a door places the player exactly,
+// and the idle lets its velocity decay, so games that left the previous room
+// on different frames meet in the same state.
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
@@ -39,9 +43,14 @@ const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
+const IDLE = Number(flag('--idle', '0'));
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
 const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
+// --avoid adds cells those walks also keep clear of: obstacles the original
+// holds after its own fight (a solid Larry Jr. tail poop) that the port's own
+// fight need not leave, so the shared keys take one path in both games.
+const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
@@ -121,7 +130,9 @@ try {
       const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
-        : !usable ? [] : inside ? ['KeyA'] : doorKeys(avoiding(state.grid, pedestals), state.player, door));
+        // A cleared boss room's open trapdoor must not be walked over.
+        : !usable ? [] : inside ? ['KeyA']
+          : doorKeys(avoiding(state.grid, state.trapdoor ? [...AWARD_CELLS, ...AVOID, ...pedestals] : pedestals), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -132,6 +143,7 @@ try {
   // Settle out of the doorway transition before the arrival checkpoint.
   await hold([]);
   do { await step(1); state = await view(); } while (state.transition);
+  if (IDLE) { await step(IDLE); state = await view(); }
   if (ARRIVAL) checkpoint(ARRIVAL);
   const walk = async (goal, cells, budget, label) => {
     for (let left = budget; Math.hypot(goal.x - state.player.x, goal.y - state.player.y) > 6; left -= STRIDE) {
@@ -156,16 +168,28 @@ try {
     checkpoint('corner');
   }
   if (EXIT) {
-    if (VIA) await walk({ x: VIA[0], y: VIA[1] }, AWARD_CELLS, EXIT, 'exit via');
+    // The shared exit keys step from cell centre to cell centre. Each game's
+    // fight leaves its own poops, and a diagonal shortcut that grazes a corner
+    // solid in one game alone would slow only that game's player.
+    const centreWalk = async (goal, cells, arrived, failure) => {
+      let target = { x: Math.round((state.player.x - 40) / 40) * 40 + 40, y: Math.round((state.player.y - 120) / 40) * 40 + 120 };
+      for (let left = EXIT; !arrived(); left -= STRIDE) {
+        if (left <= 0) throw new Error(failure);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, cells), state.player, goal, 1);
+        await hold(toward(state.player, target, 2));
+        await step(STRIDE); state = await view();
+      }
+    };
+    if (VIA) {
+      const via = { x: VIA[0], y: VIA[1] };
+      await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
+        `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
+    }
     const index = state.trapdoor?.gridIndex;
     if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
     const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
-    const pedestal = AWARD_CELLS.filter(cell => cell > 60);
-    for (let left = EXIT; state.stageTransition === 0; left -= STRIDE) {
-      if (left <= 0) throw new Error(`No trapdoor entry in ${EXIT} frames`);
-      await hold(toward(state.player, waypoint(avoiding(state.grid, pedestal), state.player, door), 2));
-      await step(STRIDE); state = await view();
-    }
+    const pedestal = [...AWARD_CELLS.filter(cell => cell > 60), ...AVOID];
+    await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`);
     await hold([]);
     for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {
       if (left <= 0) throw new Error('The stage transition did not finish in 1200 frames');
