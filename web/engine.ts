@@ -318,7 +318,7 @@ export interface State {
   music: MusicState;
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
-  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;

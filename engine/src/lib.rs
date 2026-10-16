@@ -1570,6 +1570,12 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
+        //Fresh59D080 constructs an empty Challenge code, then uses
+        //5E1170's9B formatter before forwarding the actual setter.
+        //Restart, typed and legacy paths have separate input owners.
+        if self.state.screen == Screen::Challenge && challenge.is_some() {
+            run_seeds.admit_formatted_seed_effect()?;
+        }
         self.state.item_pools = Some(items::ItemPools::new(
             run_seeds.item_pool_seed(),
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
