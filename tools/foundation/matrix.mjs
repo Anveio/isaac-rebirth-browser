@@ -20,6 +20,59 @@ const labels = {
 // These are evidence/implementation contracts, not cached pass results. The
 // executable tables below still discover every selected scenario from source.
 // Update a row when new original evidence or a runtime contract lands.
+// Completed source/report facts; historical subsystem records remain below.
+export const CURRENT_GAMEPLAY_STATUS = [
+  [
+    "Stat foundations",
+    "D38 #443 and D30 #446 merged; each owner has independent source/interface checks.",
+    "Private 17acc passed production in 30.725s; all four regular405 tapes retain 40,463,219 checks / 0 differences versus Ebc.",
+    "Artifact-specific selected contracts below; public source merges do not inherit private artifact identity.",
+    "Floor/Clippy remain pending on the private production artifact."
+  ],
+  [
+    "Experimental Treatment240",
+    "Private, unlanded seven-effect event plan and separate persistent inputs; Damage, FireDelay and Luck stages own separate read footprints.",
+    "Private0dca four 240 routes: 3,859 checks / 88 unresolved obligations; legacy12/14/222: 10,576 / 12 unresolved. Numeric/RNG/health endpoint failures are zero in those scopes.",
+    "Retained Original: six words/RNG/health and selected caches match 511 rows. Damage1, FireDelay2 and Luck1024 complete in 198 rows per side; corrected raw Luck matches 511 rows.",
+    "2,199 strict failures remain. Range8, MoveSpeed16 and other requested tails still prevent full-cache/firing acceptance."
+  ],
+  [
+    "Cupid48 histories",
+    "D38/D30 bounded Cupid preservation landed; the remaining independent per-word fixes are private, without a permission union.",
+    "Ebc real 48→4 and 48→1 routes: 23,069 checks / 8 unknown-field failures; all three histories preserved and selected pending bits clear.",
+    "No new Original Cupid pair. The earlier missing-history baseline and corrected comparator record remain separate.",
+    "This closes selected history/stat behavior, not full item or combat parity."
+  ],
+  [
+    "Weapons and precedence",
+    "Source-ordered primary selection and separate live transformations, getters, births and contacts.",
+    "Historical Homing and satellite/retained-child witnesses stay attached to their artifacts.",
+    "Knife + Brimstone + Ludovico has actual controlled Knife, retained-child, Full/Fast and contact witnesses; exact identity/callback obligations remain failed.",
+    "Controlled Knife homing nearest-query behavior is still absent; ordinary Tear homing does not supply it."
+  ],
+  [
+    "Pickups",
+    "Coin/golden-key owners landed. Cell-local persistence repair e013 is source-cleared and unbuilt.",
+    "Separate distinct-cell17acc four routes: 20,387 checks / 32 unresolved; every subtype has one positive inventory-delta witness and all five pickups collect/remove. Old same-cell15,501 / 36 is preserved.",
+    "Old same-cell pair: 1,946 Golden body-field checks pass; four port-only coins retain 7,840 UNGRADED obligations. Actual Native0 versus port18 remains a runtime bug.",
+    "Unchanged same-cell replay still required for the repair. Door/return, HUD, audible, save/stage and individual Init owners remain unqualified."
+  ],
+  [
+    "Popup, pause and sound",
+    "Popup/shared clock and pause six-bar owners have source reviews; actual Native mixer acceptance remains separate.",
+    "Private17acc pause four routes: 28,326 selected checks / 0 failures plus 16 mandatory unknowns. Saved popup browser replay stopped at a memory guard before comparison.",
+    "All five selected saved sound calls failed the singleton read with ENOSYS; sound comparison was not reached. Native pause bars remain ungraded.",
+    "No audible, pixel, callback or measured memory-saving acceptance from a build or collector transport."
+  ],
+  [
+    "Boss assets",
+    "95 original UI sheets and 56 portrait definitions landed in #442; private selector is a separate owner.",
+    "Private 17acc production passed; no selected boss-scene gameplay/pixel result in this snapshot.",
+    "Original decode/PNG census establishes assets, not the VS animation or selected scene.",
+    "Portrait/name/spot selection and authored timing still need their declared live witnesses."
+  ]
+];
+
 export const SUBSYSTEMS = [
   ["item-stat-inputs-current","Independent signed persistent stat words, actual240 event plan and per-stage cache ownership.","Private0dca/W4a6a production31.371s; main snapshot80d6 has separate later changes.","Regular40540,383,861/17,260FAIL alladded/keyset, oldvalue/typechanges0. Own2403,859/88FAIL; legacy10,576/12FAIL, numericfail0. FirstOriginal26,031/2,199FAIL;511rows sixwords/RNG/health/cachedstatsPASS.","Pendingflags disagree198rows Native0/port4294966523. Other callback/controller/identity and Native-case coverage remain; stage240fix unqualified. Floor/Clippy pending."],
   ["homing-satellite-scoped-evidence","Homing target/steering and controlledKnife satellites/retained history keep own-side identity separate from cross-game joins.","Durable428/430 cases/tools; private4433/ab2 runtime results do not qualify wholecurrentmain or next composed candidate.","4433own24,181/42FAIL, firstpair85,739/43,069FAIL. ab2regular38,027,481/0diff; satelliteown12,478/232FAIL; history2,470/108FAIL; firstpair34,648/3,237FAIL; callbacks726/31FAIL.","Strictjoins0; callback/cleanup and raw failures retained. Bothgames firstAdd2chains0 thenlater2: consumerboundary, no port-only zerochain claim."],
@@ -135,7 +188,18 @@ ${pairedCases.map(item => `| \`${item.id}\` | ${item.description}; \`${item.syst
 
 The original introductory cutscene is retained in each native tape as a source-only prelude. The browser currently starts at the independently observed first Title frame0/f32 fade .975 boundary. This alignment is explicit; it does not claim cutscene implementation or native simulation-tick identity. Original state observations never become browser inputs. Actual reports preserve the native binary hash, production build digest, consumed X11 phases/focus, original PNGs, real DOM trace, typed source state, pixel differences and failed functional fields.
 
+## Current gameplay qualification
+
+This factual snapshot uses public main \`91519815\` (D38 #443, boss assets #442 and D30 #446). Private results name their own artifacts. Source/public integration, Own/port-port execution and Original comparison are independent evidence; unresolved checks stay failed.
+
+| Area | Source/public | Own/port-port | Original scope | Remaining behavior or evidence |
+| --- | --- | --- | --- | --- |
+${CURRENT_GAMEPLAY_STATUS.map(row => `| ${row.join(' | ')} |`).join('\n')}
+
 ## Port subsystem status
+
+The sections and five-column subsystem rows below retain their named historical snapshots. A historical row or field containing “current” refers to that recorded artifact, not the factual snapshot above.
+
 
 The [system map](docs/system-map.md) records original resource/binary evidence, structural asset contracts and parallel implementation acceptance. These rows distinguish independent evidence, current implementation and executable checks. A listed check is a declared contract, not a passing result; consult the actual report. Original presentation repeats and Rust/WASM replay equality do not establish original simulation ticks or complete hidden-state parity. Update this table through [matrix.mjs](tools/foundation/matrix.mjs) as a subsystem changes.
 
