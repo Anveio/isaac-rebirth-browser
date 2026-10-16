@@ -35,6 +35,7 @@ const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g
 const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/main menu/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/backselectwidget.png",
+  "../references/isaac/rebirth/resources/gfx/ui/loadimages/loadimages-*.png",
   "../references/isaac/rebirth/resources/gfx/ui/death *.png",
   "../references/isaac/rebirth/resources/gfx/ui/ui_hearts.png",
   "../references/isaac/rebirth/resources/gfx/ui/hudpickups.png",

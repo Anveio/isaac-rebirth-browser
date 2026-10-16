@@ -90,6 +90,10 @@ const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
 //Separate literal511F10 callback32/64 footprints for permanent3.
 //The existing1/4/6 roles are independent per stage;48 stays unadmitted.
 const SPOON_BENDER_FLAGS_ITEMS: &[usize] = &[1, 3, 4, 6];
+//The same callback's permanent48 (51314D) and permanent222 (513250) reads;
+//1/4/6 stay the Spoon Bender-proven neutral reads of this callback.
+const CUPID_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 48];
+const ANTI_GRAVITY_FLAGS_ITEMS: &[usize] = &[1, 4, 6, 222];
 const SPOON_BENDER_COLOR_ITEMS: &[usize] = &[1, 3, 4, 6];
 
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
@@ -299,6 +303,18 @@ impl<'a> ItemInputs<'a> {
     ///TEMP/trinket, other cache and getter/controller owners stay separate.
     pub(crate) fn admits_homing_flags(self) -> bool {
         self.admits_permanent_readset(3, SPOON_BENDER_FLAGS_ITEMS)
+    }
+
+    ///51314D Have48 ORs bit1 (its 237/306/C08 8/336 alternates are absent
+    ///from this readset). Tear contact/piercing behavior stays separate.
+    pub(crate) fn admits_piercing_flags(self) -> bool {
+        self.admits_permanent_readset(48, CUPID_FLAGS_ITEMS)
+    }
+
+    ///513250 Have222 with regular C08 reaches515960: without316/69 it ORs
+    ///bit17. Anti-gravity tear motion stays a separate, unported owner.
+    pub(crate) fn admits_anti_gravity_flags(self) -> bool {
+        self.admits_permanent_readset(222, ANTI_GRAVITY_FLAGS_ITEMS)
     }
 
     ///Independent64 trace: positive6 precedes3 in both color destinations.
@@ -1061,12 +1077,12 @@ impl FireDelayStage {
     }
 }
 
-///Source514F40/515670 separates169 absence, positive2/153 add4-only,
+///Source514F40/515670 separates169 absence, positive2/153 add5-only,
 ///and no-presence add4-then-double. TEMP2 remains a distinct unknown query.
 #[derive(Clone, Copy)]
 enum PolyphemusDamageMode {
     Disabled,
-    AddFour,
+    AddFive,
     AddFourThenDouble,
 }
 
@@ -1127,7 +1143,8 @@ impl DamageOperator {
             }
             Self::Polyphemus { mode } => match mode {
                 PolyphemusDamageMode::Disabled => damage,
-                PolyphemusDamageMode::AddFour => damage + 4.0_f32, //514F55.
+                //514F5B loads666108=5.0 for the Have2/153 diversion.
+                PolyphemusDamageMode::AddFive => damage + 5.0_f32,
                 PolyphemusDamageMode::AddFourThenDouble => {
                     //515AF6: add4 then self-add, before the same later bound.
                     damage += 4.0_f32;
@@ -1182,7 +1199,7 @@ impl DamagePlan {
         let polyphemus_mode = if !inputs.positive_owned_count(169) {
             PolyphemusDamageMode::Disabled
         } else if inputs.positive_owned_count(2) || inputs.positive_owned_count(153) {
-            PolyphemusDamageMode::AddFour
+            PolyphemusDamageMode::AddFive
         } else {
             PolyphemusDamageMode::AddFourThenDouble
         };

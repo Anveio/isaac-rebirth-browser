@@ -100,7 +100,12 @@ export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
 }
+export interface AcquisitionHistory {
+  firstRecords: Record<string, {sourceUpdateWord: number; sourceStageWord: number;
+    sourceStageType: number; sourceRoomTypeWord: number; sourcePoolWord488: number} | null>;
+}
 export interface SavedRunSummary {
+  acquisitionHistory?: AcquisitionHistory;
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
@@ -167,6 +172,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  pocketContactDelay?: number | null;
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
@@ -301,7 +307,7 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
-  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
   runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
@@ -312,6 +318,7 @@ export interface State {
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
@@ -323,10 +330,13 @@ export interface State {
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
-    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
+    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
+      pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    treatment240Frontiers?: {healthSourceUnresolved: boolean;
+      achievementUnlocks: {achievementId: number}[]};
     damageInputs?: {sourceD30: number};
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
@@ -354,6 +364,8 @@ export interface State {
   departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
+  sourceDamageMaximum?: boolean;
+  sourceFireDelayMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
