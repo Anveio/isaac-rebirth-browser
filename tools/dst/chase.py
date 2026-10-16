@@ -89,6 +89,13 @@ def chase(args, work):
             partial = {key: sum(key in first for first in first_steps.values()) for key in sorted(keys)}
             print(f"stage {index} round {attempt} (seed {seed}, {time.monotonic() - started:.0f}s): "
                   f"{len(hits)} of {len(first_steps)} cases reach {sorted(keys)}; per key {partial}")
+            # A case that failed a property keeps only its violation tape: it
+            # is a finding to look at, never a prefix to build on.
+            violating = [label for _, label in hits if not (out / "tapes" / f"{label}-case.json").exists()]
+            if violating:
+                print(f"stage {index}: {len(violating)} reaching cases failed a property; "
+                      f"see {out / 'tapes'} ({', '.join(violating)})", file=sys.stderr)
+            hits = [hit for hit in hits if hit[1] not in violating]
             if hits:
                 step, label = hits[0]
                 tape = json.loads((out / "tapes" / f"{label}-case.json").read_text())
