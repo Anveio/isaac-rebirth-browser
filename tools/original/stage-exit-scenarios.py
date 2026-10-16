@@ -31,15 +31,17 @@ FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
 PADDING_STEP = 600
+# Frames both games stand still after re-entering the boss room.
+ANCHOR_IDLE = 120
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
 
 
-def record(base, *args):
+def record(base, *args, rooms='0', arrival=''):
     with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
         json.dump(base, handle); handle.flush()
-        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', '0', '--arrival', '', *map(str, args)],
+        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *map(str, args)],
                                 cwd=ROOT, capture_output=True, text=True, timeout=3600)
     lines = result.stdout.strip().splitlines()
     if not lines:
@@ -88,10 +90,19 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
         # each game's corner press releases depends on its fight, so the first
         # graded checkpoint comes after the trapdoor snaps the player.
         result[name] = result[name] + fight + padding(WINDOW - frames(fight) + idle)
-    tail = record(result, '--from', 'exit-start', '--exit', 1500, *(['--via', f'{via[0]},{via[1]}'] if via else []))
+    # Re-anchor: each game parks after its own fight at a slightly different
+    # sub-unit point, which can shift the trapdoor entry by a frame. Leaving
+    # the boss room and coming back places both players exactly at the door,
+    # and the idle lets that entry velocity decay, so the shared walk starts
+    # from one state. The legs' own route captures still carry the fight
+    # offset and are dropped; `re-anchor` is the first paired capture.
+    back = f"0,{fixture['rooms'][-2]},0"
+    tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
+                  *(['--via', f'{via[0]},{via[1]}'] if via else []), rooms=back, arrival='re-anchor')
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
-    actions = list(tail['actions'])
+    anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
+    actions = keys_only(tail['actions'][:anchor]) + tail['actions'][anchor:]
     routes.dense(actions, 120, 'basement-ii', 4)
     for name in ('tape', 'pairedTape'):
         result[name] = result[name] + actions

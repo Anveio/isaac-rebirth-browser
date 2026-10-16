@@ -10,6 +10,10 @@
 // --collect names rooms whose key pickups the player walks over before leaving
 // them; a key-locked door on the route is then pushed open with a held key.
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
+// --idle FRAMES holds no keys for FRAMES after the last doorway settles, before
+// the arrival checkpoint: entering through a door places the player exactly,
+// and the idle lets its velocity decay, so games that left the previous room
+// on different frames meet in the same state.
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
@@ -36,6 +40,7 @@ const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
+const IDLE = Number(flag('--idle', '0'));
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
 const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
@@ -112,7 +117,8 @@ try {
       const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
-        : !usable ? [] : doorKeys(state.grid, state.player, door));
+        // A cleared boss room's open trapdoor must not be walked over.
+        : !usable ? [] : doorKeys(state.trapdoor ? avoiding(state.grid, AWARD_CELLS) : state.grid, state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -123,6 +129,7 @@ try {
   // Settle out of the doorway transition before the arrival checkpoint.
   await hold([]);
   do { await step(1); state = await view(); } while (state.transition);
+  if (IDLE) { await step(IDLE); state = await view(); }
   if (ARRIVAL) checkpoint(ARRIVAL);
   const walk = async (goal, cells, budget, label) => {
     for (let left = budget; Math.hypot(goal.x - state.player.x, goal.y - state.player.y) > 6; left -= STRIDE) {
