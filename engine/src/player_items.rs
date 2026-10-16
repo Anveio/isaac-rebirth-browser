@@ -46,6 +46,34 @@ impl ShotSpeedInputs {
     pub(crate) const NEUTRAL: Self = Self { source_d38: 0 };
 }
 
+///Independent mutable MoveSpeed16 inputs, not a Luck or inventory owner.
+///D28 is a signed persistent term; the other three terms remain neutral-only.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MoveSpeedInputs {
+    pub source_d28: i32,
+    pub source_d44: i32,
+    pub source_13bc: i32,
+    pub source_13c0: i32,
+}
+impl MoveSpeedInputs {
+    pub(crate) const NEUTRAL: Self = Self {
+        source_d28: 0,
+        source_d44: 0,
+        source_13bc: 0,
+        source_13c0: 0,
+    };
+
+    ///No other source term is approximated by the D28 operator.
+    pub(crate) fn supports_persistent_d28(self) -> bool {
+        self.source_d44 == 0 && self.source_13bc == 0 && self.source_13c0 == 0
+    }
+
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d28 = self.source_d28.wrapping_add(delta);
+    }
+}
+
 /// Actual Player+D30, independent of collectible counts and cached C88.
 /// Fresh519662 owns zero; an untracked writer leaves this input unknown.
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -119,6 +147,8 @@ pub struct PlayerItems {
     pub temporary_collectibles: Vec<TemporaryCollectible>,
     #[serde(default)]
     pub luck_inputs: Option<LuckInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub move_speed_inputs: Option<MoveSpeedInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<DamageInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -199,6 +229,8 @@ impl PlayerItems {
             damage_inputs: Some(DamageInputs { source_d30: 0 }),
             //Actual51966C owns this initial word; no inventory inference.
             range_inputs: Some(RangeInputs { source_d34: 0 }),
+            //51964E/51954C and519798 own these four original zeros.
+            move_speed_inputs: Some(MoveSpeedInputs::NEUTRAL),
             //Actual519658, not a cache/count-derived neutral default.
             fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
@@ -237,6 +269,7 @@ impl PlayerItems {
         // TEMP producers and expiry do not prove the retained modifier inputs.
         // Removing a later record never restores this history.
         self.luck_inputs = None;
+        self.move_speed_inputs = None;
         if let Some(effect) = self
             .temporary_collectibles
             .iter_mut()
@@ -636,6 +669,24 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    //Actual48 independently preserves D28/D44/13BC/13C0 on its
+    //closed common path. This input history gives no stage or caller role.
+    let keep_cupid_move_speed = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    //Actual14/27/28/143 have cached speed effects but preserve these four
+    //persistent inputs. Each selected source Add retains existing Some only;
+    //untracked240/258/reset routes invalidate, never reconstruct history.
+    if !(normal_isaac
+        && matches!(
+            id,
+            1 | 2 | 3 | 4 | 6 | 14 | 27 | 28 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+        ))
+        && !keep_cupid_move_speed
+    {
+        owner.move_speed_inputs = None;
+    }
     //Actual48's selected common path independently preserves D34.
     //This input proof grants no Range callback/getter/caller permission.
     let keep_cupid_range = id == 48

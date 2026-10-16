@@ -113,6 +113,9 @@ impl SavedPlayerItems {
         owner.damage_inputs = self.damage_inputs;
         //5184A6/5184AC saves88DC;511A31/511A37 restores the word.
         owner.range_inputs = self.range_inputs;
+        //511820/82E/1A13/1A67 restore words absent from this bounded DTO.
+        //A fresh zero cannot stand in for the source's saved MoveSpeed terms.
+        owner.move_speed_inputs = None;
         //51848E/518494 saves88D4;511A19/511A1F restores the actual word.
         owner.fire_delay_inputs = self.fire_delay_inputs;
         //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.
