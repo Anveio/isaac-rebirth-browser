@@ -103,7 +103,7 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         .as_ref()
         .map_or(0, |descriptor| descriptor.decoration_seed);
     for index in selected {
-        if crate::doors::try_blow_open(state, index, true) {
+        if crate::doors::try_blow_open(state, index, true)? {
             continue;
         }
         let kind = state
@@ -283,8 +283,10 @@ pub(crate) fn admit_reward(
                 group_seed: seed,
                 spawn_seed: seed,
             };
-            // Pickup::Init's Random20/Random50 replacements stay unsupported.
-            let Some(chest) = crate::chests::from_selector(id, &selector, true)? else {
+            // Normal50's actual51 replacement requires the source-owned
+            // empty LeftHand operands; Red360 retains its own frontier.
+            let Some(chest) = crate::chests::from_source_selector(id, &selector, true, state)?
+            else {
                 return Err("tinted rock chest replacement is unsupported".into());
             };
             chest
@@ -301,6 +303,7 @@ pub(crate) fn admit_reward(
                 price: 0,
                 cooldown: 0,
                 loot_births: Vec::new(),
+                open_frontier: None,
             });
             chest
         }

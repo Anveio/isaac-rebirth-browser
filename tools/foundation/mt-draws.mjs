@@ -36,11 +36,20 @@ export function readNativeDraws(directory) {
 }
 
 const gameplay = draws => draws.filter(draw => draw.counter >= 1 && draw.counter < 0xffffffff);
+// The port's game update count in native Game+ce9f4 terms.
+const nativeCounter = count => count + 1;
 
-export function compareMtDraws(nativeDirectory, portDraws, context = 6) {
+// `independent` ({ label, gameUpdateCount }) marks where a case's games start
+// playing their own keys (its first pairedIndependent scope): later draws are
+// per-game and are not compared, so they cannot read as a divergence.
+export function compareMtDraws(nativeDirectory, portDraws, context = 6, independent) {
   const native = gameplay(readNativeDraws(nativeDirectory));
-  const port = portDraws.filter(draw => draw.counter >= 1).map(draw => ({ ...draw, counter: draw.counter + 1 }));
-  const length = Math.min(native.length, port.length);
+  const port = portDraws.filter(draw => draw.counter >= 1).map(draw => ({ ...draw, counter: nativeCounter(draw.counter) }));
+  const boundary = independent ? nativeCounter(independent.gameUpdateCount) : Infinity;
+  const shared = draws => draws.findIndex(draw => draw.counter > boundary);
+  const end = side => { const index = shared(side); return index < 0 ? side.length : index; };
+  const nativeEnd = end(native), portEnd = end(port);
+  const length = Math.min(nativeEnd, portEnd);
   let divergence = -1;
   for (let i = 0; i < length; i++) {
     if (native[i].kind !== port[i].kind || Math.abs(native[i].counter - port[i].counter) > 1) { divergence = i; break; }
@@ -51,6 +60,8 @@ export function compareMtDraws(nativeDirectory, portDraws, context = 6) {
     nativeDraws: native.length, portDraws: port.length,
     startIndex: { native: native[0]?.index ?? null, port: port[0]?.index ?? null },
     agreedDraws: divergence < 0 ? length : divergence,
+    ...(independent && { independentAfter: { ...independent, nativeCounter: boundary,
+      scope: 'Draws after this capture come from per-game inputs and are not compared' } }),
   };
   if (divergence >= 0) {
     result.firstDivergence = {
@@ -60,9 +71,9 @@ export function compareMtDraws(nativeDirectory, portDraws, context = 6) {
         return { draw: at, native: draw, port: port[at] ?? null };
       }),
     };
-  } else if (native.length !== port.length) {
-    result.unmatchedTail = { side: native.length > port.length ? 'native' : 'port',
-      draws: (native.length > port.length ? native : port).slice(length, length + context) };
+  } else if (nativeEnd !== portEnd) {
+    result.unmatchedTail = { side: nativeEnd > portEnd ? 'native' : 'port',
+      draws: (nativeEnd > portEnd ? native : port).slice(length, Math.min(nativeEnd > portEnd ? nativeEnd : portEnd, length + context)) };
   }
   return result;
 }

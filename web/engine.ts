@@ -7,11 +7,12 @@ export interface Player {
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
   x: number; y: number; vx: number; vy: number; hp: number; maxHp: number;
-  soulHp: number; blackHeartMask: number; eternalHearts: number;
+  soulHp: number; blackHeartMask: number; eternalHearts: number; goldenKey?: boolean | null;
   facing: Direction; bodyFacing: Direction; walkFrame: number; headFrame: number; shooting: boolean; shootingLock: number;
   renderOffset: { x: number; y: number }; controlsEnabled: boolean;
   transformationCounts: [number, number] | null;
   flying: boolean | null; gridCollisionClass: number | null;
+  slowing?: { remaining: number; factor: number; friction: number };
   eye: "negative" | "positive";
   shotsFired: number;
 }
@@ -49,7 +50,8 @@ export interface Familiar {
   flags: number; visible: boolean; active: boolean; removed: boolean; followerIndex: number; appearanceCounter: number;
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
-export type PoopEffect = { particle58: "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}} } | { explosion43: {frameTarget: number} };
+type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
+export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;
@@ -66,13 +68,26 @@ export interface SpriteEffect {
   footprint?: boolean;
 }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export type OrdinaryPlacementFrontier =
+  {kind: "playerUpdate"; field: string} |
+  {kind: "factory"; entityType: number; variant: number; subtype: number} |
+  {kind: "actorEffects" | "missingBody" | "nonfinitePosition"; actor: ActorRef} |
+  {kind: "collectibleEffects"; collectibleId: number} |
+  {kind: "pocketEffects" | "activeEffects" | "playerDamageEffects" | "gridEffects" | "chestEffects" | "restore" | "missingHistory"};
+export type PickupGrantFrontier = {kind: "missingHistory"} |
+  {kind: "input"; field: string} | {kind: "placement"; frontier: OrdinaryPlacementFrontier} |
+  {kind: "operator"; message: string};
+export interface PickupGrantHistory {
+  firstUnownedEffect: {collectibleId: number; frontier: PickupGrantFrontier} | null;
+  itemRngFrontiers: Record<number, PickupGrantFrontier>;
+}
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
-  spawnerType: number; spawnerVariant: number; parent: ActorRef | null;
-  childChain4a0: "unknown" | "empty";
+  spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
+  childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
-  homePosition: {x: number; y: number}; homingTarget: ActorRef | null;
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean; sourceMotionKnown?: boolean;
   renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
   configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -98,13 +113,26 @@ export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
 }
+export interface AcquisitionHistory {
+  firstRecords: Record<string, {sourceUpdateWord: number; sourceStageWord: number;
+    sourceStageType: number; sourceRoomTypeWord: number; sourcePoolWord488: number} | null>;
+}
 export interface SavedRunSummary {
+  acquisitionHistory?: AcquisitionHistory;
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
-  playerItems: {ownedCounts: number[]; itemRngStates: number[];
+  playerItems: {
+    pickupGrantHistory?: PickupGrantHistory | null;
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    ownedCounts: number[]; itemRngStates: number[];
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
-    activeCharge: number; saveWordD88: number; reserveCharge: number};
+    activeCharge: number; saveWordD88: number; reserveCharge: number;
+    shotSpeedInputs?: {sourceD38: number};
+    damageInputs?: {sourceD30: number};
+    fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number}};
   emptyGridCellsSaved: number; occupiedGridSeedsPending: number[];
   currentRoomRecord: number; currentRoomSeedSamples: {gridIndex: number;
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
@@ -161,13 +189,16 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  sourceSpawner?: {entityType: number; variant: number} | null;
+  pocketContactDelay?: number | null;
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
   age: number; birthGameUpdate: number; charge: number; touched: boolean;
-  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number;
+  chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph' | 'explosionGeometry' | 'regularChildInit';
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
+  morphLinks?: {parent498: ActorRef | null; link4a0: ActorRef | null; link4a8: ActorRef | null};
   regularCollision: {gridCollisionClass: number; entityCollisionClass: number} | null;
   regularRng: ItemRng | null;
   spritesheetItemId: number;
@@ -175,14 +206,14 @@ export interface Pickup {
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
 export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
-export interface RunIntroduction { age: number; active: boolean; title: string; stage: boolean; }
+export interface RunIntroduction { age: number; active: boolean; title: string; subtitle?: string; stage: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
-  age: number; selection: number; statFrames: [number, number, number, number, number, number];
+  age: number; selection: number; statFrames: [number | null, number | null, number | null, number | null, number | null, number | null];
 }
 export interface RoomAppearance {
-  backdrop: string; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
+  backdrop: string; backdropId: number; columns: number; rows: number; tileSize: number; origin: { x: number; y: number };
   fxRays?: { index: number; xMin: number; xMax: number; topParallax: number; bottomParallax: number; rayLength: number;
     raySpacing: number; perspective: number; rays: { opacity: number; animationSpeed: number; phase: number; texture: string }[] };
   backdropPatchSize: { width: number; height: number }; backdropPatchColumns: number;
@@ -202,6 +233,8 @@ export interface RoomDescriptor {
   template: RoomTemplate; doorMask: number; neighbors: (number | null)[];
   surpriseMiniboss: boolean;
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
+  /** Owned map: absent cells outside both sets are empty; missing restore history is unknown. */
+  persistentSpawnCells?: {present: number[]; unknown: number[]} | null;
 }
 export interface Floor {
   challengeCurse: {initialLocalState: number; finalLocalState: number; threshold: number; thresholdResult: number | null; selectionResult: number | null; selectedMask: number; filteredMask: number; roomAdjustmentResult: number; localDraws: number} | null;
@@ -212,6 +245,9 @@ export interface Floor {
   attemptReports: { attempt: number; initialGeneratorState: number; finalGeneratorState: number;
     initialPrimaryState: number; finalPrimaryState: number; outcome: string }[];
 }
+/** Room ambience loops 5c6980: eased volume, pitch and whether the loop plays. */
+export interface AmbienceLoop { volume: number; pitch: number; playing: boolean; }
+export interface Ambience { fire: AmbienceLoop; swarm: AmbienceLoop; }
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
@@ -250,6 +286,7 @@ export interface Room {
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
+  ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
@@ -274,11 +311,12 @@ export interface StageEffects {
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
 export interface State {
+  knifeQueryPartition?: { gameCounter: number; actors: ActorRef[]; buckets: number[][] };
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
-  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; c18ControllerHistoryKnown?: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
@@ -288,7 +326,8 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
-  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
+  runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
     requestedTimeAnchorMs: number | null; initialFade: number; fadeRate: number;
@@ -297,19 +336,34 @@ export interface State {
   music: MusicState;
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
-  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
+  acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
+    heldPockets?: {slots: {id: number; card: boolean}[];
+      frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
+        | {kind: "modifierConversion"; collectibleId: number} | null} | null;
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    pickupGrantHistory?: PickupGrantHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
-    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
+    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
+      pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    treatment240Frontiers?: {healthSourceUnresolved: boolean;
+      achievementUnlocks: {achievementId: number}[]};
+    damageInputs?: {sourceD30: number};
+    fireDelayInputs?: {sourceD2c: number};
+    rangeInputs?: {sourceD34: number};
+    shotSpeedInputs?: {sourceD38: number};
+    moveSpeedInputs?: {sourceD28: number; sourceD44: number; source13bc: number; source13c0: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
     currentClip: string | null; spritesheet: string | null; definitionLoaded: boolean; frame: number; playing: boolean};
@@ -327,8 +381,13 @@ export interface State {
   roomDisplayFlags: number[]; revealedSecretConnections: [number, number][];
   persistedRooms: Record<string, Room>;
   stageTransition: {state: number; counter: number; sameStage: boolean; animation: number};
+  ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
+  departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
+  sourceShotSpeedMinimum?: boolean;
+  sourceDamageMaximum?: boolean;
+  sourceFireDelayMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };

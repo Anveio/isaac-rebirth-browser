@@ -16,7 +16,15 @@ const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 pub(crate) const CONTROLLED: u64 = 0x2_0000_0000;
 pub use crate::attack_flags::AttackFlags;
 
-///Actual Base+4A0 empty-chain proof. Missing/nonempty histories remain unknown;
+///444890 reads CURRENT Game+CE9F4: the same State.game_update_count
+///word reset to0 and incremented before Full actor callbacks. Manual-door
+///and immediate-birth callbacks read that current word without another add.
+///Relative birth ages retain their separate subtraction owner.
+pub(crate) fn source_game_counter(game_update_count: u32) -> u32 {
+    game_update_count
+}
+
+///Actual Base+4A0 registered chain. Missing/restored histories remain unknown;
 ///447FC0's Parent+498 registration does not produce this independent owner.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +32,8 @@ pub enum ChildChain {
     #[default]
     Unknown,
     Empty,
+    ///Actual447F40-registered relation, independent of Parent498.
+    Linked(ActorRef),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -39,6 +49,10 @@ pub struct Knife {
     pub spawner_type: u32,
     pub spawner_variant: u32,
     pub parent: Option<ActorRef>,
+    ///Only actual441F1F/447FC0/registered Uninit stores prove NULL.
+    ///A missing legacy Parent field must not become a known NULL owner.
+    #[serde(default)]
+    pub parent_null_known: bool,
     #[serde(default)]
     pub child_chain_4a0: ChildChain,
 
@@ -46,10 +60,17 @@ pub struct Knife {
     pub dead: bool,
     pub visible: bool,
     pub position: WorldVector,
+    ///History of actual source motion callbacks, not a second position store.
+    ///Fresh Init owns it; an omitted legacy fact or skipped homing stays unknown.
+    #[serde(default)]
+    pub source_motion_known: bool,
     ///Actual Base+440, distinct from the saved fast-presentation position.
     pub home_position: WorldVector,
     ///Registered target+4a8, distinct from actual linked parent+498.
     pub homing_target: Option<ActorRef>,
+    ///Actual441F35/447110/registered Uninit owner; legacy None is unknown.
+    #[serde(default)]
+    pub homing_target_known: bool,
     pub saved_position: WorldVector,
     pub render_offset: WorldVector,
     pub velocity: WorldVector,
@@ -110,14 +131,17 @@ impl Knife {
             spawner_type: 0,
             spawner_variant: 0,
             parent: None,
+            parent_null_known: true, //441F1F, separate from441F2A below.
             child_chain_4a0: ChildChain::Empty, //441F2A before the Parent498 link.
 
             active: true,
             dead: false,
             visible: true,
             position: ZERO,
+            source_motion_known: true,
             home_position: ZERO,
             homing_target: None,
+            homing_target_known: true, //441F35 before any 447110 registration.
             saved_position: ZERO,
             render_offset: ZERO,
             velocity: ZERO,
@@ -158,6 +182,14 @@ impl Knife {
         }
     }
 
+    ///447FC0 registers the actual Parent498 relation independently of4A0.
+    ///Some carries its own non-NULL identity; only an actual NULL store
+    ///allows the new orphan body to distinguish NULL from missing history.
+    pub(crate) fn set_parent(&mut self, parent: Option<ActorRef>) {
+        self.parent = parent;
+        self.parent_null_known = parent.is_none();
+    }
+
     ///441bb0 marks inactive/dead. Registered pointers clear only in Uninit.
     pub(crate) fn remove(&mut self) {
         self.active = false;
@@ -187,7 +219,7 @@ impl Knife {
     ) -> bool {
         !self.hit_sequences.contains(&target_sequence)
             && (self.attack_flags.0 & CONTROLLED == 0
-                || ((game_age.wrapping_add(own_sequence) as i32) % 5 == 0
+                || ((source_game_counter(game_age).wrapping_add(own_sequence) as i32) % 5 == 0
                     && self.entity_flags & 0x4000 == 0))
     }
 
@@ -222,6 +254,12 @@ impl Knife {
 
     ///472a40 neutral bit16-clear launch. The caller owns actual C0C/C78
     ///clamping and the source range input; no per-item distance is guessed here.
+    ///447110 registers or clears this exact weak4A8 slot.
+    pub(crate) fn set_homing_target(&mut self, target: Option<ActorRef>) {
+        self.homing_target = target;
+        self.homing_target_known = true;
+    }
+
     pub(crate) fn launch_ordinary(&mut self, ratio: f32, range: f32) -> Result<(), String> {
         if !ratio.is_finite() || !range.is_finite() || ratio <= 0.0 || range <= 0.0 {
             return Err("ordinary Knife launch requires finite actual charge/range".into());
@@ -283,7 +321,7 @@ impl Knife {
         if self.raw_7f4 < 0.0 {
             //474339 actual440 reset and447110(NULL), not parent unlink.
             self.home_position = ZERO;
-            self.homing_target = None;
+            self.set_homing_target(None);
             self.raw_7f4 = 0.0;
             self.raw_814 = false;
         }
@@ -298,7 +336,7 @@ impl Knife {
         Ok(parent_has_118
             && self.raw_7f8 < 0.0
             && self.entity_flags & 0x4000 == 0
-            && (game_age as i32) % 2 == 0)
+            && (source_game_counter(game_age) as i32) % 2 == 0)
     }
 
     ///473929 runs after an actual nested Brim child callback when requested.
@@ -318,7 +356,7 @@ impl Knife {
         self.sprite
             .layer_flips
             .insert(0, [self.sprite.rotation > 0.0, false]);
-        if self.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+        if self.entity_flags & 0x4000 == 0 && (source_game_counter(game_age) as i32) % 3 == 0 {
             self.hit_sequences.clear();
         }
         if self.fast {
@@ -441,7 +479,7 @@ impl Knife {
         } else {
             self.remove();
         }
-        if self.entity_flags & 0x4000 == 0 && (game_age as i32) % 3 == 0 {
+        if self.entity_flags & 0x4000 == 0 && (source_game_counter(game_age) as i32) % 3 == 0 {
             self.hit_sequences.clear();
         }
         if !self.position.is_finite()

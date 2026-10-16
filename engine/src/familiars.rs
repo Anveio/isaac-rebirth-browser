@@ -1010,7 +1010,7 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     let scheduler = &state.actor_scheduler;
     let mut pending = Vec::new();
     for (index, effect) in state.sprite_effects.iter().enumerate() {
-        if !((matches!(effect.variant, 7 | 17 | 43 | 58)
+        if !((matches!(effect.variant, 7 | 17 | 27 | 43 | 58)
             || (effect.variant == 18 && effect.explosion_effect.is_some()))
             && effect.flags & 8 != 0
             && effect.active)

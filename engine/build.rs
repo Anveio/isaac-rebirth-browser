@@ -132,13 +132,29 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
         .expect("pickup definitions missing")
     {
         let actor = pickup["actor"].as_str().expect("pickup actor missing");
+        let drop_id = actors[actor]["Events"].as_array().and_then(|events| {
+            events
+                .iter()
+                .find(|event| event["Name"] == "DropSound")
+                .and_then(|event| event["Id"].as_u64())
+        });
         let mut clips = String::new();
         for animation in actors[actor]["Animations"]
             .as_array()
             .expect("authored pickup actor missing")
         {
+            let drop_sound = drop_id
+                .and_then(|id| {
+                    animation["Triggers"].as_array().and_then(|triggers| {
+                        triggers
+                            .iter()
+                            .find(|trigger| trigger["EventId"] == id)
+                            .and_then(|trigger| trigger["AtFrame"].as_u64())
+                    })
+                })
+                .map_or("None".to_string(), |frame| format!("Some({frame})"));
             clips.push_str(&format!(
-                "Clip {{ name: {:?}, frames: {}, looping: {} }},",
+                "Clip {{ name: {:?}, frames: {}, looping: {}, drop_sound: {drop_sound} }},",
                 animation["Name"]
                     .as_str()
                     .expect("pickup clip name missing"),
@@ -189,6 +205,43 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
     output
 }
 
+/// ItemConfig57BFA0 reads the authored card/rune achievement word. Card IDs
+/// remain separate from the four entities2.xml visual families.
+fn card_catalog(xml: &str) -> String {
+    let mut achievements = [None; 41];
+    let mut definitions: [Option<String>; 41] = std::array::from_fn(|_| None);
+    for tag in xml
+        .split("<card ")
+        .skip(1)
+        .chain(xml.split("<rune ").skip(1))
+    {
+        let head = &tag[..tag.find('>').expect("card tag end")];
+        let id: usize = attribute(head, "id")
+            .expect("card id")
+            .parse()
+            .expect("card id integer");
+        assert!(
+            id < achievements.len() && achievements[id].is_none(),
+            "invalid authored card id"
+        );
+        achievements[id] = Some(attribute(head, "achievement").map_or(-1, |value| {
+            value.parse::<i32>().expect("card achievement integer")
+        }));
+        definitions[id] = Some(format!(
+            "PocketCardDefinition {{ name: {:?}, description: {:?} }},\n",
+            attribute(head, "name").expect("card name"),
+            attribute(head, "description").unwrap_or("")
+        ));
+    }
+    assert!(
+        achievements.iter().all(Option::is_some),
+        "incomplete authored card catalogue"
+    );
+    let values: Vec<_> = achievements.into_iter().map(Option::unwrap).collect();
+    let cards: String = definitions.into_iter().map(Option::unwrap).collect();
+    format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\npub const CARD_DEFINITIONS: &[PocketCardDefinition] = &[\n{cards}];\n")
+}
+
 /// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
 /// per clip of Creep (Red), rows as hex with bit x for texel x.
 fn creep_mask_catalog(path: &Path) -> String {
@@ -237,6 +290,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 42, "gfx/1000.042_blood gush.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
         (1000, 58, "gfx/1000.058_poop particle.anm2"),
+        (1000, 27, "gfx/1000.027_wood particle.anm2"),
         (1000, 43, "gfx/1000.043_poop explosion.anm2"),
         (1000, 21, "gfx/1000.021_tiny bug.anm2"),
         (1000, 33, "gfx/1000.033_tiny fly.anm2"),
@@ -734,6 +788,28 @@ fn main() {
         &fs::read_to_string(npc_animations).expect("read authored NPC animations"),
     )
     .expect("parse authored NPC animations");
+    // npc-data.json is generated from this allowlist; an actor added to the
+    // JSON alone would be dropped by the next regeneration.
+    let npc_list = manifest
+        .parent()
+        .unwrap()
+        .join("tools/foundation/port-npc-animations.txt");
+    println!("cargo:rerun-if-changed={}", npc_list.display());
+    let listed = fs::read_to_string(npc_list).expect("read NPC animation allowlist");
+    let listed = listed
+        .lines()
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .collect::<std::collections::BTreeSet<_>>();
+    for actor in npc_clips
+        .as_object()
+        .expect("NPC animations are a map")
+        .keys()
+    {
+        assert!(
+            listed.contains(actor.as_str()),
+            "web/npc-data.json has {actor}, which tools/foundation/port-npc-animations.txt does not list"
+        );
+    }
     let boss_scene = npc_clips["gfx/ui/boss/versusscreen.anm2"]["Animations"]
         .as_array()
         .expect("boss Scene animations missing")
@@ -946,6 +1022,32 @@ fn main() {
         pickup_catalog(&pickups, &animations, &xml),
     )
     .expect("write pickup catalog");
+    let pockets = resources.join("pocketitems.xml");
+    println!("cargo:rerun-if-changed={}", pockets.display());
+    fs::write(output.join("card_catalog.rs"), {
+        let art_path = manifest.parent().unwrap().join("web/pocket-data.json");
+        println!("cargo:rerun-if-changed={}", art_path.display());
+        let art: Value =
+            serde_json::from_str(&fs::read_to_string(art_path).expect("read authored pocket art"))
+                .expect("authored pocket art JSON");
+        let sparkle = art["gfx/ui/ui_cardspills.anm2"]["Animations"]
+            .as_array()
+            .expect("pocket clips")
+            .iter()
+            .find(|clip| clip["Name"] == "Sparkle")
+            .expect("pocket Sparkle");
+        assert_eq!(
+            sparkle["Loop"], false,
+            "copied pocket Sparkle is nonlooping"
+        );
+        let frames = sparkle["FrameNum"].as_u64().expect("pocket Sparkle frames");
+        assert!(frames > 0 && frames <= u64::from(u32::MAX));
+        format!(
+            "{}pub const POCKET_SPARKLE_FRAMES: u32 = {frames};\n",
+            card_catalog(&fs::read_to_string(pockets).expect("read authored pocket configuration"))
+        )
+    })
+    .expect("write authored card catalogue");
     let audio_path = manifest.parent().unwrap().join("web/audio-data.json");
     println!("cargo:rerun-if-changed={}", audio_path.display());
     let audio: Value = serde_json::from_str(

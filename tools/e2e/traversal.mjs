@@ -53,7 +53,7 @@ const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.
         ? 'Fresh Isaac, no-hostile13x7 Basement secret bomb revelation/entry/return: complete hidden/open door objects, reciprocal persistence, source display flags and minimap routing, exact room/player/HP/immunity and authored admissions. Keeper damage/drop and item callbacks, hostile secret closure, other shapes/items and complete pixels remain separate.'
         : bank.contract === 'key'
           ? 'Fresh Isaac, no-hostile13x7 natural secret keys and ordinary library lock: denied zero-key approach, actual collection/spending, full-only unlock/collision/SFX156, admission/return/revisit, exact player/HP/immunity, complete door/display/minimap/descriptor joins. Actual Keeper17 constructor admission remains required; golden/double locks, library items and pixels remain separate.'
-        : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
+        : 'Ordinary style0 13x7 doorway and no-hostile return; mandatory hostile-room lock/return regression; contrived and OS-random spider-web crossings graded through the slowed release; exact f32 player/descriptor phases, complete authored group accounting, supported actor admission and ordinary Rock metadata, visited-room restoration. NPC behavior, other grids/doors, large-room camera and complete pixels remain separate.',
   exclusions: bank.contract === 'large-geometry'
     ? ['Interior camera scroll float details, large-room backdrop generation and complete rendered pixel parity', 'Special player/item focus, co-op, shooting lookahead, camera shake, hostile camera behavior and alternate CameraStyle2 are not accepted by this fresh no-shooting/no-hostile tape', 'Chest contact/loot, motion and rare51/360 replacements remain unsupported; historical missing normal Chest admissions stay retained', 'Chest persistent RNG30 initialization is statically mapped; this source observer does not read its four words', 'Boss/shop and other special-door art/policy/traversal, hostile large-room lifecycle, other large shapes, later floors and exits']
     : bank.contract === 'chest-opening'
@@ -148,6 +148,8 @@ try {
         for (const field of ['type', 'variant', 'name', 'width', 'height'])
           phaseAssert.equal(state.room.descriptor.template[field], descriptor.template[field], `${label}:authored identity ${field}`);
         phaseAssert.equal(state.room.descriptor.spawnSeed, original.context.publicLogState.spawnSeed, `${label}:actual room SpawnRNG log join`);
+        // Room.Init backdrop setup 5c5b30 selects Room+1ae0 from the room type and stage.
+        phaseAssert.equal(state.room.appearance.backdropId, observed.contents.room.backdropType, `${label}:source backdrop selection`);
         phaseAssert.deepEqual(state.floor.grid, source.grid, `${label}:floor topology`);
         phaseAssert.deepEqual([state.player.x, state.player.y, state.player.vx, state.player.vy],
           [actor.position[0] * .65 + 32, actor.position[1] * .65 - 46, actor.velocity[0] * .65, actor.velocity[1] * .65], `${label}:source f32 motion projection`);

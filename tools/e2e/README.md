@@ -74,12 +74,33 @@ The runner rebuilds `dist/` when `web/` or `engine/` sources are newer than it
 (use `--no-build` to skip). It always builds the native `floor` generator,
 which seed discovery runs, so `--no-build` never leaves it stale. It runs each
 suite under its own virtual display, and writes `.cache/e2e/run-*/report.json`
-and one log per suite. A failing suite prints its replay command:
+and one log per suite. Every runner on the host shares a cap on concurrent suites (one per 6 GB
+of memory, at least one; override with `E2E_HOST_SLOTS`), so overlapping runs
+queue rather than crash Chromium renderers.
+
+Updated runners require Linux `flock` (util-linux). They atomically publish a
+complete PID/start-time record in the existing `slot-N` namespace, so older
+frozen runners recognize active updated runners. Persistent `slot-N.mutex`
+sidecars serialize updated clients; do not remove them while a runner is active.
+
+Quiesce old runners when upgrading concurrent runs. An unmodified old stale-file
+reaper can read a dead record and later unlink an updated runner's live
+replacement. The new mutex cannot serialize that old cleanup code; ordinary
+mixed-client ownership is compatible, but this stale-reaper interleaving remains
+unsafe until the old runners have stopped.
+
+A failing suite prints its replay command:
 
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
+
+A replay compares builds only when both games get the same keys. Stage-exit
+cases also carry port fight keys recorded closed-loop against one production
+build (`portRecordedBuild`); replayed on another build they feed stale keys to
+a different game, and the suite prints a warning. To compare such builds, run
+the suite fresh on each.
 
 ### Keeping a cited case
 
@@ -137,8 +158,24 @@ case report gains an `mtDraws` entry from
 order by wrapper kind and update counter, and reports the first divergence
 with native return addresses and port source sites. Everything before that
 point used the same stream positions. The diagnostic never changes a case
-status. Drivers that launch the original themselves (traversal, items and
+status. A case whose games play their own keys from a capture on
+(its first `pairedIndependent` scope, e.g. stage-exit's fight) is compared only
+up to that capture; the report's `independentAfter` names it. Drivers that launch the original themselves (traversal, items and
 similar) do not support it yet.
+
+### Original wall cache draws
+
+The original pre-renders each room's backdrop walls into a cache texture when
+the room loads (`Backdrop::pre_render_walls` 424440) and keeps no wall rects
+afterwards. Paired suites built on `runPairedGate` accept `--gl-trace`: the
+gate compiles the public GL observer
+[`foundation-gl-trace.c`](../original/foundation-gl-trace.c), the original
+preloads it, and the manifest's `graphicsTrace` names the recorded draws. A
+comparator then grades the port's walls with
+[`wall-quads.mjs`](../foundation/wall-quads.mjs): every room the port entered
+must equal one of the original's 44-quad wall cache draws (patch source rects,
+destinations and flips), in entry order. It is off by default and enabled per
+suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it.
 
 ## No CI
 
@@ -269,3 +306,37 @@ bytes and record count and retain incomplete status. Only a successful final
 frame/checksum write, file close and metadata commit certify a closed journal.
 Readers reject incomplete frames, uncommitted tails and ambiguous mixed formats.
 No game field, public input, clock, RNG stream or capacity floor changes.
+
+### Functional public-WASM room-frame backend
+
+Existing room-frame suites also accept `--wasm-node WASM --wasm-sha SHA`.
+They replay the same declared menu/key/tick commands through the public ABI
+with the same seed and boot epoch, then use the existing per-frame comparer
+and suite minima. They add no resource or state override.
+`--reuse-original DIR` requires this backend and validates the retained
+Original case and public tape against the requested declaration before using
+its observations. A matching port replay is never its own reference.
+
+This route reports game-functional evidence only. Browser DOM input, renderer
+output and backend audio/PCM remain unavailable and require their separate
+Browser runs. Native and Browser resource-partial reports remain unchanged;
+a complete public-WASM journal alone does not establish a functional pass.
+
+### Functional public-WASM natural coins
+
+The existing `pickups` driver accepts `--wasm-node WASM --wasm-sha SHA` and
+replays its same coin input route/comparer/coverage minima through the public
+ABI. `--case NAME --scenarios BANK` selects one declared case without changing
+the retained whole bank. The default Browser route remains available.
+
+`--reuse-original DIR` additionally requires the explicit functional backend
+and case selection. The prior root must retain its original `scenarios.json`,
+public case tape and successful report with the complete Native manifest hash.
+The driver checks all three, then runs the existing canonical Native
+provenance validator before WASM. It never creates a missing declaration or
+uses Native output as a runtime input.
+
+Node journals are actual reset/key/tick/snapshot observations. Browser DOM,
+rendered output and audio playback/PCM remain unavailable; source/schema gaps,
+comparison failures and missing pickup witnesses remain failures. Historical
+passes do not become current-build acceptance without the real replay.

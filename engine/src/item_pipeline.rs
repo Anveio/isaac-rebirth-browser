@@ -83,6 +83,10 @@ const SOY_KIND3_ITEMS: &[usize] = &[1, 4, 118, 330];
 // Equal selected sets do not complete grant/history/contact or other stages.
 const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 
+//Independent actual Add48 footprint. Only this grant-history consumer is
+//introduced here; cache/getter/caller permissions remain separate.
+const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
+
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -219,31 +223,6 @@ impl<'a> ItemInputs<'a> {
         .then_some(0)
     }
 
-    ///Independent cache32/64 footprint for positive6 with selected1/4/114/118/329/304.
-    ///This never widens a controller, contact or temporary-effect frontier.
-    pub(crate) fn admits_number_one_appearance(self) -> bool {
-        self.positive_owned_count(6)
-            && self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
-            && self.owner.temporary_collectibles.is_empty()
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329, 304].contains(&id))
-                })
-    }
-
-    ///Literal51316D's selected Flags32 callback. No color/grant permission.
-    pub(crate) fn admits_polyphemus_flags_context(self) -> bool {
-        TearFlagsStage::admits_polyphemus(self)
-    }
-
     ///Separate50D090(kind1) readset;169 adds no modifier query or RNG here.
     pub(crate) fn admits_polyphemus_kind1_context(self) -> bool {
         self.positive_owned_count(169) && self.admits_kind1_neutral_fields()
@@ -284,35 +263,6 @@ impl<'a> ItemInputs<'a> {
 
     pub(crate) fn admits_soy_milk_kind3_getter(self) -> bool {
         self.admits_permanent_readset(330, SOY_KIND3_ITEMS)
-    }
-
-    /// Exact per-callback cache32/64 proof: other modifier and trinket owners
-    /// remain outside this scope. Future property operators extend their own
-    /// cache reads instead of widening controller/contact admission.
-    pub(crate) fn admits_selected_appearance(self) -> bool {
-        if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
-            return true;
-        }
-        if self.admits_soy_milk_cache_context() || self.admits_monstro_cache_context() {
-            return true;
-        }
-        if self.admits_epic_fetus_cache_context() {
-            return true;
-        }
-        self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|c| c.kind != 2))
-            && self.owner.temporary_collectibles.is_empty()
-            && self
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0 || (count > 0 && [1, 4, 114, 118, 329, 257, 304].contains(&id))
-                })
     }
 
     ///Actual519FC0 primary and52F370 secondary caller footprints remain distinct.
@@ -443,6 +393,43 @@ impl<'a> ItemInputs<'a> {
                 .is_none_or(|id| supported.contains(&(id as usize)))
     }
 
+    ///Each selected511F10 callback owns its own input roles.2 contributes
+    ///only the existing FireDelay multiplier here; the other callbacks have
+    ///separate source-neutral proofs. Numeric operators and noninventory
+    ///history guards stay with their actual stage and consumer.
+    fn admits_knife_cache_stage(self, stage: CacheStage) -> bool {
+        self.positive_owned_count(2)
+            && self.admits_stage_owned_roles(|id| KnifeCacheReadRole::of(stage, id).is_some())
+    }
+
+    ///Independent50D090(kind4) trace: no2 query, RNG or modifier output.
+    ///Actual C88/C98/all11CA0/C8C stay current copied fields. This readset
+    ///does not admit an ordinary multi-Knife emitter or controlled satellites.
+    pub(crate) fn admits_knife_kind4_getter(self) -> bool {
+        self.admits_stage_owned_roles(|id| matches!(id, 1 | 2 | 4 | 114 | 118 | 329))
+    }
+
+    ///Only the selected live114+329 caller may consume the newly closed2
+    ///satellite-count branch. The ordinary caller retains its old capability.
+    pub(crate) fn admits_controlled_knife_caller(self) -> bool {
+        self.positive_owned_count(114)
+            && self.positive_owned_count(329)
+            && self.admits_stage_owned_roles(|id| match id {
+                2 => true,         //Source519FC0 owns the satellite-count branch.
+                114 | 329 => true, //Actual Knife/control selection.
+                118 => true,       //Ordinary Has118 child branch bypassed by control.
+                1 | 4 => true,     //No additional live caller operator.
+                _ => false,
+            })
+    }
+
+    ///ActualAdd2's default tail writes none of the retained Luck inputs.
+    ///Only this wrapper consumes the proof; None is never recreated here.
+    pub(crate) fn admits_inner_eye_knife_grant(self) -> bool {
+        self.positive_owned_count(2)
+            && self.admits_stage_owned_roles(|id| matches!(id, 1 | 2 | 4 | 114 | 118 | 329))
+    }
+
     ///Independent511F10 footprint for positive168 with selected1/2/4,
     ///or the actual2-before168 prefix. C08=6 adds no FireDelay multiplier.
     ///Normal-Isaac, requested callbacks and field/history owners stay separate.
@@ -505,6 +492,12 @@ impl<'a> ItemInputs<'a> {
 
     ///Mechanical signed-count/context check, with no item capability implied
     ///by the checker itself. Each caller supplies its own source-owned set.
+    ///Actual zero-amount Add48 preserves an existing D38 owner only.
+    ///No missing stat word or other callback capability is constructed.
+    pub(crate) fn admits_cupid_grant_context(self) -> bool {
+        self.admits_permanent_readset(48, CUPID_GRANT_ITEMS)
+    }
+
     fn admits_permanent_readset(self, required: usize, supported: &[usize]) -> bool {
         self.positive_owned_count(required)
             && self.owner.trinket_slots == [0, 0]
@@ -638,6 +631,7 @@ impl<'a> ItemInputs<'a> {
         let fetus_context = self.admits_fetus_cache_context();
         let neutral_monstro = self.admits_monstro_cache_context();
         let epic_fetus_context = self.admits_epic_fetus_cache_context();
+        let knife_stage_reads = self.admits_knife_cache_stage(stage);
         self.admits_scalar_context()
             && self
                 .owner
@@ -655,13 +649,20 @@ impl<'a> ItemInputs<'a> {
                                 || (id == 52 && fetus_context)
                                 || (id == 229 && neutral_monstro)
                                 || (id == 168 && epic_fetus_context)
-                                || (id == 2 && epic_fetus_context)))
+                                || (id == 2 && epic_fetus_context)
+                                || knife_stage_reads))
                 })
     }
 
     /// Auxiliary callbacks have their own narrower source proof. Scalar
     /// effects admitted above do not expand Flight, Familiar, Luck or history.
     fn admits_selected_auxiliary_callbacks(self) -> bool {
+        if self.admits_knife_cache_stage(CacheStage::Flight)
+            && self.admits_knife_cache_stage(CacheStage::Familiar)
+            && self.admits_knife_cache_stage(CacheStage::Luck)
+        {
+            return true;
+        }
         if self.admits_technology_cache_context() || self.admits_fetus_cache_context() {
             return true;
         }
@@ -749,6 +750,7 @@ pub(crate) struct CachedScalars {
 pub(crate) struct CacheResolution {
     pub(crate) values: CachedScalars,
     pub(crate) completed: CacheMask,
+    pub(crate) reached_completed: CacheMask,
 }
 
 impl CacheResolution {
@@ -757,31 +759,133 @@ impl CacheResolution {
     }
 }
 
-///ShotSpeed4 owns one nonzero143 base operator plus its own neutral reads.
-///The full511F68..51212E CFG never queries/loads4/152/169. Their presence
-///therefore composes here without granting another cache, grant or caller.
-struct ShotSpeedStage;
-
-impl ShotSpeedStage {
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        //The former scalar capability is retained only as a whole for old
-        //neutral/coupled contexts. It supplies no newly combined neutral owner.
-        let legacy_neutral = inputs.admits_scalar_stage(CacheStage::ShotSpeed, &[4, 143]);
-        source_player_type == Some(0)
-            && inputs.admits_scalar_context()
-            && inputs
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0
-                        || (count > 0
-                            && (id == 143 //Actual raw nonzero base operator.
-                                || matches!(id, 4 | 152 | 169) //Source-neutral here only.
-                                || legacy_neutral))
-                })
+///Known inputs of one callback, classified by their literal source role.
+///This finite footprint has no item-pair result or alternate numeric formula.
+enum KnifeCacheReadRole {
+    Neutral,
+    DelayTier,
+    InnerEyeDelay,
+    DamageTier,
+}
+impl KnifeCacheReadRole {
+    fn of(stage: CacheStage, id: usize) -> Option<Self> {
+        use CacheStage as S;
+        match (stage, id) {
+            (S::FireDelay, 1) => Some(Self::DelayTier),
+            (S::FireDelay, 2) => Some(Self::InnerEyeDelay),
+            (S::FireDelay, 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::Damage, 4) => Some(Self::DamageTier),
+            (S::Damage, 1 | 2 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::ShotSpeed | S::Range | S::MoveSpeed, 1 | 2 | 4 | 114 | 118 | 329) => {
+                Some(Self::Neutral)
+            }
+            (S::TearFlags | S::Color, 1 | 2 | 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            (S::Flight | S::Familiar | S::Luck, 1 | 2 | 4 | 114 | 118 | 329) => Some(Self::Neutral),
+            _ => None,
+        }
     }
+}
+
+///511F68..512126: read actual operands lazily from canonical query history.
+///The complete raw arithmetic is independent of grant, getter and controller.
+#[derive(Clone, Copy)]
+struct ShotSpeedReadPlan {
+    base: f32,
+    raw_contributions: [i32; 13],
+    source_d38: i32,
+    have_five: bool,
+}
+
+impl ShotSpeedReadPlan {
+    fn read(
+        inputs: ItemInputs<'_>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        source_bfc: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        //The caller passes actual Player+BFC, independently of Entity+14.
+        if source_bfc != Some(0)
+            || !source
+                .entity
+                .is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
+        }
+        //Raw143 nonzero skips the actual TEMP143 count query entirely.
+        let base = if queries.raw_count(143)? != 0 || queries.temporary_count(143)? != 0 {
+            1.2_f32
+        } else {
+            1.0_f32
+        };
+        //First-read source order; the wrapping sum is resolved below.
+        let raw_contributions = [
+            queries.raw_count(165)?,
+            queries.raw_count(183)?,
+            queries.raw_count(339)?,
+            queries.raw_count(341)?,
+            queries.raw_count(194)?,
+            queries.raw_count(342)?,
+            queries.raw_count(176)?,
+            queries.raw_count(182)?,
+            queries.raw_count(213)?,
+            queries.raw_count(310)?,
+            queries.raw_count(255)?,
+            queries.raw_count(336)?,
+            queries.raw_count(331)?,
+        ];
+        let source_d38 = inputs.owner.shot_speed_inputs?.source_d38;
+        //The supported normal BFC0 path next queries actual trinket27.
+        //Its positive effect remains pending; other held IDs are not scanned.
+        if queries.has_trinket(27)? {
+            return None;
+        }
+        //5090C0 positive skips514B9F's distinct TEMP record-presence query.
+        let have_five = queries.have(5)? || queries.temporary_present(5)?;
+        //Normal variant0 skips Config9C entirely for the actual Game key0.
+        if source.challenge_id != 0 && source.shot_speed_minimum != Some(false) {
+            return None;
+        }
+        Some(Self {
+            base,
+            raw_contributions,
+            source_d38,
+            have_five,
+        })
+    }
+
+    fn resolve(self) -> f32 {
+        let [count165, count183, count339, count341, count194, count342, count176, count182, count213, count310, count255, count336, count331] =
+            self.raw_contributions;
+        let mut value = count165 as f32 * 0.23_f32;
+        let sum = count183
+            .wrapping_add(count339)
+            .wrapping_add(count341)
+            .wrapping_add(count194)
+            .wrapping_sub(count342);
+        value += self.base;
+        value += count176 as f32 * 0.16_f32;
+        value += sum as f32 * 0.16_f32;
+        value -= count182 as f32 * 0.25_f32;
+        value -= count213 as f32 * 0.15_f32;
+        value -= count310 as f32 * 0.5_f32;
+        value += count255 as f32 * 0.2_f32;
+        value -= count336 as f32 * 0.4_f32;
+        value -= count331 as f32 * 0.3_f32;
+        value += self.source_d38 as f32 * 0.2_f32;
+        if self.have_five {
+            value *= 1.6_f32;
+        }
+        value.max(0.6_f32)
+    }
+}
+
+///Transient actual source context, never an owner synthesized from inventory.
+#[derive(Clone, Copy)]
+pub(crate) struct CacheSourceInputs {
+    pub(crate) entity: Option<crate::PlayerEntitySource>,
+    pub(crate) challenge_id: u32,
+    pub(crate) damage_maximum: Option<bool>,
+    pub(crate) shot_speed_minimum: Option<bool>,
 }
 
 ///519FC0's selected normal Tear caller:152 owns the alternating-eye
@@ -847,22 +951,6 @@ impl FireDelayReadRole {
     }
 }
 
-///Only the Flags32 callback's implemented source roles.152 is neutral in
-///this callback, while169 supplies the existing51316D OR0x200 operator.
-///Neither role owns Color64, a returned getter field or a born actor body.
-struct TearFlagsStage;
-
-impl TearFlagsStage {
-    fn admits_polyphemus(inputs: ItemInputs<'_>) -> bool {
-        inputs.positive_owned_count(169)
-            && inputs.admits_stage_owned_roles(|id| match id {
-                4 | 152 => true, //Independently source-neutral Flags32 reads.
-                169 => true,     //Existing one OR0x200 operator.
-                _ => false,
-            })
-    }
-}
-
 /// One callback's source ownership, beside its literal pure operator.
 /// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
@@ -883,7 +971,9 @@ impl FireDelayStage {
             && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS);
         let operator_reads = !inputs.positive_owned_count(153)
             && inputs.admits_stage_owned_roles(|id| FireDelayReadRole::of(id).is_some());
-        source_player_type == Some(0) && (legacy || operator_reads)
+        source_player_type == Some(0)
+            && inputs.owner.fire_delay_inputs.is_some()
+            && (legacy || operator_reads)
     }
 
     fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
@@ -893,8 +983,14 @@ impl FireDelayStage {
         let number_one = inputs
             .owned_count(6)
             .wrapping_add(inputs.temporary_count(6));
-        let tier = number_one as f32 * 1.5_f32
+        let mut tier = number_one as f32 * 1.5_f32
             + (inputs.owned_count(1) as f32 + inputs.temporary_count(1) as f32) * 0.7_f32;
+        //512495/49D/4A3: signed conversion, separate *.5 then ADDSS into
+        //the tier BEFORE the character/nonlinear transform and min5 bound.
+        //An absent owner leaves only a partial value; completion stays pending.
+        if let Some(input) = inputs.owner.fire_delay_inputs {
+            tier += input.source_d2c as f32 * 0.5_f32;
+        }
         let root = (1.3_f32 * tier + 1.0_f32).max(0.0).sqrt();
         let mut delay = 16.0_f32 - 6.0_f32 * root;
         if tier <= 0.0 {
@@ -929,16 +1025,24 @@ impl FireDelayStage {
         if inputs.positive_owned_count(330) {
             delay = (delay - 6.0_f32) * 0.25_f32;
         }
-        (delay as i32).max(1)
+        //51279C CVTTSS2SI returns INT_MIN for NaN/overflow. Rust's
+        //saturating cast differs for a large negative signed D2C history.
+        let integer =
+            if delay.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&delay) {
+                delay as i32
+            } else {
+                i32::MIN
+            };
+        integer.max(1)
     }
 }
 
-///Source514F40/515670 separates169 absence, positive2/153 add4-only,
+///Source514F40/515670 separates169 absence, positive2/153 add5-only,
 ///and no-presence add4-then-double. TEMP2 remains a distinct unknown query.
 #[derive(Clone, Copy)]
 enum PolyphemusDamageMode {
     Disabled,
-    AddFour,
+    AddFive,
     AddFourThenDouble,
 }
 
@@ -954,6 +1058,9 @@ enum DamageOperator {
     Polyphemus {
         mode: PolyphemusDamageMode,
     },
+    PersistentAdditive {
+        source_d30: Option<i32>,
+    },
     MinimumBound,
     Technology2 {
         enabled: bool,
@@ -967,21 +1074,6 @@ enum DamageOperator {
 }
 
 impl DamageOperator {
-    ///Only this callback's implemented producers, including their inactive
-    ///presence reads. New effects extend their operator, not a pair table.
-    fn reads_owned(self, id: usize) -> bool {
-        match self {
-            Self::BaseTier { .. } | Self::SharedFourOrTwelve { .. } => matches!(id, 4 | 12),
-            Self::Polyphemus { mode } => {
-                id == 169
-                    || (!matches!(mode, PolyphemusDamageMode::Disabled) && matches!(id, 2 | 153))
-            }
-            Self::Technology2 { .. } => id == 152,
-            Self::SoyMilk { .. } => id == 330,
-            Self::MinimumBound => false,
-        }
-    }
-
     fn apply(self, mut damage: f32) -> f32 {
         match self {
             Self::BaseTier {
@@ -996,7 +1088,8 @@ impl DamageOperator {
             }
             Self::Polyphemus { mode } => match mode {
                 PolyphemusDamageMode::Disabled => damage,
-                PolyphemusDamageMode::AddFour => damage + 4.0_f32, //514F55.
+                //514F5B loads666108=5.0 for the Have2/153 diversion.
+                PolyphemusDamageMode::AddFive => damage + 5.0_f32,
                 PolyphemusDamageMode::AddFourThenDouble => {
                     //515AF6: add4 then self-add, before the same later bound.
                     damage += 4.0_f32;
@@ -1004,6 +1097,14 @@ impl DamageOperator {
                     damage
                 }
             },
+            Self::PersistentAdditive { source_d30 } => {
+                //5138EA/5138F2: signed CVTSI2SS then ADDSS after the
+                //selected character/item terms, before the first bound.
+                if let Some(value) = source_d30 {
+                    damage += value as f32;
+                }
+                damage
+            }
             Self::MinimumBound => damage.max(0.5_f32),
             Self::Technology2 { enabled } => {
                 if enabled {
@@ -1034,8 +1135,7 @@ impl DamageOperator {
 ///values are still evaluated for unknown contexts; only completion is withheld.
 ///No item pair or other callback's permission can supply a missing read owner.
 struct DamagePlan {
-    operators: [DamageOperator; 7],
-    reads_admitted: bool,
+    operators: [DamageOperator; 8],
 }
 
 impl DamagePlan {
@@ -1043,7 +1143,7 @@ impl DamagePlan {
         let polyphemus_mode = if !inputs.positive_owned_count(169) {
             PolyphemusDamageMode::Disabled
         } else if inputs.positive_owned_count(2) || inputs.positive_owned_count(153) {
-            PolyphemusDamageMode::AddFour
+            PolyphemusDamageMode::AddFive
         } else {
             PolyphemusDamageMode::AddFourThenDouble
         };
@@ -1054,6 +1154,9 @@ impl DamagePlan {
             },
             DamageOperator::Polyphemus {
                 mode: polyphemus_mode,
+            },
+            DamageOperator::PersistentAdditive {
+                source_d30: inputs.owner.damage_inputs.map(|input| input.source_d30),
             },
             DamageOperator::MinimumBound,
             DamageOperator::Technology2 {
@@ -1067,34 +1170,158 @@ impl DamagePlan {
             },
             DamageOperator::MinimumBound,
         ];
-        //514F40/515670 owns the permanent2/153 presence diversion inside
-        //this operator. TEMP2 record presence is a different source query;
-        //the actual no-TEMP context below still excludes every such record.
-        //Preserve existing neutral/coupled-owner capabilities exactly. This
-        //compatibility path does not compose unclosed neutral histories with
-        //new operators. Item1 is independently Damage-neutral in all selected
-        //operator traces; other new neutrals still need their own source proof.
-        let legacy_neutral = inputs.owned_count(12) == 0
-            && inputs.owned_count(152) == 0
-            && inputs.owned_count(169) == 0
-            && inputs.admits_scalar_stage(CacheStage::Damage, DamageStage::EFFECT_ITEMS);
-        let reads_admitted = inputs.admits_scalar_context()
-            && inputs
-                .owner
-                .owned_counts
-                .iter()
-                .enumerate()
-                .all(|(id, &count)| {
-                    count == 0
-                        || (count > 0
-                            && (id == 1
-                                || operators.iter().any(|operator| operator.reads_owned(id))
-                                || legacy_neutral))
-                });
-        Self {
-            operators,
-            reads_admitted,
+        Self { operators }
+    }
+
+    // Add to the existing DamagePlan impl. Its original new()/partial formula
+    // remains literal; requested1 completes exclusively through this read method.
+    fn read_reached(
+        inputs: ItemInputs<'_>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        source_bfc: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        //The caller passes actual Player+BFC, not the Entity kind/variant.
+        if source_bfc != Some(0)
+            || !source
+                .entity
+                .is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
         }
+        //5134C9 starts the callback with this independent record-presence query.
+        //Its positive pre-tier operator is not implemented by this small cut.
+        if queries.temporary_present(34)? {
+            return None;
+        }
+        for id in [7, 90, 216, 109] {
+            if queries.have(id)? {
+                return None;
+            }
+        }
+        //Have109 false bypasses the coins operand. A present122 record has a
+        //separate squared-count operator; its absence is queried, not assumed.
+        if queries.temporary_present(122)? {
+            return None;
+        }
+
+        //Only actually loaded E1C raw terms constrain this callback. Unknown
+        //unqueried inventory and unrelated TEMP45 do not enter these guards.
+        for id in [50, 51, 70, 345, 79, 259] {
+            if queries.raw_count(id)? != 0 {
+                return None;
+            }
+        }
+        if queries.temporary_count(259)? != 0 {
+            return None;
+        }
+        if queries.raw_count(80)? != 0 {
+            return None;
+        }
+        let signed_four = queries.raw_count(4)?;
+        if queries.raw_count(197)? != 0 {
+            return None;
+        }
+        let signed_twelve = queries
+            .raw_count(12)?
+            .wrapping_add(queries.temporary_count(12)?);
+        for id in [101, 121] {
+            if queries.raw_count(id)? != 0 {
+                return None;
+            }
+        }
+        if queries.temporary_count(121)? != 0 {
+            return None;
+        }
+        for id in [138, 193, 189, 201] {
+            if queries.raw_count(id)? != 0 {
+                return None;
+            }
+        }
+        if queries.temporary_count(201)? != 0
+            || queries.raw_count(237)? != 0
+            || queries.temporary_count(237)? != 0
+        {
+            return None;
+        }
+        for id in [206, 230, 307, 208, 331, 165] {
+            if queries.raw_count(id)? != 0 {
+                return None;
+            }
+        }
+        if queries.have(120)? || queries.temporary_present(120)? {
+            return None;
+        }
+        if queries.temporary_present(83)? {
+            return None;
+        }
+        if queries.temporary_trinket_present(58)? {
+            return None;
+        }
+        if queries.temporary_present(126)? {
+            return None;
+        }
+        if queries.temporary_trinket_present(40)? {
+            return None;
+        }
+
+        //Positive169 alone reaches the2→153→TEMP2 short-circuit diversion.
+        let mode = if !queries.have(169)? {
+            PolyphemusDamageMode::Disabled
+        } else if queries.have(2)? || queries.have(153)? || queries.temporary_present(2)? {
+            PolyphemusDamageMode::AddFive
+        } else {
+            PolyphemusDamageMode::AddFourThenDouble
+        };
+        let source_d30 = inputs.owner.damage_inputs?.source_d30;
+        if queries.has_trinket(35)? {
+            return None;
+        }
+        if queries.have(69)? {
+            return None;
+        }
+        if queries.have(261)? || queries.temporary_present(261)? {
+            return None;
+        }
+        if queries.have(182)? {
+            return None;
+        }
+        let technology2 = queries.have(152)?;
+        //These false predicates skip their independent BEC and retainedC08 reads.
+        if queries.have(157)? || queries.have(149)? {
+            return None;
+        }
+        let shared_four_or_twelve =
+            queries.have(4)? || queries.have(12)? || queries.temporary_present(12)?;
+        //The earlier TEMP34 query was false and no records mutate in511F10.
+        if queries.have(310)? {
+            return None;
+        }
+        let soy_milk = queries.have(330)?;
+        if source.challenge_id != 0 && source.damage_maximum != Some(false) {
+            return None;
+        }
+        Some(Self {
+            operators: [
+                DamageOperator::BaseTier {
+                    signed_four,
+                    signed_twelve,
+                },
+                DamageOperator::Polyphemus { mode },
+                DamageOperator::PersistentAdditive {
+                    source_d30: Some(source_d30),
+                },
+                DamageOperator::MinimumBound,
+                DamageOperator::Technology2 {
+                    enabled: technology2,
+                },
+                DamageOperator::SharedFourOrTwelve {
+                    enabled: shared_four_or_twelve,
+                },
+                DamageOperator::SoyMilk { enabled: soy_milk },
+                DamageOperator::MinimumBound,
+            ],
+        })
     }
 
     fn resolve(self) -> f32 {
@@ -1113,10 +1340,6 @@ impl DamageStage {
     const EFFECT_ITEMS: &'static [u32] = &[4, 12, 152, 169, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[1, 6, 114, 118, 329];
 
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        source_player_type == Some(0) && DamagePlan::new(inputs).reads_admitted
-    }
-
     fn resolve(inputs: ItemInputs<'_>) -> f32 {
         DamagePlan::new(inputs).resolve()
     }
@@ -1131,14 +1354,29 @@ pub(crate) fn resolve_scalars(
     source_player_type: Option<u32>,
     prior: CachedScalars,
     requested: CacheMask,
+    queries: crate::item_queries::AppearanceQueries<'_>,
+    source: CacheSourceInputs,
 ) -> Result<CacheResolution, String> {
     let mut values = prior;
     let mut completed = 0;
+    let mut reached_completed = 0;
     for stage in CacheStage::ORDER {
         let flag = stage.flag();
         if requested.0 & flag == 0 {
             continue;
         }
+        let shot_speed_plan = if stage == CacheStage::ShotSpeed {
+            ShotSpeedReadPlan::read(inputs, queries, source_player_type, source)
+        } else {
+            None
+        };
+        let damage_plan = if stage == CacheStage::Damage {
+            DamagePlan::read_reached(inputs, queries, source_player_type, source)
+        } else {
+            None
+        };
+        let shot_speed_admitted = shot_speed_plan.is_some();
+        let damage_admitted = damage_plan.is_some();
         let supported: &[u32] = match stage {
             CacheStage::FireDelay => {
                 values.max_fire_delay = FireDelayStage::resolve(inputs, primary);
@@ -1153,11 +1391,21 @@ pub(crate) fn resolve_scalars(
                     } else {
                         1.0_f32
                     };
+                //512063/06B/06F consumes the actual independent D38 word
+                //after the selected item terms. An absent owner leaves a
+                //partial value and cannot complete this callback below.
+                if let Some(auxiliary) = inputs.owner.shot_speed_inputs {
+                    values.stats.shot_speed += auxiliary.source_d38 as f32 * 0.2_f32;
+                }
                 values.stats.shot_speed = values.stats.shot_speed.max(0.6_f32);
+                if let Some(plan) = shot_speed_plan {
+                    values.stats.shot_speed = plan.resolve();
+                }
                 &[4, 143]
             }
             CacheStage::Damage => {
-                values.stats.damage = DamageStage::resolve(inputs);
+                values.stats.damage =
+                    damage_plan.map_or_else(|| DamageStage::resolve(inputs), DamagePlan::resolve);
                 DamageStage::EFFECT_ITEMS
             }
             CacheStage::Range => {
@@ -1170,9 +1418,14 @@ pub(crate) fn resolve_scalars(
                     (-23.75_f32, 0.0_f32)
                 };
                 values.stats.tear_falling_speed = falling + roid * 0.5_f32;
-                values.stats.tear_height = ((height - roid * 5.0_f32)
-                    - values.stats.tear_falling_speed * 0.5_f32)
-                    .min(-7.0);
+                let mut resolved_height = height - roid * 5.0_f32;
+                //512AE9/AF1/B05: signed D34*.5 adds to C8C BEFORE the
+                //512B0D subtraction of current C90*.5. C90/C94 are unchanged.
+                if let Some(input) = inputs.owner.range_inputs {
+                    resolved_height += input.source_d34 as f32 * 0.5_f32;
+                }
+                values.stats.tear_height =
+                    (resolved_height - values.stats.tear_falling_speed * 0.5_f32).min(-7.0);
                 values.stats.tear_falling_acceleration = 0.0;
                 &[6, 14]
             }
@@ -1184,7 +1437,13 @@ pub(crate) fn resolve_scalars(
                     .wrapping_add(inputs.temporary_count(143));
                 let roid = (inputs.owned_count(14) as f32).min(1.0);
                 let speed = additive as f32 * 0.3_f32 + roid * 0.6_f32;
-                values.stats.move_speed = (speed.min(1.0) + 1.0).clamp(0.1, 2.0);
+                let mut resolved_speed = speed.min(1.0) + 1.0;
+                //512EC1/C9/D1: signed D28*.2 AFTER the base min1+1,
+                //before late modifiers and the existing final .1..2 bound.
+                if let Some(input) = inputs.owner.move_speed_inputs {
+                    resolved_speed += input.source_d28 as f32 * 0.2_f32;
+                }
+                values.stats.move_speed = resolved_speed.clamp(0.1, 2.0);
                 &[14, 27, 28, 143]
             }
             _ => continue,
@@ -1197,18 +1456,34 @@ pub(crate) fn resolve_scalars(
         if !unadmitted_number_one
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
-                CacheStage::Damage => DamageStage::admits(inputs, source_player_type),
-                CacheStage::ShotSpeed => ShotSpeedStage::admits(inputs, source_player_type),
+                CacheStage::Damage => damage_admitted,
+                CacheStage::Range => {
+                    source_player_type == Some(0)
+                        && inputs.owner.range_inputs.is_some()
+                        && inputs.admits_scalar_stage(stage, supported)
+                }
+                CacheStage::MoveSpeed => {
+                    source_player_type == Some(0)
+                        && inputs.owner.move_speed_inputs.is_some_and(
+                            crate::player_items::MoveSpeedInputs::supports_persistent_d28,
+                        )
+                        && inputs.admits_scalar_stage(stage, supported)
+                }
+                CacheStage::ShotSpeed => shot_speed_admitted,
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {
             completed |= flag;
+            if matches!(stage, CacheStage::ShotSpeed | CacheStage::Damage) {
+                reached_completed |= flag;
+            }
         }
     }
     values.stats.validate()?;
     Ok(CacheResolution {
         values,
         completed: CacheMask(completed),
+        reached_completed: CacheMask(reached_completed),
     })
 }
 
@@ -1303,8 +1578,65 @@ pub(crate) fn resolve_neutral_flight(
     .then_some((false, 5))
 }
 
-/// 513C80 computes a signed wrapping sum, then CVTSI2SS and ADDSS. Its
-/// auxiliary words and Game 10EAD8 are distinct inputs; absent history is unknown.
+///All33 instructions of513C80..513D16 and their actual508FE0 helper
+///own this callback's read footprint. Other inventory IDs do not add a Luck
+///operator; they still require independently preserved input histories.
+struct LuckStage;
+
+impl LuckStage {
+    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
+        //Empty actual slots and a non-trinket queue close helper42/21 for
+        //either Have139 capacity. BFC0 excludes the separate BFC8 operator.
+        source_player_type == Some(0)
+            && inputs.admits_scalar_context()
+            && inputs.owner.owned_counts.iter().all(|&count| count >= 0)
+    }
+}
+
+///One immutable, source-ordered Luck callback. These integer-slot reads are
+///operators, not an admission list. Input history owns all five auxiliary
+///words and Game flags separately; no other cache/getter/caller is admitted.
+struct LuckPlan {
+    signed_sum: i32,
+    float_additive: f32,
+    run_flag_bonus: bool,
+}
+
+impl LuckPlan {
+    fn from_owned(
+        inputs: ItemInputs<'_>,
+        auxiliary: crate::player_items::LuckInputs,
+        run_flags: u64,
+    ) -> Self {
+        let signed_sum = auxiliary
+            .source_13d0
+            .wrapping_sub(auxiliary.source_13cc)
+            .wrapping_add(auxiliary.source_d3c)
+            .wrapping_add(auxiliary.source_d40)
+            .wrapping_add(inputs.owned_count(253))
+            .wrapping_add(inputs.owned_count(46))
+            .wrapping_add(inputs.owned_count(343));
+        Self {
+            signed_sum,
+            float_additive: auxiliary.source_d58,
+            run_flag_bonus: run_flags & 0x100 != 0,
+        }
+    }
+
+    fn evaluate(self) -> Result<f32, String> {
+        let mut luck = self.signed_sum as f32 + self.float_additive;
+        if self.run_flag_bonus {
+            luck += 50.0_f32; //513CFE/513D06, after trinket and character.
+        }
+        if !luck.is_finite() {
+            return Err("Luck callback overflowed its source f32 output".into());
+        }
+        Ok(luck)
+    }
+}
+
+///513C80's auxiliary words and Game10EAD8 are independent actual inputs.
+///Missing histories stay unknown; stage-neutral inventory cannot supply them.
 pub(crate) fn resolve_luck(
     inputs: ItemInputs<'_>,
     source_player_type: Option<u32>,
@@ -1320,23 +1652,10 @@ pub(crate) fn resolve_luck(
     let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
         return Ok(None);
     };
-    if source_player_type != Some(0) || !inputs.admits_selected_auxiliary_callbacks() {
+    if !LuckStage::admits(inputs, source_player_type) {
         return Ok(None);
     }
-    let sum = auxiliary
-        .source_13d0
-        .wrapping_sub(auxiliary.source_13cc)
-        .wrapping_add(auxiliary.source_d3c)
-        .wrapping_add(auxiliary.source_d40)
-        .wrapping_add(inputs.owned_count(253))
-        .wrapping_add(inputs.owned_count(46))
-        .wrapping_add(inputs.owned_count(343));
-    let mut luck = sum as f32 + auxiliary.source_d58;
-    if run_flags & 0x100 != 0 {
-        luck += 50.0_f32; // 513CFE/513D06, after the trinket and character branches.
-    }
-    if !luck.is_finite() {
-        return Err("Luck callback overflowed its source f32 output".into());
-    }
-    Ok(Some(luck))
+    LuckPlan::from_owned(inputs, auxiliary, run_flags)
+        .evaluate()
+        .map(Some)
 }

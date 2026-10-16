@@ -19,6 +19,12 @@ export class RunPresentation {
     if (!frame?.Visible) return;
     this.attached(ctx, frame, 240, 48, () => {
       this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, -9, { align: "center", pixelSnap: true });
+      const subtitle = state.runIntroduction.subtitle;
+      if (subtitle) {
+        //571F68 loads PFTempestaSevenCondensed into HUD+300;5734F0
+        //selects it and draws the second line18 units below the title.
+        this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 9, { align: "center", pixelSnap: true });
+      }
     });
   }
 
@@ -48,8 +54,10 @@ export class RunPresentation {
     const paper = this.assets.layerFrame(PAUSE, animation, 1, tick);
     if (paper?.Visible) this.attached(ctx, paper, 288, 135, () => {
       this.assets.draw(ctx, STATS, "Idle", 0, 0, 0, { layers: [0] });
-      for (const [index, frame] of menu.statFrames.entries())
-        this.assets.draw(ctx, STATS, "Idle", 0, 0, frame, { layers: [index + 1] });
+      for (const [index, frame] of menu.statFrames.entries()) {
+        if (frame !== null)
+          this.assets.draw(ctx, STATS, "Idle", 0, 0, frame, { layers: [index + 1] });
+      }
     });
     const seedPaper = this.assets.layerFrame(PAUSE, animation, 5, tick);
     if (seedPaper?.Visible) this.attached(ctx, seedPaper, 288, 135, () => {

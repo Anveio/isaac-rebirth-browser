@@ -1,5 +1,6 @@
-//! Actual Poop Particle58 and Poop Explosion43 effect controllers.
-//! Caller owns gib/retirement producers and the manager's flags8 paint pass.
+//! Actual Poop Particle58, Wood Particle27 and Poop Explosion43 effect
+//! controllers. Caller owns gib/retirement producers and the manager's
+//! flags8 paint pass.
 use crate::{
     actors::{ActorKind, ActorRef, Scheduler},
     audio::{AudioState, SoundRequest},
@@ -35,6 +36,8 @@ pub enum Particle {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum Controller {
     Particle58(Particle),
+    /// Effect update 45dc20, the rock-debris family (4/27/35) as Wood27.
+    Particle27(Particle),
     /// Actual7d4: Init0, then the real sampled background frame6..8.
     Explosion43 {
         #[serde(rename = "frameTarget")]
@@ -45,8 +48,10 @@ pub enum Controller {
 impl Controller {
     pub fn source_state(&self) -> i32 {
         match self {
-            Self::Particle58(Particle::Initializing) => 0,
-            Self::Particle58(Particle::Flying(_)) => 1,
+            Self::Particle58(Particle::Initializing) | Self::Particle27(Particle::Initializing) => {
+                0
+            }
+            Self::Particle58(Particle::Flying(_)) | Self::Particle27(Particle::Flying(_)) => 1,
             Self::Explosion43 { frame_target } => *frame_target,
         }
     }
@@ -81,6 +86,11 @@ impl Admission<'_> {
         self.admit(58, Controller::Particle58(Particle::Initializing), birth)
     }
 
+    /// Wood Particle27 through the same Effect::Init 458a70 grid class3.
+    pub fn admit_wood_particle(&mut self, birth: ParticleBirth) -> Result<u32, String> {
+        self.admit(27, Controller::Particle27(Particle::Initializing), birth)
+    }
+
     /// 4fc0f9 real43 factory has V0/spawnerNULL and NO immediate Update.
     pub fn admit_explosion(&mut self, seed: u32, position: WorldVector) -> Result<u32, String> {
         self.admit(
@@ -105,7 +115,7 @@ impl Admission<'_> {
             return Err("poop effect factory requires finite source world vectors".into());
         }
         let config = familiars::definition(1000, variant)
-            .ok_or("actual Poop Particle/Explosion catalogue absent")?;
+            .ok_or("actual Poop/Wood Particle or Poop Explosion catalogue absent")?;
         let id = *self.next_effect;
         *self.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
         self.effects.push(SpriteEffect {
@@ -130,7 +140,7 @@ impl Admission<'_> {
             collision_damage: 22.0,
             hp: config.base_hp,
             max_hp: config.base_hp,
-            grid_collision_class: if variant == 58 { 3 } else { 0 },
+            grid_collision_class: if matches!(variant, 27 | 58) { 3 } else { 0 },
             entity_collision_class: 0,
             flags: 0,
             visible: true,
@@ -172,13 +182,58 @@ impl Admission<'_> {
             .iter_mut()
             .find(|effect| effect.id == id)
             .ok_or("explicit initial58 Update requires an admitted effect")?;
-        if effect.variant != 58 || effect.full_updates != 0 {
-            return Err("explicit initial58 Update must run once on its actual birth".into());
+        if !matches!(effect.variant, 27 | 58) || effect.full_updates != 0 {
+            return Err(
+                "explicit initial particle Update must run once on its actual birth".into(),
+            );
         }
         base_update(effect)?;
         particle_update(effect, shared)?;
         finish_update(effect)
     }
+}
+
+/// Game::SpawnParticles 5515b0 (default ColorMod) for the admitted particle
+/// variants: per particle its seed, angle and immediate Update. The caller
+/// owns the speed argument.
+pub(crate) fn spawn_particles(
+    state: &mut crate::State,
+    variant: u32,
+    centre: WorldVector,
+    count: u32,
+    speed: f32,
+) -> Result<(), String> {
+    for _ in 0..count {
+        let seed = state.boot_lifecycle.shared.next_u32();
+        let direction = crate::npcs::direction(&mut state.boot_lifecycle.shared);
+        let velocity = WorldVector {
+            x: direction.x,
+            y: direction.y * 0.5,
+        } * speed;
+        let mut admission = Admission {
+            game_update_count: state.game_update_count,
+            next_effect: &mut state.next_effect,
+            effects: &mut state.sprite_effects,
+            scheduler: &mut state.actor_scheduler,
+        };
+        let birth = ParticleBirth {
+            seed,
+            position: centre,
+            velocity,
+            spawner: None,
+        };
+        let id = match variant {
+            58 => admission.admit_particle(birth)?,
+            27 => admission.admit_wood_particle(birth)?,
+            _ => {
+                return Err(format!(
+                    "SpawnParticles Effect 1000.{variant} is not admitted"
+                ))
+            }
+        };
+        admission.advance_particle_initial(id, &mut state.boot_lifecycle.shared)?;
+    }
+    Ok(())
 }
 
 fn base_update(effect: &mut SpriteEffect) -> Result<(), String> {
@@ -197,6 +252,9 @@ fn base_update(effect: &mut SpriteEffect) -> Result<(), String> {
 }
 
 fn particle_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<(), String> {
+    if let Some(Controller::Particle27(_)) = &effect.poop_effect {
+        return wood_update(effect, shared);
+    }
     let Some(Controller::Particle58(particle)) = &mut effect.poop_effect else {
         return Err("58 Update requires its typed controller owner".into());
     };
@@ -236,6 +294,46 @@ fn particle_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<()
                     .ok_or("58 landing clip absent from authored catalogue")?;
                 // 40ff50 seeks last pose; preserve actual incoming playing.
                 effect.sprite.frame = clip.frames as f32 - 1.0;
+                effect.velocity = ZERO;
+                effect.raw_7d8 = true;
+                effect.render_order_offset = 90;
+                effect.flags |= 8;
+            }
+        }
+    }
+    Ok(())
+}
+
+/// 45dc20 for Wood Particle27. The first controller (460839, 464c5d) sets
+/// gravity 1.3 and height -23, draws its rising speed -5 - Float*10, then
+/// SetFrame40fef0 stops it on frame 0 of a Random(4) Gib1..Gib4 clip. Later
+/// controllers fall like Particle58; once height passes -5 and the current
+/// clip IsFinished (always, as SetFrame stopped it) 461f06 parks it for the
+/// flags8 paint pass without seeking a frame.
+fn wood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<(), String> {
+    let Some(Controller::Particle27(particle)) = &mut effect.poop_effect else {
+        return Err("27 Update requires its typed controller owner".into());
+    };
+    match particle {
+        Particle::Initializing => {
+            let vertical_velocity = -5.0_f32 - shared.uniform() * 10.0_f32;
+            let clip = ["Gib1", "Gib2", "Gib3", "Gib4"][shared.bounded(4) as usize];
+            effect.sprite.animation = clip.into();
+            effect.sprite.frame = 0.0;
+            effect.sprite.playing = false;
+            *particle = Particle::Flying(Flight {
+                height: -23.0,
+                vertical_velocity,
+                gravity: 1.3,
+                layer_rotation: 0.0,
+            });
+        }
+        Particle::Flying(flight) => {
+            flight.vertical_velocity =
+                (0.9_f32 * flight.vertical_velocity + 0.1_f32) + flight.gravity;
+            flight.height += flight.vertical_velocity;
+            effect.render_offset.y = flight.height;
+            if flight.height > -5.0 && !effect.sprite.playing {
                 effect.velocity = ZERO;
                 effect.raw_7d8 = true;
                 effect.render_order_offset = 90;
@@ -297,9 +395,10 @@ fn finish_update(effect: &mut SpriteEffect) -> Result<(), String> {
         }
     }
     let finite_flight = match &effect.poop_effect {
-        Some(Controller::Particle58(Particle::Flying(flight))) => {
-            flight.height.is_finite() && flight.vertical_velocity.is_finite()
-        }
+        Some(
+            Controller::Particle58(Particle::Flying(flight))
+            | Controller::Particle27(Particle::Flying(flight)),
+        ) => flight.height.is_finite() && flight.vertical_velocity.is_finite(),
         _ => true,
     };
     if !effect.position.is_finite() || !effect.velocity.is_finite() || !finite_flight {
@@ -320,16 +419,16 @@ pub fn advance_full(
     }
     base_update(effect)?;
     match effect.variant {
-        58 => particle_update(effect, shared)?,
+        27 | 58 => particle_update(effect, shared)?,
         43 => explosion_update(effect, shared, audio, system_counter)?,
-        _ => return Err("poop effect dispatch requires actual58/43 variant".into()),
+        _ => return Err("poop effect dispatch requires actual27/58/43 variant".into()),
     }
     finish_update(effect)
 }
 
 fn particle_collider(effect: &SpriteEffect) -> Result<Collider, String> {
-    let config =
-        familiars::definition(1000, 58).ok_or("actual58 radius9/six-point geometry absent")?;
+    let config = familiars::definition(1000, effect.variant)
+        .ok_or("actual particle radius/grid-point geometry absent")?;
     Collider::new(CollisionGeometry {
         radius: effect.collision_radius,
         scale: WorldVector { x: 1.0, y: 1.0 },
@@ -366,7 +465,11 @@ pub fn advance_fast(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String
 
 /// Actual late full grid callback, after the manager's flags8 paint pass.
 pub fn full_grid_contact(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String> {
-    if effect.variant != 58 || !effect.active || effect.removed || effect.flags & 8 != 0 {
+    if !matches!(effect.variant, 27 | 58)
+        || !effect.active
+        || effect.removed
+        || effect.flags & 8 != 0
+    {
         return Ok(());
     }
     particle_collider(effect)?.resolve_nonplayer_walls(

@@ -3,6 +3,17 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
+///Pickup.Collect504820's AL result controls the later445710 mass response.
+///Failure to acquire an item is not itself a physics decision: AD0 returns1,
+///while a free normal-Player UseItem refusal returns0. Unknown callback
+///inputs are separate from either source return value.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PlayerContactDecision {
+    NotReached,
+    AllowPhysicalResponse,
+    VetoPhysicalResponse,
+    Unowned,
+}
 /// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
 /// include the actual Hit and UseItem names admitted by50c880/50c780. The Hit
 /// callback is composed separately; its name uses this same predicate.
@@ -26,6 +37,8 @@ pub struct Clip {
     pub name: &'static str,
     pub frames: u32,
     pub looping: bool,
+    /// Frame of the clip's authored DropSound trigger, if any.
+    pub drop_sound: Option<u32>,
 }
 
 #[derive(Debug)]
@@ -42,13 +55,218 @@ pub struct Definition {
 }
 
 include!(concat!(env!("OUT_DIR"), "/pickup_catalog.rs"));
+#[derive(Debug)]
+pub struct PocketCardDefinition {
+    pub name: &'static str,
+    pub description: &'static str,
+}
+include!(concat!(env!("OUT_DIR"), "/card_catalog.rs"));
 
-/// Fresh ordinary Isaac pickup Init owns a new RNG35 seeded by the entity's
-/// spawn seed. Item modifiers and special-room replacements are routed by the
-/// caller; zero subtype never means an arbitrary fixed regular subtype.
+pub(crate) fn card_definition(id: u32) -> Option<&'static PocketCardDefinition> {
+    CARD_DEFINITIONS.get(id as usize)
+}
+
+/// GetCard5817A0 uses an independent temporary RNG35. Unlock filtering keeps
+/// ascending configuration order and falls back once to all forty card IDs.
+/// Neither the run ItemPool state nor the shared MT stream is sampled.
+pub(crate) fn random_card(
+    seed: u32,
+    achievements: &[bool],
+    suits: bool,
+    runes: bool,
+) -> Result<u32, String> {
+    if seed == 0 || achievements.len() != 179 {
+        return Err("GetCard requires its actual nonzero seed and 179 achievement bytes".into());
+    }
+    let mut rng = crate::items::Rng::new(seed, [5, 9, 7]);
+    let (first, last) = if rng.bounded(25) == 0 {
+        (36, 40)
+    } else if rng.bounded(10) == 0 && runes {
+        (28, 35)
+    } else if rng.bounded(5) == 0 && suits {
+        (23, 27)
+    } else {
+        (1, 22)
+    };
+    let eligible = |id: &u32| {
+        let achievement = CARD_ACHIEVEMENTS[*id as usize];
+        achievement < 0 || achievements.get(achievement as usize).copied() == Some(true)
+    };
+    let mut candidates: Vec<u32> = (first..=last).filter(eligible).collect();
+    if candidates.is_empty() {
+        candidates = (1..=40).filter(eligible).collect();
+    }
+    if candidates.is_empty() {
+        return Err("GetCard has no unlocked authored card".into());
+    }
+    Ok(candidates[rng.bounded(candidates.len() as u32) as usize])
+}
+
+///Independent actual Have operands and the selected profile's unlock bytes.
+///The same Init core serves room admission, chest children and later drops;
+///a missing unrelated property never vetoes an explicit resolved family.
+#[derive(Clone, Copy)]
+pub(crate) struct PocketSubtypeInputs {
+    little_baggy: Option<bool>,
+    starter_deck: Option<bool>,
+    achievements: Option<[bool; 179]>,
+}
+impl PocketSubtypeInputs {
+    pub(crate) fn from_state(state: &crate::State) -> Self {
+        let items = state
+            .player
+            .entity_source
+            .filter(|source| source.entity_type == 1 && source.variant == 0)
+            .and(state.player_items.as_ref());
+        Self {
+            little_baggy: items
+                .and_then(|owner| owner.owned_counts.get(252))
+                .map(|count| *count > 0),
+            starter_deck: items
+                .and_then(|owner| owner.owned_counts.get(251))
+                .map(|count| *count > 0),
+            achievements: state
+                .profiles
+                .get(usize::from(state.profile).wrapping_sub(1))
+                .and_then(|profile| profile.achievements.as_slice().try_into().ok()),
+        }
+    }
+}
+
+///The actual preconversion runs once, even for explicit subtypes. Card300
+///reads252 then251 only on its positive branch; Pill70 reads251 directly.
+///The conversion jumps to the selected resolver without restarting the
+///modifier prelude. Unknown reached inputs never become neutral counts.
+fn source_pocket_selection(
+    variant: u32,
+    subtype: u32,
+    spawn_seed: u32,
+    inputs: PocketSubtypeInputs,
+) -> Result<Option<(u32, u32)>, String> {
+    let mut variant = variant;
+    let mut subtype = subtype;
+    if variant == 300 {
+        let Some(baggy) = inputs.little_baggy else {
+            return Ok(None);
+        };
+        if baggy {
+            let Some(deck) = inputs.starter_deck else {
+                return Ok(None);
+            };
+            if !deck {
+                variant = 70;
+                subtype = 0;
+            }
+        }
+    } else if variant == 70 {
+        let Some(deck) = inputs.starter_deck else {
+            return Ok(None);
+        };
+        if deck {
+            variant = 300;
+            subtype = 0;
+        }
+    } else {
+        return Ok(None);
+    }
+    if subtype == 0 {
+        if spawn_seed == 0 {
+            return Err("Pocket Init requires its actual nonzero spawn seed".into());
+        }
+        let raw = crate::room_spawns::next35(spawn_seed);
+        subtype = if variant == 70 {
+            //581950 is incoming unsigned seed%9+1 and owns no RNG.
+            raw % 9 + 1
+        } else {
+            let Some(achievements) = inputs.achievements else {
+                return Ok(None);
+            };
+            random_card(raw, &achievements, true, true)?
+        };
+    }
+    Ok(match (variant, subtype) {
+        (70, 1..=9) | (300, 1..=40) => Some((variant, subtype)),
+        _ => None,
+    })
+}
+
+/// Direct Pickup.Init4ff1e0 Have operands. Each property is independent:
+/// missing actual Player/count ownership is unknown, never a neutral count.
+#[derive(Clone, Copy)]
+pub(crate) struct RegularSubtypeInputs {
+    humbling_bundle: Option<bool>,
+    bogo_bombs: Option<bool>,
+    // The heart property additionally owns its separate negative operands.
+    heart_humbling_bundle: Option<bool>,
+}
+impl RegularSubtypeInputs {
+    const NEUTRAL: Self = Self {
+        humbling_bundle: Some(false),
+        bogo_bombs: Some(false),
+        heart_humbling_bundle: Some(false),
+    };
+
+    pub(crate) fn from_state(state: &crate::State) -> Self {
+        let items = state
+            .player
+            .entity_source
+            .filter(|source| source.entity_type == 1 && source.variant == 0)
+            .and(state.player_items.as_ref());
+        let humbling_bundle = items
+            .and_then(|items| items.owned_counts.get(203))
+            .map(|count| *count > 0);
+        //500550..638/50045f..53c/500691..6e1: these actual negative
+        //operands skip only their own extra heart draws/replacements.
+        //Room8/+1ae0 and Challenge33 pricing retain separate owners.
+        let heart_humbling_bundle = items
+            .filter(|items| {
+                state.weapon_admission.source_player_type == Some(0)
+                    && state.challenge_id != 33
+                    && state
+                        .room
+                        .descriptor
+                        .as_ref()
+                        .is_some_and(|room| room.template.room_type != 8)
+                    && [173usize, 238, 239]
+                        .into_iter()
+                        .all(|id| items.owned_counts.get(id).is_some_and(|count| *count <= 0))
+                    && items.trinket_slots == [0, 0]
+                    && items.queued_id.is_none_or(|id| {
+                        crate::items::definition(id).is_some_and(|config| config.kind != 2)
+                    })
+            })
+            .and(humbling_bundle);
+        Self {
+            humbling_bundle,
+            bogo_bombs: items
+                .and_then(|items| items.owned_counts.get(250))
+                .map(|count| *count > 0),
+            heart_humbling_bundle,
+        }
+    }
+}
+
+/// Existing neutral callers retain their original input role. Source-aware
+/// factories below supply the actual current Have inputs to the same core.
 pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u32, String> {
+    regular_subtype_with_inputs(variant, subtype, spawn_seed, RegularSubtypeInputs::NEUTRAL)?
+        .ok_or_else(|| "neutral regular subtype inputs unavailable".into())
+}
+
+/// Init owns local RNG35, distinct from the entity's persistent RNG30.
+/// None means a reached Have input is unowned; no body/ID/Init is fabricated.
+pub(crate) fn regular_subtype_with_inputs(
+    variant: u32,
+    subtype: u32,
+    spawn_seed: u32,
+    inputs: RegularSubtypeInputs,
+) -> Result<Option<u32>, String> {
     if subtype != 0 {
-        return Ok(subtype);
+        if variant == 20 && subtype == 1 {
+            //5002fe..33b also transforms an explicitly authored penny.
+            return Ok(inputs.humbling_bundle.map(|have| if have { 4 } else { 1 }));
+        }
+        return Ok(Some(subtype));
     }
     if spawn_seed == 0 {
         return Err("pickup spawn seed must be nonzero".into());
@@ -58,45 +276,83 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
         state = crate::room_spawns::next35(state);
         state % bound
     };
-    match variant {
-        // Ordinary Isaac500150: independent local35 rolls retain their order.
-        // Collectible/trinket replacements belong to their actual owners.
+    let selected = match variant {
+        //500150..1ff: Have203 selects5 before the same local35 rolls.
+        //The independent heart input closes only its actual negative
+        //173/238/239/trinket/BFC0/non-Room8 footprint above.
         10 => {
-            let mut selected = if random(2) == 0 { 2 } else { 1 };
+            let Some(humbling) = inputs.heart_humbling_bundle else {
+                return Ok(None);
+            };
+            let mut selected = if humbling { 5 } else { 1 };
+            if random(2) == 0 {
+                selected = 2;
+            }
             if random(50) == 0 {
                 selected = 4;
             }
             if random(10) == 0 {
                 selected = if random(20) == 0 { 6 } else { 3 };
             }
-            Ok(selected)
+            selected
         }
         20 => {
             let mut selected = if random(20) == 0 { 2 } else { 1 };
             if random(100) == 0 {
                 selected = 3;
             }
-            Ok(selected)
+            if selected == 1 {
+                let Some(have) = inputs.humbling_bundle else {
+                    return Ok(None);
+                };
+                if have {
+                    selected = 4;
+                }
+            }
+            selected
         }
-        // Pickup::Init4ffcae: ordinary Isaac owns no Humbling Bundle;
-        // Random(50)==0 selects the golden key, never a double key.
-        30 => Ok(if random(50) == 0 { 2 } else { 1 }),
-        // Pickup::Init4ffd4e: fresh Isaac owns neither Humbling Bundle nor
-        // BOGO Bombs. Later Megatroll/Troll draws override the regular/double roll.
+        30 => {
+            let Some(have) = inputs.humbling_bundle else {
+                return Ok(None);
+            };
+            let mut selected = if have { 3 } else { 1 };
+            if random(50) == 0 {
+                selected = 2;
+            }
+            selected
+        }
         40 => {
-            let mut selected = if random(7) == 0 { 2 } else { 1 };
+            let Some(humbling) = inputs.humbling_bundle else {
+                return Ok(None);
+            };
+            //500409..435 reaches Have250 only after Have203 returned false.
+            let double = if humbling {
+                true
+            } else {
+                let Some(have) = inputs.bogo_bombs else {
+                    return Ok(None);
+                };
+                have
+            };
+            let mut selected = if double { 2 } else { 1 };
+            if random(7) == 0 {
+                selected = 2;
+            }
             if random(50) == 0 {
                 selected = 5;
             }
             if random(10) == 0 {
                 selected = 3;
             }
-            Ok(selected)
+            selected
         }
-        _ => Err(format!(
-            "pickup selector {variant}/0 requires its owning pool or subtype resolver"
-        )),
-    }
+        _ => {
+            return Err(format!(
+                "pickup selector {variant}/0 requires its owning pool or subtype resolver"
+            ))
+        }
+    };
+    Ok(Some(selected))
 }
 
 /// Init can select transient Troll/Megatroll PU subtypes (40/3, 40/5)
@@ -104,10 +360,12 @@ pub fn regular_subtype(variant: u32, subtype: u32, spawn_seed: u32) -> Result<u3
 /// them, they use the bomb pickup's temporary visual definition, so every
 /// definition lookup for a live pickup resolves its subtype here.
 pub(crate) fn definition_subtype(variant: u32, subtype: u32) -> u32 {
-    if variant == 40 && matches!(subtype, 3 | 5) {
-        1
-    } else {
-        subtype
+    match (variant, subtype) {
+        (40, 3 | 5) | (300, 1..=22) => 1,
+        (300, 23..=27 | 36..=40) => 2,
+        (300, 28..=31) => 3,
+        (300, 32..=35) => 4,
+        _ => subtype,
     }
 }
 
@@ -146,9 +404,28 @@ pub struct SavedRegularPickup {
     pub touched: bool,
 }
 
+/// Actual weak words copied by Pickup::Morph500A8F..AAE/500BB5..BD4.
+/// Fresh supported Init owns NULL; an old restore has no invented owner.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MorphLinks {
+    pub parent498: Option<crate::actors::ActorRef>,
+    pub link4a0: Option<crate::actors::ActorRef>,
+    pub link4a8: Option<crate::actors::ActorRef>,
+}
+impl MorphLinks {
+    pub(crate) fn known_empty(&self) -> bool {
+        self.parent498.is_none() && self.link4a0.is_none() && self.link4a8.is_none()
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Pickup {
+    ///Actual Entity1C/20, independent of weak parent498.
+    ///An unowned/legacy caller never acquires an invented null spawner.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_spawner: Option<SourceSpawner>,
     pub id: u32,
     pub spawn_seed: u32,
     pub variant: u32,
@@ -176,6 +453,9 @@ pub struct Pickup {
     pub collision_radius: f32,
     pub shadow_size: f64,
     pub collection_delay: u32,
+    ///Distinct signed AD0 pickup-contact cooldown, not the ACC delay above.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pocket_contact_delay: Option<i32>,
     pub age: u32,
     pub birth_game_update: u32,
     pub charge: i32,
@@ -186,6 +466,17 @@ pub struct Pickup {
     pub regular_rng: Option<crate::items::Rng>,
     #[serde(default)]
     pub chest: Option<crate::chests::Chest>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub morph_links: Option<MorphLinks>,
+}
+
+///Game550ACD..ADA copies these words only for a nonnull spawner.
+///Base441EE8/EF supplies zeros for an actual null-spawner birth.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SourceSpawner {
+    pub entity_type: u32,
+    pub variant: u32,
 }
 
 impl Pickup {
@@ -205,7 +496,53 @@ impl Pickup {
     /// Ordinary admitted pickups use the common free ground-motion branch.
     /// Collectible home return and Chest callbacks keep their own owners.
     pub(crate) fn has_regular_physics(&self) -> bool {
-        matches!(self.variant, 10 | 20 | 30 | 40)
+        matches!(self.variant, 10 | 20 | 30 | 40 | 70 | 300)
+    }
+
+    ///Free natural Card/Pill Init uses the canonical preconversion and pool
+    ///resolver. A card keeps its actual ID after Base selects its art family.
+    pub(crate) fn from_pocket_selector(
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        appear: bool,
+        state: &crate::State,
+    ) -> Result<Option<Self>, String> {
+        if selector.entity_type != 5
+            || !matches!(selector.variant, 70 | 300)
+            || state.challenge_id == 33
+        {
+            return Ok(None);
+        }
+        Self::from_pocket_parts(
+            id,
+            u32::from(selector.variant),
+            u32::from(selector.subtype),
+            selector.spawn_seed,
+            selector.position,
+            appear,
+            PocketSubtypeInputs::from_state(state),
+        )
+    }
+
+    ///Actual Game.Spawn inputs reach this same resolver without manufacturing
+    ///an authored Room selector or consuming any extra shared seed/draw.
+    pub(crate) fn from_pocket_parts(
+        id: u32,
+        variant: u32,
+        subtype: u32,
+        spawn_seed: u32,
+        position: WorldVector,
+        appear: bool,
+        inputs: PocketSubtypeInputs,
+    ) -> Result<Option<Self>, String> {
+        let Some((variant, subtype)) =
+            source_pocket_selection(variant, subtype, spawn_seed, inputs)?
+        else {
+            return Ok(None);
+        };
+        let mut pickup = Self::spawn(id, variant, subtype, position, appear)?;
+        pickup.initialize_spawn_seed(spawn_seed)?;
+        Ok(Some(pickup))
     }
 
     /// Concrete room admission for the supported fresh normal Isaac families.
@@ -215,17 +552,69 @@ impl Pickup {
         selector: &crate::room_spawns::SpawnSelector,
         appear: bool,
     ) -> Result<Option<Self>, String> {
-        if selector.entity_type == 5 && selector.variant == 50 {
+        if selector.entity_type == 5 && matches!(selector.variant, 50 | 51) {
             return crate::chests::from_selector(id, selector, appear);
         }
         if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
             return Ok(None);
         }
+        Self::from_regular_selector(id, selector, appear, RegularSubtypeInputs::NEUTRAL)
+    }
+
+    /// Current authored10/20/30/40 Init uses actual FIRSTPlayer operands.
+    /// Other families retain their own existing factory/context contracts.
+    pub(crate) fn from_source_selector(
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        appear: bool,
+        state: &crate::State,
+    ) -> Result<Option<Self>, String> {
+        if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
+            return Self::from_selector(id, selector, appear);
+        }
+        //4ff740 Challenge33 pricing precedes the free pickup postlude.
+        //Unavailable pricing stays local to this actual selected factory.
+        if state.challenge_id == 33 {
+            return Ok(None);
+        }
+        //4ff560/500240 applies Room8 overrides even to explicit hearts.
+        //Other explicit heart subtypes do not read the random-heart inputs.
+        if selector.variant == 10
+            && state
+                .room
+                .descriptor
+                .as_ref()
+                .is_none_or(|room| room.template.room_type == 8)
+        {
+            return Ok(None);
+        }
+        Self::from_regular_selector(
+            id,
+            selector,
+            appear,
+            RegularSubtypeInputs::from_state(state),
+        )
+    }
+
+    fn from_regular_selector(
+        id: u32,
+        selector: &crate::room_spawns::SpawnSelector,
+        appear: bool,
+        inputs: RegularSubtypeInputs,
+    ) -> Result<Option<Self>, String> {
         let variant = u32::from(selector.variant);
-        let subtype = regular_subtype(variant, u32::from(selector.subtype), selector.spawn_seed)?;
+        let Some(subtype) = regular_subtype_with_inputs(
+            variant,
+            u32::from(selector.subtype),
+            selector.spawn_seed,
+            inputs,
+        )?
+        else {
+            return Ok(None);
+        };
         if !matches!(
             (variant, subtype),
-            (10, 1..=6) | (20, 1..=4) | (30, 1 | 3) | (40, 1 | 2 | 3 | 5)
+            (10, 1..=6) | (20, 1..=4) | (30, 1..=3) | (40, 1 | 2 | 3 | 5)
         ) {
             return Ok(None);
         }
@@ -308,6 +697,7 @@ impl Pickup {
             ));
         }
         Ok(Self {
+            source_spawner: None,
             id,
             spawn_seed: 0,
             variant,
@@ -315,7 +705,7 @@ impl Pickup {
             spritesheet_item_id: visual,
             position,
             presented_position: position,
-            anchor_position: if matches!(variant, 10 | 20 | 30 | 40) {
+            anchor_position: if matches!(variant, 10 | 20 | 30 | 40 | 70 | 300) {
                 WorldVector { x: 0.0, y: 0.0 }
             } else {
                 position
@@ -339,17 +729,64 @@ impl Pickup {
             collision_radius: definition.collision_radius,
             shadow_size: definition.shadow_size,
             collection_delay: 0,
+            pocket_contact_delay: Some(0),
             age: 0,
             birth_game_update: 0,
             charge: 0,
             touched: false,
-            regular_collision: matches!(variant, 10 | 20 | 30 | 40).then_some(RegularCollision {
-                grid_collision_class: 5,
-                entity_collision_class: if animation == "Idle" { 4 } else { 0 },
-            }),
+            regular_collision: matches!(variant, 10 | 20 | 30 | 40 | 70 | 300).then_some(
+                RegularCollision {
+                    grid_collision_class: 5,
+                    entity_collision_class: if animation == "Idle" { 4 } else { 0 },
+                },
+            ),
             regular_rng: None,
             chest: None,
+            morph_links: None,
         })
+    }
+
+    /// Selected free in-place Morph500A10 to an already chosen collectible.
+    /// It is not Game.Spawn: no new handle, manager slot or Room sequence.
+    pub(crate) fn morph_to_collectible(
+        &mut self,
+        subtype: u32,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
+    ) -> Result<(), String> {
+        let links = self
+            .morph_links
+            .clone()
+            .ok_or("Morph weak-word owner missing")?;
+        if !links.known_empty() {
+            return Err("Morph positive weak-link lifetime owner unadmitted".into());
+        }
+        let config = crate::items::definition(subtype).ok_or("Morph collectible config absent")?;
+        if self.spawn_seed == 0 || !self.position.is_finite() || !self.velocity.is_finite() {
+            return Err("Morph requires actual seed and finite saved vectors".into());
+        }
+        //500A2A..56 local RNG7 advances the OLD spawnSeed exactly once;
+        //the subsequent actual Init resets persistent RNG30 to this new seed.
+        let seed = crate::items::Rng::new(self.spawn_seed, [1, 21, 20]).raw();
+        let mut next = Self::spawn(self.id, 100, subtype, self.position, false)?;
+        next.spawn_seed = seed;
+        next.regular_rng = Some(crate::items::Rng::new(seed, [4, 3, 17]));
+        next.anchor_position = self.anchor_position;
+        next.presented_position = self.presented_position;
+        next.velocity = self.velocity;
+        next.touched = self.touched;
+        next.charge = config.max_charges;
+        next.birth_game_update = game_update;
+        next.morph_links = Some(links);
+        //TryOpen501178..1B0 selects actual locked-Chest Alternates frame4.
+        next.overlay_frame = 4.0;
+        next.project();
+        scheduler.reinitialize_in_place(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
+        })?;
+        *self = next;
+        Ok(())
     }
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
@@ -478,7 +915,7 @@ impl Pickup {
 
     /// Free regular coins, keys and bombs. Other families keep typed room selectors
     /// until their source collection rules and live gates are admitted.
-    pub fn try_collect(&mut self, inventory: &mut Inventory) -> bool {
+    pub fn try_collect(&mut self, inventory: &mut Inventory, player: &mut Player) -> bool {
         if !self.can_collect || self.collected || self.removed || self.collection_delay != 0 {
             return false;
         }
@@ -486,6 +923,10 @@ impl Pickup {
             (20, 1..=4) => {
                 let amount = [1, 5, 10, 2][self.subtype as usize - 1];
                 inventory.coins = inventory.coins.saturating_add(amount).min(99);
+            }
+            (30, 2) => {
+                // Collect504EEB calls508730: BD0 only, without AddKeys.
+                player.golden_key = Some(true);
             }
             (30, 1 | 3) => {
                 let amount = if self.subtype == 3 { 2 } else { 1 };
@@ -549,7 +990,7 @@ impl Pickup {
         true
     }
 
-    fn finish_collect(&mut self) {
+    pub(crate) fn finish_collect(&mut self) {
         // Collect504d30 clears physical velocity before playing Collect,
         // changes the ground class to3, then sets the dead31f flag.
         self.velocity = WorldVector { x: 0.0, y: 0.0 };
@@ -610,19 +1051,30 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
     let mut admitted = Vec::with_capacity(records.len());
     let mut handles = BTreeSet::new();
     for record in records {
-        if !matches!(record.variant, 10 | 20 | 30 | 40) || !handles.insert(record.handle) {
+        if !matches!(record.variant, 10 | 20 | 30 | 40 | 70 | 300) || !handles.insert(record.handle)
+        {
             return Err("invalid saved regular pickup record".into());
         }
         // Saved subtype is concrete. Fresh normal Isaac has no modifier that
         // rerolls it; initializing temporary RNG35 consumes no output here.
-        let subtype = regular_subtype(record.variant, record.subtype, record.spawn_seed)?;
-        let mut pickup = Pickup::spawn(
-            record.handle,
-            record.variant,
-            definition_subtype(record.variant, subtype),
-            record.position,
-            false,
-        )?;
+        let (variant, subtype) = if matches!(record.variant, 70 | 300) {
+            let Some(selected) = source_pocket_selection(
+                record.variant,
+                record.subtype,
+                record.spawn_seed,
+                PocketSubtypeInputs::from_state(state),
+            )?
+            else {
+                return Err("saved Pocket Init reached an unowned replacement input".into());
+            };
+            selected
+        } else {
+            (
+                record.variant,
+                regular_subtype(record.variant, record.subtype, record.spawn_seed)?,
+            )
+        };
+        let mut pickup = Pickup::spawn(record.handle, variant, subtype, record.position, false)?;
         pickup.subtype = subtype;
         pickup.initialize_spawn_seed(record.spawn_seed)?;
         pickup.regular_rng = Some(crate::items::Rng::new(record.rng_seed, [4, 3, 17]));
@@ -659,6 +1111,49 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
     Ok(ids)
 }
 
+/// Pickup.Update 507940: once the sprite step lands on the clip's DropSound
+/// trigger (IsEventTriggered 410790), 5042a0 plays the variant's drop sound
+/// (delay 2), drawing its shared sample. Chests play theirs in chests.rs.
+fn drop_sound(state: &mut crate::State, index: usize) {
+    let pickup = &state.room.pickups[index];
+    let Some(definition) = definition(
+        pickup.variant,
+        definition_subtype(pickup.variant, pickup.subtype),
+    ) else {
+        return;
+    };
+    let landed = definition
+        .clips
+        .iter()
+        .find(|clip| clip.name == pickup.animation)
+        .and_then(|clip| clip.drop_sound)
+        .is_some_and(|frame| pickup.animation_frame == f64::from(frame));
+    let id = match (pickup.variant, pickup.subtype) {
+        (10, _) => 68,
+        (20, 1) => 233,
+        (20, 2) => 231,
+        (20, 3) => 198,
+        (30, _) => 59,
+        (40, _) => 40,
+        (70, _) => 38,
+        (300, _) => 249,
+        _ => return,
+    };
+    if landed {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            crate::audio::SoundRequest {
+                id,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+}
+
 /// Full Pickup Update owns motion/friction; the manager owns its later grid
 /// pass. Fast4446a0 predicts and resolves its own ground preview directly.
 pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> Result<(), String> {
@@ -666,6 +1161,27 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
         return Ok(());
     };
     state.room.pickups[index].advance(phase, state.game_update_count);
+    if phase == Phase::Update {
+        drop_sound(state, index);
+    }
+    if phase == Phase::Update && matches!(state.room.pickups[index].variant, 70 | 300) {
+        //5076DB is skipped by actual Room16 and Challenge5/6/11. The
+        //ordinary branch decrements positiveAD0 only outside Appear.
+        let ordinary = !matches!(state.challenge_id, 5 | 6 | 11)
+            && state
+                .room
+                .descriptor
+                .as_ref()
+                .is_some_and(|room| room.template.room_type != 16);
+        let pickup = &mut state.room.pickups[index];
+        if ordinary && pickup.animation != "Appear" {
+            if let Some(delay) = &mut pickup.pocket_contact_delay {
+                if *delay > 0 {
+                    *delay -= 1;
+                }
+            }
+        }
+    }
     let pickup = &mut state.room.pickups[index];
     if phase != Phase::Interpolate
         || !pickup.has_regular_physics()
@@ -873,26 +1389,64 @@ pub(crate) fn resolve_grid(
 }
 
 /// The real554490 actor circle changes velocity immediately; ordinary Pickup
-/// HP0 rejects the later damage virtual. No loot or shared-RNG word is sampled.
+/// HP0 rejects ordinary Pickup damage. Closed51 alone owns the actual positive
+/// flags4 Hurt callback after the velocity effect.
 pub(crate) fn bomb_hit(
     state: &mut crate::State,
     center: WorldVector,
     blast_radius: f32,
+    damage: f32,
+    damage_flags: u32,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
     if !center.is_finite() {
         return Err("pickup blast center must be finite".into());
     }
-    for pickup in &mut state.room.pickups {
+    //4536F0 freezes its receiver list before callbacks can append loot. This
+    //retains the existing pickup order; global cross-family query order is a
+    //separate frontier, not an invented second all-actor query.
+    let candidate_count = state.room.pickups.len();
+    let current_actors = state.actor_scheduler.full_phase();
+    for index in 0..candidate_count {
+        let id = state.room.pickups[index].id;
+        let actor = crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id,
+        };
+        let current_owner =
+            current_actors.contains(&actor) && state.actor_scheduler.sequence_id(actor).is_some();
+        let pickup = &mut state.room.pickups[index];
+        let bomb_chest = pickup.variant == 51 && pickup.chest.is_some();
         //Appear has source entity class0; Collect has dead31f. Admitted
         //ordinary families have ground class5 and positive authored mass≤20.
-        if !pickup.has_regular_physics()
-            || !pickup.can_collect
+        if (!pickup.has_regular_physics() && !bomb_chest)
+            || (!bomb_chest && !pickup.can_collect)
             || pickup.collected
             || pickup.removed
             || pickup.collision_mass == 0.0
         {
             continue;
+        }
+        if bomb_chest {
+            let chest = pickup.chest.as_mut().expect("Bomb Chest");
+            //554535/54A skip class0 and gridclass4 before either effect.
+            if chest.entity_collision_class == 0 || chest.grid_collision_class == 4 {
+                continue;
+            }
+            // Fresh51's current geometry is authored12/mass3/class5. Missing
+            // current manager or other legacy geometry remains local unknown.
+            if !current_owner
+                || !pickup.position.is_finite()
+                || !pickup.velocity.is_finite()
+                || pickup.collision_radius != 12.0
+                || pickup.collision_mass != 3.0
+                || chest.grid_collision_class != 5
+            {
+                chest
+                    .open_frontier
+                    .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                continue;
+            }
         }
         let delta = WorldVector {
             x: pickup.position.x - center.x,
@@ -901,22 +1455,47 @@ pub(crate) fn bomb_hit(
         let squared = delta.x * delta.x + delta.y * delta.y;
         let radius = blast_radius + pickup.collision_radius;
         if !squared.is_finite() || !radius.is_finite() {
+            if bomb_chest {
+                pickup
+                    .chest
+                    .as_mut()
+                    .expect("Bomb Chest")
+                    .open_frontier
+                    .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                continue;
+            }
             return Err("pickup blast geometry overflowed".into());
         }
-        if squared == 0.0 || squared >= radius * radius || !line_clear(pickup.position) {
+        if squared >= radius * radius || !line_clear(pickup.position) {
             continue;
         }
-        let distance = squared.sqrt();
-        let impulse = (radius - distance).min(15.0);
-        //612b30 divides each f32 component before612a70 multiplies impulse;
-        //this differs from Normalize612820's rounded reciprocal multiply.
-        let radial = WorldVector {
-            x: delta.x / distance,
-            y: delta.y / distance,
-        } * impulse;
-        pickup.velocity = pickup.velocity * 0.5 + radial;
-        if !pickup.velocity.is_finite() {
-            return Err("pickup blast velocity overflowed".into());
+        //554625 ->5547AA skips only impulse at exact zero distance; the
+        //positive damage virtual still runs and can actually open51.
+        if squared != 0.0 {
+            let distance = squared.sqrt();
+            let impulse = (radius - distance).min(15.0);
+            //612b30 divides each f32 component before612a70 multiplies impulse;
+            //this differs from Normalize612820's rounded reciprocal multiply.
+            let radial = WorldVector {
+                x: delta.x / distance,
+                y: delta.y / distance,
+            } * impulse;
+            pickup.velocity = pickup.velocity * 0.5 + radial;
+            if !pickup.velocity.is_finite() {
+                if bomb_chest {
+                    pickup
+                        .chest
+                        .as_mut()
+                        .expect("Bomb Chest")
+                        .open_frontier
+                        .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                    continue;
+                }
+                return Err("pickup blast velocity overflowed".into());
+            }
+        }
+        if bomb_chest {
+            let _taken = crate::chests::hurt_bomb_chest(state, index, damage, damage_flags)?;
         }
     }
     Ok(())

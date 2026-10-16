@@ -77,8 +77,14 @@ export class GLMenuContext {
     }
     for (const font of Object.values(fontData)) for (const page of font.pages) paths.add(`font/${page}`);
     for (const path of extraPaths) paths.add(normalize(path));
-    await Promise.all([...paths].map(async path => {
-      const image = assets.image(path); const raw = await loadRawPNG(image.src); context.textures.set(image, context.upload(raw));
+    const pending = [...paths];
+    let next = 0;
+    // Keep raw PNG buffers and upload copies bounded while all textures load.
+    await Promise.all(Array.from({ length: 2 }, async () => {
+      while (next < pending.length) {
+        const path = pending[next++]!;
+        const image = assets.image(path); const raw = await loadRawPNG(image.src); context.textures.set(image, context.upload(raw));
+      }
     }));
     return context;
   }
@@ -96,10 +102,13 @@ export class GLMenuContext {
   private upload(raw: RawImage): Texture {
     const gl = this.gl, handle = gl.createTexture()!; gl.bindTexture(gl.TEXTURE_2D, handle);
     const textureWidth = 2 ** Math.ceil(Math.log2(raw.width)), textureHeight = 2 ** Math.ceil(Math.log2(raw.height));
-    const padded = new Uint8Array(textureWidth * textureHeight * 4);
-    for (let y = 0; y < raw.height; y++) padded.set(raw.pixels.subarray(y * raw.width * 4, (y + 1) * raw.width * 4), y * textureWidth * 4);
+    let pixels = raw.pixels;
+    if (textureWidth !== raw.width || textureHeight !== raw.height) {
+      pixels = new Uint8Array(textureWidth * textureHeight * 4);
+      for (let y = 0; y < raw.height; y++) pixels.set(raw.pixels.subarray(y * raw.width * 4, (y + 1) * raw.width * 4), y * textureWidth * 4);
+    }
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, textureWidth, textureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, padded);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, textureWidth, textureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     return { handle, width: raw.width, height: raw.height, textureWidth, textureHeight };

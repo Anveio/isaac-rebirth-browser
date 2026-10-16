@@ -10,6 +10,122 @@ four-case comparison still fails on contacts, identities and missing owners.
 Transport, source review and local replay consistency do not establish Original
 functional parity.
 
+## Current gameplay qualification
+
+Public main `d995a582` includes refused-pedestal runtime PR557 and
+optional Node tools PR558. Primary/playable remains `4543c59b`, serving the
+qualified current-CF8 artifact `ed5b8d1e` / WASM `d869557b` (Wd869), product
+`44ab4b10`/1403, with delivery `d526140f`. Its six production steps passed;
+Use45 passes 43/43 for the real TEMP45 TTL0 record and continued updates, and
+the selected item194 Own/reused-Original endpoint checks have zero failures.
+Item194's five unknown labels, actual cache/Add invocations, positive-TTL expiry
+and unrelated effects remain explicit. This artifact does not qualify557.
+
+The 21 scalar cases belong to the prior Wecee artifact: 187,499 Own
+checks with zero scalar/producer failures, 210 independent Original endpoint
+checks with zero failures, and 85 unknowns. They are not a 21-case rerun on
+Wd869. The old reports and their artifact bindings remain unchanged.
+
+The retained key-fixed Original compared with Wd869 through the public-WASM
+backend passes 422/422 presentations with zero failures (`e07f9f8a`), including
+both real key collections. The unchanged default Pocket AL CLI control on
+the same artifact passes 9,350 checks with zero failures and 11 unavailable
+obligations (`8ec05bef`). This is a transport regression control, not another
+mandatory pocket case: the earlier 3/11 scope remains. The Browser key attempt
+and menu-audio attempts remain resource-partial with zero comparison checks.
+Node results supply no Browser DOM, renderer or backend audio/PCM equality.
+
+The separate Get4+557 source `35e65b91` / WASM `e5b6ace1` has a genuine
+six-step production pass and sealed binding `88933f3a`. Its first fixed0
+live3 case passes all eight new target-lifecycle laws, from actual real3
+acquisition while the target is alive through the same Knife's registration,
+contact, target death/retirement and cleared target slot. The corrected Own
+diagnostic retains five required unknowns. Pending cache16 is MoveSpeed/D60
+and remains recorded; it is not FireDelay and is not cleared or completed.
+The original broad strict report retains 7,009 failures. Its retained-data
+correction records 7,006 failures across 86,561 checks (`60c292d0`), with six
+Get4 diagnostics and all eight target laws passing. Attribution remains open
+until the same fixed0 case is compared on the prior Wd869 artifact; an unlike
+historical case is not that baseline. Full cohort, callback and
+broader synergy acceptance remain open. This result does not qualify191,
+satellites, Get1, canonical Pill/Range/Luck or the separate pickup/transition
+source candidates.
+
+Every earlier row, strict failure and resource-partial report below retains
+its named artifact and scope. A retained section's word “current” refers to
+that recorded snapshot.
+
+## Retained e56e/Wecee qualification snapshot
+
+Current public source is `e56e66f9`; the synchronized checkout remains
+`0bb5487e`, serving scalar artifact `b3555a49` / WASM `ecee6363` (Wecee)
+with its actual six-step production qualification. New public grid admission,
+TNT updates and web shared-MT Init changes are outside that artifact's scope.
+Formatting, documentation and tool changes do not create a new gameplay
+artifact. All 21 current scalar cases close at 187,499 Own
+checks with zero scalar/producer failures, plus 210 independently validated
+Original/Own endpoint checks with zero failures; 85 unknowns remain. Item194's
+cached shot speed is 1.3600000143051147, with matching item RNG and Card seed.
+These endpoints do not establish individual cache/RNG callbacks or full synergy.
+
+Pocket runtime and selected functional proof are partial: 3 of 11 mandatory
+cases have closed. The public-tool AL control has 9,350 checks / 0 failures /
+11 unavailable obligations; the prior immutable AL report remains 9,349 / 0 /
+12 unavailable with SAME-v1 AD0 refresh unreached. Separated fixed and retained
+OS cases each retain 29,385 / 0 / 11 unavailable. Eight cases and browser,
+DOM/render, backend/PCM and broader pocket effects remain obligations. This
+pocket bank supplies no coin/key/bomb/chest coverage credit.
+
+The separate CF8 candidate and cdylib build-tool successor have an actual
+six-step production pass. Fresh Original/Own Use45 checks pass 43/43 for
+TEMP45 TTL0 and continued ticks; positive-TTL expiry and controller invocation
+remain unqualified. Its selected194 Own/reused-Original replay also closed
+with zero failures. These checks do not qualify the newer public grid
+runtime, and the served artifact remains Wecee.
+Get4/C18, new homing satellites, canonical Pill/Range and Luck1024 remain
+private source cuts with limited syntax checks, not build/game passes. The
+room191 case remains unrun in both games. The Original-only menu-audio diagnostic
+retained five real OpenAL SFX starts, its full tail and complete mono PCM
+artifacts. A later Browser-only reuse attempt launched Chrome but stopped at
+the resource floor, with zero pair checks; Browser playback and PCM/audio
+equality remain unqualified.
+Every strict historical red
+and resource-partial result below retains its original artifact and scope.
+
+## Retained 6b260 gameplay qualification snapshot
+
+This source snapshot names actual public main `6b260155`, including external shared-MT ambience/light/DropSound PR492 and upkeep494, plus pickup491, Quit495, web-owner496 and Move-save497. Its exact production artifact passed all six build steps in 42.695s with 3,565 source pins stable, using the explicit LTO-off/CG256, 1.4375 GiB startup and 512 MiB live profile. Build success, port replay comparisons and Original evidence remain separate. The private `658b299e` tests below do not qualify the later external492/494 paths. Every earlier report and snapshot remains historical with its failures preserved.
+
+| Area | Source/public | Own/port-port | Original scope | Remaining behavior or evidence |
+| --- | --- | --- | --- | --- |
+| Public interfaces and artifact scope | Public 6b260 includes shared-MT room lights/ambience, DropSound, source-ordered pickup transformations, Pause Quit, the web owner correction and optional Move-save fields. Held homing roles and next item/pocket sources are outside main. | Exact 6b260 production passed all six steps in 42.695s with 3,565 stable pins (LTO off/CG256). Four strict405 replays versus exact b319 retain 40,572,626 checks / 723,235 failures, including 703,160 changed values, 1,204 types and 4,792 missing fields; attribution is open. The separate private12de production passed all six steps in45.248s with3,571 stable pins; gameplay acceptance is pending. | The prior private658 comparison against exact b319 has 40,655,111 checks / 9,452 failures, solely added fields/keysets with no changed or removed existing values/types. It excludes external492/494 and is not whole-current-main acceptance. | The first local13-draw difference is exactly one first-visit treasure jingle plus two light passes over three fires. The later first SFX269 request matches the source half-volume and cooldown. Other723,235 strict failures are not waived; Original ambience evidence remains open. |
+| Stat inputs, acquisition history and Experimental Treatment | Independent persistent stat words and the reviewed generic default-passive CFG are public. Remaining D30/D38/Luck and C70 preservation, the corrected240 producer and acquisition-history owner/Add hook are compiled private12de cuts awaiting gameplay qualification. | Actual private658 real199/240 baseline retains 22,402 checks / 9,141 failures. Real199 grants add two keys and retain D2C/D34/four Move words; eight other owners are unavailable. Public240 has no complete producer and all fourteen requested words remain unavailable. | Historical240 Original comparisons retain six matching words/RNG/health and selected cached fields across 511 rows, with 2,199 failures including pending/cache and other owner gaps. Those old private bodies do not establish current public240 acceptance. | The next exact artifact must verify all fourteen words on unchanged real-grant inputs, initial/save ownership and activation safety. Source-ready240/history and a completed cache request do not grant unrelated getter/caller permissions. |
+| Controlled Knife and weapon precedence | Satellite prerequisites remain public. The actor, independent source contexts and precise homing roles stay private; retirement and unavailable-plan containment successors are source-reviewed but require fresh qualification. The joined private12de actor/retirement/containment/context/role source now builds; the exact death tape and full cohort remain pending. | The new first homing case on old005de reaches a real3 grant, then fails at tick453 with an unavailable previous mask8 query owner. Source review identifies a retirement boundary also reachable through the new658 roles. The earlier eight-case 2,324 / 2,310 failure cohort remains preserved. | Historical Knife/Brimstone/Ludovico, FIFO/HP and satellite results retain their named artifacts and failures. Neither a source permission split nor an unchanged ordinary405 partition establishes positive controlled homing or full synergy parity. | Keep the actor and role train joined with its safety successors. A new artifact must cross the exact first death tape, then complete the unchanged full cohort. Generic neutral Get4 remains separate. Ordinary-Tear homing from private005de has unique module/registered-target ownership absent public main; it is explicit integration debt for a later small projection, with its old qualification retained. |
+| Currencies, Golden Key and procedural pickup births | Public coins/Golden Key and persistent-cell ownership share source-ordered 203/250 operators with selected heart, coin, key and bomb factories. Card/Pill Init, canonical chest/procedural consumers, held-pocket Save and collection/drop are private12de slices with build-only qualification. | Distinct-cell coverage retains 20,387 checks / 32 unresolved, including five births/collections/removals, eighteen coins and Golden Key false-to-true with zero keys. Same-cell repair retains 193,049 selected passes plus 28 unknowns; the earlier extra-coin failure stays historical. | The retained Original same-cell route exposed the old extra coin. No new Card/Pill, held-pocket collection or paid/resource-effect Original acceptance is inherited from Init/source review or old private builds. | Paired collection, capacity spill, unknown 251/252 effects, modifiers/prices, return/reentry and unsupported child Init remain independently required. Bulk level descriptors continue to belong to the separate import workflow. |
+| Chest60, Bomb51, Mom's Key and modifier interactions | Chest60, Bomb51, Mom's Key and shared 203/250/selected-heart operators are public. Actual player/room inputs remain independent; unsupported input ownership is explicit. | Private658 corrected readers each perform 91,380 checks:203 retains 52 failures (48 mandatory unknowns, two Morph and two recorded-heart minima);250 retains 50 (48 unknowns and two Morph minima). Each fixed case matches three real hearts; observed subtype/property and requested-SFX slot laws pass. Old 1,751/1,747 observer failures remain retained. | The first actual Mom's Key Native/Own saved endpoint join on005de matches four initial five-word identities, initial/final RNG30 and final typed identities with zero selected mismatches or unmatched identities. Its prior own13 failures remain; no callback, parent/double-factory, Morph, clock or audio parity is inferred. | Remaining callback, rare-child, Morph and recorded-heart coverage failures stay open. Source SFX requests and matched endpoints do not establish played sound or individual factory/RNG callbacks. |
+| Popup, pause, Quit and transition appearance | Popup, pause/menu clocks, Pause Quit and optional Move-save inputs are public. Loading art, world-entry fade, Brim appearance, Luck-save and initial-save e2e observations are separate compiled private12de cuts with gameplay/pixels unqualified; public Continue remains unfinished. | Eight private658 public-input Quit routes complete two pause entries, resume, outgoing/opaque fade, one supported Save/Stop handoff and incoming/released menu each. The full saved reader checks 28,764 comparisons:112 observer f32 mismatches resolve to zero selected failures, while all 56 mandatory unknowns remain. Original168 failures and complete report inverse are retained. | Earlier17acc pause routes retain 28,326 selected passes / 16 unknowns. Native lifecycle, framebuffer, Stop/mixer, binary persistence, Continue and callback owners remain independently unobserved in the new own-game Quit result. | Nonzero mutated-input Save, actual frontend pixels, ceremony/iframes/costume/control and Stop audio lifecycle require their own observations. Initial neutral Save cannot certify mutation or restoration. |
+| Played sound and browser transport | Native backend/PCM ownership, browser archival tools and streamed identities are public. External492 adds actual looping ambience requests and frontend voice updates; these are separate from proving audible equality. | Latest changed-capacity browserv5 reaches the AudioContext-running wait, canonical step and a title JSON snapshot, then guards125 after10.211s with1,089 checks; no sound equality follows. Earliera75 reaches reset/audio-resume-call return with14CHALLENGE/zeroGameplay rows, whilea0ae stops beforepage/reset/helpers. All scopes stay separate. | Twelve earlier Native starts have actual table owners, accepted PLAYING, positive gain/global1 and nonzero complete PCM matching original samples, with zero selected failures. Latest browser AudioContext readiness is observed; source starts, configured gain, PCM, gameplay sound and played-sound equality remain unestablished. | A returned resume call is not an actual source start. Retain earlier NOT_REACHED/muted/ENOSYS/partial and guard reports. Stop/mixer/loop lifecycle, causal sound windows and full browser equality remain open. |
+| Boss assets and scene selection | All 95 original boss UI sheets,56 portrait definitions and the independent source selector are public. Backdrops and bulk level/monster/character imports retain their separate ownership. | Original import inventory/PNG validation and named builds establish asset/type scopes. The current exact production build does not add selected boss-scene gameplay or pixel acceptance. | Original art and selector source do not establish VS animation, pivot, scene-clock or draw-order parity. | Declared player/boss/spot/name selection, transition timing and visible Original/browser witnesses remain required. |
+| Contact regression tooling and source-only comparers | The authorized136 DST exception and existing live comparers remain separate. Unique controlledTechnology comparer366 is being projected onto current main with its FIFO/HP/Impact laws preserved, rather than being abandoned as stale. | The existing Contact DST workload actually passes eight cases of1,500 steps and21 properties in Native rlib-only packaging. This is execution of the allowed harness, not an Original game, WASM or default shipped-build pass. | Saved comparer equivalence must retain strict cross-game identities and every missing callback/lifecycle obligation. Own observations cannot manufacture an Original tuple or convert endpoint agreement into callback evidence. | Land the independently verified small366 successor and retire the old branch by ancestry or explicit supersession. No CI/hard gate or additional unit harness is introduced. |
+
+The finite item, pocket and presentation source is now compiled in private12de, after preserving a stale generated-matrix failure and one foreign Tear-symbol compile failure. Its homing death/full-cohort, all14 stat inputs, pocket collection and saved-input comparisons must retain their own actual outcomes. These future cuts remain outside public main. Matching sealed public6b production is served with its own frontend and WASM; HTTP byte delivery is not browser gameplay or sound parity.
+
+## Retained artifact records
+
+The following source snapshot is frozen at main `80d65135`, including durable Homing and satellite case/tool PRs428/430 and Hurt fix429. The runtime reports below belong to named immutable artifacts; they do not qualify every later main change.
+
+The private stat-input composite `0dca907d` / WASM `4a6ad3e0` (binding `0df24fd6`) passed normal production in 31.371s with 3,508 source pins stable. Its unchanged four-tape regular405 comparison against qualified `29c8dab6` retains 40,383,861 checks / 17,260 FAIL: 12,966 added fields and 4,294 key-set differences, with zero missing or changed existing values/types and zero errors. Floor and Clippy checks remain pending. Four Experimental Treatment240 own cases retain 3,859 / 88 FAIL, with no numeric/RNG/health endpoint failures. Three legacy12/14/222 cases retain 10,576 / 12 FAIL, with no numeric failures; these results do not establish individual RNG callback invocations.
+
+The first fresh Experimental Treatment240 Original/port pair retains 26,031 checks / 2,199 FAIL over 511 paired rows. All six signed stat words, RNG words, health and selected cached stats agree. Cache completion remains wrong in 198 rows: Native pending0 versus port4294966523; both generic and typed failures are preserved. Counter/controller fields, identities, callback owners and the other Native cases remain unresolved. The new Damage240 stage-local admission fix is a separate source candidate, not a regrade of this report.
+
+The earlier frozen `29c8dab6` qualifier passed production, but its raw405 comparison against P4 retains 38,099,273 / 1,453,039 FAIL, including material MT/grid changes. Its four Homing cases retain 24,554 / 42 FAIL. Ordinary six-case browser verification ended at a memory guard with only a partial first case; the other five remain ungraded. A corrected restart witness consumed all 5,802 literal commands, including 65 expected rejections, and passed documented outcomes/rollback, but did not reach a later floor or restart after descent: two coverage failures remain.
+
+Historical private Homing4433 retains 24,181 / 42 FAIL across four own cases and 85,739 / 43,069 FAIL in its first Original pair. Historical satellite `ab2aa0a5` retains 38,027,481 / 0 regular regression differences, 12,478 / 232 FAIL across four own satellite cases, 2,470 / 108 FAIL across four retained-child histories, and 34,648 / 3,237 FAIL in its first Original pair. The separate typed callback consumer retains 726 / 31 FAIL. Zero exact identity joins, missing callback/cleanup owners and all raw failures remain explicit. Both games show zero chains at the first Add2 endpoint followed by two later chains; this is a consumer-boundary finding, not a port-only zero-chain bug. Durable [Homing cases](../references/isaac/cases/item-composition/spoon-bender3-v1.json) and [satellite cases](../references/isaac/cases/item-composition/controlled-knife-satellites-v1.json) preserve replay inputs and scoped evidence summaries.
+
+Dedicated systems owners now cover pickups, transitions, played sound and pre-boss assets. Pickups includes coins, keys, bombs, hearts, chests and procedural spawns through the existing level descriptors; initial source slices restore coin sounds and golden-key lifecycle/spending/HUD. Transitions owns menu/world/pause fades and pickup text, sound, costume/control/iframe ceremony; the first source slice adds authored collectible title/description and the shared HUD clock. Sound comparison is being extended from PCM/transport to actual mixer/backend ownership and browser starts within declared public-input windows. The assets census decodes all95 original boss UI sheets and56 portrait definitions, including the missing exact MegaGurdy portrait. These new runtime/loader/collector slices have no build or paired-game acceptance at this snapshot. Claude retains bulk level/monster/character imports. No CI or hard gate is introduced.
+
+The following production4 and earlier records retain their historical artifact scopes and failures.
+
 The production4 artifact (`d6db18cc` / WASM `e0137262`, binding `a43e576e`) passed normal production in 28.380s with all 3,498 source pins stable. Its full regular405 comparison against qualified main9a retains 38,020,341 checks / 2,856 FAIL: 1,428 added `player.entitySource` fields and 1,428 key-shape differences; changed or missing preexisting values and errors are zero. The item-stage core411 and separate copied-Parent414 are now merged. Their runtime/build/resource inputs match this combined artifact; the standalone intermediate core was not separately built or played. Later tool metadata is outside that build, and optional floor/Clippy checks remain pending.
 
 Six public joint Technology 2 + Polyphemus captures and their finite reader retain 118,443 checks / 79 FAIL. No numeric operator field fails; 78 failures retain strict-join/callback unknowns and one reverse-case Remove-state endpoint coverage minimum remains. Four own contact cases retain 25,397 / 48 FAIL. Only recorded0/NPC18 exercises five complete copied Parent payloads, five FIFO appends, six HP drains, one death and one retirement; the three NPC14 cases retain missing-contact coverage failures.

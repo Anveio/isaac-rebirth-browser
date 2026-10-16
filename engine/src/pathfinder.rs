@@ -65,6 +65,15 @@ impl Pathfinder {
             last_target: ZERO,
         }
     }
+
+    /// Reset5b4010: everything but the flood map (+30).
+    pub(crate) fn reset(&mut self) {
+        *self = Self {
+            last_update: u32::MAX,
+            flood: std::mem::replace(&mut self.flood, RoomCosts::zeroed()),
+            ..Self::new()
+        };
+    }
 }
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
@@ -633,6 +642,58 @@ fn find_with(
         }
     } else {
         *friction *= 0.85;
+    }
+    Ok(())
+}
+
+/// Wander 5b5bd0 (calm branch): pick a free point 40 away when there is no
+/// target, then steer toward it at 0.5 / friction until within 3, on a grid
+/// hit, or (when nearly stopped) on a bounded(10) zero.
+pub(crate) fn wander(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &NpcWorld,
+    friction: f32,
+) -> Result<(), String> {
+    let position = npc.position;
+    let path = npc
+        .pathfinder
+        .as_mut()
+        .ok_or("Wander requires Entity_NPC+7d8")?;
+    if path.target == ZERO {
+        let candidate = position + crate::npcs::direction(random) * 40.0;
+        if world.grid.collision_at(candidate) == 0 {
+            path.target = candidate;
+        }
+    }
+    if path.target == ZERO {
+        return Ok(());
+    }
+    let towards = WorldVector {
+        x: path.target.x - position.x,
+        y: path.target.y - position.y,
+    };
+    let length = (towards.x * towards.x + towards.y * towards.y).sqrt();
+    if 3.0 > length || npc.grid_collided {
+        path.target = ZERO;
+        return Ok(());
+    }
+    let speed = npc.velocity.x * npc.velocity.x + npc.velocity.y * npc.velocity.y;
+    if 0.1 > speed && random.bounded(10) == 0 {
+        path.target = ZERO;
+        return Ok(());
+    }
+    // length >= 3 here, so the source's `len > 0` test always passes.
+    let step = WorldVector {
+        x: towards.x / length * 0.5,
+        y: towards.y / length * 0.5,
+    };
+    if friction != 0.0 {
+        npc.velocity = npc.velocity
+            + WorldVector {
+                x: step.x / friction,
+                y: step.y / friction,
+            };
     }
     Ok(())
 }

@@ -7,15 +7,14 @@
 # platform's libvoidstar.so in the build context at antithesis/libvoidstar.so.
 FROM rust:1.97-bookworm AS build
 ARG INSTRUMENT=0
-RUN apt-get update && apt-get install -y --no-install-recommends python3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends python3 nodejs && rm -rf /var/lib/apt/lists/*
 RUN rustup target add wasm32-unknown-unknown
 WORKDIR /src
-COPY engine engine
-COPY tools/foundation/item-catalog.py tools/foundation/item-catalog.py
-COPY web/*.json web/
-COPY references/isaac/rebirth/resources references/isaac/rebirth/resources
-COPY antithesis antithesis
-RUN cargo build --manifest-path engine/Cargo.toml --locked --release --target wasm32-unknown-unknown --lib
+# Dockerfile.dockerignore limits the context to the engine build's inputs;
+# tools/dst/sync-context.py adds any the build gains.
+COPY . .
+# The browser artifact's own build, so the image checks the WASM that ships.
+RUN bash tools/build-wasm.sh
 RUN if [ "$INSTRUMENT" = 1 ]; then \
       cp antithesis/libvoidstar.so /usr/lib/libvoidstar.so && \
       export RUSTFLAGS="-Ccodegen-units=1 -Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=3 -Cllvm-args=-sanitizer-coverage-trace-pc-guard -Clink-args=-Wl,--build-id -L/usr/lib -lvoidstar"; \
@@ -30,7 +29,7 @@ FROM debian:bookworm-slim
 COPY --from=build /out/lib/ /usr/lib/
 COPY --from=build /symbols /symbols
 COPY --from=build /out/rebirth-dst /usr/local/bin/rebirth-dst
-COPY --from=build /src/engine/target/wasm32-unknown-unknown/release/rebirth_cleanroom.wasm /opt/rebirth/engine.wasm
+COPY --from=build /src/web/generated/engine.wasm /opt/rebirth/engine.wasm
 COPY antithesis/test /opt/antithesis/test
 COPY antithesis/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -31,6 +31,10 @@ impl GridCallbackOutcome {
     /// Retain a non-controller callback gap without invalidating C18 history.
     pub(crate) fn record_frontier(&self, state: &mut State, caller: &str) {
         if let Some(channel) = self.frontier() {
+            crate::ordinary_placement::invalidate(
+                state,
+                crate::ordinary_placement::Frontier::GridEffects,
+            );
             state.weapon_admission.unadmitted_controller.get_or_insert(
                 crate::weapon_plan::UnadmittedController {
                     primary: state.weapon_cache.primary.numeric(),
@@ -187,32 +191,11 @@ fn admission(state: &mut State) -> crate::poop_effects::Admission<'_> {
     }
 }
 
-/// Game::SpawnParticles 5515b0 (Effect 1000.58, default ColorMod): one speed
-/// draw, then per particle its seed, angle and immediate Update.
+/// Poop Hurt passes Game::SpawnParticles 5515b0 Effect 1000.58 a speed of
+/// one Float + 2.
 fn particles(state: &mut State, centre: WorldVector, count: u32) -> Result<(), String> {
     let speed = state.boot_lifecycle.shared.uniform() + 2.0;
-    for _ in 0..count {
-        let seed = state.boot_lifecycle.shared.next_u32();
-        let direction = crate::npcs::direction(&mut state.boot_lifecycle.shared);
-        let velocity = WorldVector {
-            x: direction.x,
-            y: direction.y * 0.5,
-        } * speed;
-        let id = admission(state).admit_particle(crate::poop_effects::ParticleBirth {
-            seed,
-            position: centre,
-            velocity,
-            spawner: None,
-        })?;
-        crate::poop_effects::Admission {
-            game_update_count: state.game_update_count,
-            next_effect: &mut state.next_effect,
-            effects: &mut state.sprite_effects,
-            scheduler: &mut state.actor_scheduler,
-        }
-        .advance_particle_initial(id, &mut state.boot_lifecycle.shared)?;
-    }
-    Ok(())
+    crate::poop_effects::spawn_particles(state, 58, centre, count, speed)
 }
 
 /// 56aa90: a 0.1 chance of a heart (1/4) or a coin, or the Petrified Poop

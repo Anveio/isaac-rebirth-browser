@@ -307,6 +307,9 @@ pub(crate) fn advance_transition(
     state
         .persisted_rooms
         .insert(state.current_room, state.room.clone());
+    //453EC0 does not clear retained buckets; the unclosed pointer/room
+    //transition must not reuse handle IDs as prior query membership.
+    state.knife_query_partition = None;
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(room) => room,

@@ -18,6 +18,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { acquireHostSlot } from './lib/host-slots.mjs';
 import { freeBytes, pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
 import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
@@ -140,7 +141,12 @@ function replayCommand(suite, directory) {
     ? `npm run test:e2e -- ${suite.id} ${suite.replay ?? '--scenarios'} ${relative(ROOT, join(directory, 'scenarios.json'))}` : undefined;
 }
 
-function runSuite(suite) {
+async function runSuite(suite) {
+  const release = await acquireHostSlot(suite.id);
+  try { return await runSuiteInSlot(suite); } finally { release(); }
+}
+
+function runSuiteInSlot(suite) {
   const directory = join(runDirectory, suite.id);
   const args = [...mergeArgs(suite.args, suiteArgs), '--output', directory];
   const logPath = join(runDirectory, `${suite.id}.log`);

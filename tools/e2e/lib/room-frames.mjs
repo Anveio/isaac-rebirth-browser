@@ -10,9 +10,11 @@
 // trace and the common per-frame player/clock/bomb/pickup/actor comparisons.
 // It records each mismatch as a field failure and keeps comparing.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { gzipSync } from 'node:zlib';
 import { chromium } from '@playwright/test';
@@ -21,6 +23,7 @@ import { startProductionServer } from '../../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../../foundation/verify.mjs';
 import { ROOT, flag, outputDirectory, writeJson } from './cli.mjs';
 import { stepSnapshot } from './game.mjs';
+import { createPublicWasmRuntime, createPublicWasmJournal } from '../../foundation/composition-wasm-public.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './original.mjs';
 
 const run = promisify(execFile);
@@ -135,20 +138,30 @@ function compareCommon(frame) {
   return { player, pickups };
 }
 
-async function runCase({ suite, item, scenarios, directory, browser, server, caseResult }) {
+async function runCase({ suite, item, scenarios, directory, server, caseResult, wasmNode, wasmSha, reusedOriginal }) {
   await writeJson(join(directory, 'case.json'), item);
   await writeFile(join(directory, 'tape.json'), await python(suite.helper, ['--case', join(directory, 'case.json')]));
+  const originalDirectory = reusedOriginal ? resolve(reusedOriginal) : join(directory, 'original');
+  if (reusedOriginal) {
+    assert.deepEqual(JSON.parse(await readFile(join(originalDirectory, '..', 'case.json'))), item,
+      'Retained Original case must equal the whole-bank declaration');
+    assert.deepEqual(JSON.parse(await readFile(join(originalDirectory, '..', 'tape.json'))),
+      JSON.parse(await readFile(join(directory, 'tape.json'))), 'Retained Original public tape must match');
+  } else {
   await run('bash', ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', item.code, '--tape', join(directory, 'tape.json'), '--observe-every-step',
     '--state-observer', suite.observer, '--output', join(directory, 'original')],
   { cwd: ROOT, timeout: 180000, maxBuffer: 2 * 1024 * 1024 });
-  const native = JSON.parse(await readFile(join(directory, 'original/manifest.json')));
-  caseResult.nativeManifest = join(directory, 'original/manifest.json');
+  }
+  const nativeManifest = join(originalDirectory, 'manifest.json');
+  let native = JSON.parse(await readFile(nativeManifest));
+  caseResult.nativeManifest = nativeManifest;
+  caseResult.originalReused = Boolean(reusedOriginal);
   assert.equal(native.status, 'pass');
   assert.deepEqual(native.failures, []);
   assert.equal(native.seedValue, item.seedValue);
   assert.equal(native.seedReadbackMatchesCodec, true);
-  const provenance = JSON.parse(await python(suite.helper, ['--validate-original', join(directory, 'original/manifest.json')]));
+  const provenance = JSON.parse(await python(suite.helper, ['--validate-original', nativeManifest]));
   assert.equal(provenance.status, 'pass');
   assert.deepEqual(provenance.failures, []);
   const baseline = native.debugObservations.find(row => row.context.label === 'gameplay-start');
@@ -159,20 +172,52 @@ async function runCase({ suite, item, scenarios, directory, browser, server, cas
   suite.checkBaseline?.(baseline);
   const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
 
-  const page = await browser.newPage();
+  //The complete Native process and source validation finish before a
+  //Browser is admitted. Keep only the actual rows used below.
+  native = undefined;
+  let browser, page, runtime, journal, beforeInputs, completedTape = false;
+  const actualCommands = [];
+  const send = command => { runtime.command(command); actualCommands.push(command); };
+  const inputPaths = wasmNode ? [resolve(wasmNode), nativeManifest,
+    join(originalDirectory, '..', 'case.json'), join(originalDirectory, '..', 'tape.json'),
+    join(directory, 'case.json'), join(directory, 'tape.json'),
+    join(ROOT, 'tools/foundation/composition-wasm-public.mjs')] : [];
+  const inputPins = async () => Object.fromEntries(await Promise.all(inputPaths.map(async path => {
+    const hash = createHash('sha256');
+    for await (const chunk of createReadStream(path)) hash.update(chunk);
+    return [path, hash.digest('hex')];
+  })));
   const errors = [], states = [], track = {};
-  page.on('pageerror', error => errors.push(String(error)));
   let compared = 0, passed = 0, detonation;
   try {
+    if (wasmNode) {
+      beforeInputs = await inputPins();
+      runtime = createPublicWasmRuntime({ wasm: resolve(wasmNode), expectedWasmSha: wasmSha });
+      journal = createPublicWasmJournal(directory);
+      //The same public reset as the existing Browser path; no resource or state override.
+      runtime.reset(item.seedValue, scenarios.bootEpochSeed);
+      await writeJson(join(directory, 'declared-reset-input.json'),
+        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+    } else {
+    browser = await chromium.launch(browserLaunchOptions());
+    caseResult.graphics = await inspectBrowserGraphics(browser);
+    page = await browser.newPage();
+    page.on('pageerror', error => errors.push(String(error)));
     await page.goto(`${server.url}/?manual=1`);
     await waitForReady(page);
     await page.evaluate(({ seedValue, bootEpochSeed }) => {
       window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
     }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+    }
     // Menu/seed/run intervals and every tick are declared before execution;
     // deferred Music run admission is never bypassed.
     const expected = [...manualSeedCommands(item.code)];
-    const start = await enterSeededRun(page, item.code);
+    let start;
+    if (wasmNode) {
+      for (const command of manualSeedCommands(item.code)) send(command);
+      start = runtime.snapshot();
+      await journal.append({ kind: 'gameplay-start', state: start });
+    } else start = await enterSeededRun(page, item.code);
     assert.equal(start.screen, 'playing');
     for (const [field, value] of [['seedText', item.code], ['seedValid', true], ['seededRun', true], ['runSeed', item.code], ['runSeedValue', item.seedValue]])
       assert.equal(start[field], value, `seed readback ${field}`);
@@ -181,9 +226,13 @@ async function runCase({ suite, item, scenarios, directory, browser, server, cas
     let presentation = 0;
     for (const { key, frames } of item.actions) {
       const code = key ? 'Key' + key.toUpperCase() : null;
-      if (key) { await page.keyboard.down(key); expected.push({ type: 'key', code, down: true }); }
+      if (key) { if (wasmNode) send({ type: 'key', code, down: true }); else await page.keyboard.down(key); expected.push({ type: 'key', code, down: true }); }
       for (let index = 0; index < frames; index++) {
-        const state = await stepSnapshot(page);
+        let state;
+        if (wasmNode) {
+          send({ type: 'tick', count: 1 }); state = runtime.snapshot();
+          await journal.append({ kind: 'state', presentation: presentation + 1, state });
+        } else state = await stepSnapshot(page);
         expected.push({ type: 'tick', count: 1 });
         states.push(state);
         presentation++;
@@ -204,39 +253,89 @@ async function runCase({ suite, item, scenarios, directory, browser, server, cas
         compared++;
         if (presentation % 100 === 0) console.log(JSON.stringify({ case: item.name, presentation }));
       }
-      if (key) { await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
+      if (key) { if (wasmNode) send({ type: 'key', code, down: false }); else await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
     }
 
+    completedTape = true;
+    if (wasmNode) {
+      assert.deepEqual(actualCommands, expected, 'Every declared public ABI input is sent exactly once');
+      await writeJson(join(directory, 'actual-public-wasm-commands.json'), actualCommands);
+    } else {
     const trace = await page.evaluate(() => window.game.trace());
     await writeFile(join(directory, 'browser-trace.json.gz'), gzipSync(JSON.stringify(trace), { level: 1 }));
     caseResult.trace = { inputTraceTruncated: trace.inputTraceTruncated, stateHistoryTruncated: trace.stateHistoryTruncated,
       stateHistoryTruncationReason: trace.stateHistoryTruncationReason, inputEncodedBytes: trace.inputEncodedBytes,
       stateEncodedBytes: trace.stateEncodedBytes, backendEvents: trace.backendEvents.length, completeStateRecords: trace.states.length };
     assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
+    }
     Object.assign(caseResult, suite.finish({ item, states, last: states.at(-1), track, detonation }) ?? {});
-    assert.deepEqual(errors, []);
+    if (!wasmNode) assert.deepEqual(errors, []);
   } finally {
-    Object.assign(caseResult, { comparedPresentations: compared, passedPresentations: passed, detonation, ...suite.summary?.(track) });
-    await writeFile(join(directory, 'browser-states.json.gz'), gzipSync(JSON.stringify({ schema: 1, states }), { level: 1 }));
-    await page.close();
+    try {
+      Object.assign(caseResult, { comparedPresentations: compared, passedPresentations: passed, detonation, ...suite.summary?.(track) });
+      if (journal) {
+        caseResult.wasmJournal = await journal.close({ completed: completedTape });
+        const afterInputs = await inputPins();
+        await writeJson(join(directory, 'public-wasm-inputs.json'), { before: beforeInputs, after: afterInputs });
+        assert.deepEqual(afterInputs, beforeInputs, 'WASM, public declarations and independent Original stay unchanged');
+      }
+      await writeFile(join(directory, wasmNode ? 'wasm-states.json.gz' : 'browser-states.json.gz'), gzipSync(JSON.stringify({ schema: 1, states }), { level: 1 }));
+    } finally {
+      try { await page?.close(); }
+      finally {
+      try { await browser?.close(); }
+      catch (cause) {
+        const error = new Error('Browser closure failed; stop before another Native launch', { cause });
+        error.roomFrameBrowserClosureFailed = true;
+        throw error;
+      }
+      }
+    }
   }
 }
 
 export async function runRoomFrameSuite(suite) {
   const output = outputDirectory(suite.name);
+  const wasmNode = flag('--wasm-node'), wasmSha = flag('--wasm-sha'), reusedOriginal = flag('--reuse-original');
+  assert.equal(Boolean(wasmNode), Boolean(wasmSha), 'Both explicit WASM declarations required');
+  if (wasmNode) assert.match(wasmSha, /^[a-f0-9]{64}$/);
+  assert.ok(!reusedOriginal || wasmNode, 'Retained Original reuse requires the explicit functional-only WASM route');
   const recorded = flag('--scenarios');
   const scenarios = JSON.parse(recorded ? await readFile(recorded, 'utf8') : await python(suite.helper, ['--count', flag('--count', '2')]));
   validateScenarios(scenarios, suite.cases);
   const selected = flag('--case');
+  assert.ok(!reusedOriginal || selected, 'One retained Original requires one explicit --case');
   if (selected) assert.ok(scenarios.cases.some(item => item.name === selected), `Unknown recorded case ${selected}`);
   await assertOriginalBinary();
   await writeJson(join(output, 'scenarios.json'), scenarios);
 
-  const server = await startProductionServer();
-  const browser = await chromium.launch(browserLaunchOptions());
-  const report = { schema: 2, suite: suite.name, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
-    graphics: await inspectBrowserGraphics(browser), scope: suite.scope, selectedCase: selected, cases: [] };
+  const directory = flag('--production-directory');
+  const qualifiedSha = flag('--qualified-production-sha');
+  const qualifiedFiles = flag('--qualified-production-files');
+  assert.equal(Boolean(qualifiedSha), Boolean(qualifiedFiles), 'Both production identity declarations required');
+  if (qualifiedSha) {
+    assert.match(qualifiedSha, /^[a-f0-9]{64}$/);
+    assert.ok(Number.isInteger(Number(qualifiedFiles)) && Number(qualifiedFiles) > 0);
+  }
+  const server = wasmNode ? null : await startProductionServer({
+    ...(directory ? {directory:resolve(directory)} : {}),
+    ...(qualifiedSha ? {qualifiedBuildIdentity:{sha256:qualifiedSha,files:Number(qualifiedFiles)}} : {}),
+  });
+  const report = { schema: 2, suite: suite.name, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server?.build ?? null,
+    graphics: null, scope: suite.scope, selectedCase: selected, cases: [] };
+  report.captureBackend = wasmNode ? 'wasm-node' : 'browser';
+  if (wasmNode) {
+    report.wasmArtifact = { path: resolve(wasmNode), sha256: createHash('sha256').update(await readFile(resolve(wasmNode))).digest('hex') };
+    assert.equal(report.wasmArtifact.sha256, wasmSha);
+    report.unavailable = ['Browser DOM inputs', 'Renderer and PNGs', 'Audio backend and PCM'];
+    report.scope += ' Public-WASM ABI functional assertions only; Browser, DOM, rendering and backend audio remain separate obligations.';
+  }
+  //Graphics belongs to each fresh Browser below; no Browser overlaps
+  //Native capture or a following case's Native process.
+
   try {
+    if (qualifiedSha && !wasmNode) assert.deepEqual({sha256:server.build.sha256,files:server.build.files},
+      {sha256:qualifiedSha,files:Number(qualifiedFiles)}, 'Actual immutable production identity matches declaration');
     for (const item of scenarios.cases) {
       if (selected && item.name !== selected) continue;
       const directory = join(output, item.name);
@@ -244,11 +343,13 @@ export async function runRoomFrameSuite(suite) {
       const caseResult = { ...item, status: 'running', failures: [] };
       report.cases.push(caseResult);
       try {
-        await runCase({ suite, item, scenarios, directory, browser, server, caseResult });
+        await runCase({ suite, item, scenarios, directory, server, caseResult, wasmNode, wasmSha, reusedOriginal });
         caseResult.status = caseResult.failures.length ? 'fail' : 'pass';
       } catch (error) {
         caseResult.status = 'fail'; caseResult.error = String(error);
+        if (error.roomFrameBrowserClosureFailed) throw error;
       }
+      if (caseResult.graphics && report.graphics === null) report.graphics = caseResult.graphics;
       await writeJson(join(directory, 'report.json'), caseResult);
       console.log(JSON.stringify({ case: item.name, cohort: item.cohort, status: caseResult.status,
         comparedPresentations: caseResult.comparedPresentations, failures: caseResult.failures.length, error: caseResult.error }));
@@ -258,7 +359,7 @@ export async function runRoomFrameSuite(suite) {
     report.status = 'fail'; report.error = String(error);
   } finally {
     await writeJson(join(output, 'report.json'), report);
-    await browser.close(); await server.close();
+    await server?.close();
     console.log(JSON.stringify({ status: report.status, report: join(output, 'report.json'), cases: report.cases.length }));
     process.exitCode = report.status === 'pass' ? 0 : 1;
   }

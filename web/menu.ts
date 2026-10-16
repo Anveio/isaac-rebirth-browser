@@ -27,6 +27,19 @@ export class MenuRenderer {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.assets.image(`${MENU}menushadow.png`), 0, 0, 256, 149, 0, 122, 256, 149);
     ctx.restore();
+    //59C702/59C7F0 draws the outgoing confirmation quad after the menu,
+    //using Menu+4 independently of the incoming Menu+8/+C tint below.
+    if (state.runStartRequest.fading && state.runStartRequest.fadeAlpha > 0) {
+      const alpha = Math.min(1, state.runStartRequest.fadeAlpha);
+      const backend = ctx as unknown as { fillRectRGBA?: (x: number, y: number, width: number, height: number, rgba: readonly number[]) => void };
+      if (backend.fillRectRGBA) backend.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, alpha]);
+      else {
+        ctx.save(); ctx.globalAlpha *= alpha;
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, 480, 270); ctx.restore();
+      }
+      this.drawLoadingImage(ctx, state, alpha);
+    }
     if (state.menuFade.active && state.menuFade.alpha > 0) {
       const { color, alpha } = state.menuFade;
       const backend = ctx as unknown as { fillRectRGBA?: (x: number, y: number, width: number, height: number, rgba: readonly number[]) => void };
@@ -36,6 +49,17 @@ export class MenuRenderer {
         ctx.fillStyle = `#${color.slice(0, 3).map(value => Math.round(value * 255).toString(16).padStart(2, "0")).join("")}`;
         ctx.fillRect(0, 0, 480, 270); ctx.restore();
       }
+    }
+  }
+
+  /**593580: same retained texture during menu confirmation and initial Game fade. */
+  drawLoadingImage(ctx: CanvasRenderingContext2D, state: State, alpha: number): void {
+    const index = state.runStartRequest.loadingImageIndex;
+    if (index !== undefined) {
+      const image = this.assets.image(`gfx/ui/loadimages/loadimages-${String(index).padStart(3, "0")}.png`);
+      ctx.save(); ctx.globalAlpha *= alpha;
+      ctx.drawImage(image, (480 - image.width) / 2, (270 - image.height) / 2);
+      ctx.restore();
     }
   }
 
