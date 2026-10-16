@@ -59,10 +59,15 @@ function minimapShape(template: { width: number; height: number }): number {
 const LOCKED_MINIMAP_TYPES = new Set([2, 9, 12, 18, 19, 20, 21]);
 // GridEntity_Decoration Init 561e60 picks Props_*.anm2 by backdrop type
 // (3/4 Caves, 5/6 Depths, 7/8 Womb, 9 Sheol, 10 Cathedral, 12 Chest, else
-// Basement). Only the Basement/Cellar backdrops the port builds are listed.
+// Basement). Only the backdrops the port builds are listed.
+const BASEMENT_PROPS = { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false };
 const DECORATION_PROPS: Record<string, { actor: string; allowCaves: boolean }> = {
-  "gfx/backdrop/01_basement.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
-  "gfx/backdrop/02_cellar.png": { actor: "gfx/grid/props_01_basement.anm2", allowCaves: false },
+  "gfx/backdrop/01_basement.png": BASEMENT_PROPS,
+  "gfx/backdrop/02_cellar.png": BASEMENT_PROPS,
+  "gfx/backdrop/05_depths.png": { actor: "gfx/grid/props_05_depths.anm2", allowCaves: false },
+  "gfx/backdrop/09_sheol.png": { actor: "gfx/grid/props_09_sheol.anm2", allowCaves: false },
+  ...Object.fromEntries(["0a_library", "0b_shop", "0c_isaacsroom", "0d_barrenroom", "0e_arcade", "0e_diceroom", "0f_secretroom"]
+    .map(name => [`gfx/backdrop/${name}.png`, BASEMENT_PROPS])),
 };
 // 561f07: an RNG seeded (Descriptor+48 + grid index, shift35 = 5/9/7) plays
 // clip raw() % count, retrying (20 tries) while a "Caves" clip lands outside
