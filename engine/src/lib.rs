@@ -428,11 +428,15 @@ impl RunIntroduction {
     ///505D7F..505DE9 takes the current collectible config's name and
     ///description before the Pickup pose and deferred AddCollectible queue.
     pub(crate) fn collectible(config: &items::CollectibleDefinition) -> Self {
+        Self::pickup(config.name, config.description)
+    }
+
+    pub(crate) fn pickup(name: &str, description: &str) -> Self {
         Self {
             age: 0,
             active: true,
-            title: config.name.into(),
-            subtitle: config.description.into(),
+            title: name.into(),
+            subtitle: description.into(),
             stage: false,
         }
     }
@@ -1848,9 +1852,13 @@ impl Game {
     }
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
-    fn collect_regular_pickup_at(&mut self, index: usize) {
+    fn collect_regular_pickup_at(&mut self, index: usize) -> Result<(), String> {
+        if matches!(self.state.room.pickups[index].variant, 70 | 300) {
+            pockets::player_contact(&mut self.state, index)?;
+            return Ok(());
+        }
         if !pickups::player_can_collect(&self.state) {
-            return;
+            return Ok(());
         }
         let red_multiplier = if self
             .state
@@ -1912,6 +1920,7 @@ impl Game {
                 );
             }
         }
+        Ok(())
     }
 
     /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
@@ -2324,7 +2333,8 @@ impl Game {
             // NewRun54eb20 itself has no clear; delay remains unchanged.
             // The same Stop54F571 clears history for both deferred requests.
             // NewRun itself never reconstructs unknown history from counts.
-            self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
+            self.state.acquisition_history =
+                Some(acquisition_history::AcquisitionHistory::default());
             self.state.information_animation.clear();
             match request {
                 player_death::Request::Restart => {
@@ -2393,10 +2403,17 @@ impl Game {
                     self.state.run_quit.begin();
                 }
             }
-            //5282B0 pocket effects are not reconstructed here. An actual
-            //held pocket request invalidates C70 before any Player callback;
-            //later release never recreates a neutral owner.
-            if self.state.screen == Screen::Playing && self.state.public_actions.pocket_pressed {
+            //Legacy snapshots without held-record ownership keep the old
+            //conservative invalidation. Known records use5282B0's actual
+            //controls/cooldown/main-clip/nonempty admission in pockets.
+            if self.state.screen == Screen::Playing
+                && self.state.public_actions.pocket_pressed
+                && self
+                    .state
+                    .player_items
+                    .as_ref()
+                    .is_none_or(|items| items.held_pockets.is_none())
+            {
                 self.state.attack_runtime.aim_rotation_c70 = None;
                 if let Some(items) = &mut self.state.player_items {
                     //Untracked pill/card execution cannot retain speed history.
@@ -2615,7 +2632,7 @@ impl Game {
                             .iter()
                             .position(|pickup| pickup.id == id)
                         {
-                            self.collect_regular_pickup_at(index);
+                            self.collect_regular_pickup_at(index)?;
                         }
                     }
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
@@ -2902,7 +2919,7 @@ impl Game {
                     chests::player_contact(&mut self.state, index)?;
                     continue;
                 }
-                self.collect_regular_pickup_at(index);
+                self.collect_regular_pickup_at(index)?;
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             pickups::full_grid_contacts(&mut self.state)?;
@@ -3969,6 +3986,7 @@ impl Game {
             bombs::place(&mut self.state, phase)?;
         }
         active_items::advance(&mut self.state, controls_enabled)?;
+        pockets::note_unowned_use(&mut self.state, controls_enabled);
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {

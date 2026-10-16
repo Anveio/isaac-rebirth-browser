@@ -172,6 +172,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  pocketContactDelay?: number | null;
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
@@ -329,7 +330,8 @@ export interface State {
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
-    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean} | null;
+    pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
+      pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;

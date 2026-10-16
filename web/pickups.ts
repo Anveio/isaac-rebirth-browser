@@ -41,6 +41,25 @@ export class PickupRenderer {
     const attachment = this.assets.nullFrame("gfx/001.000_player.anm2", using ? "UseItem" : "Pickup", 0,
       using ? state.playerAnimation.frame : owner!.pickupAnimationFrame);
     if (!attachment?.Visible) return;
+    if (presentation.pocket) {
+      const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+      const overrides = Object.fromEntries(Array.from({length: 3}, (_, layer) => [layer, {
+        XPosition: attachment.XPosition, YPosition: attachment.YPosition,
+        Visible: attachment.Visible, RedTint, GreenTint, BlueTint,
+      }]));
+      //The one copied7E0 sprite has a Sparkle main and static named overlay.
+      //Native render visits layer0/1/2; keep their order for both pill/rune
+      //layer0 and card-front layer2, independently of the Sparkle clock.
+      for (let layer = 0; layer < 3; layer++) {
+        this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", "Sparkle", x, y, presentation.animationFrame, {
+          layers: [layer], overrides,
+        });
+        this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", presentation.pocket.overlay, x, y, presentation.pocket.overlayFrame, {
+          layers: [layer], overrides,
+        });
+      }
+      return;
+    }
     const item = catalog.items.find(item => item.id === presentation.itemId && item.kind !== "trinket");
     if (!item?.sprite) return;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
