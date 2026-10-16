@@ -252,7 +252,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
 | `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
 | `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
-| `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 28 | 8 | 0 |
+| `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 29 | 8 | 0 |
 | `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
 | `pickups` | regular pickup subtype rolls and the pickups each roll spawns as | 5 | 9 | 0 |
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
@@ -418,11 +418,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | tears: the render offset bends below 8.5 height, unless the tear accelerates | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: the render offset never falls as height rises | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear is born exactly from finite parameters and a uniform in 0..=1 | [tears.rs](engine/dst/src/units/tears.rs) |
-| Always | tears: a tear is born one step out, falling once, with its velocity | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear is born one step out, falling once, with its velocity and falling acceleration | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear's flight fails only when its position overflows | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a refused step leaves the tear unchanged | [tears.rs](engine/dst/src/units/tears.rs) |
 | Sometimes | tears: a step whose position overflows is refused | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a tear's lifetime only moves forward | [tears.rs](engine/dst/src/units/tears.rs) |
+| Always | tears: a tear keeps its velocity and falling acceleration through its flight | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a skipped phase or a removed tear changes nothing | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: an intermediate phase presents half a step ahead and moves nothing | [tears.rs](engine/dst/src/units/tears.rs) |
 | Always | tears: a dying tear is removed at the next update, where it died | [tears.rs](engine/dst/src/units/tears.rs) |

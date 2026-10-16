@@ -476,12 +476,13 @@ fn flight(e: &mut Entropy) {
                 <= slack(norm(origin) + norm(velocity))
             && tear.presented_position == tear.position
             && tear.velocity == velocity
+            && tear.falling_acceleration.to_bits() == parameters.falling_acceleration.to_bits()
             && (f64::from(tear.falling_speed) - falling).abs() <= slack(falling)
             && (f64::from(tear.height) - (f64::from(parameters.height) + falling)).abs()
                 <= slack(f64::from(parameters.height) + falling)
             && tear.render_offset_y
                 == projectiles::height_offset(tear.height, tear.falling_acceleration),
-        "tears: a tear is born one step out, falling once, with its velocity",
+        "tears: a tear is born one step out, falling once, with its velocity and falling acceleration",
         json!({ "start": details(), "tear": tear })
     );
     // Falling speed settles at 1 + 10·acceleration, so a tear whose
@@ -521,6 +522,16 @@ fn flight(e: &mut Entropy) {
         props::always!(
             lifetime == tear.lifetime && rank(before.lifetime) <= rank(lifetime),
             "tears: a tear's lifetime only moves forward",
+            step()
+        );
+        // Each step's checks derive the next state from the previous one,
+        // so a step that also rewrote the stored velocity (a per-update
+        // drag, say) would pass them; the kernel never changes either.
+        props::always!(
+            tear.velocity.x.to_bits() == before.velocity.x.to_bits()
+                && tear.velocity.y.to_bits() == before.velocity.y.to_bits()
+                && tear.falling_acceleration.to_bits() == before.falling_acceleration.to_bits(),
+            "tears: a tear keeps its velocity and falling acceleration through its flight",
             step()
         );
         if phase == Phase::Skipped || before.lifetime == Lifetime::Removed {
