@@ -209,14 +209,28 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
 /// remain separate from the four entities2.xml visual families.
 fn card_catalog(xml: &str) -> String {
     let mut achievements = [None; 41];
-    for tag in xml.split("<card ").skip(1).chain(xml.split("<rune ").skip(1)) {
+    for tag in xml
+        .split("<card ")
+        .skip(1)
+        .chain(xml.split("<rune ").skip(1))
+    {
         let head = &tag[..tag.find('>').expect("card tag end")];
-        let id: usize = attribute(head, "id").expect("card id").parse().expect("card id integer");
-        assert!(id < achievements.len() && achievements[id].is_none(), "invalid authored card id");
-        achievements[id] = Some(attribute(head, "achievement")
-            .map_or(-1, |value| value.parse::<i32>().expect("card achievement integer")));
+        let id: usize = attribute(head, "id")
+            .expect("card id")
+            .parse()
+            .expect("card id integer");
+        assert!(
+            id < achievements.len() && achievements[id].is_none(),
+            "invalid authored card id"
+        );
+        achievements[id] = Some(attribute(head, "achievement").map_or(-1, |value| {
+            value.parse::<i32>().expect("card achievement integer")
+        }));
     }
-    assert!(achievements.iter().all(Option::is_some), "incomplete authored card catalogue");
+    assert!(
+        achievements.iter().all(Option::is_some),
+        "incomplete authored card catalogue"
+    );
     let values: Vec<_> = achievements.into_iter().map(Option::unwrap).collect();
     format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\n")
 }
