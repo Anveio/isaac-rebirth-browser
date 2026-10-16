@@ -100,7 +100,12 @@ export interface BootLifecycle {
   shared: MtState; savedPlayerSeed: number; savedGridSeedSamples: GridSeedSample[];
   levelGridSeedSamples: GridSeedSample[]; backdropSeed: number; menuRunSeed: number; menuSeedText: string; secretPoses: number[];
 }
+export interface AcquisitionHistory {
+  firstRecords: Record<string, {sourceUpdateWord: number; sourceStageWord: number;
+    sourceStageType: number; sourceRoomTypeWord: number; sourcePoolWord488: number} | null>;
+}
 export interface SavedRunSummary {
+  acquisitionHistory?: AcquisitionHistory;
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
@@ -312,6 +317,7 @@ export interface State {
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
