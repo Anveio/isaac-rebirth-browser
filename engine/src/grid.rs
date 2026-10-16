@@ -179,7 +179,9 @@ pub fn for_room(
                 // Raw1500 poop: its factory's local RNG35 Int(40) keeps the
                 // ordinary variant0 unless it draws 0 (corn, golden and
                 // rainbow rolls are not admitted).
-                1500 if crate::room_spawns::next35(spawn.spawn_seed) % 40 != 0 => Some((14, 0, 0, 3)),
+                1500 if !crate::room_spawns::next35(spawn.spawn_seed).is_multiple_of(40) => {
+                    Some((14, 0, 0, 3))
+                }
                 _ => None,
             };
             if let Some((kind, variant, state, collision_class)) = admitted {

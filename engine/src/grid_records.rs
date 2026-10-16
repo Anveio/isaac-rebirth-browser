@@ -478,7 +478,11 @@ pub(crate) fn advance_tnt(state: &mut crate::State, phase: crate::phase::Phase) 
     let Some(grid) = state.room.grid.as_mut() else {
         return;
     };
-    for entity in grid.cells.iter_mut().filter_map(|cell| cell.entity.as_mut()) {
+    for entity in grid
+        .cells
+        .iter_mut()
+        .filter_map(|cell| cell.entity.as_mut())
+    {
         if entity.kind == 12 {
             entity.collision_class = if entity.state < 4 { 2 } else { 0 };
         }
