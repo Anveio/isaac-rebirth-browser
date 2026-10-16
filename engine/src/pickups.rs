@@ -958,9 +958,12 @@ pub(crate) fn bomb_hit(
     let current_actors = state.actor_scheduler.full_phase();
     for index in 0..candidate_count {
         let id = state.room.pickups[index].id;
-        let actor = crate::actors::ActorRef { kind: crate::actors::ActorKind::Pickup, id };
-        let current_owner = current_actors.contains(&actor)
-            && state.actor_scheduler.sequence_id(actor).is_some();
+        let actor = crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id,
+        };
+        let current_owner =
+            current_actors.contains(&actor) && state.actor_scheduler.sequence_id(actor).is_some();
         let pickup = &mut state.room.pickups[index];
         let bomb_chest = pickup.variant == 51 && pickup.chest.is_some();
         //Appear has source entity class0; Collect has dead31f. Admitted
@@ -981,11 +984,16 @@ pub(crate) fn bomb_hit(
             }
             // Fresh51's current geometry is authored12/mass3/class5. Missing
             // current manager or other legacy geometry remains local unknown.
-            if !current_owner || !pickup.position.is_finite() || !pickup.velocity.is_finite()
-                || pickup.collision_radius != 12.0 || pickup.collision_mass != 3.0
+            if !current_owner
+                || !pickup.position.is_finite()
+                || !pickup.velocity.is_finite()
+                || pickup.collision_radius != 12.0
+                || pickup.collision_mass != 3.0
                 || chest.grid_collision_class != 5
             {
-                chest.open_frontier.get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
+                chest
+                    .open_frontier
+                    .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
                 continue;
             }
         }
@@ -997,7 +1005,11 @@ pub(crate) fn bomb_hit(
         let radius = blast_radius + pickup.collision_radius;
         if !squared.is_finite() || !radius.is_finite() {
             if bomb_chest {
-                pickup.chest.as_mut().expect("Bomb Chest").open_frontier
+                pickup
+                    .chest
+                    .as_mut()
+                    .expect("Bomb Chest")
+                    .open_frontier
                     .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
                 continue;
             }
@@ -1020,7 +1032,11 @@ pub(crate) fn bomb_hit(
             pickup.velocity = pickup.velocity * 0.5 + radial;
             if !pickup.velocity.is_finite() {
                 if bomb_chest {
-                    pickup.chest.as_mut().expect("Bomb Chest").open_frontier
+                    pickup
+                        .chest
+                        .as_mut()
+                        .expect("Bomb Chest")
+                        .open_frontier
                         .get_or_insert(crate::chests::OpenFrontier::ExplosionGeometry);
                     continue;
                 }
