@@ -46,6 +46,22 @@ impl ShotSpeedInputs {
     pub(crate) const NEUTRAL: Self = Self { source_d38: 0 };
 }
 
+/// Actual Player+D30, independent of collectible counts and cached C88.
+/// Fresh519662 owns zero; an untracked writer leaves this input unknown.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DamageInputs {
+    pub source_d30: i32,
+}
+
+impl DamageInputs {
+    /// Actual signed ADD/LEA producer law. Call only for an already owned
+    /// input after its source event/RNG plan supplies the delta; never heal None.
+    pub fn apply_signed_delta(&mut self, delta: i32) {
+        self.source_d30 = self.source_d30.wrapping_add(delta);
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -75,6 +91,8 @@ pub struct PlayerItems {
     pub temporary_collectibles: Vec<TemporaryCollectible>,
     #[serde(default)]
     pub luck_inputs: Option<LuckInputs>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub damage_inputs: Option<DamageInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shot_speed_inputs: Option<ShotSpeedInputs>,
     ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
@@ -145,6 +163,8 @@ impl PlayerItems {
                 source_13d0: 0,
             }),
             shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
+            // Actual519662, not a default reconstructed from inventory.
+            damage_inputs: Some(DamageInputs { source_d30: 0 }),
             trinket_slots: [0; 2],
             queued_id: None,
             queued_charge: 0,
@@ -577,6 +597,22 @@ pub(crate) fn add_collectible(
         .as_mut()
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
+    //Actual Add48's selected default/common path preserves D30.
+    //This word's proof is independent of D38 and every cache role.
+    let keep_cupid_damage = id == 48
+        && normal_isaac
+        && crate::item_pipeline::ItemInputs::new(owner)
+            .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
+    // These actual Add routes preserve D30, independently of their cache,
+    // getter and caller permissions. Unmapped240/258 and other routes lose
+    // the existing owner; later counts/cache work cannot recreate it.
+    if !matches!(
+        id,
+        1 | 2 | 3 | 4 | 6 | 12 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
+    ) && !keep_cupid_damage
+    {
+        owner.damage_inputs = None;
+    }
     //Actual Add48's selected default/common path preserves D38.
     //This word's proof is independent of Luck and every cache role.
     let keep_cupid_shot_speed = id == 48

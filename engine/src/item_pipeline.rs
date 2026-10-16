@@ -972,6 +972,9 @@ enum DamageOperator {
     Polyphemus {
         mode: PolyphemusDamageMode,
     },
+    PersistentAdditive {
+        source_d30: Option<i32>,
+    },
     MinimumBound,
     Technology2 {
         enabled: bool,
@@ -996,7 +999,7 @@ impl DamageOperator {
             }
             Self::Technology2 { .. } => id == 152,
             Self::SoyMilk { .. } => id == 330,
-            Self::MinimumBound => false,
+            Self::PersistentAdditive { .. } | Self::MinimumBound => false,
         }
     }
 
@@ -1022,6 +1025,14 @@ impl DamageOperator {
                     damage
                 }
             },
+            Self::PersistentAdditive { source_d30 } => {
+                //5138EA/5138F2: signed CVTSI2SS then ADDSS after the
+                //selected character/item terms, before the first bound.
+                if let Some(value) = source_d30 {
+                    damage += value as f32;
+                }
+                damage
+            }
             Self::MinimumBound => damage.max(0.5_f32),
             Self::Technology2 { enabled } => {
                 if enabled {
@@ -1052,7 +1063,7 @@ impl DamageOperator {
 ///values are still evaluated for unknown contexts; only completion is withheld.
 ///No item pair or other callback's permission can supply a missing read owner.
 struct DamagePlan {
-    operators: [DamageOperator; 7],
+    operators: [DamageOperator; 8],
     reads_admitted: bool,
 }
 
@@ -1072,6 +1083,9 @@ impl DamagePlan {
             },
             DamageOperator::Polyphemus {
                 mode: polyphemus_mode,
+            },
+            DamageOperator::PersistentAdditive {
+                source_d30: inputs.owner.damage_inputs.map(|input| input.source_d30),
             },
             DamageOperator::MinimumBound,
             DamageOperator::Technology2 {
@@ -1096,7 +1110,8 @@ impl DamagePlan {
             && inputs.owned_count(152) == 0
             && inputs.owned_count(169) == 0
             && inputs.admits_scalar_stage(CacheStage::Damage, DamageStage::EFFECT_ITEMS);
-        let reads_admitted = inputs.admits_scalar_context()
+        let reads_admitted = inputs.owner.damage_inputs.is_some()
+            && inputs.admits_scalar_context()
             && inputs
                 .owner
                 .owned_counts
