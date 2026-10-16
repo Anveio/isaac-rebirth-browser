@@ -70,6 +70,26 @@ impl RunAdmission {
         }
     }
 
+    /// A controlled harness declares how long the original ran before the
+    /// state this reset represents. The shipped game passes host timestamps
+    /// instead and never sets it. Only a fresh, unadvanced clock accepts it.
+    pub fn set_boot_elapsed(
+        &mut self,
+        epoch_seconds: u32,
+        milliseconds: u32,
+        sub_millisecond_nanoseconds: u32,
+    ) -> Result<(), String> {
+        if sub_millisecond_nanoseconds >= 1_000_000 {
+            return Err("boot elapsed sub-millisecond part must be below 1ms".into());
+        }
+        if self.clock != WallClock::new(epoch_seconds) || self.requested_time_anchor_ms.is_some() {
+            return Err("boot elapsed time applies only to a fresh reset clock".into());
+        }
+        self.clock.milliseconds += i64::from(milliseconds);
+        self.clock.sub_millisecond_nanoseconds = sub_millisecond_nanoseconds;
+        Ok(())
+    }
+
     pub fn confirm_menu_request(&mut self) {
         self.requested_time_anchor_ms = Some(self.clock.milliseconds);
     }

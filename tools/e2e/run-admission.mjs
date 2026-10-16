@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA } from './lib/original.mjs';
@@ -92,7 +92,8 @@ try {
       page = await browser.newPage({viewport: {width: 960, height: 540}});
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(c => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed}); }, c);
+      const bootElapsed = resetBootElapsed(c.tape);
+      await page.evaluate(({c, bootElapsed}) => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed, bootElapsed}); }, {c, bootElapsed});
       const deliver = async command => {
         if (command.type === 'tick') await step(page, command.count);
         else if (command.type === 'key') await page.keyboard[command.down ? 'down' : 'up'](command.code);
@@ -127,6 +128,7 @@ try {
           const sourceNow = c.bootEpochSeed * 1000 + Math.floor(original.context.virtualElapsedNs / 1e6);
           check(label, 'own-relative-request-clock-ms', actual.clock.milliseconds - actual.requestedTimeAnchorMs,
             sourceNow - source.requestedTimeAnchorMs);
+          check(label, 'request-anchor-ms', actual.requestedTimeAnchorMs, source.requestedTimeAnchorMs);
         }
         if (source.systemState === 2 && state.screen === 'playing') {
           check(label, 'initial-fade-f32', Math.fround(actual.initialFade), Math.fround(source.initialFade));
@@ -145,8 +147,8 @@ try {
         backendEvents: trace.backendEvents.length};
       result.browserEvidence = await writeBrowserEvidence(join(directory, 'browser-states.json.gz'), {states, trace, expectedCommands});
       assertInputProvenance(trace, expectedCommands, c.runSeed, c.bootEpochSeed);
-      assert.deepEqual(trace.clockInput, {initialTimestampMillis: c.bootEpochSeed * 1000,
-        initialSubMillisecondNanoseconds: 0, presentationIntervalNanoseconds: 16_667_000});
+      assert.deepEqual(trace.clockInput, {initialTimestampMillis: c.bootEpochSeed * 1000 + bootElapsed.milliseconds,
+        initialSubMillisecondNanoseconds: bootElapsed.subMillisecondNanoseconds, presentationIntervalNanoseconds: 16_667_000});
       assert.equal(trace.backendStateTruncated, false);
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1));
       assert.deepEqual(errors, []);

@@ -13,6 +13,7 @@ import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { startProductionServer } from './production-server.mjs';
+import { resetBootElapsed } from './verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -115,10 +116,10 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed, mtDraws }) => {
-      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true });
+    await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed, mtDraws }) => {
+      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true });
       if (mtDraws) window.game.mtDraws.enable();
-    }, { ...caseData, mtDraws });
+    }, { ...caseData, bootElapsed: resetBootElapsed(caseData.tape), mtDraws });
     let presentations = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {

@@ -825,6 +825,21 @@ impl Game {
     pub fn new(initial_seed: u32) -> Result<Self, String> {
         Self::new_with_boot_epoch(initial_seed, 0)
     }
+    /// See `RunAdmission::set_boot_elapsed`; valid only before any command.
+    pub fn set_boot_elapsed(
+        &mut self,
+        milliseconds: u32,
+        sub_millisecond_nanoseconds: u32,
+    ) -> Result<(), String> {
+        if self.state.tick != 0 {
+            return Err("boot elapsed time must be declared before any command".into());
+        }
+        self.state.run_admission.set_boot_elapsed(
+            self.state.boot_epoch_seed,
+            milliseconds,
+            sub_millisecond_nanoseconds,
+        )
+    }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         Self::new_with_challenges(
             initial_seed,
@@ -4262,6 +4277,25 @@ thread_local! {
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
         serde_json::to_vec(&input::PUBLIC_KEYS).expect("key codes serialize");
+}
+///Additive: a controlled harness's declared boot elapsed time, set right after
+///reset and before any command.
+#[no_mangle]
+pub extern "C" fn set_boot_elapsed(milliseconds: u32, sub_millisecond_nanoseconds: u32) -> u32 {
+    let result = GAME.with(|state| match state.borrow_mut().as_mut() {
+        Some(game) => game.set_boot_elapsed(milliseconds, sub_millisecond_nanoseconds),
+        None => Err("boot elapsed time requires a reset game".into()),
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {

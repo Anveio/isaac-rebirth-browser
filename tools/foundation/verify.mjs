@@ -64,9 +64,32 @@ export async function waitForReady(page) {
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
 
+// foundation-clock-run.py presents this many loader frames before replaying a
+// declared tape (its `step 30` bootstrap).
+export const NATIVE_LOADER_PRESENTATIONS = 30;
+// The browser resets at the original's first rendered Title; the Title settles
+// this many presentations later, before the first menu press.
+export const TITLE_SETTLE_TICKS = 63;
+export const PRESENTATION_NS = 16_667_000;
+
+// The original's wall clock has advanced through every native presentation
+// before the browser reset: its loader frames and the declared tape up to the
+// first menu press (the press after the intro skip), less the Title settle the
+// browser still replays. Derived from the case's declared tape, never fitted.
+export function resetBootElapsed(nativeTape) {
+  assert.ok(Array.isArray(nativeTape), "Boot clock derivation requires the declared native tape");
+  const presses = nativeTape.flatMap((action, index) => action.type === "key" && action.down ? [index] : []);
+  assert.ok(presses.length >= 2, "Declared native tape must skip the intro and then press a Title menu key");
+  const frames = nativeTape.slice(0, presses[1]).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
+  const presentations = NATIVE_LOADER_PRESENTATIONS + frames - TITLE_SETTLE_TICKS;
+  assert.ok(Number.isSafeInteger(presentations) && presentations >= 0, "Declared tape reaches the Title before the browser reset");
+  const nanoseconds = presentations * PRESENTATION_NS;
+  return { milliseconds: Math.floor(nanoseconds / 1e6), subMillisecondNanoseconds: nanoseconds % 1e6 };
+}
+
 // The requested setup is independent of the observed trace and browser screen.
 export function manualSeedCommands(seedText) {
-  const commands = [{ type: "tick", count: 63 }];
+  const commands = [{ type: "tick", count: TITLE_SETTLE_TICKS }];
   const press = (code, settle) => commands.push({ type: "key", code, down: true }, { type: "tick", count: 12 },
     { type: "key", code, down: false }, { type: "tick", count: settle });
   for (let index = 0; index < 3; index++) press("Enter", 72);
@@ -269,7 +292,7 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayBuilt = false;
-export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = []) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootElapsed = undefined) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayBuilt) {
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
@@ -288,7 +311,7 @@ export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEv
     if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
   }
   assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, ...(bootElapsed && { bootElapsed }), commands: timeline }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
