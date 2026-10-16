@@ -171,6 +171,17 @@ pub fn for_room(
                 // Pit3000 Init568990 collides as class1; its autotile frame is
                 // linked after admission by `link_pits`.
                 3000 => Some((7, 0, 0, 1)),
+                // Factory5ce6b0: raw1001 is the bomb rock kind5 directly.
+                1001 => Some((5, rock_frame, 1, 3)),
+                // Raw1300 TNT kind12: Init leaves class0 (the first Update
+                // writes class2 while intact).
+                1300 => Some((12, 0, 0, 0)),
+                // Raw1500 poop: its factory's local RNG35 Int(40) keeps the
+                // ordinary variant0 unless it draws 0 (corn, golden and
+                // rainbow rolls are not admitted).
+                1500 if !crate::room_spawns::next35(spawn.spawn_seed).is_multiple_of(40) => {
+                    Some((14, 0, 0, 3))
+                }
                 _ => None,
             };
             if let Some((kind, variant, state, collision_class)) = admitted {

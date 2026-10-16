@@ -34,8 +34,8 @@ codec = entity.codec
 
 def specs():
     script = ("import { entitySpecs } from './tools/e2e/entities.mjs';"
-              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, count, contrived, boss, shop }) =>"
-              " ({ name, type, variant, shape, roomType, count, contrived, boss: Boolean(boss), shop: Boolean(shop) }))));")
+              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, gridType, count, contrived, boss, shop }) =>"
+              " ({ name, type, variant, shape, roomType, gridType, count, contrived, boss: Boolean(boss), shop: Boolean(shop) }))));")
     return json.loads(subprocess.run(['node', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
 
 
@@ -65,9 +65,9 @@ def room_cases(room_specs, attempts):
     for (code, slot, room_shape), named in routes.items():
         floor = entity.floor(codec.decode_seed(code))
         for spec in named:
-            if slot not in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType'))):
+            if slot not in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType'), spec.get('gridType'))):
                 failures.append({'spec': spec['name'], 'error': f'Contrived {code} slot {slot} does not admit {identity(spec)} in a {room_shape[0]}x{room_shape[1]} room'})
-        admitted = [spec for spec in named if slot in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType')))]
+        admitted = [spec for spec in named if slot in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType'), spec.get('gridType')))]
         if admitted:
             names = [spec['name'] for spec in admitted]
             cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), {'entropy': 'contrived spec seed'}, False, room_shape),
@@ -90,7 +90,7 @@ def room_cases(room_specs, attempts):
             if not remaining:
                 continue
             spec = by_name[name]
-            for slot, descriptor in entity.admitting_slots(floor, identity(spec), shape(spec), spec.get('roomType')):
+            for slot, descriptor in entity.admitting_slots(floor, identity(spec), shape(spec), spec.get('roomType'), spec.get('gridType')):
                 groups.setdefault((slot, shape(spec)), (descriptor, []))[1].append(spec)
         chosen, taken = {}, set()
         for key, (descriptor, admitted) in sorted(groups.items(), key=lambda item: (-len(item[1][1]), item[0][0])):

@@ -43,6 +43,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 mod epic_fetus;
+mod experimental_treatment;
 mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
@@ -74,6 +75,7 @@ mod inner_eye;
 pub mod input;
 mod item_death_effects;
 mod item_pipeline;
+mod item_queries;
 pub mod items;
 pub mod keepers;
 mod knife_path;
@@ -96,8 +98,10 @@ pub mod mt;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
+pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod phase;
+pub mod pickup_world_grants;
 pub mod pickups;
 mod plain_npc;
 pub mod player_animation;
@@ -515,6 +519,9 @@ pub struct RunStartRequest {
     pub system_pending: bool,
     ///594620 actual challenge argument; None is the existing New Run route.
     pub challenge_id: Option<u32>,
+    ///593470 retains the chosen loading texture independently of later seed changes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub loading_image_index: Option<u8>,
 }
 impl MenuFade {
     fn first_title() -> Self {
@@ -655,6 +662,14 @@ pub struct State {
     /// Unknown old Game history stays absent; ID0 skips the Config9C read.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_shot_speed_minimum: Option<bool>,
+    ///Actual normal-variant513D60/596170 Config9A maxdamage predicate.
+    ///An absent legacy Game owner never means a false predicate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_damage_maximum: Option<bool>,
+    ///Actual normal-variant512787/596170 Config9B minfirerate predicate.
+    ///Missing legacy Game ownership remains unknown independently of9A/9C.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_fire_delay_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -890,6 +905,8 @@ impl Game {
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
                 source_shot_speed_minimum: None,
+                source_damage_maximum: None,
+                source_fire_delay_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1520,6 +1537,10 @@ impl Game {
             .challenge_id
             .map(|id| self.challenge_catalog.get(id).cloned())
             .transpose()?;
+        //A newly selected Game key invalidates the previous predicate even
+        //if validation rejects this start before the new run is initialized.
+        self.state.source_damage_maximum = None;
+        self.state.source_fire_delay_minimum = None;
         self.state.challenge_id = challenge.as_ref().map_or(0, |definition| definition.id);
         self.state.challenge_run_parameters = challenge
             .as_ref()
@@ -1552,6 +1573,12 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
+        //Fresh59D080 constructs an empty Challenge code, then uses
+        //5E1170's9B formatter before forwarding the actual setter.
+        //Restart, typed and legacy paths have separate input owners.
+        if self.state.screen == Screen::Challenge && challenge.is_some() {
+            run_seeds.admit_formatted_seed_effect()?;
+        }
         self.state.item_pools = Some(items::ItemPools::new(
             run_seeds.item_pool_seed(),
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
@@ -1601,6 +1628,20 @@ impl Game {
             challenge
                 .as_ref()
                 .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
+        //54EB55/513D60: key0 bypasses Config9A; a real challenge uses its
+        //own decoded maxdamage flag, independently of ShotSpeed's Config9C.
+        self.state.source_damage_maximum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.max_damage),
+        );
+        //512787/515434: key0 bypasses Config9B; otherwise the selected
+        //definition owns minfirerate independently of maxdamage/minshotspeed.
+        self.state.source_fire_delay_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_fire_rate),
         );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
@@ -1739,6 +1780,9 @@ impl Game {
                 self.state.room.authored_actor_order.len()
             ));
         }
+        //5BF220 reaches510550 after actual Room.Init. Fresh3074 is
+        //still false here, independently of the later starting grants.
+        item_queries::note_room_placement(&mut self.state);
         npcs::initialize_startup_clear(&mut self.state);
         // Source Level generation loads the start room, then immediately calls
         // RoomMusic. This runtime's Level contract is fresh normal Basement.
@@ -1947,6 +1991,8 @@ impl Game {
         critter_counter: u32,
         loader: bool,
     ) -> Result<usize, String> {
+        //453EC0 finished its ordinary-list reset and callbacks.
+        ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
         let mut order = Vec::new();
@@ -2022,12 +2068,23 @@ impl Game {
                 selector,
                 self.state.game_update_count,
             )?;
+            ordinary_placement::remember_room_frontier(&mut self.state);
             let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
             if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                //Registered AI is not a proof of its producer footprint.
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::ActorEffects {
+                        actor: actors::ActorRef {
+                            kind: actors::ActorKind::Npc,
+                            id,
+                        },
+                    },
+                );
                 champions::roll(
                     &mut npc,
                     &mut self.state.boot_lifecycle.shared,
@@ -2093,6 +2150,18 @@ impl Game {
                     pickups.push(pickup);
                 }
             }
+            if selector.category == room_spawns::SpawnCategory::Entity
+                && order.len() == before_entities
+            {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: u32::from(selector.entity_type),
+                        variant: u32::from(selector.variant),
+                        subtype: u32::from(selector.subtype),
+                    },
+                );
+            }
             // SpawnEntity5ce7a8..7d3 calls5c57c0 with the selected type,
             // variant, edx=0,cl=0 after successful Game.Spawn. For this
             // authored entity domain1..999, exactly4..6,17,33 persist.
@@ -2102,6 +2171,9 @@ impl Game {
                 && matches!(selector.entity_type, 4..=6 | 17 | 33)
             {
                 if order.len() == before_entities {
+                    if selector.entity_type == 5 && selector.variant == 350 {
+                        crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
+                    }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
                     // the missing success/key owner and must stop there.
@@ -2173,6 +2245,22 @@ impl Game {
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
         self.state.room.complete_initialization();
+        // Room.Init 5cf628: the first visit to a boss room slams its
+        // portcullis (SFX 190, 5d0687) after the grid records; 5d0690 then
+        // rejoins 5cf64f ahead of the ambient critters.
+        if !loader && room_type == 5 {
+            self.state.audio.admit(
+                &mut self.state.boot_lifecycle.shared,
+                self.state.system_clock.system_counter.wrapping_sub(1),
+                audio::SoundRequest {
+                    id: 190,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+        }
         // First-visit ambient critters close Room.Init5cf64f inside this full
         // update, after the selector entities took their manager sequences.
         critters::spawn(&mut self.state, critter_counter, loader)?;
@@ -2416,6 +2504,10 @@ impl Game {
                     .as_ref()
                     .is_none_or(|items| items.held_pockets.is_none())
             {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::PocketEffects,
+                );
                 self.state.attack_runtime.aim_rotation_c70 = None;
                 if let Some(items) = &mut self.state.player_items {
                     //Untracked pill/card execution cannot retain speed history.
@@ -2456,6 +2548,13 @@ impl Game {
                 request.input_pending = false;
                 request.fading = true;
                 self.state.music.crossfade(95);
+                //59B14B..172 passes the current menu seed to593470 only once.
+                //Its zero fallback stores the raw seed, without encoding a code.
+                let boot = &mut self.state.boot_lifecycle;
+                if boot.menu_run_seed == 0 {
+                    boot.menu_run_seed = boot.shared.next_u32().max(1);
+                }
+                request.loading_image_index = Some((boot.menu_run_seed % 56 + 1) as u8);
                 self.state.run_admission.confirm_menu_request();
             }
         }
@@ -2606,7 +2705,13 @@ impl Game {
                 combat::advance_player_immunity(&mut self.state);
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
+                    //Saved4/5/6 replay/retirement needs its own full owner.
+                    ordinary_placement::invalidate(
+                        &mut self.state,
+                        ordinary_placement::Frontier::Restore,
+                    );
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
@@ -2656,27 +2761,7 @@ impl Game {
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
                     self.admit_room_pickups(&selectors, counter, false)?;
-                    // Room.Init 5cf628: the first visit to a boss room slams
-                    // its portcullis (SFX 190, 5d0687) after the grid records.
-                    let boss_room = self
-                        .state
-                        .room
-                        .descriptor
-                        .as_ref()
-                        .is_some_and(|descriptor| descriptor.template.room_type == 5);
-                    if boss_room {
-                        self.state.audio.admit(
-                            &mut self.state.boot_lifecycle.shared,
-                            self.state.system_clock.system_counter.wrapping_sub(1),
-                            audio::SoundRequest {
-                                id: 190,
-                                volume: 1.0,
-                                delay: 2,
-                                looping: false,
-                                pitch: 1.0,
-                            },
-                        );
-                    }
+                    item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
                     self.refresh_room_boss_count();
@@ -2799,9 +2884,11 @@ impl Game {
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
+        grid_records::advance_tnt(&mut self.state, phase);
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
+        ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
@@ -2912,8 +2999,10 @@ impl Game {
             }
             for index in 0..self.state.room.pickups.len() {
                 if self.state.room.pickups[index].variant == 100 {
-                    if !player_items::collect(&mut self.state, index)? {
-                        player_items::empty_altar_contact(&mut self.state, index)?;
+                    if player_items::collect(&mut self.state, index)?
+                        == player_items::CollectibleContact::Refused
+                    {
+                        player_items::altar_contact(&mut self.state, index)?;
                     }
                     continue;
                 }
@@ -3114,6 +3203,7 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.game_update_count,
         )?;
+        item_queries::note_room_placement(&mut self.state);
         // PlayerManager 5bf220 -> Player 510550 after Room.Init: a new level
         // has no enter door (Game+8198 is -1), so 510ac8..510b0e picks one.
         // The first door in slot order is taken; each later door draws
@@ -3688,6 +3778,24 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
+        let released_shoot = !(self.held("ArrowUp")
+            || self.held("ArrowDown")
+            || self.held("ArrowLeft")
+            || self.held("ArrowRight"));
+        let bomb_callback_owned = !bomb_triggered
+            || !controls_enabled
+            || !self.state.player.controls_enabled
+            || self.state.player.input_cooldown > 0
+            || self.state.inventory.bombs == 0
+            || self.state.bomb_placement_cooldown.remaining_updates > 0;
+        if let Some(frontier) = ordinary_placement::player_update_frontier(
+            &self.state,
+            phase == phase::Phase::Update,
+            !released_shoot,
+            bomb_callback_owned,
+        ) {
+            ordinary_placement::invalidate(&mut self.state, frontier);
+        }
         // Base main-sprite time advances before the Player death/shooting caller.
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
@@ -4110,6 +4218,9 @@ impl Game {
         if phase == phase::Phase::Update {
             player_footprints::advance(&mut self.state, footprint_velocity)?;
         }
+        //531E44 reaches deferred CF8 evaluation only on the full path,
+        //before531E6F copied-item animation and the later queued grant.
+        item_queries::reach_late_temporary_evaluation(&mut self.state, phase)?;
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);

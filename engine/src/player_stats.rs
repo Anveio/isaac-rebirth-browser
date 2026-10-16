@@ -71,6 +71,16 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         return Ok(());
     };
     let requested = item_pipeline::CacheMask(owner.unevaluated_cache_flags);
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
+        //A reached511F10 request owns the output write boundary.
+        //Missing inputs retain values but cannot retain field knowledge.
+        history.cached_callbacks &= !requested.0;
+    }
+    let owner = state.player_items.as_ref().expect("checked cache owner");
     let mut completed = 0;
     if let Some(source_type) = state.weapon_admission.source_player_type {
         let prior_primary = state.weapon_cache.primary;
@@ -81,6 +91,23 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             requested,
         )?;
         if requested.0 & 0x100 != 0 {
+            //511F29/33 executes the C08 writer before C18 cleanup.
+            //Only its actual permanent-read/source context establishes
+            //the retained field; stage100 completion remains separate.
+            let owner = state.player_items.as_mut().expect("checked cache owner");
+            let source_context = source_type == 0
+                && state
+                    .player
+                    .entity_source
+                    .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+                && owner
+                    .held_pockets
+                    .as_ref()
+                    .is_some_and(|held| held.frontier.is_none());
+            let history = owner
+                .query_history
+                .get_or_insert(crate::item_queries::ItemQueryHistory::UNKNOWN);
+            history.primary_c08 = source_context && history.permanent_counts;
             if crate::attack_runtime::complete_primary_cleanup(state, prior_primary)? {
                 completed |= 0x100;
             } else if state.weapon_cache.primary != prior_primary {
@@ -99,6 +126,13 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     //511F39 expands the actual request word after requested C08 selection.
     //Keep the owner word synchronized before its mutable Familiar callback.
     let requested = item_pipeline::expand_libra_requests(inputs, requested);
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
+        history.cached_callbacks &= !(requested.0 & !0x100);
+    }
     state
         .player_items
         .as_mut()
@@ -115,16 +149,30 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             max_fire_delay: state.max_fire_delay,
         },
         requested,
-        state.player.entity_source,
-        state.source_shot_speed_minimum,
+        crate::item_queries::AppearanceQueries::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
+        item_pipeline::CacheSourceInputs {
+            entity: state.player.entity_source,
+            challenge_id: state.challenge_id,
+            damage_maximum: state.source_damage_maximum,
+            shot_speed_minimum: state.source_shot_speed_minimum,
+        },
     )?;
     state.player_stats = resolved.values.stats;
     state.max_fire_delay = resolved.values.max_fire_delay;
     let (cache, appearance) = crate::weapon_plan::resolve_appearance(
-        inputs,
-        state.weapon_admission.source_player_type,
         state.weapon_cache,
         requested,
+        crate::item_queries::AppearanceQueries::new(
+            state.player_items.as_ref().expect("checked cache owner"),
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        ),
     );
     state.weapon_cache = cache;
     completed |= appearance.0;
@@ -137,6 +185,21 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             state.player.flying = Some(flying);
             state.player.grid_collision_class = Some(grid_class);
             completed |= 128;
+        }
+    }
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
+        //These actual resolved writes establish only their output fields;
+        //they do not repair unknown query stores or other callbacks.
+        //The exclusive Flags plan proves every reached query itself;
+        //unknown facts that it did not read cannot veto this actual write.
+        history.cached_callbacks |= appearance.0 & (32 | 64);
+        if history.permanent_counts && history.temporary_records && history.trinket_slots {
+            history.cached_callbacks |=
+                appearance.0 | (requested.0 & !resolved.pending(requested).0);
         }
     }
     if requested.0 & 512 != 0 {
@@ -167,6 +230,15 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             completed |= 1024;
         }
     }
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
+        if history.permanent_counts && history.temporary_records && history.trinket_slots {
+            history.cached_callbacks |= completed & !0x100;
+        }
+    }
     //5121EF reads Have304 again after Familiar/Luck, then couples actual
     //current fields; it never rebuilds unrequested fields from inventory.
     let final_scalars = item_pipeline::finalize_scalars(
@@ -183,6 +255,16 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         item_pipeline::CacheMask(resolved.pending(requested).0 & !completed),
     )
     .0;
+    if let Some(history) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+    {
+        //Each plan owns its actual reached queries. Unread unknown domains
+        //do not veto its result. A still-pending Libra group independently
+        //withholds knowledge of any coupled final output.
+        history.cached_callbacks |= resolved.reached_completed.0 & !pending;
+    }
     let tail_admitted = state.weapon_admission.source_player_type == Some(0)
         && state.weapon_admission.pending_primary_cleanup.is_none()
         && state.player.transformation_counts == Some([0, 0])

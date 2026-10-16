@@ -36,7 +36,9 @@ const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `re
 // Browser manifests and traces are gzipped losslessly as they are written
 // (~250 MB raw per case); the comparators read either form.
 const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
-  productionDirectory: flag('--production-directory'), nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
+  productionDirectory: flag('--production-directory'),
+  reuseOriginalDirectory: flag('--reuse-original'),
+  nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
   archiveBrowserEvidence: true })
   : { status: 'fail', cases: [] };
 

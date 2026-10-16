@@ -161,9 +161,19 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
             }
         });
     }
+    if let Some(coverage) = &mut state.room.ordinary_placement {
+        coverage.invalidate(crate::ordinary_placement::Frontier::PocketEffects);
+    }
+    crate::ordinary_placement::remember_owner(
+        owner,
+        crate::ordinary_placement::Frontier::PocketEffects,
+    );
     //An existing frontier contains historical records, not known-empty
     //current slots. Preserve it, but never retain new input ownership on a
     //later admitted request whose actual effect may still be unknown.
+    if let Some(history) = &mut owner.query_history {
+        history.forget_unowned_effect();
+    }
     state.attack_runtime.aim_rotation_c70 = None;
     owner.move_speed_inputs = None;
 }
@@ -257,6 +267,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
         )?
         .ok_or("capacity ejection reached an unowned Pocket Init")?;
         dropped.birth_game_update = state.game_update_count;
+        //50AE90/50AF90 passes null to Game.Spawn, not weak498.
+        dropped.source_spawner = Some(crate::pickups::SourceSpawner {
+            entity_type: 0,
+            variant: 0,
+        });
         dropped.pocket_contact_delay = Some(4);
         state.next_pickup = id
             .checked_add(1)
