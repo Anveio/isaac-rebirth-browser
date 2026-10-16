@@ -37,6 +37,7 @@ pub struct Chest {
 pub enum OpenFrontier {
     PlayerContext,
     CollectibleMorph,
+    ExplosionGeometry,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -302,6 +303,44 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     if state.player.golden_key == Some(false) && state.inventory.keys == 0 {
         return Ok(false);
     }
+    open_bounded_chest(state, index)
+}
+
+/// Pickup.Hurt504240 has its own positive damage/flags4/variant51/subtype
+/// gates. Its source return is false even after the real opening side effect.
+/// The selected empty normal context closes TryOpen independently of key use.
+pub(crate) fn hurt_bomb_chest(
+    state: &mut State, index: usize, damage: f32, damage_flags: u32,
+) -> Result<bool, String> {
+    let pickup = &state.room.pickups[index];
+    if damage <= 0.0 || damage_flags & 4 == 0 || pickup.variant != 51 || pickup.subtype == 0 {
+        return Ok(false);
+    }
+    if !damage.is_finite() {
+        state.room.pickups[index].chest.as_mut().expect("Bomb Chest")
+            .open_frontier.get_or_insert(OpenFrontier::ExplosionGeometry);
+        return Ok(false);
+    }
+    if !locked_context(state) {
+        state.room.pickups[index].chest.as_mut().expect("Bomb Chest")
+            .open_frontier.get_or_insert(OpenFrontier::PlayerContext);
+        return Ok(false);
+    }
+    let _opened = open_bounded_chest(state, index)?;
+    // BFC11/17's extra room callback is outside the selected normalBFC0 path.
+    Ok(false)
+}
+
+/// Actual51 and60 converge at5010F0. Share the existing R5/pool8/Morph and
+/// non-Morph operations; key consumption and SFX156 belong only to60's caller.
+fn open_bounded_chest(state: &mut State, index: usize) -> Result<bool, String> {
+    let pickup = &state.room.pickups[index];
+    let Some(chest) = pickup.chest.as_ref() else { return Ok(false) };
+    let spend_key = match pickup.variant {
+        51 => false,
+        60 => true,
+        _ => return Err("bounded Chest opening requires actual51/60".into()),
+    };
     let position = pickup.position;
     let mut rng = chest.rng;
     // Capability inspection only. Missing optional weak/pool/manager owners
@@ -338,7 +377,7 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     )?;
     // 5052E1 precedes TryOpen. Golden BD0 uses the same actual key API and
     // never decrements BCC; missing owner was rejected above, not defaulted.
-    if !state.player.try_use_key(&mut state.inventory) {
+    if spend_key && !state.player.try_use_key(&mut state.inventory) {
         return Ok(false);
     }
     let pickup = &mut state.room.pickups[index];
@@ -347,8 +386,9 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     pickup.animation_frame = 0.0;
     pickup.animation_playing = true;
     pickup.can_collect = false;
-    // 501078 SFX22, then locked-only501576 SFX156, both before local R5.
-    for id in [22, 156] {
+    // 501078 SFX22 for both; only actual variant60 reaches501576 SFX156.
+    let sounds: &[u32] = if spend_key { &[22, 156] } else { &[22] };
+    for &id in sounds {
         state.audio.admit(
             &mut state.boot_lifecycle.shared,
             state.system_clock.system_counter.wrapping_sub(1),
@@ -424,7 +464,7 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     Ok(true)
 }
 
-/// Actual locked60 non-Morph branch. PersistentRNG30, shared scatter and
+/// Actual51/60 non-Morph branch. PersistentRNG30, shared scatter and
 /// immediate child callbacks keep their independent native ordering.
 fn locked_opening_loot(
     rng: &mut Rng,
@@ -545,7 +585,7 @@ fn admit_child(
 pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
     let pickup = &state.room.pickups[index];
     if state.player.dead
-        || !matches!(pickup.variant, 50 | 60)
+        || !matches!(pickup.variant, 50 | 51 | 60)
         || pickup.removed
         || pickup
             .chest
@@ -684,21 +724,53 @@ pub(crate) fn from_selector(
     selector: &SpawnSelector,
     appear: bool,
 ) -> Result<Option<Pickup>, String> {
-    if selector.entity_type != 5 || selector.variant != 50 {
+    from_selector_with_bomb_replacement(id, selector, appear, false)
+}
+
+/// The real50 ->51 replacement still passes LeftHand508FE0 at4FFF1E.
+/// Existing callers without this operand owner keep their prior frontier;
+/// direct51 never reaches that query. No missing trinket history becomes0.
+pub(crate) fn from_source_selector(
+    id: u32, selector: &SpawnSelector, appear: bool, state: &State,
+) -> Result<Option<Pickup>, String> {
+    let no_left_hand = state.player.entity_source.is_some_and(|source| {
+        source.entity_type == 1 && source.variant == 0
+    }) && state.player_items.as_ref().is_some_and(|items| {
+        items.trinket_slots == [0, 0] && items.queued_id.is_none()
+    });
+    from_selector_with_bomb_replacement(id, selector, appear, no_left_hand)
+}
+
+fn from_selector_with_bomb_replacement(
+    id: u32, selector: &SpawnSelector, appear: bool, no_left_hand: bool,
+) -> Result<Option<Pickup>, String> {
+    if selector.entity_type != 5 || !matches!(selector.variant, 50 | 51) {
         return Ok(None);
     }
     if selector.spawn_seed == 0 {
         return Err("chest spawn seed must be nonzero".into());
     }
-    // Pickup::Init4ffedd/50026a: Random20 is always first; the red Chest
-    // replacement bypasses the second Random50. Rare replacement callbacks
-    // remain unsupported actors with their original typed selector retained.
-    let mut temporary = Rng::new(selector.spawn_seed, [5, 9, 7]);
-    if temporary.bounded(20) == 0 || temporary.bounded(50) == 0 {
-        return Ok(None);
-    }
+    // Normal50 Init4ffedd/50026a: Random20 is first; the red Chest
+    // replacement bypasses the second Random50. Only360 keeps its separate
+    // unsupported actor; the actual51 replacement uses the canonical Init.
+    let variant = if selector.variant == 50 {
+        let mut temporary = Rng::new(selector.spawn_seed, [5, 9, 7]);
+        if temporary.bounded(20) == 0 {
+            // The real360 replacement keeps its own unimplemented owner.
+            return Ok(None);
+        }
+        if temporary.bounded(50) == 0 {
+            if !no_left_hand { return Ok(None) }
+            51
+        } else {
+            50
+        }
+    } else {
+        // Direct51 goes4FFEC3 ->4FFF38, with no R20/R50/LeftHand query.
+        51
+    };
     // Init4fff38 forces closed subtype1 even when the authored subtype is0.
-    let mut pickup = Pickup::spawn(id, 50, 1, selector.position, appear)?;
+    let mut pickup = Pickup::spawn(id, variant, 1, selector.position, appear)?;
     pickup.spawn_seed = selector.spawn_seed;
     pickup.chest = Some(Chest {
         rng: Rng::new(selector.spawn_seed, [4, 3, 17]),
@@ -709,6 +781,12 @@ pub(crate) fn from_selector(
         loot_births: Vec::new(),
         open_frontier: None,
     });
+    if variant == 51 {
+        // Same no-spawner BaseInit441F1F..35 and registration as fresh60.
+        pickup.morph_links = Some(crate::pickups::MorphLinks {
+            parent498: None, link4a0: None, link4a8: None,
+        });
+    }
     Ok(Some(pickup))
 }
 

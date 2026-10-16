@@ -1981,6 +1981,8 @@ impl Game {
                 // prices, pools and replacements are admitted.
                 let pickup = if selector.entity_type == 5 && selector.variant == 60 {
                     chests::from_locked_selector(next, selector, true, &self.state)?
+                } else if selector.entity_type == 5 && selector.variant == 50 {
+                    chests::from_source_selector(next, selector, true, &self.state)?
                 } else {
                     Pickup::from_selector(next, selector, true)?
                 };
