@@ -19,10 +19,18 @@ const counted = value => new Transform({ transform(chunk, _encoding, done) {
 
 export async function readNativeEvidence(manifestPath) {
   const evidence = JSON.parse(readFileSync(manifestPath + '.meta.json', 'utf8'));
-  assert.equal(evidence.schema, 1); assert.equal(evidence.encoding, 'gzip');
+  let manifestDecoders;
+  if (manifestPath.endsWith('.gz') && evidence.schema === 1 && evidence.encoding === 'gzip') {
+    manifestDecoders = [createGunzip()];
+  } else {
+    assert.ok(manifestPath.endsWith('.zst') && evidence.schema === 2 && evidence.encoding === 'zstd-stream-json', 'Unknown Native manifest format');
+    assert.equal(evidence.windowLog, 23); assert.equal(evidence.checksum, true);
+    const { nativeJournalZstdDecoders } = await import('./native-journal-zstd.mjs');
+    manifestDecoders = nativeJournalZstdDecoders();
+  }
   assert.equal(evidence.status, 'closed');
   const archive = counter(), raw = counter();
-  await pipeline(createReadStream(manifestPath), counted(archive), createGunzip(),
+  await pipeline(createReadStream(manifestPath), counted(archive), ...manifestDecoders,
     new Writable({ write(chunk, _encoding, done) { raw.write(chunk); done(); } }));
   assert.deepEqual(archive.result(), [evidence.archiveBytes, evidence.archiveSha256]);
   assert.deepEqual(raw.result(), [evidence.rawBytes, evidence.rawSha256]);

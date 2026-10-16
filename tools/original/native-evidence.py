@@ -163,6 +163,77 @@ def write_manifest(path, report):
     return evidence
 
 
+def require_zstd():
+    """Resolve optional writer/reader dependencies only for explicit Zstd."""
+    from ctypes.util import find_library
+    module = zstd_module()
+    if find_library('zstd') is None:
+        raise RuntimeError('Zstd Native manifests require installed system libzstd')
+    return module
+
+
+def validate_manifest_format(path, metadata):
+    if path.suffix == '.gz' and (metadata['schema'], metadata['encoding']) == (1, 'gzip'):
+        return
+    if path.suffix == '.zst' and (metadata['schema'], metadata['encoding']) == (2, 'zstd-stream-json'):
+        if metadata['windowLog'] == 23 and metadata['checksum'] is True:
+            return
+    raise ValueError('Unknown Native manifest format')
+
+
+def open_manifest(path):
+    if path.suffix == '.gz':
+        return gzip.open(path, 'rb')
+    if path.suffix == '.zst':
+        return zstd_module().open_closed(path)
+    raise ValueError('Unknown Native manifest format')
+
+
+def write_zstd_manifest(path, report):
+    """Same complete manifest bytes, directly into one strict Zstd frame."""
+    if path.suffix != '.zst':
+        raise ValueError('Zstd Native manifest requires an explicit .zst path')
+    module = require_zstd()
+    temporary = path.with_name(path.name + '.part')
+    with temporary.open('xb') as output:
+        archive = module.FlushedZstdTransport(output)
+        pending = bytearray()
+
+        def append(raw):
+            offset = 0
+            while offset < len(raw):
+                take = min(module.CHUNK - len(pending), len(raw) - offset)
+                pending.extend(raw[offset:offset + take])
+                offset += take
+                if len(pending) == module.CHUNK:
+                    archive.write(bytes(pending))
+                    archive.flush()
+                    pending.clear()
+
+        try:
+            for text in manifest_chunks(report):
+                append(text.encode('utf8'))
+            append(b'\n')
+            if pending:
+                archive.write(bytes(pending))
+                archive.flush()
+            archive.close()
+        except BaseException:
+            archive.failed = True
+            raise
+    temporary.replace(path)
+    archive_bytes, archive_sha = file_digest(path)
+    if (archive_bytes, archive_sha) != (archive.transport_bytes, archive.transport_digest.hexdigest()):
+        raise ValueError('Native manifest encoded bytes changed while closing')
+    evidence = {'schema': 2, 'status': 'closed', 'encoding': 'zstd-stream-json', 'path': str(path),
+                'windowLog': 23, 'checksum': True,
+                'rawBytes': archive.input_bytes, 'rawSha256': archive.input_digest.hexdigest(),
+                'archiveBytes': archive_bytes, 'archiveSha256': archive_sha,
+                'scope': 'Complete native manifest, identical decompressed JSON bytes; no observation truncation'}
+    atomic_metadata(path.with_name(path.name + '.meta.json'), evidence)
+    return evidence
+
+
 class Progress:
     """Each committed JSONL record is a complete, independently closed gzip member.
 
@@ -202,16 +273,17 @@ class Progress:
 
 
 def read_manifest(path):
-    if path.suffix == '.gz':
+    if path.suffix in ('.gz', '.zst'):
         metadata = path.with_name(path.name + '.meta.json')
         progress = progress_path(path.parent)
+        if path.suffix == '.zst' and (not metadata.exists() or progress is None):
+            raise ValueError('Zstd Native manifest requires complete metadata and journal')
         if progress is not None and progress.suffix == '.zst' and not metadata.exists():
             raise ValueError('Zstd Native evidence requires complete manifest metadata')
         if metadata.exists() and progress is not None:
             manifest_meta = json.loads(metadata.read_text())
             progress_meta = json.loads(progress.with_name(progress.name + '.meta.json').read_text())
-            if (manifest_meta['schema'], manifest_meta['encoding']) != (1, 'gzip'):
-                raise ValueError('Unknown native evidence format')
+            validate_manifest_format(path, manifest_meta)
             validate_progress_format(progress, progress_meta)
             if manifest_meta['status'] != 'closed' or progress_meta['status'] != 'closed':
                 raise ValueError('Native evidence is not closed')
@@ -268,7 +340,7 @@ def read_manifest(path):
                 raise ValueError('Native journal does not reconstruct the complete manifest bytes')
             digest = hashlib.sha256()
             size = 0
-            with gzip.open(path, 'rb') as stream:
+            with open_manifest(path) as stream:
                 while chunk := stream.read(1024 * 1024):
                     digest.update(chunk)
                     size += len(chunk)
