@@ -1639,6 +1639,8 @@ impl Game {
             .persisted_rooms
             .get(&room_before)
             .ok_or("room change requires the persisted room it left")?;
+        // The transition first renders the room being left (its light pass).
+        room_lights::present_room(left, &mut self.state.boot_lifecycle.shared);
         saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,

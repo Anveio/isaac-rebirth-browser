@@ -8,25 +8,22 @@
 //! variant 8, 273 variant 10, effect 1000.51 and a gated type 85), none is
 //! admitted by this runtime, so only fires consume the stream here. The
 //! browser does not draw the light offsets yet; only the draws are kept.
-use crate::{actors::ActorKind, State};
+//! The frame that changes rooms renders the room being left once before
+//! ChangeRoom (the transition's capture of the outgoing room) and the entered
+//! room twice after it.
+use crate::{mt::Mt19937, Room, State};
 
 pub(crate) fn present(state: &mut State) {
-    let fires: Vec<u32> = state
-        .actor_scheduler
-        .full_phase()
-        .into_iter()
-        .filter(|actor| actor.kind == ActorKind::Npc)
-        .filter_map(|actor| {
-            state
-                .room
-                .npcs
-                .iter()
-                .find(|npc| npc.id == actor.id && npc.kind == 33 && npc.hp > 1.0)
-                .map(|npc| npc.id)
-        })
-        .collect();
-    let shared = &mut state.boot_lifecycle.shared;
-    for _ in fires {
+    present_room(&state.room, &mut state.boot_lifecycle.shared);
+}
+
+/// One pass over `room`'s fires in manager (admission) order.
+pub(crate) fn present_room(room: &Room, shared: &mut Mt19937) {
+    for _ in room
+        .npcs
+        .iter()
+        .filter(|npc| npc.kind == 33 && npc.hp > 1.0)
+    {
         let _offset = shared.uniform() * 3.0;
         let _direction = crate::npcs::direction(shared);
     }
