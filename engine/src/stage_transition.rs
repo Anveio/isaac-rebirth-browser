@@ -374,7 +374,8 @@ fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String
         .as_ref()
         .map(|entity| entity.kind);
     if occupant == Some(14) {
-        crate::attack_grid::callback_at_index(state, index, 4)?;
+        let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
+        outcome.record_frontier(state, "bossAward");
     }
     Ok(())
 }
