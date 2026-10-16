@@ -814,10 +814,10 @@ pub(crate) fn add_collectible(
     } else {
         None
     };
-    let keep_default_passive_inputs = source_effect
-        .is_some_and(PassiveGrantSourceEffect::preserves_default_inputs);
-    let keep_shot_speed_inputs = source_effect
-        .is_some_and(PassiveGrantSourceEffect::preserves_shot_speed_input);
+    let keep_default_passive_inputs =
+        source_effect.is_some_and(PassiveGrantSourceEffect::preserves_default_inputs);
+    let keep_shot_speed_inputs =
+        source_effect.is_some_and(PassiveGrantSourceEffect::preserves_shot_speed_input);
     let owner = state
         .player_items
         .as_mut()

@@ -44,7 +44,10 @@ impl HealthSource {
                 return None;
             }
         }
-        Some(Self { player_type, variant: entity.variant })
+        Some(Self {
+            player_type,
+            variant: entity.variant,
+        })
     }
 }
 
@@ -150,9 +153,8 @@ pub(crate) fn preflight(state: &State) -> Result<Admission, String> {
     //actual5090C0(109) is true.109 is the ordinary permanent-count query;
     //its source path reads no TEMP/trinket/queue. Keep both unclosed calls
     //outside preservation only; neither condition can refuse this grant.
-    let normal_inputs_preserved = normal_inputs_preserved
-        && state.inventory.coins <= 54
-        && owner.owned_counts[109] == 0;
+    let normal_inputs_preserved =
+        normal_inputs_preserved && state.inventory.coins <= 54 && owner.owned_counts[109] == 0;
     //Only this closed no-foreign-item footprint owns all five Luck words.
     //Other stat owners keep their independent event-preservation policies.
     let luck_history_preserved = normal_inputs_preserved
@@ -194,15 +196,24 @@ pub(crate) fn preflight(state: &State) -> Result<Admission, String> {
 }
 
 fn mark_health_unresolved(state: &mut State) {
-    state.player_items.as_mut().expect("preflight item owner")
-        .treatment240_frontiers.get_or_insert_with(Frontiers::default)
+    state
+        .player_items
+        .as_mut()
+        .expect("preflight item owner")
+        .treatment240_frontiers
+        .get_or_insert_with(Frontiers::default)
         .health_source_unresolved = true;
 }
 
 fn request_achievement(state: &mut State, achievement_id: u32) {
-    state.player_items.as_mut().expect("preflight item owner")
-        .treatment240_frontiers.get_or_insert_with(Frontiers::default)
-        .achievement_unlocks.push(AchievementUnlockRequest { achievement_id });
+    state
+        .player_items
+        .as_mut()
+        .expect("preflight item owner")
+        .treatment240_frontiers
+        .get_or_insert_with(Frontiers::default)
+        .achievement_unlocks
+        .push(AchievementUnlockRequest { achievement_id });
 }
 
 ///5083B0: BFC10 has its positive-only one-soul branch. Other source types
@@ -237,8 +248,12 @@ fn add_max_health(state: &mut State, source: HealthSource, delta: i32) {
     }
     let limit = if source.variant == 1 { 12 } else { 24 };
     state.player.max_hp = i32::from(state.player.max_hp)
-        .wrapping_add(delta).clamp(0, limit) as u8;
-    state.player.soul_hp = state.player.soul_hp.min(limit - i32::from(state.player.max_hp));
+        .wrapping_add(delta)
+        .clamp(0, limit) as u8;
+    state.player.soul_hp = state
+        .player
+        .soul_hp
+        .min(limit - i32::from(state.player.max_hp));
     state.player.hp = state.player.hp.min(state.player.max_hp);
     if state.player.max_hp > 13 {
         request_achievement(state, 1);
