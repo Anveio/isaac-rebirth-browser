@@ -205,6 +205,22 @@ fn pickup_catalog(path: &Path, animations: &Path, entities_xml: &str) -> String 
     output
 }
 
+/// ItemConfig57BFA0 reads the authored card/rune achievement word. Card IDs
+/// remain separate from the four entities2.xml visual families.
+fn card_catalog(xml: &str) -> String {
+    let mut achievements = [None; 41];
+    for tag in xml.split("<card ").skip(1).chain(xml.split("<rune ").skip(1)) {
+        let head = &tag[..tag.find('>').expect("card tag end")];
+        let id: usize = attribute(head, "id").expect("card id").parse().expect("card id integer");
+        assert!(id < achievements.len() && achievements[id].is_none(), "invalid authored card id");
+        achievements[id] = Some(attribute(head, "achievement")
+            .map_or(-1, |value| value.parse::<i32>().expect("card achievement integer")));
+    }
+    assert!(achievements.iter().all(Option::is_some), "incomplete authored card catalogue");
+    let values: Vec<_> = achievements.into_iter().map(Option::unwrap).collect();
+    format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\n")
+}
+
 /// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
 /// per clip of Creep (Red), rows as hex with bit x for texel x.
 fn creep_mask_catalog(path: &Path) -> String {
@@ -963,6 +979,13 @@ fn main() {
         pickup_catalog(&pickups, &animations, &xml),
     )
     .expect("write pickup catalog");
+    let pockets = resources.join("pocketitems.xml");
+    println!("cargo:rerun-if-changed={}", pockets.display());
+    fs::write(
+        output.join("card_catalog.rs"),
+        card_catalog(&fs::read_to_string(pockets).expect("read authored pocket configuration")),
+    )
+    .expect("write authored card catalogue");
     let audio_path = manifest.parent().unwrap().join("web/audio-data.json");
     println!("cargo:rerun-if-changed={}", audio_path.display());
     let audio: Value = serde_json::from_str(
