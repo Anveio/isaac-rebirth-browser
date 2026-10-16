@@ -659,6 +659,14 @@ pub struct State {
     /// Unknown old Game history stays absent; ID0 skips the Config9C read.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_shot_speed_minimum: Option<bool>,
+    ///Actual normal-variant513D60/596170 Config9A maxdamage predicate.
+    ///An absent legacy Game owner never means a false predicate.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_damage_maximum: Option<bool>,
+    ///Actual normal-variant512787/596170 Config9B minfirerate predicate.
+    ///Missing legacy Game ownership remains unknown independently of9A/9C.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_fire_delay_minimum: Option<bool>,
     pub saved_run_summary: Option<saved_game::SavedRunSummary>,
     pub audio: audio::AudioState,
     #[serde(default)]
@@ -894,6 +902,8 @@ impl Game {
                 boot_lifecycle,
                 source_cache_run_flags: Some(0), // Game constructor 554034.
                 source_shot_speed_minimum: None,
+                source_damage_maximum: None,
+                source_fire_delay_minimum: None,
                 saved_run_summary: None,
                 audio: audio::AudioState::default(),
                 pending_menu_initializations: Vec::new(),
@@ -1524,6 +1534,10 @@ impl Game {
             .challenge_id
             .map(|id| self.challenge_catalog.get(id).cloned())
             .transpose()?;
+        //A newly selected Game key invalidates the previous predicate even
+        //if validation rejects this start before the new run is initialized.
+        self.state.source_damage_maximum = None;
+        self.state.source_fire_delay_minimum = None;
         self.state.challenge_id = challenge.as_ref().map_or(0, |definition| definition.id);
         self.state.challenge_run_parameters = challenge
             .as_ref()
@@ -1605,6 +1619,20 @@ impl Game {
             challenge
                 .as_ref()
                 .is_some_and(|definition| definition.id != 0 && definition.min_shot_speed),
+        );
+        //54EB55/513D60: key0 bypasses Config9A; a real challenge uses its
+        //own decoded maxdamage flag, independently of ShotSpeed's Config9C.
+        self.state.source_damage_maximum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.max_damage),
+        );
+        //512787/515434: key0 bypasses Config9B; otherwise the selected
+        //definition owns minfirerate independently of maxdamage/minshotspeed.
+        self.state.source_fire_delay_minimum = Some(
+            challenge
+                .as_ref()
+                .is_some_and(|definition| definition.id != 0 && definition.min_fire_rate),
         );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();

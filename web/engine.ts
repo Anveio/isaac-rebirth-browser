@@ -364,6 +364,8 @@ export interface State {
   departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
+  sourceDamageMaximum?: boolean;
+  sourceFireDelayMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
