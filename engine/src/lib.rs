@@ -2661,6 +2661,13 @@ impl Game {
         self.state.lasers.clear();
         self.state.bombs.clear();
         self.state.explosions.clear();
+        // Room.Init loads current FX layers before the fresh level grid records.
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
         grid_records::admit_fresh(
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
