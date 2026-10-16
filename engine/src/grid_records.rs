@@ -95,13 +95,20 @@ impl GridEntity {
                 costs.store(index, 1000)?;
             }
             1 => {} // Supported Decoration.Init has no direct path-cost store.
-            14 if self.variant == 0 && self.state <= 3 => {
+            14 if self.variant == 0 => {
                 // Poop.Init569600: an ordinary unbroken poop blocks (class3)
-                // and stores path cost1500. Its local RNG5/9/7 first draws
-                // the variant0 sheet (569ac0 RandomInt(3)+1), then the
-                // cosmetic +314 (56994f RandomInt(2)).
-                self.collision_class = 3;
-                costs.store(index, 1500)?;
+                // and stores path cost1500; a broken one (restored from its
+                // record) stores 0 and its Update keeps class0. Its local
+                // RNG5/9/7 then draws the variant0 sheet (569ac0
+                // RandomInt(3)+1) and the cosmetic +314 (56994f RandomInt(2))
+                // whatever the state.
+                if self.state <= 3 {
+                    self.collision_class = 3;
+                    costs.store(index, 1500)?;
+                } else {
+                    self.collision_class = 0;
+                    costs.store(index, 0)?;
+                }
                 let owner = self
                     .source_owner
                     .as_mut()
@@ -109,6 +116,13 @@ impl GridEntity {
                 owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
                 owner.poop_sheet = Some(owner.local_rng.bounded(3) + 1);
                 owner.local_rng.bounded(2);
+            }
+            // Web.Init571c70 keeps class0 and stores no path cost.
+            10 => {}
+            // TNT.Init: class0, path cost1300 whatever its state.
+            12 => {
+                self.collision_class = 0;
+                costs.store(index, 1300)?;
             }
             // Rock (2/5/6) and Spike (8) Init stores are owned by the
             // recovered room geometry and path costs.
@@ -182,7 +196,7 @@ impl GridEntity {
         costs: &mut RoomCosts,
         index: usize,
     ) -> Result<(), String> {
-        if !matches!(record.kind, 1 | 14 | 15 | 16) {
+        if !matches!(record.kind, 1 | 12 | 14 | 15 | 16) {
             return Err("record factory kind is outside supported object ownership".into());
         }
         costs.get(index)?;
@@ -276,9 +290,20 @@ pub fn admit_selector(
         return Ok(());
     }
     match cell.entity.as_mut() {
-        Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8) => {
+        Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8 | 12 | 14) => {
             entity.construct_owner(shared)?;
             entity.init_seed(selector.spawn_seed, game_update, costs, index)
+        }
+        Some(entity) if entity.kind == 10 => {
+            // Web.Init571c70 (state0) draws the shared MT for its Swaying
+            // frame (4 frames), its flip (+314) and its rotation (·90,
+            // +2e4); the browser does not draw them.
+            entity.construct_owner(shared)?;
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
+            shared.bounded(4);
+            shared.bounded(2);
+            shared.bounded(4);
+            Ok(())
         }
         _ => {
             // Tinted rocks, poop, blocks, pits and other GridBase objects
@@ -441,4 +466,21 @@ fn admit_ambient_shape0(
         attempt += 1;
     }
     Ok(())
+}
+
+/// The Room grid pass 5d1378 for TNT: its Update keeps class2 while intact
+/// (state below 4) and class0 once blown. The state-4 countdown and blast
+/// are not admitted.
+pub(crate) fn advance_tnt(state: &mut crate::State, phase: crate::phase::Phase) {
+    if !phase.updates_nonplayers() {
+        return;
+    }
+    let Some(grid) = state.room.grid.as_mut() else {
+        return;
+    };
+    for entity in grid.cells.iter_mut().filter_map(|cell| cell.entity.as_mut()) {
+        if entity.kind == 12 {
+            entity.collision_class = if entity.state < 4 { 2 } else { 0 };
+        }
+    }
 }

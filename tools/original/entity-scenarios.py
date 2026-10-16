@@ -90,7 +90,7 @@ def floor(run_seed):
     return json.loads(result.stdout)
 
 
-def admitting_slots(generated, entity, shape=(13, 7), room_type=None):
+def admitting_slots(generated, entity, shape=(13, 7), room_type=None, grid_type=None):
     start = generated['descriptors'][generated['startingDescriptor']]
     for slot, index in enumerate(start['neighbors'][:4]):
         if index is None:
@@ -104,6 +104,10 @@ def admitting_slots(generated, entity, shape=(13, 7), room_type=None):
         if template['type'] not in types or (template['width'], template['height']) != shape:
             continue
         if entity[0] is not None and not spawns:
+            continue
+        # A grid spec (e.g. spider webs 1940) enters only rooms that author it.
+        if grid_type is not None and not (spawns and any(row['category'] == 'grid' and row['type'] == grid_type
+                                                          for row in spawns['selectors'])):
             continue
         # A dropped co-spawn changes the room's actor order and with it every
         # (counter + sequence) frame gate, so only fully admitted rooms qualify.

@@ -7,6 +7,7 @@
 //     type: 12, variant: 0,                 // entities2.xml identity (omit for a room-shape spec)
 //     shape: [26, 7],                       // authored room size to enter (default 13x7)
 //     roomType: 13,                         // enter a room of this authored type (typeless specs)
+//     gridType: 1940,                       // enter a room that authors this grid id (typeless specs)
 //     boss: true,                           // walk a recorded route into the floor's boss room
 //                                           // (tools/original/boss-scenarios.py; contrived entries are CODE or CODE:FIGHT)
 //     shop: true,                           // bomb a secret room for keys and walk into the shop
