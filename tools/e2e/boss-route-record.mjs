@@ -5,10 +5,13 @@
 // helper rejects any seed whose original does not arrive in the boss room.
 //
 //   node tools/e2e/boss-route-record.mjs --case CASE.json --rooms 6,7,9,0 [--production-directory dist]
-//     [--collect 7] [--arrival boss-room-arrival]
+//     [--collect 7] [--bombs 8] [--park 320,400] [--arrival boss-room-arrival]
 //
 // --collect names rooms whose key pickups the player walks over before leaving
 // them; a key-locked door on the route is then pushed open with a held key.
+// --bombs names rooms whose bomb pickups (5.40) the player walks over likewise.
+// --park X,Y walks to that point after the arrival checkpoint, releases the
+// keys and settles for 60 frames, then records a `parked` checkpoint.
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
@@ -32,6 +35,8 @@ const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
 const collect = new Set((flag('--collect', '') || '').split(',').filter(Boolean).map(Number));
+const bombs = new Set((flag('--bombs', '') || '').split(',').filter(Boolean).map(Number));
+const PARK = flag('--park') && flag('--park').split(',').map(Number);
 const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
@@ -108,7 +113,8 @@ try {
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
-      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30);
+      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30)
+        || bombs.has(state.room) && state.pickups.find(p => p.variant === 40);
       const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
@@ -131,6 +137,11 @@ try {
       await step(STRIDE); state = await view();
     }
   };
+  if (PARK) {
+    await walk({ x: PARK[0], y: PARK[1] }, [], ROOM_FRAMES, 'park');
+    await hold([]); await step(60); state = await view();
+    checkpoint('parked');
+  }
   if (FIGHT) {
     const memory = { orbit: 1 };
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
