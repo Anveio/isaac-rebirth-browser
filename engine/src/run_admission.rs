@@ -55,7 +55,8 @@ pub struct RunAdmission {
     /// Game+10eb14 and +10eb1c; the subtraction stays in f32.
     pub initial_fade: f32,
     pub fade_rate: f32,
-    /// Stage-title585500/593660 have not yet been admitted by a typed UI owner.
+    ///593660 input reset remains pending. The caller admits the separate
+    ///585500 stage streak on the actual positive-to-zero Full boundary.
     pub completion_callbacks_pending: bool,
 }
 

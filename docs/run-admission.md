@@ -58,8 +58,13 @@ report rewrite, tolerance or counter/time offset was used to strengthen them.
 The [source contract](../references/isaac/foundation/run-admission/source-contract.json)
 pins exact static functions and preserves the first source-only 339-state
 trace, including its historical controls-byte label and declared-hash
-limitation. Stage-title `585500` and input-reset `593660` callback effects
-remain explicitly pending in the runtime. Saved-run Load, the omitted native
+limitation. The existing stage-name streak now starts at the one-time positive-to-zero
+full-update boundary (`54fc2b -> 585500`), after that dispatch's earlier HUD
+update and before active Game age and actor callbacks. It no longer expires
+during the opaque startup wait. Its shared HUD clock is unchanged. The
+independent `593660` input-reset callback remains explicitly pending; the
+existing completion-pending flag is retained for that missing effect. This
+source change does not regrade the historical live comparisons above. Saved-run Load, the omitted native
 introductory cutscene and complete freeze/death/transition behavior are
 separate; unmatched startup ages or clocks cannot be repaired with a baseline.
 Early pause remains unaccepted: the current zero-tick Escape handler can open
