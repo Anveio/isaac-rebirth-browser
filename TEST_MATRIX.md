@@ -646,7 +646,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: the minimap marks exactly the current room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player enters another room | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a tear is in flight | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Sometimes | game: a tear impact is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a tear poof is presented | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a bomb is live | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a bomb explodes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player takes damage | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

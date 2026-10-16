@@ -1084,9 +1084,14 @@ pub fn state(state: &State) {
         "game: the player enters another room"
     );
     props::sometimes!(!state.tears.is_empty(), "game: a tear is in flight");
+    // Tear.Update 542530's dead branch spawns a sized TearPoof effect (wall
+    // 12, ground 13, small 0x4f/0x50) where the renderer once drew an impact.
     props::sometimes!(
-        !state.impacts.is_empty(),
-        "game: a tear impact is presented"
+        state
+            .sprite_effects
+            .iter()
+            .any(|effect| matches!(effect.variant, 12 | 13 | 0x4f | 0x50)),
+        "game: a tear poof is presented"
     );
     props::sometimes!(!state.bombs.is_empty(), "game: a bomb is live");
     props::sometimes!(!state.explosions.is_empty(), "game: a bomb explodes");
