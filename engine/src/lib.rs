@@ -100,6 +100,7 @@ pub mod npcs;
 pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod phase;
+pub mod pickup_world_grants;
 pub mod pickups;
 mod plain_npc;
 pub mod player_animation;

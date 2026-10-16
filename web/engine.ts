@@ -74,6 +74,13 @@ export type OrdinaryPlacementFrontier =
   {kind: "actorEffects" | "missingBody" | "nonfinitePosition"; actor: ActorRef} |
   {kind: "collectibleEffects"; collectibleId: number} |
   {kind: "pocketEffects" | "activeEffects" | "playerDamageEffects" | "gridEffects" | "chestEffects" | "restore" | "missingHistory"};
+export type PickupGrantFrontier = {kind: "missingHistory"} |
+  {kind: "input"; field: string} | {kind: "placement"; frontier: OrdinaryPlacementFrontier} |
+  {kind: "operator"; message: string};
+export interface PickupGrantHistory {
+  firstUnownedEffect: {collectibleId: number; frontier: PickupGrantFrontier} | null;
+  itemRngFrontiers: Record<number, PickupGrantFrontier>;
+}
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
   spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
@@ -116,6 +123,7 @@ export interface SavedRunSummary {
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
   playerItems: {
+    pickupGrantHistory?: PickupGrantHistory | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;ownedCounts: number[]; itemRngStates: number[];
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
@@ -336,6 +344,7 @@ export interface State {
       frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
         | {kind: "modifierConversion"; collectibleId: number} | null} | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    pickupGrantHistory?: PickupGrantHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
