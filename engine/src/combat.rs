@@ -19,9 +19,18 @@ pub fn try_damage_player(
     if health_units == 0 || state.player.dead || state.damage_cooldown != 0 {
         return Ok(false);
     }
+    let normal_source_query_path =
+        crate::item_queries::before_damage_queries(state, health_units, flags);
+    //Reached Player damage can have unclosed item/effect producers.
+    crate::ordinary_placement::invalidate(
+        state,
+        crate::ordinary_placement::Frontier::PlayerDamageEffects,
+    );
     crate::health_damage::apply_admitted(state, health_units, flags)?;
     state.damage_cooldown = immunity_presentations;
     crate::player_death::after_damage(state, flags)?;
+    //52C668 resolves NO_KILL/dead before52BE72 low-health query branches.
+    crate::item_queries::after_damage_queries(state, normal_source_query_path);
     crate::health_damage::finish_admitted(state);
     Ok(true)
 }

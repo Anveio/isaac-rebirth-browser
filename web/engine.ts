@@ -68,6 +68,19 @@ export interface SpriteEffect {
   footprint?: boolean;
 }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export type OrdinaryPlacementFrontier =
+  {kind: "playerUpdate"; field: string} |
+  {kind: "factory"; entityType: number; variant: number; subtype: number} |
+  {kind: "actorEffects" | "missingBody" | "nonfinitePosition"; actor: ActorRef} |
+  {kind: "collectibleEffects"; collectibleId: number} |
+  {kind: "pocketEffects" | "activeEffects" | "playerDamageEffects" | "gridEffects" | "chestEffects" | "restore" | "missingHistory"};
+export type PickupGrantFrontier = {kind: "missingHistory"} |
+  {kind: "input"; field: string} | {kind: "placement"; frontier: OrdinaryPlacementFrontier} |
+  {kind: "operator"; message: string};
+export interface PickupGrantHistory {
+  firstUnownedEffect: {collectibleId: number; frontier: PickupGrantFrontier} | null;
+  itemRngFrontiers: Record<number, PickupGrantFrontier>;
+}
 export interface Knife {
   id: number; entityType: number; variant: number; subtype: number; spawnSeed: number; birthGameUpdate: number; actorRng: ItemRng;
   spawnerType: number; spawnerVariant: number; parent: ActorRef | null; parentNullKnown?: boolean;
@@ -109,7 +122,11 @@ export interface SavedRunSummary {
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
   descriptorCount: number; copiedDescriptorCount: number; redHp: number; maxRedHp: number;
   inventory: {coins: number; bombs: number; keys: number};
-  playerItems: {ownedCounts: number[]; itemRngStates: number[];
+  playerItems: {
+    pickupGrantHistory?: PickupGrantHistory | null;
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    ownedCounts: number[]; itemRngStates: number[];
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
@@ -172,6 +189,7 @@ export interface Bomb {
 }
 export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
 export interface Pickup {
+  sourceSpawner?: {entityType: number; variant: number} | null;
   pocketContactDelay?: number | null;
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
@@ -268,6 +286,7 @@ export interface Room {
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
   authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
+  ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
@@ -307,7 +326,7 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
-  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null };
+  runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
   runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
   runAdmission: { clock: { milliseconds: number; subMillisecondNanoseconds: number; nanosecondsPerStep: number };
@@ -317,7 +336,7 @@ export interface State {
   music: MusicState;
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
-  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]} | null;
+  runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
     specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
@@ -326,15 +345,20 @@ export interface State {
     heldPockets?: {slots: {id: number; card: boolean}[];
       frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
         | {kind: "modifierConversion"; collectibleId: number} | null} | null;
+    ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
+    pickupGrantHistory?: PickupGrantHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
       pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;
     unevaluatedCacheFlags: number;
+    treatment240Frontiers?: {healthSourceUnresolved: boolean;
+      achievementUnlocks: {achievementId: number}[]};
     damageInputs?: {sourceD30: number};
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
@@ -362,6 +386,8 @@ export interface State {
   departureVelocity?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
+  sourceDamageMaximum?: boolean;
+  sourceFireDelayMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };

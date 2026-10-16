@@ -78,15 +78,15 @@ Counts of open bugs are as of the last full review.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
-| [Grid objects](#grid-objects) | Partial | Rocks, spikes, poop, trapdoor, decorations | 0 |
-| [Enemies](#enemies) | Partial | 14 ordinary NPC types | 2 |
+| [Grid objects](#grid-objects) | Partial | Rocks, spikes, poop, trapdoor, decorations | 1 |
+| [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
-| [Pocket items](#pocket-items) | Missing | None | 0 |
+| [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill and held Save; effects incomplete | 0 |
 | [Special rooms and economy](#special-rooms-and-economy) | Partial | Treasure, secret, curse rooms; shop room without sales | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
-| [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 2 |
+| [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
 | [Saves and metagame](#saves-and-metagame) | Missing | In-run save records only | 0 |
 | [Co-op](#co-op) | Missing | None | 0 |
@@ -276,10 +276,11 @@ ladders, poop variants.
 Rebirth scope: about 140 ordinary enemy types and their champions across
 all chapters.
 
-Port (14 ordinary types): Horf 12, Fly 13, Pooter 14, Attack Fly 18, Maggot
-21, Charger 23, Spitty 31, Fire Place 33, Level 2 Fly 214, Dip 217, Wall
-Hugger 218, Gurgling 237, Round Worm 244, and Shopkeeper 17. Missing: every
-other enemy, champions, Chapter 2+ enemies. Bulk enemy imports are owned by
+Port (18 ordinary types): Frowning Gaper 10.0, Gaper 10.1, Gusher 11.0,
+Pacer 11.1, Horf 12, Fly 13, Pooter 14, Attack Fly 18, Maggot 21, Charger 23,
+Spitty 31, Fire Place 33, Level 2 Fly 214, Dip 217, Wall Hugger 218, Gurgling
+237, Round Worm 244, and Shopkeeper 17. Missing: every other enemy,
+champions, Chapter 2+ enemies. Bulk enemy imports are owned by
 the user's import workflow (see AGENTS.md).
 
 Next: the rest of the Basement/Cellar spawn table.
@@ -288,6 +289,7 @@ Next: the rest of the Basement/Cellar spawn table.
 | --- | --- | --- | --- |
 | #241 | P1 | Red (attacking) Fire Place 33.1 is not admitted | e2e |
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
+| #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 
 ## Bosses
 
@@ -342,9 +344,24 @@ actives. Bulk item imports are owned by the user's import workflow.
 Rebirth scope: 33 cards, 8 runes, 28 pill effects, identification, per-run
 pill colours, drop and swap.
 
-Port: none.
+Port: partial. Public runtime owns Card/Pill Init, canonical chest/procedural
+consumers, two held records and HUD, collection/refused-contact response,
+capacity spill and held-pocket Save. The canonical Magic 8 Ball Card world
+producer is public; selected scalar/RNG/Card endpoints pass on the current
+qualified artifact. This does not implement general Card/Pill effects.
 
-Next: pocket slot and HUD, then pills (per-run mapping already seeded).
+Evidence: the current public-WASM Node AL regression passes 9,349 selected
+functional checks against its independent Original capture (AL retains 12 unavailable obligations
+and unreached SAME-v1 AD0 refresh). Separated fixed-phase0 and retained recorded-0
+each pass 29,385 checks with zero failures and 11 unavailable obligations
+(428c4301/c0022b06). Initial2 closed exit 0, so three of eleven cases are
+complete and eight remain mandatory; DOM/rendering, audible backend
+and PCM equality are unavailable in this Node result. Pocket coverage does
+not qualify basic coin/key/bomb/chest scenarios.
+
+Next: complete the remaining durable cases, 251/252 world/held conversions,
+Battery90, actual equipped effects/identification and complete save/Continue
+restoration, with real callback and audio evidence kept separate.
 
 No open bugs.
 
@@ -388,6 +405,7 @@ parity is a diagnostic only.
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
 | #450 | P3 | Boss rooms lack the blood floor scatter (walls fixed by #483); nightmare lacks the floor progress bar | playtest 2026-10-16 `playtest/9ff507f/` |
+| #535 | P2 | Killed Gapers leave flat blood decals without the gib and bone pile | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 
 ## Audio
 

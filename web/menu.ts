@@ -38,6 +38,7 @@ export class MenuRenderer {
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, 480, 270); ctx.restore();
       }
+      this.drawLoadingImage(ctx, state, alpha);
     }
     if (state.menuFade.active && state.menuFade.alpha > 0) {
       const { color, alpha } = state.menuFade;
@@ -48,6 +49,17 @@ export class MenuRenderer {
         ctx.fillStyle = `#${color.slice(0, 3).map(value => Math.round(value * 255).toString(16).padStart(2, "0")).join("")}`;
         ctx.fillRect(0, 0, 480, 270); ctx.restore();
       }
+    }
+  }
+
+  /**593580: same retained texture during menu confirmation and initial Game fade. */
+  drawLoadingImage(ctx: CanvasRenderingContext2D, state: State, alpha: number): void {
+    const index = state.runStartRequest.loadingImageIndex;
+    if (index !== undefined) {
+      const image = this.assets.image(`gfx/ui/loadimages/loadimages-${String(index).padStart(3, "0")}.png`);
+      ctx.save(); ctx.globalAlpha *= alpha;
+      ctx.drawImage(image, (480 - image.width) / 2, (270 - image.height) / 2);
+      ctx.restore();
     }
   }
 

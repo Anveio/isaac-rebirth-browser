@@ -28,6 +28,9 @@ pub struct SavedPlayerItems {
     pub shot_speed_inputs: Option<crate::player_items::ShotSpeedInputs>,
     ///518577 copies347 slots beginning Player+e1c into Saved+893c.
     pub owned_counts: Vec<i32>,
+    ///Only the actual copied count-table domain is saved here.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query_history: Option<crate::item_queries::ItemQueryHistory>,
     ///5186b0/5186e0/518708 copy current states, not initializer seeds.
     pub item_rng_states: Vec<u32>,
     pub trinket_rng_states: Vec<u32>,
@@ -36,6 +39,10 @@ pub struct SavedPlayerItems {
     ///Omitted legacy history stays unknown, never constructor-empty.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub held_pockets: Option<crate::pockets::HeldPockets>,
+    #[serde(default)]
+    pub ordinary_producer_history: Option<crate::ordinary_placement::Coverage>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pickup_grant_history: Option<crate::pickup_world_grants::History>,
     /// Saved+8908/890c/8904/8910; D80/D84 are not saved fields.
     pub active_id: u32,
     pub active_charge: i32,
@@ -66,10 +73,16 @@ impl SavedPlayerItems {
             fire_delay_inputs: owner.fire_delay_inputs,
             shot_speed_inputs: owner.shot_speed_inputs,
             owned_counts: owner.owned_counts.clone(),
+            query_history: owner
+                .query_history
+                .as_ref()
+                .map(|history| history.saved_counts()),
             item_rng_states: current_states(&owner.item_rngs, 347)?,
             trinket_rng_states: current_states(&owner.trinket_rngs, 62)?,
             pocket_rng_states: current_states(&owner.pocket_rngs, 41)?,
             held_pockets: owner.held_pockets.clone(),
+            ordinary_producer_history: owner.ordinary_producer_history.clone(),
+            pickup_grant_history: owner.pickup_grant_history.clone(),
             active_id: owner.active_id,
             active_charge: owner.active_charge,
             save_word_d88: owner.save_word_d88,
@@ -104,6 +117,12 @@ impl SavedPlayerItems {
         }
         //511710 skips dummy ID0 and copies346 dwords from Saved+8940.
         owner.owned_counts[1..].copy_from_slice(&self.owned_counts[1..]);
+        //Legacy None overwrites constructor knowledge. Even a current
+        //DTO cannot transfer C08/TEMP/trinket facts absent their stores.
+        owner.query_history = self
+            .query_history
+            .as_ref()
+            .map(|history| history.saved_counts());
         for (children, states) in [
             (&mut owner.item_rngs, &self.item_rng_states),
             (&mut owner.trinket_rngs, &self.trinket_rng_states),
@@ -119,6 +138,8 @@ impl SavedPlayerItems {
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;
         owner.held_pockets = self.held_pockets.clone();
+        owner.ordinary_producer_history = self.ordinary_producer_history.clone();
+        owner.pickup_grant_history = self.pickup_grant_history.clone();
         //51849A/5184A0 stores Saved88D8;511A25/511A2B restores D30.
         //None overwrites constructor Some(0) rather than inventing history.
         owner.damage_inputs = self.damage_inputs;

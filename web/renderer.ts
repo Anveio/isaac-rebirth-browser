@@ -177,6 +177,13 @@ export class Renderer {
       //GameRender550350 draws the outgoing black quad after Pause/HUD.
       if (state.runAdmission.initialFade <= 0 && state.runQuit.fadeAlpha > 0)
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, state.runQuit.fadeAlpha]);
+      //GameRender550450..4DE overlays the initial Game+10EB14 fade last,
+      //then593580 draws the same loading texture retained at menu confirmation.
+      if (state.runAdmission.initialFade > 0) {
+        const alpha = Math.min(1, state.runAdmission.initialFade);
+        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, alpha]);
+        this.menu.drawLoadingImage(ctx, state, alpha);
+      }
     }
     gl.presentScreen(); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;

@@ -135,6 +135,13 @@ pub struct PlayerItems {
     ///An old restore does not inherit fresh empty pocket ownership.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub held_pockets: Option<crate::pockets::HeldPockets>,
+    ///Retained unknown producer footprints survive an otherwise empty Room.
+    #[serde(default)]
+    pub ordinary_producer_history: Option<crate::ordinary_placement::Coverage>,
+    ///Validity of completed world grants and conditional writes to the
+    ///existing item RNGs. Omitted legacy history remains unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pickup_grant_history: Option<crate::pickup_world_grants::History>,
     pub entity_spawn_seed: u32,
     #[serde(default)]
     pub costume118: Option<crate::player_costume118::Costume118>,
@@ -153,6 +160,10 @@ pub struct PlayerItems {
     pub technology_eye_registered: Option<bool>,
     pub owned_counts: Vec<i32>,
     pub temporary_collectibles: Vec<TemporaryCollectible>,
+    ///Provenance of the existing permanent/TEMP/trinket/C08 stores.
+    ///Legacy omission is unknown, never a fresh empty inventory proof.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub query_history: Option<crate::item_queries::ItemQueryHistory>,
     #[serde(default)]
     pub luck_inputs: Option<LuckInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -188,6 +199,10 @@ pub struct PlayerItems {
     /// Source AddCollectible requests these bits. Keeping them pending does
     /// not claim that native 511f10 stat/familiar evaluation has occurred.
     pub unevaluated_cache_flags: u32,
+    ///Typed unresolved effects from an actual240 grant. These do not mark
+    ///profile achievements complete or admit any missing cache/weapon role.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub treatment240_frontiers: Option<crate::experimental_treatment::Frontiers>,
 }
 
 impl PlayerItems {
@@ -216,6 +231,8 @@ impl PlayerItems {
             trinket_rngs,
             pocket_rngs,
             held_pockets: Some(crate::pockets::HeldPockets::fresh()),
+            ordinary_producer_history: Some(crate::ordinary_placement::Coverage::fresh_player()),
+            pickup_grant_history: Some(crate::pickup_world_grants::History::fresh()),
             entity_spawn_seed,
             costume118: None,
             costume229: None,
@@ -225,6 +242,7 @@ impl PlayerItems {
             technology_eye_registered: Some(false),
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
+            query_history: Some(crate::item_queries::ItemQueryHistory::FRESH),
             // 519680/51968A/519524 and the 28-word loop at 519798.
             luck_inputs: Some(LuckInputs {
                 source_d3c: 0,
@@ -260,6 +278,7 @@ impl PlayerItems {
             reserve_charge: 0,
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
+            treatment240_frontiers: None,
         })
     }
 
@@ -556,7 +575,7 @@ fn add_inventory(value: u32, delta: i32) -> u32 {
     (value as i32).wrapping_add(delta).clamp(0, 99) as u32
 }
 
-fn normalize_black_hearts(player: &mut crate::Player) {
+pub(crate) fn normalize_black_hearts(player: &mut crate::Player) {
     if player.soul_hp == 0 {
         player.black_heart_mask = 0;
         return;
@@ -741,6 +760,51 @@ fn has_default_passive_grant_path(id: u32) -> bool {
     )
 }
 
+///Reached normal passive dispatch effect, separate from its completion.
+///Only closed write domains may retain an existing persistent input owner.
+#[derive(Clone, Copy)]
+enum PassiveGrantSourceEffect {
+    DefaultTail,
+    ItemRngCardSpawn,
+}
+
+impl PassiveGrantSourceEffect {
+    fn from_dispatch(id: u32) -> Option<Self> {
+        //52CF87/52DF20 selects this effect; it is not an inventory role.
+        if id == 194 {
+            Some(Self::ItemRngCardSpawn)
+        } else if has_default_passive_grant_path(id) {
+            Some(Self::DefaultTail)
+        } else {
+            None
+        }
+    }
+
+    ///Closed E1C/CF8/E14/E18 write footprint, independent of scalar
+    ///input retention and the actual world producer's completion.
+    fn preserves_query_stores(self) -> bool {
+        match self {
+            Self::DefaultTail => true,
+            Self::ItemRngCardSpawn => true,
+        }
+    }
+
+    fn preserves_default_inputs(self) -> bool {
+        matches!(self, Self::DefaultTail)
+    }
+
+    fn preserves_shot_speed_input(self) -> bool {
+        match self {
+            Self::DefaultTail => true,
+            //52DF20..52DFAE: free-position search, two local item RNG
+            //draws, GetCard, explicit Card Init/admission and ordinary
+            //cache do not write D38. Other words and the actual world
+            //effect's completion retain their independent frontiers.
+            Self::ItemRngCardSpawn => true,
+        }
+    }
+}
+
 ///Actual52cc90 common grant callback, shared by queued pickup and Challenge
 ///Player52e1a0. Queue and pool-removal fields remain owned by the caller.
 pub(crate) fn add_collectible(
@@ -750,22 +814,61 @@ pub(crate) fn add_collectible(
     touched: bool,
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
+    //Validate the actual240 RNG owner before count or draws. Gameplay
+    //contexts retain independent partial ownership and never refuse pickup.
+    let treatment = if id == 240 {
+        Some(crate::experimental_treatment::preflight(state)?)
+    } else {
+        None
+    };
     let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     //The common authored inventory/costume domains independently exclude
     //D2C/D30/D34/D38, the five Luck inputs, and D28/D44/13BC/13C0.
     //Each input has its own write-domain proof; cache flags grant none.
     //This event only retains existing owners; every None remains None.
-    let keep_default_passive_inputs = normal_isaac
+    let normal_passive_source_context = normal_isaac
         && state
             .player
             .entity_source
             .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
-        && config.kind == 1
-        && has_default_passive_grant_path(id);
+        && config.kind == 1;
+    let source_effect = if normal_passive_source_context {
+        PassiveGrantSourceEffect::from_dispatch(id)
+    } else {
+        None
+    };
+    let keep_default_passive_inputs =
+        source_effect.is_some_and(PassiveGrantSourceEffect::preserves_default_inputs);
+    let keep_shot_speed_inputs =
+        source_effect.is_some_and(PassiveGrantSourceEffect::preserves_shot_speed_input);
     let owner = state
         .player_items
         .as_mut()
         .expect("checked Player item owner");
+    //Query provenance follows the reached source dispatch, independently
+    //of persistent scalar inputs or world-effect completion. A default
+    //active grant from actual empty/D80=0 has the same plain dispatch;
+    //52D1B0 also clears the old active count, modeled below. No Use is
+    //inferred from granting an active.194 only spawns a world pickup.
+    let normal_entity = state
+        .player
+        .entity_source
+        .is_some_and(|source| source.entity_type == 1 && source.variant == 0);
+    let plain_active_grant = normal_isaac
+        && normal_entity
+        && config.kind == 3
+        && owner.active_id == 0
+        && owner.active_state_d80 == 0
+        && has_default_passive_grant_path(id);
+    let query_stores_preserved = source_effect
+        .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
+        || plain_active_grant
+        || (normal_isaac && normal_entity && treatment.is_some());
+    if !query_stores_preserved {
+        if let Some(history) = &mut owner.query_history {
+            history.forget_unowned_effect();
+        }
+    }
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
     crate::pockets::note_modifier_grant(owner, id);
     //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,
@@ -794,7 +897,7 @@ pub(crate) fn add_collectible(
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     //Actual14/27/28/143 have cached speed effects but preserve these four
     //persistent inputs. Each selected source Add retains existing Some only;
-    //untracked240/258/reset routes invalidate, never reconstruct history.
+    //untracked258/reset routes invalidate, never reconstruct history.
     if !(normal_isaac
         && matches!(
             id,
@@ -820,6 +923,7 @@ pub(crate) fn add_collectible(
         ))
         && !keep_cupid_move_speed
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_move_speed_history())
     {
         owner.move_speed_inputs = None;
     }
@@ -830,7 +934,7 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     //Actual14's default Add route preserves D34 despite its cached Range
-    //effect. Untracked240/258/reset routes invalidate this existing owner;
+    //effect. Untracked258/reset routes invalidate this existing owner;
     //None never inherits constructor zero through counts or cache evaluation.
     if !matches!(
         id,
@@ -853,6 +957,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_range
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.range_inputs = None;
     }
@@ -886,6 +991,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_fire_delay
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.fire_delay_inputs = None;
     }
@@ -896,7 +1002,7 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     // These actual Add routes preserve D30, independently of their cache,
-    // getter and caller permissions. Unmapped240/258 and other routes lose
+    // getter and caller permissions. Unmapped258 and other routes lose
     // the existing owner; later counts/cache work cannot recreate it.
     if !matches!(
         id,
@@ -919,6 +1025,7 @@ pub(crate) fn add_collectible(
             | 330
     ) && !keep_cupid_damage
         && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.damage_inputs = None;
     }
@@ -929,13 +1036,14 @@ pub(crate) fn add_collectible(
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_cupid_grant_context());
     // These actual Add paths preserve D38. This event proof grants no stat,
-    // getter or caller permission; unknown Add240/258 and other producers
+    // getter or caller permission; unknown Add258 and other producers
     // invalidate an existing owner rather than deriving one from counts.
     if !matches!(
         id,
         1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
     ) && !keep_cupid_shot_speed
-        && !keep_default_passive_inputs
+        && !keep_shot_speed_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
         owner.shot_speed_inputs = None;
     }
@@ -943,7 +1051,10 @@ pub(crate) fn add_collectible(
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
     //169's default52D0D0..52D170 path preserves this existing owner too.
-    if !matches!(id, 2 | 4 | 152 | 169) && !keep_default_passive_inputs {
+    if !matches!(id, 2 | 4 | 152 | 169)
+        && !keep_default_passive_inputs
+        && !treatment.is_some_and(|proof| proof.preserves_c70_history())
+    {
         state.attack_runtime.aim_rotation_c70 = None;
     }
     //68 has the same closed zero-amount/common auxiliary producer. Preserve
@@ -987,6 +1098,7 @@ pub(crate) fn add_collectible(
         && !keep_epic_fetus_luck
         && !keep_default_passive_inputs
         && !keep_inner_eye_knife_luck
+        && !treatment.is_some_and(|proof| proof.preserves_luck_history())
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
@@ -1005,7 +1117,30 @@ pub(crate) fn add_collectible(
     crate::player_costume229::on_collectible_added(state, id);
     crate::technology::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
-        authored_grants(state, config);
+        if let Some(proof) = treatment {
+            crate::experimental_treatment::authored_grants(state, proof);
+        } else {
+            authored_grants(state, config);
+        }
+    }
+    //This is the actual reached default CFG effect, not an ID/loadout
+    //whitelist. It never heals a prior missing producer history.
+    let ordinary_no_world_effect =
+        matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
+            && config.inventory.iter().all(|amount| *amount == 0)
+            && config.cache_flags & (256 | 512) == 0;
+    if id == 194 {
+        crate::pickup_world_grants::on_card194_added(state);
+    } else if !ordinary_no_world_effect {
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id },
+        );
+    }
+    //52D2FF..52D5A6: one source-ordered event after common authored grants.
+    //The existing cache-all request/evaluation below retains its own owners.
+    if let Some(proof) = treatment {
+        crate::experimental_treatment::apply(state, proof);
     }
     let owner = state
         .player_items
