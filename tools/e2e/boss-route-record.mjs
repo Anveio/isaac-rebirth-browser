@@ -5,10 +5,12 @@
 // helper rejects any seed whose original does not arrive in the boss room.
 //
 //   node tools/e2e/boss-route-record.mjs --case CASE.json --rooms 6,7,9,0 [--production-directory dist]
-//     [--collect 7] [--arrival boss-room-arrival]
+//     [--collect 7] [--take 3] [--arrival boss-room-arrival]
 //
 // --collect names rooms whose key pickups the player walks over before leaving
 // them; a key-locked door on the route is then pushed open with a held key.
+// --take names rooms whose collectible pedestals (5.100 with an item) the
+// player walks onto, picking each up, before leaving them.
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
@@ -32,6 +34,7 @@ const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
 const collect = new Set((flag('--collect', '') || '').split(',').filter(Boolean).map(Number));
+const take = new Set((flag('--take', '') || '').split(',').filter(Boolean).map(Number));
 const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
@@ -108,7 +111,8 @@ try {
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
-      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30);
+      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30)
+        || take.has(state.room) && state.pickups.find(p => p.variant === 100 && p.subtype > 0);
       const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
