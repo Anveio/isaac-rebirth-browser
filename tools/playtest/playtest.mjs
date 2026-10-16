@@ -122,7 +122,7 @@ const observe = () => tab.evaluate(() => {
     inventory: s.inventory, items: s.playerItems ? s.playerItems.ownedCounts.reduce((a, b) => a + b, 0) : 0,
     gameOver: !!s.playerDeath?.gameOver, runSeed: s.runSeed, npcKinds: s.room.npcs.filter(n => !n.removed).map(n => `${n.kind}.${n.variant}${n.champion ? "c" + n.champion.color : ""}`), introduction: s.runIntroduction.active, stage: s.stage,
     // Floor layout for --boss: each room's grid index and type (5 = boss).
-    rooms: s.floor ? s.floor.descriptors.map(d => [d.gridIndex, d.template.type]) : [],
+    rooms: s.floor ? s.floor.descriptors.map(d => [d.gridIndex, d.template.type, d.template.variant, d.template.name]) : [],
   };
 });
 
@@ -366,7 +366,9 @@ try {
       if (doorGoal && doorGoal.room === state.room && now > doorGoal.until && !blockedDoors.has(`${state.room}->${doorGoal.target}`)) {
         blockedDoors.add(`${state.room}->${doorGoal.target}`);
         const door = state.doors.find(d => d.target === doorGoal.target);
-        warn(`Open ${door?.side} door from room ${state.room} to room ${doorGoal.target} did not let the player through in 15s (run seed ${state.runSeed})`);
+        // Name the destination so unadmitted frontier rooms (traversal::admits) read apart from gate bugs.
+        const [, type, variant, name] = state.rooms[doorGoal.target] ?? [];
+        warn(`Open ${door?.side} door from room ${state.room} to room ${doorGoal.target} (type ${type} variant ${variant} "${name}") did not let the player through in 15s (run seed ${state.runSeed})`);
         await shot('blocked-door');
       }
       if (!doorGoal || doorGoal.room !== state.room || !open.some(d => d.target === doorGoal.target) || now > doorGoal.until) {
