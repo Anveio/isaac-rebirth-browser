@@ -150,6 +150,20 @@ status. A case whose games play their own keys from a capture on
 up to that capture; the report's `independentAfter` names it. Drivers that launch the original themselves (traversal, items and
 similar) do not support it yet.
 
+### Original wall cache draws
+
+The original pre-renders each room's backdrop walls into a cache texture when
+the room loads (`Backdrop::pre_render_walls` 424440) and keeps no wall rects
+afterwards. Paired suites built on `runPairedGate` accept `--gl-trace`: the
+gate compiles the public GL observer
+[`foundation-gl-trace.c`](../original/foundation-gl-trace.c), the original
+preloads it, and the manifest's `graphicsTrace` names the recorded draws. A
+comparator then grades the port's walls with
+[`wall-quads.mjs`](../foundation/wall-quads.mjs): every room the port entered
+must equal one of the original's 44-quad wall cache draws (patch source rects,
+destinations and flips), in entry order. It is off by default and enabled per
+suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it.
+
 ## No CI
 
 There is deliberately no CI (see [AGENTS.md](../../AGENTS.md)). Before you open

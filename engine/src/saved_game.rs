@@ -22,6 +22,10 @@ impl Default for PlayerManagerSecondaryRng {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SavedRun {
+    /// 54F391 ->576BD0 copies Game+8BA0 into Saved+58 after Player Save.
+    /// A missing legacy owner remains missing, never an inventory-derived set.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acquisition_history: Option<crate::acquisition_history::AcquisitionHistory>,
     pub run_seed: String,
     pub seeded_run: bool,
     pub stage: u32,
@@ -44,6 +48,7 @@ impl SavedRun {
         player_items: crate::player_save::SavedPlayerItems,
     ) -> Self {
         Self {
+            acquisition_history: state.acquisition_history.clone(),
             run_seed: state.run_seed.clone(),
             seeded_run: state.seeded_run,
             stage: state.stage,
@@ -87,6 +92,7 @@ impl SavedRun {
             });
         }
         Ok(SavedRunSummary {
+            acquisition_history: self.acquisition_history.clone(),
             run_seed: self.run_seed.clone(),
             seeded_run: self.seeded_run,
             stage: self.stage,
@@ -116,6 +122,8 @@ impl SavedRun {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SavedRunSummary {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acquisition_history: Option<crate::acquisition_history::AcquisitionHistory>,
     pub run_seed: String,
     pub seeded_run: bool,
     pub stage: u32,

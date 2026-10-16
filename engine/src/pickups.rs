@@ -3,6 +3,17 @@
 //! source admission order, including a pickup collected earlier in its phase.
 use crate::{motion::WorldVector, phase::Phase, Inventory, Player};
 use serde::{Deserialize, Serialize};
+///Pickup.Collect504820's AL result controls the later445710 mass response.
+///Failure to acquire an item is not itself a physics decision: AD0 returns1,
+///while a free normal-Player UseItem refusal returns0. Unknown callback
+///inputs are separate from either source return value.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PlayerContactDecision {
+    NotReached,
+    AllowPhysicalResponse,
+    VetoPhysicalResponse,
+    Unowned,
+}
 /// Normal Isaac's actual50c880 collection predicate. Supported guarded clips
 /// include the actual Hit and UseItem names admitted by50c880/50c780. The Hit
 /// callback is composed separately; its name uses this same predicate.
@@ -44,7 +55,16 @@ pub struct Definition {
 }
 
 include!(concat!(env!("OUT_DIR"), "/pickup_catalog.rs"));
+#[derive(Debug)]
+pub struct PocketCardDefinition {
+    pub name: &'static str,
+    pub description: &'static str,
+}
 include!(concat!(env!("OUT_DIR"), "/card_catalog.rs"));
+
+pub(crate) fn card_definition(id: u32) -> Option<&'static PocketCardDefinition> {
+    CARD_DEFINITIONS.get(id as usize)
+}
 
 /// GetCard5817A0 uses an independent temporary RNG35. Unlock filtering keeps
 /// ascending configuration order and falls back once to all forty card IDs.
@@ -429,6 +449,9 @@ pub struct Pickup {
     pub collision_radius: f32,
     pub shadow_size: f64,
     pub collection_delay: u32,
+    ///Distinct signed AD0 pickup-contact cooldown, not the ACC delay above.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pocket_contact_delay: Option<i32>,
     pub age: u32,
     pub birth_game_update: u32,
     pub charge: i32,
@@ -692,6 +715,7 @@ impl Pickup {
             collision_radius: definition.collision_radius,
             shadow_size: definition.shadow_size,
             collection_delay: 0,
+            pocket_contact_delay: Some(0),
             age: 0,
             birth_game_update: 0,
             charge: 0,
@@ -952,7 +976,7 @@ impl Pickup {
         true
     }
 
-    fn finish_collect(&mut self) {
+    pub(crate) fn finish_collect(&mut self) {
         // Collect504d30 clears physical velocity before playing Collect,
         // changes the ground class to3, then sets the dead31f flag.
         self.velocity = WorldVector { x: 0.0, y: 0.0 };
@@ -1125,6 +1149,24 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     state.room.pickups[index].advance(phase, state.game_update_count);
     if phase == Phase::Update {
         drop_sound(state, index);
+    }
+    if phase == Phase::Update && matches!(state.room.pickups[index].variant, 70 | 300) {
+        //5076DB is skipped by actual Room16 and Challenge5/6/11. The
+        //ordinary branch decrements positiveAD0 only outside Appear.
+        let ordinary = !matches!(state.challenge_id, 5 | 6 | 11)
+            && state
+                .room
+                .descriptor
+                .as_ref()
+                .is_some_and(|room| room.template.room_type != 16);
+        let pickup = &mut state.room.pickups[index];
+        if ordinary && pickup.animation != "Appear" {
+            if let Some(delay) = &mut pickup.pocket_contact_delay {
+                if *delay > 0 {
+                    *delay -= 1;
+                }
+            }
+        }
     }
     let pickup = &mut state.room.pickups[index];
     if phase != Phase::Interpolate

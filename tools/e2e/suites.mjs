@@ -67,7 +67,7 @@ export const SUITES = [
   suite('stage-exit', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
     '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro',
     '--helper-arg', '--contrived', '--helper-arg', 'SXREBPLT-larry', '--helper-arg', '--count', '--helper-arg', '1',
-    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120'],
+    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120', '--gl-trace'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
   // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).

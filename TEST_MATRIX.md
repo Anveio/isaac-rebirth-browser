@@ -130,7 +130,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `doors` | Curse and free treasure-room doors | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/door-scenarios.py --count 1` |
 | `secrets` | Bomb-revealed secret doors, entry and return | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/secret-door-scenarios.py --count 1` |
 | `keepers` | Keeper construction and anchored idle in secret rooms | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/keeper-scenarios.py --count 1` |
-| `stage-exit` | Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/stage-exit-scenarios.py --helper-arg --contrived --helper-arg E1T36YXW-monstro --helper-arg --contrived --helper-arg SXREBPLT-larry --helper-arg --count --helper-arg 1 --comparator tools/foundation/stage-exit-state-pair.mjs --native-frame-timeout 120` |
+| `stage-exit` | Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/stage-exit-scenarios.py --helper-arg --contrived --helper-arg E1T36YXW-monstro --helper-arg --contrived --helper-arg SXREBPLT-larry --helper-arg --count --helper-arg 1 --comparator tools/foundation/stage-exit-state-pair.mjs --native-frame-timeout 120 --gl-trace` |
 | `bedroom-doors` | Cracked bedroom doorway: one bomb damages it and scatters wood particles | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/bedroom-door-scenarios.py --helper-arg --count --helper-arg 1 --comparator tools/foundation/bedroom-door-state-pair.mjs` |
 | `key-doors` | Key collection, library unlock and revisit | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/key-door-scenarios.py --state-observer tools/original/key-door-observe.py --count 1` |
 | `large-rooms` | Tall-room bounds, doors and camera | [traversal.mjs](tools/e2e/traversal.mjs) `--scenario-helper tools/original/large-room-scenarios.py --count 2` |
@@ -593,9 +593,9 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: a Tick moves between menu screens only by starting a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: within a run the floor changes only by descending to a deeper stage, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: within a run the floor only deepens, keeps its layout while its stage and seed hold, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a run descends to a deeper stage's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: a paused run freezes gameplay and the shared stream | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a paused run freezes gameplay and the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: ticks elapse while paused | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Reachable | game: a run starts through the public menus | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: a run starts in the starting room of its seed's floor | [invariants.rs](engine/dst/src/units/game/invariants.rs) |

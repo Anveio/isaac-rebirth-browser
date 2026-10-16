@@ -20,6 +20,10 @@ pub struct PickupPresentation {
     pub item_id: u32,
     pub animation_frame: f32,
     pub animation_playing: bool,
+    ///The same copied Sprite7E0 owns collectible and Card/Pill presentation.
+    ///Absent here preserves the existing collectible representation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pocket: Option<crate::pockets::PocketPresentation>,
 }
 
 /// Actual independent inputs of Luck at 513C80. The fresh 519350 constructor
@@ -346,6 +350,17 @@ pub(crate) fn advance_item_sprite(state: &mut State, phase: Phase) {
         return;
     };
     if let Some(presentation) = &mut items.pickup_presentation {
+        if presentation.pocket.is_some() {
+            if presentation.animation_playing {
+                presentation.animation_frame += 1.0;
+                if presentation.animation_frame >= crate::pickups::POCKET_SPARKLE_FRAMES as f32 {
+                    presentation.animation_frame =
+                        crate::pickups::POCKET_SPARKLE_FRAMES as f32 - 1.0;
+                    presentation.animation_playing = false;
+                }
+            }
+            return;
+        }
         let clip = crate::pickups::definition(100, presentation.item_id)
             .expect("authored collectible actor")
             .clips
@@ -439,6 +454,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         item_id: id,
         animation_frame: 0.0,
         animation_playing: true,
+        pocket: None,
     });
     let pickup = &mut state.room.pickups[index];
     pickup.animation = "PlayerPickupSparkle".into();
@@ -736,7 +752,8 @@ pub(crate) fn add_collectible(
     let config = items::definition(id).ok_or("granted collectible config absent")?;
     let normal_isaac = state.weapon_admission.source_player_type == Some(0);
     //The common authored inventory/costume domains independently exclude
-    //D2C, D34 and D28/D44/13BC/13C0. Cache flags are not a writer proof.
+    //D2C/D30/D34/D38, the five Luck inputs, and D28/D44/13BC/13C0.
+    //Each input has its own write-domain proof; cache flags grant none.
     //This event only retains existing owners; every None remains None.
     let keep_default_passive_inputs = normal_isaac
         && state
@@ -751,6 +768,24 @@ pub(crate) fn add_collectible(
         .expect("checked Player item owner");
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
     crate::pockets::note_modifier_grant(owner, id);
+    //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,
+    //after permanent increment/source unlock checks and before effects.
+    //The membership result is captured now, never reconstructed from counts
+    //or reread after later effects. Raw first metadata is independently absent.
+    let acquisition_variant = state.player.entity_source.map(|source| source.variant);
+    let previously_acquired = match acquisition_variant {
+        Some(0) => state
+            .acquisition_history
+            .as_mut()
+            .map(|history| history.seen_or_insert(id as i32, None)),
+        Some(_) => None,
+        None => {
+            //An unknown branch may have inserted. Retaining an exact set
+            //would falsely claim absence for this and future membership reads.
+            state.acquisition_history = None;
+            None
+        }
+    };
     //Actual48 independently preserves D28/D44/13BC/13C0 on its
     //closed common path. This input history gives no stage or caller role.
     let keep_cupid_move_speed = id == 48
@@ -883,6 +918,7 @@ pub(crate) fn add_collectible(
             | 329
             | 330
     ) && !keep_cupid_damage
+        && !keep_default_passive_inputs
     {
         owner.damage_inputs = None;
     }
@@ -899,6 +935,7 @@ pub(crate) fn add_collectible(
         id,
         1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
     ) && !keep_cupid_shot_speed
+        && !keep_default_passive_inputs
     {
         owner.shot_speed_inputs = None;
     }
@@ -906,7 +943,7 @@ pub(crate) fn add_collectible(
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
     //169's default52D0D0..52D170 path preserves this existing owner too.
-    if !matches!(id, 2 | 4 | 152 | 169) {
+    if !matches!(id, 2 | 4 | 152 | 169) && !keep_default_passive_inputs {
         state.attack_runtime.aim_rotation_c70 = None;
     }
     //68 has the same closed zero-amount/common auxiliary producer. Preserve
@@ -948,15 +985,19 @@ pub(crate) fn add_collectible(
         && !keep_fetus_luck
         && !keep_monstro_luck
         && !keep_epic_fetus_luck
+        && !keep_default_passive_inputs
         && !keep_inner_eye_knife_luck
     {
         // These admitted grant paths preserve the fresh auxiliary words.
         // Nonzero setters and restore need their own producer binding.
         owner.luck_inputs = None;
     }
-    if [81, 133, 134, 145, 187, 212].contains(&id) {
-        // The 52CC90 producer needs its actual 576BB0 guard. Current item
-        // counts cannot reconstruct these transformation history counters.
+    let transformation_tail_skipped = acquisition_variant.is_some_and(|variant| variant != 0)
+        || previously_acquired == Some(true);
+    if [81, 133, 134, 145, 187, 212].contains(&id) && !transformation_tail_skipped {
+        //52D0D3..DE skips credit for nonzero variants or already-seen IDs.
+        //The first/unknown-acquisition counter/helper path remains unowned;
+        //a duplicate never restores an absent counter or repeats credit.
         state.player.transformation_counts = None;
     }
     crate::player_costume118::on_collectible_added(state, id);
