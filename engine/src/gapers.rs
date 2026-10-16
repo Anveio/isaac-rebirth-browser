@@ -60,7 +60,9 @@ fn advance(
 
 /// GetOverlayFrame 410430: the overlay's frame, or -1 without one.
 fn overlay_frame(npc: &Npc) -> i32 {
-    npc.overlay.as_ref().map_or(-1, |overlay| overlay.frame as i32)
+    npc.overlay
+        .as_ref()
+        .map_or(-1, |overlay| overlay.frame as i32)
 }
 
 fn ai(

@@ -800,7 +800,11 @@ fn main() {
         .lines()
         .filter(|line| !line.is_empty() && !line.starts_with('#'))
         .collect::<std::collections::BTreeSet<_>>();
-    for actor in npc_clips.as_object().expect("NPC animations are a map").keys() {
+    for actor in npc_clips
+        .as_object()
+        .expect("NPC animations are a map")
+        .keys()
+    {
         assert!(
             listed.contains(actor.as_str()),
             "web/npc-data.json has {actor}, which tools/foundation/port-npc-animations.txt does not list"

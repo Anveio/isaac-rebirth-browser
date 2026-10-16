@@ -82,10 +82,12 @@ fn ai(
     pathfinder::wander(npc, random, world, *friction)?;
     // 4e89ca is_frame(self, 10, 0): the global beat, without the actor's
     // manager sequence.
-    if world.game_counter % 10 == 0 {
+    if world.game_counter.is_multiple_of(10) {
         let scale = random.uniform() * 0.3 + 0.2;
         let seed = random.next_u32();
-        let id = world.effects.admit_blood(seed, npc.position, [1.0; 4], [0.0; 3])?;
+        let id = world
+            .effects
+            .admit_blood(seed, npc.position, [1.0; 4], [0.0; 3])?;
         world.effects.set_blood_scale(id, scale)?;
         world.effects.advance_blood_initial(id, random)?;
     }
@@ -96,7 +98,11 @@ fn ai(
 /// velocity every 41..60 moving updates. +f68 survives a Gaper's Morph.
 fn gush(npc: &mut Npc, random: &mut Mt19937, world: &mut NpcWorld, births: &mut Vec<Birth>) {
     // PlayOverlay("Blood", unforced): the looping clip starts once.
-    if !npc.overlay.as_ref().is_some_and(|overlay| overlay.animation == "Blood" && overlay.playing) {
+    if !npc
+        .overlay
+        .as_ref()
+        .is_some_and(|overlay| overlay.animation == "Blood" && overlay.playing)
+    {
         npc.overlay = Some(Overlay {
             animation: "Blood".into(),
             frame: 0,
