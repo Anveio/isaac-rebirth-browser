@@ -124,7 +124,7 @@ export async function enterSeededRun(page, seedText, { onCommand, onTick, onChec
   await press("Enter", 300);
   const state = await checkpoint("gameplay-start", "playing");
   if (seedText !== null) assertSeededRun(state, seedText);
-  assert.deepEqual((await page.evaluate(() => window.game.trace())).commands, manualSeedCommands(seedText),
+  assert.deepEqual(await page.evaluate(() => window.game.trace().commands), manualSeedCommands(seedText),
     "The complete menu setup must follow the independently declared command plan");
   return state;
 }
