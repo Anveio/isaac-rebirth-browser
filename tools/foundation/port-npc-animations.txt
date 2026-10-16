@@ -31,3 +31,5 @@ gfx/079.000_gemini.anm2
 gfx/079.010_gemini baby.anm2
 gfx/079.020_umbilical cord.anm2
 gfx/1000.050_laserimpact.anm2
+gfx/051.000_envy.anm2
+gfx/051.001_super envy.anm2

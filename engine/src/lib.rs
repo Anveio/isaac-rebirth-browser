@@ -54,6 +54,7 @@ pub mod fireplaces;
 pub mod floor;
 pub mod fly_effects;
 mod fmath;
+pub mod envy;
 pub mod gemini;
 pub mod gib_counts;
 pub mod gluttony;
@@ -3021,6 +3022,16 @@ impl Game {
         }
         Ok(())
     }
+    fn admit_envy_child(&mut self, index: usize, position: motion::WorldVector, variant: u32, seed: u32) -> Result<(), String> {
+        self.admit_npc_birth(index, entities::Birth::Npc(envy::child_selector(position, variant, seed)))?;
+        let id = {
+            let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+            child.variant = variant;
+            child.no_appear = true;
+            child.id
+        };
+        self.advance_npc(id, phase::Phase::Update)
+    }
     /// Admits one NPC callback product at the callback's own return point.
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
@@ -3089,6 +3100,14 @@ impl Game {
                 }
                 npc.max_hp *= spawned.health_scale;
                 npc.hp *= spawned.health_scale;
+                Ok(())
+            }
+            entities::Birth::EnvyChild { position, variant, seed } => self.admit_envy_child(index, position, variant, seed),
+            entities::Birth::EnvyThird { position, variant, seed, level } => {
+                let roll = self.state.boot_lifecycle.shared.bounded(2);
+                if level < roll + 1 {
+                    self.admit_envy_child(index, position, variant, seed)?;
+                }
                 Ok(())
             }
             entities::Birth::Child(selector) => {
