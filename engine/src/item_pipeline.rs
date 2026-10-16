@@ -87,6 +87,11 @@ const POLYPHEMUS_CALLER_ITEMS: &[usize] = &[4, 169];
 //introduced here; cache/getter/caller permissions remain separate.
 const CUPID_GRANT_ITEMS: &[usize] = &[1, 4, 48];
 
+//Separate literal511F10 callback32/64 footprints for permanent3.
+//The existing1/4/6 roles are independent per stage;48 stays unadmitted.
+const SPOON_BENDER_FLAGS_ITEMS: &[usize] = &[1, 3, 4, 6];
+const SPOON_BENDER_COLOR_ITEMS: &[usize] = &[1, 3, 4, 6];
+
 /// Literal511f10 dispatch order. Weapon selection/removal precedes stats;
 /// Libra304 has additional coupling before and after this sequence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -288,6 +293,18 @@ impl<'a> ItemInputs<'a> {
 
     pub(crate) fn admits_soy_milk_kind3_getter(self) -> bool {
         self.admits_permanent_readset(330, SOY_KIND3_ITEMS)
+    }
+
+    ///5130CA resets C98;514EF8/5130EF applies permanent Have3 bit4.
+    ///TEMP/trinket, other cache and getter/controller owners stay separate.
+    pub(crate) fn admits_homing_flags(self) -> bool {
+        self.admits_permanent_readset(3, SPOON_BENDER_FLAGS_ITEMS)
+    }
+
+    ///Independent64 trace: positive6 precedes3 in both color destinations.
+    ///This capability does not borrow the32 proof or a born-actor owner.
+    pub(crate) fn admits_homing_colors(self) -> bool {
+        self.admits_permanent_readset(3, SPOON_BENDER_COLOR_ITEMS)
     }
 
     /// Exact per-callback cache32/64 proof: other modifier and trinket owners
