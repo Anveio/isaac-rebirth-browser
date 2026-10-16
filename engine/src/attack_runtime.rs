@@ -902,6 +902,10 @@ pub(crate) fn advance_actor(
                 record_frontier(state, "controlledKnifeChildChainHistory");
                 return Ok(());
             };
+            let Some(homing) = crate::controlled_knife_homing::prepare(state, &state.knives[index])? else {
+                record_frontier(state, "controlledKnifeHomingSourceInputs");
+                return Ok(());
+            };
             let system_counter = state.system_clock.system_counter.wrapping_sub(1);
             let (before, rest) = state.knives.split_at_mut(index);
             let (anchor, after) = rest.split_first_mut().expect("resolved Knife index");
@@ -912,6 +916,7 @@ pub(crate) fn advance_actor(
                 &grid,
                 state.game_update_count,
                 state.room.manager_counts.countable_total(),
+                homing,
                 |anchor| {
                     for (chain_index, child_id) in chain.iter().enumerate() {
                         let child = before
@@ -1094,6 +1099,9 @@ fn clear_knife_links(state: &mut State, retired: &[ActorRef]) {
         }
     }
     for knife in &mut state.knives {
+        if retired.contains(&ActorRef { kind: ActorKind::Knife, id: knife.id }) {
+            knife.set_homing_target(None);
+        }
         if retired.contains(
             &(ActorRef {
                 kind: ActorKind::Knife,
