@@ -187,18 +187,58 @@ pub(crate) struct Backdrop {
     pub wall_variants: u32,
 }
 
-const BASEMENT: Backdrop = Backdrop { id: 1, gfx: "gfx/backdrop/01_basement.png", wall_variants: 3 };
+const BASEMENT: Backdrop = Backdrop {
+    id: 1,
+    gfx: "gfx/backdrop/01_basement.png",
+    wall_variants: 3,
+};
 const BACKDROPS: [Backdrop; 10] = [
     BASEMENT,
-    Backdrop { id: 5, gfx: "gfx/backdrop/05_depths.png", wall_variants: 3 },
-    Backdrop { id: 9, gfx: "gfx/backdrop/09_sheol.png", wall_variants: 3 },
-    Backdrop { id: 14, gfx: "gfx/backdrop/0a_library.png", wall_variants: 3 },
-    Backdrop { id: 15, gfx: "gfx/backdrop/0b_shop.png", wall_variants: 2 },
-    Backdrop { id: 16, gfx: "gfx/backdrop/0c_isaacsroom.png", wall_variants: 2 },
-    Backdrop { id: 17, gfx: "gfx/backdrop/0d_barrenroom.png", wall_variants: 2 },
-    Backdrop { id: 18, gfx: "gfx/backdrop/0f_secretroom.png", wall_variants: 3 },
-    Backdrop { id: 19, gfx: "gfx/backdrop/0e_diceroom.png", wall_variants: 4 },
-    Backdrop { id: 20, gfx: "gfx/backdrop/0e_arcade.png", wall_variants: 4 },
+    Backdrop {
+        id: 5,
+        gfx: "gfx/backdrop/05_depths.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 9,
+        gfx: "gfx/backdrop/09_sheol.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 14,
+        gfx: "gfx/backdrop/0a_library.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 15,
+        gfx: "gfx/backdrop/0b_shop.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 16,
+        gfx: "gfx/backdrop/0c_isaacsroom.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 17,
+        gfx: "gfx/backdrop/0d_barrenroom.png",
+        wall_variants: 2,
+    },
+    Backdrop {
+        id: 18,
+        gfx: "gfx/backdrop/0f_secretroom.png",
+        wall_variants: 3,
+    },
+    Backdrop {
+        id: 19,
+        gfx: "gfx/backdrop/0e_diceroom.png",
+        wall_variants: 4,
+    },
+    Backdrop {
+        id: 20,
+        gfx: "gfx/backdrop/0e_arcade.png",
+        wall_variants: 4,
+    },
 ];
 
 /// Room backdrop setup 5c5b30: types 0/1/4/5/6 take the stage backdrop
@@ -230,7 +270,10 @@ pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option
         21 => 19,
         _ => 0,
     };
-    (id, BACKDROPS.iter().find(|backdrop| backdrop.id == id).copied())
+    (
+        id,
+        BACKDROPS.iter().find(|backdrop| backdrop.id == id).copied(),
+    )
 }
 
 /// Wall generation 424440's variant parameters: chance Random(chance) == 0
@@ -246,9 +289,15 @@ struct WallParameters {
 impl WallParameters {
     fn for_room(backdrop: Backdrop, room_type: u32) -> Self {
         if backdrop.id == 15 && room_type == 2 {
-            return Self { chance: 3, variants: 1 };
+            return Self {
+                chance: 3,
+                variants: 1,
+            };
         }
-        Self { chance: 3, variants: backdrop.wall_variants }
+        Self {
+            chance: 3,
+            variants: backdrop.wall_variants,
+        }
     }
 
     /// The patch distribution the conditional draws produce, in units of
@@ -261,7 +310,11 @@ impl WallParameters {
             .map(|index| WallVariant {
                 source_patch_index: index as u8,
                 name: format!("variant{index}"),
-                weight: if index == 0 { (self.chance - 1) * self.variants + 1 } else { 1 },
+                weight: if index == 0 {
+                    (self.chance - 1) * self.variants + 1
+                } else {
+                    1
+                },
                 eligibility: format!("backdrop{}", backdrop.id),
             })
             .collect()
@@ -374,7 +427,11 @@ impl DecorationRng {
 /// Wall tiling after Random(walls): the four corners, then the top/bottom
 /// strips by column and the side strips by row, each tile drawing its own
 /// variant. A boss backdrop overrides the variant but keeps every draw.
-fn tile_walls(rng: &mut DecorationRng, walls: WallParameters, variant: Option<u8>) -> Vec<RoomQuad> {
+fn tile_walls(
+    rng: &mut DecorationRng,
+    walls: WallParameters,
+    variant: Option<u8>,
+) -> Vec<RoomQuad> {
     let wall = |rng: &mut DecorationRng| {
         let drawn = choose_wall(rng, walls);
         variant.unwrap_or(drawn)
@@ -514,8 +571,14 @@ impl Room {
         boss_blood_scatter(&mut rng, &grid)?;
         // The boss branch sets wallvariants to 1, so each tile draws Int(3)
         // then Int(1); the shown patch is the boss row (variant 3).
-        self.appearance.wall_quads =
-            tile_walls(&mut rng, WallParameters { chance: 3, variants: 1 }, Some(3));
+        self.appearance.wall_quads = tile_walls(
+            &mut rng,
+            WallParameters {
+                chance: 3,
+                variants: 1,
+            },
+            Some(3),
+        );
         Ok(())
     }
 }

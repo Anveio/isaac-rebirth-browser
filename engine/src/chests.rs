@@ -107,7 +107,9 @@ pub(crate) fn opening_loot(
     }
     //502B6F..594: actual Have199 doubles the current count. It changes no
     //draw, category thresholds or rare-child early return.
-    if inputs.double_loot { count += count; }
+    if inputs.double_loot {
+        count += count;
+    }
     let mut completed = 0;
     while completed < count {
         let category = rng.uniform();
@@ -187,8 +189,12 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
     let inputs = match opening_inputs(state) {
         Ok(inputs) => inputs,
         Err(frontier) => {
-            state.room.pickups[index].chest.as_mut().expect("normal Chest")
-                .open_frontier.get_or_insert(frontier);
+            state.room.pickups[index]
+                .chest
+                .as_mut()
+                .expect("normal Chest")
+                .open_frontier
+                .get_or_insert(frontier);
             return Ok(false);
         }
     };
@@ -258,14 +264,17 @@ pub(crate) struct OpeningInputs {
 ///the queued config only if it is kind2. Both known slots zero close the
 ///negative query for every count139. Unknown queued config is not empty.
 fn empty_trinket_inputs(state: &State) -> bool {
-    state.player.entity_source.is_some_and(|source| {
-        source.entity_type == 1 && source.variant == 0
-    }) && state.player_items.as_ref().is_some_and(|items| {
-        items.owned_counts.len() == 347 && items.trinket_slots == [0, 0]
-            && items.queued_id.is_none_or(|id| {
-                crate::items::definition(id).is_some_and(|config| config.kind != 2)
-            })
-    })
+    state
+        .player
+        .entity_source
+        .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        && state.player_items.as_ref().is_some_and(|items| {
+            items.owned_counts.len() == 347
+                && items.trinket_slots == [0, 0]
+                && items.queued_id.is_none_or(|id| {
+                    crate::items::definition(id).is_some_and(|config| config.kind != 2)
+                })
+        })
 }
 
 ///Actual60 Init reads LeftHand61 and the existing common free-room owner.
@@ -274,7 +283,11 @@ fn empty_trinket_inputs(state: &State) -> bool {
 ///Room2 queries Trinket13, already false through the actual empty operands.
 fn fresh_locked_context(state: &State) -> bool {
     state.challenge_id != 33
-        && state.room.descriptor.as_ref().is_some_and(|room| room.template.room_type != 8)
+        && state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|room| room.template.room_type != 8)
         && state.weapon_admission.source_player_type == Some(0)
         && empty_trinket_inputs(state)
 }
@@ -286,16 +299,23 @@ fn opening_inputs(state: &State) -> Result<OpeningInputs, OpenFrontier> {
     if state.stage == 11 || !fresh_locked_context(state) {
         return Err(OpenFrontier::PlayerContext);
     }
-    let items = state.player_items.as_ref().expect("checked actual item owner");
+    let items = state
+        .player_items
+        .as_ref()
+        .expect("checked actual item owner");
     //Independent actual child Init queries, not a neutral-item whitelist:
     //20/1 Have203; random30 Have203; random40 Have203/250;
     //random10 Have203/173/238/239. Their positive subtype operators remain
     //unmapped here. No unrelated permanent count, TEMP or D80 is read.
-    if [203usize, 250, 173, 238, 239].into_iter()
-        .any(|id| items.owned_counts[id] > 0) {
+    if [203usize, 250, 173, 238, 239]
+        .into_iter()
+        .any(|id| items.owned_counts[id] > 0)
+    {
         return Err(OpenFrontier::RegularChildInit);
     }
-    Ok(OpeningInputs { double_loot: items.owned_counts[199] > 0 })
+    Ok(OpeningInputs {
+        double_loot: items.owned_counts[199] > 0,
+    })
 }
 
 fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
@@ -318,14 +338,22 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
     let inputs = match opening_inputs(state) {
         Ok(inputs) => inputs,
         Err(frontier) => {
-            state.room.pickups[index].chest.as_mut().expect("locked Chest")
-                .open_frontier.get_or_insert(frontier);
+            state.room.pickups[index]
+                .chest
+                .as_mut()
+                .expect("locked Chest")
+                .open_frontier
+                .get_or_insert(frontier);
             return Ok(false);
         }
     };
     if state.player.golden_key.is_none() {
-        state.room.pickups[index].chest.as_mut().expect("locked Chest")
-            .open_frontier.get_or_insert(OpenFrontier::PlayerContext);
+        state.room.pickups[index]
+            .chest
+            .as_mut()
+            .expect("locked Chest")
+            .open_frontier
+            .get_or_insert(OpenFrontier::PlayerContext);
         return Ok(false);
     }
     // PaperClip19 is independently false in this actual empty trinket/queue
@@ -340,22 +368,33 @@ fn try_open_locked(state: &mut State, index: usize) -> Result<bool, String> {
 /// gates. Its source return is false even after the real opening side effect.
 /// The selected empty normal context closes TryOpen independently of key use.
 pub(crate) fn hurt_bomb_chest(
-    state: &mut State, index: usize, damage: f32, damage_flags: u32,
+    state: &mut State,
+    index: usize,
+    damage: f32,
+    damage_flags: u32,
 ) -> Result<bool, String> {
     let pickup = &state.room.pickups[index];
     if damage <= 0.0 || damage_flags & 4 == 0 || pickup.variant != 51 || pickup.subtype == 0 {
         return Ok(false);
     }
     if !damage.is_finite() {
-        state.room.pickups[index].chest.as_mut().expect("Bomb Chest")
-            .open_frontier.get_or_insert(OpenFrontier::ExplosionGeometry);
+        state.room.pickups[index]
+            .chest
+            .as_mut()
+            .expect("Bomb Chest")
+            .open_frontier
+            .get_or_insert(OpenFrontier::ExplosionGeometry);
         return Ok(false);
     }
     let inputs = match opening_inputs(state) {
         Ok(inputs) => inputs,
         Err(frontier) => {
-            state.room.pickups[index].chest.as_mut().expect("Bomb Chest")
-                .open_frontier.get_or_insert(frontier);
+            state.room.pickups[index]
+                .chest
+                .as_mut()
+                .expect("Bomb Chest")
+                .open_frontier
+                .get_or_insert(frontier);
             return Ok(false);
         }
     };
@@ -366,9 +405,15 @@ pub(crate) fn hurt_bomb_chest(
 
 /// Actual51 and60 converge at5010F0. Share the existing R5/pool8/Morph and
 /// non-Morph operations; key consumption and SFX156 belong only to60's caller.
-fn open_bounded_chest(state: &mut State, index: usize, inputs: OpeningInputs) -> Result<bool, String> {
+fn open_bounded_chest(
+    state: &mut State,
+    index: usize,
+    inputs: OpeningInputs,
+) -> Result<bool, String> {
     let pickup = &state.room.pickups[index];
-    let Some(chest) = pickup.chest.as_ref() else { return Ok(false) };
+    let Some(chest) = pickup.chest.as_ref() else {
+        return Ok(false);
+    };
     let spend_key = match pickup.variant {
         51 => false,
         60 => true,
@@ -532,7 +577,9 @@ fn locked_opening_loot(
     }
     //502049..06E: direct Have199 doubles after all actual trinket queries.
     //The selected trinket inputs are false; their earlier scatter is retained.
-    if inputs.double_loot { count += count; }
+    if inputs.double_loot {
+        count += count;
+    }
     let mut completed = 0;
     while completed < count {
         let category = rng.uniform();
@@ -768,14 +815,20 @@ pub(crate) fn from_selector(
 /// Existing callers without this operand owner keep their prior frontier;
 /// direct51 never reaches that query. No missing trinket history becomes0.
 pub(crate) fn from_source_selector(
-    id: u32, selector: &SpawnSelector, appear: bool, state: &State,
+    id: u32,
+    selector: &SpawnSelector,
+    appear: bool,
+    state: &State,
 ) -> Result<Option<Pickup>, String> {
     let no_left_hand = empty_trinket_inputs(state);
     from_selector_with_bomb_replacement(id, selector, appear, no_left_hand)
 }
 
 fn from_selector_with_bomb_replacement(
-    id: u32, selector: &SpawnSelector, appear: bool, no_left_hand: bool,
+    id: u32,
+    selector: &SpawnSelector,
+    appear: bool,
+    no_left_hand: bool,
 ) -> Result<Option<Pickup>, String> {
     if selector.entity_type != 5 || !matches!(selector.variant, 50 | 51) {
         return Ok(None);
@@ -793,7 +846,9 @@ fn from_selector_with_bomb_replacement(
             return Ok(None);
         }
         if temporary.bounded(50) == 0 {
-            if !no_left_hand { return Ok(None) }
+            if !no_left_hand {
+                return Ok(None);
+            }
             51
         } else {
             50
@@ -817,7 +872,9 @@ fn from_selector_with_bomb_replacement(
     if variant == 51 {
         // Same no-spawner BaseInit441F1F..35 and registration as fresh60.
         pickup.morph_links = Some(crate::pickups::MorphLinks {
-            parent498: None, link4a0: None, link4a8: None,
+            parent498: None,
+            link4a0: None,
+            link4a8: None,
         });
     }
     Ok(Some(pickup))
