@@ -130,12 +130,17 @@ lost prior pass. The health/guard failures remain unchanged.
 
 These captures retain complete traces and PNGs; RGBA and backend audio/PCM
 were not compared. Existing v8/v9 Shop failures retain their separate scope.
-The closed first-four readout is `b171920f`. Durable coverage is proposed as
-a source-only recipe builder that reads local Base assets and reconstructs
+The closed first-four readout is `b171920f`. The registered `common-sku` suite
+uses a source-only recipe builder that reads local Base assets and reconstructs
 ignored fixtures; copied original STB/XML/resources and private captures
 must not be published. Its four public input recipes contain keys, ticks,
 seeds and declared obligations, without private cache paths or readback data.
-The registered recipe resolver/driver is not yet promoted or qualified.
+The registered unchanged-main9841 free-no-active replay passes 1,749 functional
+and four transport checks. Frozencc38 preserves those rows and passes all 29
+additional seed-effect owner checks, giving 1,778/1,778 canonical comparisons.
+These reuse the independently validated Original capture. Default OS approaches,
+fresh Native capture through the promoted wrapper, the other three fixed cases
+on the current runtime and the three other Battery branches remain separate.
 
 ## Remaining coverage
 
@@ -163,3 +168,21 @@ Closed evidence receipts are v9 readout `49adbe79` / independent review
 `b858dd46`, corrected-schema readback `3dce849f`, v8 retirement review
 `23c8fb0e`, and control review `621bc168`.
 Private captures, resources and disassembly remain local.
+
+## Closed Source-only discovery
+
+A separately closed Source-only cohort retained all 8,192 OS draws before
+floor evaluation. Independent Shop planning evaluated every draw and selected
+0 of 2 required routes (6,378 unsupported template contexts, 1,807 missing
+route rooms and seven unsupported enclosure geometries), so the cohort remains
+FAIL. Independent Super Envy planning retained all 32,768 door-slot outcomes
+and selected first eligible ordinal 3,497, `PHCVWE1C` (run seed 1714079471,
+stage seed 2559733126), via the upper door from start room 6 to room 4.
+Eligible ordinal 7,028 remains surplus and cannot replace a later failed
+selected route. This Source cohort carries no Original/browser qualification;
+the selected route's public-input fight and parity checks are separate work.
+No draw was retried, refilled or selected from an original-game outcome.
+
+The earlier closed 1,536-draw discovery still selected only ordinal 33 of two
+required routes and remains FAIL for that shortage. Historical PWTJ and v8
+missing-overlap failures, and every retained runtime comparison, remain required.
