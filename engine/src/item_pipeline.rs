@@ -1605,10 +1605,10 @@ impl MoveSpeedReadPlan {
 
         //512EE4's false edge reaches TEMP298; no eager second lookup.
         if source.temporary_present(77)? || source.temporary_present(298)? {
-            value = 0.28_f32 + value;
+            value += 0.28_f32;
         }
         if source.has_trinket(37)? {
-            value = 0.15_f32 + value;
+            value += 0.15_f32;
         }
         if source.temporary_present(83)? {
             value -= 0.18_f32;
