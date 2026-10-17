@@ -2955,6 +2955,7 @@ impl Game {
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
+        let mut dead_player_updated = false;
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
@@ -2966,6 +2967,11 @@ impl Game {
             }
             let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
+                // Only a dead callback bypasses the existing living query.
+                // Earlier actor callbacks may have killed Player this Full.
+                if actor.kind == actors::ActorKind::Player && self.state.player.dead {
+                    dead_player_updated = true;
+                }
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
                 self.count_updated_room_actor(actor, &mut counted);
             }
@@ -3082,6 +3088,12 @@ impl Game {
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
             bombs::full_grid_contacts(&mut self.state)?;
+            if dead_player_updated {
+                // Final manager454b1d..454b2f includes dead Player443d00.
+                // Living callbacks still own their existing earlier query;
+                // general full-phase query relocation is a separate change.
+                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
+            }
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -3886,6 +3898,10 @@ impl Game {
         player_costume229::begin_full(&mut self.state, phase);
         spider_webs::begin_player_update(&mut self.state, phase)?;
         if player_death::advance(&mut self.state, phase) {
+            if phase == phase::Phase::Interpolate {
+                // RoomFast5cd975 dispatches Player, then443d00(false).
+                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
+            }
             return Ok(());
         }
         let controls_enabled = controls_enabled

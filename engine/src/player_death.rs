@@ -76,6 +76,15 @@ pub fn advance(state: &mut State, phase: Phase) -> bool {
         return false;
     }
     if phase != Phase::Skipped {
+        // Player531864 calls Base447190 before the dead branch5318a5.
+        // Its carried velocity (including a lethal grid impulse) advances
+        // position at4471c0..4471e3 before531bb6 clears it. The shared
+        // player-update head already applied temporary source friction.
+        let position = bombs::player_world(state) + bombs::player_velocity(state);
+        state.player.x =
+            f64::from(position.x) * crate::motion::WORLD_SCALE + crate::motion::WORLD_ORIGIN_X;
+        state.player.y =
+            f64::from(position.y) * crate::motion::WORLD_SCALE + crate::motion::WORLD_ORIGIN_Y;
         if state.player_animation.current != Some(Clip::Death) {
             state.player.visible = true;
             crate::player_animation::force_play(state, Clip::Death);

@@ -9,7 +9,7 @@ black hearts, and complete diary content remain unimplemented.
 | --- | --- | --- | --- |
 | Health-depleted damage and NO_KILL bit1 | Player52b080/52c675/52cbc9 | Explicit admitted damage branch; no global zero-HP death trigger | Pending |
 | Normal zero-gib Kill | Entity4464c0/445c60/44622e | SFX30 volume f32.8, delay2; own Shared raw seed, real Blood7 and immediate Update | Pending |
-| Death animation and motion | Player531850/531b24/531bb6; RoomFast5cd920 | Death forced once, velocity cleared on both Player callbacks; ANM advances only on full Base callbacks | Selected Death frame/playing/guard agree in both required routes; Base motion remains incomplete |
+| Death animation and motion | Player531850/531b24/531bb6; RoomFast5cd920 | Base carried motion precedes the dead branch and velocity reset on both Player callbacks; callbacks entered dead retain the source ground query; ANM advances only on full Base callbacks | Selected Death frame/playing/guard agree in both required routes; current full-cohort acceptance remains pending |
 | Finish and GameOver | Player52e770; Manager5bf8f0; Popup558900 | Hide body, immediate Music93 and queue8, popup state2 | Actual hidden/dead/popup2 and stopped Diary0 agree in both required routes |
 | Popup clock fence | Game550760 | Gameplay freezes; released System input and music continue | Pending |
 | Public actions14/15 | Keyboard62b520/620440/62bb90; Popup557650 | Per-key default Space/Return/Escape edges; deferred System requests | Pending |
@@ -47,9 +47,25 @@ verified (830,681,575 raw bytes). The pinned proof is
 [first-complete-live.json](../references/isaac/foundation/player-death/first-complete-live.json).
 The historical aborted cohort and unused builds remain preserved separately.
 
-Base447190 applies carried velocity before the dead Player callback clears it;
-the current dead early return omits that integration. System Exit-menu fade and
-retained title initialization also remain incomplete. These source boundaries
-are tracked for small follow-ups; no counter or position is copied or fitted
-from original observations. NO_KILL, held-arrow, Soul health, revival and full
-diary art are not accepted by this cohort.
+Base447190 applies temporary friction and carried velocity before the dead
+Player callback clears it. A lethal ordinary Spike hit still returns true from
+Player damage and receives the four-unit radial impulse; suppressing that
+impulse would omit source behavior. The dead callback now integrates native
+f32 position before clearing velocity, without ordinary controls or immunity
+advancement. RoomFast runs the retained ground query after that callback.
+A full Player callback entered dead has skipped the existing living-motion
+query, so the full manager restores its query after contacts. Common Kill
+retains Isaac's class5 and collision samples, so zero velocity still permits
+bounded penetration correction. The existing player collider supplies that
+query.
+
+The port's existing living-player grid query still runs before full-phase
+entity contacts. A Player killed later during contacts has already received
+that query and does not receive a second bounded correction in this leaf.
+Moving all living full-phase queries to the source final pass remains a
+separate physics change; near-solid contact-death ordering is unaccepted.
+System Exit-menu fade, retained title initialization and
+the player-death producer's Game-age origin also remain incomplete. No counter
+or position is copied or fitted from original observations. NO_KILL,
+held-arrow, Soul health, revival and full diary art are not accepted by the
+historical cohort above.
