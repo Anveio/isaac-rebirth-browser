@@ -28,6 +28,7 @@ import { GROUPS, RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
+const shellQuote = value => "'" + value.replaceAll("'", "'\\''") + "'";
 
 const argv = process.argv.slice(2);
 const ids = [], suiteArgs = [];
@@ -71,10 +72,15 @@ if (rerun) {
   const from = rerun !== 'newest' ? rerun : readdirSync(runs).filter(name => name.startsWith('run-') && existsSync(join(runs, name, 'report.json')))
     .sort().map(name => join(runs, name)).at(-1);
   if (!from || !existsSync(join(from, 'report.json'))) { console.error(`--rerun-failed: no run report at ${from ?? runs}`); process.exit(2); }
-  const failed = JSON.parse(readFileSync(join(from, 'report.json'), 'utf8')).suites.filter(suite => suite.status !== 'pass');
-  for (const suite of failed) { ids.push(suite.id); replays.set(suite.id, suite.replayArgs ?? suite.replay?.split(' ').slice(5) ?? []); }
-  console.log(`--rerun-failed: ${failed.length} failed suites of ${relative(ROOT, from)}: ${ids.join(' ') || 'none'}`);
-  if (!ids.length) process.exit(0);
+  const previous = JSON.parse(readFileSync(join(from, 'report.json'), 'utf8'));
+  const failed = previous.suites.filter(suite => suite.status !== 'pass');
+  for (const suite of failed) {
+    ids.push(suite.id);
+    const replay = suite.replayArgs ?? suite.replay?.split(' ').slice(5) ?? [];
+    replays.set(suite.id, mergeReplayArgs(suite.id, suite.suiteArgs ?? previous.suiteArgs ?? [], replay));
+  }
+  if (!list) console.log(`--rerun-failed: ${failed.length} failed suites of ${relative(ROOT, from)}: ${ids.join(' ') || 'none'}`);
+  if (!ids.length) { if (list) console.log('[]'); process.exit(0); }
 }
 let selection;
 if (affected) {
@@ -99,8 +105,8 @@ if (suiteArgs.length && selected.length !== 1) {
 
 // Caller flags replace the registry's flag of the same name rather than
 // relying on each driver's parser to prefer the last occurrence.
-function mergeArgs(defaults, overrides) {
-  const names = new Set(overrides.filter(arg => arg.startsWith('--')));
+function mergeArgs(defaults, overrides, replaced = []) {
+  const names = new Set([...overrides.filter(arg => arg.startsWith('--')), ...replaced]);
   const merged = [];
   for (let index = 0; index < defaults.length; index++) {
     const arg = defaults[index], takesValue = defaults[index + 1] !== undefined && !defaults[index + 1].startsWith('--');
@@ -108,6 +114,15 @@ function mergeArgs(defaults, overrides) {
     merged.push(arg);
   }
   return [...merged, ...overrides];
+}
+
+// A recorded bank fixes its selection. Paired tapes also replace the original
+// generation options; execution modes still survive, and current flags may override.
+function mergeReplayArgs(id, defaults, replay) {
+  const replaced = replay.length ? ['--case'] : [];
+  if (replay.length && suiteById.get(id)?.entry === 'tools/foundation/paired-game.mjs')
+    replaced.push('--scenarios', '--random-count', '--random-seeds', '--replay-case');
+  return mergeArgs(defaults, replay, replaced);
 }
 
 function newestMtime(directory) {
@@ -176,7 +191,8 @@ async function runSuite(suite) {
 
 function runSuiteInSlot(suite) {
   const directory = join(runDirectory, suite.id);
-  const args = [...mergeArgs(suite.args, [...replays.get(suite.id) ?? [], ...suiteArgs]), '--output', directory];
+  const overrides = mergeArgs(replays.get(suite.id) ?? [], suiteArgs);
+  const args = [...mergeArgs(suite.args, overrides), '--output', directory];
   const logPath = join(runDirectory, `${suite.id}.log`);
   const log = createWriteStream(logPath);
   const startedAt = Date.now();
@@ -190,10 +206,10 @@ function runSuiteInSlot(suite) {
     const finish = async (exitCode, signal, error) => {
       log.end();
       const result = { id: suite.id, status: exitCode === 0 && !signal ? 'pass' : 'fail', exitCode, signal, error,
-        seconds: Math.round((Date.now() - startedAt) / 1000), log: logPath, output: directory };
+        seconds: Math.round((Date.now() - startedAt) / 1000), suiteArgs: overrides, log: logPath, output: directory };
       if (result.status === 'fail') {
         result.replayArgs = replayArgs(suite, directory);
-        if (result.replayArgs) result.replay = `npm run test:e2e -- ${suite.id} ${result.replayArgs.join(' ')}`;
+        if (result.replayArgs) result.replay = `npm run test:e2e -- ${suite.id} ${mergeReplayArgs(suite.id, overrides, result.replayArgs).map(shellQuote).join(' ')}`;
       }
       // A passing suite keeps what replay and triage need; a failing one keeps everything.
       else if (!keepEvidence) result.retention = await slimSuite(directory);
