@@ -131,7 +131,12 @@ fn ai(
         }
     }
     *friction *= 0.9;
-    let push = [0.25_f32, f32::from_bits(0x3eb3_3333), f32::from_bits(0x3ee6_6666), f32::from_bits(0x3eb3_3333)][level];
+    let push = [
+        0.25_f32,
+        f32::from_bits(0x3eb3_3333),
+        f32::from_bits(0x3ee6_6666),
+        f32::from_bits(0x3eb3_3333),
+    ][level];
     let dx = if 0.0 > npc.velocity.x { -push } else { push };
     let dy = if 0.0 > npc.velocity.y { -push } else { push };
     npc.velocity = npc.velocity
