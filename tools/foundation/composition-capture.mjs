@@ -136,7 +136,7 @@ export async function captureComposition(browser, server, declaration, directory
     await page.evaluate(({initialSeed,bootEpochSeed,resources})=>{
       window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,trace:true});
     },resetInput);
-    if (declaration.pocketInit || declaration.pocketCollection) {
+    if (declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1') {
       assert.ok(Number.isFinite(declaration.sfxVolume) && declaration.sfxVolume>=0 && declaration.sfxVolume<=1);
       await page.evaluate(volume=>window.game.command({type:'audioVolume',sfx_volume:volume}),declaration.sfxVolume);
       commands.push({type:'audioVolume',sfx_volume:declaration.sfxVolume});
@@ -145,7 +145,7 @@ export async function captureComposition(browser, server, declaration, directory
     // the existing first-Title boundary, not at an invented common boot tick.
     await step(63);await checkpoint('title');
     await press('Return',72,'profile');await press('Return',72,'main');
-    const seededPocket = Boolean((declaration.pocketInit || declaration.pocketCollection)
+    const seededPocket = Boolean((declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1')
       && declaration.publicMenuRoute === 'seeded-normal');
     if (seededPocket) {
       assert.match(declaration.publicSeedCode, /^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);
@@ -250,7 +250,7 @@ export async function captureComposition(browser, server, declaration, directory
     assert.ok(traceInfo.arrayCounts.backendEvents>0&&traceInfo.backendStatesComplete);
     assert.equal(stateCount,1+declaration.initialPhaseOffset+declaration.actions.reduce((n,a)=>n+a.presentations,0));
     assert.equal(preludeStateCount,312,'Every real run-confirm/admission presentation is retained');
-    const normalPocket = Boolean((declaration.pocketInit || declaration.pocketCollection)
+    const normalPocket = Boolean((declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1')
       && declaration.publicMenuRoute === 'seeded-normal');
     const checkpoints = normalPocket
       ? [['title','title'],['profile','profile'],['main','main'],['character','character'],

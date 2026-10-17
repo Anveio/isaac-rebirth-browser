@@ -162,6 +162,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `troll-bombs` | Troll/Megatroll conversion and lifetime | [troll-bombs.mjs](tools/e2e/troll-bombs.mjs) `--count 2` |
 | `rock-blast` | Ordinary rock destruction by bombs | [rock-blast.mjs](tools/e2e/rock-blast.mjs) `--count 2` |
 | `items` | Item pools and treasure-room pedestals | [items.mjs](tools/e2e/items.mjs) `--count 2` |
+| `common-sku` | Source-authored normal SKU fixtures: four branches plus recorded OS idle-approach controls | [common-sku.mjs](tools/e2e/common-sku.mjs) `--count 1` |
 | `item-composition` | Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases | [item-composition.mjs](tools/e2e/item-composition.mjs) `--count 2` |
 | `pockets` | Card/Pill procedural Init, held collection and spills, copied presentation and sound requests; fixed and recorded/fresh OS public inputs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets all --count 1` |
 | `pill-range-use` | Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets collection --pill-use --count 1` |

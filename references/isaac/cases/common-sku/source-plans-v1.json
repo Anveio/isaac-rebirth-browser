@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "scope": "Reconstructed source-only descriptor and normal150 selector plans for named local Base resource recipes. No Native observations or cached floor payload.",
+  "plans": [
+    {
+      "seed": "PWTJRYKS",
+      "seedValue": 1666054188,
+      "stageSeed": 1003540387,
+      "shops": [
+        {
+          "index": 2,
+          "gridIndex": 110,
+          "assetStage": 0,
+          "templateVariant": 0,
+          "roomInitSeed": 1268351260,
+          "decorationSeed": 3875277693,
+          "spawnSeed": 2130230094,
+          "initialFollowingSeed": 3261947184,
+          "selectors": [
+            {
+              "groupIndex": 7,
+              "gridIndex": 81,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 280.0,
+                "y": 320.0
+              },
+              "groupSeed": 2117822201,
+              "spawnSeed": 3915400077,
+              "shopSlotAc4": 0
+            },
+            {
+              "groupIndex": 8,
+              "gridIndex": 83,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 360.0,
+                "y": 320.0
+              },
+              "groupSeed": 3122448638,
+              "spawnSeed": 668892672,
+              "shopSlotAc4": 1
+            },
+            {
+              "groupIndex": 10,
+              "gridIndex": 79,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 200.0,
+                "y": 320.0
+              },
+              "groupSeed": 2675742341,
+              "spawnSeed": 2487866897,
+              "shopSlotAc4": 2
+            },
+            {
+              "groupIndex": 11,
+              "gridIndex": 85,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 440.0,
+                "y": 320.0
+              },
+              "groupSeed": 3903378790,
+              "spawnSeed": 883138014,
+              "shopSlotAc4": 3
+            }
+          ],
+          "expectedCursor": 4,
+          "freshPersistentCells": {
+            "present": [],
+            "unknown": []
+          }
+        }
+      ],
+      "guardKind": "common-sku"
+    },
+    {
+      "seed": "7CD636LL",
+      "seedValue": 3882398476,
+      "stageSeed": 3047494072,
+      "shops": [
+        {
+          "index": 2,
+          "gridIndex": 57,
+          "assetStage": 0,
+          "templateVariant": 1,
+          "roomInitSeed": 1314637495,
+          "decorationSeed": 3138064711,
+          "spawnSeed": 1897648057,
+          "initialFollowingSeed": 3282237020,
+          "selectors": [
+            {
+              "groupIndex": 5,
+              "gridIndex": 80,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 240.0,
+                "y": 320.0
+              },
+              "groupSeed": 1513680464,
+              "spawnSeed": 2343443448,
+              "shopSlotAc4": 0
+            },
+            {
+              "groupIndex": 6,
+              "gridIndex": 82,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 320.0,
+                "y": 320.0
+              },
+              "groupSeed": 401837995,
+              "spawnSeed": 2390059177,
+              "shopSlotAc4": 1
+            },
+            {
+              "groupIndex": 7,
+              "gridIndex": 84,
+              "category": "entity",
+              "type": 5,
+              "variant": 150,
+              "subtype": 0,
+              "position": {
+                "x": 400.0,
+                "y": 320.0
+              },
+              "groupSeed": 361905752,
+              "spawnSeed": 1756444765,
+              "shopSlotAc4": 2
+            }
+          ],
+          "expectedCursor": 3,
+          "freshPersistentCells": {
+            "present": [],
+            "unknown": []
+          }
+        }
+      ],
+      "guardKind": "common-sku"
+    }
+  ]
+}
