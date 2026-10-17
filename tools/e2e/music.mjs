@@ -14,7 +14,7 @@ import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { step } from './lib/game.mjs';
+import { step, evaluateJson, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -172,7 +172,7 @@ try {
           if (action.down && action.key === 'Tab') intendedSeedEntry = true;
           else if (action.down && action.key === 'Return' && intendedSeedEntry) intendedSeedEntry = false;
         } else {
-          const actual = await page.evaluate(() => ({ state: window.game.snapshot(), audio: window.game.audio(), deviceTimes: window.__audioApi.contextTimes() }));
+          const actual = await evaluateJson(page, () => ({ state: window.game.snapshot(), audio: window.game.audio(), deviceTimes: window.__audioApi.contextTimes() }));
           states.push({ label: action.label, ...actual }); const expected = observations.get(action.label), music = expected.music;
           assert.equal(expected.status, 'pass'); assert.equal(expected.nativeBinarySha256, ORIGINAL_SHA); assert.equal(expected.originalPid > 0, true);
           assert.equal(expected.memoryWritten, false); assert.equal(expected.executableMappingsRead, false);
@@ -238,7 +238,7 @@ try {
           await writeFile(join(directory, 'browser-states.json'), JSON.stringify(states, null, 2) + '\n');
         }
       }
-      const trace = await page.evaluate(() => window.game.trace()); assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
+      const trace = await readTrace(page); assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
       check('actual reset/run and boot inputs recorded', [trace.initialSeed, trace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
       check('declared audio preferences applied before first admission', trace.bootAudioPreferences, {sfxVolume: 0, musicVolume: scenario.volume});
       check('declared window default applied at reset', trace.bootFullscreenPreferences, {fullscreen: false});
@@ -248,7 +248,7 @@ try {
       const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences, trace.bootInputConfigs);
       for (let i = 0; i < rust.length; i++) assert.equal(exactStateDifference(rust[i], trace.states[i]), null, `Actual callback replay divergence after public command${i}`);
       check('full public states replay actual backend callbacks', rust.length, trace.states.length);
-      const api = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
+      const api = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
       await verifySubmittedMusic(api, directory, check);
       check('independent public API history complete', api.truncated, false); check('production page errors', errors, []);
       const starts = api.events.slice(apiBegin).filter(event => event.type === 'start' && event.channels === 2 && event.when <= event.audioTime + 0.001);
@@ -284,7 +284,7 @@ try {
     } catch (error) { result.status = 'fail'; result.error = String(error.stack || error); }
     finally {
       if (page) {
-        const final = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return {
+        const final = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return {
           state: window.game.snapshot(), audio: window.game.audio(), trace: window.game.trace(), api: { events: window.__audioApi.events, truncated: window.__audioApi.truncated } };
         }).catch(error => ({ captureError: String(error) }));
         if (final.api) for (const event of final.api.events) if (event.pcmBase64) {
