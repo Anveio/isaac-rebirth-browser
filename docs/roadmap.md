@@ -154,6 +154,12 @@ bytes and 2,904 ordered field values match historical witnesses. Fresh shared
 Options fixed/JWMM regression passes 866/866; raw Native identities/sequence
 labels differ, with zero verdict changes and 32 identical Browser PNG bytes.
 Controls RGBA 45/60 pass/fail, Options 16/16 and all history-cap failures remain.
+Current capture-tool integration on producer `404a5617` replays the same seven
+recorded cases with fresh Native processes: 4,554/4,554 fields pass, all 137
+Browser PNG files match main0ad, and Options verdicts remain unchanged despite
+50 raw pointer/sequence differences. The outer raw-index guard fails; its
+independent diagnostic verifies unchanged staged entries, Source and inputs.
+Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, reload acceptance and remaining remapped action
 callbacks, including drop/map/restart. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
