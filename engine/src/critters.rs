@@ -30,11 +30,146 @@ pub struct Critter {
     pub dying: bool,
     /// Sprite layer0+34: a killed Tiny Fly's fall offset.
     pub fall: f32,
-    /// Spawned by the run loader: the original's first full update after
-    /// admission (Game+ce9f4 = 1) has no runtime counterpart, so the next
-    /// update replays it first.
+    /// Startup marker retained for existing serialized critter states. The
+    /// first actual Full clears it; it never admits an extra actor callback.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub loader_update_pending: bool,
+}
+
+/// Room.Save5CE418..5CE4A5's ordinary 0x48 actor record. Transient AI,
+/// velocity, sprite clocks, identities and handles belong to the new Init.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SavedAmbientRecord {
+    pub entity_type: u32,
+    pub variant: u32,
+    pub subtype: u32,
+    pub position: WorldVector,
+    pub spawn_seed: u32,
+    pub actor_rng_state: u32,
+}
+
+pub(crate) fn validate_saved_records(records: &[SavedAmbientRecord]) -> Result<(), String> {
+    if records.len() > 512
+        || records.iter().any(|record| {
+            record.entity_type != 1000
+                || !matches!(record.variant, 21 | 33 | 68)
+                || record.subtype != 0
+                || !record.position.is_finite()
+                || record.spawn_seed == 0
+                || record.actor_rng_state == 0
+        })
+    {
+        return Err("saved ambient record has no supported Source constructor owner".into());
+    }
+    Ok(())
+}
+
+/// Capture at Room.Save, before PlayerManager.Save can flush grant callbacks.
+/// None is an unknown owner, never an inferred empty list. Full manager order
+/// is retained; dead31F bodies are excluded independently of active31E.
+pub(crate) fn capture_saved_records(state: &State) -> Option<Vec<SavedAmbientRecord>> {
+    let mut records = Vec::new();
+    let mut listed = std::collections::BTreeSet::new();
+    for actor in state.actor_scheduler.full_phase() {
+        if actor.kind != ActorKind::Effect {
+            continue;
+        }
+        let effect = state
+            .sprite_effects
+            .iter()
+            .find(|effect| effect.id == actor.id)?;
+        if !listed.insert(effect.id) {
+            return None;
+        }
+        if effect.removed || effect.critter.as_ref().is_some_and(|critter| critter.dying) {
+            continue;
+        }
+        if !matches!(effect.variant, 21 | 33 | 68) {
+            // 5C57C0 excludes Blood7/ordinary poofs. Other Source-persisted
+            // Effect families still require their own record/Init owner.
+            if matches!(effect.variant, 39 | 63 | 64 | 65 | 69 | 74 | 76) {
+                return None;
+            }
+            continue;
+        }
+        // Spawner0 alone proves the 5C5800 admission; a foreign spawner's
+        // descriptor3D history must not be guessed from the current room.
+        if effect.critter.is_none()
+            || effect.subtype != 0
+            || effect.spawner_type != 0
+            || [
+                effect.actor_rng.right_a,
+                effect.actor_rng.left,
+                effect.actor_rng.right_b,
+            ] != [4, 3, 17]
+        {
+            return None;
+        }
+        records.push(SavedAmbientRecord {
+            entity_type: 1000,
+            variant: effect.variant,
+            subtype: effect.subtype,
+            position: effect.position,
+            spawn_seed: effect.spawn_seed,
+            actor_rng_state: effect.actor_rng.state,
+        });
+    }
+    // A live save-eligible body without its actual manager membership does
+    // not establish completeness from whichever vector happened to be read.
+    if state.sprite_effects.iter().any(|effect| {
+        !effect.removed
+            && !effect.critter.as_ref().is_some_and(|critter| critter.dying)
+            && matches!(
+                effect.variant,
+                21 | 33 | 39 | 63 | 64 | 65 | 68 | 69 | 74 | 76
+            )
+            && !listed.contains(&effect.id)
+    }) || validate_saved_records(&records).is_err()
+    {
+        return None;
+    }
+    Some(records)
+}
+
+/// Room.Init5CF585 ->5C5860 restores records before the first-visit gate.
+/// Game.Spawn/Init precedes saved RNG30; 21/33 then replace position from
+/// vertical/horizontal uniforms, whereas68 receives one explicit Full.
+/// The later GameLoad54EF4E Room.Update remains a separate callback.
+pub(crate) fn restore_saved_records(
+    state: &mut State,
+    records: &[SavedAmbientRecord],
+) -> Result<(), String> {
+    validate_saved_records(records)?;
+    for record in records {
+        let id = admit(
+            state,
+            Admission {
+                variant: record.variant,
+                seed: record.spawn_seed,
+                position: record.position,
+                tint: [1.0; 4],
+                offsets: [0.0; 3],
+                critter: true,
+            },
+        )?;
+        effect_mut(state, id)?.actor_rng = items::Rng::new(record.actor_rng_state, [4, 3, 17]);
+        if matches!(record.variant, 21 | 33) {
+            let (low, high) = room_rect(state);
+            let vertical = state.boot_lifecycle.shared.uniform();
+            let horizontal = state.boot_lifecycle.shared.uniform();
+            let position = WorldVector {
+                x: horizontal * (high.x - low.x) + low.x,
+                y: vertical * (high.y - low.y) + low.y,
+            };
+            let effect = effect_mut(state, id)?;
+            effect.position = position;
+            effect.presented_position = position;
+        } else {
+            update(state, id, state.game_update_count)?;
+        }
+    }
+    Ok(())
 }
 
 /// 6126c0: the unit vector of an angle in degrees.
@@ -274,6 +409,20 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
             loader_update_pending: false,
         }),
     });
+    if critter && variant == 68 {
+        // Effect.Init4592B9/4592C3: perimeter, then depth. This belongs
+        // before the Room identity and any saved RNG30 restore/readmit Full.
+        let perimeter = state.boot_lifecycle.shared.uniform();
+        let depth = state.boot_lifecycle.shared.uniform();
+        effect_mut(state, id)?
+            .critter
+            .as_mut()
+            .expect("critter")
+            .previous = WorldVector {
+            x: depth * 40.0,
+            y: perimeter * 10000.0,
+        };
+    }
     state.actor_scheduler.admit(ActorRef {
         kind: ActorKind::Effect,
         id,
@@ -370,18 +519,6 @@ pub(crate) fn spawn(
                 critter: true,
             },
         )?;
-        // Effect.Init458da8 draws the wall depth and perimeter coordinate.
-        let shared = &mut state.boot_lifecycle.shared;
-        let perimeter = shared.uniform();
-        let depth = shared.uniform();
-        effect_mut(state, id)?
-            .critter
-            .as_mut()
-            .expect("critter")
-            .previous = WorldVector {
-            x: depth * 40.0,
-            y: perimeter * 10000.0,
-        };
         update_seen(state, id, counter, Some(viewer))?;
         effect_mut(state, id)?
             .critter
@@ -400,6 +537,23 @@ fn effect_mut(state: &mut State, id: u32) -> Result<&mut SpriteEffect, String> {
         .ok_or_else(|| "critter effect is not admitted".into())
 }
 
+/// System550860/445370 restores listed actors before every Game.Full guard.
+/// Critters keep physical position separate from their Fast presentation.
+pub(crate) fn restore_fast_positions(state: &mut State) {
+    for actor in state.actor_scheduler.full_phase() {
+        if actor.kind != ActorKind::Effect {
+            continue;
+        }
+        if let Some(effect) = state
+            .sprite_effects
+            .iter_mut()
+            .find(|effect| effect.id == actor.id && effect.critter.is_some())
+        {
+            effect.presented_position = effect.position;
+        }
+    }
+}
+
 /// Scheduler callback for an admitted critter or its Blood Explosion.
 pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
     match phase {
@@ -412,43 +566,14 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
             }
             Ok(())
         }
-        // Inside full callbacks Game+ce9f4 reads game_update_count+1.
-        Phase::Update => update(state, id, state.game_update_count.wrapping_add(1)),
+        Phase::Update => {
+            if let Some(critter) = effect_mut(state, id)?.critter.as_mut() {
+                critter.loader_update_pending = false;
+            }
+            // Game54fa82 already incremented this owner before the actor pass.
+            update(state, id, state.game_update_count)
+        }
     }
-}
-
-/// The original's first full update after run admission (Game+ce9f4 = 1)
-/// precedes the runtime's first one. Replay it for the starting room's
-/// critters, in scheduler order, before that runtime update's actor pass.
-pub(crate) fn replay_loader_update(state: &mut State) -> Result<(), String> {
-    let pending: Vec<u32> = state
-        .actor_scheduler
-        .full_phase()
-        .into_iter()
-        .filter(|actor| actor.kind == ActorKind::Effect)
-        .filter_map(|actor| {
-            state
-                .sprite_effects
-                .iter()
-                .find(|effect| effect.id == actor.id)
-                .filter(|effect| {
-                    effect
-                        .critter
-                        .as_ref()
-                        .is_some_and(|critter| critter.loader_update_pending)
-                })
-                .map(|effect| effect.id)
-        })
-        .collect();
-    for id in pending {
-        effect_mut(state, id)?
-            .critter
-            .as_mut()
-            .expect("critter")
-            .loader_update_pending = false;
-        update(state, id, state.game_update_count)?;
-    }
-    Ok(())
 }
 
 /// Effect::Update 45aa70: BaseUpdate 447190, then the variant's AI case.

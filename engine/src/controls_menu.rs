@@ -34,6 +34,15 @@ pub enum Action {
     Refused,
 }
 impl ControlsMenu {
+    ///Fresh Menu9/10 UI reconstruction keeps the global Keyboard/InputConfigs
+    ///owners and this host transport sequence. Reusing an already acknowledged
+    ///sequence would cause InputConfigIO to ignore a later real save request.
+    pub fn reinitialize(&mut self) {
+        let sequence = self.next_save_sequence;
+        *self = Self::default();
+        self.next_save_sequence = sequence;
+    }
+
     pub fn begin_command(&mut self) {
         self.save_requests.clear();
         self.unavailable_actions.clear();

@@ -59,6 +59,34 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
 A slice is an inner-loop tool. Merging still needs the suites your change
 touches, compared against main.
 
+The `save-continue` suite runs public living Pause Quit, actual own-storage
+readmission/Continue and natural same-origin reload. Its default is the fixed
+moving-before-Save route plus one unfiltered OS seed; all inputs and draw bytes
+are retained before either game. No Native state enters Browser inputs.
+
+```sh
+npm run test:e2e -- save-continue --count 1 --no-build --production-directory FROZEN
+npm run test:e2e -- save-continue --scenarios references/isaac/cases/save-continue/recovery-initial-footprints-fixed-dl17.json --no-build --production-directory FROZEN
+```
+
+The current404a/1b30 first bank passes66 own Save guards and two natural reloads,
+while strict paired state remains1592/1714 (122 failures) and RGBA34 pass/28 fail.
+Original/browser placement/shared-MT differences and historical538c failures stay required;
+the own-world reload result is a separate scope. The listed-Bomb guard on0af
+reuses both recorded Native cases with all1714 rows,62 Browser PNGs and62 MT
+states unchanged; runtime2/2 and real Bomb/legacy-own-save refusal witnesses
+pass. The legacy witness uses a real same-origin app upgrade, without storage
+injection. The saved-ambient successor137b replays the same fixed/OS inputs:
+all1714 inherited rows remain,1644pass/70fail,52gains and zero lost passes.
+The additional2034 MT/ambient rows pass2006/fail28; all48 measured shared-MT
+checkpoints match cursor and624words. All28 additive failures are fixed-case
+pre-Quit velocity words. OwnSave66/66, both reloads and a real old0af legacy
+ambient-absence refusal pass. The intermediate adfb14 OS regressions and every
+older failure remain preserved; RGBA stays34pass/28fail. [Save evidence and supported
+load domain](../../docs/save-continue.md) describes both. Reuse requires exactly
+one recorded case; the canonical runner owns its host slot. Fresh Native needs
+4 GiB after the production snapshot on the actual evidence filesystem.
+
 The existing death suite has a bounded actual-audio replay:
 
 ```sh
@@ -242,6 +270,20 @@ A failing suite prints its replay command:
 ```sh
 npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
+```
+
+The retained Audio and Music banks each contain two fixed cases and one
+unfiltered OS case. Recorded replay reads the bank before fresh generation.
+On `fa1dea4d` / app `0af25692`, baseline and patched replay both passed all
+620 Audio and 783 Music checks, with no added or missing checks and no changed
+statuses. Actual process IDs, live voice counts and gapless device-clock values
+varied between captures and remain in the reports; no comparison was relaxed.
+These captures cover the existing gates; full-game audio parity and later
+runtime qualification are separate.
+
+```sh
+npm run test:e2e -- audio --scenarios references/isaac/cases/audio/savev5-fixed-and-os-snapshot-v1.json
+npm run test:e2e -- music --scenarios references/isaac/cases/music/savev5-fixed-and-os-snapshot-v1.json
 ```
 
 A replay compares builds only when both games get the same keys. Stage-exit

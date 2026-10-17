@@ -7,6 +7,7 @@ import { Preferences } from './preferences';
 import { InputConfigIO, validateInputConfigs } from './input-configs';
 import { Feedback } from './feedback';
 import { FullscreenRuntime } from './fullscreen';
+import { SaveGameIO } from './save-games';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const status = document.querySelector<HTMLElement>('#status')!;
@@ -35,6 +36,15 @@ async function boot() {
   //Real saved settings precede the first Title Music admission, as5B9930
   //precedes MenuInit. No post-constructor command may discard its Start.
   const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
+  const saveGames = new SaveGameIO();
+  let saveFailureVisible = false;
+  const reportSaveFailure = () => {
+    saveFailureVisible = true;
+    status.textContent = 'The saved profile could not be loaded or saved.';
+    status.hidden = false;
+    setTimeout(() => { status.hidden = true; }, 2400);
+  };
+  if (!saveGames.load(engine)) reportSaveFailure();
   let automaticPaused = false;
   let lifecyclePaused = !document.hasFocus() || document.hidden;
   let accumulator = 0;
@@ -50,7 +60,19 @@ async function boot() {
     if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
     const previousAmbienceUpdate = currentState.ambience.updateSequence;
     try {
-      const state = engine.command(command);
+      let state = engine.command(command);
+      //A batched public Tick can stop before a System iteration for real IO.
+      //No rendering, audio callback or next public input sees partial Main state.
+      for (let responses = 0; ; responses++) {
+        if (!state.saveWritePending && !state.saveReadmissionPending) break;
+        //One write and one menu read can belong to one public System interval.
+        const maxResponses = command.type === 'tick' ? command.count * 2 : 1;
+        if (responses >= maxResponses) throw new Error('Save IO made no bounded tick progress');
+        if (state.saveWritePending) {
+          if (!saveGames.consume(engine, state.saveRevision)) reportSaveFailure();
+        } else if (!saveGames.readmit(engine, state.saveRevision)) reportSaveFailure();
+        state = engine.snapshot();
+      }
       currentState = state;
       feedback.consume(state.optionsMenu.unavailableRequests, state.screen);
       //Settings5B8DB0 IO precedes SetMenu's audio confirmation. Back remains
@@ -198,6 +220,7 @@ async function boot() {
     rendererTargets: () => renderer.debugTargets(),
     audio: () => audio.snapshot(),
     fullscreen: () => fullscreen.snapshot(),
+    saveGames: () => saveGames.snapshot(),
     command: (command: Command) => structuredClone(dispatch(command)),
     // Automation steps leave drawing to the animation-frame loop (and to
     // capture(), which draws the state it encodes): one software-GL draw per
@@ -221,6 +244,8 @@ async function boot() {
       const loadedFullscreenPreferences = options.fullscreenPreferences ?? stored?.fullscreen ?? {fullscreen: false};
       currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
         loadedFullscreenPreferences, loadedInputConfigs ?? undefined);
+      if (!saveGames.load(engine)) reportSaveFailure();
+      currentState = engine.snapshot();
       feedback.resetDispatch();
       if (options.inputConfigs === undefined) reportInputConfigLoadFailure();
       fullscreen.reset(currentState.fullscreen.requests);
@@ -257,7 +282,7 @@ async function boot() {
   };
   Object.assign(window, { game });
   draw(currentState);
-  status.hidden = true;
+  status.hidden = !saveFailureVisible;
   document.body.dataset.ready = 'true';
   canvas.focus();
   requestAnimationFrame(frame);

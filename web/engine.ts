@@ -336,6 +336,7 @@ export interface MenuPresentation {
   blood: number; hardOverlay: number; hardWidget: boolean;
 }
 export interface State {
+  saveRevision: number; saveReadmissionPending: boolean; saveWritePending: boolean; savedLoadValid: boolean | null;
   knifeQueryPartition?: { gameCounter: number; actors: ActorRef[]; buckets: number[][] };
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
@@ -463,6 +464,10 @@ interface Exports extends WebAssembly.Exports {
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
+  save_input_ptr: (length: number) => number; load_save_data: () => number; save_data_ptr: () => number;
+  enable_saved_game_io: (protocol: number) => number;
+  complete_saved_game_write: (low: number, high: number, succeeded: number) => number;
+  complete_save_menu_readmission: (revisionLow: number, revisionHigh: number, loaded: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   frame_snapshot_ptr: () => number; background_stains_ptr: (from: number) => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
@@ -571,6 +576,46 @@ export class Engine {
     new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
     if (this.wasm.command() !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     return this.snapshot();
+  }
+  importSaveData(text: string): void {
+    const bytes = new TextEncoder().encode(text);
+    if (bytes.length > 4 * 1024 * 1024) throw new Error('Saved profiles exceed the supported 4 MiB format');
+    if (typeof this.wasm.save_input_ptr !== 'function' || typeof this.wasm.load_save_data !== 'function')
+      throw new Error('WASM save transport is stale; rebuild the engine');
+    const ptr = this.wasm.save_input_ptr(bytes.length);
+    if (!ptr) throw new Error('WASM save input allocation failed');
+    new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
+    if (this.wasm.load_save_data() !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+  }
+  enableSaveIO(): void {
+    if (typeof this.wasm.enable_saved_game_io !== 'function' || this.wasm.enable_saved_game_io(1) !== 0)
+      throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()) || 'Stale Save IO ABI');
+  }
+  completeSaveWrite(revision: number, succeeded: boolean): void {
+    if (!Number.isSafeInteger(revision) || revision < 0) throw new Error('Invalid save write revision');
+    if (typeof this.wasm.complete_saved_game_write !== 'function' ||
+      this.wasm.complete_saved_game_write(revision >>> 0, Math.floor(revision / 0x100000000), succeeded ? 1 : 0) !== 0)
+      throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()) || 'Stale Save IO ABI');
+  }
+  completeMenuReadmission(revision: number, text: string | null): boolean {
+    if (!Number.isSafeInteger(revision) || revision < 0) throw new Error('Invalid menu IO request revision');
+    const bytes = new TextEncoder().encode(text ?? '');
+    if (bytes.length > 4 * 1024 * 1024) throw new Error('Saved profiles exceed4MiB');
+    if (text !== null) {
+      const ptr = this.wasm.save_input_ptr(bytes.length);
+      if (!ptr) throw new Error('WASM save allocation failed');
+      new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
+    }
+    if (typeof this.wasm.complete_save_menu_readmission !== 'function') throw new Error('Stale menu IO ABI');
+    const result = this.wasm.complete_save_menu_readmission(revision >>> 0, Math.floor(revision / 0x100000000), text === null ? 0 : 1);
+    if (result !== 0 && result !== 2) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    return result === 0;
+  }
+  exportSaveData(): string {
+    if (typeof this.wasm.save_data_ptr !== 'function') throw new Error('WASM save transport is stale; rebuild the engine');
+    const ptr = this.wasm.save_data_ptr();
+    if (!ptr) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    return this.read(ptr, this.wasm.snapshot_len());
   }
   key(code: string, down: boolean): State { return this.command({ type: "key", code, down }); }
   text(text: string): State { return this.command({ type: "text", text }); }

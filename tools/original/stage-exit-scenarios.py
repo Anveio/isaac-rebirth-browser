@@ -245,7 +245,13 @@ def main():
         for index in range(args.count):
             # A few draws, since a drawn waypoint can sit on an authored rock.
             for _ in range(3):
-                blocked = AWARD_CELLS | set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', [])))
+                solid = set(fixture.get('originalSolid', []))
+                # Turning at the waypoint carries the player about ten units
+                # past its centre: beside a cell solid in the original alone
+                # (a fight's tail poop), only the original's player touches it
+                # and the shared walk splits (#649). Keep one cell clear.
+                beside = {cell + step for cell in solid for step in (-15, 15, -1, 1)}
+                blocked = AWARD_CELLS | solid | beside | set(near(fixture.get('originalPickups', [])))
                 cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
                                      [40 + cell % 15 * 40, 120 + cell // 15 * 40], args.production_directory)

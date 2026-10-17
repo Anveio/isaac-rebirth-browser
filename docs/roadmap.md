@@ -89,7 +89,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
-| [Saves and metagame](#saves-and-metagame) | Missing | In-run save records only; public durable Continue missing | 1 |
+| [Saves and metagame](#saves-and-metagame) | Partial | Origin-local initial-room Save/Continue and own reload; Native restoration gaps remain | 1 |
 | [Co-op](#co-op) | Missing | None | 0 |
 | [Test routes and tooling](#test-routes-and-tooling) | n/a | Live e2e, DST, playtest | 3 |
 
@@ -133,6 +133,7 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
+| #647 | P2 | Options page draws no Map Opacity, Filter, Gamma or Pop-ups values | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
 
 ## Input
 
@@ -534,9 +535,22 @@ No open bugs.
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
-Port: in-run SavedGame records and the no-achievements seeded badge. Missing:
-durable browser profile, continue, unlocks, achievements, challenges beyond
-Challenge1 ingress.
+Port: in-run SavedGame records, origin-local initial-room Save/Continue,
+natural reload and owned Tiny Bug/Fly/Wall Bug saved records through fresh Init.
+The successor137b also restores the physical/fast boundary and Stop Room's
+Backdrop seed constructor. The unchanged fixed/OS Original inputs retain all1714
+inherited rows:1644 pass/70 fail,52 gains and zero lost passes versus0af. All14
+OS regressions on the intermediate adfb candidate are recovered; its failures
+remain preserved. Additional MT/ambient rows pass2006/2034; all48 measured
+shared cursors and624-word states match. The28 added failures are fixed-case
+pre-Quit ambient velocity words; OS507/507 passes. OwnSave66/66, both reloads
+and real legacy missing-ambient-owner refusal pass; RGBA remains34 pass/28 fail.
+The70 inherited failures remain14 canonical menu/gameplay-scope errors,
+28 seed separator rows and28 last-penalty-stage rows. Other saved rooms/items/
+actors, complete progression/unlocks, broader RNG/PCM and challenges beyond
+Challenge1 ingress remain open. Historical1b30/0af122 failures and listed-Bomb/
+legacy-refusal evidence retain their exact scope. See [Save scope and
+replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

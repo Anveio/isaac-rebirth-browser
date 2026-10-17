@@ -308,6 +308,26 @@ impl SavedGameSeeds {
         }
     }
 
+    ///File write55A978..9C6 and load55E2FD..E41E visit only the declared
+    ///ordinary rows and128..134. Every grid record in those rows is serialized,
+    ///including kind0; unused ordinary rows retain this actual Clear's seeds.
+    pub fn load_serialized_stores(
+        &mut self,
+        source: &Self,
+        descriptor_count: usize,
+    ) -> Result<(), String> {
+        if descriptor_count > 127 {
+            return Err("saved descriptor count exceeds the source file format".into());
+        }
+        let rooms: Vec<_> = (0..descriptor_count)
+            .chain(128..ROOM_DESCRIPTOR_CAPACITY)
+            .collect();
+        self.descriptor_seeds
+            .copy_rooms_from(&source.descriptor_seeds, &rooms)?;
+        self.player_rng_seed = source.player_rng_seed;
+        Ok(())
+    }
+
     /// The source constructor assigns the grid seeds once, then calls Clear
     /// and replaces them. Both sets of draws belong to the shared stream.
     pub fn construct(shared: &mut Mt19937) -> Self {
@@ -386,6 +406,22 @@ impl BootState {
             .expect("Character initializer produces a nonzero seed");
     }
 
+    ///Fresh MenuManager only: ordinary profile navigation remains its
+    ///separate one-load callback. Successful loads replace actual Clear data.
+    pub fn initialize_menu_saves(
+        &mut self,
+        selected: u8,
+        load: impl FnMut(u8, &mut SavedGameSeeds) -> Result<(), String>,
+    ) -> Result<SavedGameSeeds, String> {
+        let saved = menu_saved_state(&mut self.shared, selected, load)?;
+        self.update_saved_game_samples(&saved);
+        Ok(saved)
+    }
+
+    pub fn reset_secret_poses(&mut self) {
+        self.secret_poses = secret_poses(&mut self.shared);
+    }
+
     /// Valid dialog confirmation copies the public code and decodes it into
     /// the same menu seed field. It consumes no shared sample.
     pub fn commit_character_seed(&mut self, seed: u32) -> Result<(), String> {
@@ -395,8 +431,31 @@ impl BootState {
     }
 }
 
+///SaveMenu5A8B80 visits1/2/3 then restores the prior selected slot
+///(zero at initial boot). Each callback follows its actual destination Clear.
+fn menu_saved_state(
+    shared: &mut Mt19937,
+    selected: u8,
+    mut load: impl FnMut(u8, &mut SavedGameSeeds) -> Result<(), String>,
+) -> Result<SavedGameSeeds, String> {
+    if selected > 3 {
+        return Err("menu readmission requires profile0..3".into());
+    }
+    let mut destination = None;
+    for slot in [1, 2, 3, selected] {
+        let mut cleared = SavedGameSeeds::clear(shared);
+        load(slot, &mut cleared)?;
+        destination = Some(cleared);
+    }
+    Ok(destination.expect("four actual profile callbacks"))
+}
+
+fn secret_poses(shared: &mut Mt19937) -> Vec<u8> {
+    (0..179).map(|_| (shared.bounded(3) + 1) as u8).collect()
+}
+
 fn grid_seed_samples(table: &DescriptorSeeds) -> Vec<GridSeedSample> {
-    [0, 1, ROOM_DESCRIPTOR_CAPACITY - 1]
+    [0, 1, 127, ROOM_DESCRIPTOR_CAPACITY - 1]
         .into_iter()
         .flat_map(|room_record| {
             [0, 1, PADDED_GRID_CELLS - 1]
@@ -418,18 +477,13 @@ impl BootLifecycle {
         let _startup_saved_game = SavedGameSeeds::construct(&mut shared);
         let level_grid = DescriptorSeeds::initialize(&mut shared);
         let backdrop_seed = shared.next_u32();
-        // SaveMenu reset loads each of the three profiles to compose previews,
-        // then restores the previously active profile. Each load clears the
-        // saved GameState and assigns a fresh player-manager seed.
-        for _profile in 1..=3 {
-            let _preview_saved_game = SavedGameSeeds::clear(&mut shared);
-        }
-        let saved_game = SavedGameSeeds::clear(&mut shared);
+        let saved_game = menu_saved_state(&mut shared, 0, |_, _| Ok(()))
+            .expect("initial source profile callbacks");
         // CharacterMenu reset initializes an ordinary nonzero run seed; the
         // public supplied run seed remains independent of this shared stream.
         let menu_run_seed = shared.next_u32().max(1);
         // StatsMenu reset owns one authored pose for each of its 179 secrets.
-        let secret_poses = (0..179).map(|_| (shared.bounded(3) + 1) as u8).collect();
+        let secret_poses = secret_poses(&mut shared);
         Self {
             shared,
             saved_game,

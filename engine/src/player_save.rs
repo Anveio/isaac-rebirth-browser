@@ -35,6 +35,19 @@ pub struct SavedPlayerItems {
     /// A legacy/incomplete saved table never inherits constructor zero.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shot_speed_inputs: Option<crate::player_items::ShotSpeedInputs>,
+    ///5184BE/CA/518512 copy D3C/D40/D58;511A49/55/9D restore
+    ///the same words. Missing legacy data never inherits constructor Luck.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub luck_inputs: Option<SavedLuckInputs>,
+    ///5185FD/518615 copy E14/E18, restored at51172A/51173C.
+    ///Only the actual owned held-slot domain can issue this saved value.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trinket_slots: Option<[u32; 2]>,
+    ///51861C..6A1 saves actual registration configs, not collectible counts.
+    ///The first Continue caller admits only an actually owned empty list.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costume_registrations:
+        Option<crate::player_costume_registration::CostumeRegistrationHistory>,
     ///518577 copies347 slots beginning Player+e1c into Saved+893c.
     pub owned_counts: Vec<i32>,
     ///Only the actual copied count-table domain is saved here.
@@ -61,6 +74,35 @@ pub struct SavedPlayerItems {
     pub reserve_charge: i32,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SavedLuckInputs {
+    pub source_d3c: i32,
+    pub source_d40: i32,
+    pub source_d58_bits: u32,
+}
+
+impl SavedLuckInputs {
+    fn capture(value: crate::player_items::LuckInputs) -> Self {
+        Self {
+            source_d3c: value.source_d3c,
+            source_d40: value.source_d40,
+            source_d58_bits: value.source_d58.to_bits(),
+        }
+    }
+    fn restore(self) -> Result<crate::player_items::LuckInputs, String> {
+        let value = f32::from_bits(self.source_d58_bits);
+        if !value.is_finite() {
+            return Err("saved D58 Luck input is nonfinite".into());
+        }
+        Ok(crate::player_items::LuckInputs {
+            source_d3c: self.source_d3c,
+            source_d40: self.source_d40,
+            source_d58: value,
+        })
+    }
+}
+
 fn current_states(children: &[Rng], count: usize) -> Result<Vec<u32>, String> {
     if children.len() != count
         || children
@@ -85,6 +127,13 @@ impl SavedPlayerItems {
             range_inputs: owner.range_inputs,
             fire_delay_inputs: owner.fire_delay_inputs,
             shot_speed_inputs: owner.shot_speed_inputs,
+            luck_inputs: owner.luck_inputs.map(SavedLuckInputs::capture),
+            trinket_slots: owner
+                .query_history
+                .as_ref()
+                .filter(|history| history.trinket_slots)
+                .map(|_| owner.trinket_slots),
+            costume_registrations: owner.costume_registrations.clone(),
             owned_counts: owner.owned_counts.clone(),
             query_history: owner
                 .query_history
@@ -105,6 +154,44 @@ impl SavedPlayerItems {
             save_word_d88: owner.save_word_d88,
             reserve_charge: owner.reserve_charge,
         })
+    }
+
+    ///Explicit519350 constructor→5116B0 load seam. Constructor-owned TEMP
+    ///and C08 stores are distinct from the copied saved count provenance.
+    ///This method never restores an old live history or infers a costume list.
+    pub(crate) fn restore_after_constructor(&self, owner: &mut PlayerItems) -> Result<(), String> {
+        if self
+            .costume_registrations
+            .as_ref()
+            .is_none_or(|history| !history.configuration_ids.is_empty())
+            || owner
+                .costume_registrations
+                .as_ref()
+                .is_none_or(|history| !history.configuration_ids.is_empty())
+            || !owner.temporary_collectibles.is_empty()
+            || owner.owned_counts.iter().any(|count| *count != 0)
+        {
+            return Err(
+                "Continue destination requires its actual fresh empty Player constructor".into(),
+            );
+        }
+        self.restore_into(owner)?;
+        if let Some(history) = &mut owner.query_history {
+            //5194A1→5E3F80 empties records, writes CF8=0 and D18=1.
+            //51958F independently initializes C08=1.5116B0 does not
+            //overwrite these owners;515F20 later evaluates all callbacks.
+            history.temporary_records = true;
+            history.temporary_source_cache = Some(crate::item_queries::TemporarySourceCache {
+                mask_cf8: Some(0),
+                pending_d18: Some(true),
+            });
+            history.primary_c08 = true;
+            history.cached_callbacks = 0;
+        }
+        //Only the positive saved-empty list plus constructor-empty vector
+        //admits this path. Nonempty511060 registration replay is separate.
+        owner.costume_registrations = self.costume_registrations.clone();
+        Ok(())
     }
 
     /// Actual5116b0 destination is the already constructed first Player.
@@ -133,6 +220,13 @@ impl SavedPlayerItems {
             }
         }
         //Validate wire/history before changing any live restored field.
+        let luck_inputs = self.luck_inputs.map(SavedLuckInputs::restore).transpose()?;
+        if self
+            .trinket_slots
+            .is_some_and(|slots| slots.into_iter().any(|id| id >= 62))
+        {
+            return Err("saved trinket slots are outside the base Rebirth catalogue".into());
+        }
         let legacy_pill = self.pill_effect_history.is_legacy_missing();
         if legacy_pill && self.move_speed_terms.is_some() {
             return Err(
@@ -155,6 +249,12 @@ impl SavedPlayerItems {
             .query_history
             .as_ref()
             .map(|history| history.saved_counts());
+        if let Some(slots) = self.trinket_slots {
+            owner.trinket_slots = slots;
+            if let Some(history) = &mut owner.query_history {
+                history.trinket_slots = true;
+            }
+        }
         for (children, states) in [
             (&mut owner.item_rngs, &self.item_rng_states),
             (&mut owner.trinket_rngs, &self.trinket_rng_states),
@@ -187,9 +287,8 @@ impl SavedPlayerItems {
         //overwrite constructor neutrality when the saved owner is absent.
         owner.move_speed_inputs = movement;
         owner.pill_effect_history = pill_history;
-        //This DTO never owned saved D3C/D40/D58. Do not retain fresh
-        //constructor zeros merely because the Pill array now restores.
-        owner.luck_inputs = None;
+        //A genuinely omitted legacy owner overwrites fresh constructor data.
+        owner.luck_inputs = luck_inputs;
         //51848E/518494 saves88D4;511A19/511A1F restores the actual word.
         owner.fire_delay_inputs = self.fire_delay_inputs;
         //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.
