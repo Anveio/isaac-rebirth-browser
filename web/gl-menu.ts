@@ -14,6 +14,7 @@ export class GLMenuContext {
   readonly canvas: HTMLCanvasElement;
   private readonly gl: WebGLRenderingContext;
   private readonly textures = new Map<CanvasImageSource, Texture>();
+  private readonly pendingPixels = new Map<CanvasImageSource, RawImage>();
   private readonly states: DrawState[] = [];
   private state: DrawState = { transform: [1, 0, 0, 1, 0, 0], alpha: 1, smoothing: false, fillStyle: "#000000" };
   private readonly program: WebGLProgram;
@@ -78,11 +79,12 @@ export class GLMenuContext {
     for (const path of extraPaths) paths.add(normalize(path));
     const pending = [...paths];
     let next = 0;
-    // Keep raw PNG buffers and upload copies bounded while all textures load.
+    // Validate every straight-RGBA PNG before readiness. Keep its exact
+    // pixels until the first synchronous draw uploads that texture.
     await Promise.all(Array.from({ length: 2 }, async () => {
       while (next < pending.length) {
         const path = pending[next++]!;
-        const image = assets.image(path); const raw = await loadRawPNG(image.src); context.textures.set(image, context.upload(raw));
+        const image = assets.image(path); const raw = await loadRawPNG(image.src); context.pendingPixels.set(image, raw);
       }
     }));
     return context;
@@ -114,6 +116,13 @@ export class GLMenuContext {
   }
   private texture(source: CanvasImageSource): Texture {
     const existing = this.textures.get(source); if (existing) return existing;
+    const pending = this.pendingPixels.get(source);
+    if (pending) {
+      const texture = this.upload(pending);
+      this.textures.set(source, texture);
+      this.pendingPixels.delete(source);
+      return texture;
+    }
     if (source instanceof HTMLCanvasElement) {
       const pixels = source.getContext("2d")!.getImageData(0, 0, source.width, source.height).data;
       const texture = this.upload({ width: source.width, height: source.height, pixels: new Uint8Array(pixels) }); this.textures.set(source, texture); return texture;
