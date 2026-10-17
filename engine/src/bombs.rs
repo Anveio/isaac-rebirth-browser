@@ -685,43 +685,23 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         }
         // Full class6 grid correction belongs to454B10 after entity contacts,
         // including births excluded by the current actor-update fence.
-    } else if state.bombs[index].motion.lifetime == BombLifetime::Alive {
-        use std::sync::OnceLock;
-        static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
-        let grid = state
-            .room
-            .grid
-            .as_ref()
-            .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
-            .transpose()?
-            .unwrap_or_else(crate::grid::Grid::closed_1x1_boundary);
-        let collider = COLLIDER.get_or_init(|| {
-            crate::grid::Collider::new(crate::grid::CollisionGeometry {
-                radius: 16.0,
-                scale: WorldVector { x: 1.0, y: 1.0 },
-                points: 12,
-            })
-            .expect("authored regular bomb collision geometry is valid")
-        });
+    } else if phase == Phase::Interpolate
+        && state.bombs[index].motion.lifetime != BombLifetime::Removed
+    {
+        let grid = room_grid(state)?;
         let motion = &mut state.bombs[index].motion;
-        if phase == Phase::Update {
-            collider.resolve_nonplayer_ground(
-                &grid,
-                &mut motion.position,
-                &mut motion.velocity,
-                false,
-            )?;
-            motion.presented_position = motion.position;
-        } else if phase == Phase::Interpolate {
-            let mut preview_velocity = motion.velocity;
-            collider.resolve_nonplayer_ground(
-                &grid,
-                &mut motion.presented_position,
-                &mut preview_velocity,
-                true,
-            )?;
-        }
+        //442C3B..69 clamps class5 before samples, including at zero speed.
+        motion.presented_position = grid.clamp_room(motion.presented_position, 0.0);
+        let mut preview_velocity = motion.velocity;
+        bomb_collider().resolve_nonplayer_ground(
+            &grid,
+            &mut motion.presented_position,
+            &mut preview_velocity,
+            true,
+        )?;
     }
+    // Bomb457060 calls Base447190 without a full grid query. The current live
+    // manager list receives that query at454B10, after every entity contact.
     let position = state.bombs[index].motion.position;
     let presented = state.bombs[index].motion.presented_position;
     state.bombs[index].x = f64::from(presented.x) * WORLD_SCALE + 32.0;
@@ -850,19 +830,35 @@ fn resolve_shot_grid(
     Ok(())
 }
 
-///454B10 full grid fence, after entity contacts; only the new admitted shot body.
+///454B10 queries the current live list after entity contacts, including births
+///excluded from Full. Dead31F alone does not retire an Exploding bomb.
 pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
     if !state
         .bombs
         .iter()
-        .any(|bomb| bomb.shot.is_some() && bomb.motion.lifetime != BombLifetime::Removed)
+        .any(|bomb| bomb.motion.lifetime != BombLifetime::Removed)
     {
         return Ok(());
     }
     let grid = room_grid(state)?;
     for bomb in &mut state.bombs {
-        if bomb.shot.is_some() && bomb.motion.lifetime != BombLifetime::Removed {
+        if bomb.motion.lifetime == BombLifetime::Removed {
+            continue;
+        }
+        if bomb.shot.is_some() {
             resolve_shot_grid(bomb, &grid, false)?;
+        } else {
+            let motion = &mut bomb.motion;
+            //The outer442B90 class5 query owns center clamping before samples.
+            motion.position = grid.clamp_room(motion.position, 0.0);
+            bomb_collider().resolve_nonplayer_ground(
+                &grid,
+                &mut motion.position,
+                &mut motion.velocity,
+                false,
+            )?;
+            motion.presented_position = motion.position;
+            project(bomb);
         }
     }
     Ok(())

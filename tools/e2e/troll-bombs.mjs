@@ -52,7 +52,7 @@ scenarios.cases = selectCases(scenarios.cases, item => item.name);
 if (selectedCase) scenarios.caseFilter = selectedCase;
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
-const server = await startProductionServer();
+const server = await startProductionServer({ directory: value('--production-directory') });
 const browser = await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
