@@ -7,6 +7,8 @@ gfx/grid/grid_pit.anm2
 gfx/grid/door_11_trapdoor.anm2
 gfx/grid/grid_poop.anm2
 gfx/grid/props_01_basement.anm2
+# Caves backdrop (3/4) decorations, GridEntity_Decoration Init 561e60.
+gfx/grid/props_03_caves.anm2
 # Special-room props by backdrop: sacrifice (Depths 5) and curse/devil (Sheol 9).
 gfx/grid/props_05_depths.anm2
 gfx/grid/props_09_sheol.anm2

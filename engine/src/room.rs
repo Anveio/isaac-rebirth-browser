@@ -906,6 +906,7 @@ impl Room {
             template.room_type,
             template.width,
             template.height,
+            floor.stage,
         )?;
         room.appearance.backdrop_id = backdrop_id;
         room.descriptor = Some(descriptor.clone());
@@ -1066,7 +1067,7 @@ impl Room {
     /// decoration seed. This is also the original-observation verification entry.
     /// The seed is not a run seed; this method does not generate floor topology.
     pub fn from_decoration_seed(decoration_seed: u32) -> Self {
-        Self::from_backdrop(decoration_seed, BASEMENT, 1, 13, 7)
+        Self::from_backdrop(decoration_seed, BASEMENT, 1, 13, 7, 1)
             .expect("starting-room dimensions fit the source backdrop")
     }
 
@@ -1078,6 +1079,7 @@ impl Room {
         room_type: u32,
         width: u8,
         height: u8,
+        stage: u32,
     ) -> Result<Self, String> {
         validate_backdrop_dimensions(width, height)?;
         let walls = WallParameters::for_room(backdrop, room_type);
@@ -1093,11 +1095,19 @@ impl Room {
         // fx entry from the decoration seed, shift index 35 (5494df): it does
         // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
         // overlay in authored order [2, 3, 4, 5, 1] (54972d); two
-        // RandomFloat*100 draws (5498f8, 549926; RandomFloat 5c2db0 is
-        // next * 2.3283064e-10 in f32) give the layer's x and y offsets.
+        // RandomFloat draws (5498f8, 549926; RandomFloat 5c2db0 is next *
+        // 2.3283064e-10 in f32) give the layer's x and y offsets as
+        // min + RandomFloat * (max - min). The overlay group follows the
+        // Level's chapter (fxlayers `stage`): Basement fx2 spans 0..100,
+        // Caves fx5 -10..10; both author their 1x1 overlays as [2, 3, 4, 5, 1].
+        let (overlay_folder, low, high) = if matches!(stage, 3 | 4) {
+            ("caves", -10.0_f32, 10.0_f32)
+        } else {
+            ("basement", 0.0_f32, 100.0_f32)
+        };
         let mut fx = DecorationRng::new(decoration_seed);
         let overlay_variant = [2, 3, 4, 5, 1][(fx.next() % 5) as usize];
-        let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * 100.0_f32);
+        let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * (high - low) + low);
         let overlay_origin = RoomOrigin {
             // Natural overlay size is 663×429; viewport-centered sampling starts here.
             x: (663.0 - 480.0) * 0.5 + offset(),
@@ -1194,7 +1204,7 @@ impl Room {
                     (26, 14) => "gfx/backdrop/shading_2x2.png",
                     _ => "gfx/backdrop/shading.png",
                 }.into(),
-                overlay: format!("gfx/overlays/basement/1x1_overlay_{overlay_variant}.png"),
+                overlay: format!("gfx/overlays/{overlay_folder}/1x1_overlay_{overlay_variant}.png"),
                 overlay_origin,
                 // Absolute sprite render anchor, not initial-spawn displacement
                 // or the physical ground position used by the radial light.
