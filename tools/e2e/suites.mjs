@@ -66,14 +66,16 @@ export const SUITES = [
   suite('keepers', traversal, ['--scenario-helper', helper('keeper-scenarios.py'), '--count', '1'],
     'Keeper construction and anchored idle in secret rooms'),
   // Each game fights its own keys into a fixed window; the trapdoor exit tail
-  // is shared (see stage-exit-scenarios.py).
+  // is shared (see stage-exit-scenarios.py). The descent fixture clears
+  // Basement I and II with each game's own keys and grades the exit into Caves I.
   suite('stage-exit', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
     '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro',
     '--helper-arg', '--contrived', '--helper-arg', 'SXREBPLT-larry',
-    '--helper-arg', '--contrived', '--helper-arg', 'Y9QL8QZM-larry-active', '--helper-arg', '--count', '--helper-arg', '1',
+    '--helper-arg', '--contrived', '--helper-arg', 'Y9QL8QZM-larry-active',
+    '--helper-arg', '--contrived', '--helper-arg', 'EV9BP18Q-descent', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
     '--native-frame-timeout', '120', '--gl-trace'],
-    'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
+    'Boss-room clear award trapdoor and pedestal, stage transition and Basement II and Caves I arrivals'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
   // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
   suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
