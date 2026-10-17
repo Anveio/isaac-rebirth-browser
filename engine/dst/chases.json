@@ -105,10 +105,13 @@
   },
   {
     "out": "coverage-charger-entry.json",
-    "from": null,
+    "from": "coverage-larry-segments.json",
     "steps": 4000,
     "final_extend": 300,
     "stages": [
+      [
+        "screen:Playing"
+      ],
       [
         "npc:23"
       ]
