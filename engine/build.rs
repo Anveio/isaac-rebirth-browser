@@ -528,6 +528,26 @@ fn entity_catalog(xml: &str) -> String {
 
 /// Every clip of every authored NPC actor: frame count, loop flag and the
 /// (event name, frame) triggers its anm2 authors.
+/// One authored layer-0 keyframe as `content::Keyframe`.
+fn main_keyframe(frame: &Value) -> String {
+    let number = |name: &str| {
+        let value = frame[name].as_f64().expect("authored keyframe number") as f32;
+        assert!(value.is_finite(), "non-finite authored keyframe {name}");
+        value
+    };
+    let delay = frame["Delay"].as_u64().expect("authored keyframe delay");
+    assert!(delay <= u64::from(u32::MAX));
+    format!(
+        "Keyframe {{ delay: {delay}, size: [{:?}, {:?}], pivot: [{:?}, {:?}], position: [{:?}, {:?}] }}",
+        number("Width"),
+        number("Height"),
+        number("XPivot"),
+        number("YPivot"),
+        number("XPosition"),
+        number("YPosition"),
+    )
+}
+
 fn clip_catalog(actors: &Value) -> String {
     let mut output = String::from("pub const CLIPS: &[Clip] = &[\n");
     for (actor, definition) in actors.as_object().expect("NPC actor map") {
@@ -562,12 +582,21 @@ fn clip_catalog(actors: &Value) -> String {
                         .collect()
                 })
                 .unwrap_or_default();
+            let main_layer: Vec<String> = clip["LayerAnimations"]
+                .as_array()
+                .expect("clip layers")
+                .iter()
+                .find(|layer| layer["LayerId"] == 0)
+                .and_then(|layer| layer["Frames"].as_array())
+                .map(|frames| frames.iter().map(main_keyframe).collect())
+                .unwrap_or_default();
             output.push_str(&format!(
-                "Clip {{ actor: {actor:?}, name: {:?}, frames: {}, looping: {}, events: &[{}] }},\n",
+                "Clip {{ actor: {actor:?}, name: {:?}, frames: {}, looping: {}, events: &[{}], main_layer: &[{}] }},\n",
                 clip["Name"].as_str().expect("clip name"),
                 clip["FrameNum"].as_u64().expect("clip frames"),
                 clip["Loop"].as_bool().expect("clip loop flag"),
                 events.join(", "),
+                main_layer.join(", "),
             ));
         }
     }

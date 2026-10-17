@@ -63,6 +63,18 @@ pub struct Clip {
     pub looping: bool,
     /// anm2 Triggers: (event name, AtFrame).
     pub events: &'static [(&'static str, u32)],
+    /// The keyframes of layer 0 (`LayerId` 0), in authored order.
+    pub main_layer: &'static [Keyframe],
+}
+
+/// One authored layer keyframe: Delay, Width/Height, XPivot/YPivot and
+/// XPosition/YPosition.
+#[derive(Clone, Copy, Debug)]
+pub struct Keyframe {
+    pub delay: u32,
+    pub size: [f32; 2],
+    pub pivot: [f32; 2],
+    pub position: [f32; 2],
 }
 
 include!(concat!(env!("OUT_DIR"), "/clip_catalog.rs"));
@@ -71,6 +83,30 @@ pub fn clip(actor: &str, name: &str) -> Option<&'static Clip> {
     CLIPS
         .iter()
         .find(|clip| clip.actor == actor && clip.name == name)
+}
+
+/// The current layer-0 keyframe's centre relative to the actor, as the base
+/// kill computes it (4fa9b1..4faa49): 40fa30 returns the keyframe covering
+/// the clip's current frame (the last one once the frames run out), and the
+/// centre is size * 0.5 - pivot + position. Without that keyframe it is zero.
+pub fn main_layer_centre(actor: &str, name: &str, frame: u32) -> [f32; 2] {
+    let Some(keys) = clip(actor, name).map(|clip| clip.main_layer) else {
+        return [0.0; 2];
+    };
+    let mut end = 0_u32;
+    let key = keys
+        .iter()
+        .find(|key| {
+            end = end.saturating_add(key.delay);
+            frame < end
+        })
+        .or(keys.last());
+    key.map_or([0.0; 2], |key| {
+        [
+            key.size[0] * 0.5 - key.pivot[0] + key.position[0],
+            key.size[1] * 0.5 - key.pivot[1] + key.position[1],
+        ]
+    })
 }
 
 /// One bossportraits.xml VS-screen presentation.

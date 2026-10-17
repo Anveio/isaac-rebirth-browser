@@ -202,8 +202,8 @@ impl NpcEffectAdmission<'_> {
     }
 
     /// Base kill 4fb0a2 of a dead fly-family NPC: Spawn550a40 of 1000.3 with
-    /// the drawn seed (Init draws nothing), then SetColor of the actor's
-    /// current colour. The effect has no immediate update.
+    /// the drawn seed (Init draws nothing), then SetColor 4fb11e of the
+    /// actor's SplatColor. The effect has no immediate update.
     pub(crate) fn admit_fly_explosion(
         &mut self,
         seed: u32,

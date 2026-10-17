@@ -72,6 +72,11 @@ pub struct Npc {
     /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
     #[serde(default)]
     pub sprite_color: crate::sprite_color::SpriteColor,
+    /// SplatColor +3cc: Entity::Init 441c80 resets it to white. Base-kill
+    /// branches colour their effects with it (the fly family's 1000.3 at
+    /// 4fb11e). Dingle's 4ada20 tint is still held in its own state.
+    #[serde(default = "white", skip_serializing_if = "is_white")]
+    pub splat_color: crate::sprite_color::Color,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub gluttony: Option<crate::gluttony::GluttonyState>,
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
@@ -139,6 +144,14 @@ pub struct Overlay {
     pub frame: u32,
     pub clock: f32,
     pub playing: bool,
+}
+
+fn white() -> crate::sprite_color::Color {
+    crate::sprite_color::Color::WHITE
+}
+
+fn is_white(color: &crate::sprite_color::Color) -> bool {
+    *color == crate::sprite_color::Color::WHITE
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -846,6 +859,7 @@ impl Npc {
             shooter: None,
             champion: None,
             sprite_color: crate::sprite_color::SpriteColor::default(),
+            splat_color: crate::sprite_color::Color::WHITE,
             flip_x: false,
             pathfinder: None,
             gluttony: None,

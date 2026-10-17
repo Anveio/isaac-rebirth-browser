@@ -281,7 +281,7 @@ fn advance_full(
         // on, otherwise the base kill retires the actor.
         ai(npc, random, world, births, &mut friction)?;
         if npc.dead {
-            base_kill(npc, random, world)?;
+            base_kill(npc, random, births);
             npc.removed = true;
             return Ok(());
         }
@@ -375,18 +375,22 @@ fn advance_full(
 
 /// Base kill 4fa95e of a dead NPC's update. The fly family (4fbf48..4fbf75
 /// -> 4fb0a2: types 13, 14, 18, 214, 222 and 249) draws a seed and spawns
-/// Fly Explosion 1000.3 in the actor's current colour. Types 94/85/215/250
-/// (1000.38 at 4faa5a), the gib branch from 4fbf7b and the room-age-900
-/// branch at 4fab00 remain unadmitted.
-fn base_kill(npc: &Npc, random: &mut Mt19937, world: &mut NpcWorld) -> Result<(), String> {
+/// Fly Explosion 1000.3 at the actor's position plus its current layer-0
+/// centre (4fa9b1..4faa49, added at 4fb0bc), then SetColor 4fb11e copies the
+/// actor's SplatColor. The explosion follows the AI's own births: a dead
+/// Pooter's last shot is spawned inside its AI, before the base kill. Types
+/// 94/85/215/250 (1000.38 at 4faa5a), the gib branch from 4fbf7b and the
+/// room-age-900 branch at 4fab00 remain unadmitted.
+fn base_kill(npc: &Npc, random: &mut Mt19937, births: &mut Vec<Birth>) {
     if matches!(npc.kind, 13 | 14 | 18 | 214 | 222 | 249) {
         let seed = random.next_u32();
-        let color = npc.sprite_color.current;
-        world
-            .effects
-            .admit_fly_explosion(seed, npc.position, color.tint, color.offset)?;
+        let [x, y] = content::main_layer_centre(&npc.actor, &npc.animation, npc.animation_frame);
+        births.push(Birth::FlyExplosion {
+            seed,
+            position: npc.position + WorldVector { x, y },
+            color: npc.splat_color,
+        });
     }
-    Ok(())
 }
 
 /// is_frame444890: Game+ce9f4 plus the actor's manager sequence, modulo n.
