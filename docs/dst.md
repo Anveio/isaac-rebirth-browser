@@ -142,7 +142,7 @@ boss room entry:
 - Larry Jr. lost half its segments in 46 of 64, and the deaths spawn kind 21.
 - Gemini's main body died in 2 of 128, which retires its cord.
 - Dingle still wins every fight it starts (128 of 128).
-- The Gurglings (237.1), met in a boss room by `coverage-1f62ae0612d613b8`,
+- The Gurglings (237.1), met in a boss room by `coverage-gurglings-entry`,
   survived all 256 branches on ff24cc6, though 6 to 10 of each 64 brought the
   boss below half health.
 
@@ -272,7 +272,8 @@ every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, restart and Random-exit regressions, the Monstro, Larry Jr. and
-Gemini kills, and the Dingle entry (`"from": null` chases from a fresh boot).
+Gemini kills, and the Dingle and Gurglings entries (`"from": null` chases
+from a fresh boot).
 Boss fights and descents are the first coverage a shared-MT change moves, so
 one command rebuilds all of them:
 
