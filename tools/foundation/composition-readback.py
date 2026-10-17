@@ -239,6 +239,8 @@ def native_readback():
     if pocket:
         expect(input_meta['declaredSfxVolume'], case['sfxVolume'])
         expect(input_meta['requiredPocketContract'], case['pocketInit'] if 'pocketInit' in case else case['pocketCollection'])
+    if 'pillUse' in case:
+        expect(input_meta['requiredPillUseContract'], case['pillUse'])
     expect(input_meta['nativeDepotChanged'], False)
     expect(input_meta['nativeObservationUsedAsInput'], False)
     expect(input_meta['declaredResourcesBeforeEqualsEnd'], True)
@@ -471,6 +473,8 @@ if a.wasm_node:
     result['captureBackend'] = 'wasm-node'
     result['unavailable'] = ['DOM inputs', 'Browser renderer and PNGs', 'Audio backend and PCM']
     result['scope'] = 'Complete independent Original and public-WASM ABI input/evidence readback. Actual functional fields require the unchanged pocket comparer; DOM/backend are not qualified.'
+if 'pillUse' in case:
+    result['scope'] = 'Complete independent Original and public-input capture readback. Positive Pill functional fields require the separate real-use reader; private order/render/backend remain unavailable.'
 a.output.write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps({'status': result['status'], 'checks': checks}))
 raise SystemExit(0 if result['status'] == 'pass' else 1)
