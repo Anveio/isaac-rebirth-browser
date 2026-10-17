@@ -124,6 +124,10 @@ impl GridEntity {
                 self.collision_class = 0;
                 costs.store(index, 1300)?;
             }
+            // Fresh Block3 shares Rock.Init56ED00. The actual geometry
+            // admission already owns its state0→1/frame selection; the
+            // initializer stores the same real state1 path cost.
+            3 if self.state == 1 => costs.store(index, 1000)?,
             // Rock (2/5/6) and Spike (8) Init stores are owned by the
             // recovered room geometry and path costs.
             2 | 5 | 6 | 8 => {}
@@ -254,6 +258,17 @@ pub fn admit_selector(
     {
         return Ok(());
     }
+    //5CEA7F/84 maps raw1900 to GridRock3. Its backdrop1/ordinary-Room
+    //Init has no entity descendants; Room14/15's reached effect producers
+    //and other backdrop/variant callers retain their existing frontier.
+    let ordinary_block = selector.entity_type == 1900
+        && selector.variant == 0
+        && selector.subtype == 0
+        && room.appearance.backdrop_id == 1
+        && room
+            .descriptor
+            .as_ref()
+            .is_some_and(|descriptor| descriptor.template.room_type == 1);
     let grid = room
         .grid
         .as_mut()
@@ -290,6 +305,13 @@ pub fn admit_selector(
         return Ok(());
     }
     match cell.entity.as_mut() {
+        Some(entity) if entity.kind == 3 && entity.state == 1 && ordinary_block => {
+            //Keep both real560FF0 raw constructor words, then561040
+            //overwrites primary from the authored group seed. The old
+            //unowned fallback already consumed exactly these two words.
+            entity.construct_owner(shared)?;
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)
+        }
         Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8 | 12 | 14) => {
             entity.construct_owner(shared)?;
             entity.init_seed(selector.spawn_seed, game_update, costs, index)

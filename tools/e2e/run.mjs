@@ -102,6 +102,17 @@ if (suiteArgs.length && selected.length !== 1) {
   console.error(`Suite flags (${suiteArgs.join(' ')}) need exactly one suite: npm run test:e2e -- <suite> ${suiteArgs.join(' ')}`);
   process.exit(2);
 }
+// `--scenarios BANK` means "replay this bank" for every suite: a driver whose
+// replay flag is spelled differently would otherwise ignore it and draw fresh
+// OS-random cases. (paired-game's own --scenarios lists contrived ids.)
+if (suiteArgs.includes('--scenarios') && selected.length === 1 && selected[0].entry !== 'tools/foundation/paired-game.mjs') {
+  const [suite] = selected;
+  if (suite.replay === false) { console.error(`${suite.id} has no replay input yet; it cannot take --scenarios`); process.exit(2); }
+  if (suite.replay && suite.replay !== '--scenarios') {
+    suiteArgs.splice(suiteArgs.indexOf('--scenarios'), 1, suite.replay);
+    console.log(`${suite.id} replays its bank through ${suite.replay}`);
+  }
+}
 
 // Caller flags replace the registry's flag of the same name rather than
 // relying on each driver's parser to prefer the last occurrence.
@@ -198,7 +209,7 @@ function runSuiteInSlot(suite) {
   const startedAt = Date.now();
   console.log(`▶ ${suite.id}: node ${suite.entry} ${args.join(' ')}`);
   return new Promise(done => {
-    const child = spawn('bash', ['tools/original/with-display.sh', 'node', suite.entry, ...args], { cwd: ROOT });
+    const child = spawn('bash', ['tools/original/with-display.sh', 'node', suite.entry, ...args], { cwd: ROOT, env: { ...process.env, ...suite.env } });
     for (const stream of [child.stdout, child.stderr]) stream.on('data', chunk => {
       log.write(chunk);
       if (jobs === 1) process.stdout.write(chunk);

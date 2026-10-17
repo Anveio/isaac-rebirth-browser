@@ -31,3 +31,16 @@ requiring `truncated === false`. Incomplete state history cannot establish a
 complete native/WASM replay contract, even when its input tape is complete.
 Metadata byte or record overflow stops retention explicitly and also marks
 state history incomplete; no commands or snapshots are synthesized.
+
+The browser's append-only background-stain channel serializes borrowed typed
+records directly, preserving the same `f32` JSON representation as complete
+Rust state snapshots. Building an intermediate generic JSON value widens those
+fields to `f64` and can make equivalent engine states compare unequal.
+
+A fixed real-DOM menu, seed, movement and shooting run on artifact `729b2289`
+passes all 58 exact public-state comparisons on both the first and cached
+native replay. The earlier seven failing states remain recorded. All 58 native
+states and all 10 full-frame PNGs are unchanged; comparison against the same
+two actual Original captures retains five passing and five failing pixel
+checks. This verifies JSON transport and retained presentation regression,
+without observing the Original's internal background-stain pool.

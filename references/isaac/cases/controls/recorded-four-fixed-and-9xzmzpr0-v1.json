@@ -1,0 +1,8188 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "controls-movement-up-w-to-i-v1",
+        "randomized": false,
+        "scope": "Fixed public Keyboard W-to-I route: actual menu9/10, complete binding owners, Back save/readback, actual remapped movement and old-key coasting refusal. Reload and broader action/controller/pixel/audio parity remain separate."
+      },
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "initialSeed": 2184569263,
+      "bootEpochSeed": 1700000000,
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "Existing canonical first-Title prelude, no Native observation defines Browser commands"
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "capture",
+          "label": "remap-gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-released"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-held-no-movement"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-released"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "capture",
+          "label": "remap-gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-released"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-held-no-movement"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-released"
+        }
+      ],
+      "menuOwnerPages": {
+        "title-ready": 1,
+        "profile-ready": 2,
+        "main-ready": 3,
+        "main-options-selected": 3,
+        "options-ready": 8,
+        "controls-devices-ready": 9,
+        "controls-keyboard-ready": 10,
+        "binding-await-key": 10,
+        "binding-i-committed": 10,
+        "controls-back-saved": 9,
+        "options-after-controls": 8,
+        "main-after-options": 3,
+        "main-new-run-selected": 3,
+        "character-ready": 4,
+        "seed-entry": 4,
+        "character-seed-committed": 4
+      },
+      "playingOwnerLabels": [
+        "gameplay-start",
+        "remap-gameplay-start",
+        "remapped-i-held",
+        "remapped-i-released",
+        "old-w-held-no-movement",
+        "old-w-released"
+      ],
+      "introOwnerLabels": [
+        "intro"
+      ],
+      "expectedBindingsBefore": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          87,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "expectedBindingsAfter": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          73,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "bindingChangedLabel": "binding-i-committed",
+      "backSaveLabel": "controls-back-saved",
+      "comparisons": {
+        "fullFrameRGBA": "Strict actual diagnostic, required:false; mismatch remains recorded",
+        "state": "Actual menu families1/2/3/4/8/9/10; Keyboard24x2; physical input; actual independent Native/publicBrowser P/V; file/settings readback",
+        "completeOriginalStateParity": false
+      },
+      "oldWRefusalContract": "Label retained verbatim. Eight release presentations do not imply stationary position: require actual W pressed with action2 false, actual no collision, decaying vertical speed and strict Native/Browser P/V agreement, never a zero-displacement golden. New I must produce negative vertical movement and negative velocity.",
+      "controlsMenuOwnerLabels": [
+        "controls-devices-ready",
+        "controls-keyboard-ready",
+        "binding-await-key",
+        "binding-i-committed",
+        "controls-back-saved"
+      ]
+    },
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "controls-second-column-up-i-v1",
+        "randomized": false,
+        "scope": "Fixed public Keyboard Controls route with complete declared menu/physical/binding/save and final normal-run seed owners. Audio refusal uses the corrected actual Menu clock protocol; no legacy report is regraded."
+      },
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "initialSeed": 2184569263,
+      "bootEpochSeed": 1700000000,
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "Existing canonical first-Title prelude, no Native observation defines Browser commands"
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "column1-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "two-up-columns-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column0-w-held"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column0-w-released"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column1-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column1-i-released"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "column1-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "two-up-columns-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column0-w-held"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column0-w-released"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column1-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "column1-i-released"
+        }
+      ],
+      "fixedBankCaseId": "second-column-up-i",
+      "menuOwnerPages": {
+        "title-ready": 1,
+        "profile-ready": 2,
+        "main-ready": 3,
+        "main-options-selected": 3,
+        "options-ready": 8,
+        "controls-devices-ready": 9,
+        "controls-keyboard-ready": 10,
+        "binding-await-key": 10,
+        "binding-i-committed": 10,
+        "options-after-controls": 8,
+        "main-after-options": 3,
+        "main-new-run-selected": 3,
+        "character-ready": 4,
+        "seed-entry": 4,
+        "character-seed-committed": 4,
+        "column1-selected": 10,
+        "two-up-columns-saved": 9
+      },
+      "expectedMenuConfigurations": {
+        "controls-keyboard-ready": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        },
+        "binding-await-key": {
+          "selection": 0,
+          "column": 1,
+          "waiting": true
+        },
+        "binding-i-committed": {
+          "selection": 0,
+          "column": 1,
+          "waiting": false
+        },
+        "column1-selected": {
+          "selection": 0,
+          "column": 1,
+          "waiting": false
+        }
+      },
+      "controlsMenuOwnerLabels": [
+        "controls-devices-ready",
+        "controls-keyboard-ready",
+        "binding-await-key",
+        "binding-i-committed",
+        "column1-selected",
+        "two-up-columns-saved"
+      ],
+      "playingOwnerLabels": [
+        "gameplay-start",
+        "column0-w-held",
+        "column0-w-released",
+        "column1-i-held",
+        "column1-i-released"
+      ],
+      "introOwnerLabels": [
+        "intro"
+      ],
+      "audioOwnerLabels": [],
+      "expectedBindingsBefore": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          87,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "expectedBindingTransitions": [
+        {
+          "label": "binding-i-committed",
+          "bindings": [
+            [
+              65,
+              -1
+            ],
+            [
+              68,
+              -1
+            ],
+            [
+              87,
+              73
+            ],
+            [
+              83,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ],
+            [
+              69,
+              -1
+            ],
+            [
+              32,
+              -1
+            ],
+            [
+              81,
+              -1
+            ],
+            [
+              341,
+              -1
+            ],
+            [
+              80,
+              -1
+            ],
+            [
+              258,
+              -1
+            ],
+            [
+              32,
+              257
+            ],
+            [
+              256,
+              -1
+            ],
+            [
+              82,
+              -1
+            ],
+            [
+              70,
+              -1
+            ],
+            [
+              77,
+              -1
+            ],
+            [
+              257,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ]
+          ]
+        }
+      ],
+      "saveLabel": "two-up-columns-saved",
+      "movementKind": "both-up-columns",
+      "required": [
+        "Left selects source column1",
+        "action2 columns87,73 both retained",
+        "fixed action14 Space/Enter unchanged",
+        "later public gameplay suffix must exercise each key independently"
+      ],
+      "comparisons": {
+        "fullFrameRGBA": "Strict actual diagnostic, required:false; mismatch remains recorded",
+        "state": "Actual menu families1/2/3/4/8/9/10; Keyboard24x2; physical input; actual independent Native/publicBrowser P/V; file/settings readback",
+        "completeOriginalStateParity": false
+      },
+      "unqualified": [
+        "Native/Browser process reload",
+        "per-physical fixedconfirm alternate-edge/rawpriority",
+        "Full/Fast/Skipped/disabled-interpolation bomb edges",
+        "Game Escape/pause interaction",
+        "OS/controller/hotplug/malformedfile",
+        "pixel/audiooutput/PCM/wholeControls"
+      ]
+    },
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "controls-escape-is-binding-candidate-v1",
+        "randomized": false,
+        "scope": "Fixed public Keyboard Controls route with complete declared menu/physical/binding/save and final normal-run seed owners. Audio refusal uses the corrected actual Menu clock protocol; no legacy report is regraded."
+      },
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "initialSeed": 2184569263,
+      "bootEpochSeed": 1700000000,
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "Existing canonical first-Title prelude, no Native observation defines Browser commands"
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "escape-bound-to-up"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "fresh-back-after-escape-bind"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "escape-bound-to-up"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "fresh-back-after-escape-bind"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "fixedBankCaseId": "escape-is-binding-candidate",
+      "menuOwnerPages": {
+        "title-ready": 1,
+        "profile-ready": 2,
+        "main-ready": 3,
+        "main-options-selected": 3,
+        "options-ready": 8,
+        "controls-devices-ready": 9,
+        "controls-keyboard-ready": 10,
+        "binding-await-key": 10,
+        "options-after-controls": 8,
+        "main-after-options": 3,
+        "main-new-run-selected": 3,
+        "character-ready": 4,
+        "seed-entry": 4,
+        "character-seed-committed": 4,
+        "escape-bound-to-up": 10,
+        "fresh-back-after-escape-bind": 9
+      },
+      "expectedMenuConfigurations": {
+        "controls-keyboard-ready": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        },
+        "binding-await-key": {
+          "selection": 0,
+          "column": 0,
+          "waiting": true
+        },
+        "escape-bound-to-up": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        }
+      },
+      "controlsMenuOwnerLabels": [
+        "controls-devices-ready",
+        "controls-keyboard-ready",
+        "binding-await-key",
+        "escape-bound-to-up",
+        "fresh-back-after-escape-bind"
+      ],
+      "playingOwnerLabels": [
+        "gameplay-start"
+      ],
+      "introOwnerLabels": [
+        "intro"
+      ],
+      "audioOwnerLabels": [],
+      "expectedBindingsBefore": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          87,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "expectedBindingTransitions": [
+        {
+          "label": "escape-bound-to-up",
+          "bindings": [
+            [
+              65,
+              -1
+            ],
+            [
+              68,
+              -1
+            ],
+            [
+              256,
+              -1
+            ],
+            [
+              83,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ],
+            [
+              69,
+              -1
+            ],
+            [
+              32,
+              -1
+            ],
+            [
+              81,
+              -1
+            ],
+            [
+              341,
+              -1
+            ],
+            [
+              80,
+              -1
+            ],
+            [
+              258,
+              -1
+            ],
+            [
+              32,
+              257
+            ],
+            [
+              256,
+              -1
+            ],
+            [
+              82,
+              -1
+            ],
+            [
+              70,
+              -1
+            ],
+            [
+              77,
+              -1
+            ],
+            [
+              257,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ]
+          ]
+        }
+      ],
+      "saveLabel": "fresh-back-after-escape-bind",
+      "movementKind": null,
+      "required": [
+        "Escape256 is bound while waiting; not a cancel",
+        "subsequent fresh Escape returns through fixedaction15"
+      ],
+      "comparisons": {
+        "fullFrameRGBA": "Strict actual diagnostic, required:false; mismatch remains recorded",
+        "state": "Actual menu families1/2/3/4/8/9/10; Keyboard24x2; physical input; actual independent Native/publicBrowser P/V; file/settings readback",
+        "completeOriginalStateParity": false
+      },
+      "unqualified": [
+        "Native/Browser process reload",
+        "per-physical fixedconfirm alternate-edge/rawpriority",
+        "Full/Fast/Skipped/disabled-interpolation bomb edges",
+        "Game Escape/pause interaction",
+        "OS/controller/hotplug/malformedfile",
+        "pixel/audiooutput/PCM/wholeControls"
+      ]
+    },
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "controls-duplicate-back-default-recovery-v1",
+        "randomized": false,
+        "scope": "Fixed public Keyboard Controls route with complete declared menu/physical/binding/save and final normal-run seed owners. Audio refusal uses the corrected actual Menu clock protocol; no legacy report is regraded."
+      },
+      "seed": "T1PK6Y0W",
+      "seedValue": 2184569263,
+      "initialSeed": 2184569263,
+      "bootEpochSeed": 1700000000,
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "Existing canonical first-Title prelude, no Native observation defines Browser commands"
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "down-cleared-up-s-bound"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "back-refused-sfx187"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "defaults-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "defaults-restored"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "defaults-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "default-w-held"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "default-w-released"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "s",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "down-cleared-up-s-bound"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "back-refused-sfx187"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "defaults-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "defaults-restored"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "defaults-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "t",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "default-w-held"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "default-w-released"
+        }
+      ],
+      "fixedBankCaseId": "duplicate-back-default-recovery",
+      "menuOwnerPages": {
+        "title-ready": 1,
+        "profile-ready": 2,
+        "main-ready": 3,
+        "main-options-selected": 3,
+        "options-ready": 8,
+        "controls-devices-ready": 9,
+        "controls-keyboard-ready": 10,
+        "binding-await-key": 10,
+        "options-after-controls": 8,
+        "main-after-options": 3,
+        "main-new-run-selected": 3,
+        "character-ready": 4,
+        "seed-entry": 4,
+        "character-seed-committed": 4,
+        "down-cleared-up-s-bound": 10,
+        "back-refused-sfx187": 10,
+        "defaults-selected": 10,
+        "defaults-restored": 10,
+        "defaults-back-saved": 9
+      },
+      "expectedMenuConfigurations": {
+        "controls-keyboard-ready": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        },
+        "binding-await-key": {
+          "selection": 0,
+          "column": 0,
+          "waiting": true
+        },
+        "down-cleared-up-s-bound": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        },
+        "back-refused-sfx187": {
+          "selection": 0,
+          "column": 0,
+          "waiting": false
+        },
+        "defaults-selected": {
+          "selection": 17,
+          "column": 0,
+          "waiting": false
+        },
+        "defaults-restored": {
+          "selection": 17,
+          "column": 0,
+          "waiting": false
+        }
+      },
+      "controlsMenuOwnerLabels": [
+        "controls-devices-ready",
+        "controls-keyboard-ready",
+        "binding-await-key",
+        "down-cleared-up-s-bound",
+        "back-refused-sfx187",
+        "defaults-selected",
+        "defaults-restored",
+        "defaults-back-saved"
+      ],
+      "playingOwnerLabels": [
+        "gameplay-start",
+        "default-w-held",
+        "default-w-released"
+      ],
+      "introOwnerLabels": [
+        "intro"
+      ],
+      "audioOwnerLabels": [
+        "down-cleared-up-s-bound",
+        "back-refused-sfx187"
+      ],
+      "expectedBindingsBefore": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          87,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "expectedBindingTransitions": [
+        {
+          "label": "down-cleared-up-s-bound",
+          "bindings": [
+            [
+              65,
+              -1
+            ],
+            [
+              68,
+              -1
+            ],
+            [
+              83,
+              -1
+            ],
+            [
+              -1,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ],
+            [
+              69,
+              -1
+            ],
+            [
+              32,
+              -1
+            ],
+            [
+              81,
+              -1
+            ],
+            [
+              341,
+              -1
+            ],
+            [
+              80,
+              -1
+            ],
+            [
+              258,
+              -1
+            ],
+            [
+              32,
+              257
+            ],
+            [
+              256,
+              -1
+            ],
+            [
+              82,
+              -1
+            ],
+            [
+              70,
+              -1
+            ],
+            [
+              77,
+              -1
+            ],
+            [
+              257,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "defaults-restored",
+          "bindings": [
+            [
+              65,
+              -1
+            ],
+            [
+              68,
+              -1
+            ],
+            [
+              87,
+              -1
+            ],
+            [
+              83,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ],
+            [
+              69,
+              -1
+            ],
+            [
+              32,
+              -1
+            ],
+            [
+              81,
+              -1
+            ],
+            [
+              341,
+              -1
+            ],
+            [
+              80,
+              -1
+            ],
+            [
+              258,
+              -1
+            ],
+            [
+              32,
+              257
+            ],
+            [
+              256,
+              -1
+            ],
+            [
+              82,
+              -1
+            ],
+            [
+              70,
+              -1
+            ],
+            [
+              77,
+              -1
+            ],
+            [
+              257,
+              -1
+            ],
+            [
+              263,
+              -1
+            ],
+            [
+              262,
+              -1
+            ],
+            [
+              265,
+              -1
+            ],
+            [
+              264,
+              -1
+            ]
+          ]
+        }
+      ],
+      "saveLabel": "defaults-back-saved",
+      "movementKind": "defaults-up",
+      "required": [
+        "S clears action3 in both columns before action2 receives83",
+        "Back stays Menu10 and actual SFX187 delay2 admitted",
+        "Defaults restores actual24pair first-free constructor path",
+        "Back saves complete owner and returns Menu9"
+      ],
+      "comparisons": {
+        "fullFrameRGBA": "Strict actual diagnostic, required:false; mismatch remains recorded",
+        "state": "Actual menu families1/2/3/4/8/9/10; Keyboard24x2; physical input; actual independent Native/publicBrowser P/V; file/settings readback",
+        "completeOriginalStateParity": false
+      },
+      "unqualified": [
+        "Native/Browser process reload",
+        "per-physical fixedconfirm alternate-edge/rawpriority",
+        "Full/Fast/Skipped/disabled-interpolation bomb edges",
+        "Game Escape/pause interaction",
+        "OS/controller/hotplug/malformedfile",
+        "pixel/audiooutput/PCM/wholeControls"
+      ]
+    },
+    {
+      "schema": 1,
+      "scenario": {
+        "id": "controls-os-movement-up-w-to-i-v1",
+        "randomized": true,
+        "scope": "One recorded unfiltered nonzero-u32 run seed and independent-u32 boot epoch, with the same fixed public Keyboard W-to-I route and holds. No room/layout filter or resampling."
+      },
+      "seed": "9XZMZPR0",
+      "seedValue": 4077241672,
+      "initialSeed": 4077241672,
+      "bootEpochSeed": 3719662119,
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ],
+        "sourceContract": "Existing canonical first-Title prelude, no Native observation defines Browser commands"
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "r",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "r",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "capture",
+          "label": "remap-gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-released"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-held-no-movement"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-released"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-ready"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-options-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-devices-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-keyboard-ready"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-await-key"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "binding-i-committed"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "controls-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "options-after-controls"
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main-after-options"
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 24
+        },
+        {
+          "type": "capture",
+          "label": "main-new-run-selected"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-ready"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "m",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "z",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "p",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "r",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "r",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seed-committed"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "capture",
+          "label": "remap-gameplay-start"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-held"
+        },
+        {
+          "type": "key",
+          "key": "i",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "remapped-i-released"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-held-no-movement"
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "capture",
+          "label": "old-w-released"
+        }
+      ],
+      "menuOwnerPages": {
+        "title-ready": 1,
+        "profile-ready": 2,
+        "main-ready": 3,
+        "main-options-selected": 3,
+        "options-ready": 8,
+        "controls-devices-ready": 9,
+        "controls-keyboard-ready": 10,
+        "binding-await-key": 10,
+        "binding-i-committed": 10,
+        "controls-back-saved": 9,
+        "options-after-controls": 8,
+        "main-after-options": 3,
+        "main-new-run-selected": 3,
+        "character-ready": 4,
+        "seed-entry": 4,
+        "character-seed-committed": 4
+      },
+      "playingOwnerLabels": [
+        "gameplay-start",
+        "remap-gameplay-start",
+        "remapped-i-held",
+        "remapped-i-released",
+        "old-w-held-no-movement",
+        "old-w-released"
+      ],
+      "introOwnerLabels": [
+        "intro"
+      ],
+      "expectedBindingsBefore": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          87,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "expectedBindingsAfter": [
+        [
+          65,
+          -1
+        ],
+        [
+          68,
+          -1
+        ],
+        [
+          73,
+          -1
+        ],
+        [
+          83,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ],
+        [
+          69,
+          -1
+        ],
+        [
+          32,
+          -1
+        ],
+        [
+          81,
+          -1
+        ],
+        [
+          341,
+          -1
+        ],
+        [
+          80,
+          -1
+        ],
+        [
+          258,
+          -1
+        ],
+        [
+          32,
+          257
+        ],
+        [
+          256,
+          -1
+        ],
+        [
+          82,
+          -1
+        ],
+        [
+          70,
+          -1
+        ],
+        [
+          77,
+          -1
+        ],
+        [
+          257,
+          -1
+        ],
+        [
+          263,
+          -1
+        ],
+        [
+          262,
+          -1
+        ],
+        [
+          265,
+          -1
+        ],
+        [
+          264,
+          -1
+        ]
+      ],
+      "bindingChangedLabel": "binding-i-committed",
+      "backSaveLabel": "controls-back-saved",
+      "comparisons": {
+        "fullFrameRGBA": "Strict actual diagnostic, required:false; mismatch remains recorded",
+        "state": "Actual menu families1/2/3/4/8/9/10; Keyboard24x2; physical input; actual independent Native/publicBrowser P/V; file/settings readback",
+        "completeOriginalStateParity": false
+      },
+      "oldWRefusalContract": "Label retained verbatim. Eight release presentations do not imply stationary position: require actual W pressed with action2 false, actual no collision, decaying vertical speed and strict Native/Browser P/V agreement, never a zero-displacement golden. New I must produce negative vertical movement and negative velocity.",
+      "controlsMenuOwnerLabels": [
+        "controls-devices-ready",
+        "controls-keyboard-ready",
+        "binding-await-key",
+        "binding-i-committed",
+        "controls-back-saved"
+      ],
+      "entropy": {
+        "source": "OS secrets; unfiltered nonzero-u32 run seed and independent-u32 boot epoch",
+        "seedValue": 4077241672,
+        "bootEpochSeed": 3719662119
+      }
+    }
+  ]
+}

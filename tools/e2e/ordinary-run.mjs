@@ -12,7 +12,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
 import { compareSavedRoomGrid } from '../foundation/saved-grid-compare.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step } from './lib/game.mjs';
+import { snapshot, step, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -220,7 +220,7 @@ try {
         assert.notDeepEqual(state.bootLifecycle.levelGridSeedSamples, checkpoints.find(checkpoint => checkpoint.label === 'character').state.bootLifecycle.levelGridSeedSamples, 'Actual Level admission must replace its constructor seed table');
         result.comparedLevelGridPairs = 45;
       }
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       assertInputProvenance(trace, commands, scenario.initialSeed, scenario.bootEpochSeed);
       await writeFile(join(directory, 'trace.json'), JSON.stringify(trace) + '\n'); assert.deepEqual(errors, []);
       result.status = result.savedGridRequiredFailures?.length ? 'fail' : 'pass';
@@ -233,7 +233,7 @@ try {
       await writeFile(join(directory, 'expected-commands.json'), JSON.stringify(commands, null, 2) + '\n');
       await writeFile(join(directory, 'browser-checkpoints.json'), JSON.stringify(checkpoints) + '\n');
       if (page) {
-        await page.evaluate(() => window.game.trace()).then(async trace => {
+        await readTrace(page).then(async trace => {
           await writeFile(join(directory, 'last-trace.json'), JSON.stringify(trace) + '\n');
           assertInputProvenance(trace, commands, scenario.initialSeed, scenario.bootEpochSeed);
           result.inputProvenance = { status: 'pass', expectedCommands: commands.length, observedCommands: trace.commands.length, initialSeed: scenario.initialSeed, bootEpochSeed: scenario.bootEpochSeed };

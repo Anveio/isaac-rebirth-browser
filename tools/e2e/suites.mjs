@@ -15,6 +15,7 @@
 //   replay  flag that replays the suite's recorded scenarios.json
 //           (default --scenarios; paired-game suites replay case.json tapes;
 //           false when the driver has no replay input yet)
+//   env     extra environment for the driver and the games it launches
 
 import { entitySpecs } from './entities.mjs';
 
@@ -52,6 +53,8 @@ export const SUITES = [
     'Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening'),
   // --ambient-grid also enables the level-descriptor, saved-game and grid-record
   // checks; the tapes and cases are identical with or without them.
+  suite('controls', e2e('controls'), ['--count', '1'],
+    'Keyboard menu9/10,24x2 bindings, Back/save, duplicate refusal, Defaults, Escape and actual movement; four fixed plus unfiltered OS'),
   suite('ordinary-run', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'],
     'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
@@ -130,8 +133,14 @@ export const SUITES = [
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
   suite('options-audio', e2e('options-audio'), ['--count', '1'],
-    'Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed'),
-  suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
+    'Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed',
+    { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
+  // The original streams and starts music on worker threads that keep real
+  // clocks, so this suite keeps the clock gate at full presentation cost
+  // instead of dropping released frames (foundation-clock-gate.c): faster
+  // frames would outrun the native PCM upload the suite requires.
+  suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks',
+    { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
   suite('footprint-admission', statePair, [
     '--scenario-helper', helper('entity-scenarios.py'),
     '--helper-arg', '--room-type', '--helper-arg', '6',
@@ -155,7 +164,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
-  boot: ['paired', 'regressions', 'boot-mt', 'ordinary-run', 'run-admission', 'floor', 'options-audio'],
+  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'ordinary-run', 'run-admission', 'floor', 'options-audio'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission'],
   stage: ['stage-exit', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],

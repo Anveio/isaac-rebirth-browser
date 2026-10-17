@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, statfsSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -12,9 +12,12 @@ import { manifestPath as browserManifestPath, readJsonEvidence, writeJsonEvidenc
 import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
+import { comparePixelPairs } from './pixel-pairs.mjs';
 import { flag, selectCases } from '../e2e/lib/cli.mjs';
 import { startProductionServer } from './production-server.mjs';
 import { audioObservedBrowser } from '../e2e/lib/audio-owners.mjs';
+import { evaluateJson, readTrace } from '../e2e/lib/game.mjs';
+import {readBrowserControls,installPhysicalObserver} from './controls-browser-observe.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -161,7 +164,7 @@ export function validateNativeClockPlan(data, plan, native) {
     scope: 'Actual independent Native acknowledgement/capture times validate the prior public declaration; no readback changes a Browser command'};
 }
 
-export async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan, audioOwnerTrace, optionsAudioOwners = false) {
+export async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan, audioOwnerTrace, optionsAudioOwners = false, originalMusicVolume) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
@@ -174,6 +177,11 @@ export async function nativeCapture(caseData, directory, nativeFrameTimeout, ori
   }
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
+  if (originalMusicVolume !== undefined) {
+    assert.ok(Number.isFinite(originalMusicVolume) && originalMusicVolume >= 0 && originalMusicVolume <= 1, 'Explicit Native Music volume must be within 0..1');
+    assert.ok(!audioOwnerTrace || originalMusicVolume === 1, 'Audio owner tracing already declares Music volume1');
+    if (!audioOwnerTrace) args.push('--music-volume', String(originalMusicVolume));
+  }
   if (audioOwnerTrace) {
     assert.equal(originalSfxVolume, 1);
     args.push('--audio-trace', audioOwnerTrace, '--audio-sfx-owners', '--music-volume', '1');
@@ -214,10 +222,14 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
 }
 
 export async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
-  audioPreferences = {sfxVolume: 0, musicVolume: 0}) {
+  audioPreferences = {sfxVolume: 0, musicVolume: 0}, captureControlsOwners = false) {
   mkdirSync(directory, { recursive: true });
+  assert.equal(typeof captureControlsOwners, 'boolean');
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
+  if (captureControlsOwners) await context.addInitScript(installPhysicalObserver);
   const page = await context.newPage();
+  const pageErrors = [];
+  if (captureControlsOwners) page.on('pageerror',error=>pageErrors.push({message:String(error),stack:error.stack}));
   const frames = [], inputs = [], expectedCommands = [];
   // Independent launcher inputs, never Original readback; before either capture.
   assert.ok(audioPreferences && typeof audioPreferences === 'object' && !Array.isArray(audioPreferences));
@@ -291,15 +303,20 @@ export async function browserCapture(browser, server, caseData, directory, archi
           return { ...result, stateJson };
         }, captureBrowserAudio);
         captured.state = JSON.parse(captured.stateJson);
+        if (captureControlsOwners) {
+          captured.controls = await readBrowserControls(page);
+          assert.equal(captured.controls.tick,captured.state.tick,'Actual Controls owners must share the captured manual presentation');
+          assert.equal(captured.controls.screen,captured.state.screen);
+        }
         const bytes = Buffer.from(captured.png, 'base64');
         const path = join(directory, action.label + '.png');
         writeFileSync(path, bytes);
         frames.push({ label: action.label, path, sha256: digest(bytes), browserPresentation: presentations,
-          state: captured.state, render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
+          state: captured.state, ...(captureControlsOwners ? {controls: captured.controls} : {}), render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
-    if (mtDraws) save(join(directory, 'mt-draws.json'), await page.evaluate(() => window.game.mtDraws.take()));
-    const trace = await page.evaluate(() => window.game.trace());
+    if (mtDraws) save(join(directory, 'mt-draws.json'), await evaluateJson(page, () => window.game.mtDraws.take()));
+    const trace = await readTrace(page);
     if (archiveBrowserEvidence) {
       const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
       save(join(directory, 'trace-archive.json'), evidence);
@@ -328,7 +345,21 @@ export async function browserCapture(browser, server, caseData, directory, archi
     assert.equal(final?.seededRun, true, 'Browser must commit the public manual seed entry');
     assert.equal(final?.runSeed, requestedSeed, 'Browser must read back the committed public run code');
   } catch (error) { failures.push(String(error.message)); }
-  finally { await context.close(); }
+  finally {
+    if (captureControlsOwners) {
+      try {
+        const physical=await page.evaluate(()=>window.__controlsPhysicalInputs());
+        save(join(directory,'physical-inputs.json'),physical);
+        assert.equal(physical.truncated,false);
+        const expected=caseData.pairedTape.filter(action=>action.type==='key').map(action=>({type:action.down?'keydown':'keyup',code:browserKeyCode(action.key)}));
+        assert.deepEqual(physical.events.map(({type,code})=>({type,code})),expected,'Actual trusted physical edges must equal the complete declared tape');
+        assert.ok(physical.events.every(event=>event.isTrusted&&!event.repeat&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&!event.shiftKey));
+      } catch(error) { failures.push(String(error.message)); }
+      save(join(directory,'page-errors.json'),pageErrors);
+      if (pageErrors.length) failures.push('Actual Browser pageerror(s): '+JSON.stringify(pageErrors));
+    }
+    await context.close();
+  }
   const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs };
   if (archiveBrowserEvidence) {
     const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
@@ -390,7 +421,33 @@ export function scopedState(source, actual, gameplay) {
   return checks;
 }
 
-function comparePair(caseData, native, browser, directory, exactPixels, stateComparator) {
+// The labels whose pixel diagnostics comparePair reaches, as pool jobs. Any
+// precondition comparePair would reject leaves its label (or the whole case)
+// to comparePair itself, so no difference image is written that it would not.
+function pixelJobs(caseData, native, browser, directory) {
+  try {
+    const originals = new Map((native.manifest?.frames || []).map(frame => [frame.label, frame]));
+    const candidates = new Map(browser.frames.map(frame => [frame.label, frame]));
+    const labels = caseData.pairedTape.filter(action => action.type === 'capture').map(action => action.label);
+    if (labels.indexOf('gameplay-start') < 0) return [];
+    for (const scope of caseData.pairedIndependent || [])
+      if (!(labels.indexOf(scope.after) >= 0 && scope.fields?.length && scope.reason)) return [];
+    const first = originals.get(caseData.bootstrap.boundaryLabel);
+    if (!first) return [];
+    mkdirSync(directory, { recursive: true });
+    const jobs = [];
+    for (const label of labels) {
+      const original = originals.get(label), candidate = candidates.get(label);
+      if (!original || !candidate || !Object.is(original.presentedFrame - first.presentedFrame, candidate.browserPresentation)
+        || typeof original.path !== 'string' || typeof candidate.path !== 'string') continue;
+      jobs.push({ label, sourcePath: resolve(dirname(join(native.directory, 'manifest.json')), original.path),
+        candidatePath: candidate.path, differencePath: join(directory, label + '-difference.png') });
+    }
+    return jobs;
+  } catch { return []; }
+}
+
+function comparePair(caseData, native, browser, directory, exactPixels, stateComparator, pixelResults = new Map()) {
   mkdirSync(directory, { recursive: true });
   const checks = [];
   const originals = new Map((native.manifest?.frames || []).map(frame => [frame.label, frame]));
@@ -414,12 +471,21 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       const original = originals.get(label), candidate = candidates.get(label);
       assert.ok(original && candidate, `Missing actual paired checkpoint ${label}`);
       assert.equal(original.presentedFrame - first.presentedFrame, candidate.browserPresentation, 'Both games must receive identical paired presentation intervals');
-      const sourceBytes = readFileSync(resolve(dirname(join(native.directory, 'manifest.json')), original.path));
-      const difference = pixelDifference(PNG.sync.read(sourceBytes), PNG.sync.read(readFileSync(candidate.path)));
-      writeFileSync(join(directory, label + '-difference.png'), PNG.sync.write(difference.difference));
-      const { difference: ignoredImage, ...pixels } = difference;
+      let pixels, sourcePNGHash;
+      const pooled = pixelResults.get(label);
+      if (pooled) {
+        if (Object.hasOwn(pooled, 'error')) throw new Error(pooled.error);
+        ({ pixels, sourcePNGHash } = pooled);
+      } else {
+        const sourceBytes = readFileSync(resolve(dirname(join(native.directory, 'manifest.json')), original.path));
+        const difference = pixelDifference(PNG.sync.read(sourceBytes), PNG.sync.read(readFileSync(candidate.path)));
+        writeFileSync(join(directory, label + '-difference.png'), PNG.sync.write(difference.difference));
+        const { difference: ignoredImage, ...stats } = difference;
+        pixels = stats;
+        sourcePNGHash = digest(sourceBytes);
+      }
       check.pixels = { ...pixels, status: pixels.exactRGBA ? 'pass' : 'fail', required: exactPixels };
-      check.sourcePNGHash = digest(sourceBytes);
+      check.sourcePNGHash = sourcePNGHash;
       check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
       // Only an observed scalar mismatch may be incomparable. Missing/error
@@ -448,22 +514,25 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory, reuseOriginalDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
-  originalSfxVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
+  stateComparator = scopedState, captureControlsOwners = false, movementComparator, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
+  originalSfxVolume, originalMusicVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
   glTrace = process.argv.includes('--gl-trace') }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
   assert.equal(typeof captureAudioOwners, 'boolean', 'Audio owner instrumentation is an explicit gate opt-in');
+  assert.equal(typeof captureControlsOwners, 'boolean', 'Controls owners require explicit opt-in');
+  assert.ok(movementComparator === undefined || typeof movementComparator === 'function', 'Aggregate movement must be a callable comparator');
   assert.ok(!captureAudioOwners || (captureBrowserAudio && originalSfxVolume === 1), 'Audio owners require actual Browser audio and explicit public SFX volume1');
-  const audioPreferences = {sfxVolume: originalSfxVolume ?? 0, musicVolume: captureAudioOwners ? 1 : 0};
+  const audioPreferences = {sfxVolume: originalSfxVolume ?? 0, musicVolume: originalMusicVolume ?? (captureAudioOwners ? 1 : 0)};
   assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value >= 0 && value <= 1));
+  assert.ok(!captureAudioOwners || audioPreferences.musicVolume === 1, 'Audio owner tracing requires Music volume1');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: reuseOriginalDirectory ? 'closed independent Original paired with fresh immutable Browser capture' : 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout, originalSfxVolume, publicClockSchedule, declaredAudioPreferences: audioPreferences,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
-    ...(captureAudioOwners && {captureAudioOwners}),
+    ...(captureAudioOwners && {captureAudioOwners}), ...(captureControlsOwners && {captureControlsOwners}),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -488,6 +557,10 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     }
     server = await startProductionServer({ directory: productionDirectory });
     report.build = server.build;
+    if (captureControlsOwners && !reuseOriginalDirectory) {
+      const disk = statfsSync(output);
+      assert.ok(Number(disk.bavail) * Number(disk.bsize) > 4 * 1024 ** 3, 'Fresh Native Controls requires4GiB free after the immutable production snapshot');
+    }
     report.captureSchedule = 'sequential independent Original then Browser, one Chromium lifetime per case';
     report.status = 'running';
     let definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
@@ -530,7 +603,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Original settles before Chromium starts; each Browser closes before
         // the next Original. Both use declared inputs; comparison laws stay unchanged.
         const [nativeResult] = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan, audioOwnerTrace),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan, audioOwnerTrace, false, originalMusicVolume),
         ]);
         native = nativeResult.status === 'fulfilled' ? nativeResult.value
           : {status: 'fail', error: String(nativeResult.reason), directory: join(directory, 'original')};
@@ -540,7 +613,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
             browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
-              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences),
+              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };
@@ -565,7 +638,13 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           }
           save(join(directory, 'native-public-clock-validation.json'), publicClockValidation);
         }
-        const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
+        const pixelResults = await comparePixelPairs(pixelJobs(caseData, native, candidate, join(directory, 'comparison')));
+        const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator, pixelResults);
+        if (movementComparator) {
+          const state = movementComparator(native,candidate);
+          assert.ok(Array.isArray(state) && state.length > 0,'Actual independent movement/coasting aggregate is required');
+          checks.push({label:'required-movement-and-old-key-refusal',state,status:state.every(row=>row.status==='pass')?'pass':'fail'});
+        }
         result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
           caseSha256: digest(readFileSync(join(directory, 'case.json'))),
           directory, original: { status: native.status, error: native.error, provenance: native.provenance,

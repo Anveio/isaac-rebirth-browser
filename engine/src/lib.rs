@@ -4783,12 +4783,19 @@ impl Game {
     pub fn background_stains_since_json(&self, from: usize) -> String {
         let room = &self.state.room;
         let stains = room.background_stains.get(from..).unwrap_or(&[]);
-        serde_json::to_string(&serde_json::json!({
-            "room": self.state.current_room,
-            "initialization": room.initialization_game_update,
-            "total": room.background_stains.len(),
-            "stains": stains,
-        }))
+        #[derive(Serialize)]
+        struct StainDelta<'a> {
+            room: usize,
+            initialization: Option<u32>,
+            total: usize,
+            stains: &'a [familiars::BackgroundStain],
+        }
+        serde_json::to_string(&StainDelta {
+            room: self.state.current_room,
+            initialization: room.initialization_game_update,
+            total: room.background_stains.len(),
+            stains,
+        })
         .expect("background stains contain finite values")
     }
 }

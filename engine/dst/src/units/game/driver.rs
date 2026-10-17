@@ -9,7 +9,6 @@ use crate::entropy::Entropy;
 use rebirth_cleanroom::bombs::player_world;
 use rebirth_cleanroom::grid::Grid;
 use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
-use rebirth_cleanroom::keyboard::Keyboard;
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::music::BackendEvent;
 use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
@@ -49,6 +48,22 @@ const BINDABLE: [&str; 15] = [
     "Enter",
 ];
 const MOVES: [&str; 4] = ["KeyW", "KeyA", "KeyS", "KeyD"];
+/// The driver names its play keys by their default binding; each means a
+/// Keyboard action (`keyboard::DEFAULT_PAIRS`), pressed through whatever key
+/// the player has bound to it.
+const PLAY_ACTIONS: [(&str, usize); 11] = [
+    ("KeyA", 0),
+    ("KeyD", 1),
+    ("KeyW", 2),
+    ("KeyS", 3),
+    ("ArrowLeft", 4),
+    ("ArrowRight", 5),
+    ("ArrowUp", 6),
+    ("ArrowDown", 7),
+    ("KeyE", 8),
+    ("Space", 9),
+    ("KeyQ", 10),
+];
 const AIMS: [&str; 4] = ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"];
 
 /// Each case follows one persona so ordinary budgets cover deep gameplay,
@@ -80,6 +95,8 @@ pub struct Driver {
     touched: BTreeMap<(usize, u32), u32>,
     /// Seed codes whose treasure room offers a weapon collectible.
     scouted: Vec<String>,
+    /// Each play key and the physical key currently bound to its action.
+    play_keys: [(&'static str, &'static str); 11],
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -157,7 +174,25 @@ impl Driver {
             admitted: None,
             touched: BTreeMap::new(),
             scouted: Vec::new(),
+            play_keys: PLAY_ACTIONS.map(|(code, _)| (code, code)),
         }
+    }
+
+    /// The physical key that presses a play key's action now (its first
+    /// bound key, or the play key itself while the action has none).
+    fn bound<'a>(&self, code: &'a str) -> &'a str {
+        self.play_keys
+            .iter()
+            .find(|(play, _)| *play == code)
+            .map_or(code, |(_, physical)| *physical)
+    }
+
+    /// The play key a held physical key presses, if any.
+    fn meant(&self, physical: &str) -> Option<&'static str> {
+        self.play_keys
+            .iter()
+            .find(|(_, bound)| *bound == physical)
+            .map(|(play, _)| *play)
     }
 
     /// Whether this case types seed codes, so scouting them pays off.
@@ -190,14 +225,16 @@ impl Driver {
     /// re-pressing what is already down.
     fn hold(&mut self, state: &State, keys: &[&str], ticks: u32) {
         for code in &state.pressed {
-            let play = MOVES.contains(&code.as_str()) || AIMS.contains(&code.as_str());
-            if play && !keys.contains(&code.as_str()) {
+            let meant = self.meant(code);
+            let play = meant.is_some_and(|play| MOVES.contains(&play) || AIMS.contains(&play));
+            if play && !meant.is_some_and(|play| keys.contains(&play)) {
                 self.queue.push_back(key(code, false));
             }
         }
         for code in keys {
-            if !state.pressed.contains(*code) {
-                self.queue.push_back(key(code, true));
+            let physical = self.bound(code);
+            if !state.pressed.contains(physical) {
+                self.queue.push_back(key(physical, true));
             }
         }
         self.queue.push_back(tick(ticks));
@@ -245,6 +282,14 @@ impl Driver {
     }
 
     fn plan(&mut self, state: &State, e: &mut Entropy) {
+        self.play_keys = PLAY_ACTIONS.map(|(code, action)| {
+            let bound = state
+                .keyboard
+                .get(action)
+                .into_iter()
+                .find_map(input::code_for_glfw);
+            (code, bound.unwrap_or(code))
+        });
         if e.chance(1, 25) {
             return self.adversarial(state, e);
         }
@@ -338,12 +383,12 @@ impl Driver {
                 };
                 self.press(code, e.range(1, 3))
             }
-            // The driver plays with the default keys, so it usually restores
-            // them before leaving: the reset row is one Up from the first.
-            // Back is refused while an action has no key.
-            Screen::Keyboard if state.keyboard != Keyboard::default() && !e.chance(1, 8) => {
+            // An action left without a key keeps the menu open; the driver
+            // usually resets the bindings (the reset row is one Up from the
+            // first) and sometimes presses back, which is refused.
+            Screen::Keyboard if !state.keyboard.complete() && !e.chance(1, 8) => {
                 let code = match state.controls_menu.selection {
-                    _ if !state.keyboard.complete() && e.chance(1, 6) => "Escape",
+                    _ if e.chance(1, 6) => "Escape",
                     17 => "Enter",
                     0..=8 => "ArrowUp",
                     _ => "ArrowDown",
@@ -450,7 +495,7 @@ impl Driver {
                 // and then ticking long carries the new run's player on from
                 // its starting room (regression-restart-walks-on).
                 6 => {
-                    let walk = *e.pick(&MOVES);
+                    let walk = self.bound(e.pick(&MOVES));
                     if !state.pressed.contains(walk) {
                         self.queue.push_back(key(walk, true));
                     }
@@ -541,19 +586,19 @@ impl Driver {
                     Some(npc) if e.chance(3, 4) => aim_toward(player, npc),
                     _ => *e.pick(&AIMS),
                 };
-                self.press(aim, e.range(1, 40));
+                self.press(self.bound(aim), e.range(1, 40));
             }
             // The run starts with one bomb; keep it for blocked routes more often.
             60..=64 if state.inventory.bombs > 1 || e.chance(1, 40) => {
                 // Placement samples the held key at a tick, so a tap released
                 // before any tick places nothing; usually hold across one.
                 let hold = if e.chance(1, 8) { 0 } else { e.range(1, 3) };
-                self.press("KeyE", hold)
+                self.press(self.bound("KeyE"), hold)
             }
             65..=67 => self.press("Escape", 0),
             68..=69 => self.music_backend(state, e),
             // Active item and pocket inputs; triggers read held edges at a tick.
-            70..=71 => self.press(e.pick(&["Space", "KeyQ"]), e.range(0, 3)),
+            70..=71 => self.press(self.bound(e.pick(&["Space", "KeyQ"])), e.range(0, 3)),
             _ => self.ticks(e),
         }
     }
@@ -822,7 +867,7 @@ impl Driver {
     /// Plants a bomb beside a blocking rock and retreats from the blast.
     fn bomb_rock(&mut self, player: WorldVector, rock: WorldVector, e: &mut Entropy) {
         // Placement samples the held key at a tick; hold across one.
-        self.press("KeyE", e.range(1, 3));
+        self.press(self.bound("KeyE"), e.range(1, 3));
         let away = aim_toward(rock, player);
         let code = match away {
             "ArrowRight" => "KeyD",
@@ -830,7 +875,7 @@ impl Driver {
             "ArrowDown" => "KeyS",
             _ => "KeyW",
         };
-        self.press(code, e.range(20, 40));
+        self.press(self.bound(code), e.range(20, 40));
         self.queue.push_back(tick(e.range(40, 90)));
     }
 

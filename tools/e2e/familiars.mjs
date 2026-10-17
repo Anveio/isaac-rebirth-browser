@@ -11,7 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
-import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { snapshot, stepSnapshot, readTrace } from './lib/game.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -255,7 +255,7 @@ try {
         }
         assert.ok(nativePoofRetired && browserPoofRetired, 'Both actual Poof15 actors must retire within the declared hold');
       }
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed);
       assert.equal(trace.backendStateTruncated, false, 'Actual backend state evidence must remain complete');
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1), 'Every real backend callback requires its full state');
