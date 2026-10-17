@@ -310,8 +310,12 @@ for checking your own change.
      or a mode flag on an existing driver (`items.mjs --stat-cache`).
 3. Drive the page through [`lib/game.mjs`](lib/game.mjs): `stepSnapshot(page)`
    for per-frame comparisons (one round trip carrying the engine's JSON),
-   `step(page, n)` when no state is needed. Use [`lib/cli.mjs`](lib/cli.mjs)
-   for flags and output directories.
+   `step(page, n)` when no state is needed, `readTrace(page)` for the replay
+   trace and `evaluateJson(page, fn)` for any other large page value
+   (Playwright's object serializer takes ~25 s for a full trace; JSON text
+   about 1 s, with the same value). Use [`lib/cli.mjs`](lib/cli.mjs)
+   for flags and output directories. Paired pixel diagnostics run on
+   `E2E_PIXEL_WORKERS` worker threads (default 2; 0 compares inline).
 4. Give it contrived cases and a `--count` of fuzz cases. Write
    `scenarios.json` to the output directory and accept `--scenarios` to replay
    it.

@@ -22,7 +22,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../../foundation/b
 import { startProductionServer } from '../../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../../foundation/verify.mjs';
 import { ROOT, flag, outputDirectory, selectCases, writeJson } from './cli.mjs';
-import { stepSnapshot } from './game.mjs';
+import { stepSnapshot, readTrace } from './game.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../../foundation/composition-wasm-public.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './original.mjs';
 
@@ -263,7 +263,7 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
       assert.deepEqual(actualCommands, expected, 'Every declared public ABI input is sent exactly once');
       await writeJson(join(directory, 'actual-public-wasm-commands.json'), actualCommands);
     } else {
-    const trace = await page.evaluate(() => window.game.trace());
+    const trace = await readTrace(page);
     await writeFile(join(directory, 'browser-trace.json.gz'), gzipSync(JSON.stringify(trace), { level: 1 }));
     caseResult.trace = { inputTraceTruncated: trace.inputTraceTruncated, stateHistoryTruncated: trace.stateHistoryTruncated,
       stateHistoryTruncationReason: trace.stateHistoryTruncationReason, inputEncodedBytes: trace.inputEncodedBytes,

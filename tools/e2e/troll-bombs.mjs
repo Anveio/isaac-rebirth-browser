@@ -12,7 +12,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { stepSnapshot } from './lib/game.mjs';
+import { stepSnapshot, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -280,7 +280,7 @@ try {
         }
         if (key) { await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
       }
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       const traceBytes = Buffer.from(JSON.stringify(trace) + '\n');
       const traceArchive = gzipSync(traceBytes, { level: 1 });
       await writeFile(join(directory, 'browser-trace.json.gz'), traceArchive);

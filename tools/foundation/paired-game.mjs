@@ -12,9 +12,11 @@ import { manifestPath as browserManifestPath, readJsonEvidence, writeJsonEvidenc
 import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
+import { comparePixelPairs } from './pixel-pairs.mjs';
 import { flag, selectCases } from '../e2e/lib/cli.mjs';
 import { startProductionServer } from './production-server.mjs';
 import { audioObservedBrowser } from '../e2e/lib/audio-owners.mjs';
+import { evaluateJson, readTrace } from '../e2e/lib/game.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -298,8 +300,8 @@ export async function browserCapture(browser, server, caseData, directory, archi
           state: captured.state, render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
-    if (mtDraws) save(join(directory, 'mt-draws.json'), await page.evaluate(() => window.game.mtDraws.take()));
-    const trace = await page.evaluate(() => window.game.trace());
+    if (mtDraws) save(join(directory, 'mt-draws.json'), await evaluateJson(page, () => window.game.mtDraws.take()));
+    const trace = await readTrace(page);
     if (archiveBrowserEvidence) {
       const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
       save(join(directory, 'trace-archive.json'), evidence);
@@ -390,7 +392,33 @@ export function scopedState(source, actual, gameplay) {
   return checks;
 }
 
-function comparePair(caseData, native, browser, directory, exactPixels, stateComparator) {
+// The labels whose pixel diagnostics comparePair reaches, as pool jobs. Any
+// precondition comparePair would reject leaves its label (or the whole case)
+// to comparePair itself, so no difference image is written that it would not.
+function pixelJobs(caseData, native, browser, directory) {
+  try {
+    const originals = new Map((native.manifest?.frames || []).map(frame => [frame.label, frame]));
+    const candidates = new Map(browser.frames.map(frame => [frame.label, frame]));
+    const labels = caseData.pairedTape.filter(action => action.type === 'capture').map(action => action.label);
+    if (labels.indexOf('gameplay-start') < 0) return [];
+    for (const scope of caseData.pairedIndependent || [])
+      if (!(labels.indexOf(scope.after) >= 0 && scope.fields?.length && scope.reason)) return [];
+    const first = originals.get(caseData.bootstrap.boundaryLabel);
+    if (!first) return [];
+    mkdirSync(directory, { recursive: true });
+    const jobs = [];
+    for (const label of labels) {
+      const original = originals.get(label), candidate = candidates.get(label);
+      if (!original || !candidate || !Object.is(original.presentedFrame - first.presentedFrame, candidate.browserPresentation)
+        || typeof original.path !== 'string' || typeof candidate.path !== 'string') continue;
+      jobs.push({ label, sourcePath: resolve(dirname(join(native.directory, 'manifest.json')), original.path),
+        candidatePath: candidate.path, differencePath: join(directory, label + '-difference.png') });
+    }
+    return jobs;
+  } catch { return []; }
+}
+
+function comparePair(caseData, native, browser, directory, exactPixels, stateComparator, pixelResults = new Map()) {
   mkdirSync(directory, { recursive: true });
   const checks = [];
   const originals = new Map((native.manifest?.frames || []).map(frame => [frame.label, frame]));
@@ -414,12 +442,21 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
       const original = originals.get(label), candidate = candidates.get(label);
       assert.ok(original && candidate, `Missing actual paired checkpoint ${label}`);
       assert.equal(original.presentedFrame - first.presentedFrame, candidate.browserPresentation, 'Both games must receive identical paired presentation intervals');
-      const sourceBytes = readFileSync(resolve(dirname(join(native.directory, 'manifest.json')), original.path));
-      const difference = pixelDifference(PNG.sync.read(sourceBytes), PNG.sync.read(readFileSync(candidate.path)));
-      writeFileSync(join(directory, label + '-difference.png'), PNG.sync.write(difference.difference));
-      const { difference: ignoredImage, ...pixels } = difference;
+      let pixels, sourcePNGHash;
+      const pooled = pixelResults.get(label);
+      if (pooled) {
+        if (Object.hasOwn(pooled, 'error')) throw new Error(pooled.error);
+        ({ pixels, sourcePNGHash } = pooled);
+      } else {
+        const sourceBytes = readFileSync(resolve(dirname(join(native.directory, 'manifest.json')), original.path));
+        const difference = pixelDifference(PNG.sync.read(sourceBytes), PNG.sync.read(readFileSync(candidate.path)));
+        writeFileSync(join(directory, label + '-difference.png'), PNG.sync.write(difference.difference));
+        const { difference: ignoredImage, ...stats } = difference;
+        pixels = stats;
+        sourcePNGHash = digest(sourceBytes);
+      }
       check.pixels = { ...pixels, status: pixels.exactRGBA ? 'pass' : 'fail', required: exactPixels };
-      check.sourcePNGHash = digest(sourceBytes);
+      check.sourcePNGHash = sourcePNGHash;
       check.state = stateComparator(observations.get(label), candidate.state, index >= gameplayStart, candidate);
       assert.ok(Array.isArray(check.state) && check.state.length > 0, 'Every paired checkpoint requires typed state checks');
       // Only an observed scalar mismatch may be incomparable. Missing/error
@@ -565,7 +602,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           }
           save(join(directory, 'native-public-clock-validation.json'), publicClockValidation);
         }
-        const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
+        const pixelResults = await comparePixelPairs(pixelJobs(caseData, native, candidate, join(directory, 'comparison')));
+        const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator, pixelResults);
         result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
           caseSha256: digest(readFileSync(join(directory, 'case.json'))),
           directory, original: { status: native.status, error: native.error, provenance: native.provenance,
