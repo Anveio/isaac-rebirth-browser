@@ -198,7 +198,7 @@ function runSuiteInSlot(suite) {
   const startedAt = Date.now();
   console.log(`▶ ${suite.id}: node ${suite.entry} ${args.join(' ')}`);
   return new Promise(done => {
-    const child = spawn('bash', ['tools/original/with-display.sh', 'node', suite.entry, ...args], { cwd: ROOT });
+    const child = spawn('bash', ['tools/original/with-display.sh', 'node', suite.entry, ...args], { cwd: ROOT, env: { ...process.env, ...suite.env } });
     for (const stream of [child.stdout, child.stderr]) stream.on('data', chunk => {
       log.write(chunk);
       if (jobs === 1) process.stdout.write(chunk);
