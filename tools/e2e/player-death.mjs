@@ -7,13 +7,17 @@ import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate,scopedState} from '../foundation/paired-game.mjs';
 import {flag,selectCases} from './lib/cli.mjs';
+import {validateExitAudioCases,compareExitAudioEvidence} from './lib/player-death-exit-audio.mjs';
 const option=(name,fallback)=>{const i=process.argv.indexOf(name);return i<0?fallback:process.argv[i+1];};
 const output=resolve(option('--output',`.cache/e2e/player-death/${Date.now()}-${process.pid}`));mkdirSync(output,{recursive:true});
 const save=(p,d)=>writeFileSync(p,JSON.stringify(d,null,2)+'\n');
 const manifest=p=>JSON.parse((existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'.gz'))).toString('utf8'));
 const scenarioFile=option('--scenario-file',undefined);
+const exitAudio=process.argv.includes('--exit-audio');
+assert.ok(!exitAudio||scenarioFile,'--exit-audio requires the explicitly kept seven-capture prefix --scenario-file');
 const scenarioInput=scenarioFile?readFileSync(resolve(scenarioFile)):undefined;
 const scenarios=JSON.parse(scenarioInput||execFileSync('python3',['tools/original/player-death-scenarios.py','--count',option('--count','2')],{encoding:'utf8',maxBuffer:8*1024*1024}));
+if(exitAudio)validateExitAudioCases(scenarios.cases,scenarios.caseFilter);
 // A bank recorded under --case holds only the cases that ran; each one it holds
 // still meets its mandatory-death and OS-row checks.
 const whole=!scenarios.caseFilter;
@@ -27,6 +31,7 @@ assert.ok((!whole||randomCases.length>=2)&&randomCases.every(c=>
  c.entropy?.source==='OS secrets; unfiltered nonzero32-bit public seed'&&
  c.entropy.draw?.seedValue===c.seedValue),'At least two complete recorded unfiltered OS rows must remain in the bank');
 scenarios.cases=selectCases(scenarios.cases,c=>c.scenario.id);if(flag('--case'))scenarios.caseFilter=flag('--case');
+if(exitAudio)validateExitAudioCases(scenarios.cases,scenarios.caseFilter);
 save(resolve(output,'scenarios.json'),scenarios);
 const paths=scenarios.cases.map((c,n)=>{const p=resolve(output,`replay-${n}.json`);save(p,c);return p;});
 function compare(source,actual,gameplay){
@@ -60,7 +65,9 @@ function compare(source,actual,gameplay){
 }
 const report=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:paths,
  productionDirectory:option('--production-directory'),
- originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,archiveBrowserEvidence:true,publicClockSchedule:true});
+ originalObserver:exitAudio?'tools/original/player-death-exit-audio-observe.py':'tools/original/player-death-observe.py',
+ ...(exitAudio&&{originalSfxVolume:1,captureBrowserAudio:true,captureAudioOwners:true}),
+ stateComparator:compare,archiveBrowserEvidence:true,publicClockSchedule:true});
 const coverage=scenarios.cases.map((c,n)=>{
  try {
  const native=manifest(resolve(report.cases[n].directory,'original/manifest.json'));
@@ -73,6 +80,13 @@ const coverage=scenarios.cases.map((c,n)=>{
   return {id:c.scenario.id,required:requiredIds.has(c.scenario.id)||c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
  }
 });
-const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,caseFilter:scenarios.caseFilter,coverage,scope:'Independently declared public wall-clock inputs on both games. Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
+const exitAudioResults=exitAudio?scenarios.cases.map((data,n)=>{
+ const paired=report.cases[n];let audio;
+ try {assert.ok(paired,'Every declared Exit prefix needs its actual canonical capture');audio=compareExitAudioEvidence(data,paired);}
+ catch(error){audio={schema:1,status:'fail',error:String(error.stack||error),scope:'Missing/rejected owner evidence is never zero or waived'};}
+ save(resolve(output,`exit-audio-${n}.json`),audio);return {id:data.scenario.id,...audio};
+}):undefined;
+const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')&&(!exitAudio||exitAudioResults.every(c=>c.status==='pass'))?'pass':'fail',pairedStatus:report.status,caseFilter:scenarios.caseFilter,coverage,scope:'Independently declared public wall-clock inputs on both games. Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
+if(exitAudio){result.exitAudio=exitAudioResults;result.scope+=' Explicit selected seven-capture Exit audio prefix: actual deferred Exit to Main, all14 bounded controller/actual-owner/API checks, zero observed Browser forward SFX8 events and three earlier unique SFX8 controls in each game are required. No audible/PCM equality, full music lifecycle or complete Shared-MT claim.';}
 if(scenarioInput)result.scenarioInput={path:resolve(scenarioFile),sha256:createHash('sha256').update(scenarioInput).digest('hex'),bytes:scenarioInput.length};
 save(resolve(output,'report.json'),result);console.log(JSON.stringify(result));process.exitCode=result.status==='pass'?0:1;

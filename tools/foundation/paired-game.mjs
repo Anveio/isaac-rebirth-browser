@@ -14,6 +14,7 @@ import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
 import { flag, selectCases } from '../e2e/lib/cli.mjs';
 import { startProductionServer } from './production-server.mjs';
+import { audioObservedBrowser } from '../e2e/lib/audio-owners.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -121,7 +122,7 @@ function validateNativeClockPlan(data, plan, native) {
     scope: 'Actual independent Native acknowledgement/capture times validate the prior public declaration; no readback changes a Browser command'};
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan) {
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan, audioOwnerTrace) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
@@ -130,6 +131,10 @@ async function nativeCapture(caseData, directory, nativeFrameTimeout, originalOb
     '--step-ns', String(publicClockPlan.presentationIntervalNanoseconds));
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
+  if (audioOwnerTrace) {
+    assert.equal(originalSfxVolume, 1);
+    args.push('--audio-trace', audioOwnerTrace, '--audio-sfx-owners', '--music-volume', '1');
+  }
   if (mtDraws) args.push('--mt-trace');
   if (glTrace) args.push('--gl-trace', glTrace);
   let error;
@@ -379,17 +384,20 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory, reuseOriginalDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
-  stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
+  stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
   originalSfxVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
   glTrace = process.argv.includes('--gl-trace') }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
+  assert.equal(typeof captureAudioOwners, 'boolean', 'Audio owner instrumentation is an explicit gate opt-in');
+  assert.ok(!captureAudioOwners || (captureBrowserAudio && originalSfxVolume === 1), 'Audio owners require actual Browser audio and explicit public SFX volume1');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: reuseOriginalDirectory ? 'closed independent Original paired with fresh immutable Browser capture' : 'fresh original process paired with immutable browser production artifact',
     nativeFrameTimeout, originalSfxVolume, publicClockSchedule,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
+    ...(captureAudioOwners && {captureAudioOwners}),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -406,6 +414,12 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       await runProcess('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', '-Wl,--no-undefined',
         join(ROOT, 'tools/original/foundation-gl-trace.c'), join(ROOT, 'tools/original/foundation-gl-state.c'),
         '-o', glTraceLibrary, '-ldl', '-lm'], { cwd: ROOT });
+    const audioOwnerTrace = captureAudioOwners ? join(output, 'audio-trace.so') : undefined;
+    if (audioOwnerTrace) {
+      await runProcess('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
+        join(ROOT, 'tools/original/audio-trace.c'), '-o', audioOwnerTrace, '-ldl', '-pthread'], {cwd: ROOT});
+      report.audioOwnerTraceLibrarySha256 = digest(readFileSync(audioOwnerTrace));
+    }
     server = await startProductionServer({ directory: productionDirectory });
     report.build = server.build;
     report.captureSchedule = 'sequential independent Original then Browser, one Chromium lifetime per case';
@@ -447,7 +461,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         // Original settles before Chromium starts; each Browser closes before
         // the next Original. Both use declared inputs; comparison laws stay unchanged.
         const [nativeResult] = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan, audioOwnerTrace),
         ]);
         native = nativeResult.status === 'fulfilled' ? nativeResult.value
           : {status: 'fail', error: String(nativeResult.reason), directory: join(directory, 'original')};
@@ -456,7 +470,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
-            browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan),
+            browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
+              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };
