@@ -103,6 +103,7 @@ pub mod pathfinder;
 pub mod phase;
 pub mod pickup_world_grants;
 pub mod pickups;
+pub mod pill_effect_history;
 mod plain_npc;
 pub mod player_animation;
 pub mod player_costume118;
@@ -682,6 +683,11 @@ pub struct State {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acquisition_history: Option<acquisition_history::AcquisitionHistory>,
     pub item_pools: Option<items::ItemPools>,
+    #[serde(
+        default,
+        serialize_with = "pill_effect_history::serialize_player_items",
+        deserialize_with = "pill_effect_history::deserialize_player_items"
+    )]
     pub player_items: Option<player_items::PlayerItems>,
     pub player_animation: player_animation::PlayerAnimation,
     pub public_actions: public_actions::PublicActions,

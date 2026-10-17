@@ -696,7 +696,10 @@ impl<'a> ItemInputs<'a> {
     }
 
     pub(crate) fn admits_complete_selected_tail(self) -> bool {
-        self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
+        self.admits_selected_auxiliary_callbacks()
+            && self.owner.luck_inputs.is_some()
+            && crate::pill_effect_history::callback_word(self.owner, 17).is_some()
+            && crate::pill_effect_history::callback_word(self.owner, 18).is_some()
     }
 
     ///Separate literal neutral kind4/contact modifier footprint. Extending
@@ -1464,9 +1467,12 @@ pub(crate) fn resolve_scalars(
                 }
                 CacheStage::MoveSpeed => {
                     source_player_type == Some(0)
-                        && inputs.owner.move_speed_inputs.is_some_and(
-                            crate::player_items::MoveSpeedInputs::supports_persistent_d28,
-                        )
+                        && inputs
+                            .owner
+                            .move_speed_inputs
+                            .is_some_and(|terms| terms.source_d44 == 0)
+                        && crate::pill_effect_history::callback_word(inputs.owner, 13) == Some(0)
+                        && crate::pill_effect_history::callback_word(inputs.owner, 14) == Some(0)
                         && inputs.admits_scalar_stage(stage, supported)
                 }
                 CacheStage::ShotSpeed => shot_speed_admitted,
@@ -1606,11 +1612,12 @@ impl LuckPlan {
     fn from_owned(
         inputs: ItemInputs<'_>,
         auxiliary: crate::player_items::LuckInputs,
+        pill_down: i32,
+        pill_up: i32,
         run_flags: u64,
     ) -> Self {
-        let signed_sum = auxiliary
-            .source_13d0
-            .wrapping_sub(auxiliary.source_13cc)
+        let signed_sum = pill_up
+            .wrapping_sub(pill_down)
             .wrapping_add(auxiliary.source_d3c)
             .wrapping_add(auxiliary.source_d40)
             .wrapping_add(inputs.owned_count(253))
@@ -1655,7 +1662,13 @@ pub(crate) fn resolve_luck(
     if !LuckStage::admits(inputs, source_player_type) {
         return Ok(None);
     }
-    LuckPlan::from_owned(inputs, auxiliary, run_flags)
+    let (Some(pill_down), Some(pill_up)) = (
+        crate::pill_effect_history::callback_word(inputs.owner, 17),
+        crate::pill_effect_history::callback_word(inputs.owner, 18),
+    ) else {
+        return Ok(None);
+    };
+    LuckPlan::from_owned(inputs, auxiliary, pill_down, pill_up, run_flags)
         .evaluate()
         .map(Some)
 }
