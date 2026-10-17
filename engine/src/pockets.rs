@@ -235,6 +235,18 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
         //An admitted request with legacy unknown slots may run a
         //Pill writer. Blocked requests returned before this branch.
         crate::pill_effect_history::forget(owner);
+        crate::active_charges::invalidate_owner(
+            owner,
+            &[
+                crate::active_charges::Word::ActiveId,
+                crate::active_charges::Word::Charge,
+                crate::active_charges::Word::Subordinate,
+                crate::active_charges::Word::Reserve,
+            ],
+            crate::active_charges::Frontier::PocketEffect {
+                source_pc: 0x5282b0,
+            },
+        );
         return Ok(());
     };
     if held.frontier.is_none() {
@@ -250,6 +262,18 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
             }
         });
     }
+    crate::active_charges::invalidate_owner(
+        owner,
+        &[
+            crate::active_charges::Word::ActiveId,
+            crate::active_charges::Word::Charge,
+            crate::active_charges::Word::Subordinate,
+            crate::active_charges::Word::Reserve,
+        ],
+        crate::active_charges::Frontier::PocketEffect {
+            source_pc: 0x5282b0,
+        },
+    );
     if let Some(coverage) = &mut state.room.ordinary_placement {
         coverage.invalidate(crate::ordinary_placement::Frontier::PocketEffects);
     }

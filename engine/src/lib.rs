@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 pub mod acquisition_history;
+mod active_charges;
 pub mod active_items;
 pub mod actors;
 pub mod ambience;
@@ -4144,6 +4145,11 @@ impl Game {
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;
         }
+        active_charges::before_advance(
+            &mut self.state,
+            controls_enabled,
+            phase == phase::Phase::Update,
+        );
         active_items::advance(&mut self.state, controls_enabled)?;
         pockets::use_pocket(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
