@@ -361,6 +361,8 @@ pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
 fn stage_name(stage: u32) -> &'static str {
     match stage {
         2 => "BASEMENT II",
+        3 => "CAVES I",
+        4 => "CAVES II",
         _ => "BASEMENT I",
     }
 }
