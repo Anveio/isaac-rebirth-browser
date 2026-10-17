@@ -1465,7 +1465,7 @@ impl RangeReadPlan {
         falling_speed += prefix_falling_speed;
 
         //512AE9..512B11 consumes this computed speed before the149 override.
-        height = words.source_d34? as f32 * 0.5_f32 + height;
+        height += words.source_d34? as f32 * 0.5_f32;
         height -= falling_speed * 0.5_f32;
         if queries.have(149)? {
             falling_acceleration = 0.6_f32;
@@ -1475,8 +1475,8 @@ impl RangeReadPlan {
             height += 10.0_f32;
         }
         if queries.have(233)? {
-            falling_speed = 7.0_f32 + falling_speed;
-            falling_acceleration = 0.01_f32 * falling_acceleration;
+            falling_speed += 7.0_f32;
+            falling_acceleration *= 0.01_f32;
         }
         if queries.have(307)? {
             height -= 1.5_f32;
