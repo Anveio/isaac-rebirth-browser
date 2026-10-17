@@ -102,5 +102,16 @@
         "npc:237"
       ]
     ]
+  },
+  {
+    "out": "coverage-charger-entry.json",
+    "from": null,
+    "steps": 4000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "npc:23"
+      ]
+    ]
   }
 ]
