@@ -252,6 +252,13 @@ try {
     };
     if (VIA) {
       const via = { x: VIA[0], y: VIA[1] };
+      // The turn there overshoots about ten units: a waypoint beside an
+      // interior cell the port's own fight left solid would touch it in the
+      // port alone (#649), so the helper draws another. Walls are in both.
+      const cell = Math.round((via.y - 120) / 40) * 15 + Math.round((via.x - 40) / 40);
+      const interior = next => next % 15 > 0 && next % 15 < 14 && next > 14 && next < 120;
+      if ([cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1'))
+        throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
       await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
         `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
     }
