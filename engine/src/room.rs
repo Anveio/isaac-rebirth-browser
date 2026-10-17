@@ -394,8 +394,12 @@ fn tile_floor(rng: &mut DecorationRng, width: u8, height: u8) -> Vec<RoomQuad> {
         quads.push(quad(
             selected,
             rect(52.0, 52.0, 182.0, 104.0),
-            rect(52.0 + f64::from(column) * 26.0,
-                 52.0 + f64::from(row) * 26.0, 182.0, 104.0),
+            rect(
+                52.0 + f64::from(column) * 26.0,
+                52.0 + f64::from(row) * 26.0,
+                182.0,
+                104.0,
+            ),
             flip_x,
             flip_y,
         ));
@@ -416,8 +420,12 @@ fn tile_floor(rng: &mut DecorationRng, width: u8, height: u8) -> Vec<RoomQuad> {
     quads.push(quad(
         catalogue[patch - 1],
         rect(52.0, 52.0, 182.0, 104.0),
-        rect(52.0 + f64::from(right) * 26.0,
-             52.0 + f64::from(bottom) * 26.0, 182.0, 104.0),
+        rect(
+            52.0 + f64::from(right) * 26.0,
+            52.0 + f64::from(bottom) * 26.0,
+            182.0,
+            104.0,
+        ),
         true,
         true,
     ));
@@ -564,7 +572,16 @@ fn tile_walls(
             wall_quads.push(quad(
                 wall(rng),
                 rect(source_x, 0.0, 26.0, 52.0),
-                rect(x, if bottom { f64::from(height + 2) * 26.0 } else { 0.0 }, 26.0, 52.0),
+                rect(
+                    x,
+                    if bottom {
+                        f64::from(height + 2) * 26.0
+                    } else {
+                        0.0
+                    },
+                    26.0,
+                    52.0,
+                ),
                 flip_x,
                 bottom,
             ));
@@ -586,7 +603,16 @@ fn tile_walls(
             wall_quads.push(quad(
                 wall(rng),
                 rect(0.0, source_y, 52.0, 26.0),
-                rect(if right { f64::from(width + 2) * 26.0 } else { 0.0 }, y, 52.0, 26.0),
+                rect(
+                    if right {
+                        f64::from(width + 2) * 26.0
+                    } else {
+                        0.0
+                    },
+                    y,
+                    52.0,
+                    26.0,
+                ),
                 right,
                 flip_y,
             ));
