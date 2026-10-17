@@ -180,7 +180,7 @@ impl OptionsMenu {
     }
 
     fn repeat(counter: u32) -> bool {
-        counter == 0 || (counter > 49 && counter % 10 == 0)
+        counter == 0 || (counter > 49 && counter.is_multiple_of(10))
     }
 
     fn adjust(
@@ -192,7 +192,7 @@ impl OptionsMenu {
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
-        if !Self::repeat(held) && !(self.selection == 6 && held > 49 && held % 2 == 0) {
+        if !Self::repeat(held) && !(self.selection == 6 && held > 49 && held.is_multiple_of(2)) {
             return Ok(Action::None);
         }
         let delta = direction as f32 * 0.1_f32;
