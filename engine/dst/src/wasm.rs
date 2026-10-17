@@ -8,6 +8,8 @@
 use crate::json_diff;
 use crate::props;
 use crate::tape::{Reset, Tape};
+use crate::units::game::saves::{published_io, serve};
+use rebirth_cleanroom::save_host::SaveIo;
 use serde_json::{json, Value};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use wasmi::{Engine, Instance, Linker, Memory, Store, TypedFunc};
@@ -32,6 +34,12 @@ struct Exports {
     error_len: TypedFunc<(), u32>,
     public_keys_ptr: TypedFunc<(), u32>,
     public_keys_len: TypedFunc<(), u32>,
+    save_input_ptr: TypedFunc<u32, u32>,
+    load_save_data: TypedFunc<(), u32>,
+    enable_saved_game_io: TypedFunc<u32, u32>,
+    complete_saved_game_write: TypedFunc<(u32, u32, u32), u32>,
+    complete_save_menu_readmission: TypedFunc<(u32, u32, u32), u32>,
+    save_data_ptr: TypedFunc<(), u32>,
 }
 
 /// Snapshots compared per tape besides the final one; interpretation is
@@ -92,6 +100,12 @@ impl Module {
             error_len: export!("error_len"),
             public_keys_ptr: export!("public_keys_ptr"),
             public_keys_len: export!("public_keys_len"),
+            save_input_ptr: export!("save_input_ptr"),
+            load_save_data: export!("load_save_data"),
+            enable_saved_game_io: export!("enable_saved_game_io"),
+            complete_saved_game_write: export!("complete_saved_game_write"),
+            complete_save_menu_readmission: export!("complete_save_menu_readmission"),
+            save_data_ptr: export!("save_data_ptr"),
             store,
         })
     }
@@ -182,6 +196,13 @@ impl Module {
         if reset.map_err(trap)? != 0 {
             return Ok(Some(json!({ "step": "reset" })));
         }
+        // The browser declares save IO and loads its stored document before
+        // the first command, then answers the save IO each command leaves.
+        let host = tape.save_host.as_ref();
+        let mut store = match host.map(|host| host.boot(&mut wasm)).transpose() {
+            Ok(store) => store,
+            Err(error) => return Ok(Some(json!({ "step": "saveHost", "error": error }))),
+        };
         let count = tape.commands.len();
         let stride = (count / SAMPLED_SNAPSHOTS).max(1);
         for (index, command) in tape.commands.iter().enumerate() {
@@ -205,6 +226,13 @@ impl Module {
                 return Ok(Some(
                     json!({ "step": index, "command": command, "wasmFailed": failed, "nativeOk": native_ok }),
                 ));
+            }
+            if !failed {
+                if let Err(error) = serve(&mut store, host, &mut wasm, command) {
+                    return Ok(Some(
+                        json!({ "step": index, "command": command, "saveHost": error }),
+                    ));
+                }
             }
             if index % stride == stride - 1 || index + 1 == count {
                 let snapshot = wasm.read(wasm.snapshot_ptr, wasm.snapshot_len)?;
@@ -240,16 +268,97 @@ impl Exports {
             .map_err(|error| error.to_string())?;
         Ok(bytes)
     }
+
+    fn call<P: wasmi::WasmParams>(
+        &mut self,
+        function: TypedFunc<P, u32>,
+        parameters: P,
+    ) -> Result<u32, String> {
+        function
+            .call(&mut self.store, parameters)
+            .map_err(|error| format!("engine.wasm trapped: {error}"))
+    }
+
+    /// Copies `bytes` into the buffer `save_input_ptr` allocates.
+    fn save_input(&mut self, bytes: &[u8]) -> Result<(), String> {
+        let pointer = self.call(self.save_input_ptr, bytes.len() as u32)?;
+        if pointer == 0 {
+            return Err("save input allocation".into());
+        }
+        self.memory
+            .write(&mut self.store, pointer as usize, bytes)
+            .map_err(|error| error.to_string())
+    }
+}
+
+/// The shipped WASM's save transport, as `web/engine.ts` calls it.
+impl SaveIo for Exports {
+    fn enable(&mut self) -> Result<(), String> {
+        match self.call(self.enable_saved_game_io, 1)? {
+            0 => Ok(()),
+            _ => Err("enable_saved_game_io refused".into()),
+        }
+    }
+    fn import(&mut self, document: &[u8]) -> Result<(), String> {
+        self.save_input(document)?;
+        match self.call(self.load_save_data, ())? {
+            0 => Ok(()),
+            _ => Err("load_save_data refused".into()),
+        }
+    }
+    fn pending(&mut self) -> Result<(bool, bool, u64), String> {
+        let snapshot = self.read(self.snapshot_ptr, self.snapshot_len)?;
+        published_io(&snapshot)
+    }
+    fn export(&mut self) -> Result<Vec<u8>, String> {
+        let document = self.read(self.save_data_ptr, self.snapshot_len)?;
+        if document.is_empty() {
+            return Err("save_data_ptr refused".into());
+        }
+        Ok(document)
+    }
+    fn complete_write(&mut self, revision: u64, succeeded: bool) -> Result<(), String> {
+        let parameters = (
+            revision as u32,
+            (revision >> 32) as u32,
+            u32::from(succeeded),
+        );
+        match self.call(self.complete_saved_game_write, parameters)? {
+            0 => Ok(()),
+            _ => Err("complete_saved_game_write refused".into()),
+        }
+    }
+    fn complete_readmission(
+        &mut self,
+        revision: u64,
+        document: Option<&[u8]>,
+    ) -> Result<bool, String> {
+        if let Some(document) = document {
+            self.save_input(document)?;
+        }
+        let parameters = (
+            revision as u32,
+            (revision >> 32) as u32,
+            u32::from(document.is_some()),
+        );
+        match self.call(self.complete_save_menu_readmission, parameters)? {
+            0 => Ok(true),
+            2 => Ok(false),
+            _ => Err("complete_save_menu_readmission refused".into()),
+        }
+    }
 }
 
 /// Names a snapshot divergence: replays the native engine through `step` and
 /// returns the first JSON path whose value differs from the WASM snapshot.
 fn first_difference(tape: &Tape, step: usize, wasm: &[u8]) -> Value {
-    let Ok(mut game) = tape.boot() else {
+    let Ok((mut game, mut store)) = tape.session() else {
         return Value::Null;
     };
     for command in &tape.commands[..=step] {
-        let _ = game.command(command.clone());
+        if game.command(command.clone()).is_ok() {
+            let _ = serve(&mut store, tape.save_host.as_ref(), &mut game, command);
+        }
     }
     // Both sides parse the same published JSON text; `to_value` would widen
     // f32 fields instead of keeping their shortest representation.

@@ -8,7 +8,7 @@ mod actors;
 mod bombs;
 mod contact;
 mod floor;
-mod game;
+pub(crate) mod game;
 mod grid;
 mod item_pools;
 mod layout;
