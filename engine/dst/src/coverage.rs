@@ -238,6 +238,13 @@ pub fn observe(state: &State) {
             ("keys held", state.inventory.keys > 0),
             ("paused", state.paused),
             ("game over", state.player_death.game_over.is_some()),
+            // Player.Update fires before it flushes a queued collectible, so
+            // a shot on the frame a pickup lowers the fire delay leaves the
+            // cooldown above the new delay (Number One, 52f..530 then 531f01).
+            (
+                "fire cooldown above the max fire delay",
+                state.fire_cooldown > state.max_fire_delay,
+            ),
         ];
         keys.extend(
             features

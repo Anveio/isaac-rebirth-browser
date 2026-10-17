@@ -91,5 +91,67 @@
         "menus after a Random run's GameOver"
       ]
     ]
+  },
+  {
+    "out": "coverage-gurglings-entry.json",
+    "from": null,
+    "steps": 8000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "npc:237"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-charger-entry.json",
+    "from": "coverage-larry-segments.json",
+    "steps": 4000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "screen:Playing"
+      ],
+      [
+        "npc:23"
+      ]
+    ]
+  },
+  {
+    "out": "regression-number-one-cooldown.json",
+    "stages": [
+      [
+        "screen:Playing"
+      ],
+      [
+        "fire cooldown above the max fire delay"
+      ]
+    ]
+  },
+  {
+    "out": "regression-envy-split-death.json",
+    "stages": [
+      [
+        "npc:51"
+      ],
+      [
+        "removed:51"
+      ]
+    ]
+  },
+  {
+    "out": "regression-descent-with-active-item.json",
+    "stages": [
+      [
+        "active item held",
+        "npc:19"
+      ],
+      [
+        "cleared:5"
+      ],
+      [
+        "stage:2"
+      ]
+    ]
   }
 ]
