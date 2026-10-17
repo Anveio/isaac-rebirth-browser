@@ -1,6 +1,6 @@
 use rebirth_cleanroom::{
-    fullscreen::FullscreenPreferences, options_menu::AudioPreferences, Command, Game,
-    MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS,
+    fullscreen::FullscreenPreferences, options_menu::AudioPreferences, save_host::SaveHost,
+    Command, Game, MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS,
 };
 use serde::Deserialize;
 use std::io::{self, Read};
@@ -18,6 +18,9 @@ struct Replay {
     boot_input_configs: Option<rebirth_cleanroom::keyboard::InputConfigs>,
     #[serde(default)]
     boot_elapsed: Option<BootElapsed>,
+    /// The browser's own-save storage; absent, the game has no save IO.
+    #[serde(default)]
+    save_host: Option<SaveHost>,
     commands: Vec<Command>,
 }
 #[derive(Deserialize)]
@@ -84,11 +87,29 @@ fn main() {
             std::process::exit(1);
         }
     }
-    println!("{}", game.json());
-    for command in replay.commands {
-        if let Err(error) = game.command(command) {
+    let mut store = match replay
+        .save_host
+        .as_ref()
+        .map(|host| host.boot(&mut game))
+        .transpose()
+    {
+        Ok(store) => store,
+        Err(error) => {
             eprintln!("{error}");
             std::process::exit(1);
+        }
+    };
+    println!("{}", game.json());
+    for command in replay.commands {
+        if let Err(error) = game.command(command.clone()) {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        if let (Some(host), Some(store)) = (&replay.save_host, &mut store) {
+            if let Err(error) = store.service(host, &mut game, &command) {
+                eprintln!("{error}");
+                std::process::exit(1);
+            }
         }
         println!("{}", game.json());
     }

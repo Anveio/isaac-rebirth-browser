@@ -15,6 +15,9 @@ pub struct GridOwner {
     /// Poop.Init569600 variant0 sheet: grid_poop_{RandomInt(3)+1}.png.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub poop_sheet: Option<u32>,
+    /// TNT.Init owns the signed fuse and its separately loaded Sprite.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tnt: Option<crate::tnt::Controller>,
 }
 
 /// Seven semantic fields in each native 0x1c-byte grid record. Padding beside
@@ -64,6 +67,7 @@ impl GridEntity {
             birth_game_update: None,
             local_rng: Rng::new(0xaa17_414f, [5, 9, 7]),
             poop_sheet: None,
+            tnt: None,
         });
         Ok(())
     }
@@ -123,6 +127,10 @@ impl GridEntity {
             12 => {
                 self.collision_class = 0;
                 costs.store(index, 1300)?;
+                self.source_owner
+                    .as_mut()
+                    .ok_or("TNT Init requires its constructor")?
+                    .tnt = Some(crate::tnt::Controller::initialized(self.state));
             }
             // Fresh Block3 shares Rock.Init56ED00. The actual geometry
             // admission already owns its state0→1/frame selection; the
@@ -552,25 +560,4 @@ fn admit_ambient_shape0(
         attempt += 1;
     }
     Ok(())
-}
-
-/// The Room grid pass 5d1378 for TNT: its Update keeps class2 while intact
-/// (state below 4) and class0 once blown. The state-4 countdown and blast
-/// are not admitted.
-pub(crate) fn advance_tnt(state: &mut crate::State, phase: crate::phase::Phase) {
-    if !phase.updates_nonplayers() {
-        return;
-    }
-    let Some(grid) = state.room.grid.as_mut() else {
-        return;
-    };
-    for entity in grid
-        .cells
-        .iter_mut()
-        .filter_map(|cell| cell.entity.as_mut())
-    {
-        if entity.kind == 12 {
-            entity.collision_class = if entity.state < 4 { 2 } else { 0 };
-        }
-    }
 }

@@ -807,6 +807,18 @@ actors/items/rooms and complete progression remain open.
 The listed-Bomb/unknown-legacy guard on0af reuses both recorded Native cases:
 all1714 ordered rows,62 Browser PNGs and62 MT states equal1b30. Public Bomb
 and real own legacy-save app-upgrade refusals pass; stored bytes remain intact.
+The saved-ambient successor137b restores owned1000/21,33,68 records through
+fresh Init and saved RNG30, corrects the Full/Fast position boundary and the
+Stop Room/Backdrop seed constructor. On the unchanged fixed/OS Original inputs,
+all1714 inherited rows remain:1644 pass/70 fail,52 gains/zero lost passes.
+The additional2034 shared-MT/ambient rows pass2006/fail28; all48 measured
+cursor/624-word checkpoints match. All28 additive failures precede Quit in
+fixed-case ambient velocity words; OS507/507 passes. OwnSave66/66, both natural
+reloads and real old0af legacy ambient-owner refusal pass; RGBA34/28 retains
+all verdicts. Intermediate adfb OS14 lost passes are recovered and its failed
+reports remain preserved. Broader saved actors/items/rooms and progression,
+14 canonical menu/gameplay-scope errors,28 seed separators and28 penalty-stage
+rows remain open.
 [Save/Continue scope](save-continue.md) preserves exact current and historical
 producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
@@ -818,6 +830,24 @@ all 1,190 existing comparisons, 59 Browser shared-MT snapshots and 59 PNGs;
 123 canonical and 52 pixel failures remain. Special descendants, restore and
 damage/destruction remain separate. [Block evidence](block-grid-evidence.md)
 records the accepted constructor scope and next observed prerequisite.
+
+The [bounded TNT common-callback result](tnt-grid-evidence.md) on frozen
+e3fa5336/1,408 files (WASM e505236c) passes 41,659 required checks:21,038 fixed
+and 20,621 first recorded OS boot 4011211959/idle 8, with fresh Native and actual
+Browser captures,401 clock acknowledgments and 40 selected Native captures.
+All 22,535 prior passes remain exact with zero losses;19,113 added rows pass,
+and 11 invalid live-four guards now pass actual Penny conservation while the
+old raw failures remain unchanged. Separate corrected-clock ordinary-room
+Node and fresh-Native/DOM controls each pass 278 checkpoints,99,406 inherited
+fields and 279 added clock rows, recovering 162 marker failures with zero lost
+parent passes. Broader recorded11-rock/six-bomb/four-key controls preserve
+all1,687,079 inherited field keys and all passing values;8,811 added absolute-clock
+fields pass. The252 known Rock failures remain, with64 already-failing tinted
+positions changed against actual137b and no changed expectations.
+Transient18 seed/callback is UNOBSERVED; capped history,
+fullRGBA, rare50/41 pool/pickup350, mixed-grid order, Player/NPC damage, reentry and
+whole MT remain open. This is no whole-game/current-main qualification.
+
 
 The historical CI matrix discovered thirty-six live suites and ran separate
 jobs with `fail-fast: false`, preserving each result and evidence. Agents now

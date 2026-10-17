@@ -205,6 +205,33 @@ pub(crate) fn bomb_hit_with_copied_source(
     copied_source: Option<combat::CopiedDamageSource>,
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
+    blast_hit_with_kind(
+        state,
+        center,
+        blast_radius,
+        damage,
+        source,
+        copied_source,
+        combat::DamageKind::Bomb,
+        line_clear,
+    )
+}
+
+/// The same circle/impulse/queue with the caller's actual incoming flags.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each argument is a separate input of the 554490 blast circle: center, radius, damage, source, copied EntityRef, the caller's incoming damage flags and its line-clear test"
+)]
+pub(crate) fn blast_hit_with_kind(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    damage: f32,
+    source: combat::DamageSource,
+    copied_source: Option<combat::CopiedDamageSource>,
+    kind: combat::DamageKind,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         if npc.dead
             || npc.removed
@@ -236,7 +263,7 @@ pub(crate) fn bomb_hit_with_copied_source(
             health,
             combat::DamageEvent {
                 amount: damage,
-                kind: combat::DamageKind::Bomb,
+                kind,
                 source,
                 copied_source,
             },

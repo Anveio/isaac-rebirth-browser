@@ -1000,6 +1000,49 @@ pub(crate) fn explode_with_copied_source(
     source: crate::combat::DamageSource,
     copied_source: Option<crate::combat::CopiedDamageSource>,
 ) -> Result<(), String> {
+    explode_with_kind(
+        state,
+        position,
+        radius,
+        damage,
+        source,
+        copied_source,
+        crate::combat::DamageKind::Bomb,
+        true,
+    )
+}
+
+/// TNT's caller has no source Entity and disables554490's line-check input.
+pub(crate) fn explode_tnt(state: &mut State, position: WorldVector) -> Result<(), String> {
+    explode_with_kind(
+        state,
+        position,
+        75.0,
+        60.0,
+        crate::combat::DamageSource {
+            id: 0,
+            entity_type: 0,
+        },
+        None,
+        crate::combat::DamageKind::Tnt,
+        false,
+    )
+}
+
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each argument is a separate input of the 554490 explosion routine: position, radius, damage, source, copied EntityRef, damage flags and the line-check switch TNT disables"
+)]
+fn explode_with_kind(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    damage: f32,
+    source: crate::combat::DamageSource,
+    copied_source: Option<crate::combat::CopiedDamageSource>,
+    kind: crate::combat::DamageKind,
+    check_line: bool,
+) -> Result<(), String> {
     //Unclosed rock/alt-rock destruction can add4/5/6 despite no current body.
     crate::ordinary_placement::invalidate(state, crate::ordinary_placement::Frontier::GridEffects);
     let line = state
@@ -1009,19 +1052,22 @@ pub(crate) fn explode_with_copied_source(
         .map(|descriptor| crate::grid::Grid::new(descriptor.clone()))
         .transpose()?;
     let clear = |target: WorldVector| {
-        line.as_ref()
-            .is_none_or(|grid| grid.blast_line_clear(position, target, true))
+        !check_line
+            || line
+                .as_ref()
+                .is_none_or(|grid| grid.blast_line_clear(position, target, true))
     };
-    crate::npcs::bomb_hit_with_copied_source(
+    crate::npcs::blast_hit_with_kind(
         state,
         position,
         radius,
         damage,
         source,
         copied_source,
+        kind,
         &clear,
     )?;
-    crate::pickups::bomb_hit(state, position, radius, damage, 4, &clear)?;
+    crate::pickups::bomb_hit(state, position, radius, damage, kind.flags(), &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
         isaac_blast_velocity(
@@ -1043,7 +1089,7 @@ pub(crate) fn explode_with_copied_source(
             state,
             units,
             DAMAGE_COOLDOWN_TICKS / u32::from(PLAYER_DAMAGE) * u32::from(units),
-            4,
+            kind.flags(),
         )?;
     }
     crate::critters::blast(state, position, radius, &clear);

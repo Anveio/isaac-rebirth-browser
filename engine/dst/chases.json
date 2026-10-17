@@ -196,5 +196,23 @@
         "screen:Playing"
       ]
     ]
+  },
+  {
+    "out": "coverage-save-continue.json",
+    "from": null,
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "property:game: a save write is stored",
+        "property:game: a save write's storage fails"
+      ],
+      [
+        "property:game: a menu readmission loads the stored document"
+      ],
+      [
+        "property:game: a saved run is continued"
+      ]
+    ]
   }
 ]

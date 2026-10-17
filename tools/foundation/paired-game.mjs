@@ -174,6 +174,7 @@ export async function nativeCapture(caseData, directory, nativeFrameTimeout, ori
     assert.ok(audioOwnerTrace, 'Options owners require the actual audio observer library');
     args.push('--audio-options-owners');
   }
+  if (caseData.tnt?.observeEveryTapeStep === true) args.push('--observe-every-step');
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
   if (originalMusicVolume !== undefined) {
@@ -353,8 +354,20 @@ export async function browserCapture(browser, server, caseData, directory, archi
       assert.equal(entered[0].state.seedValid, true);
       assert.ok(frames.indexOf(entered[0]) < frames.findIndex(frame => frame.label === 'gameplay-start'), 'Seed dialog must precede fresh admission');
     } else {
-      assert.equal(final?.seedText, requestedSeed, 'Browser must read back every requested seed character');
-      assert.equal(final?.seedValid, true, 'Browser must validate the requested seed');
+      // Fresh Main reconstructs Character's transient dialog. Require its
+      // actual run-admission witness; final committed run checks stay below.
+      let seedReadback = final;
+      if (final?.screen === 'main') {
+        const entries = frames.filter(frame => frame.label === 'gameplay-start');
+        assert.equal(entries.length, 1, 'Returned Main requires one actual run-admission seed witness');
+        seedReadback = entries[0].state;
+        assert.equal(seedReadback?.screen, 'playing');
+        assert.equal(seedReadback?.seededRun, true);
+        assert.ok(Number.isSafeInteger(seedReadback?.runTick) && seedReadback.runTick > 0,
+          'Returned Main requires actual prior gameplay');
+      }
+      assert.equal(seedReadback?.seedText, requestedSeed, 'Browser must read back every requested seed character');
+      assert.equal(seedReadback?.seedValid, true, 'Browser must validate the requested seed');
     }
     assert.equal(final?.seededRun, true, 'Browser must commit the public manual seed entry');
     assert.equal(final?.runSeed, requestedSeed, 'Browser must read back the committed public run code');
