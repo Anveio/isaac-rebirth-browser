@@ -111,8 +111,14 @@ bounded same-Native Options fields and both unchanged Browser runtime tests.
 Default paired-kernel replays preserve all prior values: fixed 5999/5999 passes;
 recorded HH936E8Z keeps its 78 failures among 6060 checks, with no lost passes.
 Historical 3a9 runtime/SFX/free-SKU checks keep their separate artifact scope.
-The Options readers/comparer/clock tools are still ignored: durable promotion
-and a permanent registered Options suite remain debt. Keyboard Controls now owns
+The registered `options-audio` suite owns actual request/query/gain/reset, Back
+persistence and final public run-seed observations. Its first a716/99f fixed plus
+unfiltered OS result passes 866/866 fields. Fresh main634-based 4ca Native/Browser
+integration replays the same fixed plus recorded JWMM YY0Y bank with no new draws
+or filtering: 866/866 pass and all 32 Browser PNG bytes equal 99f. Fresh Native
+identities and journal labels differ; verdicts do not. Both 400-state history caps
+and 16/32 pixel diagnostics remain failed. The [public replay bank](../references/isaac/cases/options-audio/recorded-fixed-jwmm-epoch-holds-v1.json)
+keeps the inputs. Keyboard Controls now owns
 the 24-action/two-column editor and its persistence; its [artifact-bound fixed,
 unfiltered OS and Full/Fast bomb results](controls-keyboard.md) remain separate
 from other systems. Fresh main173 artifact 4ca passes runtime 2/2 and exact fixed
@@ -121,7 +127,7 @@ Map Opacity, Filter, Gamma and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Next: promote durable Options and Controls acceptance tools; complete Controls
+Next: promote durable Controls acceptance tools; complete Controls
 reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
 See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 

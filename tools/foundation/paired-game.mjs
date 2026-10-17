@@ -104,7 +104,7 @@ function independentDraws(caseData, directory) {
 
 // Opt-in paired clocks use only the declared source-only prelude and the
 // native launcher defaults, then require the actual clock acknowledgements.
-function declarePublicClockPlan(data) {
+export function declarePublicClockPlan(data) {
   const nativeBootstrapPresentations = 30; // foundation-clock-run.py step30
   const presentationIntervalNanoseconds = 16_667_000; // launcher's --step-ns default
   assert.ok(Number.isInteger(data.bootEpochSeed) && data.bootEpochSeed >= 0 && data.bootEpochSeed <= 0xffffffff);
@@ -147,7 +147,7 @@ function declarePublicClockPlan(data) {
     nativeAcknowledgements, nativeCaptures, browserTickCommands};
 }
 
-function validateNativeClockPlan(data, plan, native) {
+export function validateNativeClockPlan(data, plan, native) {
   assert.equal(native.status, 'pass');
   assert.equal(native.provenance?.status, 'pass', 'Existing canonical Native provenance remains required');
   const manifest = native.manifest;
@@ -161,13 +161,17 @@ function validateNativeClockPlan(data, plan, native) {
     scope: 'Actual independent Native acknowledgement/capture times validate the prior public declaration; no readback changes a Browser command'};
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan, audioOwnerTrace) {
+export async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan, audioOwnerTrace, optionsAudioOwners = false) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
     '--state-observer', originalObserver, '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
   if (publicClockPlan) args.push('--boot-epoch-seed', String(publicClockPlan.bootEpochSeed),
     '--step-ns', String(publicClockPlan.presentationIntervalNanoseconds));
+  if (optionsAudioOwners) {
+    assert.ok(audioOwnerTrace, 'Options owners require the actual audio observer library');
+    args.push('--audio-options-owners');
+  }
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
   if (audioOwnerTrace) {
@@ -209,7 +213,7 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest, manifestPath, evidence };
 }
 
-async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
+export async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
   audioPreferences = {sfxVolume: 0, musicVolume: 0}) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
