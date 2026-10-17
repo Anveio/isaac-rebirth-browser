@@ -4,8 +4,10 @@ This is a partial ordinary Shop implementation. The descriptor owns its
 RNG35 category table, cursor, sale slot and following seed. Resolved stock
 uses real Heart, Key, Bomb, Pill, collectible and Battery producers. Each
 SKU owns its signed price and slot. Affordability and grant refusals preserve
-the offer without debit; a successful paid grant debits exactly once, copies
-the body presentation and immediately sets its removal flags. The manager
+the offer without debit; a successful paid grant debits exactly once and
+immediately sets its removal flags. Regular pickups copy their body Sprite
+into the Player presentation; collectibles use the existing deferred item
+presentation and grant queue. The manager
 retains that retired member until its next Full precontact stable sweep.
 Free Collect keeps its distinct lifecycle.
 
@@ -22,6 +24,13 @@ parent `4ea0005d`. Its inventory binds 2,837 runtime/resource files, including
 the new Shop module. Build, format and upkeep checks pass. These documents
 are rebased onto main `1d69526a`; later integration artifacts need their own
 binding and do not acquire whole-runtime parity from these captures.
+
+The fresh integration build on main `1d69526a`, artifact `5c33bb75`
+(1,407 files), passes build and both browser lifecycle tests. Its actual
+Browser replay against the unchanged v9 Original passes the same 117 source
+guards and 390 typed fields. All 1,190 canonical keys, expected values and
+results are unchanged, including the retained failures; RGBA remains
+seven exact and 52 failing labels.
 
 ## Actual paid Bomb witness
 
