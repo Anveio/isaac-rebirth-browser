@@ -611,7 +611,11 @@ pub(crate) fn after_damage_queries(state: &mut State, normal_source_path: bool) 
 ///Apply only query/cache uncertainty at these actual source boundaries.
 ///Random-choice and cosmetic frontiers do not erase unrelated inputs.
 fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> bool {
-    if plan.foreign_effects.iter().any(|effect| effect.kind == DamageForeignEffectKind::NestedUse) {
+    if plan
+        .foreign_effects
+        .iter()
+        .any(|effect| effect.kind == DamageForeignEffectKind::NestedUse)
+    {
         //A reached unowned nested Use can write Pill counters even when
         //the separate query-history owner was already unavailable.
         if let Some(owner) = state.player_items.as_mut() {

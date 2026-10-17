@@ -210,6 +210,10 @@ fn legacy_words(
 ///deserializable JSON tag or a way to refill a current missing word.
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "a Copy save-wire value; LegacyMissing is only the serde default for an omitted field, so boxing Current would drop Copy and add an allocation for nothing"
+)]
 pub enum SavedPillEffectHistory {
     #[default]
     #[serde(skip)]
