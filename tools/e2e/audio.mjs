@@ -12,7 +12,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step } from './lib/game.mjs';
+import { snapshot, step, evaluateJson, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -139,7 +139,7 @@ try {
           else if (action.down && action.key === 'Return' && intendedSeedEntry) intendedSeedEntry = false;
         }
         else {
-          const actual = await page.evaluate(() => ({ state: window.game.snapshot(), audio: window.game.audio() }));
+          const actual = await evaluateJson(page, () => ({ state: window.game.snapshot(), audio: window.game.audio() }));
           states.push({ label: action.label, ...actual });
           const expected = observations.get(action.label); assert.equal(expected.status, 'pass');
           assert.equal(expected.nativeBinarySha256, ORIGINAL_SHA); assert.equal(expected.memoryWritten, false); assert.equal(expected.executableMappingsRead, false);
@@ -179,7 +179,7 @@ try {
         }
       }
       const actualAudio = await page.evaluate(() => window.game.audio());
-      const actualApi = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
+      const actualApi = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
       // All authored base SFX are mono PCM16; music streams are stereo and
       // have their own live controller/queue acceptance cohort.
       const actualApiStarts = actualApi.events.filter(event => event.type === 'start' && event.channels === 1);
@@ -211,7 +211,7 @@ try {
       }
       check('browser runtime errors', errors, []);
       check('browser actual public seed readback', (await snapshot(page)).runSeedValue, native.seedValue);
-      const wasmTrace = await page.evaluate(() => window.game.trace());
+      const wasmTrace = await readTrace(page);
       check('actual reset/run and boot inputs recorded', [wasmTrace.initialSeed, wasmTrace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
       check('declared audio preferences applied before first admission', wasmTrace.bootAudioPreferences, {sfxVolume: scenario.volume, musicVolume: 1});
       check('declared window default applied at reset', wasmTrace.bootFullscreenPreferences, {fullscreen: false});
