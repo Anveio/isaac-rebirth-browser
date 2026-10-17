@@ -34,8 +34,6 @@ pub struct LuckInputs {
     pub source_d3c: i32,
     pub source_d40: i32,
     pub source_d58: f32,
-    pub source_13cc: i32,
-    pub source_13d0: i32,
 }
 
 /// Actual Player+D38, independent of inventory and the evaluated C7C output.
@@ -57,21 +55,12 @@ impl ShotSpeedInputs {
 pub struct MoveSpeedInputs {
     pub source_d28: i32,
     pub source_d44: i32,
-    pub source_13bc: i32,
-    pub source_13c0: i32,
 }
 impl MoveSpeedInputs {
     pub(crate) const NEUTRAL: Self = Self {
         source_d28: 0,
         source_d44: 0,
-        source_13bc: 0,
-        source_13c0: 0,
     };
-
-    ///No other source term is approximated by the D28 operator.
-    pub(crate) fn supports_persistent_d28(self) -> bool {
-        self.source_d44 == 0 && self.source_13bc == 0 && self.source_13c0 == 0
-    }
 
     pub fn apply_signed_delta(&mut self, delta: i32) {
         self.source_d28 = self.source_d28.wrapping_add(delta);
@@ -164,10 +153,17 @@ pub struct PlayerItems {
     ///Legacy omission is unknown, never a fresh empty inventory proof.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub query_history: Option<crate::item_queries::ItemQueryHistory>,
-    #[serde(default)]
+    #[serde(default, rename = "luckTerms")]
     pub luck_inputs: Option<LuckInputs>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "moveSpeedTerms",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub move_speed_inputs: Option<MoveSpeedInputs>,
+    ///One canonical Player1388..13F4 array; State owns its versioned wire view.
+    #[serde(skip)]
+    pub pill_effect_history: Option<crate::pill_effect_history::PillEffectHistory>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<DamageInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -203,6 +199,9 @@ pub struct PlayerItems {
     ///profile achievements complete or admit any missing cache/weapon role.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub treatment240_frontiers: Option<crate::experimental_treatment::Frontiers>,
+    ///Actual reached Pill use leaves these distinct non-scalar owners open.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pill_use_frontiers: Option<crate::pockets::PillUseFrontiers>,
 }
 
 impl PlayerItems {
@@ -248,8 +247,6 @@ impl PlayerItems {
                 source_d3c: 0,
                 source_d40: 0,
                 source_d58: 0.0,
-                source_13cc: 0,
-                source_13d0: 0,
             }),
             shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
             // Actual519662, not a default reconstructed from inventory.
@@ -258,6 +255,7 @@ impl PlayerItems {
             range_inputs: Some(RangeInputs { source_d34: 0 }),
             //51964E/51954C and519798 own these four original zeros.
             move_speed_inputs: Some(MoveSpeedInputs::NEUTRAL),
+            pill_effect_history: Some(crate::pill_effect_history::PillEffectHistory::FRESH),
             //Actual519658, not a cache/count-derived neutral default.
             fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
@@ -279,6 +277,7 @@ impl PlayerItems {
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
             treatment240_frontiers: None,
+            pill_use_frontiers: None,
         })
     }
 
@@ -893,6 +892,9 @@ pub(crate) fn add_collectible(
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
     if !query_stores_preserved {
+        //An actual unclosed Add dispatch may reach another counter writer.
+        //Closed default/194/treatment/plain-active footprints preserve the array.
+        crate::pill_effect_history::forget(owner);
         if let Some(history) = &mut owner.query_history {
             history.forget_unowned_effect();
         }

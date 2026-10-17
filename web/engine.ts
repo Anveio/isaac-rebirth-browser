@@ -51,7 +51,8 @@ export interface Familiar {
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
 type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
-export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} };
+export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} }
+  | { particle5: { particle: ParticleFlight; subtype: number; stage: number } };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;
@@ -87,7 +88,7 @@ export interface Knife {
   childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
-  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean;
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean; sourceMotionKnown?: boolean;
   renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
   configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -316,7 +317,7 @@ export interface State {
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
-  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; c18ControllerHistoryKnown?: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
@@ -363,6 +364,9 @@ export interface State {
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
     shotSpeedInputs?: {sourceD38: number};
+    pillEffectHistory: {kind: "current"; version: 1; history: {words: (number | null)[]} | null};
+    moveSpeedTerms?: {sourceD28: number; sourceD44: number};
+    luckTerms: {sourceD3c: number; sourceD40: number; sourceD58: number} | null;
     moveSpeedInputs?: {sourceD28: number; sourceD44: number; source13bc: number; source13c0: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
@@ -384,6 +388,7 @@ export interface State {
   ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   departureVelocity?: {x: number; y: number};
+  departurePosition?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
   sourceDamageMaximum?: boolean;
@@ -391,7 +396,7 @@ export interface State {
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | null; frame: number; playing: boolean; guard: boolean };
 
   gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;

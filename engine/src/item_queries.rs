@@ -360,6 +360,12 @@ pub(crate) fn reach_late_temporary_evaluation(
         .as_mut()
         .and_then(|owner| owner.query_history.as_mut())
     else {
+        //This reached full path continues to515F40 in Source. Without
+        //TEMP326 history, its actual cooldown/virtual-damage guard cannot
+        //be excluded; this is not a general stat-cache uncertainty rule.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
         return Ok(());
     };
     if let Some(mask) = deferred {
@@ -400,6 +406,13 @@ pub(crate) fn reach_late_temporary_evaluation(
         Some(_) => false,
     };
     let taurus_cache_mask = scalar_evaluation_footprint(queries, 0x10);
+    if possible_breath {
+        //517268..5172F7 includes the unclosed virtual damage callback.
+        //Keep this word owner independent of queryHistory's availability.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
+    }
     let Some(history) = state
         .player_items
         .as_mut()
@@ -511,6 +524,11 @@ pub(crate) fn before_damage_queries(state: &mut State, health_units: u8, flags: 
             .entity_source
             .is_some_and(|source| source.entity_type == 1 && source.variant == 0);
     if !normal_source_context {
+        //The caller has admitted damage; this entity/character callback
+        //has no closed word-write footprint, independent of queryHistory.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
         if let Some(history) = state
             .player_items
             .as_mut()
@@ -593,6 +611,17 @@ pub(crate) fn after_damage_queries(state: &mut State, normal_source_path: bool) 
 ///Apply only query/cache uncertainty at these actual source boundaries.
 ///Random-choice and cosmetic frontiers do not erase unrelated inputs.
 fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> bool {
+    if plan
+        .foreign_effects
+        .iter()
+        .any(|effect| effect.kind == DamageForeignEffectKind::NestedUse)
+    {
+        //A reached unowned nested Use can write Pill counters even when
+        //the separate query-history owner was already unavailable.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
+    }
     let Some(history) = state
         .player_items
         .as_mut()

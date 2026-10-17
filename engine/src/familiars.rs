@@ -480,6 +480,17 @@ pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     {
         return crate::blood_effects::advance(state, phase, id);
     }
+    if phase == Phase::Update
+        && state.sprite_effects.iter().any(|effect| {
+            effect.id == id
+                && matches!(
+                    effect.poop_effect,
+                    Some(crate::poop_effects::Controller::Particle5(_))
+                )
+        })
+    {
+        return crate::poop_effects::advance_blood_particle(state, id);
+    }
     if let Some(effect) = state
         .sprite_effects
         .iter_mut()

@@ -343,19 +343,21 @@ fn advance_full(
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;
-        // Source44641d death sound precedes the real Blood Splat seed. Gib
-        // particles for authored gib counts are not yet admitted.
+        // Die 445c60: the death sound (44641d, louder with gibs), the gibs,
+        // then the real Blood Splat seed.
+        let gibs = content::entity(npc.kind, npc.variant).gib_amount > 0;
         world.audio.admit(
             random,
             world.system_counter,
             SoundRequest {
                 id: 30,
-                volume: 0.8,
+                volume: if gibs { 1.0 } else { 0.8 },
                 delay: 2,
                 looping: false,
                 pitch: 1.0,
             },
         );
+        crate::gib_counts::burst(npc, random, world)?;
         let seed = random.next_u32();
         npc.death_effect_seed = Some(seed);
         births.push(Birth::Blood(seed));

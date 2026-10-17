@@ -239,7 +239,29 @@ fn card_catalog(xml: &str) -> String {
     );
     let values: Vec<_> = achievements.into_iter().map(Option::unwrap).collect();
     let cards: String = definitions.into_iter().map(Option::unwrap).collect();
-    format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\npub const CARD_DEFINITIONS: &[PocketCardDefinition] = &[\n{cards}];\n")
+    //57BF80 indexes the authored final Pill effect, not a held color.
+    let mut pills: [Option<String>; 28] = std::array::from_fn(|_| None);
+    for tag in xml.split("<pilleffect ").skip(1) {
+        let head = &tag[..tag.find('>').expect("Pill effect tag end")];
+        let id: usize = attribute(head, "id")
+            .expect("Pill effect id")
+            .parse()
+            .expect("Pill effect id integer");
+        assert!(
+            id < pills.len() && pills[id].is_none(),
+            "invalid authored Pill effect id"
+        );
+        pills[id] = Some(format!(
+            "PocketPillDefinition {{ name: {:?} }},\n",
+            attribute(head, "name").expect("Pill effect name")
+        ));
+    }
+    assert!(
+        pills.iter().all(Option::is_some),
+        "incomplete authored Pill effect catalogue"
+    );
+    let pills: String = pills.into_iter().map(Option::unwrap).collect();
+    format!("pub const CARD_ACHIEVEMENTS: [i32; 41] = {values:?};\npub const CARD_DEFINITIONS: &[PocketCardDefinition] = &[\n{cards}];\npub const PILL_DEFINITIONS: &[PocketPillDefinition] = &[\n{pills}];\n")
 }
 
 /// tools/foundation/extract-alpha-masks.py output: one alpha>0.5 bitfield
@@ -290,6 +312,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 42, "gfx/1000.042_blood gush.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
         (1000, 58, "gfx/1000.058_poop particle.anm2"),
+        (1000, 5, "gfx/1000.005_blood particle.anm2"),
         (1000, 27, "gfx/1000.027_wood particle.anm2"),
         (1000, 43, "gfx/1000.043_poop explosion.anm2"),
         (1000, 21, "gfx/1000.021_tiny bug.anm2"),
@@ -695,7 +718,9 @@ fn main() {
             .as_u64()
             .expect("Pickup frame count")
     ));
-    for name in ["Trapdoor", "Appear", "Death", "UseItem", "Hit"] {
+    for name in [
+        "Trapdoor", "Appear", "Death", "UseItem", "Hit", "Sad", "Happy",
+    ] {
         let clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
             .as_array()
             .expect("authored player clips")

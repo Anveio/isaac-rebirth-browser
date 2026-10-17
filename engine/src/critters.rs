@@ -284,7 +284,12 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
 /// Room.Init 5cf64f, on the descriptor's first visit after the ambient grid
 /// decoration. `counter` is Game+ce9f4 while this Room.Init runs; `loader`
 /// marks the run loader's starting room.
-pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(), String> {
+pub(crate) fn spawn(
+    state: &mut State,
+    counter: u32,
+    loader: bool,
+    viewer: WorldVector,
+) -> Result<(), String> {
     let Some(descriptor) = state.room.descriptor.as_ref() else {
         return Ok(());
     };
@@ -344,7 +349,7 @@ pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(),
                     critter: true,
                 },
             )?;
-            update(state, id, counter)?;
+            update_seen(state, id, counter, Some(viewer))?;
             effect_mut(state, id)?
                 .critter
                 .as_mut()
@@ -377,7 +382,7 @@ pub(crate) fn spawn(state: &mut State, counter: u32, loader: bool) -> Result<(),
             x: depth * 40.0,
             y: perimeter * 10000.0,
         };
-        update(state, id, counter)?;
+        update_seen(state, id, counter, Some(viewer))?;
         effect_mut(state, id)?
             .critter
             .as_mut()
@@ -448,6 +453,17 @@ pub(crate) fn replay_loader_update(state: &mut State) -> Result<(), String> {
 
 /// Effect::Update 45aa70: BaseUpdate 447190, then the variant's AI case.
 fn update(state: &mut State, id: u32, counter: u32) -> Result<(), String> {
+    update_seen(state, id, counter, None)
+}
+
+/// `viewer` overrides the player position the AI measures against: Room.Init
+/// updates each new critter before PlayerManager places the player.
+fn update_seen(
+    state: &mut State,
+    id: u32,
+    counter: u32,
+    viewer: Option<WorldVector>,
+) -> Result<(), String> {
     let effect = effect_mut(state, id)?;
     if effect.removed {
         return Ok(());
@@ -467,8 +483,8 @@ fn update(state: &mut State, id: u32, counter: u32) -> Result<(), String> {
     effect.current_friction = effect.configured_friction;
     match variant {
         2 => blood_explosion(state, id),
-        21 => tiny_bug(state, id),
-        33 => tiny_fly(state, id, counter),
+        21 => tiny_bug(state, id, viewer),
+        33 => tiny_fly(state, id, counter, viewer),
         68 => wall_bug(state, id),
         _ => Err("critter variant has no AI case".into()),
     }?;
@@ -524,8 +540,9 @@ fn splat(state: &mut State, id: u32, scale: Option<f32>, flags: u32) -> Result<(
 }
 
 /// Case 21 (45c090).
-fn tiny_bug(state: &mut State, id: u32) -> Result<(), String> {
-    let player = crate::bombs::player_world(state);
+fn tiny_bug(state: &mut State, id: u32, viewer: Option<WorldVector>) -> Result<(), String> {
+    // 45c138: the nearest player's position (551f90).
+    let player = viewer.unwrap_or_else(|| crate::bombs::player_world(state));
     let player_velocity = crate::bombs::player_velocity(state);
     let mut effect = effect_mut(state, id)?.clone();
     let mut critter = effect.critter.clone().expect("critter");
@@ -634,8 +651,13 @@ fn tears_within(
 }
 
 /// Case 33 (45b790), shared with effect variants 0/8/18.
-fn tiny_fly(state: &mut State, id: u32, counter: u32) -> Result<(), String> {
-    let player = crate::bombs::player_world(state);
+fn tiny_fly(
+    state: &mut State,
+    id: u32,
+    counter: u32,
+    viewer: Option<WorldVector>,
+) -> Result<(), String> {
+    let player = viewer.unwrap_or_else(|| crate::bombs::player_world(state));
     let sequence = state
         .actor_scheduler
         .sequence_id(ActorRef {

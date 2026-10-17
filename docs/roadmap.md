@@ -68,7 +68,7 @@ Counts of open bugs are as of the last full review.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus; pause | 4 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams; shared MT incomplete | 7 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -78,7 +78,7 @@ Counts of open bugs are as of the last full review.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
-| [Grid objects](#grid-objects) | Partial | Rocks, spikes, poop, trapdoor, decorations | 1 |
+| [Grid objects](#grid-objects) | Partial | Rocks, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 0 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
@@ -107,7 +107,10 @@ Next: options menu; death screen parity; intro cutscene.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
+| #587 | P1 | Menu page changes (title, file select, main, character, seed) cut instead of panning | playtest 2026-10-17 `playtest/menus/` menus-tour |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
+| #588 | P2 | Character select draws stat icons over a locked character's unlock text | playtest 2026-10-17 `playtest/menus/` menus-tour |
+| #589 | P3 | Seed entry shows underscore placeholders the original doesn't draw | playtest 2026-10-17 `playtest/menus/` menus-tour |
 
 ## Input
 
@@ -194,7 +197,7 @@ Next: Basement II to Caves (#413 first).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
-| #449 | P3 | No "BASEMENT I" name streak at run start; Basement II start room keeps the controls drawing | playtest 2026-10-16 `playtest/2045007/` |
+| #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
 
 ## Player
 
@@ -263,13 +266,12 @@ including large rooms.
 Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
-Port: rocks, spikes, poop, trapdoor, decorations, grid records and costs.
-Missing: tinted and bomb rocks, pits, TNT, blocks, buttons, crawlspace
-ladders, poop variants.
+Port: rocks, authored bomb rocks, spikes, poop (authored too), TNT (intact
+collision only), spider webs, trapdoor, decorations, grid records and costs.
+Missing: TNT fuse/countdown and blast, tinted rocks, pits, blocks, buttons,
+crawlspace ladders, poop variants.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #447 | P1 | Authored poop (grid 1500) never appears: the selector leaves its cell empty | playtest 2026-10-16 `playtest/2045007/` dingle-DV02XJWW |
+No open bugs.
 
 ## Enemies
 
@@ -451,3 +453,4 @@ Bugs in a test route or tool rather than in the game.
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
+- #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).

@@ -103,6 +103,7 @@ pub mod pathfinder;
 pub mod phase;
 pub mod pickup_world_grants;
 pub mod pickups;
+pub mod pill_effect_history;
 mod plain_npc;
 pub mod player_animation;
 pub mod player_costume118;
@@ -682,6 +683,11 @@ pub struct State {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acquisition_history: Option<acquisition_history::AcquisitionHistory>,
     pub item_pools: Option<items::ItemPools>,
+    #[serde(
+        default,
+        serialize_with = "pill_effect_history::serialize_player_items",
+        deserialize_with = "pill_effect_history::deserialize_player_items"
+    )]
     pub player_items: Option<player_items::PlayerItems>,
     pub player_animation: player_animation::PlayerAnimation,
     pub public_actions: public_actions::PublicActions,
@@ -728,6 +734,11 @@ pub struct State {
     /// It lives through the transition, so a state saved during one keeps it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub departure_velocity: Option<motion::WorldVector>,
+    /// The player's world position while ChangeRoom runs the entered room's
+    /// Room.Init, before the entry door placement: Room.Init's critter
+    /// updates measure the player there.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub departure_position: Option<motion::WorldVector>,
     pub stage_effects: StageEffects,
     pub inventory: Inventory,
     pub next_pickup: u32,
@@ -957,6 +968,7 @@ impl Game {
                 stage_transition: stage_transition::StageTransition::default(),
                 ambience: ambience::Ambience::default(),
                 departure_velocity: None,
+                departure_position: None,
                 stage_effects,
                 inventory: Inventory {
                     coins: 0,
@@ -1657,7 +1669,8 @@ impl Game {
         self.state.damage_cooldown = 0;
         self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
         self.state.bomb_action_was_down = self.held("KeyE");
-        self.state.run_introduction = RunIntroduction::stage(true);
+        //54FC2B starts the initial stage streak only after the opaque fade.
+        self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
@@ -1720,6 +1733,7 @@ impl Game {
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
         self.state.departure_velocity = None;
+        self.state.departure_position = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
             self.state.current_room,
@@ -1770,7 +1784,9 @@ impl Game {
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
         let counter = self.state.game_update_count;
-        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true)?;
+        // The run's starting room sees the player already at its start.
+        let viewer = bombs::player_world(&self.state);
+        let suppressed_entities = self.admit_room_pickups(&selectors, counter, true, viewer)?;
         let requested_entities = requested_entities
             .checked_sub(suppressed_entities)
             .ok_or("suppressed authored entity count exceeds selected inputs")?;
@@ -1973,6 +1989,7 @@ impl Game {
     /// unchanged counter. It leaves position and velocity unchanged; its only
     /// shared draws are the 50c000 footprint, gated by the departing velocity.
     fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
+        self.state.departure_position = None;
         if let (phase::Phase::Update, Some(velocity)) =
             (phase, self.state.departure_velocity.take())
         {
@@ -1985,11 +2002,13 @@ impl Game {
     /// NPCs and pickups when rebuilding the shared actor scheduler.
     /// `critter_counter` is Game+ce9f4 while this Room.Init runs and `loader`
     /// marks the run loader's starting room (see critters::spawn).
+    /// `critter_viewer` is where Room.Init's critter updates see the player.
     pub fn admit_room_pickups(
         &mut self,
         selectors: &[room_spawns::SpawnSelector],
         critter_counter: u32,
         loader: bool,
+        critter_viewer: motion::WorldVector,
     ) -> Result<usize, String> {
         //453EC0 finished its ordinary-list reset and callbacks.
         ordinary_placement::begin_fresh_room(&mut self.state);
@@ -2263,7 +2282,7 @@ impl Game {
         }
         // First-visit ambient critters close Room.Init5cf64f inside this full
         // update, after the selector entities took their manager sequences.
-        critters::spawn(&mut self.state, critter_counter, loader)?;
+        critters::spawn(&mut self.state, critter_counter, loader, critter_viewer)?;
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(suppressed_entities)
@@ -2760,7 +2779,12 @@ impl Game {
                         .selectors
                         .clone();
                     let counter = self.state.game_update_count.wrapping_add(1);
-                    self.admit_room_pickups(&selectors, counter, false)?;
+                    let viewer = self
+                        .state
+                        .departure_position
+                        .take()
+                        .unwrap_or_else(|| bombs::player_world(&self.state));
+                    self.admit_room_pickups(&selectors, counter, false, viewer)?;
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     // The admitted Room::Update follows authored mixed order.
@@ -2843,16 +2867,25 @@ impl Game {
             }
             return Ok(());
         }
-        if phase == phase::Phase::Update
-            && self
+        if phase == phase::Phase::Update {
+            let initial_fade_was_positive = self.state.run_admission.initial_fade > 0.0;
+            if self
                 .state
                 .run_admission
                 .blocks_full_update(&mut self.state.player)?
-        {
-            // Fast5507f0 does not take this guard. Music belongs to System and
-            // continues while Game's full update and age are held.
-            self.state.music.advance();
-            return Ok(());
+            {
+                // Fast5507f0 does not take this guard. Music belongs to System and
+                // continues while Game's full update and age are held.
+                self.state.music.advance();
+                return Ok(());
+            }
+            if initial_fade_was_positive {
+                //54FC2B ->585500 restarts the existing HUD streak after this
+                //Full's earlier HUD update, before GameAge and actor callbacks.
+                //The positive-to-zero edge is one-shot;593660 input reset is
+                //still represented by completion_callbacks_pending, not cleared.
+                self.state.run_introduction = RunIntroduction::stage(true);
+            }
         }
 
         // Game54fb88 invokes580330 after its active transition branches.
@@ -3766,6 +3799,8 @@ impl Game {
                 Some(
                     player_animation::Clip::UseItem
                         | player_animation::Clip::Hit
+                        | player_animation::Clip::Sad
+                        | player_animation::Clip::Happy
                         | player_animation::Clip::Trapdoor
                         | player_animation::Clip::Appear
                 )
@@ -3843,6 +3878,12 @@ impl Game {
         let regular_dispatch = if shoot_callback_admitted {
             match weapon_plan::resolve_current_weapon(&self.state)? {
                 weapon_plan::LiveWeaponResolution::Unadmitted(channel) => {
+                    //A known regular-shot cache refusal cannot write C18.
+                    //Other unresolved source channels may skip a persistent
+                    //controller/cleanup; current pointers never heal history.
+                    if channel != "regularTearCache" {
+                        self.state.weapon_admission.c18_controller_history_known = false;
+                    }
                     if technology2_selected {
                         technology2::primary_frontier(&mut self.state, channel);
                     } else {
@@ -3979,6 +4020,11 @@ impl Game {
                                 aim_step.callback_aim,
                             )?
                         };
+                        if outcome == attack_runtime::DispatchOutcome::Unadmitted
+                            && plan.controller.writes_c18()
+                        {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         //519FC0 returns before the released idle D9C -> DA0 effect.
                         if controlled {
                             attack_runtime::controlled_idle_head(&mut self.state, buttons.held());
@@ -4044,6 +4090,9 @@ impl Game {
                         }
                         outcome == attack_runtime::DispatchOutcome::RegularTear
                     } else {
+                        if plan.controller.writes_c18() {
+                            self.state.weapon_admission.c18_controller_history_known = false;
+                        }
                         self.state
                             .weapon_admission
                             .record_unadmitted(plan.primary, "ordinaryShootingAimHistory");
@@ -4096,7 +4145,7 @@ impl Game {
             bombs::place(&mut self.state, phase)?;
         }
         active_items::advance(&mut self.state, controls_enabled)?;
-        pockets::note_unowned_use(&mut self.state, controls_enabled);
+        pockets::use_pocket(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {

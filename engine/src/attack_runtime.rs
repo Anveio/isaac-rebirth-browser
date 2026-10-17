@@ -404,7 +404,10 @@ fn controlled_actor_frontier(knife: &Knife) -> Result<Option<&'static str>, Stri
     if knife.child_chain_4a0 == crate::knives::ChildChain::Unknown {
         return Ok(Some("controlledKnifeChildChainHistory"));
     }
-    if knife.attack_flags.0 & (4 | 0x400 | 0x800000) != 0 {
+    if knife.attack_flags.0 & 4 != 0 && !knife.source_motion_known {
+        return Ok(Some("controlledKnifeMotionHistory"));
+    }
+    if knife.attack_flags.0 & (0x400 | 0x800000) != 0 {
         return Ok(Some("controlledKnifeProperties"));
     }
     Ok(None)
@@ -440,10 +443,17 @@ fn controlled_knife(
             .as_ref()
             .ok_or("controlled Knife item owner absent")?,
     )?;
-    if !crate::weapon_plan::admits_controlled_knife_caller(
+    let reached_caller = crate::weapon_plan::ControlledKnifeCallerPlan::read(state, input.held())
+        .is_some_and(|plan| {
+            request.attack_flags & !4 == 0
+                && (plan.requested_satellites == 0 || request.attack_flags == 0)
+        });
+    if !(crate::weapon_plan::admits_controlled_knife_caller(
         items,
         state.weapon_admission.source_player_type,
-    ) || request.attack_flags & (4 | 0x400 | 0x800000) != 0
+    ) || reached_caller)
+        || request.attack_flags & (0x400 | 0x800000) != 0
+        || (request.attack_flags & 4 != 0 && !reached_caller)
     {
         record_frontier(state, "controlledKnifeProperties");
         return Ok(DispatchOutcome::Unadmitted);
@@ -834,6 +844,43 @@ pub(crate) fn advance_actor(
     let Some(index) = state.knives.iter().position(|knife| knife.id == id) else {
         return Err("updated Knife handle is unresolved".into());
     };
+    //Only the newly opened parent homing route consumes this history. A
+    //later valid C18 pointer/partition cannot repair an earlier missed source
+    //controller's motion or registered target. Existing neutral paths remain.
+    if state.knives[index].attack_flags.0 & 4 != 0
+        && state.knives[index].parent
+            == Some(ActorRef {
+                kind: ActorKind::Player,
+                id: 0,
+            })
+    {
+        //4735AE consumes the actual parentC08 before the homing/common
+        //tail. Active/pocket effects later in the Player callback can lose
+        //that owner after its earlier shooting dispatch has already run.
+        let primary_known = state.player_items.as_ref().is_some_and(|owner| {
+            crate::item_queries::AppearanceQueries::new(
+                owner,
+                state.weapon_cache.primary,
+                state.player.entity_source,
+                None,
+            )
+            .primary()
+            .is_some_and(|primary| primary.numeric() == primary_c08)
+        });
+        if !state.weapon_admission.c18_controller_history_known || !primary_known {
+            state.knives[index].source_motion_known = false;
+            state.knives[index].homing_target_known = false;
+            record_frontier(
+                state,
+                if primary_known {
+                    "controlledKnifeControllerHistory"
+                } else {
+                    "controlledKnifePrimaryHistory"
+                },
+            );
+            return Ok(());
+        }
+    }
     //Subtype1 Fast never enters18 or reads Parent498. Every other admitted
     //body must distinguish an actual NULL store from missing legacy history.
     let reads_parent = state.knives[index].subtype == 0 || phase == Phase::Update;
@@ -884,6 +931,12 @@ pub(crate) fn advance_actor(
             primary_c08,
         };
         if let Some(channel) = controlled_actor_frontier(&state.knives[index])? {
+            //This is an actually skipped persistent actor body, independent
+            //of diagnostics emitted later by contacts or grid callbacks.
+            state.knives[index].source_motion_known = false;
+            if state.knives[index].attack_flags.0 & 4 != 0 {
+                state.knives[index].homing_target_known = false;
+            }
             record_frontier(state, channel);
             // Retain known presentation/tail work while the unmapped actor
             // effect remains an explicit admission failure.
@@ -899,12 +952,18 @@ pub(crate) fn advance_actor(
             }
         } else {
             let Some(chain) = crate::controlled_knife_satellites::chain(&state.knives, id)? else {
+                state.knives[index].source_motion_known = false;
+                if state.knives[index].attack_flags.0 & 4 != 0 {
+                    state.knives[index].homing_target_known = false;
+                }
                 record_frontier(state, "controlledKnifeChildChainHistory");
                 return Ok(());
             };
             let Some(homing) =
                 crate::controlled_knife_homing::prepare(state, &state.knives[index])?
             else {
+                state.knives[index].source_motion_known = false;
+                state.knives[index].homing_target_known = false;
                 record_frontier(state, "controlledKnifeHomingSourceInputs");
                 return Ok(());
             };
@@ -1151,7 +1210,7 @@ pub(crate) fn restore_fast_positions(state: &mut State) {
 /// insertion, once for each admitted contact, preserving conditional RNG.
 pub(crate) fn knife_contacts(
     state: &mut State,
-    preflight: impl Fn(&State, bool) -> Result<KnifeContactAdmission, String>,
+    preflight: impl Fn(&State, bool, &Knife) -> Result<KnifeContactAdmission, String>,
     mut resolve_kind4: impl FnMut(&mut State) -> Result<f32, String>,
 ) -> Result<(), String> {
     let knife_handles: Vec<_> = state
@@ -1268,7 +1327,7 @@ pub(crate) fn knife_contacts(
             {
                 return Err("Knife stored48c damage violates finite source domain".into());
             }
-            let admission = preflight(state, parent_is_player)?;
+            let admission = preflight(state, parent_is_player, &state.knives[index])?;
             if admission != KnifeContactAdmission::Mapped {
                 let channel = match admission {
                     KnifeContactAdmission::UnmappedBuilderModifiers => "knifeContactModifiers",
@@ -1379,38 +1438,14 @@ pub(crate) fn complete_primary_cleanup(
 pub(crate) fn contacts(state: &mut State) -> Result<(), String> {
     knife_contacts(
         state,
-        |state, parent_is_player| {
+        |state, parent_is_player, knife| {
             if !parent_is_player {
                 return Ok(crate::weapon_plan::admit_knife_transformation_history(
                     state.player.transformation_counts,
                 ));
             }
-            state.player_stats.validate()?;
-            if !state.weapon_cache.color_ca0.is_finite() {
-                return Err("Knife contact requires finite actual Player color".into());
-            }
-            Ok(crate::weapon_plan::admit_neutral_knife_contact(
-                crate::item_pipeline::ItemInputs::new(
-                    state
-                        .player_items
-                        .as_ref()
-                        .ok_or("Knife contact requires actual first Player items")?,
-                )?,
-                state.weapon_admission.source_player_type,
-                state.player.transformation_counts,
-            ))
+            crate::weapon_plan::admit_current_knife_contact(state, knife)
         },
-        |state| {
-            crate::weapon_plan::resolve_neutral_kind4_damage(
-                crate::item_pipeline::ItemInputs::new(
-                    state
-                        .player_items
-                        .as_ref()
-                        .ok_or("Knife contact requires actual first Player items")?,
-                )?,
-                state.weapon_admission.source_player_type,
-                state.player_stats,
-            )
-        },
+        |state| crate::weapon_plan::resolve_current_kind4_damage(state),
     )
 }

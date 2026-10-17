@@ -31,7 +31,13 @@ export interface SpriteColor { tint: readonly number[]; offsets: readonly number
 export interface DrawOptions { color?: SpriteColor; scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
-const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
+// Authored sheets are relative to the anm2's root path and may climb out of
+// it (ui_cardspills.anm2 names "..\Effects\Effect_023_StarFlash.png").
+export const normalizeAssetPath = (path: string) => path.replaceAll("\\", "/").split("/").reduce<string[]>((parts, part) => {
+  if (part === "..") parts.pop(); else if (part !== "." && part !== "") parts.push(part);
+  return parts;
+}, []).join("/").replace(/^resources\//i, "").toLowerCase();
+const normalize = normalizeAssetPath;
 const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/main menu/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/backselectwidget.png",
@@ -65,6 +71,9 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/backdrop/0f_secretroom.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/controls.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/shading.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/shading_1x2.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/shading_2x1.png",
+  "../references/isaac/rebirth/resources/gfx/backdrop/shading_2x2.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/light_gradient.png",
   "../references/isaac/rebirth/resources/gfx/overlays/basement/1x1_*.png",
   "../references/isaac/rebirth/resources/gfx/grid/door_01_normaldoor.png",
@@ -90,6 +99,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopspawn.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_002b_shitpoof.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_poopgibs.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_030_bloodgibs.png",
   "../references/isaac/rebirth/resources/gfx/monsters/**/*.png",
   "../references/isaac/rebirth/resources/gfx/bosses/**/*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",

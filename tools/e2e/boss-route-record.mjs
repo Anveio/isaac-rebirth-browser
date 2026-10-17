@@ -86,7 +86,7 @@ try {
   assert.ok(start >= 0, `The case tape must reach ${FROM}`);
   // A labelled step marker is itself replayed; captures are no-ops here.
   for (const action of caseData.pairedTape.slice(0, start + 1)) {
-    if (action.type === 'step') await page.evaluate(count => window.game.step(count), action.frames);
+    if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
     else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
   }
   // Each capture also records where the port stood, for divergence reports.
@@ -105,7 +105,7 @@ try {
     }
   };
   const step = async count => {
-    await page.evaluate(n => window.game.step(n), count);
+    await page.evaluate(n => { window.game.step(n); }, count);
     frames += count;
     const last = actions.at(-1);
     if (last?.type === 'step') last.frames += count; else actions.push({ type: 'step', frames: count });

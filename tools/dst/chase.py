@@ -23,8 +23,11 @@ written tape is replayed, and kept only if the replay reaches every stage's
 keys.
 
 `--recipes engine/dst/chases.json` reruns the recorded chase of every
-scenario tape the corpus holds (`--only NAME` for one), each from its own
-first `at` commands, so one command rebuilds what a shared-MT change moved.
+scenario tape the corpus holds (`--only NAME` for one), so one command
+rebuilds what a shared-MT change moved. A recipe's first stage is the
+scenario's precondition, such as `room:5` before a boss clear. Each chase
+starts from its own tape, cut just after the replay first reaches that
+stage, or from a fresh boot when drift moved the tape off it.
 """
 import argparse
 import json
@@ -45,6 +48,16 @@ def replay(binary, tape, report):
     result = json.loads(report.read_text())
     failed = [p["message"] for p in result["properties"] if p["status"] == "failed"]
     return set(result["coverage"]["reached"]), failed
+
+
+def precondition_cut(binary, tape, keys, report):
+    """Commands of `tape` up to the one where its replay first reaches all of
+    `keys`, or None when it never does."""
+    run(binary, ["--replay", str(tape), "--report", str(report), "--allow-unmet"])
+    (first,) = json.loads(report.read_text())["coverage"]["firstSteps"].values()
+    if not set(keys) <= first.keys():
+        return None
+    return max(first[key] for key in keys) + 1
 
 
 def write_tape(path, tape, length):
@@ -167,12 +180,19 @@ def main():
         # `"from": null` chases from a fresh boot rather than a prefix.
         source = recipe.get("from", recipe["out"])
         one.source = corpus / source if source else None
-        one.at = recipe.get("at")
         one.stage = recipe["stages"]
         for key in ("cases", "steps", "rounds", "extend", "final_extend"):
             setattr(one, key, recipe.get(key, getattr(args, key)))
         print(f"== {recipe['out']}")
         work = (args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")) / recipe["out"].removesuffix(".json")
+        work.mkdir(parents=True, exist_ok=True)
+        if one.source:
+            one.at = precondition_cut(args.binary, one.source, one.stage[0], work / "precondition.json")
+            if one.at is None:
+                print(f"{source} no longer reaches {one.stage[0]}; chasing from a fresh boot")
+                one.source = None
+            else:
+                print(f"{source} reaches {one.stage[0]} at command {one.at - 1}")
         failed += build(one, work)
     return 1 if failed else 0
 

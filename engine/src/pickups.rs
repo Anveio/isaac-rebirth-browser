@@ -60,10 +60,19 @@ pub struct PocketCardDefinition {
     pub name: &'static str,
     pub description: &'static str,
 }
+#[derive(Debug)]
+pub struct PocketPillDefinition {
+    pub name: &'static str,
+}
 include!(concat!(env!("OUT_DIR"), "/card_catalog.rs"));
 
 pub(crate) fn card_definition(id: u32) -> Option<&'static PocketCardDefinition> {
     CARD_DEFINITIONS.get(id as usize)
+}
+
+///Actual57BF80 config lookup after final effect resolution.
+pub(crate) fn pill_definition(effect: u32) -> Option<&'static PocketPillDefinition> {
+    PILL_DEFINITIONS.get(effect as usize)
 }
 
 /// GetCard5817A0 uses an independent temporary RNG35. Unlock filtering keeps
