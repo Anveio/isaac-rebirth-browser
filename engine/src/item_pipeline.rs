@@ -1348,6 +1348,181 @@ impl DamageStage {
     }
 }
 
+/// Pure query surface for5127C8..512C3E. The eventual adapter must use the
+/// canonical query/history owner; Some never comes from inventory-derived
+/// absence, cache-mask state, or an unowned pocket-effect history.
+trait RangeReadQueries {
+    fn raw_count(&self, id: usize) -> Option<i32>;
+    fn temporary_count(&self, id: u32) -> Option<i32>;
+    fn have(&self, id: usize) -> Option<bool>;
+    fn temporary_present(&self, id: u32) -> Option<bool>;
+    fn has_trinket(&self, id: u32) -> Option<bool>;
+    fn primary(&self) -> Option<PrimaryWeaponC08>;
+}
+
+/// Local optional views, not another mutable Pill/Range inventory or Save DTO.
+/// Effects11/12 are1388+4*effectID, read independently from the future canonical
+///28-word owner. Existing D34 remains its own direct persistent-word owner.
+#[derive(Clone, Copy)]
+struct RangeWordViews {
+    pill_effect11_range_down: Option<i32>,
+    pill_effect12_range_up: Option<i32>,
+    source_d34: Option<i32>,
+    source_player_type_bfc: Option<u32>,
+    source_variant14: Option<u32>,
+    source_subtype30e8: Option<u32>,
+}
+
+#[derive(Clone, Copy)]
+struct RangeReadPlan {
+    tear_height: f32,
+    tear_falling_speed: f32,
+    tear_falling_acceleration: f32,
+}
+
+impl RangeReadPlan {
+    /// Source-ordered arithmetic for the closed normal BFC0 branch. Other BFC
+    /// prefixes retain an unavailable plan; no character default is fabricated.
+    /// Retained C08 and variant/subtype are consumed only where source reads them.
+    fn read(queries: &impl RangeReadQueries, words: RangeWordViews) -> Option<Self> {
+        //5127EE ->514FAF: positive permanent6 skips the TEMP presence helper.
+        let number_one = queries.have(6)? || queries.temporary_present(6)?;
+        let mut height = -23.75_f32;
+        let mut falling_speed = 0.0_f32;
+        let mut falling_acceleration = 0.0_f32;
+        if number_one {
+            height = -7.75_f32;
+            falling_speed = 0.45_f32;
+        } else if words.source_player_type_bfc? != 0 {
+            //514FBC's other character operands are not owned by this slice.
+            return None;
+        }
+        let coefficient = 5.0_f32;
+
+        //512838..5128DB. Preserve wrapping integer groups before conversion,
+        //then separate binary32 operations; Pill words are not raw item counts.
+        let raw12 = queries.raw_count(12)?;
+        let temp12 = queries.temporary_count(12)?;
+        let raw71 = queries.raw_count(71)?;
+        let temp71 = queries.temporary_count(71)?;
+        let range_up = words.pill_effect12_range_up? as f32 * 0.5_f32;
+        let mut group = raw12
+            .wrapping_add(temp12)
+            .wrapping_sub(raw71.wrapping_add(temp71));
+        group = group.wrapping_add(queries.raw_count(30)?);
+        group = group.wrapping_add(queries.raw_count(31)?);
+        group = group.wrapping_add(queries.raw_count(29)?);
+        let mut height_modifier = group as f32;
+        height_modifier += range_up;
+        height_modifier -= words.pill_effect11_range_down? as f32 * 0.4_f32;
+        height_modifier += queries.raw_count(339)? as f32;
+        height_modifier += queries.raw_count(345)? as f32;
+        height_modifier += queries.raw_count(14)? as f32;
+        let modifier336 = queries.raw_count(336)? as f32 * 0.5_f32;
+        height_modifier *= coefficient;
+        height_modifier += modifier336;
+        height_modifier += queries.raw_count(331)? as f32 * 0.8_f32;
+        height_modifier += queries.raw_count(5)? as f32;
+        //512947 adds the TEMP value to the accumulated modifier in this order.
+        let height_delta = queries.temporary_count(5)? as f32 + height_modifier;
+        let prefix_falling_speed = falling_speed;
+        height -= height_delta;
+
+        //512937..512ADB computes the fresh C90; repeated source reads remain
+        //explicit, including all eight reached TEMP-count helper calls.
+        let mut group = queries
+            .raw_count(12)?
+            .wrapping_add(queries.temporary_count(12)?);
+        group = group.wrapping_add(queries.raw_count(30)?);
+        group = group.wrapping_add(queries.raw_count(31)?);
+        group = group.wrapping_add(queries.raw_count(29)?);
+        let mut speed_modifier = group as f32;
+        let raw71 = queries.raw_count(71)?;
+        let group71 = raw71.wrapping_add(queries.temporary_count(71)?);
+        speed_modifier += group71 as f32 * 3.0_f32;
+        speed_modifier += queries.raw_count(101)? as f32;
+        speed_modifier += queries.raw_count(110)? as f32;
+        speed_modifier += queries.temporary_count(110)? as f32;
+        speed_modifier += queries.raw_count(121)? as f32;
+        speed_modifier += queries.raw_count(345)? as f32;
+        speed_modifier += queries.raw_count(14)? as f32;
+        speed_modifier += queries.temporary_count(121)? as f32;
+        speed_modifier += queries.raw_count(182)? as f32 * 1.5_f32;
+        speed_modifier += queries.raw_count(197)? as f32;
+        speed_modifier += queries.raw_count(339)? as f32;
+        let modifier336 = queries.raw_count(336)? as f32 * 0.5_f32;
+        speed_modifier *= 0.5_f32;
+        speed_modifier -= modifier336;
+        speed_modifier += queries.raw_count(331)? as f32 * 0.8_f32;
+        speed_modifier += queries.raw_count(189)? as f32;
+        speed_modifier += queries.raw_count(5)? as f32;
+        let temporary5 = queries.temporary_count(5)? as f32;
+        if words.source_player_type_bfc? != 0 {
+            //The BFC7 -1 suffix and other character histories stay unowned.
+            return None;
+        }
+        falling_speed = temporary5 + speed_modifier;
+        falling_speed += prefix_falling_speed;
+
+        //512AE9..512B11 consumes this computed speed before the149 override.
+        height = words.source_d34? as f32 * 0.5_f32 + height;
+        height -= falling_speed * 0.5_f32;
+        if queries.have(149)? {
+            falling_acceleration = 0.6_f32;
+            falling_speed = 13.0_f32;
+        }
+        if queries.have(224)? {
+            height += 10.0_f32;
+        }
+        if queries.have(233)? {
+            falling_speed = 7.0_f32 + falling_speed;
+            falling_acceleration = 0.01_f32 * falling_acceleration;
+        }
+        if queries.have(307)? {
+            height -= 1.5_f32;
+        }
+        if queries.have(214)? {
+            height -= coefficient;
+        }
+        if queries.has_trinket(26)? && queries.primary()? == PrimaryWeaponC08::RegularTears {
+            height -= 10.0_f32;
+        }
+        //512C1B/515158: variant0 never needs the optional subtype word.
+        if words.source_variant14? == 1 && words.source_subtype30e8? == 21 {
+            height -= 5.0_f32;
+        }
+        if height > -7.0_f32 {
+            height = -7.0_f32;
+        }
+        Some(Self {
+            tear_height: height,
+            tear_falling_speed: falling_speed,
+            tear_falling_acceleration: falling_acceleration,
+        })
+    }
+}
+
+impl RangeReadQueries for crate::item_queries::AppearanceQueries<'_> {
+    fn raw_count(&self, id: usize) -> Option<i32> {
+        (*self).raw_count(id)
+    }
+    fn temporary_count(&self, id: u32) -> Option<i32> {
+        (*self).temporary_count(id)
+    }
+    fn have(&self, id: usize) -> Option<bool> {
+        (*self).have(id)
+    }
+    fn temporary_present(&self, id: u32) -> Option<bool> {
+        (*self).temporary_present(id)
+    }
+    fn has_trinket(&self, id: u32) -> Option<bool> {
+        (*self).has_trinket(id)
+    }
+    fn primary(&self) -> Option<PrimaryWeaponC08> {
+        (*self).primary()
+    }
+}
+
 /// Recompute requested mapped callbacks from actual item inputs, retaining
 /// partial values and pending bits for every unimplemented callback owner.
 /// This extraction preserves Source110 arithmetic and predicates exactly.
@@ -1378,6 +1553,32 @@ pub(crate) fn resolve_scalars(
         } else {
             None
         };
+        let range_plan = if stage == CacheStage::Range
+            && source.entity.is_some_and(|entity| entity.entity_type == 1)
+        {
+            RangeReadPlan::read(
+                &queries,
+                RangeWordViews {
+                    pill_effect11_range_down: crate::pill_effect_history::callback_word(
+                        inputs.owner,
+                        11,
+                    ),
+                    pill_effect12_range_up: crate::pill_effect_history::callback_word(
+                        inputs.owner,
+                        12,
+                    ),
+                    source_d34: inputs.owner.range_inputs.map(|word| word.source_d34),
+                    source_player_type_bfc: source_player_type,
+                    source_variant14: source.entity.map(|entity| entity.variant),
+                    //The current caller has no independent30E8 owner. Actual
+                    //variant0 bypasses it; reached variant1 remains pending.
+                    source_subtype30e8: None,
+                },
+            )
+        } else {
+            None
+        };
+        let range_admitted = range_plan.is_some();
         let shot_speed_admitted = shot_speed_plan.is_some();
         let damage_admitted = damage_plan.is_some();
         let supported: &[u32] = match stage {
@@ -1430,6 +1631,11 @@ pub(crate) fn resolve_scalars(
                 values.stats.tear_height =
                     (resolved_height - values.stats.tear_falling_speed * 0.5_f32).min(-7.0);
                 values.stats.tear_falling_acceleration = 0.0;
+                if let Some(plan) = range_plan {
+                    values.stats.tear_height = plan.tear_height;
+                    values.stats.tear_falling_speed = plan.tear_falling_speed;
+                    values.stats.tear_falling_acceleration = plan.tear_falling_acceleration;
+                }
                 &[6, 14]
             }
             CacheStage::MoveSpeed => {
@@ -1451,20 +1657,15 @@ pub(crate) fn resolve_scalars(
             }
             _ => continue,
         };
-        //The literal TEMP6/negative6 values are distinct from their producer
-        //history qualification. Keep these requested until that lifecycle is
-        //admitted; only positive permanent6 expands this completion domain.
-        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay | CacheStage::Range)
+        //FireDelay keeps its existing conservative producer qualification.
+        //Range's exclusive plan owns each actually reached Have/TEMP query.
+        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay)
             && (inputs.owned_count(6) < 0 || inputs.number_one_record_present());
         if !unadmitted_number_one
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => damage_admitted,
-                CacheStage::Range => {
-                    source_player_type == Some(0)
-                        && inputs.owner.range_inputs.is_some()
-                        && inputs.admits_scalar_stage(stage, supported)
-                }
+                CacheStage::Range => range_admitted,
                 CacheStage::MoveSpeed => {
                     source_player_type == Some(0)
                         && inputs
@@ -1480,7 +1681,10 @@ pub(crate) fn resolve_scalars(
             }
         {
             completed |= flag;
-            if matches!(stage, CacheStage::ShotSpeed | CacheStage::Damage) {
+            if matches!(
+                stage,
+                CacheStage::ShotSpeed | CacheStage::Damage | CacheStage::Range
+            ) {
                 reached_completed |= flag;
             }
         }
