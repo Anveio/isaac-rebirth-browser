@@ -51,6 +51,11 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
+// around in those rooms: an authored slot machine (6.x) the port does not
+// spawn yet still blocks the original's player (#645).
+const ROUTE_AVOID = new Map((flag('--route-avoid', '') || '').split(';').filter(Boolean)
+  .map(item => item.split(':')).map(([room, cells]) => [Number(room), cells.split(',').map(Number)]));
 // --hurt: the original's fixture fight ends below full health. Basement II's
 // generation reads it (a Challenge room needs full health), so a port fight
 // that ends at full health takes one blast of its own bomb before parking.
@@ -160,7 +165,7 @@ try {
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
           ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)]), door)
-          : doorKeys(avoiding(state.grid, pedestals), state.player, door));
+          : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.

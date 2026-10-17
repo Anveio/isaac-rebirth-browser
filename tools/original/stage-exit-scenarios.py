@@ -100,8 +100,12 @@ def descended(result, fixture, production_directory):
         marker = f'descent-{index}'
         case = {**result, 'pairedTape': result['pairedTape'] + keys_only(actions) + [{'type': 'capture', 'label': marker}]}
         rooms = floor['rooms'][-1:] if index == 0 else floor['rooms']
+        # routeAvoid {room: [cells]}: authored objects the port does not
+        # spawn yet (a slot machine, #645) that still block the original's walk.
+        avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         leg = record(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
                      *(['--exit', EXIT_LEG] if index + 1 < len(floors) else []),
+                     *(['--route-avoid', avoid] if avoid else []),
                      rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
         if leg['status'] != 'pass':
             raise RuntimeError(f"Port descent leg {index} for {fixture['name']} failed: {leg['reason']}")
