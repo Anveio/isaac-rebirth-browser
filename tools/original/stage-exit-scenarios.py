@@ -71,12 +71,16 @@ def fought(fixture):
     transition (a Challenge room needs full health, a stage-2 Arcade more
     than four coins), which each game's own fight decides. A fixture's
     original fight must leave the same full-health and coin thresholds as
-    the port's, or the next floor's rooms diverge."""
+    the port's, or the next floor's rooms diverge; a fixture whose original
+    ends hurt says so (originalHealth) and the port's segment matches it."""
     result = routes.paired.build('paired-bomb-moving-even', fixture['seed'])
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1] + fixture['route']
-    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW)
+    # originalHealth [red, maxRed, soul]: the original's fight ends below full
+    # health, so a port fight at full health takes one bomb blast (--hurt).
+    red, maximum, soul = fixture.get('originalHealth', [0, 0, 0])
+    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *(['--hurt'] if red + soul < maximum else []))
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     fights = {'tape': fixture['originalFight'], 'pairedTape': keys_only(port['actions'])}

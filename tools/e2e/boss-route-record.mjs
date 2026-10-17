@@ -30,7 +30,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { flag } from './lib/cli.mjs';
+import { flag, hasFlag } from './lib/cli.mjs';
 import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
@@ -51,6 +51,10 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --hurt: the original's fixture fight ends below full health. Basement II's
+// generation reads it (a Challenge room needs full health), so a port fight
+// that ends at full health takes one blast of its own bomb before parking.
+const HURT = hasFlag('--hurt');
 // The centre of the room grid cell holding a point.
 const centreOf = point => ({ x: Math.round((point.x - 40) / 40) * 40 + 40, y: Math.round((point.y - 120) / 40) * 40 + 120 });
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
@@ -58,7 +62,7 @@ const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map(
 const STRIDE = 2;
 const namedKeys = { Return: 'Enter', Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
 // DOM codes back to the tape's X11 names.
-const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' };
+const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', KeyE: 'e', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' };
 
 // Walk toward a key pickup, routing through fireplaces; a fire standing in the
 // next cell is shot out along its axis instead of walked into.
@@ -196,6 +200,27 @@ try {
         }
         await hold([]);
       }
+    }
+    if (HURT && state.player.full) {
+      // A cell two or more from the walls and three from the trapdoor and
+      // pedestal, so the blast reaches neither nor a wall's secret door.
+      const far = (cell, from) => Math.hypot((cell % 15 - from % 15) * 40, (Math.floor(cell / 15) - Math.floor(from / 15)) * 40) >= 120;
+      const spots = [];
+      for (let r = 2; r <= 6; r++) for (let c = 2; c <= 12; c++) {
+        const cell = r * 15 + c;
+        if (state.grid.solid[cell] !== '1' && far(cell, state.trapdoor.gridIndex) && far(cell, 97)) spots.push(cell);
+      }
+      const near = cell => Math.hypot(40 + cell % 15 * 40 - state.player.x, 120 + Math.floor(cell / 15) * 40 - state.player.y);
+      const spot = spots.sort((a, b) => near(a) - near(b))[0];
+      if (spot === undefined) throw new Error('No open cell for the health-matching bomb');
+      await walk({ x: 40 + spot % 15 * 40, y: 120 + Math.floor(spot / 15) * 40 }, AWARD_CELLS, 600, 'bomb spot');
+      await hold([]); await step(10);
+      await hold(['KeyE']); await step(1); await hold([]);
+      for (let left = 300; state.player.full; left--) {
+        if (left <= 0) throw new Error('The health-matching bomb did not hurt the player');
+        await step(1); state = await view();
+      }
+      await step(30); state = await view();
     }
     await walk({ x: 80, y: 400 }, AWARD_CELLS, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.

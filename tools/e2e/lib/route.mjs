@@ -73,7 +73,8 @@ function solidGrid(grid, npcs) {
 export function routingView(s) {
   return {
     room: s.currentRoom, transition: !!s.roomTransition, clear: s.room.combatClear,
-    player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled },
+    player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled,
+      full: s.player.maxHp <= s.player.hp + s.player.soulHp },
     grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed)),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     keys: s.inventory.keys,
