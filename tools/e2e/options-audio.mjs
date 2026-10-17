@@ -28,6 +28,8 @@ const output = outputDirectory('options-audio');
 const helper = 'tools/original/options-scenarios.py';
 const observer = path.join(ROOT, 'tools/original/options-observe.py');
 const sourcePaths = [
+  'tools/foundation/controls-browser-observe.mjs',
+  'tools/e2e/lib/game.mjs', 'tools/foundation/pixel-pairs.mjs',
   'tools/e2e/options-audio.mjs', 'tools/e2e/options-audio-observer.mjs', 'tools/e2e/options-gain-observer.mjs',
   'tools/e2e/audio-api-observer.mjs', 'tools/e2e/lib/cli.mjs', 'tools/e2e/lib/original.mjs',
   'tools/foundation/paired-game.mjs', 'tools/foundation/options-audio-state-pair.mjs',
