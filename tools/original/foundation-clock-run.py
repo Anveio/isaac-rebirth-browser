@@ -123,6 +123,7 @@ def main():
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
+    parser.add_argument('--render-all', action='store_true', help='Draw and present every released frame (gate ISAAC_CLOCK_GATE_RENDER_ALL=1); implied by --gl-trace')
     parser.add_argument('--width', type=int, default=960, help='Original supported window width; larger values aid public subpixel diagnostics')
     parser.add_argument('--height', type=int, default=540, help='Original supported window height')
     parser.add_argument('--max-render-scale', type=int, default=2, help='Original supported MaxRenderScale option; normal comparisons use 2')
@@ -305,11 +306,16 @@ def main():
         env['LD_PRELOAD'] = str(gate) + ' ' + str(args.gl_trace.resolve()) + (' ' + os.environ['LD_PRELOAD'] if os.environ.get('LD_PRELOAD') else '')
         env['ISAAC_GL_TRACE_DIR'] = str(trace)
         env['ISAAC_GL_TRACE_CONTROL'] = str(trace / 'request')
+        # The graphics observer records submitted draws, so every released
+        # frame must still draw them (see foundation-clock-gate.c).
+        env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
         env.pop('ISAAC_GL_TRACE_STOP_AFTER_FRAME', None)
         if args.trace_every_frame:
             env['ISAAC_GL_TRACE_EVERY_FRAME'] = '1'
     elif args.trace_every_frame:
         raise SystemExit('--trace-every-frame requires --gl-trace')
+    if args.render_all:
+        env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
     if args.audio_trace:
         trace = out / 'audio-trace'
         trace.mkdir(exist_ok=True)
@@ -356,6 +362,8 @@ def main():
                         'mainThreadSleeps': 'recorded then returned without host delay', 'realPerformance': 'controller wall clock'},
               'inputDelivery': {'api': 'public X11 key events', 'serverAutoRepeat': False},
               'hostExecution': {'frameTimeoutSeconds': args.frame_timeout, 'lpNumThreads': env.get('LP_NUM_THREADS'),
+                                'releasedPresentations': 'drawn' if env.get('ISAAC_CLOCK_GATE_RENDER_ALL', '0') not in ('', '0') else 'default framebuffer dropped',
+                                'windowAttributeReplies': 'forwarded' if env.get('ISAAC_CLOCK_GATE_WINDOW_QUERIES', '0') not in ('', '0') else 'cached per frame',
                                 'scope': 'Host-wall wait limit and requested software-renderer pool; public tape/virtual steps unchanged'},
               'simulationTicks': False, 'fullInternalState': False, 'failures': []}
     if observer:

@@ -315,7 +315,9 @@ spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
 Port: ordinary/tinted rocks and supported tinted rewards, authored bomb rocks,
 spikes, poop (authored too), TNT (intact collision only), spider webs, trapdoor,
-decorations, grid records and costs. Missing: TNT fuse/countdown and blast,
+ordinary backdrop-1 Block initialization, decorations, grid records and costs.
+The [Block constructor comparison](block-grid-evidence.md) preserves its existing
+gameplay and pixel failures. Missing: TNT fuse/countdown and blast,
 broader pit/block behavior, buttons, crawlspace ladders and poop variants.
 
 | Bug | Sev | Symptom | Source |

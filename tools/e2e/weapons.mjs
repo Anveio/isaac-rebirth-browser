@@ -12,7 +12,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { TearContracts } from './tear-contracts.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step, stepSnapshot } from './lib/game.mjs';
+import { snapshot, step, stepSnapshot, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 const ROOT=resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const run=promisify(execFile);
@@ -176,7 +176,7 @@ try {
   finally {
    if(page){
     try {
-     const trace=await page.evaluate(()=>window.game.trace());
+     const trace=await readTrace(page);
      await writeFile(join(directory,'trace.json'),JSON.stringify(trace)+'\n');
      assert.equal(trace.enabled,true);assert.equal(trace.truncated,false);
      assert.equal(trace.initialSeed,initialSeed);assert.equal(trace.bootEpochSeed,epoch);

@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {writeJsonEvidence} from './browser-evidence.mjs';
 import {BrowserProgress} from './composition-progress.mjs';
+import { evaluateJson } from '../e2e/lib/game.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
@@ -119,7 +120,7 @@ export async function captureComposition(browser, server, declaration, directory
     commands.push({type:'key',code,down});inputs.push({name,code,down,presentation});
   };
   const checkpoint = async label => {
-    const captured = await page.evaluate(()=>window.game.capture());
+    const captured = await evaluateJson(page, ()=>window.game.capture());
     const bytes = Buffer.from(captured.png,'base64');
     const path = join(directory,label+'.png');await writeFile(path,bytes);
     if(!captureScreens.has(label))captureScreens.set(label,{screen:captured.state.screen,mainSelection:captured.state.mainSelection,challengeSelection:captured.state.challengeSelection});
@@ -131,7 +132,7 @@ export async function captureComposition(browser, server, declaration, directory
       if (label !== 'gameplay-start') {await step(count);return;}
       for (let i=0;i<count;i++) {
         await step(1);
-        await progress.append('preludeState',{presentation,relativeTitlePresentation:presentation-63,state:await page.evaluate(()=>window.game.snapshot())});
+        await progress.append('preludeState',{presentation,relativeTitlePresentation:presentation-63,state:await evaluateJson(page, ()=>window.game.snapshot())});
         preludeStateCount++;
       }
     };
@@ -162,7 +163,7 @@ export async function captureComposition(browser, server, declaration, directory
         await step(12);await page.keyboard.up(text);
         inputs.push({name:text,code,down:false,presentation,sourceText:true});await step(6);
       }
-      assert.equal((await page.evaluate(()=>window.game.snapshot())).screen,'seed');
+      assert.equal((await evaluateJson(page, ()=>window.game.snapshot())).screen,'seed');
       await press('Return',72,'character-seeded');
     } else {
       await press('Down',72,'challenge-selected');await press('Return',72,'challenges');
@@ -173,11 +174,11 @@ export async function captureComposition(browser, server, declaration, directory
       assert.equal(entered.runSeed.replaceAll(' ',''),declaration.publicSeedCode);
     }
     gameplayPresentation = 0;
-    await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+    await progress.append('state',{presentation,gameplayPresentation,state:await evaluateJson(page, ()=>window.game.snapshot())});
     stateCount++;
     if (declaration.initialPhaseOffset) {
       assert.equal(declaration.initialPhaseOffset,1);await step(1);gameplayPresentation++;
-      await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+      await progress.append('state',{presentation,gameplayPresentation,state:await evaluateJson(page, ()=>window.game.snapshot())});
       stateCount++;
     }
     let held = new Set();
@@ -190,7 +191,7 @@ export async function captureComposition(browser, server, declaration, directory
       for (const name of [...requested].filter(name=>!held.has(name)).sort()) await key(name,true);
       for (let i=0;i<action.presentations;i++) {
         await step(1);gameplayPresentation++;
-        await progress.append('state',{presentation,gameplayPresentation,state:await page.evaluate(()=>window.game.snapshot())});
+        await progress.append('state',{presentation,gameplayPresentation,state:await evaluateJson(page, ()=>window.game.snapshot())});
         stateCount++;
         if ([3,4].includes(i+1)) await checkpoint(action.label+'-observe-step'+String(i+1));
       }
