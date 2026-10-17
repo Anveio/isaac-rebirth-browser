@@ -97,13 +97,41 @@ Replay the kept bank through `player-death --scenario-file
 references/isaac/cases/player-death/recovery-dead-player-base-motion.json`;
 an explicit `--case death-spikes-restart` selects its focused required route.
 
+Deferred GameOver Exit now restores the fresh menu presentation owned by
+System594cb0. Run entry destroyed the prior menu controller; MenuInit59ab7c
+therefore initializes the offscreen Title actor at frame0, while 59ad17 and
+StartFadeIn59b0f0 initialize alpha1 and the request's opaque-black color.
+The same System dispatch subtracts f32.025 before presentation. Returning to
+Title within an existing menu-controller lifetime still retains its clock.
+
+A focused recovery replay of the same `death-spikes-exit` public case uses
+production
+`46a4d7068777e616264b2f1c814d5f3d072a84ac02ae04e3e8d751aa96ff5d43`.
+This artifact contains committed guarded493, the separately bound ordinary-bomb349
+candidate, and the nine-line Exit presentation change. Actual DOM Browser
+capture and independent Native provenance pass; all 741 checkpoints execute,
+and the required route actually dies and reaches popup2. Against the d1a9b8d7
+Exit replay, exactly 240 of 13,140 canonical fields improve: 80 Title frames,
+80 fade colors, 40 fade-active fields and 40 fade-alpha fields. The other
+12,900 field rows are identical, with zero
+regressions or additional changes. The case remains **FAIL** on the same 654
+Game-age checks. The canonical default step transport and field comparer are
+unchanged; all 741 actual Browser PNGs, full manifests and input/backend traces
+remain local. RGBA differences were not computed for this focused replay.
+The aggregate state-history trace reaches its recorded byte cap; all 741
+independent checkpoint states remain complete in the manifest.
+
+Exit audio remains a separate source gap: fresh MenuInit requests Music61 and
+SetMenu0-to3 emits no forward SFX8, while the current Exit path requests Music1
+and SFX8. The focused replay's SFX30 checks do not qualify those backend
+contracts. The historical four-case results above retain their original reds.
+
 The port's existing living-player grid query still runs before full-phase
 entity contacts. A Player killed later during contacts has already received
 that query and does not receive a second bounded correction in this leaf.
 Moving all living full-phase queries to the source final pass remains a
 separate physics change; near-solid contact-death ordering is unaccepted.
-System Exit-menu fade, retained title initialization and
-the player-death producer's Game-age origin also remain incomplete. No counter
-or position is copied or fitted from original observations. NO_KILL,
-held-arrow, Soul health, revival and full diary art are not accepted by the
-historical cohort above.
+The player-death producer's clock correction remains pending production
+qualification. No counter or position is copied or fitted from original
+observations. NO_KILL, held-arrow, Soul health, revival and full diary art are
+not accepted by the historical cohort above.
