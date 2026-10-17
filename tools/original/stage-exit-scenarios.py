@@ -112,7 +112,7 @@ def near(points):
             if any(((40 + col * 40 - x) ** 2 + (120 + row * 40 - y) ** 2) ** 0.5 < 30 for x, y in points)]
 
 
-def case(fixture, base, fights, identifier, randomized, idle, via, production_directory=None):
+def case(fixture, base, fights, identifier, randomized, idle, via, production_directory=None, candidates=None):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
         # `exit-start` labels the padding step rather than a capture: where
@@ -132,10 +132,13 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
+                  *(['--via-candidates', ';'.join(f'{x},{y}' for x, y in candidates)] if candidates else []),
                   *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor',
                   production_directory=production_directory)
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
+    # The recorder reports the candidate waypoint it walked through.
+    via = tail.get('via') or via
     if tail.get('build') != base.get('portRecordedBuild'):
         raise ValueError('Port fight and exit must be recorded on the same production artifact')
     anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
@@ -181,8 +184,10 @@ def main():
             raise ValueError(f'Contrived stage exit {name} failed: {reason}')
         cases.append(built)
         for index in range(args.count):
-            # A few draws, since a drawn waypoint can sit on an authored rock.
-            for _ in range(3):
+            # The waypoint comes from an OS-shuffled candidate order: the
+            # recorder takes the first one clear of the port's own solid
+            # cells (authored rocks, its fight's poops). A retry reshuffles.
+            for _ in range(2):
                 solid = set(fixture.get('originalSolid', []))
                 # Turning at the waypoint carries the player about ten units
                 # past its centre: beside a cell solid in the original alone
@@ -190,9 +195,10 @@ def main():
                 # and the shared walk splits (#649). Keep one cell clear.
                 beside = {cell + step for cell in solid for step in (-15, 15, -1, 1)}
                 blocked = AWARD_CELLS | solid | beside | set(near(fixture.get('originalPickups', [])))
-                cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
-                built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
-                                     [40 + cell % 15 * 40, 120 + cell // 15 * 40], args.production_directory)
+                cells = [c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked]
+                entropy.shuffle(cells)
+                built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241), None,
+                                     args.production_directory, [[40 + cell % 15 * 40, 120 + cell // 15 * 40] for cell in cells])
                 if built is not None or not reason.startswith('port-exit'):
                     break
             if built is None:
