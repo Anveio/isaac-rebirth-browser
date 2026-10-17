@@ -1,6 +1,6 @@
-//! Actual Poop Particle58, Wood Particle27 and Poop Explosion43 effect
-//! controllers. Caller owns gib/retirement producers and the manager's
-//! flags8 paint pass.
+//! Actual Poop Particle58, Wood Particle27, Blood Particle5 and Poop
+//! Explosion43 effect controllers. Caller owns gib/retirement producers and
+//! the manager's flags8 paint pass.
 use crate::{
     actors::{ActorKind, ActorRef, Scheduler},
     audio::{AudioState, SoundRequest},
@@ -38,6 +38,9 @@ pub enum Controller {
     Particle58(Particle),
     /// Effect update 45dc20, the rock-debris family (4/27/35) as Wood27.
     Particle27(Particle),
+    /// Effect update 45d9b8 (Blood Particle 1000.5, Entity::Die's blood, bone,
+    /// gut and eye gibs and their airborne children).
+    Particle5(BloodParticle),
     /// Actual7d4: Init0, then the real sampled background frame6..8.
     Explosion43 {
         #[serde(rename = "frameTarget")]
@@ -52,6 +55,7 @@ impl Controller {
                 0
             }
             Self::Particle58(Particle::Flying(_)) | Self::Particle27(Particle::Flying(_)) => 1,
+            Self::Particle5(blood) => blood.stage,
             Self::Explosion43 { frame_target } => *frame_target,
         }
     }
@@ -59,9 +63,31 @@ impl Controller {
     pub fn layer_rotation(&self) -> Option<f32> {
         match self {
             Self::Particle58(Particle::Flying(flight)) => Some(flight.layer_rotation),
+            Self::Particle5(BloodParticle {
+                particle: Particle::Flying(flight),
+                ..
+            }) => Some(flight.layer_rotation),
             _ => None,
         }
     }
+}
+
+/// Blood Particle state +7d4 is `stage`: 0 before the first Update, then one
+/// more per airborne Update. A particle spawned by another effect (Entity+1c
+/// is 1000) takes the child branches.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BloodParticle {
+    pub particle: Particle,
+    pub subtype: u32,
+    pub stage: i32,
+}
+
+/// What an airborne ordinary Blood Particle spawns after its own Update.
+struct AirborneSpawns {
+    position: WorldVector,
+    stage: i32,
+    spawner: Parent,
 }
 
 /// Real Game.Spawn arguments. Cached spawner metadata never links parent498.
@@ -84,6 +110,22 @@ impl Admission<'_> {
     /// Category5 bypasses inherited color copy, preserving factory white.
     pub fn admit_particle(&mut self, birth: ParticleBirth) -> Result<u32, String> {
         self.admit(58, Controller::Particle58(Particle::Initializing), birth)
+    }
+
+    /// Die 445c60 and the airborne 4634b5 spawn 1000.5 with the gib category
+    /// as subtype; the caller separately invokes Update where the source does.
+    pub fn admit_blood_particle(&mut self, birth: ParticleBirth, subtype: u32) -> Result<u32, String> {
+        let id = self.admit(
+            5,
+            Controller::Particle5(BloodParticle {
+                particle: Particle::Initializing,
+                subtype,
+                stage: 0,
+            }),
+            birth,
+        )?;
+        self.effects.last_mut().expect("admitted blood particle").subtype = subtype;
+        Ok(id)
     }
 
     /// Wood Particle27 through the same Effect::Init 458a70 grid class3.
@@ -140,7 +182,7 @@ impl Admission<'_> {
             collision_damage: 22.0,
             hp: config.base_hp,
             max_hp: config.base_hp,
-            grid_collision_class: if matches!(variant, 27 | 58) { 3 } else { 0 },
+            grid_collision_class: if matches!(variant, 5 | 27 | 58) { 3 } else { 0 },
             entity_collision_class: 0,
             flags: 0,
             visible: true,
@@ -182,14 +224,169 @@ impl Admission<'_> {
             .iter_mut()
             .find(|effect| effect.id == id)
             .ok_or("explicit initial58 Update requires an admitted effect")?;
-        if !matches!(effect.variant, 27 | 58) || effect.full_updates != 0 {
+        if !matches!(effect.variant, 5 | 27 | 58) || effect.full_updates != 0 {
             return Err(
                 "explicit initial particle Update must run once on its actual birth".into(),
             );
         }
         base_update(effect)?;
-        particle_update(effect, shared)?;
+        if effect.variant == 5 {
+            // The first Update only picks the clip and launch; it spawns nothing.
+            blood_update(effect, shared)?;
+        } else {
+            particle_update(effect, shared)?;
+        }
         finish_update(effect)
+    }
+}
+
+/// A full Update of Blood Particle 1000.5 with its airborne spawns: on a 1/3
+/// roll a small BloodSplat 1000.7 (seed, scale Float*0.3+0.1, immediate
+/// Update), then on stages 2..4 children while a fresh Random(stage) exceeds
+/// their count (seed, Angle*5 velocity, no immediate Update).
+pub(crate) fn advance_blood_particle(state: &mut crate::State, id: u32) -> Result<(), String> {
+    let effect = state
+        .sprite_effects
+        .iter_mut()
+        .find(|effect| effect.id == id)
+        .ok_or("Blood Particle Update requires an admitted effect")?;
+    if !effect.active || effect.removed {
+        return Ok(());
+    }
+    base_update(effect)?;
+    let spawns = blood_update(effect, &mut state.boot_lifecycle.shared)?;
+    finish_update(effect)?;
+    let Some(spawns) = spawns else {
+        return Ok(());
+    };
+    let shared = &mut state.boot_lifecycle.shared;
+    if shared.bounded(3) == 0 {
+        let seed = state.boot_lifecycle.shared.next_u32();
+        let splat = familiars::admit_blood_splat(state, seed, spawns.position, [1.0; 4], [0.0; 3])?;
+        let scale = state.boot_lifecycle.shared.uniform() * 0.3 + 0.1;
+        familiars::set_blood_scale(state, splat, scale)?;
+        familiars::advance_blood_initial(state, splat)?;
+    }
+    if (2..=4).contains(&spawns.stage) {
+        let mut count = 0;
+        while count < state.boot_lifecycle.shared.bounded(spawns.stage as u32) {
+            let shared = &mut state.boot_lifecycle.shared;
+            let seed = shared.next_u32();
+            let velocity = crate::npcs::direction(shared) * 5.0;
+            Admission {
+                game_update_count: state.game_update_count,
+                next_effect: &mut state.next_effect,
+                effects: &mut state.sprite_effects,
+                scheduler: &mut state.actor_scheduler,
+            }
+            .admit_blood_particle(
+                ParticleBirth {
+                    seed,
+                    position: spawns.position,
+                    velocity,
+                    spawner: Some(spawns.spawner),
+                },
+                0,
+            )?;
+            count += 1;
+        }
+    }
+    Ok(())
+}
+
+/// The 45d9b8 controller. Returns the spawn request of an airborne ordinary
+/// particle (its stage before the increment).
+fn blood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<Option<AirborneSpawns>, String> {
+    let child = effect.spawner_type == 1000;
+    let position = effect.position;
+    let spawner = Parent {
+        actor: ActorRef {
+            kind: ActorKind::Effect,
+            id: effect.id,
+        },
+        entity_type: 1000,
+        variant: 5,
+    };
+    let Some(Controller::Particle5(blood)) = &mut effect.poop_effect else {
+        return Err("Blood Particle Update requires its typed controller owner".into());
+    };
+    match &mut blood.particle {
+        Particle::Initializing => {
+            let (rotation, vertical_velocity) = if child && effect.spawner_variant == 5 {
+                // 464e1d: a child stops on a Random(13) frame of "Particle".
+                effect.sprite.animation = "Particle".into();
+                effect.sprite.frame = shared.bounded(13) as f32;
+                effect.sprite.playing = false;
+                (0.0, (-shared.uniform()) * 20.0_f32 + 5.0_f32)
+            } else {
+                let rotation = shared.uniform() * 360.0_f32;
+                let clip = match blood.subtype {
+                    0 => ["BloodGib01", "BloodGib02", "BloodGib03"][shared.bounded(3) as usize],
+                    1 => ["Bone02", "Bone01"][shared.bounded(2) as usize],
+                    2 => ["Guts01", "Guts02", "Liver"][shared.bounded(3) as usize],
+                    3 => "Eye",
+                    5 => return Err("Blood Particle subtype5 Gib clips are not authored".into()),
+                    _ => "BloodGib01",
+                };
+                // Play(force=false), as for Particle58.
+                if effect.sprite.animation != clip {
+                    effect.sprite.animation = clip.into();
+                    effect.sprite.frame = 0.0;
+                    effect.sprite.playing = true;
+                }
+                (rotation, (-shared.uniform()) * 30.0_f32 + 5.0_f32)
+            };
+            blood.particle = Particle::Flying(Flight {
+                height: -23.0,
+                vertical_velocity,
+                gravity: 1.3,
+                layer_rotation: rotation,
+            });
+            blood.stage = 1;
+            Ok(None)
+        }
+        Particle::Flying(flight) => {
+            flight.vertical_velocity =
+                (0.9_f32 * flight.vertical_velocity + 0.1_f32) + flight.gravity;
+            flight.height += flight.vertical_velocity;
+            effect.render_offset.y = flight.height;
+            if flight.height > -5.0 {
+                if child {
+                    // 464024: frames 4..10 are removed, the rest are painted.
+                    if (4..=10).contains(&(effect.sprite.frame as i32)) {
+                        effect.active = false;
+                        effect.removed = true;
+                    } else {
+                        effect.raw_7d8 = true;
+                        effect.flags |= 8;
+                    }
+                } else {
+                    let config = familiars::definition(1000, 5)
+                        .ok_or("actual5 landing catalogue absent")?;
+                    let clip = config
+                        .clips
+                        .iter()
+                        .find(|clip| clip.name == effect.sprite.animation)
+                        .ok_or("5 landing clip absent from authored catalogue")?;
+                    effect.sprite.frame = clip.frames as f32 - 1.0;
+                    effect.velocity = ZERO;
+                    effect.raw_7d8 = true;
+                    effect.render_order_offset = 90;
+                    effect.flags |= 8;
+                }
+                return Ok(None);
+            }
+            if child {
+                return Ok(None);
+            }
+            let stage = blood.stage;
+            blood.stage += 1;
+            Ok(Some(AirborneSpawns {
+                position,
+                stage,
+                spawner,
+            }))
+        }
     }
 }
 
@@ -397,7 +594,11 @@ fn finish_update(effect: &mut SpriteEffect) -> Result<(), String> {
     let finite_flight = match &effect.poop_effect {
         Some(
             Controller::Particle58(Particle::Flying(flight))
-            | Controller::Particle27(Particle::Flying(flight)),
+            | Controller::Particle27(Particle::Flying(flight))
+            | Controller::Particle5(BloodParticle {
+                particle: Particle::Flying(flight),
+                ..
+            }),
         ) => flight.height.is_finite() && flight.vertical_velocity.is_finite(),
         _ => true,
     };
@@ -420,6 +621,7 @@ pub fn advance_full(
     base_update(effect)?;
     match effect.variant {
         27 | 58 => particle_update(effect, shared)?,
+        5 => return Err("Blood Particle Update requires its state-level spawn owner".into()),
         43 => explosion_update(effect, shared, audio, system_counter)?,
         _ => return Err("poop effect dispatch requires actual27/58/43 variant".into()),
     }
@@ -465,7 +667,7 @@ pub fn advance_fast(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String
 
 /// Actual late full grid callback, after the manager's flags8 paint pass.
 pub fn full_grid_contact(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String> {
-    if !matches!(effect.variant, 27 | 58)
+    if !matches!(effect.variant, 5 | 27 | 58)
         || !effect.active
         || effect.removed
         || effect.flags & 8 != 0
