@@ -366,6 +366,7 @@ pub(crate) fn reach_late_temporary_evaluation(
         if let Some(owner) = state.player_items.as_mut() {
             crate::pill_effect_history::forget(owner);
         }
+        crate::active_charges::note_possible_temporary326(state);
         return Ok(());
     };
     if let Some(mask) = deferred {
@@ -412,6 +413,7 @@ pub(crate) fn reach_late_temporary_evaluation(
         if let Some(owner) = state.player_items.as_mut() {
             crate::pill_effect_history::forget(owner);
         }
+        crate::active_charges::note_possible_temporary326(state);
     }
     let Some(history) = state
         .player_items
@@ -528,6 +530,19 @@ pub(crate) fn before_damage_queries(state: &mut State, health_units: u8, flags: 
         //has no closed word-write footprint, independent of queryHistory.
         if let Some(owner) = state.player_items.as_mut() {
             crate::pill_effect_history::forget(owner);
+            //This actual foreign-writer possibility is independent of query history.
+            crate::active_charges::invalidate_owner(
+                owner,
+                &[
+                    crate::active_charges::Word::ActiveId,
+                    crate::active_charges::Word::Charge,
+                    crate::active_charges::Word::Subordinate,
+                    crate::active_charges::Word::Reserve,
+                ],
+                crate::active_charges::Frontier::DamageEffect {
+                    source_pc: 0x52b080,
+                },
+            );
         }
         if let Some(history) = state
             .player_items
@@ -620,6 +635,30 @@ fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> boo
         //the separate query-history owner was already unavailable.
         if let Some(owner) = state.player_items.as_mut() {
             crate::pill_effect_history::forget(owner);
+        }
+    }
+    //Charge validity is independent from query history, including its
+    //legacy-None return below. Only a reached nested Use owns this loss.
+    for effect in &plan.foreign_effects {
+        if effect.kind == DamageForeignEffectKind::NestedUse {
+            crate::active_charges::invalidate(
+                state,
+                &[
+                    crate::active_charges::Word::ActiveId,
+                    crate::active_charges::Word::Charge,
+                    crate::active_charges::Word::Subordinate,
+                    crate::active_charges::Word::Reserve,
+                ],
+                crate::active_charges::Frontier::DamageEffect {
+                    source_pc: effect.pc,
+                },
+            );
+        }
+    }
+    //All possible nested Use losses precede this narrower setter receipt.
+    for effect in &plan.foreign_effects {
+        if effect.kind == DamageForeignEffectKind::ChargeSetter156 {
+            crate::active_charges::note_unowned_setter_delta(state, 1, effect.pc);
         }
     }
     let Some(history) = state
@@ -973,6 +1012,7 @@ pub(crate) enum DamageForeignEffectKind {
     ConfigCostume,
     PersistentBecInput,
     NestedUse,
+    ChargeSetter156,
     ShieldRefusal,
     SpecialPresence,
     TrinketRemoval,
@@ -1051,6 +1091,17 @@ impl DamageQueryWritePlan {
         }
         if queries.have(117) != Some(false) {
             plan.foreign(B, DamageForeignEffectKind::ConfigCostume, 0x52c2d9, "117 TEMP writer precedes costume5102F0; transitive costume effects remain separate");
+        }
+        //52BA52..52C288 is after the possible313 refusal and before HP.
+        //An earlier possible Use35 can change the later Have156 result.
+        if plan
+            .foreign_effects
+            .iter()
+            .any(|effect| effect.kind == DamageForeignEffectKind::NestedUse)
+            || queries.have(156) != Some(false)
+        {
+            plan.foreign(B, DamageForeignEffectKind::ChargeSetter156, 0x52c288,
+                "Have156 can call509E10(D78+1); only its active-word/effect footprint is unimplemented");
         }
         if queries.has_trinket(8) != Some(false) && queries.temporary_present(93) != Some(true) {
             plan.use_effect(B, 93, 0x52bc38);

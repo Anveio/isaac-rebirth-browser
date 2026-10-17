@@ -53,6 +53,8 @@ pub struct SavedPlayerItems {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pickup_grant_history: Option<crate::pickup_world_grants::History>,
     /// Saved+8908/890c/8904/8910; D80/D84 are not saved fields.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_charge_history: Option<crate::active_charges::History>,
     pub active_id: u32,
     pub active_charge: i32,
     pub save_word_d88: i32,
@@ -94,6 +96,10 @@ impl SavedPlayerItems {
             held_pockets: owner.held_pockets.clone(),
             ordinary_producer_history: owner.ordinary_producer_history.clone(),
             pickup_grant_history: owner.pickup_grant_history.clone(),
+            active_charge_history: owner
+                .active_charge_history
+                .as_ref()
+                .map(crate::active_charges::History::saved_words),
             active_id: owner.active_id,
             active_charge: owner.active_charge,
             save_word_d88: owner.save_word_d88,
@@ -160,6 +166,10 @@ impl SavedPlayerItems {
             }
         }
         owner.save_word_d88 = self.save_word_d88;
+        owner.active_charge_history = self
+            .active_charge_history
+            .as_ref()
+            .map(crate::active_charges::History::saved_words);
         owner.active_id = self.active_id;
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;

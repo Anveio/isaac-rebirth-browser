@@ -118,6 +118,11 @@ export interface AcquisitionHistory {
   firstRecords: Record<string, {sourceUpdateWord: number; sourceStageWord: number;
     sourceStageType: number; sourceRoomTypeWord: number; sourcePoolWord488: number} | null>;
 }
+export interface ActiveChargeHistory {
+  unowned: Partial<Record<"activeId" | "charge" | "subordinate" | "reserve",
+    {kind: string; [field: string]: unknown}>>;
+  unownedEffects: {kind: string; [field: string]: unknown}[];
+}
 export interface SavedRunSummary {
   acquisitionHistory?: AcquisitionHistory;
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
@@ -125,6 +130,7 @@ export interface SavedRunSummary {
   inventory: {coins: number; bombs: number; keys: number};
   playerItems: {
     pickupGrantHistory?: PickupGrantHistory | null;
+    activeChargeHistory?: ActiveChargeHistory | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     ownedCounts: number[]; itemRngStates: number[];
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
@@ -348,6 +354,7 @@ export interface State {
         | {kind: "modifierConversion"; collectibleId: number} | null} | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     pickupGrantHistory?: PickupGrantHistory | null;
+    activeChargeHistory?: ActiveChargeHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
