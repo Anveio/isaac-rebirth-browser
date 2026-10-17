@@ -266,6 +266,20 @@ npm run test:e2e -- keys --scenarios .cache/e2e/run-…/keys/scenarios.json
 npm run test:e2e -- paired --replay-cases .cache/e2e/run-…/paired/<case>/case.json
 ```
 
+The retained Audio and Music banks each contain two fixed cases and one
+unfiltered OS case. Recorded replay reads the bank before fresh generation.
+On `fa1dea4d` / app `0af25692`, baseline and patched replay both passed all
+620 Audio and 783 Music checks, with no added or missing checks and no changed
+statuses. Actual process IDs, live voice counts and gapless device-clock values
+varied between captures and remain in the reports; no comparison was relaxed.
+These captures cover the existing gates; full-game audio parity and later
+runtime qualification are separate.
+
+```sh
+npm run test:e2e -- audio --scenarios references/isaac/cases/audio/savev5-fixed-and-os-snapshot-v1.json
+npm run test:e2e -- music --scenarios references/isaac/cases/music/savev5-fixed-and-os-snapshot-v1.json
+```
+
 A replay compares builds only when both games get the same keys. Stage-exit
 cases also carry port fight keys recorded closed-loop against one production
 build (`portRecordedBuild`); replayed on another build they feed stale keys to

@@ -23,15 +23,20 @@ const output = resolve(value('--output') || join(ROOT, '.cache/e2e/audio', Strin
 const count = Number(value('--count') || 2);
 assert.ok(Number.isInteger(count) && count >= 1 && count <= 16);
 await mkdir(output, { recursive: true });
-const generated = JSON.parse((await run('python3', ['tools/original/foundation-seeds.py', '--count', String(count)], { cwd: ROOT })).stdout);
-let cases = [
-  { name: 'audible-restarts', code: 'QSYVKMSE', bootEpochSeed: 1700000000, volume: 1, taps: ['Left', 'Left', 'Right', 'Right'] },
-  { name: 'muted-admissions', code: 'ZG800TRJ', bootEpochSeed: 0, volume: 0, taps: ['Right', 'Left', 'Right', 'Left'] },
-  ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: 1,
-    taps: Array.from({ length: 4 }, () => randomInt(2) ? ['Left', 'Right'] : ['Right', 'Left']).flat() })),
-];
-let caseFilter;
-if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
+const scenariosPath = flag('--scenarios');
+assert.ok(scenariosPath === undefined || scenariosPath.length > 0, '--scenarios requires a nonempty path');
+let cases, caseFilter;
+if (scenariosPath !== undefined) {
+  ({ cases, caseFilter } = JSON.parse(await readFile(resolve(scenariosPath), 'utf8')));
+} else {
+  const generated = JSON.parse((await run('python3', ['tools/original/foundation-seeds.py', '--count', String(count)], { cwd: ROOT })).stdout);
+  cases = [
+    { name: 'audible-restarts', code: 'QSYVKMSE', bootEpochSeed: 1700000000, volume: 1, taps: ['Left', 'Left', 'Right', 'Right'] },
+    { name: 'muted-admissions', code: 'ZG800TRJ', bootEpochSeed: 0, volume: 0, taps: ['Right', 'Left', 'Right', 'Left'] },
+    ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: 1,
+      taps: Array.from({ length: 4 }, () => randomInt(2) ? ['Left', 'Right'] : ['Right', 'Left']).flat() })),
+  ];
+}
 assert.ok(Array.isArray(cases) && cases.length >= 1 && cases.length <= 18);
 assert.equal(new Set(cases.map(c => c.name)).size, cases.length);
 for (const c of cases) {
@@ -179,7 +184,7 @@ try {
         }
       }
       const actualAudio = await page.evaluate(() => window.game.audio());
-      const actualApi = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
+      const actualApi = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: structuredClone(window.__audioApi.events), truncated: window.__audioApi.truncated }; });
       // All authored base SFX are mono PCM16; music streams are stereo and
       // have their own live controller/queue acceptance cohort.
       const actualApiStarts = actualApi.events.filter(event => event.type === 'start' && event.channels === 1);
