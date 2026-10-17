@@ -88,6 +88,12 @@ def hurt(health):
     return ['--hurt'] if red + soul < maximum else []
 
 
+def avoided(fixture):
+    """Last boss-room cells the shared walks keep off: the original's own
+    solid cells and the cells by the pickups its fight leaves."""
+    return sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
+
+
 def descended(result, fixture, production_directory):
     """The port's own segment for a descent fixture, one closed-loop leg per
     floor, each replaying the legs before it: the leg fights the boss room
@@ -103,9 +109,11 @@ def descended(result, fixture, production_directory):
         # routeAvoid {room: [cells]}: authored objects the port does not
         # spawn yet (a slot machine, #645) that still block the original's walk.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
+        last = index + 1 == len(floors)
         leg = record(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
-                     *(['--exit', EXIT_LEG] if index + 1 < len(floors) else []),
+                     *([] if last else ['--exit', EXIT_LEG]),
                      *(['--route-avoid', avoid] if avoid else []),
+                     *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
                      rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
         if leg['status'] != 'pass':
             raise RuntimeError(f"Port descent leg {index} for {fixture['name']} failed: {leg['reason']}")
@@ -139,8 +147,9 @@ def fought(fixture, production_directory=None):
     if 'descent' in fixture:
         port = descended(result, fixture, production_directory)
     else:
-        port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
-                      *hurt(fixture.get('originalHealth')), production_directory=production_directory)
+        port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *hurt(fixture.get('originalHealth')),
+                      *(['--avoid', ','.join(map(str, avoided(fixture)))] if avoided(fixture) else []),
+                      production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     build = port.get('build')
@@ -188,7 +197,7 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     # stepping from cell centre to cell centre keeps it off their corners.
     rooms = final_rooms(fixture)
     back = f"{rooms[-1]},{rooms[-2]},{rooms[-1]}"
-    avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
+    avoid = avoided(fixture)
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
                   *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor',

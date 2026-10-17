@@ -242,6 +242,55 @@ try {
     const blocked = [...AWARD_CELLS, ...pickupCells(state)];
     const park = [106, 107, 91, 108, 92, 76].find(cell => state.grid.solid[cell] !== '1' && !blocked.includes(cell));
     if (park === undefined) throw new Error('No open bottom-left cell to park in');
+    // Port-only poops can also cut the parking corner off from a doorway the
+    // shared re-anchor walk leaves through: EV9BP18Q's Basement II room keeps
+    // a fresh poop beside the doorway's inner cell while the original's own
+    // poop and a heart cell (--avoid) close its other side. Shoot out the
+    // first poop on the cheapest corner-to-doorway route until it is open.
+    const w = state.grid.w, cellAt = (x, y) => Math.round((y - 120) / 40) * w + Math.round((x - 40) / 40);
+    const keepOff = () => new Set([state.trapdoor?.gridIndex, ...AVOID, ...pickupCells(state),
+      ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))]);
+    // 0-1 BFS over the room's interior: open cells cost 0, solid poops 1.
+    const corridor = (from, to) => {
+      const off = keepOff(), cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
+      while (deque.length) {
+        const cell = deque.shift();
+        if (cell === to) break;
+        for (const next of [cell - w, cell + w, cell - 1, cell + 1]) {
+          const c = next % w, r = Math.floor(next / w);
+          if (c < 1 || c > w - 2 || r < 1 || r > state.grid.h - 2 || (off.has(next) && next !== to)) continue;
+          const poop = state.poops.includes(next);
+          if (!poop && state.grid.solid[next] === '1') continue;
+          const total = cost.get(cell) + (poop ? 1 : 0);
+          if (cost.has(next) && cost.get(next) <= total) continue;
+          cost.set(next, total); previous.set(next, cell);
+          if (poop) deque.push(next); else deque.unshift(next);
+        }
+      }
+      if (!previous.has(to)) return null;
+      const path = [];
+      for (let cell = to; cell !== -1; cell = previous.get(cell)) path.unshift(cell);
+      return path;
+    };
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
+      const inner = cellAt(door.x + inward[0], door.y + inward[1]);
+      for (let tries = 0; ; tries++) {
+        const path = corridor(park, inner);
+        if (!path) throw new Error(`No corner route to the ${door.side} doorway`);
+        const at = path.findIndex(cell => state.poops.includes(cell));
+        if (at < 0) break;
+        if (tries === 6) throw new Error(`Corner route to the ${door.side} doorway still crosses poops`);
+        const poop = path[at], stand = path[at - 1];
+        await walk({ x: 40 + stand % w * 40, y: 120 + Math.floor(stand / w) * 40 }, blocked, 600, 'route poop');
+        const aim = { [1]: 'ArrowRight', [-1]: 'ArrowLeft', [w]: 'ArrowDown', [-w]: 'ArrowUp' }[poop - stand];
+        for (let left = 600; state.grid.solid[poop] === '1'; left -= STRIDE) {
+          if (left <= 0) throw new Error(`Route poop at cell ${poop} still stands`);
+          await hold([aim]); await step(STRIDE); state = await view();
+        }
+        await hold([]);
+      }
+    }
     await walk({ x: 40 + park % 15 * 40, y: 120 + Math.floor(park / 15) * 40 }, blocked, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
