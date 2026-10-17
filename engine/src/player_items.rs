@@ -24,6 +24,76 @@ pub struct PickupPresentation {
     ///Absent here preserves the existing collectible representation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pocket: Option<crate::pockets::PocketPresentation>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub regular: Option<RegularPickupPresentation>,
+}
+
+///50A830 copies the actual regular Sprite, independently of the Player pose.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RegularPickupPresentation {
+    pub variant: u32,
+    pub subtype: u32,
+    pub actor: String,
+    pub animation: String,
+    pub animation_frame: f32,
+    pub animation_playing: bool,
+    pub overlay: Option<String>,
+    pub overlay_frame: f32,
+    pub overlay_playing: bool,
+    ///50A830 copies original local layer state at contact.533970 applies
+    ///the main null0 attachment only on a later actual Player callback.
+    pub attached_to_player: bool,
+}
+impl RegularPickupPresentation {
+    pub(crate) fn from_pickup(pickup: &crate::pickups::Pickup) -> Self {
+        Self {
+            variant: pickup.variant,
+            subtype: pickup.subtype,
+            actor: pickup.actor.clone(),
+            animation: pickup.animation.clone(),
+            animation_frame: pickup.animation_frame as f32,
+            animation_playing: pickup.animation_playing,
+            overlay: pickup.overlay.clone(),
+            overlay_frame: pickup.overlay_frame,
+            overlay_playing: pickup.overlay_playing,
+            attached_to_player: false,
+        }
+    }
+    fn advance(&mut self) {
+        let definition = crate::pickups::definition(
+            self.variant,
+            crate::pickups::definition_subtype(self.variant, self.subtype),
+        )
+        .expect("copied regular definition");
+        let advance = |name: &str, frame: &mut f32, playing: &mut bool| {
+            if !*playing {
+                return;
+            }
+            let clip = definition
+                .clips
+                .iter()
+                .find(|clip| clip.name == name)
+                .expect("copied regular clip");
+            *frame += 1.0;
+            if *frame >= clip.frames as f32 {
+                *frame = if clip.looping {
+                    0.0
+                } else {
+                    clip.frames.saturating_sub(1) as f32
+                };
+                *playing = clip.looping;
+            }
+        };
+        advance(
+            &self.animation,
+            &mut self.animation_frame,
+            &mut self.animation_playing,
+        );
+        if let Some(overlay) = &self.overlay {
+            advance(overlay, &mut self.overlay_frame, &mut self.overlay_playing);
+        }
+    }
 }
 
 /// Actual independent inputs of Luck at 513C80. The fresh 519350 constructor
@@ -385,6 +455,12 @@ pub(crate) fn advance_item_sprite(state: &mut State, phase: Phase) {
         return;
     };
     if let Some(presentation) = &mut items.pickup_presentation {
+        if let Some(copy) = &mut presentation.regular {
+            copy.advance();
+            presentation.animation_frame = copy.animation_frame;
+            presentation.animation_playing = copy.animation_playing;
+            return;
+        }
         if presentation.pocket.is_some() {
             if presentation.animation_playing {
                 presentation.animation_frame += 1.0;
@@ -419,11 +495,25 @@ pub(crate) fn finish_player_update(state: &mut State, phase: Phase) -> Result<()
     if items.collection_delay > 0 {
         items.collection_delay -= 1;
     }
-    if phase != Phase::Update {
-        return Ok(());
-    }
-    if !items.pickup_animation_guard && !state.player_animation.guard {
+    if phase == Phase::Update && !items.pickup_animation_guard && !state.player_animation.guard {
         flush_queued(state)?;
+    }
+    //Fast rejoins531E7F;531F01..531F8C still reaches533970 after the
+    //Full-only queue handling. Only copied-sprite animation is Full-only.
+    //A contact-created copy missed this Player callback and keeps its source
+    //local pose until the next callback, including the next Fast callback.
+    if phase != Phase::Skipped {
+        if let Some(items) = state.player_items.as_mut() {
+            if items.pickup_animation_guard {
+                if let Some(copy) = items
+                    .pickup_presentation
+                    .as_mut()
+                    .and_then(|presentation| presentation.regular.as_mut())
+                {
+                    copy.attached_to_player = true;
+                }
+            }
+        }
     }
     Ok(())
 }
@@ -455,8 +545,9 @@ pub(crate) enum CollectibleContact {
     Untouched,
 }
 
-/// First free natural collectible, normal Isaac, with no active swap. The
-/// retained empty altar is an actor with stopped Empty main frame0.
+/// First natural collectible, normal Isaac, with no active swap.
+/// Free price0 retains the stopped Empty altar; owned nonzero Shop prices
+/// remove the actual body after subtype-clear, before the paid caller tail.
 pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleContact, String> {
     if state.room.pickups[index].variant != 100 || state.room.pickups[index].removed {
         return Ok(CollectibleContact::Untouched);
@@ -505,6 +596,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
         animation_frame: 0.0,
         animation_playing: true,
         pocket: None,
+        regular: None,
     });
     let pickup = &mut state.room.pickups[index];
     pickup.animation = "PlayerPickupSparkle".into();
@@ -513,11 +605,23 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     enqueue(state, id, charge, touched)?;
     let pickup = &mut state.room.pickups[index];
     pickup.subtype = 0;
-    // 40fef0 is named SetFrame, not PlayOverlay: it selects the main Empty
-    // clip, sets frame0 and clears main playing. Alternates remains untouched.
-    pickup.animation = "Empty".into();
-    pickup.animation_frame = 0.0;
-    pickup.animation_playing = false;
+    if pickup
+        .shop_price
+        .as_ref()
+        .is_some_and(|price| price.value != 0)
+    {
+        //505F12/1A reads AC0 and clears subtype before the price test.
+        //Nonzero505F2B/32 invokes immediate Remove441BB0, retaining
+        //the actual PlayerPickupSparkle Sprite until manager cleanup.
+        //The caller subsequently unloads price Sprite and debits coins.
+        pickup.removed = true;
+    } else {
+        //Price0 alone reaches5061DF/40FEF0: stopped Empty main frame0.
+        //Alternates remains untouched; free altar lifetime is unchanged.
+        pickup.animation = "Empty".into();
+        pickup.animation_frame = 0.0;
+        pickup.animation_playing = false;
+    }
     pickup.collected = true;
     pickup.can_collect = false;
     let room_type = state
@@ -599,6 +703,39 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
     pickup.presented_position = altar.position;
     pickup.velocity = altar.velocity;
     pickup.project();
+    Ok(())
+}
+
+///AddCoins518AB0 signed clamp and Money=Power immediate cache callback.
+///The achievement2 attempt remains unavailable for eligible high balances;
+///the Shop caller checks that boundary before any purchase mutation.
+pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), String> {
+    let owner = state
+        .player_items
+        .as_ref()
+        .ok_or("Shop Player item owner absent")?;
+    let money_power = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    )
+    .have(109)
+    .ok_or("AddCoins Have109 history unavailable")?;
+    state.inventory.coins = add_inventory(state.inventory.coins, -price);
+    if money_power {
+        state
+            .player_items
+            .as_mut()
+            .expect("checked owner")
+            .unevaluated_cache_flags |= 1;
+        crate::player_stats::evaluate_cache(state)?;
+    }
+    if state.inventory.coins > 54 && state.achievement_eligibility {
+        return Err("AddCoins achievement2 eligibility branch unadmitted".into());
+    }
+    //5BD5F5 tests the committed-seed byte System+11 and returns before
+    //any write/callee; seeded eligibility=false is an exact no-op here.
     Ok(())
 }
 

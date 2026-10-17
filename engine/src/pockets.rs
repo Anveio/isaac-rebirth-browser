@@ -349,21 +349,45 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
     {
         return Ok(PlayerContactDecision::AllowPhysicalResponse);
     }
-    let Some(owner) = state.player_items.as_ref() else {
+    //Preserve the free callback's AL0 physical response for the legacy guard.
+    if state
+        .player_items
+        .as_ref()
+        .is_some_and(|owner| owner.pickup_animation_guard)
+    {
+        return Ok(PlayerContactDecision::AllowPhysicalResponse);
+    }
+    if !grant(state, index)? {
         return Ok(PlayerContactDecision::Unowned);
+    }
+    crate::pickups::collect_sound(state, index);
+    state.room.pickups[index].finish_collect();
+    Ok(PlayerContactDecision::VetoPhysicalResponse)
+}
+
+///50AE00/50AF00 and50A8A0/50AA80 are the shared family grant prefix.
+///The contact owner has already checked AD0, ACC, CanCollect and item clips.
+///Paid callers retain these writes before50A830 replaces the copied Sprite.
+pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
+    let pickup = &state.room.pickups[index];
+    if !matches!(pickup.variant, 70 | 300) || pickup.collected || pickup.removed {
+        return Ok(false);
+    }
+    let Some(owner) = state.player_items.as_ref() else {
+        return Ok(false);
     };
     if owner.pickup_animation_guard {
-        return Ok(PlayerContactDecision::AllowPhysicalResponse);
+        return Ok(false);
     }
     let Some(held) = owner
         .held_pockets
         .as_ref()
         .filter(|held| held.frontier.is_none())
     else {
-        return Ok(PlayerContactDecision::Unowned);
+        return Ok(false);
     };
     let Some(capacity) = capacity(owner) else {
-        return Ok(PlayerContactDecision::Unowned);
+        return Ok(false);
     };
     let slots = held.slots;
     let slot = PocketSlot {
@@ -371,7 +395,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
         card: pickup.variant == 300,
     };
     if !matches!((slot.card, slot.id), (true, 1..=40) | (false, 1..=9)) {
-        return Ok(PlayerContactDecision::Unowned);
+        return Ok(false);
     }
     let spill = slots[0].id != 0 && slots[capacity - 1].id != 0;
     if spill {
@@ -424,6 +448,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
         animation_frame: 0.0,
         animation_playing: true,
         pocket: Some(PocketPresentation::for_slot(slot)),
+        regular: None,
     });
     crate::player_animation::force_play(state, crate::player_animation::Clip::UseItem);
     if slot.card && state.challenge_id != 9 {
@@ -435,19 +460,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<PlayerContactDe
         };
         state.run_introduction = crate::RunIntroduction::pickup(name, description);
     }
-    state.audio.admit(
-        &mut state.boot_lifecycle.shared,
-        state.system_clock.system_counter.wrapping_sub(1),
-        crate::audio::SoundRequest {
-            id: if slot.card { 8 } else { 252 },
-            volume: 1.0,
-            delay: 2,
-            looping: false,
-            pitch: 1.0,
-        },
-    );
-    state.room.pickups[index].finish_collect();
-    Ok(PlayerContactDecision::VetoPhysicalResponse)
+    Ok(true)
 }
 
 ///445710 captures the overlap before the two callbacks, then reads current
@@ -465,51 +478,11 @@ pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), Stri
     if collect(state, index)? != PlayerContactDecision::AllowPhysicalResponse {
         return Ok(());
     }
-    //A missing legacy grid/flying/class owner cannot become ground geometry.
-    if state.player.flying != Some(false) || state.player.grid_collision_class != Some(5) {
-        return Ok(());
-    }
-    let Some(frame) = state.room.grid.clone() else {
-        return Ok(());
-    };
-    let grid = crate::grid::Grid::new(frame)?;
-    static PLAYER_COLLIDER: std::sync::OnceLock<crate::grid::Collider> = std::sync::OnceLock::new();
-    let collider = PLAYER_COLLIDER.get_or_init(|| {
-        crate::grid::Collider::new(crate::grid::CollisionGeometry {
-            radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
-            scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
-            points: 40,
-        })
-        .expect("authored normal Isaac geometry")
-    });
-    let mut player = crate::combat::ContactBody {
-        id: 0,
-        entity_type: 1,
-        position: player_position,
-        velocity: crate::bombs::player_velocity(state),
-        radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
-        mass: crate::content::PLAYER_COLLISION_MASS_WORLD as f32,
-    };
-    let pickup = &state.room.pickups[index];
-    let mut body = crate::combat::ContactBody {
-        id: pickup.id,
-        entity_type: 5,
-        position: pickup_position,
-        velocity: pickup.velocity,
-        radius: pickup_radius,
-        mass: pickup.collision_mass,
-    };
-    crate::combat::resolve_player_pickup_contact(&mut player, &mut body, |shift| {
-        collider.blocks_player_shift(&grid, player_position, shift)
-    })?;
-    state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
-    state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
-    state.player.vx = f64::from(player.velocity.x) * 0.65;
-    state.player.vy = f64::from(player.velocity.y) * 0.65;
-    let pickup = &mut state.room.pickups[index];
-    pickup.position = body.position;
-    pickup.presented_position = body.position;
-    pickup.velocity = body.velocity;
-    pickup.project();
-    Ok(())
+    crate::pickups::player_physical_response(
+        state,
+        index,
+        player_position,
+        pickup_position,
+        pickup_radius,
+    )
 }

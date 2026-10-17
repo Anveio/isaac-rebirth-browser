@@ -48,7 +48,7 @@ assert.ok(!reusedOriginal || scenarios.cases.length === 1, 'One retained Origina
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
-const server = wasmNode ? null : await startProductionServer();
+const server = wasmNode ? null : await startProductionServer({ directory: value('--production-directory') });
 const browser = wasmNode ? null : await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server?.build ?? null,

@@ -134,6 +134,7 @@ pub mod run_admission;
 pub mod run_quit;
 pub mod saved_game;
 pub mod seed;
+pub mod shop;
 mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
@@ -1930,6 +1931,12 @@ impl Game {
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
     fn collect_regular_pickup_at(&mut self, index: usize) -> Result<(), String> {
+        if shop::player_contact(&mut self.state, index)? {
+            return Ok(());
+        }
+        if self.state.room.pickups[index].variant == 90 {
+            return pickups::collect_battery(&mut self.state, index);
+        }
         if matches!(self.state.room.pickups[index].variant, 70 | 300) {
             pockets::player_contact(&mut self.state, index)?;
             return Ok(());
@@ -1959,43 +1966,7 @@ impl Game {
                 pickup.try_collect(&mut self.state.inventory, &mut self.state.player)
             })
         {
-            // Collect504480 routes key ->504720 and bomb ->5046d0
-            // after inventory mutation, before the System increment.
-            let sound = match pickup.variant {
-                10 => Some((
-                    match pickup.subtype {
-                        3 => 54,
-                        4 => 266,
-                        _ => 185,
-                    },
-                    1.0,
-                )),
-                //Collect504510: only successful free Coin20/1..4 reaches here.
-                //The actual subtype owns the configured sound, not its amount.
-                20 => match pickup.subtype {
-                    1 | 4 => Some((234, 1.0)),
-                    2 => Some((232, 1.0)),
-                    3 => Some((199, 1.0)),
-                    _ => None,
-                },
-                30 if pickup.subtype == 2 => Some((204, 1.0)),
-                30 => Some((58, 0.85)),
-                40 => Some((201, 1.0)),
-                _ => None,
-            };
-            if let Some((id, volume)) = sound {
-                self.state.audio.admit(
-                    &mut self.state.boot_lifecycle.shared,
-                    self.state.system_clock.system_counter - 1,
-                    audio::SoundRequest {
-                        id,
-                        volume,
-                        delay: 2,
-                        looping: false,
-                        pitch: 1.0,
-                    },
-                );
-            }
+            pickups::collect_sound(&mut self.state, index);
         }
         Ok(())
     }
@@ -2132,6 +2103,18 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
+            } else if room_type == 2 && selector.entity_type == 5 && selector.variant == 150 {
+                if let Some(mut pickup) = shop::from_selector(&mut self.state, next, selector)? {
+                    pickup.birth_game_update = self.state.game_update_count;
+                    order.push(actors::ActorRef {
+                        kind: actors::ActorKind::Pickup,
+                        id: next,
+                    });
+                    next = next
+                        .checked_add(1)
+                        .ok_or("pickup identity counter exhausted")?;
+                    pickups.push(pickup);
+                }
             } else if selector.entity_type == 5
                 && selector.variant == 100
                 && !matches!(room_type, 2 | 3 | 14 | 22)
@@ -2782,6 +2765,7 @@ impl Game {
                     //and actual inactive Uninit fence before entity contacts.
                     familiars::paint_background_effects(&mut self.state)?;
                     explosion_effects::retire_full(&mut self.state);
+                    pickups::retire_full(&mut self.state);
                     let candidates = pickups::contact_candidates(&self.state)?;
                     //454a0a dispatches Player/PU callbacks before453340's
                     //PU self-pairs. Disabled transition controls do not veto
@@ -2799,12 +2783,6 @@ impl Game {
                     }
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
-                    self.state.room.pickups.retain(|pickup| !pickup.removed);
-                    let pickups = &self.state.room.pickups;
-                    self.state.actor_scheduler.retain(|actor| {
-                        actor.kind != actors::ActorKind::Pickup
-                            || pickups.iter().any(|pickup| pickup.id == actor.id)
-                    });
                 } else {
                     let selectors = self
                         .state
@@ -2856,16 +2834,11 @@ impl Game {
                     self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
+                    pickups::retire_full(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
                     bombs::full_grid_contacts(&mut self.state)?;
-                    self.state.room.pickups.retain(|pickup| !pickup.removed);
-                    let pickups = &self.state.room.pickups;
-                    self.state.actor_scheduler.retain(|actor| {
-                        actor.kind != actors::ActorKind::Pickup
-                            || pickups.iter().any(|pickup| pickup.id == actor.id)
-                    });
                     npcs::admit_room_combat(&mut self.state);
                     self.show_miniboss_streak();
                     // ChangeRoom 5dd858 then selects the room's music (5c4bf0).
@@ -3002,6 +2975,7 @@ impl Game {
             epic_fetus::retire_full(&mut self.state);
             explosion_effects::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
+            pickups::retire_full(&mut self.state);
             //454DF0: after fenced actors, inactive31E Uninit/registered
             //unlink and stable manager compaction precede455292->4545D0.
             //Retain the prior snapshot throughout those actor callbacks;
@@ -3073,6 +3047,9 @@ impl Game {
                 }
             }
             for index in 0..self.state.room.pickups.len() {
+                if shop::player_contact(&mut self.state, index)? {
+                    continue;
+                }
                 if self.state.room.pickups[index].variant == 100 {
                     if player_items::collect(&mut self.state, index)?
                         == player_items::CollectibleContact::Refused
@@ -3126,7 +3103,9 @@ impl Game {
             .retain(|tear| tear.motion.lifetime != projectiles::Lifetime::Removed);
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
-        self.state.room.pickups.retain(|pickup| !pickup.removed);
+        //Pickup contacts run after the Full manager sweep. A body removed
+        //there stays listed through this presentation and the intervening
+        //non-Full phase; the next actual Full pre-contact sweep retires it.
         controlled_knife_homing::unlink_removed_targets(&mut self.state);
         npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
