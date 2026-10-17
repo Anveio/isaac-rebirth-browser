@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PNG } from 'pngjs';
 import { roomArtRows } from '../foundation/entity-compare.mjs';
+import { evaluateJson } from './lib/game.mjs';
 
 const vector = value => [Math.fround(value.x), Math.fround(value.y)];
 export function compareCamera(phaseAssert, state, contents, label) {
@@ -83,7 +84,7 @@ export async function captureCameraVisibility(page, native, label, contents, dir
   const frame = native.frames.find(frame => frame.label === label);
   assert.ok(frame, 'Functional camera phase must have an actual original frame');
   const sourceBytes = await readFile(frame.path), source = PNG.sync.read(sourceBytes);
-  const capture = await page.evaluate(() => window.game.capture());
+  const capture = await evaluateJson(page, () => window.game.capture());
   const browserBytes = Buffer.from(capture.png, 'base64'), candidate = PNG.sync.read(browserBytes);
   assert.deepEqual([candidate.width, candidate.height], [source.width, source.height]);
   const actor = contents.players[0], scroll = contents.room.renderScroll;

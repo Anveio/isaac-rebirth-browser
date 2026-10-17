@@ -13,7 +13,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step } from './lib/game.mjs';
+import { snapshot, step, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -143,7 +143,7 @@ try {
         }
         assertSeededRun(state, c.code, c.runSeed);
       }
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       result.traceHistory = {truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated, backendStateTruncated: trace.backendStateTruncated,
         backendEvents: trace.backendEvents.length};

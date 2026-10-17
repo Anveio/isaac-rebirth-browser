@@ -10,7 +10,7 @@ import { tasksForRegion } from "./systems.mjs";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
 import { startProductionServer } from "./production-server.mjs";
 import { CONTROLLED_BOMB_CHECKPOINTS } from "./mask-checkpoints.mjs";
-import { snapshot } from '../e2e/lib/game.mjs';
+import { snapshot, evaluateJson, readTrace } from '../e2e/lib/game.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 export const FOUNDATION_SEED = "T1PK6Y0W";
@@ -170,7 +170,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     await record({ type: "tick", count });
   };
   const capture = async (label, expectedScreen) => {
-    const capture = await page.evaluate(() => window.game.capture());
+    const capture = await evaluateJson(page, () => window.game.capture());
     assert.equal(capture.state.screen, expectedScreen, `${label}: actual keyboard navigation must reach ${expectedScreen}`);
     const decoded = decodePng(capture.png);
     const nativeSize = decoded.width === 480 && decoded.height === 270 ? scaleNearest(decoded, 2) : decoded;
@@ -180,7 +180,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     if (onCheckpoint) await onCheckpoint(frame);
   };
   const finish = async () => {
-    const actualTrace = await page.evaluate(() => window.game.trace());
+    const actualTrace = await readTrace(page);
     assertInputProvenance(actualTrace, commands, initialSeed, bootEpochSeed);
     assert.equal(actualTrace.stateHistoryTruncated, false, "Replay comparison requires complete browser state history");
     assert.equal(actualTrace.states.length, commands.length + 1, "Replay comparison must retain every public command state");

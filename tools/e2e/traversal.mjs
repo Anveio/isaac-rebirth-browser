@@ -13,7 +13,7 @@ import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedComma
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 import { compareChests } from './chest-checks.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step } from './lib/game.mjs';
+import { snapshot, step, readTrace } from './lib/game.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
@@ -128,7 +128,7 @@ try {
       if (declaredSfxVolume !== undefined)
         seeded = await page.evaluate(volume => window.game.command({ type: 'audioVolume', sfx_volume: volume }), sfxVolume);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
-        trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
+        trace: await readTrace(page), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);
       const observedRooms = new Set(), admissions = new Map(), states = [], comparisonFailures = [];
       // Later evidence/transport failures must not erase field comparisons.
@@ -459,7 +459,7 @@ try {
             assert.deepEqual([door.variant, door.state, door.collisionClass], [1, 1, 4], 'Zero-key public approach must retain source key lock');
           }
       }
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       row.visitedRooms = [...observedRooms];
       row.traceHistory = { truncated: trace.truncated, inputTraceTruncated: trace.inputTraceTruncated,
         stateHistoryTruncated: trace.stateHistoryTruncated, retainedStates: trace.states.length,
