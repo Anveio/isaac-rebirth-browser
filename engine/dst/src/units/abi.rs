@@ -197,6 +197,80 @@ pub fn run(case: &mut Case) {
     let authored = resources(e);
     settings(e, &authored);
     input_configs(e, &authored);
+    saves(e);
+}
+
+/// The own-save transport `web/engine.ts` calls (`save_input_ptr`,
+/// `load_save_data`, `enable_saved_game_io`, `save_data_ptr`): documents are
+/// bounded at 4 MiB, save IO is declared only with protocol 1 at a fresh
+/// Title, and a document loads only into a fresh Title. A refused call
+/// reports an error and leaves the game unchanged.
+fn saves(e: &mut Entropy) {
+    use rebirth_cleanroom::save_profiles::MAX_BYTES;
+    props::always!(
+        abi::save_input_ptr(MAX_BYTES + 1 + e.index(1024)).is_null()
+            && !abi::save_input_ptr(MAX_BYTES).is_null(),
+        "abi: save documents are bounded at 4 MiB"
+    );
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    abi::reset(seed, epoch);
+    let title = snapshot();
+    // The document this fresh Title would store.
+    let pointer = abi::save_data_ptr();
+    let document = if pointer.is_null() {
+        Vec::new()
+    } else {
+        // SAFETY: save_data_ptr fills the snapshot buffer snapshot_len describes.
+        unsafe { std::slice::from_raw_parts(pointer, abi::snapshot_len()) }.to_vec()
+    };
+    let load = |bytes: &[u8]| {
+        let pointer = abi::save_input_ptr(bytes.len());
+        if pointer.is_null() {
+            return None;
+        }
+        // SAFETY: save_input_ptr returned a writable buffer of exactly bytes.len().
+        unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), pointer, bytes.len()) };
+        Some(abi::load_save_data())
+    };
+    let protocol = e.range(2, u32::MAX);
+    let refused_protocol = abi::enable_saved_game_io(protocol) == 1 && !error().is_empty();
+    let corrupt = *e.pick(&[
+        &b""[..],
+        b"{}",
+        b"null",
+        b"not json",
+        br#"{"version":2,"profiles":[]}"#,
+    ]);
+    let refused_document = load(corrupt) == Some(1) && !error().is_empty();
+    props::always!(
+        refused_protocol && refused_document && snapshot() == title,
+        "abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game",
+        json!({ "protocol": protocol, "document": String::from_utf8_lossy(corrupt) })
+    );
+    props::always!(
+        !document.is_empty()
+            && abi::enable_saved_game_io(1) == 0
+            && load(&document) == Some(0)
+            && abi::error_len() == 0,
+        "abi: a fresh Title declares save IO and loads a save document",
+        json!({ "error": error() })
+    );
+    // Leaving the Title for the profile menu ends both boundaries.
+    let leave = serde_json::to_vec(&Command::Key {
+        code: "Enter".into(),
+        down: true,
+    })
+    .expect("command");
+    let left = send(&leave) == Some(0);
+    let moved = snapshot();
+    props::always!(
+        !left
+            || (abi::enable_saved_game_io(1) == 1
+                && load(&document) == Some(1)
+                && !error().is_empty()
+                && snapshot() == moved),
+        "abi: save IO and save documents are refused outside a fresh Title, keeping the game"
+    );
 }
 
 /// The input-configuration reset `web/engine.ts` boots with when the browser

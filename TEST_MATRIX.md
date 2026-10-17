@@ -319,8 +319,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 74 | 55 | 2 |
-| `abi` | the exported C ABI transport the browser bridge drives | 21 | 3 | 0 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 78 | 60 | 2 |
+| `abi` | the exported C ABI transport the browser bridge drives | 25 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -736,6 +736,15 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: the save host answers every save write and menu readmission a command leaves | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a save write is stored | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a save write's storage fails | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a menu readmission loads the stored document | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: Continue resumes the saved run's character, seeds and floor | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a saved run is continued | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: a stale or unrequested save acknowledgement is refused without change | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a stale acknowledgement arrives while save IO is pending | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: a save document exports and imports back unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: the seed scout starts a seeded run | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Sometimes | game: a scouted seed offers a weapon collectible | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
@@ -751,6 +760,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: save documents are bounded at 4 MiB | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a fresh Title declares save IO and loads a save document | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: save IO and save documents are refused outside a fresh Title, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration reset boots with the stored configuration | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration reset refuses a configuration inputconfigs.dat cannot hold, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
