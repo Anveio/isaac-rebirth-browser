@@ -194,7 +194,7 @@ Next: Basement II to Caves (#413 first).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
-| #449 | P3 | No "BASEMENT I" name streak at run start; Basement II start room keeps the controls drawing | playtest 2026-10-16 `playtest/2045007/` |
+| #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
 
 ## Player
 
