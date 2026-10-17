@@ -138,5 +138,20 @@
         "removed:51"
       ]
     ]
+  },
+  {
+    "out": "regression-descent-with-active-item.json",
+    "stages": [
+      [
+        "active item held",
+        "npc:19"
+      ],
+      [
+        "cleared:5"
+      ],
+      [
+        "stage:2"
+      ]
+    ]
   }
 ]
