@@ -24,6 +24,59 @@ npm run test:e2e                            # everything
 npm run test:e2e -- --affected              # only the suites your change reaches
 ```
 
+### Running a slice
+
+A small change rarely needs every suite or every case. These narrow a run:
+
+```sh
+npm run test:e2e -- --groups                     # the logical groups and their suites
+npm run test:e2e -- @items @audio                # every suite in those groups
+npm run test:e2e -- @combat --list               # what a selection would run
+npm run test:e2e -- keys --case 'random-*'       # only matching cases (comma-separated, * wildcard)
+npm run test:e2e -- --rerun-failed               # failed suites of the newest run, on the same cases
+npm run test:e2e -- --rerun-failed .cache/e2e/run-…
+```
+
+- **Groups** (`GROUPS` in [`suites.mjs`](suites.mjs)) are `@boot`, `@rooms`,
+  `@stage`, `@pickups`, `@items`, `@combat`, `@monsters` and `@audio`. A suite
+  may sit in several; the registry refuses a suite in none.
+- **`--case PATTERNS`** matches the id each suite prints for a case and names its
+  directory by. Names differ by driver: `scenario.id` for paired-game and
+  state-pair suites (`health-soul-phase0`, `gaper-random-0`), `name` elsewhere
+  (`random-0`, `fixed-epoch`), the seed code for traversal-family and floor
+  suites. A pattern matching nothing fails with the known ids. The suite
+  validates its whole generated bank first, so contrived and OS-random
+  composition checks still hold. It then records only the cases that ran,
+  marked `caseFilter`, so the printed replay reruns exactly those. A bank marked
+  `caseFilter` skips whole-bank count and composition checks on replay; every
+  per-case check still applies. Fresh `paired` cases all share the id
+  `paired-random-run`, and a filtered `floor` run draws no fresh seeds (replay
+  one with `--scenarios … --case`).
+- **`--rerun-failed`** reruns each failed suite with the replay flags its run
+  recorded. A suite that died before recording its bank runs fresh. A failed run
+  prints this command.
+
+A slice is an inner-loop tool. Merging still needs the suites your change
+touches, compared against main.
+
+The existing death suite has a bounded actual-audio replay:
+
+```sh
+npm run test:e2e -- player-death --exit-audio --scenario-file references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json
+```
+
+`--exit-audio` requires that explicitly marked one-case seven-capture Exit
+prefix; it rejects a full death tape or other selected routes before launching
+either game. It preserves the canonical public clock, field checks and actual
+death/popup coverage, requires actual deferred Exit to Main, adds all 14 bounded Music/SFX8 checks and requires three
+earlier actual unique-owner SFX8 starts in each runtime. Existing Native
+forwarding OpenAL instrumentation and same-call Browser API observations remain
+blocking, including zero observed Browser forward SFX8 events, complete traces,
+unmuted volume, destination and actual buffer hashes. Missing owner evidence cannot imply zero starts. Full pixels
+remain retained diagnostics; these checks do not claim audible/PCM equality,
+complete music lifecycle or full Shared-MT parity. Default death-bank/OS-random
+admission and the separate `audio` suite's menu/PCM schema are unchanged.
+
 ### Only what your change touches
 
 ```sh
@@ -340,3 +393,52 @@ Node journals are actual reset/key/tick/snapshot observations. Browser DOM,
 rendered output and audio playback/PCM remain unavailable; source/schema gaps,
 comparison failures and missing pickup witnesses remain failures. Historical
 passes do not become current-build acceptance without the real replay.
+
+### Common SKU resource fixtures
+
+`common-sku` runs the four retained normal-run Battery/collectible contracts
+plus one unfiltered recorded OS idle-approach case by default. The approach
+case uses the declared PWTJ run seed; it does not claim a fresh random floor.
+`--scenarios` replays recorded public recipes without drawing entropy, and
+`--case` selects a mandatory recorded subset. A zero-case filter fails.
+
+The suite reconstructs its private STB inputs locally through
+`prepare-shop-sku-fixtures.py` and the existing Base decoder. Local canonical
+Base assets are required. Public cases contain source recipes, keys/ticks and
+obligations, without original resource payloads or private cache paths.
+Generated resources/captures remain below ignored `.cache`; unresolved recipes
+fail and cannot silently use a free or base-room substitute. `--prepare-only`
+launches neither game. The suite uses headed Chromium with its observed graphics backend (default Mesa) under the existing
+runner's display and accepts `--production-directory` for immutable runtimes.
+`--reuse-original ROOT` adds a fresh actual Browser capture while the existing
+canonical transport reader validates every retained Native input, clock,
+resource and archive; it adds no fresh Native evidence.
+
+Owner fields and mandatory contact/branch/grant/debit/presentation/retirement
+checks are blocking. Pickup P/V compare exact binary32 words; Native448 maps
+to the actual Browser presented owner, with integration values also retained.
+The canonical reader reports active queuedTouched as boolean; historical
+validated0/1 captures retain their wire and receive an explicit typed decode.
+The historical first four cases on frozen build `5c33` retain 41,481 strict
+semantic checks: 41,212 pass and 269 fail on health or pickup guard fields. The
+new comparer preserves those values and statuses. An explicit mapping renames
+1,042 Native field labels from the legacy ChallengeID alias to seed effect mode;
+ChallengeID remains a separate frontdoor and state contract. All 16 retained
+input and transport checks also pass. The promoted suite's registered replay
+on frozen build `9841` passed the free-no-active case through the canonical
+runner: 1,749 functional checks and all four input and transport checks passed,
+with unchanged source pins. This qualifies that recorded case, rather than
+a whole bank or the default OS approach. A separate actual Chromium/Mesa
+Browser replay with the reviewed isolated suite on frozen build `cc38` reused
+the closed Native free-no-active case. All 1,749 existing functional checks
+passed with unchanged actual values, expectations and results, and 29 separate
+comparisons of actual Native and Browser seed effect mode fields passed. All
+1,770 protected inputs stayed unchanged. This adds no fresh Native evidence
+and does not replay or waive the other three cases' historical failures.
+
+All other failures remain strict. PNGs are retained; RGBA/backend audio/PCM
+are not graded by this suite. See [the closed first-four scope and retained
+failures](../../docs/shop-economy.md#first-common-sku-controls). Fresh Native
+capture through the promoted wrapper, the default OS approach case and the
+three remaining Battery branch controls remain unqualified. These recorded
+fixture results do not establish complete current-main or retail-floor parity.

@@ -56,6 +56,7 @@ mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 mod contact_candidates;
 mod controlled_knife_homing;
+pub mod envy;
 pub mod familiars;
 pub mod fireplaces;
 pub mod floor;
@@ -133,6 +134,7 @@ pub mod run_admission;
 pub mod run_quit;
 pub mod saved_game;
 pub mod seed;
+pub mod shop;
 mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
@@ -1599,10 +1601,14 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
-        //Fresh59D080 constructs an empty Challenge code, then uses
-        //5E1170's9B formatter before forwarding the actual setter.
-        //Restart, typed and legacy paths have separate input owners.
-        if self.state.screen == Screen::Challenge && challenge.is_some() {
+        if self.state.screen == Screen::Character {
+            //59EE70 commits the actual typed code;59F617 forwards this same
+            //menu string through594620/54EB20 to the5E1470 seed setter.
+            //Fresh generated codes use that menu owner after5E1170 as well.
+            run_seeds.admit_menu_seed_effect(&self.state.boot_lifecycle.menu_seed_text)?;
+        } else if self.state.screen == Screen::Challenge && challenge.is_some() {
+            //Fresh59D080 uses5E1170's9B formatter for its actual setter.
+            //Restart and legacy paths retain their separate input owners.
             run_seeds.admit_formatted_seed_effect()?;
         }
         self.state.item_pools = Some(items::ItemPools::new(
@@ -1929,6 +1935,12 @@ impl Game {
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
     fn collect_regular_pickup_at(&mut self, index: usize) -> Result<(), String> {
+        if shop::player_contact(&mut self.state, index)? {
+            return Ok(());
+        }
+        if self.state.room.pickups[index].variant == 90 {
+            return pickups::collect_battery(&mut self.state, index);
+        }
         if matches!(self.state.room.pickups[index].variant, 70 | 300) {
             pockets::player_contact(&mut self.state, index)?;
             return Ok(());
@@ -1958,43 +1970,7 @@ impl Game {
                 pickup.try_collect(&mut self.state.inventory, &mut self.state.player)
             })
         {
-            // Collect504480 routes key ->504720 and bomb ->5046d0
-            // after inventory mutation, before the System increment.
-            let sound = match pickup.variant {
-                10 => Some((
-                    match pickup.subtype {
-                        3 => 54,
-                        4 => 266,
-                        _ => 185,
-                    },
-                    1.0,
-                )),
-                //Collect504510: only successful free Coin20/1..4 reaches here.
-                //The actual subtype owns the configured sound, not its amount.
-                20 => match pickup.subtype {
-                    1 | 4 => Some((234, 1.0)),
-                    2 => Some((232, 1.0)),
-                    3 => Some((199, 1.0)),
-                    _ => None,
-                },
-                30 if pickup.subtype == 2 => Some((204, 1.0)),
-                30 => Some((58, 0.85)),
-                40 => Some((201, 1.0)),
-                _ => None,
-            };
-            if let Some((id, volume)) = sound {
-                self.state.audio.admit(
-                    &mut self.state.boot_lifecycle.shared,
-                    self.state.system_clock.system_counter - 1,
-                    audio::SoundRequest {
-                        id,
-                        volume,
-                        delay: 2,
-                        looping: false,
-                        pitch: 1.0,
-                    },
-                );
-            }
+            pickups::collect_sound(&mut self.state, index);
         }
         Ok(())
     }
@@ -2131,6 +2107,18 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
+            } else if room_type == 2 && selector.entity_type == 5 && selector.variant == 150 {
+                if let Some(mut pickup) = shop::from_selector(&mut self.state, next, selector)? {
+                    pickup.birth_game_update = self.state.game_update_count;
+                    order.push(actors::ActorRef {
+                        kind: actors::ActorKind::Pickup,
+                        id: next,
+                    });
+                    next = next
+                        .checked_add(1)
+                        .ok_or("pickup identity counter exhausted")?;
+                    pickups.push(pickup);
+                }
             } else if selector.entity_type == 5
                 && selector.variant == 100
                 && !matches!(room_type, 2 | 3 | 14 | 22)
@@ -2570,17 +2558,21 @@ impl Game {
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
                     self.state.menu_presentation.reinitialize();
+                    // Menu was destroyed on run entry.594D40 constructs it;
+                    //59AB7C initializes the offscreen Title at frame0, and
+                    //59AD17/59B0F0 begin the requested opaque-black fade.
+                    self.state.title_animation_frame = 0;
+                    self.state.menu_fade = MenuFade {
+                        active: true,
+                        alpha: 1.0,
+                        color: [0.0, 0.0, 0.0, 1.0],
+                    };
                     // A Random run stored its resolved character; the menus
                     // return to the profile's own selection.
                     self.load_menu_character();
-                    self.state.audio.pending.push(audio::SoundRequest {
-                        id: 8,
-                        volume: 1.0,
-                        delay: 0,
-                        looping: false,
-                        pitch: 1.0,
-                    });
-                    self.state.music.crossfade(1);
+                    // Fresh MenuInit59A4D2/59A51A requests Music61.
+                    // SetMenu0-to3 skips the forward-confirm SFX8 branch.
+                    self.state.music.crossfade(61);
                 }
             }
         }
@@ -2871,6 +2863,7 @@ impl Game {
                     //and actual inactive Uninit fence before entity contacts.
                     familiars::paint_background_effects(&mut self.state)?;
                     explosion_effects::retire_full(&mut self.state);
+                    pickups::retire_full(&mut self.state);
                     let candidates = pickups::contact_candidates(&self.state)?;
                     //454a0a dispatches Player/PU callbacks before453340's
                     //PU self-pairs. Disabled transition controls do not veto
@@ -2888,12 +2881,6 @@ impl Game {
                     }
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
-                    self.state.room.pickups.retain(|pickup| !pickup.removed);
-                    let pickups = &self.state.room.pickups;
-                    self.state.actor_scheduler.retain(|actor| {
-                        actor.kind != actors::ActorKind::Pickup
-                            || pickups.iter().any(|pickup| pickup.id == actor.id)
-                    });
                 } else {
                     let selectors = self
                         .state
@@ -2945,16 +2932,11 @@ impl Game {
                     self.update_boss_bar();
                     familiars::paint_background_effects(&mut self.state)?;
                     blood_effects::clear_retired_links(&mut self.state);
+                    pickups::retire_full(&mut self.state);
                     pickups::full_grid_contacts(&mut self.state)?;
                     chests::full_grid_contacts(&mut self.state)?;
                     npcs::post_contact_grid(&mut self.state)?;
                     bombs::full_grid_contacts(&mut self.state)?;
-                    self.state.room.pickups.retain(|pickup| !pickup.removed);
-                    let pickups = &self.state.room.pickups;
-                    self.state.actor_scheduler.retain(|actor| {
-                        actor.kind != actors::ActorKind::Pickup
-                            || pickups.iter().any(|pickup| pickup.id == actor.id)
-                    });
                     npcs::admit_room_combat(&mut self.state);
                     self.show_miniboss_streak();
                     // ChangeRoom 5dd858 then selects the room's music (5c4bf0).
@@ -3052,6 +3034,7 @@ impl Game {
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
+        let mut player_updated = false;
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
@@ -3063,6 +3046,11 @@ impl Game {
             }
             let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
+                // Every actual Player callback defers its full grid query
+                // until the manager has completed all entity contacts.
+                if actor.kind == actors::ActorKind::Player {
+                    player_updated = true;
+                }
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
                 self.count_updated_room_actor(actor, &mut counted);
             }
@@ -3089,6 +3077,7 @@ impl Game {
             epic_fetus::retire_full(&mut self.state);
             explosion_effects::retire_full(&mut self.state);
             controlled_tear::retire_full(&mut self.state);
+            pickups::retire_full(&mut self.state);
             //454DF0: after fenced actors, inactive31E Uninit/registered
             //unlink and stable manager compaction precede455292->4545D0.
             //Retain the prior snapshot throughout those actor callbacks;
@@ -3160,6 +3149,9 @@ impl Game {
                 }
             }
             for index in 0..self.state.room.pickups.len() {
+                if shop::player_contact(&mut self.state, index)? {
+                    continue;
+                }
                 if self.state.room.pickups[index].variant == 100 {
                     if player_items::collect(&mut self.state, index)?
                         == player_items::CollectibleContact::Refused
@@ -3175,6 +3167,11 @@ impl Game {
                 self.collect_regular_pickup_at(index)?;
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
+            if player_updated {
+                // Final manager454b1d..454b2f visits the retained Player
+                // first, including one killed during the contact pass.
+                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
+            }
             pickups::full_grid_contacts(&mut self.state)?;
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
@@ -3207,7 +3204,9 @@ impl Game {
             .retain(|tear| tear.motion.lifetime != projectiles::Lifetime::Removed);
         bombs::advance_explosions(&mut self.state, phase, explosion_fence);
         bombs::retire_removed(&mut self.state);
-        self.state.room.pickups.retain(|pickup| !pickup.removed);
+        //Pickup contacts run after the Full manager sweep. A body removed
+        //there stays listed through this presentation and the intervening
+        //non-Full phase; the next actual Full pre-contact sweep retires it.
         controlled_knife_homing::unlink_removed_targets(&mut self.state);
         npcs::unlink_removed(&mut self.state.room.npcs);
         self.state.room.npcs.retain(|npc| !npc.removed);
@@ -3457,7 +3456,12 @@ impl Game {
         bomb_triggered: bool,
     ) -> Result<(), String> {
         match actor.kind {
-            actors::ActorKind::Player => self.update_player(phase, bomb_triggered, true)?,
+            actors::ActorKind::Player => self.update_player_with_grid(
+                phase,
+                bomb_triggered,
+                true,
+                phase == phase::Phase::Update,
+            )?,
             actors::ActorKind::Familiar => {
                 familiars::advance_actor(&mut self.state, phase, actor.id)?
             }
@@ -3777,6 +3781,25 @@ impl Game {
         }
         Ok(())
     }
+    fn admit_envy_child(
+        &mut self,
+        index: usize,
+        position: motion::WorldVector,
+        variant: u32,
+        seed: u32,
+    ) -> Result<(), String> {
+        self.admit_npc_birth(
+            index,
+            entities::Birth::Npc(envy::child_selector(position, variant, seed)),
+        )?;
+        let id = {
+            let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+            child.variant = variant;
+            child.no_appear = true;
+            child.id
+        };
+        self.advance_npc(id, phase::Phase::Update)
+    }
     /// Admits one NPC callback product at the callback's own return point.
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
@@ -3845,6 +3868,23 @@ impl Game {
                 }
                 npc.max_hp *= spawned.health_scale;
                 npc.hp *= spawned.health_scale;
+                Ok(())
+            }
+            entities::Birth::EnvyChild {
+                position,
+                variant,
+                seed,
+            } => self.admit_envy_child(index, position, variant, seed),
+            entities::Birth::EnvyThird {
+                position,
+                variant,
+                seed,
+                level,
+            } => {
+                let roll = self.state.boot_lifecycle.shared.bounded(2);
+                if level < roll + 1 {
+                    self.admit_envy_child(index, position, variant, seed)?;
+                }
                 Ok(())
             }
             entities::Birth::Child(selector) => {
@@ -3925,6 +3965,16 @@ impl Game {
         bomb_triggered: bool,
         controls_enabled: bool,
     ) -> Result<(), String> {
+        // Standalone transition callbacks retain their existing grid path.
+        self.update_player_with_grid(phase, bomb_triggered, controls_enabled, false)
+    }
+    fn update_player_with_grid(
+        &mut self,
+        phase: phase::Phase,
+        bomb_triggered: bool,
+        controls_enabled: bool,
+        defer_full_grid: bool,
+    ) -> Result<(), String> {
         if phase == phase::Phase::Update {
             self.state.player_animation.advance_full();
             if matches!(
@@ -3969,6 +4019,10 @@ impl Game {
         player_costume229::begin_full(&mut self.state, phase);
         spider_webs::begin_player_update(&mut self.state, phase)?;
         if player_death::advance(&mut self.state, phase) {
+            if phase == phase::Phase::Interpolate {
+                // RoomFast5cd975 dispatches Player, then443d00(false).
+                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
+            }
             return Ok(());
         }
         let controls_enabled = controls_enabled
@@ -4266,13 +4320,24 @@ impl Game {
             self.state.player_stats.move_speed,
         )?
         .1;
-        motion::advance(
-            &mut self.state.player,
-            &self.state.room,
-            dx,
-            dy,
-            self.state.player_stats.move_speed,
-        );
+        if defer_full_grid {
+            // Actions, later actors and contacts see provisional full-pass
+            // vectors; manager454b2f owns the subsequent grid response.
+            motion::advance_without_grid(
+                &mut self.state.player,
+                dx,
+                dy,
+                self.state.player_stats.move_speed,
+            )?;
+        } else {
+            motion::advance(
+                &mut self.state.player,
+                &self.state.room,
+                dx,
+                dy,
+                self.state.player_stats.move_speed,
+            );
+        }
         spider_webs::finish_player_update(&mut self.state);
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;

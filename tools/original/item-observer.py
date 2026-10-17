@@ -115,7 +115,7 @@ def observe(pid,context):
      # 52ee40 tests the pointer first and never uses an inactive touched byte.
      # Record that raw byte without asserting a nonexistent active bool.
      touched_raw=read(player+0x3064,1)[0]
-     touched=bools(player+0x3064,1)[0]if queued else None
+     touched=(bools(player+0x3064,1)[0]==1)if queued else None
      # Legacy shootingPressed is raw DB0:52F73D stores opposed shoot pairs,
      # not the BPL HasShoot value passed at530042/53004C. Keep its wire name.
      players.append({'ownedCounts':list(struct.unpack('<347i',read(player+0xe1c,347*4))),'queuedId':i32(queued+4)if queued else None,'queuedCharge':i32(player+0x3060),'queuedTouched':touched,'queuedTouchedRaw':touched_raw,'cacheFlags':struct.unpack('<I',read(player+0xd6c,4))[0],'activeId':i32(player+0xd74),'activeCharge':i32(player+0xd78),'pickupCooldown':i32(player+0x30d4),
@@ -145,6 +145,18 @@ def observe(pid,context):
       players[-1]['heldPocketRecords']=[{'slot':slot,'sourceIdOffset':0x3044+slot*8,
        'id':struct.unpack_from('<i',held,slot*8)[0],'typeTagRaw':held[slot*8+4]}
        for slot in range(2)]
+     if context.get('persistentItemInputs',False):
+      #Actual raw Player words only. Absent port owners are never inputs;
+      #this optional observation performs14 bounded4-byte native reads.
+      players[-1]['persistentItemInputs']={
+       'sourceD2c':i32(player+0xd2c),'sourceD34':i32(player+0xd34),
+       'source13b4':i32(player+0x13b4),'source13b8':i32(player+0x13b8),
+       'sourceD28':i32(player+0xd28),'sourceD44':i32(player+0xd44),
+       'source13bc':i32(player+0x13bc),'source13c0':i32(player+0x13c0),
+       'sourceD30':i32(player+0xd30),'sourceD38':i32(player+0xd38),
+       'sourceD3c':i32(player+0xd3c),'sourceD40':i32(player+0xd40),
+       'sourceD58':f32(player+0xd58),'source13cc':i32(player+0x13cc),
+       'source13d0':i32(player+0x13d0),'sourceC70':i32(player+0xc70)}
      temp_begin,temp_end=u64(player+0xd00),u64(player+0xd08)
      if temp_end<temp_begin or(temp_end-temp_begin)%16 or(temp_end-temp_begin)//16>347:raise ValueError('Temporary record array outside bound')
      for record in range(temp_begin,temp_end,16):
@@ -171,7 +183,15 @@ def observe(pid,context):
  except Exception as error:report['status']='fail';report['error']=repr(error)
  finally:
   if stopped:os.kill(pid,signal.SIGCONT)
- if report['status']=='pass'and report.get('gamePresent'):
+ #The core fields above are valid on every actual gameplay stage. A caller
+ #that needs only those owners may explicitly omit the separate stage1-only
+ #pickup-world reader; the default acquisition/world contract is unchanged.
+ include_world = context.get('includePickupWorld', True)
+ if type(include_world) is not bool:
+  report['status']='fail';report['error']='includePickupWorld must be an explicit bool'
+ if include_world is False:
+  report['worldScope']='Explicit core item owners only; no pickup-world observation requested'
+ if report['status']=='pass'and report.get('gamePresent')and include_world:
   report['world']=world_reader.observe(pid,context)
   if report['world']['status']!='pass':report['status']='fail';report['error']='Native world observer failed'
  return report

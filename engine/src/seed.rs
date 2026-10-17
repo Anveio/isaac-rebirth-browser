@@ -54,6 +54,20 @@ impl RunSeeds {
         Ok(())
     }
 
+    /// Character59EE70/59F617 forwards the stored menu code to54EB20.
+    /// BootState stores the same code compactly; the source input adds its
+    /// single display separator before5E1470 writes the effect lookup result.
+    /// Missing or mismatched menu input cannot supply this owner. No RNG draws.
+    pub(crate) fn admit_menu_seed_effect(&mut self, code: &str) -> Result<(), String> {
+        if code != encode(self.start_seed)? {
+            return Err("seed-effect admission requires its owned canonical menu code".into());
+        }
+        let mut setter_code = code.as_bytes().to_vec();
+        setter_code.insert(4, b' ');
+        self.source_effect_mode = Some(source_seed_effect_mode(&setter_code));
+        Ok(())
+    }
+
     pub fn item_pool_seed(&mut self) -> u32 {
         self.stream_state = startup_next(self.stream_state);
         self.stream_state

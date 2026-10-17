@@ -2,10 +2,14 @@
 //
 //   npm run test:e2e                         every suite, one at a time
 //   npm run test:e2e -- keys doors           selected suites
+//   npm run test:e2e -- @items @audio        logical groups (tools/e2e/suites.mjs GROUPS)
+//   npm run test:e2e -- --groups             groups and their suites
 //   npm run test:e2e -- --jobs 2             suites in parallel (logs go to files)
 //   npm run test:e2e -- keys --count 4       extra flags override the suite's defaults
+//   npm run test:e2e -- keys --case 'random-*'   only the matching cases (comma-separated, * wildcard)
+//   npm run test:e2e -- --rerun-failed [RUN] replay the failed suites of the newest (or given) run
 //   npm run test:e2e -- keys --scenarios .cache/e2e/<run>/keys/scenarios.json
-//   npm run test:e2e -- --list               suite ids as JSON (CI matrix)
+//   npm run test:e2e -- --list               suite ids as JSON (with suites/groups: the expanded selection)
 //   npm run test:e2e -- --keep-evidence      keep every artifact of passing suites too
 //   npm run test:e2e -- --keep-runs 5        slim runs older than the newest 5 (default 3)
 //   npm run test:e2e -- --affected           suites the changes since origin/main touch
@@ -20,14 +24,15 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { acquireHostSlot } from './lib/host-slots.mjs';
 import { freeBytes, pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
-import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
+import { GROUPS, RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
+const shellQuote = value => "'" + value.replaceAll("'", "'\\''") + "'";
 
 const argv = process.argv.slice(2);
 const ids = [], suiteArgs = [];
-let jobs = 1, output, list = false, build = true, keepEvidence = false, keepRuns = 3, affected = false, base = 'origin/main';
+let jobs = 1, output, list = false, build = true, keepEvidence = false, keepRuns = 3, affected = false, base = 'origin/main', rerun;
 for (let index = 0; index < argv.length; index++) {
   const arg = argv[index];
   if (arg === '--jobs') jobs = Number(argv[++index]);
@@ -39,15 +44,43 @@ for (let index = 0; index < argv.length; index++) {
   else if (arg === '--affected') affected = true;
   else if (arg === '--base') base = argv[++index];
   else if (arg === '--suite') ids.push(...argv[++index].split(','));
+  else if (arg === '--rerun-failed') rerun = argv[index + 1] && !argv[index + 1].startsWith('--') ? resolve(argv[++index]) : 'newest';
+  else if (arg === '--groups') { console.log(JSON.stringify(GROUPS, null, 2)); process.exit(0); }
   else if (!arg.startsWith('--') && !suiteArgs.length) ids.push(...arg.split(','));
   else suiteArgs.push(arg);
 }
 if (!Number.isInteger(jobs) || jobs < 1) { console.error('--jobs must be a positive integer'); process.exit(2); }
 if (!Number.isInteger(keepRuns) || keepRuns < 1) { console.error('--keep-runs must be a positive integer'); process.exit(2); }
+// `@group` expands to its suites; a suite named twice runs once.
+for (const id of ids.filter(id => id.startsWith('@'))) if (!GROUPS[id.slice(1)]) {
+  console.error(`Unknown group ${id}; known: ${Object.keys(GROUPS).map(group => `@${group}`).join(' ')}`);
+  process.exit(2);
+}
+ids.splice(0, ids.length, ...new Set(ids.flatMap(id => id.startsWith('@') ? GROUPS[id.slice(1)] : [id])));
 const unknown = ids.filter(id => !suiteById.has(id));
 if (unknown.length) {
   console.error(`Unknown suite ${unknown.join(', ')}; known: ${SUITES.map(suite => suite.id).join(', ')}`);
   process.exit(2);
+}
+// --rerun-failed reruns each failed suite of an earlier run with the replay
+// flags that run recorded, i.e. the same cases; a suite that recorded none
+// (it died before writing its bank) runs fresh.
+const replays = new Map();
+if (rerun) {
+  if (ids.length || affected) { console.error('--rerun-failed selects suites itself; do not name suites or pass --affected'); process.exit(2); }
+  const runs = join(ROOT, '.cache/e2e');
+  const from = rerun !== 'newest' ? rerun : readdirSync(runs).filter(name => name.startsWith('run-') && existsSync(join(runs, name, 'report.json')))
+    .sort().map(name => join(runs, name)).at(-1);
+  if (!from || !existsSync(join(from, 'report.json'))) { console.error(`--rerun-failed: no run report at ${from ?? runs}`); process.exit(2); }
+  const previous = JSON.parse(readFileSync(join(from, 'report.json'), 'utf8'));
+  const failed = previous.suites.filter(suite => suite.status !== 'pass');
+  for (const suite of failed) {
+    ids.push(suite.id);
+    const replay = suite.replayArgs ?? suite.replay?.split(' ').slice(5) ?? [];
+    replays.set(suite.id, mergeReplayArgs(suite.id, suite.suiteArgs ?? previous.suiteArgs ?? [], replay));
+  }
+  if (!list) console.log(`--rerun-failed: ${failed.length} failed suites of ${relative(ROOT, from)}: ${ids.join(' ') || 'none'}`);
+  if (!ids.length) { if (list) console.log('[]'); process.exit(0); }
 }
 let selection;
 if (affected) {
@@ -58,7 +91,8 @@ if (affected) {
   if (!ids.length && !list) process.exit(0);
 }
 if (list) {
-  console.log(JSON.stringify(selection ? selection.selected : RUNNABLE.map(suite => suite.id), null, selection ? 2 : 0));
+  // With suites, groups or --rerun-failed, the expanded selection.
+  console.log(JSON.stringify(selection ? selection.selected : ids.length ? ids : RUNNABLE.map(suite => suite.id), null, selection ? 2 : 0));
   process.exit(0);
 }
 const selected = ids.length ? ids.map(id => suiteById.get(id)) : RUNNABLE;
@@ -71,8 +105,8 @@ if (suiteArgs.length && selected.length !== 1) {
 
 // Caller flags replace the registry's flag of the same name rather than
 // relying on each driver's parser to prefer the last occurrence.
-function mergeArgs(defaults, overrides) {
-  const names = new Set(overrides.filter(arg => arg.startsWith('--')));
+function mergeArgs(defaults, overrides, replaced = []) {
+  const names = new Set([...overrides.filter(arg => arg.startsWith('--')), ...replaced]);
   const merged = [];
   for (let index = 0; index < defaults.length; index++) {
     const arg = defaults[index], takesValue = defaults[index + 1] !== undefined && !defaults[index + 1].startsWith('--');
@@ -80,6 +114,15 @@ function mergeArgs(defaults, overrides) {
     merged.push(arg);
   }
   return [...merged, ...overrides];
+}
+
+// A recorded bank fixes its selection. Paired tapes also replace the original
+// generation options; execution modes still survive, and current flags may override.
+function mergeReplayArgs(id, defaults, replay) {
+  const replaced = replay.length ? ['--case'] : [];
+  if (replay.length && suiteById.get(id)?.entry === 'tools/foundation/paired-game.mjs')
+    replaced.push('--scenarios', '--random-count', '--random-seeds', '--replay-case');
+  return mergeArgs(defaults, replay, replaced);
 }
 
 function newestMtime(directory) {
@@ -129,16 +172,16 @@ if (!keepEvidence) {
 
 // Paired-game suites replay recorded case.json tapes; every other driver
 // replays its scenarios.json through the suite's replay flag.
-function replayCommand(suite, directory) {
+function replayArgs(suite, directory) {
   if (suite.entry === 'tools/foundation/paired-game.mjs') {
     let cases = [];
     try { cases = JSON.parse(readFileSync(join(directory, 'report.json'), 'utf8')).cases ?? []; } catch {}
     const failed = cases.filter(item => item.status !== 'pass' && item.directory).map(item => relative(ROOT, join(item.directory, 'case.json')));
-    return failed.length ? `npm run test:e2e -- ${suite.id} --replay-cases ${failed.join(',')}` : undefined;
+    return failed.length ? ['--replay-cases', failed.join(',')] : undefined;
   }
   if (suite.replay === false) return undefined;
   return existsSync(join(directory, 'scenarios.json'))
-    ? `npm run test:e2e -- ${suite.id} ${suite.replay ?? '--scenarios'} ${relative(ROOT, join(directory, 'scenarios.json'))}` : undefined;
+    ? [suite.replay ?? '--scenarios', relative(ROOT, join(directory, 'scenarios.json'))] : undefined;
 }
 
 async function runSuite(suite) {
@@ -148,7 +191,8 @@ async function runSuite(suite) {
 
 function runSuiteInSlot(suite) {
   const directory = join(runDirectory, suite.id);
-  const args = [...mergeArgs(suite.args, suiteArgs), '--output', directory];
+  const overrides = mergeArgs(replays.get(suite.id) ?? [], suiteArgs);
+  const args = [...mergeArgs(suite.args, overrides), '--output', directory];
   const logPath = join(runDirectory, `${suite.id}.log`);
   const log = createWriteStream(logPath);
   const startedAt = Date.now();
@@ -162,8 +206,11 @@ function runSuiteInSlot(suite) {
     const finish = async (exitCode, signal, error) => {
       log.end();
       const result = { id: suite.id, status: exitCode === 0 && !signal ? 'pass' : 'fail', exitCode, signal, error,
-        seconds: Math.round((Date.now() - startedAt) / 1000), log: logPath, output: directory };
-      if (result.status === 'fail') result.replay = replayCommand(suite, directory);
+        seconds: Math.round((Date.now() - startedAt) / 1000), suiteArgs: overrides, log: logPath, output: directory };
+      if (result.status === 'fail') {
+        result.replayArgs = replayArgs(suite, directory);
+        if (result.replayArgs) result.replay = `npm run test:e2e -- ${suite.id} ${mergeReplayArgs(suite.id, overrides, result.replayArgs).map(shellQuote).join(' ')}`;
+      }
       // A passing suite keeps what replay and triage need; a failing one keeps everything.
       else if (!keepEvidence) result.retention = await slimSuite(directory);
       report.suites.push(result);
@@ -189,6 +236,7 @@ for (const suite of report.suites.filter(suite => suite.status === 'fail')) {
   console.log(`  ✘ ${suite.id}: ${relative(ROOT, suite.log)}`);
   if (suite.replay) console.log(`      replay: ${suite.replay}`);
 }
+if (report.status === 'fail') console.log(`rerun every failed suite on the same cases: npm run test:e2e -- --rerun-failed ${relative(ROOT, runDirectory)}`);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
   '| suite | result | time | replay |', '|---|---|---|---|',
   ...report.suites.map(suite => `| ${suite.id} | ${suite.status === 'pass' ? '✅' : '❌'} | ${suite.seconds}s | ${suite.replay ? `\`${suite.replay}\`` : ''} |`),

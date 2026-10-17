@@ -119,6 +119,21 @@ pub(crate) enum Birth {
     /// A mid-room NPC the spawner parents to itself and adopts as its child
     /// (SetParent447fc0 + SetChild447f40), updated at once (vtable+0x18).
     Child(SpawnSelector),
+    /// Envy's split child 48c9d0: config row `variant % 10`, the split
+    /// variant, the parent's seed, APPEAR cleared, updated at once.
+    EnvyChild {
+        position: WorldVector,
+        variant: u32,
+        seed: u32,
+    },
+    /// Super Envy's third child: bounded(2) at admission (after the first
+    /// two children's nested Updates), spawned when level < roll + 1.
+    EnvyThird {
+        position: WorldVector,
+        variant: u32,
+        seed: u32,
+        level: u32,
+    },
     /// A mid-room NPC parented to the spawner, without entity collision,
     /// hidden and with APPEAR cleared (Gemini's umbilical cord pieces).
     Attached(SpawnSelector),
@@ -163,7 +178,7 @@ pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
 /// Class3 flyers with authored sample points (the Duke of Flies): 442c3b
 /// clamps the center, then only wall and door samples reflect (442b90).
 pub(crate) fn wall_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    let points = npc.config().grid_points;
     if npc.grid_collision_class != 3 || points == 0 {
         return clamp_walls(npc, grid);
     }
@@ -187,7 +202,7 @@ pub(crate) fn wall_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
 pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
     // 442bc0 clears +34c even when this pass has no collision samples.
     npc.grid_collided = false;
-    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    let points = npc.config().grid_points;
     if npc.grid_collision_class != 5 || points == 0 {
         return clamp_walls(npc, grid);
     }
@@ -234,6 +249,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::maggots::FAMILY,
     &crate::duke::FAMILY,
     &crate::gemini::FAMILY,
+    &crate::envy::FAMILY,
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
 ];

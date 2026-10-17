@@ -47,6 +47,11 @@ fn advance(
     world: &mut NpcWorld,
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
+    //4FA3EB dispatches Horf AI with31F set before the next-Full retirement.
+    //Keep the living callback's existing no-APPEAR behavior.
+    if npc.dead {
+        return plain_npc::advance_dead_ai(npc, phase, random, world, births, ai);
+    }
     plain_npc::advance(npc, phase, random, world, births, ai)
 }
 

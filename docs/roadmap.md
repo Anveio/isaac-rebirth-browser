@@ -10,7 +10,8 @@ acceptance records, [TEST_MATRIX.md](../TEST_MATRIX.md) holds executable
 coverage, [dst.md](dst.md) holds DST findings, and GitHub issues hold bug
 detail. A row here is a pointer and a status, never a parity claim.
 
-Last full review: 2026-10-16, main `8c9d68b`, 31 open issues.
+The counts below describe the reconciled open issue rows, not a whole-game
+passing result or a fixed source snapshot.
 
 ## How to update this file
 
@@ -55,7 +56,7 @@ original/port footage, then filing what it saw here by these rules.
 
 | Milestone | What a player can do | Gate |
 | --- | --- | --- |
-| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Current focus. Blocked by #413. |
+| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Current focus: verify the complete route. Later descent remains unadmitted (#413); its repeated-tick freeze is guarded. |
 | **M1 Chapter 1** | Basement I/II and Cellar with every Chapter 1 enemy, boss, room type and common item | All Chapter 1 bosses; shops, devil/angel rooms, Cellar unlock |
 | **M2 Chapters 2-4** | Caves/Catacombs, Depths/Necropolis, Womb/Utero, Mom and Mom's Heart | Other stage generators, their enemies and bosses |
 | **M3 Endgame** | Sheol/Cathedral, Dark Room/Chest, Satan, Isaac, ???, The Lamb, endings | Final floors, final bosses, ending cutscenes |
@@ -64,33 +65,33 @@ original/port footage, then filing what it saw here by these rules.
 
 ## Subsystem overview
 
-Counts of open bugs are as of the last full review.
+Counts include unresolved evidence and confirmation work on still-open issues.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus with page pans; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 1 |
 | [Input](#input) | Partial | Keyboard only | 0 |
-| [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams; shared MT incomplete | 7 |
+| [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
-| [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | 1x1 and four large shapes; eight room types | 2 |
+| [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
 | [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 3 |
-| [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 2 |
-| [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
+| [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
+| [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
-| [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
-| [Grid objects](#grid-objects) | Partial | Rocks, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 0 |
+| [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
+| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
-| [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
-| [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
+| [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
+| [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
-| [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill and held Save; effects incomplete | 0 |
-| [Special rooms and economy](#special-rooms-and-economy) | Partial | Treasure, secret, curse rooms; shop room without sales | 0 |
+| [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill, held Save and Range Down/Up use | 0 |
+| [Special rooms and economy](#special-rooms-and-economy) | Partial | Normal Shop stock/prices and scoped paid Bomb witness; other economy frontiers remain | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
-| [Saves and metagame](#saves-and-metagame) | Missing | In-run save records only | 0 |
+| [Saves and metagame](#saves-and-metagame) | Missing | In-run save records only; public durable Continue missing | 1 |
 | [Co-op](#co-op) | Missing | None | 0 |
-| [Test routes and tooling](#test-routes-and-tooling) | n/a | Live e2e, DST, playtest | 2 |
+| [Test routes and tooling](#test-routes-and-tooling) | n/a | Live e2e, DST, playtest | 3 |
 
 ## Boot, menus and pause
 
@@ -102,9 +103,9 @@ Port: Title, profile, main, character and seed menus run with source timing;
 the menu board pans between pages, with File select clips, the character
 carousel, Back/Select widgets and hard-mode fades
 (`engine/src/menu_presentation.rs`, frame-exact on the menus tour); run
-introduction banner; pause menu; Challenge1 XML ingress. Missing: intro
-cutscene (the paired tapes skip it), options, stats, bestiary, challenge list,
-win screen.
+introduction banner; pause menu; Challenge page and declared Challenge1 XML
+ingress. Missing: intro cutscene (the paired tapes skip it), options, stats
+and win screen. General challenge rules remain separate from menu presentation.
 
 Next: options menu; death screen parity; intro cutscene.
 
@@ -130,22 +131,24 @@ the one global MT19937 every effect, sound and particle draws from.
 
 Port: seed codec and entry, run/stage/descriptor streams, ItemPool and Player
 child RNGs, and one shared MT owner for boot, menu, audio, tears and admitted
-actors. Missing: special seeds, and many shared-MT consumers, so the port's
+actors. Fresh Character admission also forwards its owned menu code through
+the seed-effect lookup; the [scoped live owner comparison](run-admission.md#fresh-character-seed-effect-owner)
+does not establish special-seed effects or later placement behavior.
+Missing: special seeds, and many shared-MT consumers, so the port's
 MT stream drifts from the original during play. Every missing consumer is a
 P2 bug here even when its caller lives in another subsystem.
 
-Next: close the run-start gap (#162), then add consumers in the order the
-paired runs hit them.
+Next: investigate the first divergent source consumer on each retained route
+(#162), preserving already matched draw prefixes.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #162 | P2 | Port is about 288 draws behind at run start and does not advance while walking | e2e |
-| #194 | P2 | Room light pass draws per fireplace light every presented frame (missing) | e2e |
-| #213 | P2 | "Swaying" grid object Init draws frame, flip and rotation (missing) | e2e |
+| #162 | P2 | Shared-MT routes still diverge after the merged admission/room consumer stack; the old 288-draw diagnosis is historical | e2e --mt-draws |
+| #213 | P2 | Swaying/Web Init draws are implemented; stored/drawn appearance and live closure remain unverified | issue; f5849102 |
 | #252 | P2 | Rock destruction debris particles draw (missing) | e2e |
-| #256 | P2 | Insect-swarm ambience loop starts with a sample draw (missing) | e2e |
-| #416 | P2 | Sound sample draw during the Duke and Grub fights (missing) | e2e |
 | #417 | P2 | Large-room boundary constructs extra door GridBase objects (missing) | e2e |
+| #459 | P2 | ChangeRoom tail footprint uses the wrong player velocity; candidate awaits live rebaseline | e2e --mt-draws |
+| #592 | P2 | Pocket collection requests match but an OS case chooses a different sound sample | e2e pockets |
 
 ## Floor generation
 
@@ -163,18 +166,18 @@ No open bugs.
 
 ## Rooms, doors and transitions
 
-Rebirth scope: 1x1, tall, wide, large and L-shaped rooms; every room type;
+Rebirth scope: 1x1, tall, wide and large rectangles; every base room type;
 door styles and locks; room transitions; minimap; room persistence.
 
 Port: 1x1 rooms of types normal, shop, treasure, secret, super secret,
 curse, library and sacrifice; tall (13x14), wide (26x7) and large (26x14)
 normal rooms; boss and miniboss rooms when their boss is implemented;
 reciprocal doors, key doors, curse-door damage, minimap and supported room
-persistence. Missing: narrow and L-shaped rooms, arcade, challenge, devil,
-angel, crawlspace and other special rooms, coin and bomb locks, full actor
-reentry.
+persistence. Missing: arcade, challenge, devil, angel, crawlspace and other
+special rooms, coin and bomb locks, full actor reentry. The evidenced base
+loader has four rectangle sizes; expansion contours are not missing-base goals.
 
-Next: narrow (1x1 thin) shapes; devil/angel door after a boss.
+Next: complete supported-room reentry; devil/angel door after a boss.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
@@ -189,14 +192,16 @@ name streak, chapter order, Womb/Utero to Sheol/Cathedral, final floors,
 endings.
 
 Port: boss clear award (with poop occupants), trapdoor, stage transition and
-the Basement I to Basement II step. Missing: every step after Basement II,
+the Basement I to Basement II step. The [carried-active follow-up](stage-exit-evidence.md)
+passes 48 mandatory identity/charge/reserve/ownership/descent checks across
+two active routes on frozen f837, with an ordinary control. Missing: every step after Basement II,
 alternate stages, endings.
 
-Next: Basement II to Caves (#413 first).
+Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
+| #413 | P1 | Basement II's open trapdoor refuses descent because the next generator is unadmitted; 2efbef1 guards the old repeated-tick freeze | issue; docs/dst.md |
 | #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 
@@ -207,8 +212,16 @@ black, eternal), damage and invulnerability, death, revival, transformations.
 
 Port: normal Isaac f32 movement, phase-aware controls, cache evaluation for
 the supported items, red/soul/black/eternal health, damage and immunity,
-death animation. Missing: transformations (Guppy, Beelzebub, ...), revival
+death animation. Missing: base transformations such as Guppy, revival
 items, broader damage sources.
+
+The Player Full-grid change moves
+ordinary Full Player ground response after entity contacts. Its isolated 9841
+candidate versus actual 5c33 gains 36 scalar passes with zero prior-pass losses;
+the 40-gain prediction, 38 scalar failures, both Fast coverage guards and 238/266
+RGBA failures remain red. Same-Native Shop and fixed declared-clock death
+controls preserve their fields and actual Browser PNGs. [scoped source/evidence](player-death.md#player-full-grid-after-contacts)
+does not establish complete physics or current-main acceptance.
 
 Next: transformations once their items exist.
 
@@ -233,7 +246,6 @@ Next: remaining Chapter 1 pool weapons.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #372 | P1 | Regression from #287: recorded pedestal route stops firing regular tears | e2e damage-fire-delay |
 | #191 | P2 | Port spawns a regular tear one presentation early after an item pickup | e2e stat-cache |
 
 ## Bombs
@@ -242,7 +254,10 @@ Rebirth scope: placement, fuse, blast, damage, craters, bomb items and
 variants (Troll, Mega, Bobby, Butt, ...).
 
 Port: placement, fuse, motion, blast damage to player, NPCs and grid, Troll
-and Mega Troll conversion. Missing: bomb-modifying items, craters, Bomb Bum
+and Mega Troll conversion. Ordinary class5 Full ground response now follows
+entity contacts and both phases clamp to actual Room bounds; [scoped #349
+evidence](system-map.md#ordinary-bomb-late-grid-response-349) retains unresolved
+center/near-wall NPC timing. Missing: bomb-modifying items, craters, Bomb Bum
 and other variants.
 
 No open bugs. Bomb contact bugs are under *Collision and physics*.
@@ -257,8 +272,7 @@ including large rooms.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #349 | P2 | Bombs skip the post-contact grid pass, so an NPC can push one into a wall | DST |
-| #365 | P2 | Walking a chest into a wall sinks it 10.8 px into the wall cell | DST |
+| #365 | P2 | Player-pushed chests sink into walls or open doorways; original behavior needs a live comparison before changing the constraint | DST; original comparison pending |
 | #218 | P2 | Original leaves about 2 px of player/NPC overlap for one update; the port separates at once | e2e |
 | #190 | P2 | Player/grid contact slides sub-unit amounts at rock edges in large rooms | e2e |
 
@@ -267,12 +281,15 @@ including large rooms.
 Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
-Port: rocks, authored bomb rocks, spikes, poop (authored too), TNT (intact
-collision only), spider webs, trapdoor, decorations, grid records and costs.
-Missing: TNT fuse/countdown and blast, tinted rocks, pits, blocks, buttons,
-crawlspace ladders, poop variants.
+Port: ordinary/tinted rocks and supported tinted rewards, authored bomb rocks,
+spikes, poop (authored too), TNT (intact collision only), spider webs, trapdoor,
+decorations, grid records and costs. Missing: TNT fuse/countdown and blast,
+broader pit/block behavior, buttons, crawlspace ladders and poop variants.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #485 | P2 | Retained tinted-rock/troll-bomb regressions remain red; the issue also retains separate Dip phase failures | e2e rock-blast, dips |
+| #507 | P2 | Wide/double rooms lack the original's ambient decoration admission and associated draws | e2e entities |
 
 ## Enemies
 
@@ -285,6 +302,11 @@ Spitty 31, Fire Place 33, Level 2 Fly 214, Dip 217, Wall Hugger 218, Gurgling
 237, Round Worm 244, and Shopkeeper 17. Missing: every other enemy,
 champions, Chapter 2+ enemies. Bulk enemy imports are owned by
 the user's import workflow (see AGENTS.md).
+
+Horf's final dead Full update now runs its AI before retirement. Scoped
+[regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
+77,793 passing enemy rows; default base-kill effects, complete status handling
+and direct final-shot/shared-MT qualification remain open.
 
 Next: the rest of the Basement/Cellar spawn table.
 
@@ -299,11 +321,24 @@ Next: the rest of the Basement/Cellar spawn table.
 Rebirth scope: about 50 bosses and minibosses, champion bosses, VS screen,
 boss health bar, boss rush.
 
-Port (7): Monstro 20, Larry Jr. 19, Grub 239, Gluttony 49,
-The Duke of Flies 67, Gemini 79, Dingle 261; VS scene from boss portraits.
-Missing: every other Chapter 1 boss (Gurdy, Gurdy Jr., Widow, Pin, Famine,
-Little Horn, Steven, Fistula, Lust and the other sins), all later bosses,
-champion variants, Super Gluttony.
+Port (8 families): Monstro 20, Larry Jr. 19, Grub 239, Gluttony 49,
+The Duke of Flies 67, Gemini 79, Dingle 261 and Envy/Super Envy 51;
+VS scene from boss portraits. Envy's new live cases remain red, and Super
+Envy room coverage remains pending (#605). Missing: other Chapter 1 bosses
+(Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), later bosses
+including Gurdy/Gurdy Jr., remaining champion variants and Super Gluttony.
+
+A separately closed Source-only cohort retained all 8,192 OS draws before
+floor evaluation. Independent Shop planning evaluated every draw and selected
+0 of 2 required routes (6,378 unsupported template contexts, 1,807 missing
+route rooms and seven unsupported enclosure geometries), so the cohort remains
+FAIL. Independent Super Envy planning retained all 32,768 door-slot outcomes
+and selected first eligible ordinal 3,497, `PHCVWE1C` (run seed 1714079471,
+stage seed 2559733126), via the upper door from start room 6 to room 4.
+Eligible ordinal 7,028 remains surplus and cannot replace a later failed
+selected route. This Source cohort carries no Original/browser qualification;
+the selected route's public-input fight and parity checks are separate work.
+No draw was retried, refilled or selected from an original-game outcome.
 
 Next: remaining Chapter 1 bosses.
 
@@ -315,16 +350,18 @@ Next: remaining Chapter 1 bosses.
 ## Pickups and chests
 
 Rebirth scope: coins, keys, bombs, hearts (all kinds), batteries, chests
-(normal, gold, red, spiked, mimic), sacks, pickup variants and drop tables.
+(normal, Bomb, locked, Big and red), pickup variants and drop tables.
 
-Port: natural coins, keys, bombs, hearts, chest opening, troll bombs,
-collection and persistence. Missing: batteries, sacks, gold/red/spiked
-chests, room-clear reward table beyond the supported cases.
+Port: natural coins, keys, bombs, hearts, supported normal/locked/Bomb Chest
+opening, troll bombs, collection and persistence. Missing: batteries,
+Big/red chest behavior and the room-clear reward table beyond the
+supported cases. Source admission is not complete chest parity.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #177 | P2 | Chest loot child actors and their motion differ from the original | e2e chest-opening |
+| #177 | P2 | Historical Chest child/motion differences; #480 narrows the retained fixed cases to scatter direction | e2e chest-opening |
 | #178 | P2 | Some rooms admit 2 of 3 natural bomb pickups (seed Q8CMHWHP) | e2e bomb-pickups |
+| #480 | P2 | Three retained Chest cases match child identities/speed but scatter in different directions | e2e chest-opening |
 
 ## Items, pools and familiars
 
@@ -350,10 +387,14 @@ pill colours, drop and swap.
 Port: partial. Public runtime owns Card/Pill Init, canonical chest/procedural
 consumers, two held records and HUD, collection/refused-contact response,
 capacity spill and held-pocket Save. The canonical Magic 8 Ball Card world
-producer is public; selected scalar/RNG/Card endpoints pass on the current
-qualified artifact. This does not implement general Card/Pill effects.
+producer and Range Down/Up Pill use are implemented. The latter updates the
+canonical counter, requests/evaluates Range, consumes/promotes held slots and
+plays Sad/Happy; other effects and the complete ceremony remain incomplete.
 
-Evidence: the current public-WASM Node AL regression passes 9,349 selected
+Evidence: #586's frozen candidate passes 5,639 Original/public-WASM checks;
+#602 persists `pill-range-use` and passes a 1,409-check retained-Original replay
+on c224/ee04/Wfa54. Neither result is a whole-current-runtime, Browser pixel
+or PCM qualification. The historical public-WASM Node AL regression passes 9,349 selected
 functional checks against its independent Original capture (AL retains 12 unavailable obligations
 and unreached SAME-v1 AD0 refresh). Separated fixed-phase0 and retained recorded-0
 each pass 29,385 checks with zero failures and 11 unavailable obligations
@@ -375,11 +416,29 @@ sacrifice rooms, arcades (slots, fortune teller, blood bank, beggars),
 libraries, challenge rooms, Isaac's bedroom, Boss Rush.
 
 Port: treasure, secret, super secret, curse, library and sacrifice rooms
-enter; shop room and Shopkeeper enter but nothing is for sale. Missing:
-prices and purchases, devil/angel chance and rooms, slots and beggars,
-challenge rooms.
+enter. [Normal Shop economy](shop-economy.md) has descriptor-owned stock,
+real common SKU bodies, prices, paid grant/debit/copy and live reentry. The
+frozen lifecycle artifact qualifies one actual funded Bomb purchase: fresh
+v9 passes 117/117 source guards and 390/390 owned fields. The corrected
+canonical view retains eight failures; 52/59 RGBA diagnostics fail. Earlier
+v8 missing-overlap evidence stays red. First-four source-authored common-SKU
+fixtures on frozen5c33 establish free no-active refusal, affordable priced
+no-active refusal, an undercharged Battery grant and a paid collectible
+queue/deferred grant. All64 summary witness checks pass; the strict aggregate
+41,212/41,481 retains250 health and19 BF4 guard failures. Raw reports and
+representation/actual-owner readbacks remain separate; RGBA/PCM is ungraded.
+The registered `common-sku` replay now preserves all 1,749 free-no-active rows
+and, on frozencc38, passes 29 additional actual seed-effect owner checks.
+The remaining fixed cases and default OS approach are not newly qualified.
+These are fixture witnesses, not whole retail-floor or current-main parity.
 
-Next: shop purchases; devil/angel chance after the boss.
+Next: promote source-only local fixture recipes and owned-schema coverage;
+qualify free-full/free-undercharged/paid-full Battery and other paid SKU
+callbacks; implement
+canonical Store Credit/Steam Sale and eligible achievements. Upgraded
+shops, unadmitted ABD contexts, charge/effect48, Continue, broader Full/Fast grid parity,
+complete audio/pixels, devil/angel chance and rooms, slots, beggars and
+challenge rooms remain separate.
 
 No open bugs.
 
@@ -407,8 +466,8 @@ parity is a diagnostic only.
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
-| #450 | P3 | Boss rooms lack the blood floor scatter (walls fixed by #483); nightmare lacks the floor progress bar | playtest 2026-10-16 `playtest/9ff507f/` |
-| #535 | P2 | Killed Gapers leave flat blood decals without the gib and bone pile | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
+| #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
+| #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 
 ## Audio
 
@@ -430,7 +489,9 @@ Port: in-run SavedGame records and the no-achievements seeded badge. Missing:
 durable browser profile, continue, unlocks, achievements, challenges beyond
 Challenge1 ingress.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #499 | P2 | PR503 removes the active-ID stage-save refusal; the bounded Lemon Mishap descent and recorded OS approach now pass 48 actual carried-word/descent checks on frozen f837. Random-held-active-item fuzz remains owed; later stages, other active effects and pixels remain separate | [scoped evidence](stage-exit-evidence.md); e2e stage-exit |
 
 ## Co-op
 
@@ -448,9 +509,19 @@ Bugs in a test route or tool rather than in the game.
 | --- | --- | --- | --- |
 | #196 | P3 | blood-start contrived route never reaches the boss in the original; regenerate it | e2e blood-start |
 | #220 | P3 | health-damage black-heart route never acquires the Black Heart in the original; regenerate it | e2e health-damage |
+| #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
 
 ## Recently fixed
 
+- #438 resolves the source-derived admission/death clock mismatch; [scoped clock evidence](player-death.md) retains the fresh OS cohort's required Original audio-observation failure, pixel reds and incomplete audio acceptance.
+- [PR615](https://github.com/Anveio/isaac-rebirth-browser/pull/615) restores the fresh Title/frame0 and black fade on GameOver Exit; clock and audio qualification remain separate.
+
+- [PR614](https://github.com/Anveio/isaac-rebirth-browser/pull/614) resolves #349 ordinary-bomb ground response after NPC contacts and Room clamping; [scoped qualification](system-map.md#ordinary-bomb-late-grid-response-349) preserves unresolved Hugger timing and existing regression failures.
+
+- #612 restores dead Player Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
+
+- #527 completes Flags32 for items 48/222; the three recorded regular-fire regression cases return to zero failures (#372 closed).
+- Shared-MT light-pass, ambience-loop and pickup DropSound source consumers have landed (#194, #256, #416 closed); other first-divergence routes remain open.
 - #598 pans the menu board between pages and animates the carousel; playtest 2026-10-17 `playtest/7b74719/` menus tour (with Challenges) is pixel-exact on 1781 of 1782 menu frames (#587, #588, #589 closed).
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).

@@ -705,6 +705,18 @@ pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
 }
 
 impl Npc {
+    /// The authored entities2.xml row this NPC was born from. The entity
+    /// keeps the config its spawn resolved, and Die 445c60, the champion
+    /// roll and the grid colliders read that row; a family whose runtime
+    /// variants are not authored rows (Envy's split heads) maps them back.
+    pub(crate) fn config(&self) -> &'static crate::content::EntityConfig {
+        let variant = match self.kind {
+            51 => crate::envy::config_variant(self.variant),
+            _ => self.variant,
+        };
+        crate::content::entity(self.kind, variant)
+    }
+
     /// Morph480750: rewrite type/variant/subtype, then Init47f500 reloads the
     /// config row and anm2 (overlay cleared, default clip stopped at frame 0)
     /// and re-applies a kept champion color. HP is clamped to the new max;

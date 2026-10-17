@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
 import { startProductionServer } from "./production-server.mjs";
+import { flag, selectCases } from "../e2e/lib/cli.mjs";
 import { assertSeededRun, browserScenario } from "./verify.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
@@ -16,14 +17,19 @@ const descriptors = (values) => values.map((room) => ({
   template: Object.fromEntries(templateFields.map((key) => [key, room.template[key]])),
 }));
 
-export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/foundation/floor-e2e.json") }) {
+export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/foundation/floor-e2e.json"), caseFilter }) {
   const native = JSON.parse(readFileSync(sourceReport, "utf8"));
   assert.equal(native.schema, 1); assert.equal(native.skipped, 0);
   assert.ok(native.cases?.length > 0, "Requires independent original floor cases");
   assert.equal(native.selected, native.cases.length, "All selected source cases must be accounted for");
   const identities = native.cases.map((entry) => entry.runSeed);
   assert.equal(new Set(identities).size, identities.length, "Original identities must be independent");
-  const report = { schema: 1, status: "running", sourceReport: resolve(sourceReport), selected: native.cases.length, skipped: 0, cases: [] };
+  caseFilter ??= native.caseFilter;
+  const cases = selectCases(native.cases, entry => entry.seed.replaceAll(" ", ""), caseFilter === undefined ? [] : ["--case", caseFilter]);
+  mkdirSync(dirname(output), { recursive: true });
+  writeFileSync(join(dirname(output), "scenarios.json"), JSON.stringify({ schema: 1, caseFilter,
+    seeds: cases.map(entry => entry.seed) }, null, 2) + "\n");
+  const report = { schema: 1, status: "running", sourceReport: resolve(sourceReport), caseFilter, selected: cases.length, skipped: 0, cases: [] };
   let server, browser;
   try {
     server = await startProductionServer();
@@ -32,7 +38,7 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
     report.graphics = await inspectBrowserGraphics(browser);
     const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
     await page.goto(server.url);
-    for (const original of native.cases) {
+    for (const original of cases) {
       const result = { seed: original.seed, status: "fail" };
       try {
         assert.equal(original.status, "pass", JSON.stringify(original.error ?? original.differences));
@@ -102,25 +108,29 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const output = resolve(value("--output") ?? join(ROOT, ".cache/e2e/floor", String(Date.now())));
   mkdirSync(output, { recursive: true });
   let sourceReport = value("--source-report");
+  let caseFilter = flag("--case");
   if (!sourceReport) {
     sourceReport = join(output, "native.json");
     // Contrived seeds exercise two failed boss fits and a failed treasure fit;
     // a replay (--scenarios) reruns exactly the recorded seeds, random ones included.
     const replay = value("--scenarios") && JSON.parse(readFileSync(resolve(value("--scenarios")), "utf8"));
-    const seeds = replay ? replay.seeds : ["QNXPTVT1", "0YAZCZ7N", "BHX1EF8A"];
+    caseFilter ??= replay?.caseFilter;
+    // --case keeps the matching known seeds; fresh OS-random seeds have no
+    // name before they are drawn, so a filtered run draws none.
+    const seeds = selectCases(replay ? replay.seeds : ["QNXPTVT1", "0YAZCZ7N", "BHX1EF8A"], code => code.replaceAll(" ", ""));
     const args = ["tools/original/foundation-floor-verify.py", "--report", sourceReport, "--capture",
-      "--count", replay ? "0" : value("--count") ?? "2", ...seeds.flatMap(code => ["--seed", code])];
+      "--count", replay || flag("--case") ? "0" : value("--count") ?? "2", ...seeds.flatMap(code => ["--seed", code])];
     const captured = spawnSync("python3", args, { cwd: ROOT, encoding: "utf8", timeout: 600_000 });
     // Record the seeds before judging the capture so a failing random floor
     // can still be replayed.
     if (existsSync(sourceReport)) {
       const native = JSON.parse(readFileSync(sourceReport, "utf8"));
-      writeFileSync(join(output, "scenarios.json"), JSON.stringify({ schema: 1,
+      writeFileSync(join(output, "scenarios.json"), JSON.stringify({ schema: 1, caseFilter,
         seeds: native.cases.map(entry => entry.seed).filter(Boolean) }, null, 2) + "\n");
     }
     assert.equal(captured.status, 0, captured.stderr + captured.stdout);
   }
-  const report = await floorE2e({ sourceReport, output: join(output, "report.json") });
+  const report = await floorE2e({ sourceReport, output: join(output, "report.json"), caseFilter });
   console.log(JSON.stringify({ status: report.status, originals: report.cases.length, cases: report.cases }));
   process.exitCode = report.status === "pass" ? 0 : 1;
 }

@@ -11,7 +11,30 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
-## Current gameplay qualification
+## Source implementation and live scope
+
+Merged source and a passing captured artifact are separate qualifications. The
+records below retain their own source, WASM and input bindings; none is an
+automatic rerun on advancing `main` or confirmation of the served build.
+
+| Area | Implemented source | Independent live scope and remaining work |
+| --- | --- | --- |
+| Fresh Character seed-effect mode | Fresh NewRun validates and forwards the actual compact menu code to the existing Seeds+48 lookup before startup streams; Challenge keeps its separate input path. No RNG or inferred neutral mode is added. | Frozen cc38 passes all 1,749 existing free-SKU checks plus 29 direct actual Native/Browser seed-effect owner checks; unchanged-main9841 retains a missing owner. The canonical comparer requires this owner separately from existing gameplay and ChallengeID rows. Restart/legacy, untyped live entry, special-seed effects, room-clear placement and complete MT/pixel/audio parity remain separate. See [owner and replay scope](run-admission.md#fresh-character-seed-effect-owner). |
+| Rectangular room art | [PR576](https://github.com/Anveio/isaac-rebirth-browser/pull/576) sizes floor, wall, boss-wall and shading assembly from the four base rectangles: 13x7, 13x14, 26x7 and 26x14. | The qualified c194/a985/W8c7 WF82 replay passes 635/635 Original/public-WASM State comparisons and 571 camera-history phases, reaching standard and tall rooms. [PR582](https://github.com/Anveio/isaac-rebirth-browser/pull/582) records that scope without a new run. Wide/double and boss-specific live art, completed current-build Browser camera PNGs and full-frame equality remain unqualified by those reports. |
+| Browser GPU masks | The existing presentation test compares retained independent native shadow/light targets. | The fresh recovery run on production `8beae6bbe77714fb59236a91510cf4fa6892be28326b645db77798f6c8a789ae` (1,407 files) passes all nine selected cases with zero skipped. Original state parity and simulation-tick delivery remain false. This is retained-target Browser equality, not a fresh Native capture or wide/double/overlay RGBA qualification. |
+| Wide/double bounds and coverage | The existing room specs compare cache dimensions, floor/wall bounds and covered floor/wall cells with independent native bounds. | On the same recovery artifact, `room-26x7-random-0` / 6RG7LV8Z passes 3,150/3,150 art comparisons (630 per predicate); `room-26x14-random-0` / V01TLK80 passes 2,870/2,870 (574 per predicate). Both cases remain red: wide has 2,199/28,690 field failures and 196/637 paired matches; double has 2,229/32,971 failures and 188/581 paired matches. Decoration, projectile-seed, camera-scroll and player-position failures remain preserved. Actual Original/Browser PNGs are retained; no RGBA, shading or overlay equality follows. |
+| Overlays | Main still selects the Basement 1x1 overlay and its 663x429 crop for every rectangle. | Size-specific overlay selection/crop and camera-shake routing remain separate source work; an independently built candidate does not establish integration or live images. No positive base narrow/L contour evidence is established. |
+| Pill and cache owners | Canonical Pill28 history, reached Range, Range Down/Up use, independent active words, reached Move Speed and the controlled Knife's canonical active identity are merged through PRs572/580/586/595–597. | [PR586](https://github.com/Anveio/isaac-rebirth-browser/pull/586) reports 5,639 passing checks on its frozen candidate; [PR602](https://github.com/Anveio/isaac-rebirth-browser/pull/602) persists `pill-range-use` and reports a 1,409-check retained-Original replay on c224/ee04/Wfa54. These do not qualify the whole current runtime, other Pill effects, complete ceremony, pixels or PCM. |
+| Menus and imported bosses | Menu page/carousel presentation and Envy/Super Envy source are merged. | [PR601](https://github.com/Anveio/isaac-rebirth-browser/pull/601) records 1,781/1,782 menu frames and closes #587–589; [#600](https://github.com/Anveio/isaac-rebirth-browser/issues/600) retains the stage-streak placement gap. [PR605](https://github.com/Anveio/isaac-rebirth-browser/pull/605) retains Envy failures of 475/14,893, 468/14,982 and 2/13,320; Super Envy room coverage remains pending. |
+| Closed Source-only Shop/Super discovery | One closed 8,192-draw OS bank, independent complete Source floor evaluation and no outcome filtering. | Shop selected 0/2 and remains FAIL; Super retained all 32,768 slot outcomes and selected ordinal 3,497 / `PHCVWE1C` via upper door 6→4. Ordinal 7,028 stays surplus. These are Source plans, with no selected-route Native/browser qualification; the whole cohort remains FAIL. See [discovery scope](shop-economy.md#closed-source-only-discovery). |
+| Normal Shop economy | Partial ordinary Shop owns descriptor stock table/cursor/sale/following RNG, real common SKU bodies, nested price/slot, paid grant/debit/copy, next-Full manager retirement and live reentry. | Frozen eb33/1,407 files qualifies an actual paid Bomb: fresh v9 source 117/117 and owned fields 390/390 pass. Corrected canonical 1,182/1,190 retains eight failures; historical raw 1,068/1,190 and 52/59 RGBA failures stay retained. Same-Native v8 retirement passes 373/373 with exactly eight fixes and no lost passes; v8 strict overlap remains FAIL. First-four source-authored normal-run SKU controls on frozen5c33 complete actual Native+MesaBrowser: free no-active1749/1749; paid no-active10479/10652, undercharged10809/10899 and collectible18175/18181. All64 summary witnesses pass; strict aggregate41212/41481 retains250 health+19 BF4 guard failures, raw40804/41146 stays archived. Complete typed wire/actual-owner readbacks lose no prior pass; PNGs retained, RGBA/PCM not computed. The registered free-no-active replay passes1749 functional+4 transport checks on9841; cc38 preserves those rows and passes29 added seed-effect owner checks. DefaultOS, freshNative wrapper execution, other current-runtime fixed cases, three other Battery branches and remaining SKU grants retain their separate scopes. Modifiers, eligible achievements, upgrades, ABD contexts, Continue, broader Full/Fast grid parity and complete audio/pixels remain separate. See [Shop scope and controls](shop-economy.md). |
+| Gameplay frontiers | Unsupported next-stage trapdoors now refuse descent; held active IDs survive the supported stage-save normalization. | [#413](https://github.com/Anveio/isaac-rebirth-browser/issues/413) remains a later-stage frontier, rather than the old repeated-tick freeze. [#499](https://github.com/Anveio/isaac-rebirth-browser/issues/499) now has [scoped carried-active descent evidence](stage-exit-evidence.md): on frozen f837, two active routes and an ordinary control pass 7,642 tail checks, including 48 actual active-word/settled-descent checks. The OS draw varies approach actions on fixed Y9QL8QZM; it is not random-run-seed coverage. Pixel and per-game fight differences remain retained. [PR609](https://github.com/Anveio/isaac-rebirth-browser/pull/609) qualifies its source-derived run-admission clock cohort; the independently declared [death clock](player-death.md) resolves the separate producer mismatch in [#438](https://github.com/Anveio/isaac-rebirth-browser/issues/438), with the fresh OS cohort still failing a required Original audio observation. [Dead-callback motion](player-death.md) fixes517 Y checks in the scoped [#493](https://github.com/Anveio/isaac-rebirth-browser/issues/493) replay; broader living contact/grid parity remains unresolved. Ordinary-bomb late-grid response [#349](https://github.com/Anveio/isaac-rebirth-browser/issues/349) has [scoped moving-doorway and regression qualification](#ordinary-bomb-late-grid-response-349); separate NPC/bomb timing failures remain open. |
+| Player Full grid after contacts | Ordinary Full Player motion/actions defer the retained ground query until after entity contacts, before other final ground queries, subject to the existing class0 bypass. Fast and standalone transition callbacks retain their paths. | Exact immutable 5c33 parent to 9841 candidate A/B reuses unchanged Native and captures all 266 Browser checkpoints/15,510 scalar fields: 36 gains, zero prior-pass losses or changed Native expectations, and 38 unchanged failures. The 40-gain prediction remains FAIL: 34 bomb birth-counter and four Full tear-alive/admission rows stay red. Both Full coverage guards pass; both Fast same-birth-solid-response guards fail. Strict RGBA is 28/266 exact with 238 retained failures. Same-Native Shop v9 preserves all 1,190 rows and 59 Browser PNG bytes; fixed declared-clock Restart/Exit passes 26,977 fields/1,481 checkpoints on each artifact with every actual value and 1,481 Browser PNG bytes identical. Full PNGs remain local; death RGBA is not computed. This Full-grid evidence does not establish complete physics, pixel, audio or whole-main acceptance. See [source and scoped controls](player-death.md#player-full-grid-after-contacts). |
+| Death Exit menu presentation | Deferred GameOver Exit initializes a fresh Title actor at frame0 and black alpha1 fade before the existing System fade advance; an existing menu-controller lifetime retains its clock. | [Focused death evidence](player-death.md) on frozen `46a4d706` fixes 240 Title/fade fields among 13,140 canonical fields, with 12,900 identical rows, zero regressions or changed Native expectations, and 654 unchanged Game-age failures. All741 checkpoints, Native provenance and actual death/popup execute. Complete checkpoint states/PNGs remain local; aggregate state-history reaches its byte cap and RGBA was not computed. Exit music/SFX and public-clock qualification remain separate. |
+| Death Exit audio | Fresh Exit MenuInit selects Music61 and SetMenu0-to3 skips forward-confirm SFX8. Visual Title/fade and public-clock leaves retain their separate qualifications. | Frozen `f837cf59` (1,407 files) repeats the exact seven-capture public Exit prefix against a fresh Native and actual Browser: all 95 canonical rows are identical to703, while 14/14 bounded Music/SFX8 owner/backend checks pass versus 10/14 on703. Four former audio failures become passing with no changed Native expectations or prior-pass losses. Native 0/Browser 0 actual SFX8 starts and zero observed Browser SFX8 events in the dispatch window require three earlier actual unique-owner SFX8 controls in each runtime; Browser controls reach the output graph with actual buffer hashes. Native 690 clock acknowledgements/eight capture times, Browser 1,631 public ticks/seven captures, source provenance and required death/popup coverage pass. All 15 actual PNGs remain local; RGBA was not computed for that initial prefix capture. Complete audio/PCM/music lifecycle/Shared-MT parity remains open, as do the separate fresh-OS required Original SFX30 observation and historical 733/740 Restart pixel failures. The registered player-death --exit-audio replay on the same artifact then passes 7/7 checkpoints, 95/95 canonical fields and 14/14 audio checks with mandatory Exit/request/control coverage; its seven strict RGBA diagnostics have four exact passes and three retained failures. See [death evidence](player-death.md). |
+| Admission/death public clock (#438) | Run-admission retains its own PR609 qualification. The shared paired gate defaults its public clock schedule off; only the registered death driver opts into predeclared count-one timestamps through the no-draw step API. Actual Native epoch/bootstrap/interval/acknowledgements/capture times validate that prior plan and never choose Browser inputs. Omitting timestamps preserves the prior count-only command; count-one batching changes are explicit. | Combined frozen70314c6f passes all 2,962 retained checkpoints / 52,190 canonical fields, including 2,774 former Game-age failures; the 240 Exit-field gains belong to the separately qualified visual leaf. Registered fresh-Native Restart passes 740 checkpoints / 13,837 fields but retains 733/740 full-RGBA diagnostic failures. Both fresh OS clocks/provenance validate, yet the cohort remains **FAIL** on the required Original SFX30 observation at 7KMTELQG/hurt-89 despite all 25,196 emitted scalar rows passing. No waiver, resampling, causal clock diagnosis or complete audio/backend acceptance follows. Retained/fresh functional wrappers do not compute pixels. See [death evidence](player-death.md) and [run admission](run-admission.md). |
+
+## Retained d995/Wd869 qualification snapshot
 
 Public main `d995a582` includes refused-pedestal runtime PR557 and
 optional Node tools PR558. Primary/playable remains `4543c59b`, serving the
@@ -98,7 +121,7 @@ The earlier frozen `29c8dab6` qualifier passed production, but its raw405 compar
 
 Historical private Homing4433 retains 24,181 / 42 FAIL across four own cases and 85,739 / 43,069 FAIL in its first Original pair. Historical satellite `ab2aa0a5` retains 38,027,481 / 0 regular regression differences, 12,478 / 232 FAIL across four own satellite cases, 2,470 / 108 FAIL across four retained-child histories, and 34,648 / 3,237 FAIL in its first Original pair. The separate typed callback consumer retains 726 / 31 FAIL. Zero exact identity joins, missing callback/cleanup owners and all raw failures remain explicit. Both games show zero chains at the first Add2 endpoint followed by two later chains; this is a consumer-boundary finding, not a port-only zero-chain bug. Durable [Homing cases](../references/isaac/cases/item-composition/spoon-bender3-v1.json) and [satellite cases](../references/isaac/cases/item-composition/controlled-knife-satellites-v1.json) preserve replay inputs and scoped evidence summaries.
 
-Dedicated systems owners now cover pickups, transitions, played sound and pre-boss assets. Pickups includes coins, keys, bombs, hearts, chests and procedural spawns through the existing level descriptors; initial source slices restore coin sounds and golden-key lifecycle/spending/HUD. Transitions owns menu/world/pause fades and pickup text, sound, costume/control/iframe ceremony; the first source slice adds authored collectible title/description and the shared HUD clock. Sound comparison is being extended from PCM/transport to actual mixer/backend ownership and browser starts within declared public-input windows. The assets census decodes all95 original boss UI sheets and56 portrait definitions, including the missing exact MegaGurdy portrait. These new runtime/loader/collector slices have no build or paired-game acceptance at this snapshot. Claude retains bulk level/monster/character imports. No CI or hard gate is introduced.
+Dedicated systems owners now cover pickups, transitions, played sound and pre-boss assets. Pickups includes coins, keys, bombs, hearts, chests and procedural spawns through the existing level descriptors; initial source slices restore coin sounds and golden-key lifecycle/spending/HUD. Transitions owns menu/world/pause fades and pickup text, sound, costume/control/iframe ceremony; the first source slice adds authored collectible title/description and the shared HUD clock. Sound comparison is being extended from PCM/transport to actual mixer/backend ownership and browser starts within declared public-input windows. The assets census decodes all 95 original boss UI sheets and56 portrait definitions, including the missing exact MegaGurdy portrait. These new runtime/loader/collector slices have no build or paired-game acceptance at this snapshot. Claude retains bulk level/monster/character imports. No CI or hard gate is introduced.
 
 The following production4 and earlier records retain their historical artifact scopes and failures.
 
@@ -195,11 +218,11 @@ The Wave1/Wave2 snapshots below are historical results from the earlier test
 policy. Their removed unit/integrity suites are not current executable gates.
 Consult the latest paired report for current implementation outcomes.
 
-## Monstro BloodStart source leaf
+## Retained Monstro BloodStart source leaf
 
 The new partial producer routes ordinary Monstro’s real BloodStart random branches through Effect17, SFX72 and Effect42 in their original order. It preserves the actual authored NullId0 guide, separate cached spawner/link fields, signed scales and layer flips, and distinct active/dead lifecycle. The required `test:e2e:blood-start` gate retains contrived978 and recorded OSBLL routes with both input phases; it requires actual Death-interval execution and matched bodies. Private all-target Rust check and strictClippy pass at `d28154f`; production/WASM and fresh game qualification remain pending. Explosion2/77/category5 remains an explicit runtime error before any final reward, and existing native-prefix failures remain blocking. The final-heart/delayed-clear/Grid17 owners are separate; no boss-clear or stage-completion claim follows from this leaf.
 
-## Current source and actual-game qualification
+## Retained 3df99031 source and actual-game qualification
 
 Current main `3df99031` includes ordinary Player Brimstone299, per-field comparer
 continuation311, the FireDelay descriptor304, optional regular Tear variant298
@@ -665,6 +688,13 @@ damage/death/drop callbacks remain separate.
 [Key evidence](../references/isaac/foundation/keys/npc-composite-live-report.json)
 and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
 record each immutable build's scope.
+
+Horf12's final dead Full update now dispatches its AI before retirement while
+preserving the living no-APPEAR path. The [scoped Horf evidence](npc-evidence.md#horfs-final-dead-update)
+retains 77,793 passing enemy rows and every existing base failure across two
+fixed routes and one recorded OS route. The separate natural-death Shop case
+retains its failures; direct final-shot/MT, status and default base-kill
+qualification remain open.
 
 A fresh full key cohort on the menu/seed-dialog/NPC/secret composite passes
 another 1,690 phases, including two new recorded OS-random seeds. Direct free
@@ -1191,6 +1221,10 @@ remain separate open contracts; no captured map or seed-specific offset is used.
 
 ## New bomb reference observations
 
+These early observations retain their original runtime and test scope. The later
+[ordinary-bomb late-grid correction](#ordinary-bomb-late-grid-response-349)
+records its implemented source and separate frozen-artifact qualification.
+
 The bomb workstream captured fresh stationary, escape and continuous-graphics
 native runs under `.cache/foundation/bomb-stationary/run/`, `bomb-escape/run/`
 and `bomb-exact/run/`. E consumes the starting bomb once, with the displayed
@@ -1275,6 +1309,65 @@ are under `.cache/coordination/presentation/sampler-proof/`. The retained
 binds source depth format/function/writes/clear/range/geometry to raw GL, actual
 controller input, logs and target hashes. Loader and capture guards reject
 missing or altered source fields and provenance.
+
+## Ordinary bomb late-grid response (#349)
+
+The [ordinary bomb implementation](../engine/src/bombs.rs) now resolves class5
+Full ground contact at the existing manager fence after NPC contact writes,
+including newly admitted bombs and still-active Exploding bodies. The actor's
+Full callback owns Base motion, drag and fuse/animation; the manager owns the
+late full query. Full response commits physical/presented position and stored
+velocity together. Intermediate response corrects only the predicted position
+using copied velocity. The separate class6 shot-bomb solver is unchanged.
+Both ordinary phases clamp the center to actual Room bounds before sampling.
+
+Frozen candidate `a48aa48ceb5b9ba334bfd9aefe4c0099dcf0782ba695e5233c44d4762f06ac51`
+and isolated guarded parent
+`524351dbbd078b0fc62980668f633a36474b12e597c8a3a2a4c4affdf1a92781`
+(1,407 files each) replay four exact public-input cases against the same
+independently validated Native captures, with fresh actual Browser DOM/WASM
+captures. All 1,485 bomb-specific fields keep their keys and Native expectations:
+four moving-doorway yfields become passing and no prior pass is lost. The
+doorway bomb fields improve from 16/20 to 20/20; its canonical checkpoints already
+pass 152/152 on both artifacts. The moving-birth clamp is observed; no separate
+zero-speed resting-doorway witness or DST execution is claimed.
+
+Across 4,898 canonical state fields, 233 near-wall fields become passing with no
+lost prior passes. C7YP dense wall remains 125/125 bomb fields and 42/42 canonical
+checkpoints. Center and near-wall Hugger routes remain red: 502/670 and 430/670
+passing bomb fields respectively; candidate canonical checkpoints are 99/151
+and 84/158.
+The near-wall route retains 240 bomb failures and 88 canonical failures whose
+actual values change; some absolute errors increase. Its NPC contact occurs
+16 presentations before Native, so this accepts the observed late response
+without accepting NPC/bomb timing.
+Both games' centers stay within bounds on that route; it does not reproduce
+the retained DST wall-escape case.
+
+The same complete pickup bank passes 6/6 cases and 2,784/2,784 presentations on
+both builds. The same Troll bank retains 4/9 passing cases, 3,388/3,935 passing
+presentations, 547 field failures and two unchanged required-Native-readmission
+errors. Both complete Rock banks attempt all 11 cases: 9 pass, 2 fail, with
+4,136/4,316 passing presentations, 252 field failures and no case errors.
+Their statuses, coverage, Native expectations and all remaining failure values
+are identical; the 252 failures retain 209 pickup-position and 43 countdown
+differences. These failures and guard gaps remain explicit. Actual PNGs and
+input/backend traces are retained locally; this functional A/B does not compute
+RGBA or establish pixel equality. Historical bomb results above and in
+[bomb evidence](bomb-evidence.md) retain their original scope.
+The registered [bomb-pickup](../tools/e2e/bomb-pickups.mjs),
+[Troll](../tools/e2e/troll-bombs.mjs) and [Rock](../tools/e2e/rock-blast.mjs)
+drivers retain their own whole-case results; the existing
+[Troll/tinted-rock regression issue](https://github.com/Anveio/isaac-rebirth-browser/issues/485)
+remains open.
+
+A separate later integration check on frozen
+`bf3036402648adf643b8bfe56aa48ceb786f4c1fdf7e30b32daeb84f57899281`
+(1,407 files) replays only the unchanged doorway case: Native provenance and
+actual Browser capture pass, with 152/152 canonical checkpoints and 20/20 exact
+bomb fields. Input/backend traces and PNGs are retained; RGBA is not computed.
+This confirms that case on the integrated artifact, without qualifying the
+whole current runtime or any other workstream.
 
 ## Source entity and grid boundaries for the next implementation wave
 

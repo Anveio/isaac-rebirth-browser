@@ -198,11 +198,12 @@ export interface Explosion { id: number; x: number; y: number; animationFrame: n
 export interface Pickup {
   sourceSpawner?: {entityType: number; variant: number} | null;
   pocketContactDelay?: number | null;
+  shopPrice?: {value: number; slot: number; purchaseFrontier?: string; sprite: {actor: string; animation: string; animationFrame: number; animationPlaying: boolean; layerFrames: (number | null)[]} | null};
   id: number; spawnSeed: number; variant: number; subtype: number; position: { x: number; y: number };
   x: number; y: number; actor: string; animation: string; animationFrame: number; animationPlaying: boolean;
   canCollect: boolean; collected: boolean; removed: boolean; collisionRadius: number; shadowSize: number; collectionDelay: number;
   overlay: string | null; overlayFrame: number; overlayPlaying: boolean;
-  age: number; birthGameUpdate: number; charge: number; touched: boolean;
+  age: number; birthGameUpdate: number; charge: number; touched: boolean; saveByteAbd?: number;
   chest: {rng: ItemRng; gridCollisionClass: number; entityCollisionClass: number; price: number; cooldown: number; openFrontier?: 'playerContext' | 'collectibleMorph' | 'explosionGeometry' | 'regularChildInit';
     lootBirths: {variant: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}; spriteScaleMultiplier: number | null}[]} | null;
   morphLinks?: {parent498: ActorRef | null; link4a0: ActorRef | null; link4a8: ActorRef | null};
@@ -240,6 +241,8 @@ export interface RoomDescriptor {
   template: RoomTemplate; doorMask: number; neighbors: (number | null)[];
   surpriseMiniboss: boolean;
   roomInitSeed: number; decorationSeed: number; spawnSeed: number; followingSeed: number;
+  shop?: {categories: number[] | null; cursor: number; saleSlot: number;
+    unadmitted: {spawnSeed: number; slot: number; variant: number; subtype: number; reason: string}[]};
   /** Owned map: absent cells outside both sets are empty; missing restore history is unknown. */
   persistentSpawnCells?: {present: number[]; unknown: number[]} | null;
 }
@@ -266,7 +269,7 @@ export interface Room {
   backgroundStains: {sourceEffectId: number; spawnSeed: number; birthGameUpdate: number;
     position: {x: number; y: number}; variant: number; renderOffset: {x: number; y: number}; layerRotation: number | null; sprite: ActorSprite; footprint?: boolean}[];
   savedRegularPickups: {handle: number; variant: number; subtype: number; position: {x: number; y: number};
-    spawnSeed: number; rngSeed: number; charge: number; touched: boolean}[];
+    spawnSeed: number; rngSeed: number; charge: number; touched: boolean; saveByteAbd?: number; shopPrice?: {value: number; slot: number}}[];
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -372,6 +375,8 @@ export interface State {
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
+      regular?: {variant: number; subtype: number; actor: string; animation: string; animationFrame: number;
+        animationPlaying: boolean; overlay: string | null; overlayFrame: number; overlayPlaying: boolean; attachedToPlayer: boolean};
       pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
     collectionDelay: number; activeId: number; activeCharge: number; activeSubordinateCharge: number; saveWordD88: number;
     activeStateD80: number; activeStateD84: number; reserveCharge: number; activeFlag3076: boolean;

@@ -25,7 +25,7 @@ export class ReplayTrace {
 
   constructor(initialSeed: number, enabled: boolean, initialState: State,
     maxBytes = 32 * 1024 * 1024, maxCommands = 36_000, maxInputBytes = 4 * 1024 * 1024,
-    maxBackendStateBytes = 4 * 1024 * 1024) {
+    maxBackendStateBytes = 16 * 1024 * 1024) {
     if (![maxBytes, maxCommands, maxInputBytes, maxBackendStateBytes].every(value => Number.isSafeInteger(value) && value >= 0))
       throw new Error('Trace budgets must be nonnegative safe integers');
     this.initialSeed = initialSeed;

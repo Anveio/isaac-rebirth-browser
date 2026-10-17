@@ -68,7 +68,7 @@ pub(crate) fn burst(
         motion::WorldVector,
         poop_effects::{Admission, ParticleBirth},
     };
-    let config = crate::content::entity(npc.kind, npc.variant);
+    let config = npc.config();
     // Challenge23 scales the amount by 8; this caller has no challenge owner.
     let counts = sample(
         config.gib_amount,

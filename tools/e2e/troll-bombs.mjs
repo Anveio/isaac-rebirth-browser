@@ -11,6 +11,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -30,7 +31,8 @@ else {
 }
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 3 && scenarios.cases.length <= 11);
+// A bank recorded under --case holds only the cases that ran.
+if (!scenarios.caseFilter) assert.ok(scenarios.cases.length >= 3 && scenarios.cases.length <= 11);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -45,22 +47,22 @@ for (const item of scenarios.cases) {
   }
 }
 const stateLast = states => states[states.length - 1];
-const selectedCase = value('--case');
-if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase), 'Targeted replay requires a recorded public case name');
+const selectedCase = flag('--case');
+scenarios.cases = selectCases(scenarios.cases, item => item.name);
+if (selectedCase) scenarios.caseFilter = selectedCase;
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
-const server = await startProductionServer();
+const server = await startProductionServer({ directory: value('--production-directory') });
 const browser = await chromium.launch(browserLaunchOptions());
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server.build,
-  selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
+  caseFilter: scenarios.caseFilter, selection: selectedCase ? { scope: 'Explicit targeted recorded-case replay; default CI executes the complete cohort', case: selectedCase } : { scope: 'Complete selected cohort' },
   graphics: await inspectBrowserGraphics(browser),
   scope: 'Live public-seed natural Troll/Megatroll conversion, typed shared seed, zero-velocity child admission, relative actor order, full/fast motion and fuse, animation, lifetime, homing, grid/HP and remaining pickup behavior. Every field mismatch remains blocking, including shared-stream alignment and blast pickup impulse. Required recorded OS draws are unfiltered.',
   cases: [],
 };
 try {
   for (const item of scenarios.cases) {
-    if (selectedCase && item.name !== selectedCase) continue;
     const directory = join(output, item.name);
     await mkdir(directory, { recursive: true });
     const caseResult = { ...item, cohort: item.cohort, status: 'running', failures: [] };

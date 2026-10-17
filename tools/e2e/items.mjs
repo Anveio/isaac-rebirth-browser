@@ -12,6 +12,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -38,19 +39,24 @@ const scenarios = replayOriginal ? JSON.parse(await readFile(join(replayOriginal
     ...(damageFireDelay ? ['--damage-fire-delay'] : statCache ? ['--stat-cache'] : acquisition && !activeUse ? ['--acquisition'] : [])], { cwd: ROOT, timeout: 600000 })).stdout);
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 12 : acquisition ? 8 : 6));
+// A bank recorded under --case holds only the cases that ran; its whole bank
+// met the count and cohort composition when it was recorded, and every case it
+// holds still meets its per-case requirements.
+const whole = !scenarios.caseFilter;
+if (whole) assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= (activeUse ? 12 : acquisition ? 8 : 6));
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 if (activeUse && !replayOriginal) {
-  assert.equal(scenarios.cases.length, 12, 'Active use requires the complete twelve-case fresh cohort');
+  if (whole) assert.equal(scenarios.cases.length, 12, 'Active use requires the complete twelve-case fresh cohort');
   const fixed = JSON.parse((await run('python3', ['tools/original/active-item-scenarios.py', '--fixed-only'],
     { cwd: ROOT })).stdout);
   assert.equal(fixed.cases.length, 10);
   for (const required of fixed.cases) {
-    assert.deepEqual(scenarios.cases.find(item => item.name === required.name), required,
+    const present = scenarios.cases.find(item => item.name === required.name);
+    if (whole || present) assert.deepEqual(present, required,
       `Active use requires the unchanged public seed/phase/actions and witnesses for ${required.name}`);
   }
   const fresh = scenarios.cases.filter(item => item.entropy === 'OS secrets');
-  assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
+  if (whole) assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
     [['random-pedestal-0', 0], ['random-pedestal-1', 1]], 'Both fresh OS admission phases are required');
   for (const item of fresh) {
     const required = fixed.cases.find(fixed => fixed.name === `recorded-active-use-${item.delay}`);
@@ -58,25 +64,28 @@ if (activeUse && !replayOriginal) {
     assert.equal(item.expectedItemId, undefined, 'Fresh OS outcomes cannot request a filtered item identity');
     assert.equal(item.requirePickupShotGuard, undefined, 'The held-Pickup witnesses belong to their fixed public cases');
   }
-  assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
-    [0, 1], 'Both held-Pickup admission phases are required');
-  assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
-    ['98C1GNPZ', 'DN8RQDXC', 'R74QYMYS', 'VRQPT844'], 'Every earlier unfiltered OS outcome is required');
-  assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
-    'Two new unfiltered OS outcomes are required');
+  if (whole) {
+    assert.deepEqual(scenarios.cases.filter(item => item.requirePickupShotGuard).map(item => item.delay).sort(),
+      [0, 1], 'Both held-Pickup admission phases are required');
+    assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
+      ['98C1GNPZ', 'DN8RQDXC', 'R74QYMYS', 'VRQPT844'], 'Every earlier unfiltered OS outcome is required');
+    assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
+      'Two new unfiltered OS outcomes are required');
+  }
 }
 
 if (statCoverage) {
-  assert.equal(scenarios.cases.length, 8, 'Stat cache requires the complete eight-case cohort');
+  if (whole) assert.equal(scenarios.cases.length, 8, 'Stat cache requires the complete eight-case cohort');
   const fixed = JSON.parse((await run('python3', ['tools/original/item-scenarios.py', '--fixed-only',
     damageFireDelay ? '--damage-fire-delay' : '--stat-cache'], { cwd: ROOT })).stdout);
   assert.equal(fixed.cases.length, 6);
   for (const required of fixed.cases) {
-    assert.deepEqual(scenarios.cases.find(item => item.name === required.name), required,
+    const present = scenarios.cases.find(item => item.name === required.name);
+    if (whole || present) assert.deepEqual(present, required,
       `Cache coverage requires the unchanged seed/phase/public actions for ${required.name}`);
   }
   const fresh = scenarios.cases.filter(item => !fixed.cases.some(required => required.name === item.name));
-  assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
+  if (whole) assert.deepEqual(fresh.map(item => [item.name, item.delay]).sort(),
     [['random-pedestal-0', 0], ['random-pedestal-1', 1]], 'Both new OS admission phases are required');
   for (const item of fresh) {
     assert.equal(item.entropy, 'OS secrets');
@@ -85,13 +94,15 @@ if (statCoverage) {
     assert.deepEqual(item.actions, fixed.cases.find(required => required.name === `recorded-pedestal-${item.delay}`).actions,
       'Every new unfiltered OS outcome requires the complete acquisition/motion/shooting tape');
   }
-  assert.deepEqual(scenarios.cases.filter(item => item.expectedItemId !== undefined)
-    .map(item => [item.expectedItemId, item.delay]).sort(), damageFireDelay ? [[1, 0], [1, 1], [4, 0], [4, 1]] : [[14, 0], [14, 1], [143, 0], [143, 1]],
-    'Both independent admission phases of each mapped treasure passive are required');
-  assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
-    ['R74QYMYS', 'VRQPT844'], 'The retained unfiltered active/passive outcomes cannot be replaced');
-  assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
-    'Two freshly recorded, item-unfiltered OS discoveries are required');
+  if (whole) {
+    assert.deepEqual(scenarios.cases.filter(item => item.expectedItemId !== undefined)
+      .map(item => [item.expectedItemId, item.delay]).sort(), damageFireDelay ? [[1, 0], [1, 1], [4, 0], [4, 1]] : [[14, 0], [14, 1], [143, 0], [143, 1]],
+      'Both independent admission phases of each mapped treasure passive are required');
+    assert.deepEqual(scenarios.cases.filter(item => item.entropy === 'Recorded OS secrets').map(item => item.code).sort(),
+      ['R74QYMYS', 'VRQPT844'], 'The retained unfiltered active/passive outcomes cannot be replaced');
+    assert.equal(scenarios.cases.filter(item => item.entropy === 'OS secrets').length, 2,
+      'Two freshly recorded, item-unfiltered OS discoveries are required');
+  }
 }
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -106,8 +117,9 @@ for (const item of scenarios.cases) {
     else item.actions.push({key: null, frames: 100});
   }
 }
-const selectedCase = value('--case');
-if (selectedCase) assert.ok(scenarios.cases.some(item => item.name === selectedCase));
+const selectedCase = flag('--case');
+scenarios.cases = selectCases(scenarios.cases, item => item.name);
+if (selectedCase) scenarios.caseFilter = selectedCase;
 const catalogue = JSON.parse((await run('python3', ['tools/foundation/item-catalog.py'], { cwd: ROOT })).stdout);
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
@@ -117,7 +129,7 @@ const report = { schema: 1, status: 'running', production: server.build, origina
   graphics: await inspectBrowserGraphics(browser), sourceHashes: catalogue.sourceHashes,
   scope: activeUse ? 'Natural independent original/browser acquisition and public active use; authored charge/count/temporary records/health/7d4/7d8/UseItem/motion/SFX admission are required. Full raw fields, inputs, backend histories and all random failures remain retained; pixels and complete shared MT stay diagnostics. Other active effects and charge modifiers remain explicitly unimplemented.' : damageFireDelay ? 'Natural public Sad Onion1 and Cricket Head4 acquisition at both phases, retained291/48 and two fresh OS outcomes conditioned only on a port-predicted public treasure route; outcomes are retained without native item filtering. Cached stats, firing counter/cooldown/head timer, Player motion, actual Tear birth ordinal/owner, current manager membership/death flag, birth damage/base damage/scale/radius/clip and stored velocity are blocking, as are every existing pool/count/grant/queue and input provenance comparison. Unsupported item/weapon effects and every mismatch remain retained; no source values enter WASM.' : statCache ? 'Natural public acquisition of Roid Rage14 and Speed Ball143 at both phase offsets, plus retained and fresh unfiltered OS outcomes. Spoon27/Belt28 are source-mapped but boss-only and have no live acquisition acceptance here. All actual cached stats/fire delay, player XY/VXY before and after grant, emitted tear velocity, grant/count/pool/queue fields and complete public seed/DOM provenance are blocking. Other item effects remain unsupported with every comparison failure retained; complete MT, unfamiliar callbacks and later child RNG states are explicit diagnostics.' : acquisition ? 'Natural first free collectible contact, real deferred Pickup animation/queue, all347 owned counts, authored inventory/health grants, first active ownership/charge, pool removal and collection sound admission. Baseline complete450 Player child RNGs are required. Actual stat/familiar/cache callbacks, later child RNG mutation, active swaps/use, achievements, paid/override contexts and pixels remain unaccepted; full MT/cache/child RNG differences are retained diagnostics.' : 'Fresh-profile authored catalogue, causal run/pool seeds, complete 16 pools/497 weights and ID maps, natural free treasure pedestal Init/selection, phase/animation/charge and public seed/input provenance. Acquisition, item effects/cache evaluation, familiars, paid/override contexts and pixels remain unaccepted.',
   activeUse: activeUse ? {scope: 'Public first acquisition and action9 use; native record/charge/health/ANM/input/motion and157 admission required. Other active leaves remain red when exercised, with every OS discovery retained.'} : null,
-  selection: selectedCase ? { scope: 'Targeted recorded public case; default gate runs the complete cohort', case: selectedCase } : { scope: 'Complete cohort' }, cases: [] };
+  caseFilter: scenarios.caseFilter, selection: scenarios.caseFilter ? { scope: 'Targeted recorded public cases; default gate runs the complete cohort', case: scenarios.caseFilter } : { scope: 'Complete cohort' }, cases: [] };
 report.originalCapture = replayOriginal ? {mode: 'frozen-current-turn-original-recovery',
   reportPath: join(replayOriginal, 'report.json'), reportSha256: digest(frozenReportBytes),
   recordedProduction: frozenReport.production,
@@ -149,7 +161,6 @@ const archiveCompletedNative = async directory => {
 };
 try {
   for (const item of scenarios.cases) {
-    if (selectedCase && item.name !== selectedCase) continue;
     const directory = join(output, item.name);
     await mkdir(directory, { recursive: true });
     const result = { ...item, status: 'running', failures: [] };

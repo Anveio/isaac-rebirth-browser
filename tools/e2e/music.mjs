@@ -13,6 +13,7 @@ import { waitForReady, nativeReplay } from '../foundation/verify.mjs';
 import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -27,13 +28,16 @@ const generated = JSON.parse((await run('python3', ['tools/original/foundation-s
 let cases = [{ name: 'audible-title-floor-pause', code: 'QSYVKMSE', bootEpochSeed: 1700000000, volume: 1 },
   { name: 'muted-real-lifecycle', code: 'ZG800TRJ', bootEpochSeed: 0, volume: 0 },
   ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: i % 2 }))];
-if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')).cases;
+let caseFilter;
+if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
 assert.ok(Array.isArray(cases) && cases.length > 0 && cases.length <= 10 && new Set(cases.map(c => c.name)).size === cases.length);
 for (const c of cases) assert.ok(/^[a-zA-Z0-9_-]{1,40}$/.test(c.name) && /^[a-zA-Z0-9]{8}$/.test(c.code) &&
   Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff && (c.volume === 0 || c.volume === 1));
+cases = selectCases(cases, c => c.name);
+caseFilter = flag('--case') ?? caseFilter;
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
 await assertOriginalBinary();
-await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Recorded OS-random run seeds and independent Node crypto boot epochs', cases }, null, 2) + '\n');
+await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Recorded OS-random run seeds and independent Node crypto boot epochs', caseFilter, cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
 const librarySha = sha(await readFile(join(output, 'audio-trace.so')));
 const referencePcm = new Map();
@@ -115,7 +119,7 @@ function musicStarts(calls) {
 const production = await startProductionServer(), browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256: librarySha,
   production: production.build, graphics: await inspectBrowserGraphics(browser),
-  scope: 'Fresh public menu/seed/play/pause inputs; source45-track table, Title61 intro/loop,95 real completion/room queue, fresh normal first-floor main/layer streams, exact f32 fades and actual Web Audio/OpenAL PCM. Capture names never establish native Playing: actual System state/public log are retained. Native pre-Title100 voiceover tail is explicitly skipped at browser entry. Alternate floor generation, later room jingles, count-driven layer admission and pitch special modes remain separate scope.', cases: [] };
+  scope: 'Fresh public menu/seed/play/pause inputs; source45-track table, Title61 intro/loop,95 real completion/room queue, fresh normal first-floor main/layer streams, exact f32 fades and actual Web Audio/OpenAL PCM. Capture names never establish native Playing: actual System state/public log are retained. Native pre-Title100 voiceover tail is explicitly skipped at browser entry. Alternate floor generation, later room jingles, count-driven layer admission and pitch special modes remain separate scope.', caseFilter, cases: [] };
 try {
   for (const scenario of cases) {
     const directory = join(output, scenario.name); await mkdir(directory, { recursive: true });

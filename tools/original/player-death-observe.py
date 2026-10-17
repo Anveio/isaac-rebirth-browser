@@ -88,7 +88,7 @@ def observe(pid,context):
                               'scope':'Actual System is outside gameplay; no Room read attempted'}}
     result['death'] = death
     sounds = audio.observe(pid,context)
-    result['deathSound'] = {key: sounds.get(key) for key in ('status','memoryWritten','globalSfxVolume')}
+    result['deathSound'] = {key: sounds.get(key) for key in ('status','memoryWritten','globalSfxVolume','error')}
     result['deathSound']['slot30'] = next((slot for slot in sounds.get('slots',[]) if slot['id']==30),None)
     result['processExecutable'] = EXECUTABLES[pid]
     result['scope'] = 'Independent original death fields, public menu/gameplay and SFX30 wrapper; no native state supplies browser inputs'

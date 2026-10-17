@@ -4,8 +4,9 @@ The port implements fresh normal-mode Isaac's planted bomb: E placement,
 one inventory debit, a paused fuse, authored Pulse/Explosion playback, one
 full-heart blast hit, strict radial contact, native knockback, and a damage
 countdown. Moving births inherit source velocity and use the global full/intermediate
-phase. Enemy/grid damage, pushed bombs, variants and crater decals
-remain separate work. This does not establish native simulation-tick parity.
+phase. The sections below also record enemy/grid blast behavior and post-contact
+grid response for pushed bombs, with their remaining scope. This does not
+establish complete native simulation-tick parity.
 
 ## Public original scenarios
 
@@ -264,3 +265,131 @@ Both are now implemented (issue #206) and exercised by `rock-blast`:
   matches every presentation of both cases. The secondary blast's 1000/1 and
   particle spawns, and their two shared-stream draws (`0x42e8c0`), remain
   unadmitted like ordinary rock debris.
+
+## Ordinary bomb grid response after entity contacts (#349)
+
+The original Bomb Full callback (`0x457060`) delegates Base motion, applies
+drag, advances its fuse/animation, and may detonate or home. Neither that
+callback nor Base Full (`0x447190`) owns the ordinary full ground query.
+Manager Full fences actor updates at its previous tail, retires inactive
+actors, runs entity contacts, then queries its current live list at
+`0x454b10`. This includes births excluded from the Full update fence and
+still-active Exploding bodies. The dead flag alone does not retire a bomb;
+animation completion removes it before the next contact pass.
+
+The port now performs ordinary Full ground response at its existing
+`full_grid_contacts` fence after NPC contact writes. It commits physical and
+presented positions, stored velocity, and projected coordinates together.
+Intermediate response remains in the actor callback and corrects only the
+presented position using a copied velocity. It does not advance the fuse or
+overwrite stored Full motion. Removed bodies remain excluded. The separate
+class6 shot-bomb solver retains its existing ownership and collision rules.
+
+The outer class5 query (`0x442c3b`–`0x442c69`) clamps the center to the actual
+Room bounds before sampling, including at zero speed. The port applies this
+clamp in both phases. The public
+[doorway continuation](../references/isaac/cases/paired/bombs349-doorway-clamp-v1.json)
+moves through the upper doorway before planting at seed `CQHR8NEH`. With Room
+top bound 140 and the player at native y129.4242401, the first observed moving
+bomb is at y142 after the ordinary 2px inward refinement. The parent runtime
+leaves it at y134.1638641 while matching its velocity and fuse. All four
+observed bomb y fields now pass. This is a moving birth witness; no separate
+live zero-speed resting-doorway result is claimed. The Exploding admission
+rule is source-proven; this leaf does not claim a new isolated live
+Exploding-only witness. No DST tape or property was run, changed, or promoted.
+
+### Isolated runtime qualification
+
+The isolated candidate production artifact is
+`a48aa48ceb5b9ba334bfd9aefe4c0099dcf0782ba695e5233c44d4762f06ac51`.
+Its pre-349 parent includes the guarded #493 dead-player fix and formatting:
+`524351dbbd078b0fc62980668f633a36474b12e597c8a3a2a4c4affdf1a92781`.
+Both contain 1,407 files. These comparisons isolate the bomb leaf; they are
+not complete replays of later merged main sources. `check:build`, Rust format,
+runner syntax, and diff checks passed. The Troll driver forwards the existing
+production-directory option so its actual replay is bound to these artifacts.
+
+Four exact public-input cases reuse independently validated Original captures
+and run fresh canonical Browser DOM/WASM captures with complete backend/input
+traces and actual PNGs. They retain the exact Native expectations and public
+presentation intervals. These functional A/B replays do not compute RGBA
+differences or claim pixel parity; earlier complete pixel diagnostics remain
+preserved.
+
+| Case | Parent exact bomb fields | Candidate exact bomb fields | Parent → candidate canonical checkpoints |
+| --- | ---: | ---: | ---: |
+| C7YPWS61 dense wall | 125/125 | 125/125 | 42/42 → 42/42 |
+| CQHR8NEH center Hugger | 502/670 | 502/670 | 99/151 → 99/151 |
+| CQHR8NEH near-wall Hugger | 430/670 | 430/670 | 82/158 → 84/158 |
+| CQHR8NEH moving doorway birth | 16/20 | 20/20 | 152/152 → 152/152 |
+
+At the near-wall bomb's first NPC contact, the candidate immediately produces
+native event x72.35924530029297 and vx+0.4214285910129547. The parent leaves
+x70.35924530029297 and vx−1.071428656578064 until its next update. The Original
+executes the corresponding response 16 presentations later, so these frozen
+routes still expose an earlier NPC phase discrepancy. Both observed centers
+remain inside Room bounds. This witnesses contact ordering and reflection;
+it does not reproduce the retained DST center-wall-escape case. Same-label
+failures remain unchanged in the acceptance law; the event correspondence
+does not shift labels or substitute Native expected values.
+
+Pointwise comparison covers the same 1,485 exact bomb fields and 4,898
+canonical scalar fields with identical Native expectations and no missing or
+added keys. No previously passing field becomes failing. Four doorway bomb
+fields become passing. The near-wall route still has 240 failing bomb fields
+whose actual values change, including some larger absolute errors. Across
+the canonical fields, 233 become passing (76 player x, 76 vx, 75 vy, four HP,
+and two countdown fields), while 88 remaining near-wall failures change value.
+Both Hugger cases remain failing. The contact correction does not establish
+complete NPC/bomb parity or monotonic improvement of every numeric residual.
+
+The full recorded suite banks retain every cohort and unfiltered draw:
+
+| Suite | Parent and candidate cases | Passing presentations | Field failures | Other blocking results |
+| --- | ---: | ---: | ---: | --- |
+| `bomb-pickups` | 6/6 pass | 2,784/2,784 | 0 | None |
+| `troll-bombs` | 4/9 pass | 3,388/3,935 | 547 | Two required Native readmission guards fail |
+| `rock-blast` | 9/11 pass | 4,136/4,316 | 252 | No case errors |
+
+The complete pickup bank, cases, and public tapes are equal between builds;
+all six cases pass. The complete Troll bank has identical statuses,
+presentation coverage, all 547 failure records, and both guard errors. There
+are no new or closed failing keys, changed Native expectations, or changed
+remaining failure values. Its field failures are 43 countdown and 504 Rock
+retirement mismatches. Both corrected Mega routes compare all 416/417
+presentations without field failures but fail the unchanged requirement to
+reconstruct Native regular pickups. These are coverage gaps; a separate
+versioned public return route is required rather than weakening the guards.
+
+The complete Rock bank also has identical case statuses, full presentation
+coverage, and all 252 failure records between builds. No failing keys are new
+or closed, and no Native expectations or remaining failure values change.
+The retained `regression-tinted-rock` route has 65 pickup-position failures;
+`regression-troll-bomb` has 144 pickup-position and 43 countdown failures.
+Both remain failing on the parent and candidate. None of these suite failures
+or readmission guards is waived.
+
+At the isolated build, `--affected --list` selected 43 suites through the
+conservative file fallback. Qualification ran the four recorded paired cases
+and these three complete relevant banks; it does not claim all selected
+suites passed. Input-only cases and complete banks are retained under
+[`references/isaac/cases`](../references/isaac/cases/). The three public paired
+copies omit only a historical research annotation; their seed, bootstrap,
+tapes, and comparison declarations are identical to the captured cases.
+Original captures, raw disassembly, and resource-bearing reference fixtures
+remain ignored local evidence.
+
+### Post-integration doorway check
+
+A later integration build combined the Claude #613 merge and committed bomb
+leaf with the visual Exit and public clock transport working-tree sources
+recorded in its binding. One unchanged cached doorway case ran against frozen
+artifact
+`bf3036402648adf643b8bfe56aa48ceb786f4c1fdf7e30b32daeb84f57899281`
+(1,407 files). Original provenance and actual Browser capture passed, as did
+all 152 canonical checkpoints and all 20 exact bomb fields. The current
+canonical capture module used the default `publicClockSchedule=false` and
+no declared public clock plan or timestamp override. Complete Browser
+input/backend traces and actual PNGs were retained; RGBA differences were
+not computed. This short integration result is separate from the isolated
+parent/candidate qualification above.

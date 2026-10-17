@@ -26,6 +26,10 @@ const browserPath = manifestPath(directory, 'browser');
 const native = readJsonEvidence(originalPath), browser = readJsonEvidence(browserPath);
 const gate = load(resolve(dirname(directory), 'report.json'));
 const replay = load(resolve(directory, 'case.json'));
+assert.match(gate.build?.sha256 ?? '', /^[a-f0-9]{64}$/, 'The pair must identify its actual production artifact');
+for (const [phase, build] of [['fight', replay.stageExit?.recordedBuilds?.fight],
+  ['exit', replay.stageExit?.recordedBuilds?.exit], ['replay', replay.portRecordedBuild]])
+  assert.equal(build, gate.build.sha256, `The ${phase} recording must match the actual paired artifact`);
 assert.equal(browser.status, 'pass', 'Actual production DOM/WASM capture must pass');
 const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
 const observations = new Map(native.debugObservations.map(row => [row.context.label, row.observation]));
@@ -59,6 +63,10 @@ for (const label of labels) {
   // entry frame (and so the StageTransition counter) follows from it.
   diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
     [state.player.x, state.player.y]);
+  // Each fight also leaves its own health, which Basement II's generation
+  // reads (a Challenge room needs full health).
+  diagnostic(label, 'player.health', [player.redHp, player.maxRedHp, player.soulHp],
+    [state.player.hp, state.player.maxHp, state.player.soulHp]);
   const clip = PLAYER_CLIPS.includes(player.animation) ? player.animation : null;
   const actualClip = PLAYER_CLIPS.includes(state.playerAnimation.current) ? state.playerAnimation.current : null;
   check(label, 'player.clip', clip, actualClip);
@@ -85,6 +93,55 @@ for (const label of labels) {
   check(label, 'pedestals', pedestals, actualPedestals);
 }
 check('next-stage', 'arrivedStage', 2, finalStage);
+// The authored active fixture must retain a positive carried-item contract
+// even on replay; an old bank lacking it cannot silently pass the new gate.
+const expectedActiveId = replay.stageExit?.carriedActiveItemId;
+if (replay.stageExit?.fixture === 'Y9QL8QZM-larry-active')
+  assert.equal(expectedActiveId, 56, 'The active-item fixture must declare its authored Lemon Mishap');
+if (expectedActiveId !== undefined) {
+  assert.ok(Number.isInteger(expectedActiveId) && expectedActiveId > 0 && expectedActiveId <= 346,
+    'Expected carried item must be a positive authored collectible ID');
+  for (const [label, stage] of [['re-anchor', 1], ['next-stage', 2]]) {
+    assert.ok(labels.includes(label), `Carried item requires the public ${label} checkpoint`);
+    const observation = observations.get(label), frame = frames.get(label);
+    const items = observation?.carriedItems, gameplay = observation?.gameplay;
+    assert.equal(items?.status, 'pass', `${label} requires actual bounded Native item evidence`);
+    assert.equal(items.memoryWritten, false);
+    assert.equal(items.executableMappingsRead, false);
+    assert.equal(items.nativeBinarySha256, gate.sourceBinarySha256);
+    assert.equal(items.gamePresent, true);
+    assert.ok(Array.isArray(items.players) && items.players.length === 1,
+      `${label} requires one actual Native Player item owner`);
+    assert.equal(gameplay?.status, 'pass');
+    const original = items.players[0], actual = frame?.state?.playerItems;
+    assert.ok(actual, `${label} requires the actual Browser item owner`);
+    const history = actual.activeChargeHistory;
+    assert.ok(history && typeof history === 'object' && !Array.isArray(history)
+      && history.unowned && typeof history.unowned === 'object' && !Array.isArray(history.unowned),
+    `${label} requires actual Browser active-word ownership history`);
+    for (const word of ['activeId', 'charge', 'reserve'])
+      check(label, `carriedActive.browserOwned.${word}`, true, !Object.hasOwn(history.unowned, word));
+    for (const field of ['activeId', 'activeCharge', 'reserveCharge']) {
+      assert.ok(Number.isInteger(original[field]), `${label} missing Native ${field}`);
+      assert.ok(Number.isInteger(actual[field]), `${label} missing Browser ${field}`);
+    }
+    check(label, 'carriedActive.nativeId', expectedActiveId, original.activeId);
+    check(label, 'carriedActive.browserId', expectedActiveId, actual.activeId);
+    //Both fields are actual i32 reads in the existing item observer and
+    //actual public WASM state, never reconstructed from the expected ID.
+    check(label, 'carriedActive.charge', original.activeCharge, actual.activeCharge);
+    check(label, 'carriedActive.reserve', original.reserveCharge, actual.reserveCharge);
+    check(label, 'carriedActive.nativeStage', stage, gameplay.level.stage);
+    check(label, 'carriedActive.browserStage', stage, frame.state.stage);
+    check(label, 'carriedActive.nativeTransitionSettled', 0, gameplay.stageTransition.state);
+    check(label, 'carriedActive.browserTransitionSettled', 0, frame.state.stageTransition.state);
+  }
+  check('next-stage', 'carriedActive.nativeDescentObserved', true,
+    labels.some(label => observations.get(label)?.gameplay?.stageTransition?.state > 0));
+  check('next-stage', 'carriedActive.browserDescentObserved', true,
+    labels.some(label => frames.get(label)?.state?.stageTransition?.state > 0));
+}
+
 // With `--gl-trace`, each room the port entered (the shared route, the boss
 // room, the re-anchor's previous room and the boss room again, then Basement
 // II) must equal an original wall cache draw, in entry order
@@ -104,7 +161,7 @@ if (native.graphicsTrace) {
 // The original logs each Level::Init seed; the last one is Basement II's.
 check('next-stage', 'stageSeed', native.observedState.stageSeed, frames.get('next-stage').state.stageSeed);
 const report = { schema: 1, status: checks.every(item => item.status === 'pass') ? 'pass' : 'fail',
-  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
+  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room. Declared carried active identity, charge and reserve require bounded Native reads and settled stage1→2 descent. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
   buildSha256: gate.build.sha256, sourceBinarySha256: gate.sourceBinarySha256,
   originalManifestSha256: hash(originalPath), browserManifestSha256: hash(browserPath),
   caseSha256: hash(resolve(directory, 'case.json')), checks, diagnostics };

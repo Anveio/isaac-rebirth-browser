@@ -1,0 +1,649 @@
+{
+  "schema": 1,
+  "bootEpochSeed": 1700000000,
+  "source": "Public seed and key events only; authored discovery never enters WASM",
+  "cases": [
+    {
+      "name": "rock-phase-0",
+      "code": "YQ16XWHR",
+      "seedValue": 2889922101,
+      "delay": 0,
+      "slot": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 27
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "a",
+          "frames": 72
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": "w",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+      "cohort": "ordinary-rock-only"
+    },
+    {
+      "name": "rock-phase-1",
+      "code": "YQ16XWHR",
+      "seedValue": 2889922101,
+      "delay": 1,
+      "slot": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 27
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "a",
+          "frames": 72
+        },
+        {
+          "key": null,
+          "frames": 41
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": "w",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+      "cohort": "ordinary-rock-only"
+    },
+    {
+      "name": "block-line",
+      "code": "286TWPAC",
+      "seedValue": 3361105609,
+      "delay": 0,
+      "slot": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "w",
+          "frames": 12
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "a",
+          "frames": 15
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "d",
+          "frames": 12
+        },
+        {
+          "key": null,
+          "frames": 15
+        },
+        {
+          "key": "w",
+          "frames": 18
+        },
+        {
+          "key": null,
+          "frames": 15
+        },
+        {
+          "key": "a",
+          "frames": 15
+        },
+        {
+          "key": null,
+          "frames": 120
+        }
+      ],
+      "entropy": "Contrived public route behind a natural Block",
+      "cohort": "block-line"
+    },
+    {
+      "name": "random-rock-0",
+      "code": "Y3HVC696",
+      "seedValue": 2845888142,
+      "delay": 0,
+      "slot": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 27
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "a",
+          "frames": 72
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": "w",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 1100,
+      "cohort": "ordinary-rock-only"
+    },
+    {
+      "name": "random-rock-1",
+      "code": "42XK76W4",
+      "seedValue": 3653886223,
+      "delay": 1,
+      "slot": 0,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 27
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "a",
+          "frames": 72
+        },
+        {
+          "key": null,
+          "frames": 41
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": "w",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 1488,
+      "cohort": "ordinary-rock-only"
+    },
+    {
+      "name": "random-block-line",
+      "code": "1J6QGX7W",
+      "seedValue": 3050806450,
+      "delay": 0,
+      "slot": 1,
+      "actions": [
+        {
+          "key": "w",
+          "frames": 74
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "w",
+          "frames": 12
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "a",
+          "frames": 15
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "d",
+          "frames": 12
+        },
+        {
+          "key": null,
+          "frames": 15
+        },
+        {
+          "key": "w",
+          "frames": 18
+        },
+        {
+          "key": null,
+          "frames": 15
+        },
+        {
+          "key": "a",
+          "frames": 15
+        },
+        {
+          "key": null,
+          "frames": 120
+        }
+      ],
+      "entropy": "OS secrets",
+      "cohort": "block-line",
+      "discoveryAttempts": 245
+    },
+    {
+      "name": "regression-rock-phase-0",
+      "code": "26T688VM",
+      "seedValue": 3368857734,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "s",
+          "frames": 17
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": "a",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+      "cohort": "explosive-rock-regression",
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
+    },
+    {
+      "name": "regression-rock-phase-1",
+      "code": "26T688VM",
+      "seedValue": 3368857734,
+      "delay": 1,
+      "actions": [
+        {
+          "key": "s",
+          "frames": 17
+        },
+        {
+          "key": null,
+          "frames": 21
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": "a",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "Contrived public bomb phase offset on a recorded natural rock room",
+      "cohort": "explosive-rock-regression",
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
+    },
+    {
+      "name": "regression-random-rock-0",
+      "code": "794ZK08P",
+      "seedValue": 3759811366,
+      "delay": 0,
+      "slot": 2,
+      "actions": [
+        {
+          "key": null,
+          "frames": 60
+        },
+        {
+          "key": "w",
+          "frames": 27
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "d",
+          "frames": 72
+        },
+        {
+          "key": null,
+          "frames": 40
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "d",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": "w",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "OS secrets",
+      "discoveryAttempts": 242,
+      "cohort": "explosive-rock-regression",
+      "description": "Already-selected natural kind5 Rock stays admitted; a blast that reaches it moves it to state3 and its secondary explosion follows four full updates later."
+    },
+    {
+      "name": "regression-tinted-rock",
+      "code": "ZLJJ61ZJ",
+      "seedValue": 2776625571,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "s",
+          "frames": 17
+        },
+        {
+          "key": null,
+          "frames": 20
+        },
+        {
+          "key": "a",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 95
+        },
+        {
+          "key": "w",
+          "frames": 25
+        },
+        {
+          "key": "a",
+          "frames": 30
+        },
+        {
+          "key": null,
+          "frames": 10
+        }
+      ],
+      "entropy": "Recorded OS secrets discovery",
+      "cohort": "tinted-rock-regression",
+      "description": "Player blast also reaches natural kind4 tinted rock at cell50; native destroys it and admits chest60/1. Keep this unsupported drop/collision regression in the default cohort."
+    },
+    {
+      "name": "regression-troll-bomb",
+      "code": "XD0VNH46",
+      "seedValue": 2533542370,
+      "delay": 0,
+      "actions": [
+        {
+          "key": "s",
+          "frames": 17
+        },
+        {
+          "key": null,
+          "frames": 100
+        },
+        {
+          "key": "s",
+          "frames": 25
+        },
+        {
+          "key": null,
+          "frames": 30
+        },
+        {
+          "key": "e",
+          "frames": 1
+        },
+        {
+          "key": null,
+          "frames": 122
+        },
+        {
+          "key": "s",
+          "frames": 50
+        },
+        {
+          "key": null,
+          "frames": 30
+        }
+      ],
+      "entropy": "Recorded OS secrets discovery, candidate186",
+      "cohort": "troll-bomb-regression",
+      "description": "Authored Bomb40/0 becomes native type4 variant3 and detonates before public E, destroys ordinary rocks and imparts motion to remaining bomb pickups. Missing troll/pickup callbacks remain mandatory blocking."
+    }
+  ]
+}

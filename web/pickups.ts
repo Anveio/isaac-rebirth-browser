@@ -20,6 +20,15 @@ export class PickupRenderer {
       this.assets.draw(ctx, pickup.actor, pickup.animation, x, y, pickup.animationFrame, {
         spritesheets, overrides,
       });
+      const price = pickup.shopPrice?.sprite;
+      if (price) {
+        //SetAnimation owns global frame-1/stopped; actual independent
+        //SetLayerFrame overrides select each static currency/digit layer.
+        for (const [layer, frame] of price.layerFrames.entries()) {
+          if (frame === null) continue;
+          this.assets.draw(ctx, price.actor, price.animation, x, y, frame, { layers: [layer], overrides });
+        }
+      }
     }
   }
 
@@ -40,6 +49,25 @@ export class PickupRenderer {
     if ((!owner?.pickupAnimationGuard && !using) || !presentation) return;
     const attachment = this.assets.nullFrame("gfx/001.000_player.anm2", using ? "UseItem" : "Pickup", 0,
       using ? state.playerAnimation.frame : owner!.pickupAnimationFrame);
+    if (presentation.regular) {
+      const copy = presentation.regular;
+      const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+      //50A830 copied the source local pose after this turn's Player
+      //callback.533970 changes it only at the next actual Player callback;
+      //that birth frame must retain the visible Idle layer at its old pose.
+      if (copy.attachedToPlayer && !attachment?.Visible) return;
+      const attached = copy.attachedToPlayer && attachment ? {
+        XPosition: attachment.XPosition, YPosition: attachment.YPosition, Visible: attachment.Visible,
+      } : {};
+      //533970 attaches every copied layer. Supported regular actors use
+      //body0 plus optional glow1; preserve both actual authored channels.
+      const overrides = Object.fromEntries([0, 1].map(id => [id, {
+        ...attached, RedTint, GreenTint, BlueTint,
+      }]));
+      this.assets.draw(ctx, copy.actor, copy.animation, x, y, copy.animationFrame, { overrides });
+      if (copy.overlay) this.assets.draw(ctx, copy.actor, copy.overlay, x, y, copy.overlayFrame, { overrides });
+      return;
+    }
     if (!attachment?.Visible) return;
     if (presentation.pocket) {
       const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
