@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "entropy": "OS secrets run seeds and Node crypto boot epochs/menu taps",
+  "cases": [
+    {
+      "name": "audible-restarts",
+      "code": "QSYVKMSE",
+      "bootEpochSeed": 1700000000,
+      "volume": 1,
+      "taps": [
+        "Left",
+        "Left",
+        "Right",
+        "Right"
+      ]
+    },
+    {
+      "name": "muted-admissions",
+      "code": "ZG800TRJ",
+      "bootEpochSeed": 0,
+      "volume": 0,
+      "taps": [
+        "Right",
+        "Left",
+        "Right",
+        "Left"
+      ]
+    },
+    {
+      "name": "random-0",
+      "code": "WK4RYZ4J",
+      "bootEpochSeed": 4197421899,
+      "volume": 1,
+      "taps": [
+        "Right",
+        "Left",
+        "Left",
+        "Right",
+        "Right",
+        "Left",
+        "Right",
+        "Left"
+      ]
+    }
+  ]
+}

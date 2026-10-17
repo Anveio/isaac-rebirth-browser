@@ -699,6 +699,8 @@ pub enum DamageKind {
     Tear,
     Knife,
     Bomb,
+    /// TNT grid blast forwards DAMAGE_EXPLOSION | DAMAGE_TNT.
+    Tnt,
     FireContact,
     RoomEffect,
     /// Entity_Laser do_damage476760 passes DAMAGE_LASER.
@@ -712,6 +714,7 @@ impl DamageKind {
         match self {
             Self::Tear | Self::Knife => 0,
             Self::Bomb => 4,
+            Self::Tnt => 0x1004,
             Self::FireContact => 2,
             Self::Laser => 8,
             Self::RoomEffect => 0,

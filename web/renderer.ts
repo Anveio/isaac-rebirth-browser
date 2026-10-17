@@ -281,6 +281,12 @@ export class Renderer {
       } else if (rock) {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 12 && entity.sourceOwner?.tnt) {
+        const sprite = entity.sourceOwner.tnt.sprite;
+        // TNT owns four frame0 grid clips; its callback never advances ANM.
+        const crop = { Idle: [0, 0], IdleMedium: [32, 0], ReadyToExplode: [0, 32], Blown: [32, 32] }[sprite.animation]!;
+        ctx.drawImage(this.assets.image("gfx/grid/grid_tnt.png"), crop[0]!, crop[1]!, 32, 32, x - 16, y - 16, 32, 32);
+        this.drawnGrid.push({ index, kind: 12, animation: sprite.animation, frame: sprite.frame });
       } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
         // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
         // (State5 once broken); a spawn into a loaded room plays Appear first.
@@ -623,9 +629,11 @@ export class Renderer {
     }
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
-    const actors: Record<number, string> = { 2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+    const actors: Record<number, string> = { 1: "gfx/1000.001_bomb explosion.anm2",
+      2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
       12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
-      17: "gfx/1000.017_poof04.anm2", 21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
+      17: "gfx/1000.017_poof04.anm2", 18: "gfx/1000.018_bomb crater.anm2",
+      21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
       42: "gfx/1000.042_blood gush.anm2", 68: "gfx/1000.021_tiny bug.anm2",
       79: "gfx/1000.012_tear poof_small.anm2", 80: "gfx/1000.012_tear poof_verysmall.anm2" };
     const actor = actors[variant];
@@ -634,12 +642,15 @@ export class Renderer {
     ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
     const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
       [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
-    this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-      { layerScales, overrides: { 0: {
+    const colorOptions = variant === 1
+      ? { color: { tint: sprite.tint, offsets: sprite.offsets } }
+      : { overrides: { 0: {
         RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
         BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
         RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
-        BlueOffset: sprite.offsets[2] * 255 } } });
+        BlueOffset: sprite.offsets[2] * 255 } } };
+    this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
+      { layerScales, ...colorOptions });
     ctx.restore();
   }
   private prepareRoom(room: Room): void {

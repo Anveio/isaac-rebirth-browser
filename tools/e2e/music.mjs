@@ -24,12 +24,17 @@ const output = resolve(value('--output') || join(ROOT, '.cache/e2e/music', Strin
 const count = Number(value('--count') || 2);
 assert.ok(Number.isInteger(count) && count >= 1 && count <= 8);
 await mkdir(output, { recursive: true });
-const generated = JSON.parse((await run('python3', ['tools/original/foundation-seeds.py', '--count', String(count)], { cwd: ROOT })).stdout);
-let cases = [{ name: 'audible-title-floor-pause', code: 'QSYVKMSE', bootEpochSeed: 1700000000, volume: 1 },
-  { name: 'muted-real-lifecycle', code: 'ZG800TRJ', bootEpochSeed: 0, volume: 0 },
-  ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: i % 2 }))];
-let caseFilter;
-if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
+const scenariosPath = flag('--scenarios');
+assert.ok(scenariosPath === undefined || scenariosPath.length > 0, '--scenarios requires a nonempty path');
+let cases, caseFilter;
+if (scenariosPath !== undefined) {
+  ({ cases, caseFilter } = JSON.parse(await readFile(resolve(scenariosPath), 'utf8')));
+} else {
+  const generated = JSON.parse((await run('python3', ['tools/original/foundation-seeds.py', '--count', String(count)], { cwd: ROOT })).stdout);
+  cases = [{ name: 'audible-title-floor-pause', code: 'QSYVKMSE', bootEpochSeed: 1700000000, volume: 1 },
+    { name: 'muted-real-lifecycle', code: 'ZG800TRJ', bootEpochSeed: 0, volume: 0 },
+    ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: i % 2 }))];
+}
 assert.ok(Array.isArray(cases) && cases.length > 0 && cases.length <= 10 && new Set(cases.map(c => c.name)).size === cases.length);
 for (const c of cases) assert.ok(/^[a-zA-Z0-9_-]{1,40}$/.test(c.name) && /^[a-zA-Z0-9]{8}$/.test(c.code) &&
   Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff && (c.volume === 0 || c.volume === 1));
@@ -248,7 +253,7 @@ try {
       const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences, trace.bootInputConfigs);
       for (let i = 0; i < rust.length; i++) assert.equal(exactStateDifference(rust[i], trace.states[i]), null, `Actual callback replay divergence after public command${i}`);
       check('full public states replay actual backend callbacks', rust.length, trace.states.length);
-      const api = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });
+      const api = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: structuredClone(window.__audioApi.events), truncated: window.__audioApi.truncated }; });
       await verifySubmittedMusic(api, directory, check);
       check('independent public API history complete', api.truncated, false); check('production page errors', errors, []);
       const starts = api.events.slice(apiBegin).filter(event => event.type === 'start' && event.channels === 2 && event.when <= event.audioTime + 0.001);
@@ -285,7 +290,7 @@ try {
     finally {
       if (page) {
         const final = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return {
-          state: window.game.snapshot(), audio: window.game.audio(), trace: window.game.trace(), api: { events: window.__audioApi.events, truncated: window.__audioApi.truncated } };
+          state: window.game.snapshot(), audio: window.game.audio(), trace: window.game.trace(), api: { events: structuredClone(window.__audioApi.events), truncated: window.__audioApi.truncated } };
         }).catch(error => ({ captureError: String(error) }));
         if (final.api) for (const event of final.api.events) if (event.pcmBase64) {
           await mkdir(join(directory, 'browser-pcm'), { recursive: true });
