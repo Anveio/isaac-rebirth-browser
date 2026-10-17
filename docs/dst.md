@@ -101,8 +101,9 @@ menus: in play it would simulate ten minutes in one command, repeated by every
 replay and the interpreted WASM differential. Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
-controlled steps, and steers by the published state. Options, Controls
-and Keyboard act on keys held at a tick (the released System poll), so
+controlled steps, and steers by the published state. The menu explorer
+also opens Main's Challenge and Options menus. Options, Controls and
+Keyboard act on keys held at a tick (the released System poll), so
 there the driver holds its presses into ticks, sometimes long enough to
 reach Options' hold repeat. In the Keyboard menu it binds keys, including
 its own play keys, so bindings go missing and back is refused until it

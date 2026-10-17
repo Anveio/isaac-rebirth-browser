@@ -270,6 +270,17 @@ impl Driver {
                 14 => self.press("Escape", 0),
                 _ => self.ticks(e),
             },
+            // The menu explorer opens Main's other menus too: Challenge and
+            // Options (and their Controls and Keyboard pages).
+            Screen::Main if self.persona == Persona::Explorer && self.menu_budget > 0 => {
+                self.menu_budget -= 1;
+                match e.below(20) {
+                    0..=7 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),
+                    8..=14 => self.press("Enter", e.range(0, 2)),
+                    15 => self.press("Escape", 0),
+                    _ => self.ticks(e),
+                }
+            }
             Screen::Main => {
                 if state.main_selection == 0 {
                     match e.below(20) {
@@ -329,8 +340,10 @@ impl Driver {
             }
             // The driver plays with the default keys, so it usually restores
             // them before leaving: the reset row is one Up from the first.
+            // Back is refused while an action has no key.
             Screen::Keyboard if state.keyboard != Keyboard::default() && !e.chance(1, 8) => {
                 let code = match state.controls_menu.selection {
+                    _ if !state.keyboard.complete() && e.chance(1, 6) => "Escape",
                     17 => "Enter",
                     0..=8 => "ArrowUp",
                     _ => "ArrowDown",
