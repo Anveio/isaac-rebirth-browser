@@ -95,6 +95,7 @@ pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
 pub mod maggots;
+pub mod map_presentation;
 pub mod menu_lifecycle;
 pub mod menu_presentation;
 pub mod monstro;
@@ -676,6 +677,10 @@ pub struct State {
     #[serde(default)]
     pub input_configs: keyboard::InputConfigs,
     #[serde(default)]
+    pub map_settings: map_presentation::MapPreferences,
+    #[serde(default)]
+    pub minimap_presentation: map_presentation::MapPresentation,
+    #[serde(default)]
     pub fullscreen: fullscreen::FullscreenState,
     pub challenge_selection: Option<u32>,
     ///Real Config achievement requirements queried for the fresh menu rows.
@@ -908,6 +913,7 @@ impl Game {
             None,
             None,
             keyboard::InputConfigs::default(),
+            None,
         )
     }
     pub fn new_with_resources(
@@ -954,6 +960,48 @@ impl Game {
         fullscreen: Option<fullscreen::FullscreenPreferences>,
         input_configs: Option<keyboard::InputConfigs>,
     ) -> Result<Self, String> {
+        Self::new_with_input_configs_and_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            input_configs,
+            None,
+        )
+    }
+    /// Additive MapOpacity ingress; all legacy callers retain source .3.
+    pub fn new_with_map_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        map: Option<map_presentation::MapPreferences>,
+    ) -> Result<Self, String> {
+        Self::new_with_input_configs_and_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            None,
+            map,
+        )
+    }
+    /// Independent immutable Keyboard and Map owners share one constructor.
+    pub fn new_with_input_configs_and_map_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: Option<keyboard::InputConfigs>,
+        map: Option<map_presentation::MapPreferences>,
+    ) -> Result<Self, String> {
+        let map = map
+            .map(map_presentation::MapPreferences::validate)
+            .transpose()?;
         let input_configs = input_configs
             .map(keyboard::InputConfigs::validate)
             .transpose()?
@@ -981,6 +1029,7 @@ impl Game {
             preferences,
             fullscreen,
             input_configs,
+            map,
         )
     }
     fn new_with_challenges(
@@ -991,6 +1040,7 @@ impl Game {
         preferences: Option<options_menu::AudioPreferences>,
         fullscreen: Option<fullscreen::FullscreenPreferences>,
         input_configs: keyboard::InputConfigs,
+        map: Option<map_presentation::MapPreferences>,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
@@ -1051,6 +1101,8 @@ impl Game {
                 controls_menu: controls_menu::ControlsMenu::default(),
                 keyboard: input_configs.keyboard(),
                 input_configs,
+                map_settings: map.unwrap_or_default(),
+                minimap_presentation: map_presentation::MapPresentation::default(),
                 fullscreen: fullscreen::FullscreenState::from_preferences(fullscreen)?,
                 challenge_selection: None,
                 challenge_unlocked: Vec::new(),
@@ -1706,6 +1758,15 @@ impl Game {
         self.state.profiles[usize::from(self.state.profile - 1)].selected_character =
             self.state.character.clone();
     }
+    fn advance_minimap_full(&mut self) {
+        if self.state.minimap_presentation.advance_full(
+            self.state.public_actions.held[13],
+            self.state.map_settings.opacity,
+        ) {
+            //5B1240 requests585500 on exactly the tenth held Game Full.
+            self.state.run_introduction = RunIntroduction::stage(true);
+        }
+    }
     fn refresh_minimap(&mut self) {
         // Level.UpdateVisibility586940 retains descriptor flags. Fresh Isaac
         // reveals adjacent rooms, but a secret endpoint requires an actually
@@ -1848,6 +1909,7 @@ impl Game {
         self.state.paused = false;
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
+        self.state.minimap_presentation = map_presentation::MapPresentation::default();
         mt::note_update(0);
         //54F471/54F635 clear duration, without writing the independent output.
         self.state
@@ -3410,6 +3472,7 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.run_introduction.active = false;
         self.state.game_update_count = 0;
+        self.state.minimap_presentation = map_presentation::MapPresentation::default();
         if let Some(shake) = &mut self.state.game_shake {
             shake.reset_duration();
         }
@@ -3579,6 +3642,7 @@ impl Game {
                 &self.state.pressed,
                 &mut self.state.audio,
                 &mut self.state.music,
+                &mut self.state.map_settings,
                 &mut self.state.boot_lifecycle.shared,
                 audio_counter,
             )?;
@@ -3609,6 +3673,7 @@ impl Game {
                         &self.state.audio,
                         &self.state.music,
                         &self.state.fullscreen,
+                        &self.state.map_settings,
                     )?;
                     self.state.screen = Screen::Main;
                     //59CAC0 stores the new page now; next iteration's view
@@ -3695,7 +3760,7 @@ impl Game {
             //No source callback has been admitted for these global actions.
             //Their real held/triggered owners remain observable; each actual
             //attempt emits an explicit capability failure, never a fake effect.
-            for action in [11, 12, 13, 16, 17, 18] {
+            for action in [11, 12, 16, 17, 18] {
                 if self.state.public_actions.triggered[action] {
                     self.state.controls_menu.unavailable_actions.push(action);
                 }
@@ -3855,6 +3920,9 @@ impl Game {
             phase,
             self.special_room_assets.as_deref().map(Vec::as_slice),
         )? {
+            if phase == phase::Phase::Update {
+                self.advance_minimap_full();
+            }
             if boss_cleanup {
                 // State3 calls Player.Update at5dde9e before enabling controls
                 // and leaving the transition. The outer actor pass stays frozen.
@@ -4057,6 +4125,7 @@ impl Game {
         }
 
         if phase == phase::Phase::Update {
+            self.advance_minimap_full();
             // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
                 .state
@@ -5795,6 +5864,8 @@ struct InputConfigBoot {
     audio_preferences: Option<options_menu::AudioPreferences>,
     #[serde(default)]
     fullscreen_preferences: Option<fullscreen::FullscreenPreferences>,
+    #[serde(default)]
+    map_preferences: Option<map_presentation::MapPreferences>,
     input_configs: keyboard::InputConfigs,
 }
 #[no_mangle]
@@ -5810,15 +5881,191 @@ pub extern "C" fn reset_with_input_configs(initial_seed: u32, boot_epoch_seed: u
         } else {
             None
         };
-        Game::new_with_input_configs(
+        Game::new_with_input_configs_and_map_preferences(
             initial_seed,
             boot_epoch_seed,
             resources,
             boot.audio_preferences,
             boot.fullscreen_preferences,
             Some(boot.input_configs),
+            boot.map_preferences,
         )
     });
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// All preference values are declared inputs; no platform acknowledgements.
+#[no_mangle]
+pub extern "C" fn reset_with_map_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    reset_with_map_inputs(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_map_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_map_inputs(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            fullscreen,
+            has_audio,
+            sfx_volume,
+            music_volume,
+            map_opacity,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+fn reset_with_map_inputs(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    // The original additive map ABI declares its fullscreen value explicitly.
+    reset_with_map_input_presence(
+        initial_seed,
+        boot_epoch_seed,
+        resources,
+        1,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+/// A map preference does not declare another owner's startup request.
+#[no_mangle]
+pub extern "C" fn reset_with_map_preferences_v2(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    reset_with_map_input_presence(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        has_fullscreen,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_map_preferences_v2(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_map_input_presence(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            has_fullscreen,
+            fullscreen,
+            has_audio,
+            sfx_volume,
+            music_volume,
+            map_opacity,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+fn reset_with_map_input_presence(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let result = if has_fullscreen > 1 || fullscreen > 1 || has_audio > 1 {
+        Err("Initial fullscreen/audio presence flags must be exactly zero or one".into())
+    } else {
+        Game::new_with_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            (has_audio == 1).then_some(options_menu::AudioPreferences {
+                sfx_volume,
+                music_volume,
+            }),
+            (has_fullscreen == 1).then_some(fullscreen::FullscreenPreferences {
+                fullscreen: fullscreen == 1,
+            }),
+            Some(map_presentation::MapPreferences {
+                opacity: map_opacity,
+            }),
+        )
+    };
     match result {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));

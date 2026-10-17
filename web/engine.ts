@@ -361,7 +361,7 @@ export interface State {
     completionCallbacksPending: boolean };
   audio: AudioState;
   music: MusicState;
-  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
+  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean; mapOpacity: string}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
@@ -434,6 +434,8 @@ export interface State {
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
+  mapSettings: MapPreferences;
+  minimapPresentation: {mode: number; expandedLatched: boolean; heldFrames: number; smallAlpha: number; expandedAlpha: number};
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; fireCooldown: number; nextTear: number;
   fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
@@ -452,6 +454,7 @@ export interface State {
 export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }
 export interface AudioPreferences { sfxVolume: number; musicVolume: number; }
 export interface FullscreenPreferences { fullscreen: boolean; }
+export interface MapPreferences { opacity: number; }
 export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
@@ -461,6 +464,10 @@ interface Exports extends WebAssembly.Exports {
   reset_with_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_boot_resources_and_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_boot_resources_and_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
+  reset_with_map_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_boot_resources_and_map_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_map_preferences_v2: (initialSeed: number, bootEpochSeed: number, hasFullscreen: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_boot_resources_and_map_preferences_v2: (initialSeed: number, bootEpochSeed: number, hasFullscreen: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
@@ -491,7 +498,7 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs) {
+  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
@@ -501,7 +508,7 @@ export class Engine {
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
       || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
-    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs); return engine;
+    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs, mapPreferences); return engine;
   }
   private static validateSeed(initialSeed: number) {
     if (!Number.isInteger(initialSeed) || initialSeed < 1 || initialSeed > 0xffffffff)
@@ -511,7 +518,7 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     if (audioPreferences !== undefined && (!audioPreferences ||
@@ -527,6 +534,18 @@ export class Engine {
     if (typeof this.wasm.reset_with_fullscreen_preferences !== 'function' ||
       typeof this.wasm.reset_with_boot_resources_and_fullscreen_preferences !== 'function')
       throw new Error('WASM fullscreen preference owner is stale; rebuild with npm run build:wasm');
+    if (mapPreferences !== undefined && (!mapPreferences || typeof mapPreferences !== 'object' || Array.isArray(mapPreferences) ||
+      Object.keys(mapPreferences).join(',') !== 'opacity' || !Number.isFinite(mapPreferences.opacity) || mapPreferences.opacity<0 || mapPreferences.opacity>1))
+      throw new Error('Initial map preference requires exactly one finite opacity within 0..1');
+    if (mapPreferences !== undefined && (typeof this.wasm.reset_with_map_preferences_v2 !== 'function' ||
+      typeof this.wasm.reset_with_boot_resources_and_map_preferences_v2 !== 'function'))
+      throw new Error('WASM map preference owner is stale; rebuild with npm run build:wasm');
+    const mapReset = (withResources: boolean) => {
+      const reset = withResources ? this.wasm.reset_with_boot_resources_and_map_preferences_v2 : this.wasm.reset_with_map_preferences_v2;
+      return reset(initialSeed, bootEpochSeed, Number(fullscreenPreferences !== undefined),
+        Number(fullscreenPreferences?.fullscreen ?? false), Number(audioPreferences !== undefined),
+        audioPreferences?.sfxVolume ?? 0, audioPreferences?.musicVolume ?? 0, mapPreferences!.opacity);
+    };
     const displayReset = (withResources: boolean) => {
       const reset = withResources ? this.wasm.reset_with_boot_resources_and_fullscreen_preferences : this.wasm.reset_with_fullscreen_preferences;
       return reset(initialSeed, bootEpochSeed, Number(fullscreenPreferences!.fullscreen), Number(audioPreferences !== undefined),
@@ -542,13 +561,14 @@ export class Engine {
         if (resourcePointer === 0) throw new Error('WASM resource allocation failed');
         new Uint8Array(this.wasm.memory.buffer,resourcePointer,resourceBytes.length).set(resourceBytes);
       }
-      const bytes = new TextEncoder().encode(JSON.stringify({withResources:resources !== undefined, audioPreferences, fullscreenPreferences, inputConfigs}));
+      const bytes = new TextEncoder().encode(JSON.stringify({withResources:resources !== undefined, audioPreferences, fullscreenPreferences, inputConfigs, mapPreferences}));
       if (bytes.length > 65536) throw new Error('Keyboard startup inputs exceed64KiB');
       const pointer = this.wasm.request_ptr(bytes.length);
       if (pointer === 0) throw new Error('Keyboard startup input allocation failed');
       new Uint8Array(this.wasm.memory.buffer,pointer,bytes.length).set(bytes);
       result = this.wasm.reset_with_input_configs(initialSeed,bootEpochSeed);
-    } else if (resources === undefined) result = fullscreenPreferences !== undefined ? displayReset(false)
+    } else if (resources === undefined) result = mapPreferences !== undefined ? mapReset(false)
+      : fullscreenPreferences !== undefined ? displayReset(false)
       : audioPreferences === undefined ? this.wasm.reset(initialSeed, bootEpochSeed)
       : this.wasm.reset_with_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     else {
@@ -559,7 +579,8 @@ export class Engine {
       const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = fullscreenPreferences !== undefined ? displayReset(true)
+      result = mapPreferences !== undefined ? mapReset(true)
+        : fullscreenPreferences !== undefined ? displayReset(true)
         : audioPreferences === undefined ? this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed)
         : this.wasm.reset_with_boot_resources_and_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     }

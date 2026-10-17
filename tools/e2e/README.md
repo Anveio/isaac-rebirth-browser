@@ -168,10 +168,31 @@ recorded navigation hold. The critical 237 burst stays unchanged; held menu
 navigation varies below the source repeat threshold. Every case completes the
 public Tab/seed/normal-start route and requires actual final run-seed readback.
 
+The current registered suite and direct driver default declare preference schema
+3 before generating or replaying cases. `--preferences-schema 3` seeds and reads
+`isaac-rebirth.options.v3`, including an unchanged `mapOpacity: "0.3000"`.
+The archived `preference-contract.json` and V3 observer identity bind this public
+startup IO separately from the unchanged physical input bank. V3 requires actual
+load/save events, the selected storage key and values, actual Browser map-setting
+words, and the Native Back file's serialized MapOpacity. The existing Native
+owner version, audio/PCM, clock, seed and physical-input checks remain mandatory.
+This is an audio/Back regression contract; it does not qualify Map arrows,
+minimap rendering, schema migration, malformed settings or process reload.
+
+Use `--preferences-schema 2` explicitly to replay the historical V2 producer and
+comparer branch against its corresponding old artifact. It retains the exact
+V2 storage object and comparison fields; it cannot qualify the current V3 Back
+save. A bank records keys and clocks, not a preference version: replay it with
+the original declared flag and artifact, or declare a new V3 qualification.
+No preference version is inferred from observed storage. Preserved V2 results,
+including the 866 checks below, are not regraded as V3 evidence.
+
 ```sh
-npm run test:e2e -- options-audio --no-build --production-directory FROZEN
-npm run test:e2e -- options-audio --scenarios SAVED_BANK --case audio-arrows-back-v1 --no-build --production-directory FROZEN
-npm run test:e2e -- options-audio --scenarios references/isaac/cases/options-audio/recorded-fixed-jwmm-epoch-holds-v1.json --no-build --production-directory FROZEN
+npm run test:e2e -- options-audio --preferences-schema 3 --no-build --production-directory FROZEN
+npm run test:e2e -- options-audio --preferences-schema 3 --scenarios SAVED_BANK --case audio-arrows-back-v1 --no-build --production-directory FROZEN
+npm run test:e2e -- options-audio --preferences-schema 3 --scenarios references/isaac/cases/options-audio/recorded-fixed-jwmm-epoch-holds-v1.json --no-build --production-directory FROZEN
+# Historical V2 replay keeps its old artifact and explicit protocol:
+npm run test:e2e -- options-audio --preferences-schema 2 --scenarios HISTORICAL_BANK --no-build --production-directory HISTORICAL_V2_ARTIFACT
 ```
 
 Requests, configured-wrapper identity, actual IsPlaying/gain writes, class
@@ -643,3 +664,33 @@ failures](../../docs/shop-economy.md#first-common-sku-controls). Fresh Native
 capture through the promoted wrapper, the default OS approach case and the
 three remaining Battery branch controls remain unqualified. These recorded
 fixture results do not establish complete current-main or retail-floor parity.
+
+### Map opacity and map surfaces
+
+`options-map` uses the canonical paired capture and public clock. Its default
+bank runs the fixed31-Native/30-Browser route and one fresh unfiltered OS run
+seed with an independent boot epoch. Both cases keep the physical menu/Map
+route, row3 repeat/clamp checks, changed-value Back, seeded normal start and two
+short Tab consumers. The public input case and rectangle contract contain no
+Original capture or authored media.
+
+```sh
+npm run test:e2e -- options-map --no-build --production-directory FROZEN
+npm run test:e2e -- options-map --scenarios SAVED_BANK --no-build --production-directory FROZEN
+```
+
+The executing Source is archived before the first fresh draw. All draws and the
+complete generated bank are retained before case filtering. Replay validates
+the exact recorded bank without drawing entropy or selecting by game outcome.
+Every declared case runs even after an earlier comparison failure; partial
+results, actual logs, reports and raw owners remain available.
+
+Actual settings/Map manager fields, trusted physical inputs, clock/provenance,
+Back file and V3 storage, configured237 and Browser render submissions are
+required. Missing owners fail. The fixed declared menu-gauge and Playing-map
+rectangles compare exact RGBA without adaptive alignment or masks; a mismatch
+fails this render gate. Full-frame RGBA stays an explicit diagnostic. Old84 Map
+and V2 Options results remain historical; this suite never regrades them.
+Natural reload/migration, banner/controller, fullmix and complete sharedMT
+parity need separate evidence. Source registration alone is not a passing live
+qualification.
