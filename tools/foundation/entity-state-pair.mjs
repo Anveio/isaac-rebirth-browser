@@ -16,7 +16,8 @@ const option = (name, required = true) => {
   return at >= 0 ? process.argv[at + 1] : undefined;
 };
 const directory = resolve(option('--case'));
-const named = JSON.parse(readFileSync(resolve(directory, 'case.json'), 'utf8')).entity?.specs ?? [option('--entity')];
+const caseEntity = JSON.parse(readFileSync(resolve(directory, 'case.json'), 'utf8')).entity ?? {};
+const named = caseEntity.specs ?? [option('--entity')];
 const specs = await Promise.all(named.map(loadSpec));
 const native = loadManifest(directory, 'original'), browser = loadManifest(directory, 'browser');
 assert.equal(native.status, 'pass', 'Fresh original capture must pass');
@@ -40,16 +41,19 @@ for (const spec of specs) {
   }
   assert.ok(rows.length, `${spec.name}: a case must compare at least one gameplay capture`);
   const execution = markers(directory, spec);
+  // A case may require more markers (boss-scenarios.py crossing: both
+  // overlapping draw orders).
+  const required = [...new Set([...spec.required, ...(caseEntity.required ?? [])])];
   for (const [side, reached] of Object.entries(execution))
-    for (const name of spec.required) rows.push({ label: 'execution', field: `${side}.${name}`, expected: true, actual: reached[name],
+    for (const name of required) rows.push({ label: 'execution', field: `${side}.${name}`, expected: true, actual: reached[name],
       status: reached[name] ? 'pass' : 'fail' });
   for (const row of rows) checks.push({ entity: spec.name, ...row });
   graded[spec.name] = { status: rows.every(row => row.status === 'pass') ? 'pass' : 'fail', checks: rows.length,
-    failures: rows.filter(row => row.status === 'fail').length, required: spec.required, execution };
+    failures: rows.filter(row => row.status === 'fail').length, required, execution };
 }
 const status = checks.every(row => row.status === 'pass') ? 'pass' : 'fail';
 writeFileSync(resolve(option('--output')), JSON.stringify({ schema: 2, entities: named, status, specs: graded,
-  scope: `Every authored NPC identity in the room, each graded spec's shared and spec fields, its drawn sprite scale, room/door/manager state and enemy projectile seeds are exact and required at every gameplay capture; both games must reach each spec's required lifecycle markers.`,
+  scope: `Every authored NPC identity in the room, each graded spec's shared and spec fields, its drawn sprite scale and draw order against the player, room/door/manager state and enemy projectile seeds are exact and required at every gameplay capture; both games must reach each spec's required lifecycle markers.`,
   checks }, null, 2) + '\n');
 console.log(JSON.stringify({ status, checks: checks.length, failures: checks.filter(row => row.status === 'fail').length, specs: graded }));
 process.exitCode = status === 'pass' ? 0 : 1;

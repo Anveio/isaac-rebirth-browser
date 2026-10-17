@@ -2301,6 +2301,33 @@ impl Game {
         self.refresh_stage_effects();
         Ok(suppressed_entities)
     }
+    /// Manager Update tail 452760 over the Player/Entity_NPC render array.
+    /// Both classes use the base Entity virtual+50 key 441bd0:
+    /// floor(f32(y * 100 + 10030 + 0.5)) plus the integer Entity+460 addend,
+    /// compared unsigned. Entity_Player::Init 519350 sets that addend to 5
+    /// (519485) after Entity::Init clears it, so Isaac draws over an NPC
+    /// standing up to 0.05 below him. NPCs keep 0 unless their family sets it
+    /// (Fireplace AI 49a530 writes -1000 at 49a681/49a886/49affe).
+    fn sort_render_array(&mut self) {
+        let key = |y: f32, offset: i32| {
+            ((((y * 100.0) + 10030.0) + 0.5).floor() as i64 as u32).wrapping_add(offset as u32)
+        };
+        let state = &mut self.state;
+        // Player x/y are screen units; the key reads world Entity+44c.
+        let player = key(bombs::player_world(state).y, 5);
+        let npcs = &state.room.npcs;
+        state.actor_scheduler.sort_render(|actor| match actor.kind {
+            actors::ActorKind::Player => Some(player),
+            actors::ActorKind::Npc => npcs.iter().find(|npc| npc.id == actor.id).map(|npc| {
+                let offset = npc
+                    .fireplace
+                    .as_ref()
+                    .map_or(0, |fire| fire.render_order_offset);
+                key(npc.position.y, offset)
+            }),
+            _ => None,
+        });
+    }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         attack_runtime::reset_room_schedule(&mut self.state);
@@ -2888,6 +2915,8 @@ impl Game {
                 if !restoring {
                     traversal::begin_boss_scene(&mut self.state);
                 }
+                // The admitting Room.Update ends its manager pass with 452760.
+                self.sort_render_array();
             }
             self.refresh_minimap();
             if self.state.room_transition.is_none() {
@@ -3175,6 +3204,10 @@ impl Game {
             actors::ActorKind::Laser => self.state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => true,
         });
+        if phase == phase::Phase::Update {
+            // Manager Update454df0 ends with the render sort 452760 (45529a).
+            self.sort_render_array();
+        }
         if phase != phase::Phase::Skipped {
             self.state.music.advance();
         }
