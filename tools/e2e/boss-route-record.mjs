@@ -232,7 +232,12 @@ try {
       }
       await step(30); state = await view();
     }
-    await walk({ x: 80, y: 400 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'corner walk');
+    // An authored corner object (a Monstro room's poop in cell 106) parks the
+    // player in the nearest open bottom-left cell, pressed against it.
+    const blocked = [...AWARD_CELLS, ...pickupCells(state)];
+    const park = [106, 107, 91, 108, 92, 76].find(cell => state.grid.solid[cell] !== '1' && !blocked.includes(cell));
+    if (park === undefined) throw new Error('No open bottom-left cell to park in');
+    await walk({ x: 40 + park % 15 * 40, y: 120 + Math.floor(park / 15) * 40 }, blocked, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
     state = await view();

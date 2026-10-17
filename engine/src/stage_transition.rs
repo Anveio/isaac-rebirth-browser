@@ -370,11 +370,14 @@ fn stage_name(stage: u32) -> &'static str {
 }
 
 /// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30
-/// destroy. Poop has no Destroy override (561c00 is Hurt(4)), so a tail poop
-/// runs Poop Hurt56a390 with its draws, particles, explosion and drop roll.
-/// Other occupants' destroys, unported Hurt branches and the 5c7f30
-/// relocation when collision remains are not admitted: those cells keep their
-/// object and the award still spawns there.
+/// destroy with immediate=1. Poop has no Destroy override (561c00 is
+/// Hurt(4)), so a tail poop runs Poop Hurt56a390 with its draws, particles,
+/// explosion and drop roll. An ordinary or tinted rock (an authored rock on a
+/// Larry Jr. room's award cell) breaks through Rock.Destroy56c670, whose
+/// immediate flag only changes bomb rocks. Other occupants' destroys,
+/// unported Hurt branches and the 5c7f30 relocation when collision remains
+/// are not admitted: those cells keep their object and the award still
+/// spawns there.
 fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String> {
     let occupant = state
         .room
@@ -385,9 +388,15 @@ fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String
         .entity
         .as_ref()
         .map(|entity| entity.kind);
-    if occupant == Some(14) {
-        let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
-        outcome.record_frontier(state, "bossAward");
+    match occupant {
+        Some(14) => {
+            let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
+            outcome.record_frontier(state, "bossAward");
+        }
+        Some(2 | 4) => {
+            crate::rock_blast::destroy_rock(state, index)?;
+        }
+        _ => {}
     }
     Ok(())
 }
