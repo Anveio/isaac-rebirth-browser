@@ -32,7 +32,8 @@ def digest(path):
 
 
 case = json.loads(a.case.read_bytes())
-pocket = 'pocketInit' in case or 'pocketCollection' in case
+common_sku = case.get('commonSku', {}).get('schema') == 'source-public-common-sku-v1'
+pocket = 'pocketInit' in case or 'pocketCollection' in case or common_sku
 normal_pocket = pocket and case['publicMenuRoute'] == 'seeded-normal'
 native_dir, browser_dir = a.original_directory or a.directory / 'original', a.directory / ('wasm' if a.wasm_node else 'browser')
 pins = {str(path): digest(path) for directory in (native_dir, browser_dir) if directory.exists()
@@ -238,7 +239,16 @@ def native_readback():
     input_meta = json.loads((native_dir / 'composition-input.json').read_bytes())
     if pocket:
         expect(input_meta['declaredSfxVolume'], case['sfxVolume'])
-        expect(input_meta['requiredPocketContract'], case['pocketInit'] if 'pocketInit' in case else case['pocketCollection'])
+        if common_sku:
+            # These are declared input obligations, not captured game state.
+            # Legacy captures retain extra source-provenance metadata unchanged.
+            fields = ('schema', 'sourceOnlyFixture', 'challengeId', 'acquiredActiveId',
+                      'target', 'publicCheckpointAliases')
+            actual = input_meta['requiredCommonSkuContract']
+            expect({key: actual[key] for key in fields},
+                   {key: case['commonSku'][key] for key in fields})
+        else:
+            expect(input_meta['requiredPocketContract'], case['pocketInit'] if 'pocketInit' in case else case['pocketCollection'])
     if 'pillUse' in case:
         expect(input_meta['requiredPillUseContract'], case['pillUse'])
     expect(input_meta['nativeDepotChanged'], False)

@@ -1,0 +1,4234 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "battery90-free-no-active",
+      "publicMenuRoute": "seeded-normal",
+      "publicSeedCode": "PWTJRYKS",
+      "publicRunSeed": 1666054188,
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "sfxVolume": 1.0,
+      "actions": [
+        {
+          "label": "sku-phase-0000",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "sku-phase-0001",
+          "keys": [
+            "w"
+          ],
+          "presentations": 38
+        },
+        {
+          "label": "sku-phase-0002",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0003",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0004",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0005",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0006",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0007",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0008",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0009",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0010",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0011",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0012",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0013",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0014",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0015",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0016",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0017",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0018",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0019",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0020",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0021",
+          "keys": [],
+          "presentations": 24
+        }
+      ],
+      "fixtureRecipe": {
+        "schema": "shop-common-sku-local-v1",
+        "mode": "free-no-active"
+      },
+      "commonSku": {
+        "schema": "source-public-common-sku-v1",
+        "sourceOnlyFixture": true,
+        "challengeId": 0,
+        "acquiredActiveId": null,
+        "target": "battery90",
+        "publicCheckpointAliases": [
+          {
+            "publicLabel": "released-ready",
+            "gameplayPresentation": 96,
+            "actionIndex": 0
+          },
+          {
+            "publicLabel": "battery-before-contact",
+            "gameplayPresentation": 134,
+            "actionIndex": 1
+          },
+          {
+            "publicLabel": "battery-contact-00",
+            "gameplayPresentation": 135,
+            "actionIndex": 2
+          },
+          {
+            "publicLabel": "battery-contact-01",
+            "gameplayPresentation": 136,
+            "actionIndex": 3
+          },
+          {
+            "publicLabel": "battery-contact-02",
+            "gameplayPresentation": 137,
+            "actionIndex": 4
+          },
+          {
+            "publicLabel": "battery-contact-03",
+            "gameplayPresentation": 138,
+            "actionIndex": 5
+          },
+          {
+            "publicLabel": "battery-contact-04",
+            "gameplayPresentation": 139,
+            "actionIndex": 6
+          },
+          {
+            "publicLabel": "battery-contact-05",
+            "gameplayPresentation": 140,
+            "actionIndex": 7
+          },
+          {
+            "publicLabel": "battery-contact-06",
+            "gameplayPresentation": 141,
+            "actionIndex": 8
+          },
+          {
+            "publicLabel": "battery-contact-07",
+            "gameplayPresentation": 142,
+            "actionIndex": 9
+          },
+          {
+            "publicLabel": "battery-contact-08",
+            "gameplayPresentation": 143,
+            "actionIndex": 10
+          },
+          {
+            "publicLabel": "battery-contact-09",
+            "gameplayPresentation": 144,
+            "actionIndex": 11
+          },
+          {
+            "publicLabel": "battery-contact-10",
+            "gameplayPresentation": 145,
+            "actionIndex": 12
+          },
+          {
+            "publicLabel": "battery-contact-11",
+            "gameplayPresentation": 146,
+            "actionIndex": 13
+          },
+          {
+            "publicLabel": "battery-contact-12",
+            "gameplayPresentation": 147,
+            "actionIndex": 14
+          },
+          {
+            "publicLabel": "battery-contact-13",
+            "gameplayPresentation": 148,
+            "actionIndex": 15
+          },
+          {
+            "publicLabel": "battery-contact-14",
+            "gameplayPresentation": 149,
+            "actionIndex": 16
+          },
+          {
+            "publicLabel": "battery-contact-15",
+            "gameplayPresentation": 150,
+            "actionIndex": 17
+          },
+          {
+            "publicLabel": "battery-contact-16",
+            "gameplayPresentation": 151,
+            "actionIndex": 18
+          },
+          {
+            "publicLabel": "battery-contact-17",
+            "gameplayPresentation": 152,
+            "actionIndex": 19
+          },
+          {
+            "publicLabel": "battery-contact-18",
+            "gameplayPresentation": 153,
+            "actionIndex": 20
+          },
+          {
+            "publicLabel": "battery-outcome",
+            "gameplayPresentation": 177,
+            "actionIndex": 21
+          }
+        ],
+        "branch": "free-no-active"
+      },
+      "scope": "Source-authored normal challenge0 resource fixture, reconstructed locally by named recipe. Public keys/ticks only; no Native observations or runtime state injection.",
+      "origin": "contrived"
+    },
+    {
+      "name": "battery90-paid-no-active",
+      "publicMenuRoute": "seeded-normal",
+      "publicSeedCode": "PWTJRYKS",
+      "publicRunSeed": 1666054188,
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "sfxVolume": 1.0,
+      "actions": [
+        {
+          "label": "sku-phase-0000",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "sku-phase-0001",
+          "keys": [
+            "w"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "sku-phase-0002",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0003",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0004",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0005",
+          "keys": [
+            "s"
+          ],
+          "presentations": 58
+        },
+        {
+          "label": "sku-phase-0006",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0007",
+          "keys": [
+            "a"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "sku-phase-0008",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0009",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0010",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0011",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0012",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0013",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0014",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0015",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0016",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0017",
+          "keys": [
+            "e"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0018",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0019",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0020",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0021",
+          "keys": [
+            "d"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0022",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0023",
+          "keys": [
+            "d"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0024",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0025",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0026",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0027",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0028",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0029",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0030",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0031",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0032",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0033",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0034",
+          "keys": [],
+          "presentations": 140
+        },
+        {
+          "label": "sku-phase-0035",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0036",
+          "keys": [
+            "a"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0037",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0038",
+          "keys": [
+            "a"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0039",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 16
+        },
+        {
+          "label": "sku-phase-0040",
+          "keys": [
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0041",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0042",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 22
+        },
+        {
+          "label": "sku-phase-0043",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0044",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0045",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0046",
+          "keys": [
+            "a"
+          ],
+          "presentations": 72
+        },
+        {
+          "label": "sku-phase-0047",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0048",
+          "keys": [],
+          "presentations": 35
+        },
+        {
+          "label": "sku-phase-0049",
+          "keys": [
+            "d"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "sku-phase-0050",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0051",
+          "keys": [
+            "d"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "sku-phase-0052",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 42
+        },
+        {
+          "label": "sku-phase-0053",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0054",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0055",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0056",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0057",
+          "keys": [
+            "a"
+          ],
+          "presentations": 29
+        },
+        {
+          "label": "sku-phase-0058",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0059",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 15
+        },
+        {
+          "label": "sku-phase-0060",
+          "keys": [
+            "s"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0061",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0062",
+          "keys": [
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0063",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0064",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0065",
+          "keys": [
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0066",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 7
+        },
+        {
+          "label": "sku-phase-0067",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0068",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0069",
+          "keys": [
+            "d"
+          ],
+          "presentations": 11
+        },
+        {
+          "label": "sku-phase-0070",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0071",
+          "keys": [
+            "d"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0072",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0073",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 15
+        },
+        {
+          "label": "sku-phase-0074",
+          "keys": [
+            "s"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0075",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 5
+        },
+        {
+          "label": "sku-phase-0076",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0077",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0078",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0079",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0080",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0081",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0082",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0083",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0084",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0085",
+          "keys": [
+            "a"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0086",
+          "keys": [
+            "a"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0087",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0088",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0089",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0090",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0091",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0092",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0093",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0094",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0095",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0096",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0097",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0098",
+          "keys": [
+            "d"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0099",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0100",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0101",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0102",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0103",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0104",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0105",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0106",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0107",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0108",
+          "keys": [],
+          "presentations": 120
+        }
+      ],
+      "fixtureRecipe": {
+        "schema": "shop-common-sku-local-v1",
+        "mode": "paid-no-active"
+      },
+      "commonSku": {
+        "schema": "source-public-common-sku-v1",
+        "sourceOnlyFixture": true,
+        "challengeId": 0,
+        "acquiredActiveId": null,
+        "target": "battery90",
+        "publicCheckpointAliases": [
+          {
+            "publicLabel": "reused-route-start",
+            "gameplayPresentation": 60,
+            "actionIndex": 0
+          },
+          {
+            "publicLabel": "authored-funding-collected",
+            "gameplayPresentation": 158,
+            "actionIndex": 4
+          },
+          {
+            "publicLabel": "authored-funding-junction-arrival",
+            "gameplayPresentation": 263,
+            "actionIndex": 6
+          },
+          {
+            "publicLabel": "authored-secret-bomb-position",
+            "gameplayPresentation": 389,
+            "actionIndex": 16
+          },
+          {
+            "publicLabel": "authored-secret-bomb-born",
+            "gameplayPresentation": 390,
+            "actionIndex": 17
+          },
+          {
+            "publicLabel": "authored-secret-bomb-retreat",
+            "gameplayPresentation": 494,
+            "actionIndex": 33
+          },
+          {
+            "publicLabel": "authored-secret-bomb-complete",
+            "gameplayPresentation": 634,
+            "actionIndex": 34
+          },
+          {
+            "publicLabel": "authored-secret-arrival",
+            "gameplayPresentation": 775,
+            "actionIndex": 45
+          },
+          {
+            "publicLabel": "authored-secret-key-contact-0",
+            "gameplayPresentation": 867,
+            "actionIndex": 47
+          },
+          {
+            "publicLabel": "authored-secret-keys-collected",
+            "gameplayPresentation": 902,
+            "actionIndex": 48
+          },
+          {
+            "publicLabel": "authored-secret-return",
+            "gameplayPresentation": 1039,
+            "actionIndex": 50
+          },
+          {
+            "publicLabel": "authored-shop-arrival",
+            "gameplayPresentation": 1175,
+            "actionIndex": 56
+          },
+          {
+            "publicLabel": "priced-stock-funded",
+            "gameplayPresentation": 1175,
+            "actionIndex": 56
+          },
+          {
+            "publicLabel": "paid-before-approach",
+            "gameplayPresentation": 1374,
+            "actionIndex": 72
+          },
+          {
+            "publicLabel": "paid-before-contact",
+            "gameplayPresentation": 1397,
+            "actionIndex": 75
+          },
+          {
+            "publicLabel": "paid-contact-00",
+            "gameplayPresentation": 1398,
+            "actionIndex": 76
+          },
+          {
+            "publicLabel": "paid-contact-01",
+            "gameplayPresentation": 1399,
+            "actionIndex": 77
+          },
+          {
+            "publicLabel": "paid-contact-02",
+            "gameplayPresentation": 1400,
+            "actionIndex": 78
+          },
+          {
+            "publicLabel": "paid-contact-03",
+            "gameplayPresentation": 1401,
+            "actionIndex": 79
+          },
+          {
+            "publicLabel": "paid-contact-04",
+            "gameplayPresentation": 1402,
+            "actionIndex": 80
+          },
+          {
+            "publicLabel": "paid-contact-05",
+            "gameplayPresentation": 1403,
+            "actionIndex": 81
+          },
+          {
+            "publicLabel": "paid-contact-06",
+            "gameplayPresentation": 1404,
+            "actionIndex": 82
+          },
+          {
+            "publicLabel": "paid-contact-07",
+            "gameplayPresentation": 1405,
+            "actionIndex": 83
+          },
+          {
+            "publicLabel": "paid-contact-08",
+            "gameplayPresentation": 1406,
+            "actionIndex": 84
+          },
+          {
+            "publicLabel": "paid-contact-09",
+            "gameplayPresentation": 1407,
+            "actionIndex": 85
+          },
+          {
+            "publicLabel": "paid-contact-10",
+            "gameplayPresentation": 1408,
+            "actionIndex": 86
+          },
+          {
+            "publicLabel": "paid-contact-11",
+            "gameplayPresentation": 1409,
+            "actionIndex": 87
+          },
+          {
+            "publicLabel": "paid-contact-12",
+            "gameplayPresentation": 1410,
+            "actionIndex": 88
+          },
+          {
+            "publicLabel": "paid-contact-13",
+            "gameplayPresentation": 1411,
+            "actionIndex": 89
+          },
+          {
+            "publicLabel": "paid-contact-14",
+            "gameplayPresentation": 1412,
+            "actionIndex": 90
+          },
+          {
+            "publicLabel": "paid-contact-15",
+            "gameplayPresentation": 1413,
+            "actionIndex": 91
+          },
+          {
+            "publicLabel": "paid-contact-16",
+            "gameplayPresentation": 1414,
+            "actionIndex": 92
+          },
+          {
+            "publicLabel": "paid-contact-17",
+            "gameplayPresentation": 1415,
+            "actionIndex": 93
+          },
+          {
+            "publicLabel": "paid-contact-18",
+            "gameplayPresentation": 1416,
+            "actionIndex": 94
+          },
+          {
+            "publicLabel": "paid-contact-19",
+            "gameplayPresentation": 1417,
+            "actionIndex": 95
+          },
+          {
+            "publicLabel": "paid-contact-20",
+            "gameplayPresentation": 1418,
+            "actionIndex": 96
+          },
+          {
+            "publicLabel": "paid-contact-21",
+            "gameplayPresentation": 1419,
+            "actionIndex": 97
+          },
+          {
+            "publicLabel": "paid-contact-22",
+            "gameplayPresentation": 1420,
+            "actionIndex": 98
+          },
+          {
+            "publicLabel": "paid-contact-23",
+            "gameplayPresentation": 1421,
+            "actionIndex": 99
+          },
+          {
+            "publicLabel": "paid-contact-24",
+            "gameplayPresentation": 1422,
+            "actionIndex": 100
+          },
+          {
+            "publicLabel": "paid-contact-25",
+            "gameplayPresentation": 1423,
+            "actionIndex": 101
+          },
+          {
+            "publicLabel": "paid-contact-26",
+            "gameplayPresentation": 1424,
+            "actionIndex": 102
+          },
+          {
+            "publicLabel": "paid-contact-27",
+            "gameplayPresentation": 1425,
+            "actionIndex": 103
+          },
+          {
+            "publicLabel": "paid-contact-28",
+            "gameplayPresentation": 1426,
+            "actionIndex": 104
+          },
+          {
+            "publicLabel": "paid-contact-29",
+            "gameplayPresentation": 1427,
+            "actionIndex": 105
+          },
+          {
+            "publicLabel": "paid-contact-30",
+            "gameplayPresentation": 1428,
+            "actionIndex": 106
+          },
+          {
+            "publicLabel": "paid-contact-31",
+            "gameplayPresentation": 1429,
+            "actionIndex": 107
+          },
+          {
+            "publicLabel": "paid-outcome",
+            "gameplayPresentation": 1549,
+            "actionIndex": 108
+          }
+        ],
+        "branch": "paid-no-active"
+      },
+      "scope": "Source-authored normal challenge0 resource fixture, reconstructed locally by named recipe. Public keys/ticks only; no Native observations or runtime state injection.",
+      "origin": "contrived"
+    },
+    {
+      "name": "battery90-paid-undercharged",
+      "publicMenuRoute": "seeded-normal",
+      "publicSeedCode": "PWTJRYKS",
+      "publicRunSeed": 1666054188,
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "sfxVolume": 1.0,
+      "actions": [
+        {
+          "label": "sku-phase-0000",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "sku-phase-0001",
+          "keys": [
+            "w"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "sku-phase-0002",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0003",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0004",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0005",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0006",
+          "keys": [
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0007",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 7
+        },
+        {
+          "label": "sku-phase-0008",
+          "keys": [],
+          "presentations": 120
+        },
+        {
+          "label": "sku-phase-0009",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 40
+        },
+        {
+          "label": "sku-phase-0010",
+          "keys": [
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0011",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0012",
+          "keys": [
+            "s"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0013",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0014",
+          "keys": [
+            "a"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "sku-phase-0015",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0016",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0017",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0018",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0019",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0020",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0021",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0022",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0023",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0024",
+          "keys": [
+            "e"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0025",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0026",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0027",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0028",
+          "keys": [
+            "d"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0029",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0030",
+          "keys": [
+            "d"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0031",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0032",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0033",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0034",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0035",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0036",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0037",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0038",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0039",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0040",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0041",
+          "keys": [],
+          "presentations": 140
+        },
+        {
+          "label": "sku-phase-0042",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0043",
+          "keys": [
+            "a"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0044",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0045",
+          "keys": [
+            "a"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0046",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 16
+        },
+        {
+          "label": "sku-phase-0047",
+          "keys": [
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0048",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0049",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 22
+        },
+        {
+          "label": "sku-phase-0050",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0051",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0052",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0053",
+          "keys": [
+            "a"
+          ],
+          "presentations": 72
+        },
+        {
+          "label": "sku-phase-0054",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0055",
+          "keys": [],
+          "presentations": 35
+        },
+        {
+          "label": "sku-phase-0056",
+          "keys": [
+            "d"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "sku-phase-0057",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0058",
+          "keys": [
+            "d"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "sku-phase-0059",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 42
+        },
+        {
+          "label": "sku-phase-0060",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0061",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0062",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0063",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0064",
+          "keys": [
+            "space"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0065",
+          "keys": [],
+          "presentations": 64
+        },
+        {
+          "label": "sku-phase-0066",
+          "keys": [
+            "a"
+          ],
+          "presentations": 29
+        },
+        {
+          "label": "sku-phase-0067",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0068",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 15
+        },
+        {
+          "label": "sku-phase-0069",
+          "keys": [
+            "s"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0070",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0071",
+          "keys": [
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0072",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0073",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0074",
+          "keys": [
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0075",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 7
+        },
+        {
+          "label": "sku-phase-0076",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0077",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0078",
+          "keys": [
+            "d"
+          ],
+          "presentations": 11
+        },
+        {
+          "label": "sku-phase-0079",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0080",
+          "keys": [
+            "d"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0081",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0082",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 15
+        },
+        {
+          "label": "sku-phase-0083",
+          "keys": [
+            "s"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0084",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 5
+        },
+        {
+          "label": "sku-phase-0085",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0086",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0087",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0088",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0089",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0090",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0091",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0092",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0093",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0094",
+          "keys": [
+            "a"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0095",
+          "keys": [
+            "a"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0096",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0097",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0098",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0099",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0100",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0101",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0102",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0103",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0104",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0105",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0106",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0107",
+          "keys": [
+            "d"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0108",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0109",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0110",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0111",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0112",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0113",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0114",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0115",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0116",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0117",
+          "keys": [],
+          "presentations": 120
+        }
+      ],
+      "fixtureRecipe": {
+        "schema": "shop-common-sku-local-v1",
+        "mode": "paid-undercharged"
+      },
+      "commonSku": {
+        "schema": "source-public-common-sku-v1",
+        "sourceOnlyFixture": true,
+        "challengeId": 0,
+        "acquiredActiveId": 45,
+        "target": "battery90",
+        "publicCheckpointAliases": [
+          {
+            "publicLabel": "reused-route-start",
+            "gameplayPresentation": 60,
+            "actionIndex": 0
+          },
+          {
+            "publicLabel": "authored-funding-collected",
+            "gameplayPresentation": 158,
+            "actionIndex": 4
+          },
+          {
+            "publicLabel": "active-pedestal-granted",
+            "gameplayPresentation": 307,
+            "actionIndex": 8
+          },
+          {
+            "publicLabel": "authored-funding-junction-arrival",
+            "gameplayPresentation": 419,
+            "actionIndex": 13
+          },
+          {
+            "publicLabel": "authored-secret-bomb-position",
+            "gameplayPresentation": 545,
+            "actionIndex": 23
+          },
+          {
+            "publicLabel": "authored-secret-bomb-born",
+            "gameplayPresentation": 546,
+            "actionIndex": 24
+          },
+          {
+            "publicLabel": "authored-secret-bomb-retreat",
+            "gameplayPresentation": 650,
+            "actionIndex": 40
+          },
+          {
+            "publicLabel": "authored-secret-bomb-complete",
+            "gameplayPresentation": 790,
+            "actionIndex": 41
+          },
+          {
+            "publicLabel": "authored-secret-arrival",
+            "gameplayPresentation": 931,
+            "actionIndex": 52
+          },
+          {
+            "publicLabel": "authored-secret-key-contact-0",
+            "gameplayPresentation": 1023,
+            "actionIndex": 54
+          },
+          {
+            "publicLabel": "authored-secret-keys-collected",
+            "gameplayPresentation": 1058,
+            "actionIndex": 55
+          },
+          {
+            "publicLabel": "authored-secret-return",
+            "gameplayPresentation": 1195,
+            "actionIndex": 57
+          },
+          {
+            "publicLabel": "authored-shop-arrival",
+            "gameplayPresentation": 1331,
+            "actionIndex": 63
+          },
+          {
+            "publicLabel": "priced-stock-funded",
+            "gameplayPresentation": 1331,
+            "actionIndex": 63
+          },
+          {
+            "publicLabel": "active-used",
+            "gameplayPresentation": 1396,
+            "actionIndex": 65
+          },
+          {
+            "publicLabel": "paid-before-approach",
+            "gameplayPresentation": 1595,
+            "actionIndex": 81
+          },
+          {
+            "publicLabel": "paid-before-contact",
+            "gameplayPresentation": 1618,
+            "actionIndex": 84
+          },
+          {
+            "publicLabel": "paid-contact-00",
+            "gameplayPresentation": 1619,
+            "actionIndex": 85
+          },
+          {
+            "publicLabel": "paid-contact-01",
+            "gameplayPresentation": 1620,
+            "actionIndex": 86
+          },
+          {
+            "publicLabel": "paid-contact-02",
+            "gameplayPresentation": 1621,
+            "actionIndex": 87
+          },
+          {
+            "publicLabel": "paid-contact-03",
+            "gameplayPresentation": 1622,
+            "actionIndex": 88
+          },
+          {
+            "publicLabel": "paid-contact-04",
+            "gameplayPresentation": 1623,
+            "actionIndex": 89
+          },
+          {
+            "publicLabel": "paid-contact-05",
+            "gameplayPresentation": 1624,
+            "actionIndex": 90
+          },
+          {
+            "publicLabel": "paid-contact-06",
+            "gameplayPresentation": 1625,
+            "actionIndex": 91
+          },
+          {
+            "publicLabel": "paid-contact-07",
+            "gameplayPresentation": 1626,
+            "actionIndex": 92
+          },
+          {
+            "publicLabel": "paid-contact-08",
+            "gameplayPresentation": 1627,
+            "actionIndex": 93
+          },
+          {
+            "publicLabel": "paid-contact-09",
+            "gameplayPresentation": 1628,
+            "actionIndex": 94
+          },
+          {
+            "publicLabel": "paid-contact-10",
+            "gameplayPresentation": 1629,
+            "actionIndex": 95
+          },
+          {
+            "publicLabel": "paid-contact-11",
+            "gameplayPresentation": 1630,
+            "actionIndex": 96
+          },
+          {
+            "publicLabel": "paid-contact-12",
+            "gameplayPresentation": 1631,
+            "actionIndex": 97
+          },
+          {
+            "publicLabel": "paid-contact-13",
+            "gameplayPresentation": 1632,
+            "actionIndex": 98
+          },
+          {
+            "publicLabel": "paid-contact-14",
+            "gameplayPresentation": 1633,
+            "actionIndex": 99
+          },
+          {
+            "publicLabel": "paid-contact-15",
+            "gameplayPresentation": 1634,
+            "actionIndex": 100
+          },
+          {
+            "publicLabel": "paid-contact-16",
+            "gameplayPresentation": 1635,
+            "actionIndex": 101
+          },
+          {
+            "publicLabel": "paid-contact-17",
+            "gameplayPresentation": 1636,
+            "actionIndex": 102
+          },
+          {
+            "publicLabel": "paid-contact-18",
+            "gameplayPresentation": 1637,
+            "actionIndex": 103
+          },
+          {
+            "publicLabel": "paid-contact-19",
+            "gameplayPresentation": 1638,
+            "actionIndex": 104
+          },
+          {
+            "publicLabel": "paid-contact-20",
+            "gameplayPresentation": 1639,
+            "actionIndex": 105
+          },
+          {
+            "publicLabel": "paid-contact-21",
+            "gameplayPresentation": 1640,
+            "actionIndex": 106
+          },
+          {
+            "publicLabel": "paid-contact-22",
+            "gameplayPresentation": 1641,
+            "actionIndex": 107
+          },
+          {
+            "publicLabel": "paid-contact-23",
+            "gameplayPresentation": 1642,
+            "actionIndex": 108
+          },
+          {
+            "publicLabel": "paid-contact-24",
+            "gameplayPresentation": 1643,
+            "actionIndex": 109
+          },
+          {
+            "publicLabel": "paid-contact-25",
+            "gameplayPresentation": 1644,
+            "actionIndex": 110
+          },
+          {
+            "publicLabel": "paid-contact-26",
+            "gameplayPresentation": 1645,
+            "actionIndex": 111
+          },
+          {
+            "publicLabel": "paid-contact-27",
+            "gameplayPresentation": 1646,
+            "actionIndex": 112
+          },
+          {
+            "publicLabel": "paid-contact-28",
+            "gameplayPresentation": 1647,
+            "actionIndex": 113
+          },
+          {
+            "publicLabel": "paid-contact-29",
+            "gameplayPresentation": 1648,
+            "actionIndex": 114
+          },
+          {
+            "publicLabel": "paid-contact-30",
+            "gameplayPresentation": 1649,
+            "actionIndex": 115
+          },
+          {
+            "publicLabel": "paid-contact-31",
+            "gameplayPresentation": 1650,
+            "actionIndex": 116
+          },
+          {
+            "publicLabel": "paid-outcome",
+            "gameplayPresentation": 1770,
+            "actionIndex": 117
+          }
+        ],
+        "branch": "paid-undercharged"
+      },
+      "scope": "Source-authored normal challenge0 resource fixture, reconstructed locally by named recipe. Public keys/ticks only; no Native observations or runtime state injection.",
+      "origin": "contrived"
+    },
+    {
+      "name": "battery90-paid100",
+      "publicMenuRoute": "seeded-normal",
+      "publicSeedCode": "7CD636LL",
+      "publicRunSeed": 3882398476,
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "sfxVolume": 1.0,
+      "actions": [
+        {
+          "label": "sku-phase-0000",
+          "keys": [],
+          "presentations": 60
+        },
+        {
+          "label": "sku-phase-0001",
+          "keys": [
+            "w"
+          ],
+          "presentations": 44
+        },
+        {
+          "label": "sku-phase-0002",
+          "keys": [],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0003",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0004",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0005",
+          "keys": [
+            "s"
+          ],
+          "presentations": 38
+        },
+        {
+          "label": "sku-phase-0006",
+          "keys": [],
+          "presentations": 96
+        },
+        {
+          "label": "sku-phase-0007",
+          "keys": [
+            "w"
+          ],
+          "presentations": 72
+        },
+        {
+          "label": "sku-phase-0008",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0009",
+          "keys": [
+            "d"
+          ],
+          "presentations": 32
+        },
+        {
+          "label": "sku-phase-0010",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0011",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0012",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0013",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0014",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0015",
+          "keys": [
+            "w"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0016",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0017",
+          "keys": [
+            "w"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0018",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0019",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0020",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0021",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0022",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0023",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0024",
+          "keys": [
+            "a"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0025",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0026",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0027",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0028",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0029",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0030",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0031",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0032",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0033",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0034",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0035",
+          "keys": [],
+          "presentations": 40
+        },
+        {
+          "label": "sku-phase-0036",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0037",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0038",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0039",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0040",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0041",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0042",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0043",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0044",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 14
+        },
+        {
+          "label": "sku-phase-0045",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0046",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0047",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0048",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0049",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0050",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0051",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0052",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0053",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0054",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0055",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0056",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0057",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0058",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0059",
+          "keys": [
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0060",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0061",
+          "keys": [
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0062",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0063",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0064",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0065",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0066",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0067",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0068",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0069",
+          "keys": [
+            "e"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0070",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0071",
+          "keys": [
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0072",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0073",
+          "keys": [
+            "d"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0074",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0075",
+          "keys": [
+            "d"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0076",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0077",
+          "keys": [
+            "d"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0078",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0079",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0080",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0081",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0082",
+          "keys": [
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0083",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0084",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0085",
+          "keys": [
+            "w"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0086",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0087",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0088",
+          "keys": [],
+          "presentations": 140
+        },
+        {
+          "label": "sku-phase-0089",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0090",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0091",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0092",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0093",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 34
+        },
+        {
+          "label": "sku-phase-0094",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0095",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0096",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0097",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0098",
+          "keys": [
+            "a"
+          ],
+          "presentations": 72
+        },
+        {
+          "label": "sku-phase-0099",
+          "keys": [],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0100",
+          "keys": [],
+          "presentations": 35
+        },
+        {
+          "label": "sku-phase-0101",
+          "keys": [
+            "d"
+          ],
+          "presentations": 90
+        },
+        {
+          "label": "sku-phase-0102",
+          "keys": [],
+          "presentations": 47
+        },
+        {
+          "label": "sku-phase-0103",
+          "keys": [
+            "d"
+          ],
+          "presentations": 22
+        },
+        {
+          "label": "sku-phase-0104",
+          "keys": [
+            "d",
+            "w"
+          ],
+          "presentations": 56
+        },
+        {
+          "label": "sku-phase-0105",
+          "keys": [
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0106",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0107",
+          "keys": [
+            "Up",
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0108",
+          "keys": [
+            "Up",
+            "d"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0109",
+          "keys": [
+            "Up",
+            "d",
+            "w"
+          ],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0110",
+          "keys": [
+            "Left",
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0111",
+          "keys": [
+            "Left",
+            "w"
+          ],
+          "presentations": 22
+        },
+        {
+          "label": "sku-phase-0112",
+          "keys": [
+            "Left",
+            "a",
+            "w"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0113",
+          "keys": [
+            "Down",
+            "a",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0114",
+          "keys": [
+            "Down",
+            "a"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0115",
+          "keys": [
+            "Down",
+            "a",
+            "s"
+          ],
+          "presentations": 14
+        },
+        {
+          "label": "sku-phase-0116",
+          "keys": [
+            "Down",
+            "a",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0117",
+          "keys": [
+            "Right",
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0118",
+          "keys": [
+            "Right",
+            "s"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0119",
+          "keys": [
+            "Right",
+            "d",
+            "s"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0120",
+          "keys": [
+            "Up",
+            "d",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0121",
+          "keys": [
+            "Up",
+            "d"
+          ],
+          "presentations": 28
+        },
+        {
+          "label": "sku-phase-0122",
+          "keys": [
+            "Up",
+            "d",
+            "w"
+          ],
+          "presentations": 14
+        },
+        {
+          "label": "sku-phase-0123",
+          "keys": [
+            "Left",
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0124",
+          "keys": [
+            "Left",
+            "w"
+          ],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0125",
+          "keys": [
+            "Left",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0126",
+          "keys": [
+            "Left",
+            "a",
+            "w"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0127",
+          "keys": [
+            "Down",
+            "a",
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0128",
+          "keys": [
+            "Down",
+            "a"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0129",
+          "keys": [
+            "Down",
+            "a",
+            "s"
+          ],
+          "presentations": 16
+        },
+        {
+          "label": "sku-phase-0130",
+          "keys": [
+            "Right",
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0131",
+          "keys": [
+            "Right",
+            "s"
+          ],
+          "presentations": 26
+        },
+        {
+          "label": "sku-phase-0132",
+          "keys": [
+            "Right",
+            "d",
+            "s"
+          ],
+          "presentations": 16
+        },
+        {
+          "label": "sku-phase-0133",
+          "keys": [
+            "Up",
+            "d",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0134",
+          "keys": [
+            "Up",
+            "d"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0135",
+          "keys": [
+            "Up",
+            "d"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0136",
+          "keys": [
+            "Up",
+            "d",
+            "w"
+          ],
+          "presentations": 16
+        },
+        {
+          "label": "sku-phase-0137",
+          "keys": [
+            "Left",
+            "d",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0138",
+          "keys": [
+            "Left",
+            "w"
+          ],
+          "presentations": 22
+        },
+        {
+          "label": "sku-phase-0139",
+          "keys": [
+            "Left",
+            "a",
+            "w"
+          ],
+          "presentations": 18
+        },
+        {
+          "label": "sku-phase-0140",
+          "keys": [
+            "Down",
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0141",
+          "keys": [
+            "Down",
+            "a"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0142",
+          "keys": [
+            "Down",
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0143",
+          "keys": [
+            "Down",
+            "a",
+            "s"
+          ],
+          "presentations": 12
+        },
+        {
+          "label": "sku-phase-0144",
+          "keys": [
+            "Right",
+            "a",
+            "s"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0145",
+          "keys": [
+            "Right",
+            "s"
+          ],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0146",
+          "keys": [
+            "Right",
+            "d",
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0147",
+          "keys": [],
+          "presentations": 82
+        },
+        {
+          "label": "sku-phase-0148",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0149",
+          "keys": [
+            "a"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0150",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0151",
+          "keys": [
+            "a"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0152",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0153",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 34
+        },
+        {
+          "label": "sku-phase-0154",
+          "keys": [
+            "a"
+          ],
+          "presentations": 10
+        },
+        {
+          "label": "sku-phase-0155",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "sku-phase-0156",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0157",
+          "keys": [],
+          "presentations": 48
+        },
+        {
+          "label": "sku-phase-0158",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 20
+        },
+        {
+          "label": "sku-phase-0159",
+          "keys": [
+            "a"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0160",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 8
+        },
+        {
+          "label": "sku-phase-0161",
+          "keys": [
+            "a"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0162",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 5
+        },
+        {
+          "label": "sku-phase-0163",
+          "keys": [
+            "a"
+          ],
+          "presentations": 6
+        },
+        {
+          "label": "sku-phase-0164",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 3
+        },
+        {
+          "label": "sku-phase-0165",
+          "keys": [
+            "a"
+          ],
+          "presentations": 9
+        },
+        {
+          "label": "sku-phase-0166",
+          "keys": [],
+          "presentations": 24
+        },
+        {
+          "label": "sku-phase-0167",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 14
+        },
+        {
+          "label": "sku-phase-0168",
+          "keys": [
+            "s"
+          ],
+          "presentations": 2
+        },
+        {
+          "label": "sku-phase-0169",
+          "keys": [
+            "a",
+            "s"
+          ],
+          "presentations": 7
+        },
+        {
+          "label": "sku-phase-0170",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0171",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0172",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0173",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0174",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0175",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0176",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0177",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0178",
+          "keys": [
+            "d",
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0179",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0180",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0181",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0182",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0183",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0184",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0185",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0186",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0187",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0188",
+          "keys": [
+            "a",
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0189",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0190",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0191",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0192",
+          "keys": [
+            "w"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0193",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0194",
+          "keys": [],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0195",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0196",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0197",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0198",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0199",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0200",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0201",
+          "keys": [
+            "s"
+          ],
+          "presentations": 1
+        },
+        {
+          "label": "sku-phase-0202",
+          "keys": [],
+          "presentations": 120
+        }
+      ],
+      "fixtureRecipe": {
+        "schema": "shop-common-sku-local-v1",
+        "mode": "paid100"
+      },
+      "commonSku": {
+        "schema": "source-public-common-sku-v1",
+        "sourceOnlyFixture": true,
+        "challengeId": 0,
+        "acquiredActiveId": null,
+        "target": "paid100",
+        "publicCheckpointAliases": [
+          {
+            "publicLabel": "reused-route-start",
+            "gameplayPresentation": 60,
+            "actionIndex": 0
+          },
+          {
+            "publicLabel": "authored-funding-collected",
+            "gameplayPresentation": 158,
+            "actionIndex": 4
+          },
+          {
+            "publicLabel": "start-anchor-restored",
+            "gameplayPresentation": 292,
+            "actionIndex": 6
+          },
+          {
+            "publicLabel": "reused-funding-junction-arrival",
+            "gameplayPresentation": 411,
+            "actionIndex": 8
+          },
+          {
+            "publicLabel": "reused-nickel-right-approach",
+            "gameplayPresentation": 505,
+            "actionIndex": 16
+          },
+          {
+            "publicLabel": "reused-nickel-upper-right-approach",
+            "gameplayPresentation": 551,
+            "actionIndex": 18
+          },
+          {
+            "publicLabel": "reused-nickel-above-approach",
+            "gameplayPresentation": 615,
+            "actionIndex": 27
+          },
+          {
+            "publicLabel": "reused-source-nickel-contact",
+            "gameplayPresentation": 677,
+            "actionIndex": 34
+          },
+          {
+            "publicLabel": "reused-source-funding-outcome",
+            "gameplayPresentation": 717,
+            "actionIndex": 35
+          },
+          {
+            "publicLabel": "reused-nickel-exit-up",
+            "gameplayPresentation": 773,
+            "actionIndex": 43
+          },
+          {
+            "publicLabel": "reused-secret-left-upper-approach",
+            "gameplayPresentation": 845,
+            "actionIndex": 53
+          },
+          {
+            "publicLabel": "reused-secret-left-approach",
+            "gameplayPresentation": 911,
+            "actionIndex": 63
+          },
+          {
+            "publicLabel": "reused-secret-bomb-position",
+            "gameplayPresentation": 957,
+            "actionIndex": 68
+          },
+          {
+            "publicLabel": "reused-secret-bomb-born",
+            "gameplayPresentation": 958,
+            "actionIndex": 69
+          },
+          {
+            "publicLabel": "reused-secret-bomb-retreat",
+            "gameplayPresentation": 1062,
+            "actionIndex": 87
+          },
+          {
+            "publicLabel": "reused-secret-bomb-complete",
+            "gameplayPresentation": 1202,
+            "actionIndex": 88
+          },
+          {
+            "publicLabel": "reused-secret-arrival",
+            "gameplayPresentation": 1321,
+            "actionIndex": 97
+          },
+          {
+            "publicLabel": "reused-secret-key-contact-0",
+            "gameplayPresentation": 1413,
+            "actionIndex": 99
+          },
+          {
+            "publicLabel": "reused-secret-keys-collected",
+            "gameplayPresentation": 1448,
+            "actionIndex": 100
+          },
+          {
+            "publicLabel": "reused-secret-return",
+            "gameplayPresentation": 1585,
+            "actionIndex": 102
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-arrival",
+            "gameplayPresentation": 1717,
+            "actionIndex": 106
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-0",
+            "gameplayPresentation": 1719,
+            "actionIndex": 107
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-120",
+            "gameplayPresentation": 1839,
+            "actionIndex": 115
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-240",
+            "gameplayPresentation": 1959,
+            "actionIndex": 124
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-360",
+            "gameplayPresentation": 2079,
+            "actionIndex": 134
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-480",
+            "gameplayPresentation": 2199,
+            "actionIndex": 142
+          },
+          {
+            "publicLabel": "reused-shop-parent-combat-clear",
+            "gameplayPresentation": 2325,
+            "actionIndex": 147
+          },
+          {
+            "publicLabel": "reused-shop-arrival",
+            "gameplayPresentation": 2451,
+            "actionIndex": 157
+          },
+          {
+            "publicLabel": "priced-stock-funded",
+            "gameplayPresentation": 2451,
+            "actionIndex": 157
+          },
+          {
+            "publicLabel": "paid-before-approach",
+            "gameplayPresentation": 2531,
+            "actionIndex": 166
+          },
+          {
+            "publicLabel": "paid-before-contact",
+            "gameplayPresentation": 2554,
+            "actionIndex": 169
+          },
+          {
+            "publicLabel": "paid-contact-00",
+            "gameplayPresentation": 2555,
+            "actionIndex": 170
+          },
+          {
+            "publicLabel": "paid-contact-01",
+            "gameplayPresentation": 2556,
+            "actionIndex": 171
+          },
+          {
+            "publicLabel": "paid-contact-02",
+            "gameplayPresentation": 2557,
+            "actionIndex": 172
+          },
+          {
+            "publicLabel": "paid-contact-03",
+            "gameplayPresentation": 2558,
+            "actionIndex": 173
+          },
+          {
+            "publicLabel": "paid-contact-04",
+            "gameplayPresentation": 2559,
+            "actionIndex": 174
+          },
+          {
+            "publicLabel": "paid-contact-05",
+            "gameplayPresentation": 2560,
+            "actionIndex": 175
+          },
+          {
+            "publicLabel": "paid-contact-06",
+            "gameplayPresentation": 2561,
+            "actionIndex": 176
+          },
+          {
+            "publicLabel": "paid-contact-07",
+            "gameplayPresentation": 2562,
+            "actionIndex": 177
+          },
+          {
+            "publicLabel": "paid-contact-08",
+            "gameplayPresentation": 2563,
+            "actionIndex": 178
+          },
+          {
+            "publicLabel": "paid-contact-09",
+            "gameplayPresentation": 2564,
+            "actionIndex": 179
+          },
+          {
+            "publicLabel": "paid-contact-10",
+            "gameplayPresentation": 2565,
+            "actionIndex": 180
+          },
+          {
+            "publicLabel": "paid-contact-11",
+            "gameplayPresentation": 2566,
+            "actionIndex": 181
+          },
+          {
+            "publicLabel": "paid-contact-12",
+            "gameplayPresentation": 2567,
+            "actionIndex": 182
+          },
+          {
+            "publicLabel": "paid-contact-13",
+            "gameplayPresentation": 2568,
+            "actionIndex": 183
+          },
+          {
+            "publicLabel": "paid-contact-14",
+            "gameplayPresentation": 2569,
+            "actionIndex": 184
+          },
+          {
+            "publicLabel": "paid-contact-15",
+            "gameplayPresentation": 2570,
+            "actionIndex": 185
+          },
+          {
+            "publicLabel": "paid-contact-16",
+            "gameplayPresentation": 2571,
+            "actionIndex": 186
+          },
+          {
+            "publicLabel": "paid-contact-17",
+            "gameplayPresentation": 2572,
+            "actionIndex": 187
+          },
+          {
+            "publicLabel": "paid-contact-18",
+            "gameplayPresentation": 2573,
+            "actionIndex": 188
+          },
+          {
+            "publicLabel": "paid-contact-19",
+            "gameplayPresentation": 2574,
+            "actionIndex": 189
+          },
+          {
+            "publicLabel": "paid-contact-20",
+            "gameplayPresentation": 2575,
+            "actionIndex": 190
+          },
+          {
+            "publicLabel": "paid-contact-21",
+            "gameplayPresentation": 2576,
+            "actionIndex": 191
+          },
+          {
+            "publicLabel": "paid-contact-22",
+            "gameplayPresentation": 2577,
+            "actionIndex": 192
+          },
+          {
+            "publicLabel": "paid-contact-23",
+            "gameplayPresentation": 2578,
+            "actionIndex": 193
+          },
+          {
+            "publicLabel": "paid-contact-24",
+            "gameplayPresentation": 2579,
+            "actionIndex": 194
+          },
+          {
+            "publicLabel": "paid-contact-25",
+            "gameplayPresentation": 2580,
+            "actionIndex": 195
+          },
+          {
+            "publicLabel": "paid-contact-26",
+            "gameplayPresentation": 2581,
+            "actionIndex": 196
+          },
+          {
+            "publicLabel": "paid-contact-27",
+            "gameplayPresentation": 2582,
+            "actionIndex": 197
+          },
+          {
+            "publicLabel": "paid-contact-28",
+            "gameplayPresentation": 2583,
+            "actionIndex": 198
+          },
+          {
+            "publicLabel": "paid-contact-29",
+            "gameplayPresentation": 2584,
+            "actionIndex": 199
+          },
+          {
+            "publicLabel": "paid-contact-30",
+            "gameplayPresentation": 2585,
+            "actionIndex": 200
+          },
+          {
+            "publicLabel": "paid-contact-31",
+            "gameplayPresentation": 2586,
+            "actionIndex": 201
+          },
+          {
+            "publicLabel": "paid-outcome",
+            "gameplayPresentation": 2706,
+            "actionIndex": 202
+          }
+        ],
+        "branch": "paid100"
+      },
+      "scope": "Source-authored normal challenge0 resource fixture, reconstructed locally by named recipe. Public keys/ticks only; no Native observations or runtime state injection.",
+      "origin": "contrived"
+    }
+  ],
+  "scope": "Four fixed source-authored normal-run public input recipes. Complete strict failures remain blocking; no resources or Native observations are embedded.",
+  "suite": "common-sku"
+}
