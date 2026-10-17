@@ -2091,7 +2091,10 @@ impl Game {
         if let (phase::Phase::Update, Some(velocity)) =
             (phase, self.state.departure_velocity.take())
         {
-            player_footprints::advance(&mut self.state, velocity)?;
+            // The unchanged counter: game_update_count on the current run
+            // clock (the ordinary Full read below is one more).
+            let counter = self.state.game_update_count;
+            player_footprints::advance(&mut self.state, velocity, counter)?;
         }
         Ok(())
     }
@@ -4742,7 +4745,12 @@ impl Game {
             self.state.attack_runtime.shooting_aim_db4 = Some(aim);
         }
         if phase == phase::Phase::Update {
-            player_footprints::advance(&mut self.state, footprint_velocity)?;
+            // Ordinary Full increments Game+ce9f4 before Player. On the current
+            // run clock that read is game_update_count+1, like every other
+            // Full-callback gate; #438's corrected clock makes it
+            // game_update_count and drops this +1 with the others.
+            let counter = self.state.game_update_count.wrapping_add(1);
+            player_footprints::advance(&mut self.state, footprint_velocity, counter)?;
         }
         //531E44 reaches deferred CF8 evaluation only on the full path,
         //before531E6F copied-item animation and the later queued grant.

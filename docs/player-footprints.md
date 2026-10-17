@@ -3,8 +3,16 @@
 Player50BEF0 calls IsFrame444890 with `(6, 0)` for footprint cadence and
 `(12, 0)` for the foot side. That helper reads Game+CE9F4 directly. Ordinary
 Game Full increments this counter before dispatching Player; ChangeRoom's
-extra Room.Update uses the unchanged counter. The footprint helper now uses
-that actual counter in both paths, removing its extra increment.
+extra Room.Update uses the unchanged counter. On the current run clock, where
+every other Full-callback gate reads `game_update_count + 1`, the ordinary Full
+footprint reads `game_update_count + 1` and the ChangeRoom tail reads
+`game_update_count`; each caller passes its own value. Reading
+`game_update_count` on the ordinary path as well put the cadence one update
+early on seeded routes: Duke/Pooter contrived entity cases drew the footprint
+seed at native update 73 where the original runs Fly AI (duke-contrived-0 518
+agreed shared draws versus 4,339 with the Full read restored). #438's corrected
+run clock makes the ordinary read `game_update_count` and removes that +1 with
+the other gates.
 
 The selected `PHCVWE1C` upper-door route comes from the previously closed
 8,192-draw OS bank, ordinal 3,497. No draw was replaced or repeated. The
