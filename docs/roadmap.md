@@ -68,17 +68,17 @@ Counts of open bugs are as of the last full review.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus with page pans; pause | 1 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams; shared MT incomplete | 7 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | 1x1 and four large shapes; eight room types | 2 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 2 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 3 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 2 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
-| [Grid objects](#grid-objects) | Partial | Rocks, spikes, poop, trapdoor, decorations | 1 |
+| [Grid objects](#grid-objects) | Partial | Rocks, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 0 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 7 bosses and minibosses | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts, chests | 2 |
@@ -99,7 +99,10 @@ carousel, seed entry, challenge menu, options, stats, pause menu, death and
 win screens.
 
 Port: Title, profile, main, character and seed menus run with source timing;
-run introduction banner; pause menu; Challenge1 XML ingress. Missing: intro
+the menu board pans between pages, with File select clips, the character
+carousel, Back/Select widgets and hard-mode fades
+(`engine/src/menu_presentation.rs`, frame-exact on the menus tour); run
+introduction banner; pause menu; Challenge1 XML ingress. Missing: intro
 cutscene (the paired tapes skip it), options, stats, bestiary, challenge list,
 win screen.
 
@@ -194,7 +197,8 @@ Next: Basement II to Caves (#413 first).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
-| #449 | P3 | No "BASEMENT I" name streak at run start; Basement II start room keeps the controls drawing | playtest 2026-10-16 `playtest/2045007/` |
+| #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
+| #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 
 ## Player
 
@@ -263,13 +267,12 @@ including large rooms.
 Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
-Port: rocks, spikes, poop, trapdoor, decorations, grid records and costs.
-Missing: tinted and bomb rocks, pits, TNT, blocks, buttons, crawlspace
-ladders, poop variants.
+Port: rocks, authored bomb rocks, spikes, poop (authored too), TNT (intact
+collision only), spider webs, trapdoor, decorations, grid records and costs.
+Missing: TNT fuse/countdown and blast, tinted rocks, pits, blocks, buttons,
+crawlspace ladders, poop variants.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #447 | P1 | Authored poop (grid 1500) never appears: the selector leaves its cell empty | playtest 2026-10-16 `playtest/2045007/` dingle-DV02XJWW |
+No open bugs.
 
 ## Enemies
 
@@ -448,6 +451,8 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #598 pans the menu board between pages and animates the carousel; playtest 2026-10-17 `playtest/7b74719/` menus tour (with Challenges) is pixel-exact on 1781 of 1782 menu frames (#587, #588, #589 closed).
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
+- #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).

@@ -30,15 +30,18 @@ spec.loader.exec_module(routes)
 FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
+PADDING_STEP = 600
+# Frames both games stand still after re-entering the boss room.
+ANCHOR_IDLE = 120
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
 
 
-def record(base, *args):
+def record(base, *args, rooms='0', arrival=''):
     with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
         json.dump(base, handle); handle.flush()
-        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', '0', '--arrival', '', *map(str, args)],
+        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *map(str, args)],
                                 cwd=ROOT, capture_output=True, text=True, timeout=3600)
     lines = result.stdout.strip().splitlines()
     if not lines:
@@ -71,17 +74,47 @@ def fought(fixture):
     return result, fights
 
 
+def padding(total):
+    """The window's remainder in steps of at most PADDING_STEP frames. The
+    original runner bounds each step's host wall time (--native-frame-timeout),
+    and several thousand frames in one step can exceed it on a loaded host.
+    Only the last step carries the `exit-start` label."""
+    steps = [{'type': 'step', 'frames': PADDING_STEP} for _ in range((total - 1) // PADDING_STEP)]
+    return steps + [{'type': 'step', 'frames': total - frames(steps), 'label': 'exit-start'}]
+
+
+def clearance(fixture):
+    """The original's solid cells and their eight neighbours (a 15-wide boss
+    room). The port, which records the walk, does not hold these cells, so
+    the walk keeps a cell of margin around them."""
+    return sorted({cell + dr * 15 + dc for cell in fixture.get('originalSolid', [])
+                   for dr in (-1, 0, 1) for dc in (-1, 0, 1)})
+
+
 def case(fixture, base, fights, identifier, randomized, idle, via):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
         # `exit-start` labels the padding step rather than a capture: where
         # each game's corner press releases depends on its fight, so the first
         # graded checkpoint comes after the trapdoor snaps the player.
-        result[name] = result[name] + fight + [{'type': 'step', 'frames': WINDOW - frames(fight) + idle, 'label': 'exit-start'}]
-    tail = record(result, '--from', 'exit-start', '--exit', 1500, *(['--via', f'{via[0]},{via[1]}'] if via else []))
+        result[name] = result[name] + fight + padding(WINDOW - frames(fight) + idle)
+    # Re-anchor: each game parks after its own fight at a slightly different
+    # sub-unit point, which can shift the trapdoor entry by a frame. Leaving
+    # the boss room and coming back places both players exactly at the door,
+    # and the idle lets that entry velocity decay, so the shared walk starts
+    # from one state. The legs' own route captures still carry the fight
+    # offset and are dropped; `re-anchor` is the first paired capture.
+    # The original's own fight can leave solid cells (a Larry Jr. tail poop)
+    # that the port's fight does not; the shared walk keeps clear of them.
+    back = f"0,{fixture['rooms'][-2]},0"
+    avoid = clearance(fixture)
+    tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
+                  *(['--via', f'{via[0]},{via[1]}'] if via else []),
+                  *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor')
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
-    actions = list(tail['actions'])
+    anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
+    actions = keys_only(tail['actions'][:anchor]) + tail['actions'][anchor:]
     routes.dense(actions, 120, 'basement-ii', 4)
     for name in ('tape', 'pairedTape'):
         result[name] = result[name] + actions
@@ -118,7 +151,8 @@ def main():
         for index in range(args.count):
             # A few draws, since a drawn waypoint can sit on an authored rock.
             for _ in range(3):
-                cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in AWARD_CELLS])
+                blocked = AWARD_CELLS | set(clearance(fixture))
+                cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
                                      [40 + cell % 15 * 40, 120 + cell // 15 * 40])
                 if built is not None or not reason.startswith('port-exit'):

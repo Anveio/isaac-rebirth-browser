@@ -607,6 +607,7 @@ pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
                 },
             );
             crate::stage_transition::spawn_boss_award(state)?;
+            crate::active_charges::room_clear(state)?;
         }
     }
     Ok(())

@@ -34,8 +34,6 @@ pub struct LuckInputs {
     pub source_d3c: i32,
     pub source_d40: i32,
     pub source_d58: f32,
-    pub source_13cc: i32,
-    pub source_13d0: i32,
 }
 
 /// Actual Player+D38, independent of inventory and the evaluated C7C output.
@@ -57,21 +55,12 @@ impl ShotSpeedInputs {
 pub struct MoveSpeedInputs {
     pub source_d28: i32,
     pub source_d44: i32,
-    pub source_13bc: i32,
-    pub source_13c0: i32,
 }
 impl MoveSpeedInputs {
     pub(crate) const NEUTRAL: Self = Self {
         source_d28: 0,
         source_d44: 0,
-        source_13bc: 0,
-        source_13c0: 0,
     };
-
-    ///No other source term is approximated by the D28 operator.
-    pub(crate) fn supports_persistent_d28(self) -> bool {
-        self.source_d44 == 0 && self.source_13bc == 0 && self.source_13c0 == 0
-    }
 
     pub fn apply_signed_delta(&mut self, delta: i32) {
         self.source_d28 = self.source_d28.wrapping_add(delta);
@@ -164,10 +153,17 @@ pub struct PlayerItems {
     ///Legacy omission is unknown, never a fresh empty inventory proof.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub query_history: Option<crate::item_queries::ItemQueryHistory>,
-    #[serde(default)]
+    #[serde(default, rename = "luckTerms")]
     pub luck_inputs: Option<LuckInputs>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "moveSpeedTerms",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub move_speed_inputs: Option<MoveSpeedInputs>,
+    ///One canonical Player1388..13F4 array; State owns its versioned wire view.
+    #[serde(skip)]
+    pub pill_effect_history: Option<crate::pill_effect_history::PillEffectHistory>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub damage_inputs: Option<DamageInputs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -186,6 +182,9 @@ pub struct PlayerItems {
     pub pickup_animation_guard: bool,
     pub pickup_presentation: Option<PickupPresentation>,
     pub collection_delay: i32,
+    ///Validity only; canonical values remain the existing active words.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_charge_history: Option<crate::active_charges::History>,
     pub active_id: u32,
     pub active_charge: i32,
     pub active_subordinate_charge: i32,
@@ -203,6 +202,9 @@ pub struct PlayerItems {
     ///profile achievements complete or admit any missing cache/weapon role.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub treatment240_frontiers: Option<crate::experimental_treatment::Frontiers>,
+    ///Actual reached Pill use leaves these distinct non-scalar owners open.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pill_use_frontiers: Option<crate::pockets::PillUseFrontiers>,
 }
 
 impl PlayerItems {
@@ -248,8 +250,6 @@ impl PlayerItems {
                 source_d3c: 0,
                 source_d40: 0,
                 source_d58: 0.0,
-                source_13cc: 0,
-                source_13d0: 0,
             }),
             shot_speed_inputs: Some(ShotSpeedInputs::NEUTRAL),
             // Actual519662, not a default reconstructed from inventory.
@@ -258,6 +258,7 @@ impl PlayerItems {
             range_inputs: Some(RangeInputs { source_d34: 0 }),
             //51964E/51954C and519798 own these four original zeros.
             move_speed_inputs: Some(MoveSpeedInputs::NEUTRAL),
+            pill_effect_history: Some(crate::pill_effect_history::PillEffectHistory::FRESH),
             //Actual519658, not a cache/count-derived neutral default.
             fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
@@ -269,6 +270,7 @@ impl PlayerItems {
             pickup_animation_guard: false,
             pickup_presentation: None,
             collection_delay: 0,
+            active_charge_history: Some(crate::active_charges::History::fresh()),
             active_id: 0,
             active_charge: 0,
             active_subordinate_charge: 0,
@@ -279,6 +281,7 @@ impl PlayerItems {
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
             treatment240_frontiers: None,
+            pill_use_frontiers: None,
         })
     }
 
@@ -293,11 +296,21 @@ impl PlayerItems {
     /// 5e4140 creates or increments the separate temporary count/cooldown
     /// record. Costume admission and cache evaluation remain caller-owned.
     pub(crate) fn add_temporary_collectible(&mut self, item_id: u32) -> Result<(), String> {
-        let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
-        // TEMP producers and expiry do not prove the retained modifier inputs.
-        // Removing a later record never restores this history.
+        //The existing Use wrapper retains its independent input policy.
         self.luck_inputs = None;
         self.move_speed_inputs = None;
+        self.insert_source_temporary_collectible(item_id)
+    }
+
+    ///5E4140's canonical record/count/cooldown prefix. The caller separately
+    ///owns costume registration and effect dispatch. This single vector is
+    ///also the source for lazy record queries; unknown prior counts stay
+    ///unknown in query_history after this owned increment.
+    pub(crate) fn insert_source_temporary_collectible(
+        &mut self,
+        item_id: u32,
+    ) -> Result<(), String> {
+        let config = items::definition(item_id).ok_or("temporary collectible ItemConfig absent")?;
         if let Some(effect) = self
             .temporary_collectibles
             .iter_mut()
@@ -311,6 +324,9 @@ impl PlayerItems {
                 count: 1,
                 cooldown: config.cooldown,
             });
+        }
+        if let Some(history) = &mut self.query_history {
+            history.record_temporary_cache_write(config.cache_flags);
         }
         Ok(())
     }
@@ -425,19 +441,34 @@ fn enqueue(state: &mut State, id: u32, charge: i32, touched: bool) -> Result<(),
     Ok(())
 }
 
+/// What 504820 returns for a Player touching a free collectible pedestal.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CollectibleContact {
+    /// The collect path returns 1, vetoing 445710's mass response.
+    Collected,
+    /// Every refusal returns 0 through 5048b8/504910 for normal Isaac, so the
+    /// class4 altar separates from the Player: the empty altar (5054ba), a
+    /// FrameCount of at most 20 (505d3a), a held item (50c780), the Player
+    /// delay (5054d3) or the pickup wait (504a30).
+    Refused,
+    /// A removed actor, or the unadmitted active swap: left untouched.
+    Untouched,
+}
+
 /// First free natural collectible, normal Isaac, with no active swap. The
 /// retained empty altar is an actor with stopped Empty main frame0.
-pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
+pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleContact, String> {
+    if state.room.pickups[index].variant != 100 || state.room.pickups[index].removed {
+        return Ok(CollectibleContact::Untouched);
+    }
     if !crate::pickups::player_can_collect(state) {
-        return Ok(false);
+        return Ok(CollectibleContact::Refused);
     }
     let pickup = &state.room.pickups[index];
     let Some(owner) = state.player_items.as_ref() else {
-        return Ok(false);
+        return Ok(CollectibleContact::Untouched);
     };
-    if pickup.variant != 100
-        || pickup.subtype == 0
-        || pickup.removed
+    if pickup.subtype == 0
         || pickup.collection_delay != 0
         || pickup.age <= 20
         || owner.collection_delay > 0
@@ -449,14 +480,14 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
         })
         || !pickup.touches(&state.player)
     {
-        return Ok(false);
+        return Ok(CollectibleContact::Refused);
     }
     let id = pickup.subtype;
     let config = items::definition(id).ok_or("natural collectible config absent")?;
     if config.kind == 3 && owner.active_id != 0 {
         // Active swapping also owns Morph/RemoveCollectible callbacks; this
         // first-acquisition leaf leaves that unsupported contact untouched.
-        return Ok(false);
+        return Ok(CollectibleContact::Untouched);
     }
     let (charge, touched) = (pickup.charge, pickup.touched);
     state
@@ -507,20 +538,20 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<bool, String> {
             },
         );
     }
-    Ok(true)
+    Ok(CollectibleContact::Collected)
 }
 
-/// Successful Collect returns1 and vetoes445710 mass response. The subsequent
-/// free subtype0 callback returns0, so the retained class4 altar separates from
-/// the Player using the same native impulse/position kernel as other bodies.
-pub(crate) fn empty_altar_contact(state: &mut State, index: usize) -> Result<(), String> {
+/// Successful Collect returns1 and vetoes445710 mass response. Every refused
+/// contact returns0, so the class4 altar, full or empty, separates from the
+/// Player using the same native impulse/position kernel as other bodies.
+pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), String> {
     use crate::{bombs, combat, grid, motion::WorldVector};
     use std::sync::OnceLock;
     let pickup = &state.room.pickups[index];
     //4453e7..4453fe vetoes a dead body independently of the collection
     //callback. A living Player's collection/queue guard still permits the
     //retained free class4 altar's physical response after504820 returns0.
-    if state.player.dead || pickup.variant != 100 || pickup.subtype != 0 || pickup.removed {
+    if state.player.dead || pickup.variant != 100 || pickup.removed {
         return Ok(());
     }
     let lattice = grid::Grid::new(
@@ -864,7 +895,31 @@ pub(crate) fn add_collectible(
         .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
+    //Use the reached Add descriptor, not query uncertainty or a second
+    //ID exclusion list. These closed bodies do not write active words.
+    let charge_words_preserved = keep_default_passive_inputs
+        || matches!(
+            source_effect,
+            Some(PassiveGrantSourceEffect::ItemRngCardSpawn)
+        )
+        || plain_active_grant
+        || (normal_isaac && normal_entity && treatment.is_some());
+    if !charge_words_preserved {
+        crate::active_charges::invalidate_owner(
+            owner,
+            &[
+                crate::active_charges::Word::ActiveId,
+                crate::active_charges::Word::Charge,
+                crate::active_charges::Word::Subordinate,
+                crate::active_charges::Word::Reserve,
+            ],
+            crate::active_charges::Frontier::GrantEffect { collectible_id: id },
+        );
+    }
     if !query_stores_preserved {
+        //An actual unclosed Add dispatch may reach another counter writer.
+        //Closed default/194/treatment/plain-active footprints preserve the array.
+        crate::pill_effect_history::forget(owner);
         if let Some(history) = &mut owner.query_history {
             history.forget_unowned_effect();
         }

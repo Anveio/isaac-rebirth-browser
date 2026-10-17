@@ -41,7 +41,7 @@ pub(crate) fn advance(
     if knife.subtype != 0 || knife.attack_flags.0 & knives::CONTROLLED == 0 {
         return Err("controlled Knife requires the admitted subtype0 bit33 path".into());
     }
-    if knife.attack_flags.0 & (4 | 0x400 | 0x800000) != 0 {
+    if knife.attack_flags.0 & (0x400 | 0x800000) != 0 {
         return Err("controlled Knife orbital, spectral or attraction path is unadmitted".into());
     }
 

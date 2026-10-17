@@ -51,7 +51,8 @@ export interface Familiar {
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
 }
 type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
-export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} };
+export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} }
+  | { particle5: { particle: ParticleFlight; subtype: number; stage: number } };
 export interface SpriteEffect {
   id: number; variant: number; subtype: number; spawnSeed: number;
   spawnerType: number; spawnerVariant: number;
@@ -87,7 +88,7 @@ export interface Knife {
   childChain4a0: "unknown" | "empty" | { linked: ActorRef };
   active: boolean; dead: boolean; visible: boolean;
   position: {x: number; y: number}; savedPosition: {x: number; y: number};
-  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean;
+  homePosition: {x: number; y: number}; homingTarget: ActorRef | null; homingTargetKnown?: boolean; sourceMotionKnown?: boolean;
   renderOffset: {x: number; y: number}; velocity: {x: number; y: number};
   configuredFriction: number; currentFriction: number;
   collisionRadius: number; collisionMass: number; collisionDamage: number;
@@ -117,6 +118,11 @@ export interface AcquisitionHistory {
   firstRecords: Record<string, {sourceUpdateWord: number; sourceStageWord: number;
     sourceStageType: number; sourceRoomTypeWord: number; sourcePoolWord488: number} | null>;
 }
+export interface ActiveChargeHistory {
+  unowned: Partial<Record<"activeId" | "charge" | "subordinate" | "reserve",
+    {kind: string; [field: string]: unknown}>>;
+  unownedEffects: {kind: string; [field: string]: unknown}[];
+}
 export interface SavedRunSummary {
   acquisitionHistory?: AcquisitionHistory;
   runSeed: string; seededRun: boolean; stage: number; gameUpdateCount: number;
@@ -124,9 +130,10 @@ export interface SavedRunSummary {
   inventory: {coins: number; bombs: number; keys: number};
   playerItems: {
     pickupGrantHistory?: PickupGrantHistory | null;
+    activeChargeHistory?: ActiveChargeHistory | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     ownedCounts: number[]; itemRngStates: number[];
-    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     trinketRngStates: number[]; pocketRngStates: number[]; activeId: number;
     activeCharge: number; saveWordD88: number; reserveCharge: number;
     shotSpeedInputs?: {sourceD38: number};
@@ -310,13 +317,23 @@ export interface StageEffects {
   actorTint: [number, number, number];
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
+export type MenuPage = "title" | "save" | "game" | "character" | "challenge";
+export interface MenuClip { animation: string; frame: number; playing: boolean }
+/** MenuManager view, Back/Select widgets, File select and Character carousel. */
+export interface MenuPresentation {
+  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number;
+  widgetsShown: boolean; widgets: [number, number];
+  save: { file: number; menu: MenuClip; drawings: [MenuClip, MenuClip, MenuClip] };
+  carousel: { angle: number; portraits: [number, number][] };
+  blood: number; hardOverlay: number; hardWidget: boolean;
+}
 export interface State {
   knifeQueryPartition?: { gameCounter: number; actors: ActorRef[]; buckets: number[][] };
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
   attackRuntime: {chargeC0c: number | null; aimRotationC70?: number | null; headDirectionDa0: number | null; shootingAimDb4: {x: number; y: number} | null; movementDirectionD9c: number | null; playerDc4: {x: number; y: number} | null; persistent: ActorRef | null; secondary: (ActorRef | null)[]; technology2C40?: {pointerKnown: boolean; actor: ActorRef | null; firstDiagnostic: string | null}; nextKnife: number};
   knives: Knife[];
   stageShootingGuard: {state: number; counter: number};
-  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
+  weaponAdmission: {sourcePlayerType: number|null; c18IsKnownEmpty: boolean; c18ControllerHistoryKnown?: boolean; pendingPrimaryCleanup: {fromPrimary:number;toPrimary:number}|null; unadmittedController: {primary:number;channel:string}|null};
   lasers: {id:number; origin:"npcShootAngle"|"playerCharged" | "playerControlled" | "playerTechnology" | "playerTechnology2"; uninitialized:boolean|null; entityType:number; variant:number; subtype:number;
     spawnSeed:number; parent:ActorRef|null; child:ActorRef|null; active:boolean; dead:boolean; visible:boolean;
     position:{x:number;y:number}; savedPosition:{x:number;y:number}; renderOffset:{x:number;y:number};
@@ -326,6 +343,7 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
+  menuPresentation: MenuPresentation;
   runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
   runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
@@ -347,10 +365,11 @@ export interface State {
         | {kind: "modifierConversion"; collectibleId: number} | null} | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     pickupGrantHistory?: PickupGrantHistory | null;
+    activeChargeHistory?: ActiveChargeHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
-    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
+    queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
       pocket?: {overlay: "Pills" | "CardFronts" | "Runes"; overlayFrame: number}} | null;
@@ -363,6 +382,9 @@ export interface State {
     fireDelayInputs?: {sourceD2c: number};
     rangeInputs?: {sourceD34: number};
     shotSpeedInputs?: {sourceD38: number};
+    pillEffectHistory: {kind: "current"; version: 1; history: {words: (number | null)[]} | null};
+    moveSpeedTerms?: {sourceD28: number; sourceD44: number};
+    luckTerms: {sourceD3c: number; sourceD40: number; sourceD58: number} | null;
     moveSpeedInputs?: {sourceD28: number; sourceD44: number; source13bc: number; source13c0: number};
     luckInputs: {sourceD3c: number; sourceD40: number; sourceD58: number; source13cc: number; source13d0: number} | null} | null;
   informationAnimation: {state: number; delay: number; currentActor: string | null;
@@ -384,6 +406,7 @@ export interface State {
   ambience: Ambience;
   roomTransition: {fromRoom: number; targetRoom: number; fromSlot: number; targetSlot: number; phase: "out" | "in" | "bossScene" | "bossCleanup"; fullUpdates: number; bossScene: {presentationIndex: number; animationFrame: number; animationPlaying: boolean} | null} | null;
   departureVelocity?: {x: number; y: number};
+  departurePosition?: {x: number; y: number};
   sourceCacheRunFlags: number | null;
   sourceShotSpeedMinimum?: boolean;
   sourceDamageMaximum?: boolean;
@@ -391,7 +414,7 @@ export interface State {
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | null; frame: number; playing: boolean; guard: boolean };
 
   gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;

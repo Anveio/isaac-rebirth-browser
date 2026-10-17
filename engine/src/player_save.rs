@@ -11,7 +11,16 @@ pub struct SavedPlayerItems {
     /// Actual Saved88D0/88EC/95EC/95F0, separate from evaluated MoveSpeed.
     /// Legacy omission never inherits a fresh constructor's neutral terms.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub move_speed_inputs: Option<crate::player_items::MoveSpeedInputs>,
+    pub move_speed_inputs: Option<crate::pill_effect_history::MoveSpeedView>,
+    ///New non-Pill terms survive independently of missing Pill words.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub move_speed_terms: Option<crate::player_items::MoveSpeedInputs>,
+    ///Only truly omitted legacy data may seed the old copied13/14 pair.
+    #[serde(
+        default,
+        skip_serializing_if = "crate::pill_effect_history::SavedPillEffectHistory::is_legacy_missing"
+    )]
+    pub pill_effect_history: crate::pill_effect_history::SavedPillEffectHistory,
     /// Actual Saved+88D8, copied only from an already owned Player+D30.
     /// Legacy saved data never inherits a fresh constructor's known zero.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -44,6 +53,8 @@ pub struct SavedPlayerItems {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pickup_grant_history: Option<crate::pickup_world_grants::History>,
     /// Saved+8908/890c/8904/8910; D80/D84 are not saved fields.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_charge_history: Option<crate::active_charges::History>,
     pub active_id: u32,
     pub active_charge: i32,
     pub save_word_d88: i32,
@@ -67,7 +78,9 @@ impl SavedPlayerItems {
             return Err("Player save requires all347 owned count slots".into());
         }
         Ok(Self {
-            move_speed_inputs: owner.move_speed_inputs,
+            move_speed_inputs: crate::pill_effect_history::MoveSpeedView::from_owner(owner),
+            move_speed_terms: owner.move_speed_inputs,
+            pill_effect_history: crate::pill_effect_history::SavedPillEffectHistory::capture(owner),
             damage_inputs: owner.damage_inputs,
             range_inputs: owner.range_inputs,
             fire_delay_inputs: owner.fire_delay_inputs,
@@ -83,6 +96,10 @@ impl SavedPlayerItems {
             held_pockets: owner.held_pockets.clone(),
             ordinary_producer_history: owner.ordinary_producer_history.clone(),
             pickup_grant_history: owner.pickup_grant_history.clone(),
+            active_charge_history: owner
+                .active_charge_history
+                .as_ref()
+                .map(crate::active_charges::History::saved_words),
             active_id: owner.active_id,
             active_charge: owner.active_charge,
             save_word_d88: owner.save_word_d88,
@@ -115,6 +132,21 @@ impl SavedPlayerItems {
                 return Err("Saved Player RNG35 states are incomplete or reserved zero".into());
             }
         }
+        //Validate wire/history before changing any live restored field.
+        let legacy_pill = self.pill_effect_history.is_legacy_missing();
+        if legacy_pill && self.move_speed_terms.is_some() {
+            return Err(
+                "Current saved movement terms require the explicit Pill history field".into(),
+            );
+        }
+        let pill_history = self
+            .pill_effect_history
+            .restore(self.move_speed_inputs, None)?;
+        let movement = if legacy_pill {
+            self.move_speed_inputs.map(|view| view.terms())
+        } else {
+            self.move_speed_terms
+        };
         //511710 skips dummy ID0 and copies346 dwords from Saved+8940.
         owner.owned_counts[1..].copy_from_slice(&self.owned_counts[1..]);
         //Legacy None overwrites constructor knowledge. Even a current
@@ -134,6 +166,10 @@ impl SavedPlayerItems {
             }
         }
         owner.save_word_d88 = self.save_word_d88;
+        owner.active_charge_history = self
+            .active_charge_history
+            .as_ref()
+            .map(crate::active_charges::History::saved_words);
         owner.active_id = self.active_id;
         owner.active_charge = self.active_charge;
         owner.reserve_charge = self.reserve_charge;
@@ -149,7 +185,11 @@ impl SavedPlayerItems {
         //51878C/793 include 13BC/13C0 in the saved112-byte block.
         //511820/82E/1A13/1A67 restore these same four words. None must
         //overwrite constructor neutrality when the saved owner is absent.
-        owner.move_speed_inputs = self.move_speed_inputs;
+        owner.move_speed_inputs = movement;
+        owner.pill_effect_history = pill_history;
+        //This DTO never owned saved D3C/D40/D58. Do not retain fresh
+        //constructor zeros merely because the Pill array now restores.
+        owner.luck_inputs = None;
         //51848E/518494 saves88D4;511A19/511A1F restores the actual word.
         owner.fire_delay_inputs = self.fire_delay_inputs;
         //5184B2/5184B8 writes Saved88E0;511A43 restores PlayerD38.

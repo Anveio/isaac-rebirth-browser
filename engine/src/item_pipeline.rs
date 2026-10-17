@@ -696,7 +696,10 @@ impl<'a> ItemInputs<'a> {
     }
 
     pub(crate) fn admits_complete_selected_tail(self) -> bool {
-        self.admits_selected_auxiliary_callbacks() && self.owner.luck_inputs.is_some()
+        self.admits_selected_auxiliary_callbacks()
+            && self.owner.luck_inputs.is_some()
+            && crate::pill_effect_history::callback_word(self.owner, 17).is_some()
+            && crate::pill_effect_history::callback_word(self.owner, 18).is_some()
     }
 
     ///Separate literal neutral kind4/contact modifier footprint. Extending
@@ -1345,6 +1348,388 @@ impl DamageStage {
     }
 }
 
+/// Pure query surface for5127C8..512C3E. The eventual adapter must use the
+/// canonical query/history owner; Some never comes from inventory-derived
+/// absence, cache-mask state, or an unowned pocket-effect history.
+trait RangeReadQueries {
+    fn raw_count(&self, id: usize) -> Option<i32>;
+    fn temporary_count(&self, id: u32) -> Option<i32>;
+    fn have(&self, id: usize) -> Option<bool>;
+    fn temporary_present(&self, id: u32) -> Option<bool>;
+    fn has_trinket(&self, id: u32) -> Option<bool>;
+    fn primary(&self) -> Option<PrimaryWeaponC08>;
+}
+
+/// Local optional views, not another mutable Pill/Range inventory or Save DTO.
+/// Effects11/12 are1388+4*effectID, read independently from the future canonical
+///28-word owner. Existing D34 remains its own direct persistent-word owner.
+#[derive(Clone, Copy)]
+struct RangeWordViews {
+    pill_effect11_range_down: Option<i32>,
+    pill_effect12_range_up: Option<i32>,
+    source_d34: Option<i32>,
+    source_player_type_bfc: Option<u32>,
+    source_variant14: Option<u32>,
+    source_subtype30e8: Option<u32>,
+}
+
+#[derive(Clone, Copy)]
+struct RangeReadPlan {
+    tear_height: f32,
+    tear_falling_speed: f32,
+    tear_falling_acceleration: f32,
+}
+
+impl RangeReadPlan {
+    /// Source-ordered arithmetic for the closed normal BFC0 branch. Other BFC
+    /// prefixes retain an unavailable plan; no character default is fabricated.
+    /// Retained C08 and variant/subtype are consumed only where source reads them.
+    fn read(queries: &impl RangeReadQueries, words: RangeWordViews) -> Option<Self> {
+        //5127EE ->514FAF: positive permanent6 skips the TEMP presence helper.
+        let number_one = queries.have(6)? || queries.temporary_present(6)?;
+        let mut height = -23.75_f32;
+        let mut falling_speed = 0.0_f32;
+        let mut falling_acceleration = 0.0_f32;
+        if number_one {
+            height = -7.75_f32;
+            falling_speed = 0.45_f32;
+        } else if words.source_player_type_bfc? != 0 {
+            //514FBC's other character operands are not owned by this slice.
+            return None;
+        }
+        let coefficient = 5.0_f32;
+
+        //512838..5128DB. Preserve wrapping integer groups before conversion,
+        //then separate binary32 operations; Pill words are not raw item counts.
+        let raw12 = queries.raw_count(12)?;
+        let temp12 = queries.temporary_count(12)?;
+        let raw71 = queries.raw_count(71)?;
+        let temp71 = queries.temporary_count(71)?;
+        let range_up = words.pill_effect12_range_up? as f32 * 0.5_f32;
+        let mut group = raw12
+            .wrapping_add(temp12)
+            .wrapping_sub(raw71.wrapping_add(temp71));
+        group = group.wrapping_add(queries.raw_count(30)?);
+        group = group.wrapping_add(queries.raw_count(31)?);
+        group = group.wrapping_add(queries.raw_count(29)?);
+        let mut height_modifier = group as f32;
+        height_modifier += range_up;
+        height_modifier -= words.pill_effect11_range_down? as f32 * 0.4_f32;
+        height_modifier += queries.raw_count(339)? as f32;
+        height_modifier += queries.raw_count(345)? as f32;
+        height_modifier += queries.raw_count(14)? as f32;
+        let modifier336 = queries.raw_count(336)? as f32 * 0.5_f32;
+        height_modifier *= coefficient;
+        height_modifier += modifier336;
+        height_modifier += queries.raw_count(331)? as f32 * 0.8_f32;
+        height_modifier += queries.raw_count(5)? as f32;
+        //512947 adds the TEMP value to the accumulated modifier in this order.
+        let height_delta = queries.temporary_count(5)? as f32 + height_modifier;
+        let prefix_falling_speed = falling_speed;
+        height -= height_delta;
+
+        //512937..512ADB computes the fresh C90; repeated source reads remain
+        //explicit, including all eight reached TEMP-count helper calls.
+        let mut group = queries
+            .raw_count(12)?
+            .wrapping_add(queries.temporary_count(12)?);
+        group = group.wrapping_add(queries.raw_count(30)?);
+        group = group.wrapping_add(queries.raw_count(31)?);
+        group = group.wrapping_add(queries.raw_count(29)?);
+        let mut speed_modifier = group as f32;
+        let raw71 = queries.raw_count(71)?;
+        let group71 = raw71.wrapping_add(queries.temporary_count(71)?);
+        speed_modifier += group71 as f32 * 3.0_f32;
+        speed_modifier += queries.raw_count(101)? as f32;
+        speed_modifier += queries.raw_count(110)? as f32;
+        speed_modifier += queries.temporary_count(110)? as f32;
+        speed_modifier += queries.raw_count(121)? as f32;
+        speed_modifier += queries.raw_count(345)? as f32;
+        speed_modifier += queries.raw_count(14)? as f32;
+        speed_modifier += queries.temporary_count(121)? as f32;
+        speed_modifier += queries.raw_count(182)? as f32 * 1.5_f32;
+        speed_modifier += queries.raw_count(197)? as f32;
+        speed_modifier += queries.raw_count(339)? as f32;
+        let modifier336 = queries.raw_count(336)? as f32 * 0.5_f32;
+        speed_modifier *= 0.5_f32;
+        speed_modifier -= modifier336;
+        speed_modifier += queries.raw_count(331)? as f32 * 0.8_f32;
+        speed_modifier += queries.raw_count(189)? as f32;
+        speed_modifier += queries.raw_count(5)? as f32;
+        let temporary5 = queries.temporary_count(5)? as f32;
+        if words.source_player_type_bfc? != 0 {
+            //The BFC7 -1 suffix and other character histories stay unowned.
+            return None;
+        }
+        falling_speed = temporary5 + speed_modifier;
+        falling_speed += prefix_falling_speed;
+
+        //512AE9..512B11 consumes this computed speed before the149 override.
+        height += words.source_d34? as f32 * 0.5_f32;
+        height -= falling_speed * 0.5_f32;
+        if queries.have(149)? {
+            falling_acceleration = 0.6_f32;
+            falling_speed = 13.0_f32;
+        }
+        if queries.have(224)? {
+            height += 10.0_f32;
+        }
+        if queries.have(233)? {
+            falling_speed += 7.0_f32;
+            falling_acceleration *= 0.01_f32;
+        }
+        if queries.have(307)? {
+            height -= 1.5_f32;
+        }
+        if queries.have(214)? {
+            height -= coefficient;
+        }
+        if queries.has_trinket(26)? && queries.primary()? == PrimaryWeaponC08::RegularTears {
+            height -= 10.0_f32;
+        }
+        //512C1B/515158: variant0 never needs the optional subtype word.
+        if words.source_variant14? == 1 && words.source_subtype30e8? == 21 {
+            height -= 5.0_f32;
+        }
+        if height > -7.0_f32 {
+            height = -7.0_f32;
+        }
+        Some(Self {
+            tear_height: height,
+            tear_falling_speed: falling_speed,
+            tear_falling_acceleration: falling_acceleration,
+        })
+    }
+}
+
+impl RangeReadQueries for crate::item_queries::AppearanceQueries<'_> {
+    fn raw_count(&self, id: usize) -> Option<i32> {
+        (*self).raw_count(id)
+    }
+    fn temporary_count(&self, id: u32) -> Option<i32> {
+        (*self).temporary_count(id)
+    }
+    fn have(&self, id: usize) -> Option<bool> {
+        (*self).have(id)
+    }
+    fn temporary_present(&self, id: u32) -> Option<bool> {
+        (*self).temporary_present(id)
+    }
+    fn has_trinket(&self, id: u32) -> Option<bool> {
+        (*self).has_trinket(id)
+    }
+    fn primary(&self) -> Option<PrimaryWeaponC08> {
+        (*self).primary()
+    }
+}
+
+/// Source512C42..5130B8, including the two out-of-line TEMP suffixes.
+/// This read-only view borrows existing values and their independent owners.
+/// A missing reached operand does not imply zero or an empty source map.
+trait MoveSpeedSource {
+    fn raw_count(&self, id: u32) -> Option<i32>;
+    fn temporary_count(&self, id: u32) -> Option<i32>;
+    fn temporary_present(&self, id: u32) -> Option<bool>;
+    fn have(&self, id: u32) -> Option<bool>;
+    fn has_trinket(&self, id: u32) -> Option<bool>;
+    fn pill_word(&self, effect: usize) -> Option<i32>;
+    fn source_d44(&self) -> Option<i32>;
+    fn source_d28(&self) -> Option<i32>;
+    fn source_d5c(&self) -> Option<f32>;
+    fn player_type_bfc(&self) -> Option<u32>;
+    fn active_id_d74(&self) -> Option<u32>;
+}
+
+#[derive(Clone, Copy)]
+struct MoveSpeedReadPlan {
+    value: f32,
+}
+
+impl MoveSpeedReadPlan {
+    fn read(source: &impl MoveSpeedSource) -> Option<Self> {
+        //512C59..C6E accumulates signed integers before CVTSI2SS.
+        let mut initial = source.raw_count(119)?;
+        initial = initial.wrapping_add(source.raw_count(27)?);
+        initial = initial.wrapping_add(source.raw_count(232)?);
+        //512C75 copies D44 into the character table's separate index9.
+        //The normal-Isaac output below uses actual table index0, not D44.
+        let _source_d44 = source.source_d44()?;
+        let temporary66 = source.temporary_count(66)?;
+        let pill14 = source.pill_word(14)?;
+        initial = initial.wrapping_add(temporary66);
+        initial = initial.wrapping_add(source.raw_count(28)?);
+        let mut value = initial as f32;
+        value += pill14 as f32 * 0.5_f32;
+        value -= source.pill_word(13)? as f32 * 0.4_f32;
+        value += source.raw_count(340)? as f32;
+        value += source.raw_count(12)? as f32;
+        value += source.temporary_count(12)? as f32;
+        value += source.raw_count(71)? as f32;
+        value += source.temporary_count(71)? as f32;
+        value += source.raw_count(101)? as f32;
+        value += source.temporary_count(122)? as f32;
+        value += source.raw_count(120)? as f32;
+        value += source.temporary_count(120)? as f32;
+        value += source.raw_count(143)? as f32;
+        let temporary143 = source.temporary_count(143)?;
+        let roid = source.raw_count(14)? as f32;
+        let mut reduction = source.raw_count(13)?;
+        reduction = reduction.wrapping_add(source.raw_count(121)?);
+        value += temporary143 as f32;
+        value *= 0.3_f32;
+        value += roid.min(1.0_f32) * 0.6_f32;
+        reduction = reduction.wrapping_add(source.temporary_count(121)?);
+        let subtraction = if reduction > 0 {
+            0.1_f32
+        } else {
+            //513DA0 uses the signed wrapping total, including negatives.
+            0.1_f32 * reduction as f32
+        };
+        let player_type = source.player_type_bfc()?;
+        value -= subtraction;
+        let speed_ball = source.raw_count(70)? as f32 * 0.4_f32;
+        //Source table8E6820 word0 is actual +0.0; other characters need
+        //their own selected table inputs and are not silently Isaac.
+        if player_type != 0 {
+            return None;
+        }
+        value += 0.0_f32;
+        let slow = source.raw_count(90)?.wrapping_add(source.raw_count(129)?);
+        value += speed_ball;
+        value += source.raw_count(79)? as f32 * 0.2_f32;
+        value += source.raw_count(82)? as f32 * 0.3_f32;
+        value = value.min(1.0_f32) + 1.0_f32;
+        value -= slow as f32 * 0.2_f32;
+        value += source.raw_count(189)? as f32 * 0.2_f32;
+        value += source.source_d28()? as f32 * 0.2_f32;
+
+        //512EE4's false edge reaches TEMP298; no eager second lookup.
+        if source.temporary_present(77)? || source.temporary_present(298)? {
+            value += 0.28_f32;
+        }
+        if source.has_trinket(37)? {
+            value += 0.15_f32;
+        }
+        if source.temporary_present(83)? {
+            value -= 0.18_f32;
+        }
+        if source.have(230)? {
+            value += 0.2_f32;
+        }
+        //Read the same canonical D74 value only through its per-word owner.
+        //A current raw ID or query-map completeness cannot establish it.
+        if matches!(source.active_id_d74()?, 181 | 130) {
+            value = value.max(1.5_f32);
+        }
+        if source.have(299)? {
+            value -= 0.3_f32;
+            if source.temporary_present(299)? {
+                //514D5D reaches this separate float only on both positives.
+                let source_d5c = source.source_d5c()?;
+                if !source_d5c.is_finite() {
+                    return None;
+                }
+                value += source_d5c;
+            }
+        }
+        if source.have(300)? {
+            value += 0.25_f32;
+        }
+        if source.have(306)? {
+            value += 0.2_f32;
+        }
+        if source.have(307)? {
+            value += 0.1_f32;
+        }
+        if source.have(314)? {
+            value -= 0.4_f32;
+        }
+        if !value.is_finite() {
+            return None;
+        }
+        Some(Self {
+            value: value.clamp(0.1_f32, 2.0_f32),
+        })
+    }
+
+    fn resolve(self) -> f32 {
+        self.value
+    }
+}
+
+///One temporary borrow of canonical values; no second stat/input store.
+struct RuntimeMoveSpeedSource<'a> {
+    inputs: ItemInputs<'a>,
+    queries: crate::item_queries::AppearanceQueries<'a>,
+    player_type: Option<u32>,
+}
+
+impl MoveSpeedSource for RuntimeMoveSpeedSource<'_> {
+    fn raw_count(&self, id: u32) -> Option<i32> {
+        self.queries.raw_count(id as usize)
+    }
+    fn temporary_count(&self, id: u32) -> Option<i32> {
+        self.queries.temporary_count(id)
+    }
+    fn temporary_present(&self, id: u32) -> Option<bool> {
+        self.queries.temporary_present(id)
+    }
+    fn have(&self, id: u32) -> Option<bool> {
+        self.queries.have(id as usize)
+    }
+    fn has_trinket(&self, id: u32) -> Option<bool> {
+        self.queries.has_trinket(id)
+    }
+    fn pill_word(&self, effect: usize) -> Option<i32> {
+        crate::pill_effect_history::callback_word(self.inputs.owner, effect)
+    }
+    fn source_d44(&self) -> Option<i32> {
+        self.inputs
+            .owner
+            .move_speed_inputs
+            .map(|words| words.source_d44)
+    }
+    fn source_d28(&self) -> Option<i32> {
+        self.inputs
+            .owner
+            .move_speed_inputs
+            .map(|words| words.source_d28)
+    }
+    fn source_d5c(&self) -> Option<f32> {
+        //There is currently no source-owned D5C writer/history. This is
+        //reached only on Have299 && TEMP299; no zero or D44 substitution.
+        None
+    }
+    fn player_type_bfc(&self) -> Option<u32> {
+        self.player_type
+    }
+    fn active_id_d74(&self) -> Option<u32> {
+        //Dependency: the existing canonical per-word charge-history owner.
+        crate::active_charges::active_id(self.inputs.owner)
+    }
+}
+
+impl MoveSpeedReadPlan {
+    fn read_reached(
+        inputs: ItemInputs<'_>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        player_type: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        if !source
+            .entity
+            .is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
+        }
+        Self::read(&RuntimeMoveSpeedSource {
+            inputs,
+            queries,
+            player_type,
+        })
+    }
+}
+
 /// Recompute requested mapped callbacks from actual item inputs, retaining
 /// partial values and pending bits for every unimplemented callback owner.
 /// This extraction preserves Source110 arithmetic and predicates exactly.
@@ -1375,6 +1760,38 @@ pub(crate) fn resolve_scalars(
         } else {
             None
         };
+        let range_plan = if stage == CacheStage::Range
+            && source.entity.is_some_and(|entity| entity.entity_type == 1)
+        {
+            RangeReadPlan::read(
+                &queries,
+                RangeWordViews {
+                    pill_effect11_range_down: crate::pill_effect_history::callback_word(
+                        inputs.owner,
+                        11,
+                    ),
+                    pill_effect12_range_up: crate::pill_effect_history::callback_word(
+                        inputs.owner,
+                        12,
+                    ),
+                    source_d34: inputs.owner.range_inputs.map(|word| word.source_d34),
+                    source_player_type_bfc: source_player_type,
+                    source_variant14: source.entity.map(|entity| entity.variant),
+                    //The current caller has no independent30E8 owner. Actual
+                    //variant0 bypasses it; reached variant1 remains pending.
+                    source_subtype30e8: None,
+                },
+            )
+        } else {
+            None
+        };
+        let range_admitted = range_plan.is_some();
+        let move_speed_plan = if stage == CacheStage::MoveSpeed {
+            MoveSpeedReadPlan::read_reached(inputs, queries, source_player_type, source)
+        } else {
+            None
+        };
+        let move_speed_admitted = move_speed_plan.is_some();
         let shot_speed_admitted = shot_speed_plan.is_some();
         let damage_admitted = damage_plan.is_some();
         let supported: &[u32] = match stage {
@@ -1427,6 +1844,11 @@ pub(crate) fn resolve_scalars(
                 values.stats.tear_height =
                     (resolved_height - values.stats.tear_falling_speed * 0.5_f32).min(-7.0);
                 values.stats.tear_falling_acceleration = 0.0;
+                if let Some(plan) = range_plan {
+                    values.stats.tear_height = plan.tear_height;
+                    values.stats.tear_falling_speed = plan.tear_falling_speed;
+                    values.stats.tear_falling_acceleration = plan.tear_falling_acceleration;
+                }
                 &[6, 14]
             }
             CacheStage::MoveSpeed => {
@@ -1444,37 +1866,33 @@ pub(crate) fn resolve_scalars(
                     resolved_speed += input.source_d28 as f32 * 0.2_f32;
                 }
                 values.stats.move_speed = resolved_speed.clamp(0.1, 2.0);
+                if let Some(plan) = move_speed_plan {
+                    values.stats.move_speed = plan.resolve();
+                }
                 &[14, 27, 28, 143]
             }
             _ => continue,
         };
-        //The literal TEMP6/negative6 values are distinct from their producer
-        //history qualification. Keep these requested until that lifecycle is
-        //admitted; only positive permanent6 expands this completion domain.
-        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay | CacheStage::Range)
+        //FireDelay keeps its existing conservative producer qualification.
+        //Range's exclusive plan owns each actually reached Have/TEMP query.
+        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay)
             && (inputs.owned_count(6) < 0 || inputs.number_one_record_present());
         if !unadmitted_number_one
             && match stage {
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => damage_admitted,
-                CacheStage::Range => {
-                    source_player_type == Some(0)
-                        && inputs.owner.range_inputs.is_some()
-                        && inputs.admits_scalar_stage(stage, supported)
-                }
-                CacheStage::MoveSpeed => {
-                    source_player_type == Some(0)
-                        && inputs.owner.move_speed_inputs.is_some_and(
-                            crate::player_items::MoveSpeedInputs::supports_persistent_d28,
-                        )
-                        && inputs.admits_scalar_stage(stage, supported)
-                }
+                CacheStage::Range => range_admitted,
+                CacheStage::MoveSpeed => move_speed_admitted,
                 CacheStage::ShotSpeed => shot_speed_admitted,
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
         {
             completed |= flag;
-            if matches!(stage, CacheStage::ShotSpeed | CacheStage::Damage) {
+            if matches!(
+                stage,
+                CacheStage::ShotSpeed | CacheStage::Damage | CacheStage::Range
+            ) || (stage == CacheStage::MoveSpeed && move_speed_admitted)
+            {
                 reached_completed |= flag;
             }
         }
@@ -1606,11 +2024,12 @@ impl LuckPlan {
     fn from_owned(
         inputs: ItemInputs<'_>,
         auxiliary: crate::player_items::LuckInputs,
+        pill_down: i32,
+        pill_up: i32,
         run_flags: u64,
     ) -> Self {
-        let signed_sum = auxiliary
-            .source_13d0
-            .wrapping_sub(auxiliary.source_13cc)
+        let signed_sum = pill_up
+            .wrapping_sub(pill_down)
             .wrapping_add(auxiliary.source_d3c)
             .wrapping_add(auxiliary.source_d40)
             .wrapping_add(inputs.owned_count(253))
@@ -1655,7 +2074,13 @@ pub(crate) fn resolve_luck(
     if !LuckStage::admits(inputs, source_player_type) {
         return Ok(None);
     }
-    LuckPlan::from_owned(inputs, auxiliary, run_flags)
+    let (Some(pill_down), Some(pill_up)) = (
+        crate::pill_effect_history::callback_word(inputs.owner, 17),
+        crate::pill_effect_history::callback_word(inputs.owner, 18),
+    ) else {
+        return Ok(None);
+    };
+    LuckPlan::from_owned(inputs, auxiliary, pill_down, pill_up, run_flags)
         .evaluate()
         .map(Some)
 }

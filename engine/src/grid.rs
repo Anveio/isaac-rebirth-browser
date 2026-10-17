@@ -56,6 +56,15 @@ pub struct DoorCollision {
     pub barred: bool,
 }
 
+/// Canonical native Room allocation bound shared by Init and backdrop art.
+pub(crate) fn validate_room_dimensions(width: u16, height: u16) -> Result<(), String> {
+    let count = usize::from(width) * usize::from(height);
+    if width < 3 || height < 3 || count > MAX_GRID_CELLS {
+        return Err("authored room grid exceeds native cell bounds".into());
+    }
+    Ok(())
+}
+
 /// Admit supported authored rocks and spikes with their actual local spawn seeds. The
 /// boundary/door entries are collision profiles; their independent actor RNG
 /// and callbacks are not represented by those geometry-only spawn seeds.
@@ -69,9 +78,7 @@ pub fn for_room(
     let width = u16::from(asset.template.width) + 2;
     let height = u16::from(asset.template.height) + 2;
     let count = usize::from(width) * usize::from(height);
-    if width < 3 || height < 3 || count > MAX_GRID_CELLS {
-        return Err("authored room grid exceeds native cell bounds".into());
-    }
+    validate_room_dimensions(width, height)?;
     let mut cells = vec![GridCell::default(); count];
     for (index, cell) in cells.iter_mut().enumerate() {
         let column = index % usize::from(width);
@@ -171,6 +178,17 @@ pub fn for_room(
                 // Pit3000 Init568990 collides as class1; its autotile frame is
                 // linked after admission by `link_pits`.
                 3000 => Some((7, 0, 0, 1)),
+                // Factory5ce6b0: raw1001 is the bomb rock kind5 directly.
+                1001 => Some((5, rock_frame, 1, 3)),
+                // Raw1300 TNT kind12: Init leaves class0 (the first Update
+                // writes class2 while intact).
+                1300 => Some((12, 0, 0, 0)),
+                // Raw1500 poop: its factory's local RNG35 Int(40) keeps the
+                // ordinary variant0 unless it draws 0 (corn, golden and
+                // rainbow rolls are not admitted).
+                1500 if !crate::room_spawns::next35(spawn.spawn_seed).is_multiple_of(40) => {
+                    Some((14, 0, 0, 3))
+                }
                 _ => None,
             };
             if let Some((kind, variant, state, collision_class)) = admitted {
@@ -910,7 +928,19 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false)
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.0)
+    }
+
+    /// 44364a..443681: Dip (217) and type 220 scale the reflection impulse
+    /// `inward * 1.8 - 0.1` by 1.2 (66acfc) before the speed rescale.
+    pub fn resolve_nonplayer_ground_bouncy(
+        &self,
+        grid: &Grid,
+        position: &mut WorldVector,
+        velocity: &mut WorldVector,
+        preview: bool,
+    ) -> Result<Option<GridContact>, String> {
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.2)
     }
 
     ///442CD4 /443512: class6 ignores grid collision1, and refines six times.
@@ -922,7 +952,7 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, true)
+        self.resolve_nonplayer_ground_class(grid, position, velocity, preview, true, 1.0)
     }
 
     fn resolve_nonplayer_ground_class(
@@ -932,6 +962,7 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
         ignores_pits: bool,
+        reflection_scale: f32,
     ) -> Result<Option<GridContact>, String> {
         if !position.is_finite() || !velocity.is_finite() {
             return Err("nonplayer collision requires finite world vectors".into());
@@ -960,7 +991,7 @@ impl Collider {
             let reflected = if preview {
                 *velocity
             } else {
-                *velocity + normal * (inward * 1.8 - 0.1)
+                *velocity + normal * ((inward * 1.8 - 0.1) * reflection_scale)
             };
             let speed = (reflected.x * reflected.x + reflected.y * reflected.y).sqrt();
             if !reflected.is_finite() || !speed.is_finite() || (!preview && speed <= 0.0) {

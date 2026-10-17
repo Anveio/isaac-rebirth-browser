@@ -130,28 +130,129 @@ pub(crate) fn note_modifier_grant(owner: &mut player_items::PlayerItems, id: u32
     }
 }
 
+///Unimplemented reached use owners remain separate from known held slots,
+///the canonical Pill words and completed scalar callbacks. These flags never
+///certify progression, time effects, player color or private callback entry.
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PillUseFrontiers {
+    pub player_be8: bool,
+    pub persistent_counter5: bool,
+    pub persistent_use43: bool,
+    pub game_time_551dd0: bool,
+    pub identified_color: bool,
+    pub unresolved_name_mode: bool,
+    pub range_up_color: bool,
+}
+
+///5282B0's known11/12 arm. Resolution did not create input ownership: an
+///unknown prior counter remains unknown even though the actual use consumes
+///the Pill. Cache completion is still the reached Range plan's own decision.
+fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
+    let displayed_name = match state
+        .run_seeds
+        .as_ref()
+        .and_then(|seeds| seeds.source_effect_mode)
+    {
+        Some(29) => Some("???"),
+        Some(9) | None => None,
+        Some(_) => Some(
+            crate::pickups::pill_definition(effect)
+                .ok_or("Resolved Pill config is absent")?
+                .name,
+        ),
+    };
+    //528446's identification byte is an independent unimplemented owner.
+    //Do not invent a fresh global store without its foreign-writer history.
+    if let Some(name) = displayed_name {
+        state.run_introduction = crate::RunIntroduction::pickup(name, "");
+    }
+    let owner = state.player_items.as_mut().expect("resolved Pill owner");
+    let frontiers = owner
+        .pill_use_frontiers
+        .get_or_insert_with(Default::default);
+    frontiers.player_be8 = true;
+    frontiers.persistent_counter5 = true;
+    frontiers.persistent_use43 = true;
+    frontiers.game_time_551dd0 = true;
+    frontiers.identified_color = true;
+    frontiers.unresolved_name_mode |= displayed_name.is_none();
+    frontiers.range_up_color |= effect == 12;
+    //5284A3 increments before529003/528EC7 request the independent cache8.
+    if let Some(history) = owner.pill_effect_history.as_mut() {
+        history.increment_resolved(effect)?;
+    }
+    owner.unevaluated_cache_flags |= 8;
+    crate::player_animation::pill_response(state, effect == 12);
+    if effect == 12 {
+        //528EF6 follows Happy268. Color13F8/timed tint remains explicit above.
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            crate::audio::SoundRequest {
+                id: 132,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+    //5286D2 evaluates CURRENT inputs before5286D7 reads CURRENT slot1.
+    //No cached number or zero pending endpoint is a callback-entry witness.
+    crate::player_stats::evaluate_cache(state)?;
+    let held = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.held_pockets.as_mut())
+        .ok_or("Pill effect lost its held-slot owner before promotion")?;
+    held.slots[0] = held.slots[1];
+    //5286DF clears only the ID dword; the second record's tag is retained.
+    held.slots[1].id = 0;
+    Ok(())
+}
+
 ///5282B0 invokes the effect before reading CURRENT slot1 and shifting it.
-///Until that effect is owned, retain diagnostic history and refuse to treat
-///it as current source slots. No unsupported effect or early shift is faked.
-pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
+///Only the source-closed11/12 scalar arms consume current slots here; other
+///effects preserve the existing typed frontier and conservative invalidation.
+pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<(), String> {
     if !controls_enabled
         || state.player.input_cooldown > 0
         || !state.public_actions.pocket_triggered
         || (state.player_animation.current == Some(crate::player_animation::Clip::UseItem)
             && state.player_animation.playing)
     {
-        return;
+        return Ok(());
+    }
+    let resolved_pill = crate::pill_effect_history::resolve_held_pill(state);
+    if let Some(effect @ (11 | 12)) = resolved_pill {
+        return use_range_pill(state, effect);
     }
     let Some(owner) = state.player_items.as_mut() else {
-        return;
+        return Ok(());
     };
     let Some(held) = owner.held_pockets.as_mut() else {
-        return;
+        //An admitted request with legacy unknown slots may run a
+        //Pill writer. Blocked requests returned before this branch.
+        crate::pill_effect_history::forget(owner);
+        crate::active_charges::invalidate_owner(
+            owner,
+            &[
+                crate::active_charges::Word::ActiveId,
+                crate::active_charges::Word::Charge,
+                crate::active_charges::Word::Subordinate,
+                crate::active_charges::Word::Reserve,
+            ],
+            crate::active_charges::Frontier::PocketEffect {
+                source_pc: 0x5282b0,
+            },
+        );
+        return Ok(());
     };
     if held.frontier.is_none() {
         let slot = held.slots[0];
         if slot.id == 0 {
-            return;
+            return Ok(());
         }
         held.frontier = Some(if slot.card {
             PocketFrontier::CardEffect { card_id: slot.id }
@@ -161,6 +262,18 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
             }
         });
     }
+    crate::active_charges::invalidate_owner(
+        owner,
+        &[
+            crate::active_charges::Word::ActiveId,
+            crate::active_charges::Word::Charge,
+            crate::active_charges::Word::Subordinate,
+            crate::active_charges::Word::Reserve,
+        ],
+        crate::active_charges::Frontier::PocketEffect {
+            source_pc: 0x5282b0,
+        },
+    );
     if let Some(coverage) = &mut state.room.ordinary_placement {
         coverage.invalidate(crate::ordinary_placement::Frontier::PocketEffects);
     }
@@ -168,6 +281,15 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
         owner,
         crate::ordinary_placement::Frontier::PocketEffects,
     );
+    //5284A3 commits the actual final-effect increment before dispatch.
+    //The unimplemented effect tail cannot claim its final word history;
+    //forget that ownership afterward, preserving the existing frontier.
+    if let (Some(effect), Some(history)) = (resolved_pill, owner.pill_effect_history.as_mut()) {
+        history
+            .increment_resolved(effect)
+            .expect("bounded actual Pill-effect resolver");
+    }
+    crate::pill_effect_history::forget(owner);
     //An existing frontier contains historical records, not known-empty
     //current slots. Preserve it, but never retain new input ownership on a
     //later admitted request whose actual effect may still be unknown.
@@ -176,6 +298,7 @@ pub(crate) fn note_unowned_use(state: &mut State, controls_enabled: bool) {
     }
     state.attack_runtime.aim_rotation_c70 = None;
     owner.move_speed_inputs = None;
+    Ok(())
 }
 
 ///504820→505520 adds the pocket before copying7E0, starting UseItem and

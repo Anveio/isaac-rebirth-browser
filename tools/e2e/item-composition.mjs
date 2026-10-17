@@ -11,14 +11,28 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { captureComposition } from '../foundation/composition-capture.mjs';
 
-const recordedBankDirectory = 'references/isaac/foundation/item-composition/history';
+const pocketMode = flag('--pockets');
+const pillUseMode = hasFlag('--pill-use');
+assert.ok(!pillUseMode || pocketMode === 'collection',
+  'Positive Pill use requires the public collection mode');
+const wasmNode = flag('--wasm-node');
+const wasmSha = flag('--wasm-sha');
+const reusedOriginal = flag('--reuse-original');
+if (wasmNode) {
+  assert.ok(pocketMode, 'Explicit WASM Node fallback is scoped to pocket cases');
+  assert.match(wasmSha ?? '', /^[a-f0-9]{64}$/);
+} else assert.ok(!wasmSha && !reusedOriginal, 'WASM/reuse declarations need --wasm-node');
+if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'Unknown pocket mode');
+const recordedBankDirectory = pocketMode ? 'references/isaac/foundation/pockets/history'
+  : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--count 2 | --scenarios BANK] [--production DIST] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection] [--pill-use] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
-  console.log(`Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
+  console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
+    : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
   process.exit(0);
 }
-const output = outputDirectory('item-composition');
+const output = outputDirectory(pocketMode ? 'pockets-' + pocketMode : 'item-composition');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
 const sourceFiles = [
@@ -36,7 +50,16 @@ const sourceFiles = [
   'tools/foundation/browser-evidence.mjs', 'tools/foundation/production-server.mjs',
   'tools/foundation/browser.mjs',
 ];
+if (pocketMode) sourceFiles.push('tools/original/pocket-scenarios.py',
+  'tools/original/pocket-collection-observe.py', 'tools/original/audio-observer.py',
+  'tools/foundation/pocket-state-pair.py', 'tools/original/native-journal-zstd.py',
+  'tools/original/state-observer.py', 'references/isaac/foundation/pockets/history/scenarios.json');
 const filePins = async paths => Object.fromEntries(await Promise.all(paths.map(async path => [path, hash(await readFile(path))])));
+if (pillUseMode) sourceFiles.push('tools/foundation/pill-range-use-state-pair.py',
+  'tools/original/pill-range-use-scenarios.py',
+  'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
+  'references/isaac/rebirth/resources/challenges.xml');
+if (wasmNode) sourceFiles.push('tools/foundation/composition-wasm-public.mjs');
 const sourcePins = () => filePins(sourceFiles.map(path => join(ROOT, path)));
 
 async function child(command, args, log) {
@@ -69,8 +92,10 @@ try {
     report.inputMode = 'recorded bank; no new entropy';
   } else {
     const generated = join(output, 'declared-inputs');
-    const result = await child('python3', [join(ROOT, 'tools/original/composition-scenarios.py'),
-      '--output', generated, '--count', flag('--count', '2')], join(output, 'declaration.log'));
+    const result = await child('python3', [join(ROOT, pillUseMode ? 'tools/original/pill-range-use-scenarios.py' : pocketMode
+      ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
+      '--output', generated, '--count', flag('--count', '2'),
+      ...(pocketMode && !pillUseMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
     report.inputMode = 'fixed cases plus every freshly journaled unfiltered OS projection';
@@ -86,6 +111,15 @@ try {
     for (const key of ['authoredResourcePath', 'specialRoomsPath']) {
       if (fixture[key]) fixture[key] = resolve(dirname(bankPath), fixture[key]);
     }
+    if (pocketMode) {
+      const kind = declaration.pocketInit ? 'init' : declaration.pocketCollection ? 'collection' : null;
+      assert.ok(kind && (pocketMode === 'all' || pocketMode === kind), 'Every declared replay case must match the requested pocket mode');
+      assert.equal(Number.isFinite(declaration.sfxVolume), true);
+      assert.ok(declaration.sfxVolume >= 0 && declaration.sfxVolume <= 1);
+    }
+    assert.equal(Boolean(declaration.pillUse), pillUseMode,
+      'Real consumption requires its separate use reader');
+    if (pillUseMode) assert.equal(declaration.pillUse.schema, 'source-public-pill-range-use-v1');
     return { ...declaration, fixture };
   });
   if (cases.some(item => item.requires?.spoonBender3Functional !== undefined)) {
@@ -114,8 +148,22 @@ try {
   report.resourcePinsBefore = await filePins(resources);
   report.declaredOrder = cases.map(item => item.name);
   await save(join(output, 'report.json'), report);
-  if (!hasFlag('--prepare-only')) {
-    server = await startProductionServer({ directory: resolve(flag('--production', join(ROOT, 'dist'))) });
+  if (wasmNode) {
+    assert.equal(hash(await readFile(resolve(wasmNode))), wasmSha, 'Actual qualified WASM bytes');
+    assert.ok(!reusedOriginal || cases.length === 1, 'A closed Original reuse names exactly one identical case');
+    report.captureBackend = 'wasm-node';
+    report.wasmArtifact = {path:resolve(wasmNode),sha256:wasmSha};
+    report.unavailable = ['Browser DOM inputs', 'Renderer and PNGs', 'Audio backend and PCM'];
+    report.scope = 'Independent Original evidence and explicit qualified public-WASM ABI replay. Actual game fields remain assertions; DOM/render/backend evidence is unavailable.';
+  }
+  if (!hasFlag('--prepare-only') && !wasmNode) {
+    const qualifiedSha = flag('--qualified-production-sha');
+    const qualifiedFiles = flag('--qualified-production-files');
+    assert.equal(Boolean(qualifiedSha), Boolean(qualifiedFiles), 'Both qualified production declarations required');
+    server = await startProductionServer({ directory: resolve(flag('--production', join(ROOT, 'dist'))),
+      ...(qualifiedSha ? {qualifiedBuildIdentity:{sha256:qualifiedSha,files:Number(qualifiedFiles)}} : {}) });
+    if (qualifiedSha) assert.deepEqual({sha256:server.build.sha256,files:server.build.files},
+      {sha256:qualifiedSha,files:Number(qualifiedFiles)}, 'Actual production identity matches declaration');
     report.production = server.build;
     const launch = browserLaunchOptions();
     browser = await chromium.launch({ ...launch, headless: false, args: [...launch.args, '--no-sandbox'] });
@@ -129,22 +177,40 @@ try {
     report.cases.push(result);
     await save(join(output, 'report.json'), report);
     console.log(JSON.stringify({ case: declaration.name, status: 'started' }));
+    const originalDirectory = reusedOriginal ? resolve(reusedOriginal) : join(directory, 'original');
     try {
+      if (reusedOriginal) {
+        assert.deepEqual(JSON.parse(await readFile(join(originalDirectory,'case.json'),'utf8')),declaration,
+          'Reused independent Original must have the exact same declaration');
+        result.original = {exitCode:0,scope:'Reused closed independent Original capture; no new Native process.',directory:originalDirectory};
+      } else {
       const args = [join(ROOT, 'tools/original/composition-run.py'), '--scenarios', scenarios,
         '--case', declaration.name, '--output', join(directory, 'original')];
+      if (pocketMode) args.push('--pockets', declaration.pocketInit ? 'init' : 'collection');
       if (hasFlag('--prepare-only')) args.push('--prepare-only');
-      else args.push('--archive-evidence', '--observe-every-step', '--state-observer',
-        join(ROOT, 'tools/original/composition-observe.py'), '--frame-timeout', flag('--native-frame-timeout', '60'));
+      else args.push('--archive-evidence', ...(pocketMode ? ['--journal-codec', 'zstd'] : []), '--observe-every-step', '--state-observer',
+        join(ROOT, pocketMode ? 'tools/original/pocket-collection-observe.py'
+          : 'tools/original/composition-observe.py'), '--frame-timeout', flag('--native-frame-timeout', '60'));
       result.original = await child('python3', args, join(directory, 'original.log'));
+      }
     } catch (error) { result.errors.push('Original: ' + String(error)); }
     // Every declared browser case is attempted even when its native capture fails.
     if (!hasFlag('--prepare-only')) {
-      try { result.browserCapture = await captureComposition(browser, server, declaration, join(directory, 'browser')); }
-      catch (error) { result.errors.push('Browser: ' + String(error)); }
+      const portDirectory = join(directory,wasmNode?'wasm':'browser');
+      try {
+        if (wasmNode) {
+          await mkdir(portDirectory);
+          const node = await child(process.execPath,[join(ROOT,'tools/foundation/composition-wasm-public.mjs'),
+            portDirectory,resolve(wasmNode),wasmSha,join(directory,'case.json'),hash(await readFile(join(directory,'case.json')))],
+            join(directory,'wasm.log'));
+          result.wasmCapture = node;
+        } else result.browserCapture = await captureComposition(browser, server, declaration, portDirectory);
+      } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); }
       for (const [key, tool, args] of [
-        ['captureReadback', 'composition-readback.py', ['--directory', directory]],
-        ['comparison', 'composition-state-pair.py', ['--original', join(directory, 'original/manifest.json.gz'),
-          '--browser', join(directory, 'browser/browser-evidence.json.gz')]],
+        ['captureReadback', 'composition-readback.py', ['--directory', directory, ...(wasmNode?['--wasm-node','--wasm-artifact',resolve(wasmNode),'--wasm-sha',wasmSha]:[]), ...(reusedOriginal?['--original-directory',originalDirectory]:[])]],
+        ['comparison', pillUseMode ? 'pill-range-use-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
+          '--browser', join(portDirectory,wasmNode?'actual-replay-result.json':'browser-evidence.json.gz'),
+          ...(pillUseMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
       ]) {
         try {
           result[key] = await child('python3', [join(ROOT, 'tools/foundation', tool),
@@ -155,7 +221,7 @@ try {
     }
     result.status = hasFlag('--prepare-only')
       ? result.original?.exitCode === 0 && !result.errors.length ? 'prepared-not-executed' : 'fail'
-      : result.original?.exitCode === 0 && result.browserCapture?.status === 'pass'
+      : result.original?.exitCode === 0 && (wasmNode ? result.wasmCapture?.exitCode === 0 : result.browserCapture?.status === 'pass')
         && result.captureReadback?.exitCode === 0 && result.comparison?.exitCode === 0 && !result.errors.length ? 'pass' : 'fail';
     await save(join(directory, 'case-report.json'), result);
     await save(join(output, 'report.json'), report);

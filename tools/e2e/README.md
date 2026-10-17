@@ -306,3 +306,37 @@ bytes and record count and retain incomplete status. Only a successful final
 frame/checksum write, file close and metadata commit certify a closed journal.
 Readers reject incomplete frames, uncommitted tails and ambiguous mixed formats.
 No game field, public input, clock, RNG stream or capacity floor changes.
+
+### Functional public-WASM room-frame backend
+
+Existing room-frame suites also accept `--wasm-node WASM --wasm-sha SHA`.
+They replay the same declared menu/key/tick commands through the public ABI
+with the same seed and boot epoch, then use the existing per-frame comparer
+and suite minima. They add no resource or state override.
+`--reuse-original DIR` requires this backend and validates the retained
+Original case and public tape against the requested declaration before using
+its observations. A matching port replay is never its own reference.
+
+This route reports game-functional evidence only. Browser DOM input, renderer
+output and backend audio/PCM remain unavailable and require their separate
+Browser runs. Native and Browser resource-partial reports remain unchanged;
+a complete public-WASM journal alone does not establish a functional pass.
+
+### Functional public-WASM natural coins
+
+The existing `pickups` driver accepts `--wasm-node WASM --wasm-sha SHA` and
+replays its same coin input route/comparer/coverage minima through the public
+ABI. `--case NAME --scenarios BANK` selects one declared case without changing
+the retained whole bank. The default Browser route remains available.
+
+`--reuse-original DIR` additionally requires the explicit functional backend
+and case selection. The prior root must retain its original `scenarios.json`,
+public case tape and successful report with the complete Native manifest hash.
+The driver checks all three, then runs the existing canonical Native
+provenance validator before WASM. It never creates a missing declaration or
+uses Native output as a runtime input.
+
+Node journals are actual reset/key/tick/snapshot observations. Browser DOM,
+rendered output and audio playback/PCM remain unavailable; source/schema gaps,
+comparison failures and missing pickup witnesses remain failures. Historical
+passes do not become current-build acceptance without the real replay.

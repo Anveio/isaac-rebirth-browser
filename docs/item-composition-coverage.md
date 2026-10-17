@@ -12,6 +12,88 @@ functional parity.
 
 ## Current gameplay qualification
 
+Public main `d995a582` includes refused-pedestal runtime PR557 and
+optional Node tools PR558. Primary/playable remains `4543c59b`, serving the
+qualified current-CF8 artifact `ed5b8d1e` / WASM `d869557b` (Wd869), product
+`44ab4b10`/1403, with delivery `d526140f`. Its six production steps passed;
+Use45 passes 43/43 for the real TEMP45 TTL0 record and continued updates, and
+the selected item194 Own/reused-Original endpoint checks have zero failures.
+Item194's five unknown labels, actual cache/Add invocations, positive-TTL expiry
+and unrelated effects remain explicit. This artifact does not qualify557.
+
+The 21 scalar cases belong to the prior Wecee artifact: 187,499 Own
+checks with zero scalar/producer failures, 210 independent Original endpoint
+checks with zero failures, and 85 unknowns. They are not a 21-case rerun on
+Wd869. The old reports and their artifact bindings remain unchanged.
+
+The retained key-fixed Original compared with Wd869 through the public-WASM
+backend passes 422/422 presentations with zero failures (`e07f9f8a`), including
+both real key collections. The unchanged default Pocket AL CLI control on
+the same artifact passes 9,350 checks with zero failures and 11 unavailable
+obligations (`8ec05bef`). This is a transport regression control, not another
+mandatory pocket case: the earlier 3/11 scope remains. The Browser key attempt
+and menu-audio attempts remain resource-partial with zero comparison checks.
+Node results supply no Browser DOM, renderer or backend audio/PCM equality.
+
+The separate Get4+557 source `35e65b91` / WASM `e5b6ace1` has a genuine
+six-step production pass and sealed binding `88933f3a`. Its first fixed0
+live3 case passes all eight new target-lifecycle laws, from actual real3
+acquisition while the target is alive through the same Knife's registration,
+contact, target death/retirement and cleared target slot. The corrected Own
+diagnostic retains five required unknowns. Pending cache16 is MoveSpeed/D60
+and remains recorded; it is not FireDelay and is not cleared or completed.
+The original broad strict report retains 7,009 failures. Its retained-data
+correction records 7,006 failures across 86,561 checks (`60c292d0`), with six
+Get4 diagnostics and all eight target laws passing. Attribution remains open
+until the same fixed0 case is compared on the prior Wd869 artifact; an unlike
+historical case is not that baseline. Full cohort, callback and
+broader synergy acceptance remain open. This result does not qualify191,
+satellites, Get1, canonical Pill/Range/Luck or the separate pickup/transition
+source candidates.
+
+Every earlier row, strict failure and resource-partial report below retains
+its named artifact and scope. A retained section's word “current” refers to
+that recorded snapshot.
+
+## Retained e56e/Wecee qualification snapshot
+
+Current public source is `e56e66f9`; the synchronized checkout remains
+`0bb5487e`, serving scalar artifact `b3555a49` / WASM `ecee6363` (Wecee)
+with its actual six-step production qualification. New public grid admission,
+TNT updates and web shared-MT Init changes are outside that artifact's scope.
+Formatting, documentation and tool changes do not create a new gameplay
+artifact. All 21 current scalar cases close at 187,499 Own
+checks with zero scalar/producer failures, plus 210 independently validated
+Original/Own endpoint checks with zero failures; 85 unknowns remain. Item194's
+cached shot speed is 1.3600000143051147, with matching item RNG and Card seed.
+These endpoints do not establish individual cache/RNG callbacks or full synergy.
+
+Pocket runtime and selected functional proof are partial: 3 of 11 mandatory
+cases have closed. The public-tool AL control has 9,350 checks / 0 failures /
+11 unavailable obligations; the prior immutable AL report remains 9,349 / 0 /
+12 unavailable with SAME-v1 AD0 refresh unreached. Separated fixed and retained
+OS cases each retain 29,385 / 0 / 11 unavailable. Eight cases and browser,
+DOM/render, backend/PCM and broader pocket effects remain obligations. This
+pocket bank supplies no coin/key/bomb/chest coverage credit.
+
+The separate CF8 candidate and cdylib build-tool successor have an actual
+six-step production pass. Fresh Original/Own Use45 checks pass 43/43 for
+TEMP45 TTL0 and continued ticks; positive-TTL expiry and controller invocation
+remain unqualified. Its selected194 Own/reused-Original replay also closed
+with zero failures. These checks do not qualify the newer public grid
+runtime, and the served artifact remains Wecee.
+Get4/C18, new homing satellites, canonical Pill/Range and Luck1024 remain
+private source cuts with limited syntax checks, not build/game passes. The
+room191 case remains unrun in both games. The Original-only menu-audio diagnostic
+retained five real OpenAL SFX starts, its full tail and complete mono PCM
+artifacts. A later Browser-only reuse attempt launched Chrome but stopped at
+the resource floor, with zero pair checks; Browser playback and PCM/audio
+equality remain unqualified.
+Every strict historical red
+and resource-partial result below retains its original artifact and scope.
+
+## Retained 6b260 gameplay qualification snapshot
+
 This source snapshot names actual public main `6b260155`, including external shared-MT ambience/light/DropSound PR492 and upkeep494, plus pickup491, Quit495, web-owner496 and Move-save497. Its exact production artifact passed all six build steps in 42.695s with 3,565 source pins stable, using the explicit LTO-off/CG256, 1.4375 GiB startup and 512 MiB live profile. Build success, port replay comparisons and Original evidence remain separate. The private `658b299e` tests below do not qualify the later external492/494 paths. Every earlier report and snapshot remains historical with its failures preserved.
 
 | Area | Source/public | Own/port-port | Original scope | Remaining behavior or evidence |

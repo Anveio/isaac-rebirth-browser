@@ -91,6 +91,10 @@ impl Default for WeaponCache {
 pub struct WeaponAdmission {
     pub source_player_type: Option<u32>,
     pub c18_is_known_empty: bool,
+    ///Actual persistent Player-controller history, separate from a physical
+    ///C18 pointer or an unrelated contact/grid diagnostic. Legacy is unknown.
+    #[serde(default)]
+    pub c18_controller_history_known: bool,
     ///Port effect history: an earlier requested primary change reached an
     ///unadmitted prior C18. Equality on a later request cannot erase it.
     #[serde(default)]
@@ -118,6 +122,7 @@ impl WeaponAdmission {
         Self {
             source_player_type: Some(0),
             c18_is_known_empty: true,
+            c18_controller_history_known: true,
             pending_primary_cleanup: None,
             unadmitted_controller: None,
         }
@@ -440,6 +445,24 @@ pub(crate) enum ControllerChannel {
     ControlledTear,
 }
 
+impl ControllerChannel {
+    ///Source callback footprint at an actual skipped Player invocation.
+    ///Ordinary68/52 and regular/burst emitters do not bind C18.
+    pub(crate) fn writes_c18(self) -> bool {
+        matches!(
+            self,
+            Self::OrdinaryKnife
+                | Self::ControlledKnife
+                | Self::ChargedBrimstone
+                | Self::ControlledBrimstone
+                | Self::ControlledTechnology
+                | Self::ControlledTear
+                | Self::ControlledFetus
+                | Self::EpicFetus
+        )
+    }
+}
+
 pub(crate) fn resolve_controller(
     items: ItemInputs<'_>,
     primary: PrimaryWeaponC08,
@@ -627,6 +650,504 @@ pub(crate) fn admit_neutral_knife_contact(
 ///Actual neutral50D090(kind4) after registry insertion reads CURRENT C88,
 ///which can differ from the earlier Knife48C copied by Player reapply.
 ///This stage requests no RNG; proc/contact callback ownership is separate.
+/// Pure 50D090(kind4) read schedule. The caller supplies independently owned
+/// current fields/query histories and the actual Player receiver. No mutable
+/// state, cached-output completion, actor capability or RNG ownership is made
+/// here. C70 and actor/caller history remain the live caller's separate inputs:
+/// this source getter itself never reads C70.
+pub(crate) trait Kind4Source {
+    fn have(&self, id: usize) -> Option<bool>;
+    fn temporary_present(&self, id: u32) -> Option<bool>;
+    fn has_trinket(&self, id: u32) -> Option<bool>;
+    fn height_c8c(&self) -> Option<f32>;
+    fn damage_c88(&self) -> Option<f32>;
+    fn flags_c98(&self) -> Option<AttackFlags>;
+    fn color_ca0(&self) -> Option<AttackColor>;
+    fn luck_d64(&self) -> Option<f32>;
+    fn entity_variant(&self) -> Option<u32>;
+    fn variant_subtype_30e8(&self) -> Option<u32>;
+    fn turn_state_d70(&self) -> Option<i8>;
+    fn source_player_type_bfc(&self) -> Option<u32>;
+    fn primary_c08(&self) -> Option<PrimaryWeaponC08>;
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Kind4Frontier {
+    MissingField {
+        source_pc: u32,
+        field: &'static str,
+    },
+    MissingHave {
+        source_pc: u32,
+        id: usize,
+    },
+    MissingTemporary {
+        source_pc: u32,
+        id: u32,
+    },
+    MissingTrinket {
+        source_pc: u32,
+        id: u32,
+    },
+    InvalidField {
+        source_pc: u32,
+        field: &'static str,
+    },
+    /// An actual reached SharedBound invocation; no draw is fabricated or
+    /// consumed by this pure planner. Earlier reads do not complete Get4.
+    SharedDraw {
+        source_pc: u32,
+        bound: u32,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct Kind4ReadPlan {
+    pub variant: u32,
+    pub color: AttackColor,
+    pub flags: AttackFlags,
+    pub damage: f32,
+    pub scale: f32,
+    pub height: f32,
+}
+
+impl Kind4ReadPlan {
+    pub(crate) fn read(source: &impl Kind4Source) -> Result<Self, Kind4Frontier> {
+        // 50D0B1..128: source order is C8C, C88, C98, then all eleven CA0
+        // words. The separate result color cannot alias the Player field.
+        let height = Self::finite(source.height_c8c(), 0x50d0b1, "C8C")?;
+        let damage = Self::finite(source.damage_c88(), 0x50d0b7, "C88")?;
+        let flags = Self::field(source.flags_c98(), 0x50d0ce, "C98")?;
+        let color = Self::field(source.color_ca0(), 0x50d0e5, "CA0")?;
+        if damage < 0.0 || !color.is_finite() {
+            return Err(Kind4Frontier::InvalidField {
+                source_pc: 0x50d12b,
+                field: "nonnegative C88 / finite CA0",
+            });
+        }
+        // The linear pair is binary32; sqrt and its .15f32 coefficient
+        // execute in binary64 before the final binary32 conversion.
+        let linear = damage * 0.04_f32 + 0.6_f32;
+        let scale = (f64::from(linear) + f64::from(damage).sqrt() * f64::from(0.15_f32)) as f32;
+        let mut plan = Self {
+            variant: 0,
+            color,
+            flags,
+            damage,
+            scale,
+            height,
+        };
+
+        if Self::trinket(source, 30, 0x50d176)? {
+            return Err(Self::luck_draw(source, 0x50d18c, 0.5, 10, 1, 0x50d1ad)?);
+        }
+        if Self::trinket(source, 31, 0x50d1c7)? {
+            return Err(Self::luck_draw(source, 0x50d1dd, 0.5, 10, 1, 0x50d1fe)?);
+        }
+        if Self::have(source, 110, 0x50d218)? || Self::temporary(source, 110, 0x50db6c)? {
+            return Err(Self::luck_draw(source, 0x50d232, 0.15, 5, 2, 0x50d254)?);
+        }
+        if Self::have(source, 89, 0x50d26e)? {
+            return Err(Self::luck_draw(source, 0x50d27f, 0.2, 4, 1, 0x50d29c)?);
+        }
+        if Self::have(source, 231, 0x50d2b1)? {
+            return Err(Self::luck_draw(source, 0x50d2c7, 0.5, 10, 1, 0x50d2df)?);
+        }
+        if Self::have(source, 103, 0x50d2f4)? {
+            return Err(Self::luck_draw(source, 0x50d30a, 0.25, 4, 1, 0x50d322)?);
+        }
+        if Self::have(source, 200, 0x50d337)? {
+            return Err(Self::luck_draw(source, 0x50d34d, 0.334, 10, 1, 0x50d365)?);
+        }
+        if Self::have(source, 201, 0x50d37a)? || Self::temporary(source, 201, 0x50db8c)? {
+            return Err(Self::luck_draw(source, 0x50d394, 0.334, 10, 1, 0x50d3ac)?);
+        }
+        if Self::have(source, 221, 0x50d3c1)? {
+            plan.flags.0 |= 0x80000;
+        }
+        if Self::have(source, 330, 0x50d3da)? {
+            plan.scale *= 0.5;
+        }
+        if Self::have(source, 336, 0x50d3fd)? {
+            plan.scale *= 1.5;
+        }
+        // This second Have330 is an actual reached source query. A positive
+        // result bypasses the entire conversion chain below.
+        if !Self::have(source, 330, 0x50d420)? {
+            let converts = Self::have(source, 230, 0x50db38)?
+                || Self::have(source, 229, 0x50dd18)?
+                || Self::have(source, 7, 0x50dd2d)?
+                || Self::have(source, 138, 0x50dd42)?
+                || Self::have(source, 80, 0x50dd57)?
+                || Self::have(source, 183, 0x50dd6c)?
+                || (Self::field(source.entity_variant(), 0x50dd79, "variant")? == 1
+                    && Self::field(source.variant_subtype_30e8(), 0x50dd7f, "30E8")? == 13)
+                || Self::temporary(source, 34, 0x50dd9b)?
+                || Self::have(source, 90, 0x50ddb0)?
+                || Self::temporary(source, 122, 0x50ddc5)?
+                || Self::have(source, 126, 0x50ddda)?;
+            if converts {
+                plan.variant = if plan.variant == 11 { 12 } else { 1 };
+            }
+        }
+        if Self::have(source, 228, 0x50d435)? || Self::have(source, 230, 0x50dba8)? {
+            return Err(Self::luck_draw(source, 0x50d442, 1.0, 100, 1, 0x50d45f)?);
+        }
+        if Self::field(source.entity_variant(), 0x50d4b1, "variant")? == 1
+            && Self::field(source.variant_subtype_30e8(), 0x50dbc0, "30E8")? == 21
+        {
+            return Err(Kind4Frontier::SharedDraw {
+                source_pc: 0x50dbd2,
+                bound: 30,
+            });
+        }
+        if Self::have(source, 154, 0x50d4c3)? {
+            if Self::field(source.turn_state_d70(), 0x50d4cc, "D70")? == -1 {
+                plan.variant = 1;
+                plan.damage += 2.0;
+            } else if Self::field(source.source_player_type_bfc(), 0x50d4d9, "BFC")? == 2
+                || Self::field(source.primary_c08(), 0x50d4e2, "C08")?
+                    != PrimaryWeaponC08::RegularTears
+            {
+                return Err(Kind4Frontier::SharedDraw {
+                    source_pc: 0x50d4f0,
+                    bound: 2,
+                });
+            }
+        }
+        if Self::have(source, 254, 0x50d508)? {
+            if Self::field(source.turn_state_d70(), 0x50d511, "D70")? < 0 {
+                plan.color.tint = [1.0, 0.0, 0.0, 1.0];
+                plan.color.offsets = [0.0; 3];
+                plan.damage += 1.0;
+                plan.scale *= 1.25;
+                plan.height -= 10.0;
+            } else if Self::field(source.source_player_type_bfc(), 0x50d51e, "BFC")? == 2
+                || Self::field(source.primary_c08(), 0x50d527, "C08")?
+                    != PrimaryWeaponC08::RegularTears
+            {
+                return Err(Kind4Frontier::SharedDraw {
+                    source_pc: 0x50d535,
+                    bound: 2,
+                });
+            }
+        }
+        if Self::have(source, 261, 0x50d550)? {
+            plan.scale += plan.scale;
+        }
+        if Self::have(source, 309, 0x50d56f)? {
+            plan.scale *= 1.25;
+        }
+        if Self::have(source, 48, 0x50d592)? || Self::have(source, 306, 0x50db18)? {
+            match plan.variant {
+                0 => plan.variant = 11,
+                1 => plan.variant = 12,
+                _ => {}
+            }
+        }
+        if Self::have(source, 257, 0x50d5b9)? || Self::temporary(source, 257, 0x50d9c4)? {
+            plan.flags.0 |= 0x400000;
+            plan.variant = 5;
+        }
+        if Self::have(source, 259, 0x50d5dd)? || Self::temporary(source, 259, 0x50d9ec)? {
+            return Err(Self::luck_draw(source, 0x50d5f7, 0.1, 3, 1, 0x50d616)?);
+        }
+        if Self::have(source, 317, 0x50d630)? || Self::temporary(source, 317, 0x50dafc)? {
+            plan.variant = 7;
+        }
+        if Self::have(source, 237, 0x50d64c)? || Self::temporary(source, 237, 0x50dadc)? {
+            plan.variant = 8;
+        }
+        if Self::have(source, 315, 0x50d668)? || Self::temporary(source, 315, 0x50dabc)? {
+            plan.variant = 3;
+        }
+        if Self::have(source, 213, 0x50d684)? || Self::temporary(source, 213, 0x50da9c)? {
+            plan.variant = 10;
+        }
+        if Self::have(source, 305, 0x50d6a0)? {
+            let byte = 1.0_f32 / 255.0_f32;
+            plan.color.tint = [50.0 * byte, 255.0 * byte, 50.0 * byte, 255.0 * byte];
+            plan.color.offsets = [0.0; 3];
+        }
+        if Self::have(source, 150, 0x50d6b5)? || Self::temporary(source, 150, 0x50da0c)? {
+            let request = Self::luck_draw(source, 0x50d6c2, 1.0, 10, 0, 0x50d6dd)?;
+            if matches!(request, Kind4Frontier::SharedDraw { bound: 0, .. }) {
+                // Actual42E8A3..AA returns zero before5E4FE0 when bound0.
+                // Therefore50D6E6..FD is deterministic and consumes no MT.
+                plan.variant = 2;
+                plan.damage = 3.2_f32 * Self::finite(source.damage_c88(), 0x50d6ee, "C88")?;
+            } else {
+                return Err(request);
+            }
+        }
+        // kind4 bypasses both kind5's Have125/140 and kind1's flag scaling.
+        if !plan.scale.is_finite() || !plan.damage.is_finite() || !plan.height.is_finite() {
+            return Err(Kind4Frontier::InvalidField {
+                source_pc: 0x50d716,
+                field: "Get4 result",
+            });
+        }
+        Ok(plan)
+    }
+
+    fn field<T>(value: Option<T>, source_pc: u32, field: &'static str) -> Result<T, Kind4Frontier> {
+        value.ok_or(Kind4Frontier::MissingField { source_pc, field })
+    }
+    fn finite(
+        value: Option<f32>,
+        source_pc: u32,
+        field: &'static str,
+    ) -> Result<f32, Kind4Frontier> {
+        let value = Self::field(value, source_pc, field)?;
+        if value.is_finite() {
+            Ok(value)
+        } else {
+            Err(Kind4Frontier::InvalidField { source_pc, field })
+        }
+    }
+    fn have(source: &impl Kind4Source, id: usize, source_pc: u32) -> Result<bool, Kind4Frontier> {
+        source
+            .have(id)
+            .ok_or(Kind4Frontier::MissingHave { source_pc, id })
+    }
+    fn temporary(
+        source: &impl Kind4Source,
+        id: u32,
+        source_pc: u32,
+    ) -> Result<bool, Kind4Frontier> {
+        source
+            .temporary_present(id)
+            .ok_or(Kind4Frontier::MissingTemporary { source_pc, id })
+    }
+    fn trinket(source: &impl Kind4Source, id: u32, source_pc: u32) -> Result<bool, Kind4Frontier> {
+        source
+            .has_trinket(id)
+            .ok_or(Kind4Frontier::MissingTrinket { source_pc, id })
+    }
+    fn luck_draw(
+        source: &impl Kind4Source,
+        field_pc: u32,
+        coefficient: f32,
+        base: i32,
+        minimum: i32,
+        source_pc: u32,
+    ) -> Result<Kind4Frontier, Kind4Frontier> {
+        let product = Self::finite(source.luck_d64(), field_pc, "D64")? * coefficient;
+        // CVTTSS2SI: out-of-range/unordered converts to the x86 indefinite
+        // i32::MIN; SUB wraps before the signed CMOV bound/minimum operation.
+        let truncated = if (-2147483648.0_f32..2147483648.0_f32).contains(&product) {
+            product.trunc() as i32
+        } else {
+            i32::MIN
+        };
+        let bound = base.wrapping_sub(truncated).max(minimum) as u32;
+        Ok(Kind4Frontier::SharedDraw { source_pc, bound })
+    }
+}
+
+/// Read-only current Player inputs for the pure50D090 kind4 schedule. This
+/// adapter grants no getter/caller/actor permission and writes no cache value.
+struct Kind4SharedInputs<'a>(&'a crate::State);
+
+impl Kind4SharedInputs<'_> {
+    fn queries(&self) -> Option<crate::item_queries::AppearanceQueries<'_>> {
+        Some(crate::item_queries::AppearanceQueries::new(
+            self.0.player_items.as_ref()?,
+            self.0.weapon_cache.primary,
+            self.0.player.entity_source,
+            None,
+        ))
+    }
+
+    fn cached(&self, mask: u32) -> bool {
+        self.0
+            .player_items
+            .as_ref()
+            .and_then(|owner| owner.query_history.as_ref())
+            .is_some_and(|history| history.cached_callbacks & mask == mask)
+    }
+}
+
+impl Kind4Source for Kind4SharedInputs<'_> {
+    fn have(&self, id: usize) -> Option<bool> {
+        self.queries()?.have(id)
+    }
+    fn temporary_present(&self, id: u32) -> Option<bool> {
+        self.queries()?.temporary_present(id)
+    }
+    fn has_trinket(&self, id: u32) -> Option<bool> {
+        self.queries()?.has_trinket(id)
+    }
+    fn height_c8c(&self) -> Option<f32> {
+        self.cached(8).then_some(self.0.player_stats.tear_height)
+    }
+    fn damage_c88(&self) -> Option<f32> {
+        self.cached(1).then_some(self.0.player_stats.damage)
+    }
+    fn flags_c98(&self) -> Option<AttackFlags> {
+        self.cached(32).then_some(self.0.weapon_cache.flags_c98)
+    }
+    fn color_ca0(&self) -> Option<AttackColor> {
+        self.cached(64).then_some(self.0.weapon_cache.color_ca0)
+    }
+    fn luck_d64(&self) -> Option<f32> {
+        if self.cached(1024) {
+            self.0.player_stats.luck
+        } else {
+            None
+        }
+    }
+    fn entity_variant(&self) -> Option<u32> {
+        let source = self.0.player.entity_source?;
+        (source.entity_type == 1).then_some(source.variant)
+    }
+    fn variant_subtype_30e8(&self) -> Option<u32> {
+        None
+    }
+    fn turn_state_d70(&self) -> Option<i8> {
+        None
+    }
+    fn source_player_type_bfc(&self) -> Option<u32> {
+        self.0.weapon_admission.source_player_type
+    }
+    fn primary_c08(&self) -> Option<PrimaryWeaponC08> {
+        self.queries()?.primary()
+    }
+}
+
+///The getter consumes its actual current fields and query owners. It has no
+///inventory roster, mutable RNG, actor permission or C70 input.
+pub(crate) fn read_current_kind4(state: &crate::State) -> Result<Kind4ReadPlan, Kind4Frontier> {
+    if state.weapon_admission.source_player_type != Some(0)
+        || !matches!(state.player.entity_source,
+            Some(source) if source.entity_type == 1 && source.variant == 0)
+    {
+        return Err(Kind4Frontier::MissingField {
+            source_pc: 0x50d090,
+            field: "actual normal Player1/0 receiver",
+        });
+    }
+    Kind4ReadPlan::read(&Kind4SharedInputs(state))
+}
+
+///Keep every original getter alternative literal. The new branch reads only
+///its reached source operands and never promotes an unknown transformation.
+pub(crate) fn admit_current_knife_contact(
+    state: &crate::State,
+    knife: &crate::knives::Knife,
+) -> Result<KnifeContactAdmission, String> {
+    let owner = state
+        .player_items
+        .as_ref()
+        .ok_or("Knife contact requires actual first Player items")?;
+    let inputs = ItemInputs::new(owner)?;
+    let old = admit_neutral_knife_contact(
+        inputs,
+        state.weapon_admission.source_player_type,
+        state.player.transformation_counts,
+    );
+    if old != KnifeContactAdmission::UnmappedBuilderModifiers {
+        state.player_stats.validate()?;
+        if !state.weapon_cache.color_ca0.is_finite() {
+            return Err("Knife contact requires finite actual Player color".into());
+        }
+        return Ok(old);
+    }
+    //The new getter domain cannot certify geometry produced by an earlier
+    //unperformed Player controller or parent homing callback. These facts
+    //are independent of current flags, C18 physical equality and the getter.
+    if !state.weapon_admission.c18_controller_history_known
+        || !knife.source_motion_known
+        || read_current_kind4(state).is_err()
+    {
+        return Ok(KnifeContactAdmission::UnmappedBuilderModifiers);
+    }
+    Ok(admit_knife_transformation_history(
+        state.player.transformation_counts,
+    ))
+}
+
+///50D090 executes after actual registry insertion and returns current38.
+///Other Get4 outputs are resolved in source order but this contact copies only
+///damage; Knife flags/color/48C still belong to their independent real caller.
+pub(crate) fn resolve_current_kind4_damage(state: &crate::State) -> Result<f32, String> {
+    let inputs = ItemInputs::new(
+        state
+            .player_items
+            .as_ref()
+            .ok_or("Knife contact requires actual first Player items")?,
+    )?;
+    if state.weapon_admission.source_player_type == Some(0) && inputs.admits_knife_kind4_getter() {
+        return resolve_neutral_kind4_damage(
+            inputs,
+            state.weapon_admission.source_player_type,
+            state.player_stats,
+        );
+    }
+    read_current_kind4(state)
+        .map(|plan| plan.damage)
+        .map_err(|frontier| format!("kind4 reached source input is unowned: {frontier:?}"))
+}
+
+///Transient51B060 caller read plan, not an inventory/actor capability.
+pub(crate) struct ControlledKnifeCallerPlan {
+    pub(crate) requested_satellites: usize,
+}
+
+impl ControlledKnifeCallerPlan {
+    pub(crate) fn read(state: &crate::State, held_input: bool) -> Option<Self> {
+        if state.weapon_admission.source_player_type != Some(0)
+            || !matches!(state.player.entity_source,
+                Some(source) if source.entity_type == 1 && source.variant == 0)
+            || state.attack_runtime.aim_rotation_c70.is_none()
+            || state.weapon_admission.pending_primary_cleanup.is_some()
+            || !state.weapon_admission.c18_controller_history_known
+            || (state.attack_runtime.persistent.is_none()
+                && !state.weapon_admission.c18_is_known_empty)
+        {
+            return None;
+        }
+        let owner = state.player_items.as_ref()?;
+        let history = owner.query_history.as_ref()?;
+        //50BDD0/51B16B copy C88,C98,CA0. C8C belongs independently to
+        //the later Get4 contact. Held steering additionally reads currentC7C.
+        let copied = 1 | 32 | 64 | if held_input { 4 } else { 0 };
+        if history.cached_callbacks & copied != copied {
+            return None;
+        }
+        let queries = AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        );
+        if queries.primary()? != PrimaryWeaponC08::MomsKnife || !queries.have(329)? {
+            return None;
+        }
+        //519FC0's preceding217 luck proc runs only with actual held input.
+        //The active323 charging prefix is likewise separate from this caller.
+        if held_input && (queries.have(217)? || crate::active_charges::active_id(owner)? == 323) {
+            return None;
+        }
+        let requested_satellites = if queries.have(153)? {
+            3
+        } else if queries.have(2)? {
+            2
+        } else if queries.have(245)? || queries.temporary_present(245)? {
+            1
+        } else {
+            0
+        };
+        Some(Self {
+            requested_satellites,
+        })
+    }
+}
+
+//The live caller separately checks requested_satellites==0 OR current copied
+//flags==0 until the actual nonneutral4A0 formation operator is implemented.
+//That actor restriction does not change this source query plan or its count.
+
 pub(crate) fn resolve_neutral_kind4_damage(
     items: ItemInputs<'_>,
     source_player_type: Option<u32>,

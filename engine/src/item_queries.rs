@@ -13,6 +13,9 @@ use std::collections::{BTreeMap, BTreeSet};
 pub struct ItemQueryHistory {
     pub permanent_counts: bool,
     pub temporary_records: bool,
+    ///Actual CF8 mask/D18 words; omitted legacy and saved-count histories are unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temporary_source_cache: Option<TemporarySourceCache>,
     ///Only these actual CF8 IDs may differ after a bounded unowned writer.
     ///Other queries still read the canonical vector. This is uncertainty
     ///metadata, never another temporary inventory or a generated effect.
@@ -35,6 +38,84 @@ pub struct ItemQueryHistory {
     pub temporary_evaluation: Option<TemporaryEvaluationFrontier>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub unresolved_effects: BTreeMap<u32, String>,
+}
+
+/// Actual CF8 pending words. These values are independent of the bounded
+/// possible-write frontier and the canonical temporary record vector.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TemporarySourceCache {
+    pub mask_cf8: Option<u32>,
+    pub pending_d18: Option<bool>,
+}
+
+impl TemporarySourceCache {
+    const FRESH: Self = Self {
+        mask_cf8: Some(0),
+        pending_d18: Some(false),
+    };
+    const UNKNOWN: Self = Self {
+        mask_cf8: None,
+        pending_d18: None,
+    };
+
+    fn record_write(&mut self, config_mask: u32) {
+        //5E41A1 OR cannot heal an unknown preceding mask.5E419D's direct
+        //assignment does independently establish the pending byte.
+        self.mask_cf8 = self.mask_cf8.map(|old| old | config_mask);
+        self.pending_d18 = Some(true);
+    }
+
+    fn possible_write(&mut self) {
+        self.mask_cf8 = None;
+        if self.pending_d18 != Some(true) {
+            self.pending_d18 = None;
+        }
+    }
+}
+
+impl ItemQueryHistory {
+    ///An actual canonical insertion/removal owns the CF8 OR and D18 store.
+    ///It does not heal record-query, cached-output or prior effect history.
+    pub(crate) fn record_temporary_cache_write(&mut self, config_mask: u32) {
+        self.temporary_source_cache
+            .get_or_insert(TemporarySourceCache::UNKNOWN)
+            .record_write(config_mask);
+    }
+}
+
+///Source531E44 tests D18 and ORs the actual CF8 mask into D6C before
+///511F10. Missing words retain uncertainty instead of inventing a request.
+fn evaluate_owned_temporary_cache(state: &mut State) -> Result<(), String> {
+    let actual = state
+        .player_items
+        .as_ref()
+        .and_then(|owner| owner.query_history.as_ref())
+        .and_then(|history| history.temporary_source_cache);
+    if let Some(TemporarySourceCache {
+        mask_cf8: mask,
+        pending_d18: Some(true),
+    }) = actual
+    {
+        if let Some(mask) = mask {
+            state
+                .player_items
+                .as_mut()
+                .expect("checked TEMP owner")
+                .unevaluated_cache_flags |= mask;
+            crate::player_stats::evaluate_cache(state)?;
+        } else if let Some(history) = state
+            .player_items
+            .as_mut()
+            .and_then(|owner| owner.query_history.as_mut())
+        {
+            //The actual D18 byte owns an invocation, but its unknown mask
+            //does not establish any particular callback or numeric result.
+            history.cached_callbacks = 0;
+            history.primary_c08 = false;
+        }
+    }
+    Ok(())
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -65,6 +146,7 @@ impl ItemQueryHistory {
     pub(crate) const UNKNOWN: Self = Self {
         permanent_counts: false,
         temporary_records: false,
+        temporary_source_cache: None,
         temporary_unknown_inputs: BTreeSet::new(),
         trinket_slots: false,
         primary_c08: false,
@@ -79,6 +161,7 @@ impl ItemQueryHistory {
     pub(crate) const FRESH: Self = Self {
         permanent_counts: true,
         temporary_records: true,
+        temporary_source_cache: Some(TemporarySourceCache::FRESH),
         temporary_unknown_inputs: BTreeSet::new(),
         trinket_slots: true,
         primary_c08: true,
@@ -111,6 +194,9 @@ impl ItemQueryHistory {
         possible_cache_mask: Option<u32>,
         writer_pc: u32,
     ) {
+        if let Some(actual) = &mut self.temporary_source_cache {
+            actual.possible_write();
+        }
         self.temporary_unknown_inputs.extend(keys.iter().copied());
         let frontier =
             self.temporary_evaluation
@@ -243,12 +329,16 @@ fn scalar_evaluation_footprint(queries: AppearanceQueries<'_>, mask: u32) -> u32
 ///Actual late full Player path:531E44 deferred Evaluate precedes the
 ///515F40 status callback. Interpolation bypasses both. These uncertainty
 ///hooks neither invent requests nor execute the unimplemented effects.
-pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
+pub(crate) fn reach_late_temporary_evaluation(
+    state: &mut State,
+    phase: Phase,
+) -> Result<(), String> {
     if phase != Phase::Update {
-        return;
+        return Ok(());
     }
+    evaluate_owned_temporary_cache(state)?;
     let Some(owner) = state.player_items.as_ref() else {
-        return;
+        return Ok(());
     };
     let queries = AppearanceQueries::new(
         owner,
@@ -270,7 +360,14 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
         .as_mut()
         .and_then(|owner| owner.query_history.as_mut())
     else {
-        return;
+        //This reached full path continues to515F40 in Source. Without
+        //TEMP326 history, its actual cooldown/virtual-damage guard cannot
+        //be excluded; this is not a general stat-cache uncertainty rule.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
+        crate::active_charges::note_possible_temporary326(state);
+        return Ok(());
     };
     if let Some(mask) = deferred {
         //Expansion belongs to this reached Evaluate boundary, not the room
@@ -282,9 +379,18 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
     }
     //531E5F clears CF8's pending word, then owns positive-TTL decrements
     //and transition-to-zero erasure before the515F40 source queries.
+    if let Some(actual) = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.query_history.as_mut())
+        .and_then(|history| history.temporary_source_cache.as_mut())
+    {
+        //Actual5E3F07/0B assigns both words before the TTL loop.
+        *actual = TemporarySourceCache::FRESH;
+    }
     advance_known_temporary_expiry(state);
     let Some(owner) = state.player_items.as_ref() else {
-        return;
+        return Ok(());
     };
     let queries = AppearanceQueries::new(
         owner,
@@ -301,12 +407,20 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
         Some(_) => false,
     };
     let taurus_cache_mask = scalar_evaluation_footprint(queries, 0x10);
+    if possible_breath {
+        //517268..5172F7 includes the unclosed virtual damage callback.
+        //Keep this word owner independent of queryHistory's availability.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
+        crate::active_charges::note_possible_temporary326(state);
+    }
     let Some(history) = state
         .player_items
         .as_mut()
         .and_then(|owner| owner.query_history.as_mut())
     else {
-        return;
+        return Ok(());
     };
     if possible_taurus_cache {
         //516175/51663B can Evaluate actual cache16 within515F40 itself.
@@ -326,6 +440,7 @@ pub(crate) fn reach_late_temporary_evaluation(state: &mut State, phase: Phase) {
         //footprint yet. Do not infer its history from the retained vector.
         history.forget_unowned_effect();
     }
+    Ok(())
 }
 
 fn advance_known_temporary_expiry(state: &mut State) {
@@ -335,6 +450,27 @@ fn advance_known_temporary_expiry(state: &mut State) {
     let Some(history) = &mut owner.query_history else {
         return;
     };
+    //Unrepresented source records may expire AFTER the direct clear above.
+    //Their actual config-kind masks bound only the next deferred evaluation;
+    //no cached numeric value is erased here and no record/query fact heals.
+    let unknown_expiry = if !history.temporary_records {
+        Some(None)
+    } else if !history.temporary_unknown_inputs.is_empty() {
+        Some(
+            history
+                .temporary_unknown_inputs
+                .iter()
+                .try_fold(0_u32, |mask, key| {
+                    let config = items::definition(key.item_id)?;
+                    (u32::from(config.kind) == key.config_kind).then_some(mask | config.cache_flags)
+                }),
+        )
+    } else {
+        None
+    };
+    if let Some(mask) = unknown_expiry {
+        history.note_temporary_writer(&[], mask, 0x5e3ef0);
+    }
     if !history.temporary_records {
         return;
     }
@@ -357,7 +493,8 @@ fn advance_known_temporary_expiry(state: &mut State) {
             history.note_temporary_writer(&[], None, 0x5e3ef0);
             continue;
         };
-        history.note_temporary_writer(&[], Some(config.cache_flags), 0x5e3ef0);
+        //Actual5E3F4D and5E3F66 after known TTL1→0 erasure.
+        history.record_temporary_cache_write(config.cache_flags);
         if !matches!(id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
             //The actual CF8 erasure is independent of unimplemented
             //costume/health/audio effects.517580 has no direct E1C/CF8/C08
@@ -389,6 +526,24 @@ pub(crate) fn before_damage_queries(state: &mut State, health_units: u8, flags: 
             .entity_source
             .is_some_and(|source| source.entity_type == 1 && source.variant == 0);
     if !normal_source_context {
+        //The caller has admitted damage; this entity/character callback
+        //has no closed word-write footprint, independent of queryHistory.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+            //This actual foreign-writer possibility is independent of query history.
+            crate::active_charges::invalidate_owner(
+                owner,
+                &[
+                    crate::active_charges::Word::ActiveId,
+                    crate::active_charges::Word::Charge,
+                    crate::active_charges::Word::Subordinate,
+                    crate::active_charges::Word::Reserve,
+                ],
+                crate::active_charges::Frontier::DamageEffect {
+                    source_pc: 0x52b080,
+                },
+            );
+        }
         if let Some(history) = state
             .player_items
             .as_mut()
@@ -471,6 +626,41 @@ pub(crate) fn after_damage_queries(state: &mut State, normal_source_path: bool) 
 ///Apply only query/cache uncertainty at these actual source boundaries.
 ///Random-choice and cosmetic frontiers do not erase unrelated inputs.
 fn apply_damage_query_plan(state: &mut State, plan: DamageQueryWritePlan) -> bool {
+    if plan
+        .foreign_effects
+        .iter()
+        .any(|effect| effect.kind == DamageForeignEffectKind::NestedUse)
+    {
+        //A reached unowned nested Use can write Pill counters even when
+        //the separate query-history owner was already unavailable.
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pill_effect_history::forget(owner);
+        }
+    }
+    //Charge validity is independent from query history, including its
+    //legacy-None return below. Only a reached nested Use owns this loss.
+    for effect in &plan.foreign_effects {
+        if effect.kind == DamageForeignEffectKind::NestedUse {
+            crate::active_charges::invalidate(
+                state,
+                &[
+                    crate::active_charges::Word::ActiveId,
+                    crate::active_charges::Word::Charge,
+                    crate::active_charges::Word::Subordinate,
+                    crate::active_charges::Word::Reserve,
+                ],
+                crate::active_charges::Frontier::DamageEffect {
+                    source_pc: effect.pc,
+                },
+            );
+        }
+    }
+    //All possible nested Use losses precede this narrower setter receipt.
+    for effect in &plan.foreign_effects {
+        if effect.kind == DamageForeignEffectKind::ChargeSetter156 {
+            crate::active_charges::note_unowned_setter_delta(state, 1, effect.pc);
+        }
+    }
     let Some(history) = state
         .player_items
         .as_mut()
@@ -822,6 +1012,7 @@ pub(crate) enum DamageForeignEffectKind {
     ConfigCostume,
     PersistentBecInput,
     NestedUse,
+    ChargeSetter156,
     ShieldRefusal,
     SpecialPresence,
     TrinketRemoval,
@@ -900,6 +1091,17 @@ impl DamageQueryWritePlan {
         }
         if queries.have(117) != Some(false) {
             plan.foreign(B, DamageForeignEffectKind::ConfigCostume, 0x52c2d9, "117 TEMP writer precedes costume5102F0; transitive costume effects remain separate");
+        }
+        //52BA52..52C288 is after the possible313 refusal and before HP.
+        //An earlier possible Use35 can change the later Have156 result.
+        if plan
+            .foreign_effects
+            .iter()
+            .any(|effect| effect.kind == DamageForeignEffectKind::NestedUse)
+            || queries.have(156) != Some(false)
+        {
+            plan.foreign(B, DamageForeignEffectKind::ChargeSetter156, 0x52c288,
+                "Have156 can call509E10(D78+1); only its active-word/effect footprint is unimplemented");
         }
         if queries.has_trinket(8) != Some(false) && queries.temporary_present(93) != Some(true) {
             plan.use_effect(B, 93, 0x52bc38);

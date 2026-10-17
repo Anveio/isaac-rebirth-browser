@@ -65,7 +65,8 @@ export const SUITES = [
   // Each game fights its own keys into a fixed window; the trapdoor exit tail
   // is shared (see stage-exit-scenarios.py).
   suite('stage-exit', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
-    '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro', '--helper-arg', '--count', '--helper-arg', '1',
+    '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro',
+    '--helper-arg', '--contrived', '--helper-arg', 'SXREBPLT-larry', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--native-frame-timeout', '120', '--gl-trace'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II arrival'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
@@ -90,6 +91,14 @@ export const SUITES = [
   suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
   suite('item-composition', e2e('item-composition'), ['--count', '2'],
     'Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases'),
+  suite('pockets', e2e('item-composition'), ['--pockets', 'all', '--count', '1'],
+    'Card/Pill procedural Init, held collection and spills, copied presentation and sound requests; fixed and recorded/fresh OS public inputs'),
+  suite('card-pill-init', e2e('item-composition'), ['--pockets', 'init', '--count', '1'],
+    'Card/Pill Init and random IDs through procedural source groups', { alias: 'pockets' }),
+  suite('pocket-collection', e2e('item-composition'), ['--pockets', 'collection', '--count', '1'],
+    'Card/Pill held records, two capacity spills, presentation and sound requests', { alias: 'pockets' }),
+  suite('pill-range-use', e2e('item-composition'), ['--pockets', 'collection', '--pill-use', '--count', '1'],
+    'Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),

@@ -3,10 +3,17 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PNG } from 'pngjs';
+import { roomArtRows } from '../foundation/entity-compare.mjs';
 
 const vector = value => [Math.fround(value.x), Math.fround(value.y)];
 export function compareCamera(phaseAssert, state, contents, label) {
   const room = contents.room, actual = state.camera;
+  const art = [];
+  roomArtRows(art, contents, state);
+  for (const row of art) {
+    phaseAssert.ok(row.expected !== undefined && row.actual !== undefined, `${label}:${row.field}:available`);
+    phaseAssert.deepEqual(row.actual, row.expected, `${label}:${row.field}`);
+  }
   phaseAssert.equal(room.cameraStyle, 1, `${label}:source default CameraStyle1`);
   phaseAssert.ok(actual, `${label}:admitted source camera controller`);
   if (!actual) return null;
