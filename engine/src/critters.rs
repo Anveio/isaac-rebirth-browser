@@ -30,9 +30,9 @@ pub struct Critter {
     pub dying: bool,
     /// Sprite layer0+34: a killed Tiny Fly's fall offset.
     pub fall: f32,
-    /// Spawned by the run loader: the original's first full update after
-    /// admission (Game+ce9f4 = 1) has no runtime counterpart, so the next
-    /// update replays it first.
+    /// Spawned by the run loader on a start with `native_loader_lead`: the
+    /// original's first full update after admission (Game+ce9f4 = 1) has no
+    /// runtime counterpart, so the next update replays it first.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub loader_update_pending: bool,
 }
@@ -297,6 +297,8 @@ pub(crate) fn spawn(
     // Room types 5, 9, 18/19 and 21 first run their own Room.Init extras
     // (boss SFX190, arcade, statues, dice floor), then rejoin this spawner.
     let start_room = descriptor.index == state.floor.starting_descriptor;
+    // A Challenge start has no unmatched loader update to replay.
+    let replay = loader && crate::native_loader_lead(state);
     let mut rng = items::Rng::new(descriptor.spawn_seed, [5, 9, 7]);
     // Backdrop0x37 (Room+17c8) does not occur in stage1 Basement.
     if rng.bounded(2) != 0 || room_type == 16 {
@@ -354,7 +356,7 @@ pub(crate) fn spawn(
                 .critter
                 .as_mut()
                 .expect("critter")
-                .loader_update_pending = loader;
+                .loader_update_pending = replay;
         }
     }
     for _ in 0..wall_bugs {
@@ -387,7 +389,7 @@ pub(crate) fn spawn(
             .critter
             .as_mut()
             .expect("critter")
-            .loader_update_pending = loader;
+            .loader_update_pending = replay;
     }
     Ok(())
 }
@@ -412,8 +414,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
             }
             Ok(())
         }
-        // Inside full callbacks Game+ce9f4 reads game_update_count+1.
-        Phase::Update => update(state, id, state.game_update_count.wrapping_add(1)),
+        Phase::Update => update(state, id, crate::native_game_counter(state)),
     }
 }
 

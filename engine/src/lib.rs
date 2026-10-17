@@ -625,6 +625,23 @@ fn pause_stat_frame(value: f32) -> u8 {
         };
     integer.clamp(1, 7) as u8
 }
+
+/// Whether the original ran the run loader's full update before the port's
+/// first one. Seeded/ordinary starts do: at equal presentations native
+/// Game+ce9f4 is game_update_count+1. Challenge starts do not: there it equals
+/// game_update_count (pockets Challenge captures read pill Appear frame N and
+/// native counter N on the same presentation).
+pub(crate) fn native_loader_lead(state: &State) -> bool {
+    state.challenge_id == 0
+}
+
+/// Native Game+ce9f4 inside the full callbacks.
+pub(crate) fn native_game_counter(state: &State) -> u32 {
+    state
+        .game_update_count
+        .wrapping_add(u32::from(native_loader_lead(state)))
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct State {
@@ -2810,7 +2827,7 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count.wrapping_add(1);
+                    let counter = native_game_counter(&self.state);
                     let viewer = self
                         .state
                         .departure_position
@@ -3643,6 +3660,7 @@ impl Game {
             .iter()
             .map(|knife| (knife.position, knife.collision_radius))
             .collect();
+        let game_counter = native_game_counter(&self.state);
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -3651,9 +3669,8 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                // Native Game+ce9f4 is one more than game_update_count (the
-                // run-loader origin); AI frame gates read the native value.
-                game_counter: self.state.game_update_count.wrapping_add(1),
+                // AI frame gates read native Game+ce9f4.
+                game_counter,
                 player,
                 player_velocity,
                 grid: &grid,

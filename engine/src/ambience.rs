@@ -89,7 +89,7 @@ fn targets(state: &State) -> (f32, f32, f32) {
     } else {
         pitch / flies as f32
     };
-    let t = state.game_update_count.wrapping_add(1) as f32;
+    let t = crate::native_game_counter(state) as f32;
     let wobble =
         (crate::fmath::sin(t / 61.0) + crate::fmath::sin(t / 53.0) + crate::fmath::sin(t / 23.0))
             * 0.02;

@@ -472,7 +472,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                 .collect();
             let probe = Probe {
                 player: crate::bombs::player_world(state),
-                game_counter: state.game_update_count.wrapping_add(1),
+                game_counter: crate::native_game_counter(state),
                 sequence: state
                     .actor_scheduler
                     .sequence_id(ActorRef {

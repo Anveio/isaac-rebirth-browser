@@ -9,9 +9,9 @@ use crate::{grid::Grid, motion::WorldVector, State};
 
 /// Room.Update ages destruction markers before actor dispatch every third full
 /// game update. Paused gameplay and doorway freezes do not advance this clock.
-/// The gate reads native Game+ce9f4, which is one more than game_update_count.
+/// The gate reads native Game+ce9f4.
 pub fn advance_markers(state: &mut State) {
-    if !(state.game_update_count + 1).is_multiple_of(3) {
+    if !crate::native_game_counter(state).is_multiple_of(3) {
         return;
     }
     if let Some(costs) = &mut state.room.path_costs {

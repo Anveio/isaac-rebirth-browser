@@ -13,10 +13,9 @@ const TINT: [f32; 4] = [0.0, 0.0, 0.0, 0.7];
 /// `velocity` is the player's velocity after input and before this update's
 /// grid collision, which 531c8f precedes.
 pub(crate) fn advance(state: &mut State, velocity: WorldVector) -> Result<(), String> {
-    // 50bef0(-1): IsFrame444890(6, 0) on Game+ce9f4, which reads
-    // game_update_count+1 inside the full callbacks, and a clear Player+d68
+    // 50bef0(-1): IsFrame444890(6, 0) on Game+ce9f4 and a clear Player+d68
     // byte that no supported player sets.
-    let counter = state.game_update_count.wrapping_add(1);
+    let counter = crate::native_game_counter(state);
     if !counter.is_multiple_of(6) {
         return Ok(());
     }
