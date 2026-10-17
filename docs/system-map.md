@@ -25,7 +25,7 @@ automatic rerun on advancing `main` or confirmation of the served build.
 | Overlays | Main still selects the Basement 1x1 overlay and its 663x429 crop for every rectangle. | Size-specific overlay selection/crop and camera-shake routing remain separate source work; an independently built candidate does not establish integration or live images. No positive base narrow/L contour evidence is established. |
 | Pill and cache owners | Canonical Pill28 history, reached Range, Range Down/Up use, independent active words, reached Move Speed and the controlled Knife's canonical active identity are merged through PRs572/580/586/595–597. | [PR586](https://github.com/Anveio/isaac-rebirth-browser/pull/586) reports 5,639 passing checks on its frozen candidate; [PR602](https://github.com/Anveio/isaac-rebirth-browser/pull/602) persists `pill-range-use` and reports a 1,409-check retained-Original replay on c224/ee04/Wfa54. These do not qualify the whole current runtime, other Pill effects, complete ceremony, pixels or PCM. |
 | Menus and imported bosses | Menu page/carousel presentation and Envy/Super Envy source are merged. | [PR601](https://github.com/Anveio/isaac-rebirth-browser/pull/601) records 1,781/1,782 menu frames and closes #587–589; [#600](https://github.com/Anveio/isaac-rebirth-browser/issues/600) retains the stage-streak placement gap. [PR605](https://github.com/Anveio/isaac-rebirth-browser/pull/605) retains Envy failures of 475/14,893, 468/14,982 and 2/13,320; Super Envy room coverage remains pending. |
-| Gameplay frontiers | Unsupported next-stage trapdoors now refuse descent; held active IDs survive the supported stage-save normalization. | [#413](https://github.com/Anveio/isaac-rebirth-browser/issues/413) remains a later-stage frontier, rather than the old repeated-tick freeze. [#499](https://github.com/Anveio/isaac-rebirth-browser/issues/499) still owes a live active-item descent fixture after PR503. [PR609](https://github.com/Anveio/isaac-rebirth-browser/pull/609) passes the source-derived run-admission clock cohort; [#438](https://github.com/Anveio/isaac-rebirth-browser/issues/438) still tracks the separate death producer. [Dead-callback motion](player-death.md) fixes517 Y checks in the scoped [#493](https://github.com/Anveio/isaac-rebirth-browser/issues/493) replay; living contact/grid ordering and placed-bomb late grid contact [#349](https://github.com/Anveio/isaac-rebirth-browser/issues/349) remain unresolved. |
+| Gameplay frontiers | Unsupported next-stage trapdoors now refuse descent; held active IDs survive the supported stage-save normalization. | [#413](https://github.com/Anveio/isaac-rebirth-browser/issues/413) remains a later-stage frontier, rather than the old repeated-tick freeze. [#499](https://github.com/Anveio/isaac-rebirth-browser/issues/499) still owes a live active-item descent fixture after PR503. [PR609](https://github.com/Anveio/isaac-rebirth-browser/pull/609) passes the source-derived run-admission clock cohort; [#438](https://github.com/Anveio/isaac-rebirth-browser/issues/438) still tracks the separate death producer. [Dead-callback motion](player-death.md) fixes517 Y checks in the scoped [#493](https://github.com/Anveio/isaac-rebirth-browser/issues/493) replay; living contact/grid ordering remains unresolved. Ordinary-bomb late-grid response [#349](https://github.com/Anveio/isaac-rebirth-browser/issues/349) has [scoped moving-doorway and regression qualification](#ordinary-bomb-late-grid-response-349); separate NPC/bomb timing failures remain open. |
 
 ## Retained d995/Wd869 qualification snapshot
 
@@ -1207,6 +1207,10 @@ remain separate open contracts; no captured map or seed-specific offset is used.
 
 ## New bomb reference observations
 
+These early observations retain their original runtime and test scope. The later
+[ordinary-bomb late-grid correction](#ordinary-bomb-late-grid-response-349)
+records its implemented source and separate frozen-artifact qualification.
+
 The bomb workstream captured fresh stationary, escape and continuous-graphics
 native runs under `.cache/foundation/bomb-stationary/run/`, `bomb-escape/run/`
 and `bomb-exact/run/`. E consumes the starting bomb once, with the displayed
@@ -1291,6 +1295,65 @@ are under `.cache/coordination/presentation/sampler-proof/`. The retained
 binds source depth format/function/writes/clear/range/geometry to raw GL, actual
 controller input, logs and target hashes. Loader and capture guards reject
 missing or altered source fields and provenance.
+
+## Ordinary bomb late-grid response (#349)
+
+The [ordinary bomb implementation](../engine/src/bombs.rs) now resolves class5
+Full ground contact at the existing manager fence after NPC contact writes,
+including newly admitted bombs and still-active Exploding bodies. The actor's
+Full callback owns Base motion, drag and fuse/animation; the manager owns the
+late full query. Full response commits physical/presented position and stored
+velocity together. Intermediate response corrects only the predicted position
+using copied velocity. The separate class6 shot-bomb solver is unchanged.
+Both ordinary phases clamp the center to actual Room bounds before sampling.
+
+Frozen candidate `a48aa48ceb5b9ba334bfd9aefe4c0099dcf0782ba695e5233c44d4762f06ac51`
+and isolated guarded parent
+`524351dbbd078b0fc62980668f633a36474b12e597c8a3a2a4c4affdf1a92781`
+(1,407 files each) replay four exact public-input cases against the same
+independently validated Native captures, with fresh actual Browser DOM/WASM
+captures. All 1,485 bomb-specific fields keep their keys and Native expectations:
+four moving-doorway yfields become passing and no prior pass is lost. The
+doorway bomb fields improve from 16/20 to 20/20; its canonical checkpoints already
+pass 152/152 on both artifacts. The moving-birth clamp is observed; no separate
+zero-speed resting-doorway witness or DST execution is claimed.
+
+Across 4,898 canonical state fields, 233 near-wall fields become passing with no
+lost prior passes. C7YP dense wall remains 125/125 bomb fields and 42/42 canonical
+checkpoints. Center and near-wall Hugger routes remain red: 502/670 and 430/670
+passing bomb fields respectively; candidate canonical checkpoints are 99/151
+and 84/158.
+The near-wall route retains 240 bomb failures and 88 canonical failures whose
+actual values change; some absolute errors increase. Its NPC contact occurs
+16 presentations before Native, so this accepts the observed late response
+without accepting NPC/bomb timing.
+Both games' centers stay within bounds on that route; it does not reproduce
+the retained DST wall-escape case.
+
+The same complete pickup bank passes 6/6 cases and 2,784/2,784 presentations on
+both builds. The same Troll bank retains 4/9 passing cases, 3,388/3,935 passing
+presentations, 547 field failures and two unchanged required-Native-readmission
+errors. Both complete Rock banks attempt all 11 cases: 9 pass, 2 fail, with
+4,136/4,316 passing presentations, 252 field failures and no case errors.
+Their statuses, coverage, Native expectations and all remaining failure values
+are identical; the 252 failures retain 209 pickup-position and 43 countdown
+differences. These failures and guard gaps remain explicit. Actual PNGs and
+input/backend traces are retained locally; this functional A/B does not compute
+RGBA or establish pixel equality. Historical bomb results above and in
+[bomb evidence](bomb-evidence.md) retain their original scope.
+The registered [bomb-pickup](../tools/e2e/bomb-pickups.mjs),
+[Troll](../tools/e2e/troll-bombs.mjs) and [Rock](../tools/e2e/rock-blast.mjs)
+drivers retain their own whole-case results; the existing
+[Troll/tinted-rock regression issue](https://github.com/Anveio/isaac-rebirth-browser/issues/485)
+remains open.
+
+A separate later integration check on frozen
+`bf3036402648adf643b8bfe56aa48ceb786f4c1fdf7e30b32daeb84f57899281`
+(1,407 files) replays only the unchanged doorway case: Native provenance and
+actual Browser capture pass, with 152/152 canonical checkpoints and 20/20 exact
+bomb fields. Input/backend traces and PNGs are retained; RGBA is not computed.
+This confirms that case on the integrated artifact, without qualifying the
+whole current runtime or any other workstream.
 
 ## Source entity and grid boundaries for the next implementation wave
 
