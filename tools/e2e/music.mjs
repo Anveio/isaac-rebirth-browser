@@ -245,7 +245,7 @@ try {
       check('actual Native public audio options', native.audioOptions, {sfxVolume: 0, musicVolume: scenario.volume});
       check('complete actual public DOM command tape', trace.commands, commands);
       assert.ok(trace.backendEvents.length >= 4, 'Actual music completion/intro-loop callbacks must be recorded');
-      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences);
+      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences, trace.bootInputConfigs);
       for (let i = 0; i < rust.length; i++) assert.equal(exactStateDifference(rust[i], trace.states[i]), null, `Actual callback replay divergence after public command${i}`);
       check('full public states replay actual backend callbacks', rust.length, trace.states.length);
       const api = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });

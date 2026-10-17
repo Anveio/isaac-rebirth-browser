@@ -1,9 +1,10 @@
 import './style.css';
-import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences } from './engine';
+import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
 import { Preferences } from './preferences';
+import { InputConfigIO, validateInputConfigs } from './input-configs';
 import { Feedback } from './feedback';
 import { FullscreenRuntime } from './fullscreen';
 
@@ -20,13 +21,20 @@ async function boot() {
   let initialSeed = randomSeed();
   const bootEpochSeed = Math.floor(Date.now() / 1000) >>> 0;
   const preferences = new Preferences();
+  const inputConfigIO = new InputConfigIO();
+  let bootInputConfigs = inputConfigIO.load();
   const feedback = new Feedback(canvas);
+  const reportInputConfigLoadFailure = () => {
+    const event = inputConfigIO.snapshot().events.at(-1);
+    if (event?.operation === 'load' && event.status === 'fail') feedback.inputConfigurationFailure('load',event.error ?? 'Input configuration load failed');
+  };
+  reportInputConfigLoadFailure();
   const savedPreferences = preferences.load();
   let bootAudioPreferences = savedPreferences?.audio ?? null;
   let bootFullscreenPreferences = savedPreferences?.fullscreen ?? null;
   //Real saved settings precede the first Title Music admission, as5B9930
   //precedes MenuInit. No post-constructor command may discard its Start.
-  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
+  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
   let automaticPaused = false;
   let lifecyclePaused = !document.hasFocus() || document.hidden;
   let accumulator = 0;
@@ -51,6 +59,13 @@ async function boot() {
         status.textContent = 'Preferences could not be saved.'; status.hidden = false;
         setTimeout(() => { status.hidden = true; }, 2400);
       }
+      if (!inputConfigIO.consume(state.controlsMenu.saveRequests)) {
+        const event = inputConfigIO.snapshot().events.at(-1);
+        feedback.inputConfigurationFailure('save',event?.error ?? 'Input configuration save failed');
+        status.textContent = 'Keyboard bindings could not be saved.'; status.hidden = false;
+        setTimeout(() => { status.hidden = true; }, 2400);
+      }
+      feedback.consumeControls(state.controlsMenu.unavailableActions);
       fullscreen.consume(state.fullscreen.requests);
       audio.consume(state.audio.events, state.audio.volumeCallbacks);
       //Only an actual source Room.Update reissues ambience volume/pitch.
@@ -86,30 +101,43 @@ async function boot() {
   });
   audio.music.consume(currentState.music);
   const supported = engine.publicKeys;
-  function keyboard(event: KeyboardEvent, down: boolean) {
-    // Native UI keys must reach the real notice buttons. A healthy game's
-    // already-held key still receives its actual release after focus changes.
+  // Only the focused game captures raw keys/chords. Native key identities are
+  // preserved, including both sides of Control/Alt/Meta; browser/OS shortcuts
+  // outside the canvas retain their default behavior.
+  function releasePressedKeys() {
     if (feedback.runtimeFailed) return;
+    for (const code of [...currentState.pressed])
+      if (supported.has(code)) dispatch({ type: 'key', code, down: false });
+  }
+  function keyboard(event: KeyboardEvent, down: boolean) {
+    if (feedback.runtimeFailed) return;
+    const held = supported.has(event.code) && currentState.pressed.includes(event.code);
     const noticeTarget = feedback.isInteractiveTarget(event.target);
     if ((noticeTarget || (feedback.visible && event.code === 'Tab')) && event.code !== 'Escape') {
-      if (!down && supported.has(event.code) && currentState.pressed.includes(event.code)) {
+      // Notice buttons keep their native keyboard behavior. An actual game
+      // release still reaches its owner after focus moves to a notice.
+      if (!down && held) {
         try { dispatch({ type: 'key', code: event.code, down: false }); }
         catch (error) { status.textContent = String(error); status.hidden = false; }
       }
       return;
     }
-    if (down && event.isTrusted) { void audio.unlock().catch(console.error); fullscreen.gesture(event); }
-    if (down && (event.ctrlKey || event.altKey || event.metaKey)) return;
-    const seedText = currentState.screen === 'seed' && /^[a-z0-9]$/i.test(event.key);
+    // Preserve the existing notice Escape/Back recovery even when its Dismiss
+    // button owns focus. Other game keydowns require the actual canvas focus.
+    const noticeEscape = feedback.visible && event.code === 'Escape';
+    if (down && document.activeElement !== canvas && !noticeEscape) return;
+    // Releases belong to the key's real pressed owner, regardless of focus or
+    // modifier flags. Unowned browser keyups must not be captured by the game.
+    if (!down && !held) return;
+    const seedText = currentState.screen === 'seed' && /^[a-z0-9]$/i.test(event.key)
+      && !event.ctrlKey && !event.altKey && !event.metaKey;
     if (!supported.has(event.code) && !seedText) return;
     event.preventDefault();
+    if (down && event.isTrusted) { void audio.unlock().catch(console.error); fullscreen.gesture(event); }
     if (down && event.repeat) return;
     try {
-      if (seedText) {
-        if (down) dispatch({ type: 'text', text: event.key.toUpperCase() });
-        else if (supported.has(event.code) && currentState.pressed.includes(event.code))
-          dispatch({ type: 'key', code: event.code, down: false });
-      } else dispatch({ type: 'key', code: event.code, down });
+      if (down && seedText) dispatch({ type: 'text', text: event.key.toUpperCase() });
+      else dispatch({ type: 'key', code: event.code, down });
     } catch (error) {
       status.textContent = String(error);
       status.hidden = false;
@@ -118,11 +146,11 @@ async function boot() {
   }
   window.addEventListener('keydown', (event) => keyboard(event, true));
   window.addEventListener('keyup', (event) => keyboard(event, false));
+  canvas.addEventListener('blur', releasePressedKeys);
   window.addEventListener('blur', () => {
     lifecyclePaused = true;
     accumulator = 0;
-    if (!feedback.runtimeFailed)
-      for (const code of supported) dispatch({ type: 'key', code, down: false });
+    releasePressedKeys();
   });
   window.addEventListener('focus', () => {
     lifecyclePaused = document.hidden;
@@ -131,6 +159,7 @@ async function boot() {
   });
   document.addEventListener('visibilitychange', () => {
     lifecyclePaused = document.hidden || !document.hasFocus();
+    if (document.hidden) releasePressedKeys();
     accumulator = 0;
     previous = performance.now();
   });
@@ -162,6 +191,7 @@ async function boot() {
   const game = {
     snapshot: () => engine.snapshot(),
     preferences: () => preferences.snapshot(),
+    inputConfigs: () => inputConfigIO.snapshot(),
     feedback: () => feedback.snapshot(),
     // The engine's own JSON text: cheap for automation to transfer and parse.
     snapshotJson: () => engine.snapshotJson(),
@@ -179,19 +209,23 @@ async function boot() {
       if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
       automaticPaused = false; accumulator = 0; previous = performance.now();
     },
-    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences } = {}) => {
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences; inputConfigs?: InputConfigs } = {}) => {
       fullscreen.assertIdleForReset();
       preferences.resetDispatch();
+      inputConfigIO.resetDispatch();
+      const loadedInputConfigs = options.inputConfigs === undefined ? inputConfigIO.load() : validateInputConfigs(options.inputConfigs);
       const stored = preferences.load();
       const loadedAudioPreferences = options.audioPreferences ?? stored?.audio ?? null;
       // Reused documents receive a real source-default exit request when no
       // saved or independently declared Fullscreen input exists.
       const loadedFullscreenPreferences = options.fullscreenPreferences ?? stored?.fullscreen ?? {fullscreen: false};
       currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
-        loadedFullscreenPreferences);
+        loadedFullscreenPreferences, loadedInputConfigs ?? undefined);
       feedback.resetDispatch();
+      if (options.inputConfigs === undefined) reportInputConfigLoadFailure();
       fullscreen.reset(currentState.fullscreen.requests);
       //Retain the validated immutable input, never a caller-owned live object.
+      bootInputConfigs = loadedInputConfigs === null ? null : structuredClone(loadedInputConfigs);
       bootAudioPreferences = loadedAudioPreferences === null ? null : {...loadedAudioPreferences};
       bootFullscreenPreferences = {...loadedFullscreenPreferences};
       audio.reset(options.trace === true);
@@ -202,7 +236,7 @@ async function boot() {
       draw(currentState);
       return engine.snapshot();
     },
-    trace: () => ({...trace.snapshot(), bootAudioPreferences: bootAudioPreferences === null ? null : {...bootAudioPreferences},
+    trace: () => ({...trace.snapshot(), bootInputConfigs: bootInputConfigs === null ? null : structuredClone(bootInputConfigs), bootAudioPreferences: bootAudioPreferences === null ? null : {...bootAudioPreferences},
       bootFullscreenPreferences: bootFullscreenPreferences === null ? null : {...bootFullscreenPreferences}}),
     // Diagnostic shared-MT draw log for the e2e --mt-draws comparator.
     mtDraws: { enable: (enabled = true) => engine.setMtDrawLog(enabled), take: () => engine.takeMtDraws() },

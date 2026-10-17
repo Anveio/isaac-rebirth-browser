@@ -14,6 +14,8 @@ struct Replay {
     boot_audio_preferences: Option<AudioPreferences>,
     #[serde(default)]
     boot_fullscreen_preferences: Option<FullscreenPreferences>,
+    #[serde(default)]
+    boot_input_configs: Option<rebirth_cleanroom::keyboard::InputConfigs>,
     commands: Vec<Command>,
 }
 fn main() {
@@ -52,12 +54,13 @@ fn main() {
         eprintln!("replay exceeds 36,000 total simulation steps");
         std::process::exit(1);
     }
-    let mut game = match Game::new_with_boot_preferences(
+    let mut game = match Game::new_with_input_configs(
         replay.initial_seed,
         replay.boot_epoch_seed,
         None,
         replay.boot_audio_preferences,
         replay.boot_fullscreen_preferences,
+        replay.boot_input_configs,
     ) {
         Ok(game) => game,
         Err(error) => {
