@@ -464,7 +464,7 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
-- Dead Player callbacks retain Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
+- #612 restores dead Player Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
 
 - #527 completes Flags32 for items 48/222; the three recorded regular-fire regression cases return to zero failures (#372 closed).
 - Shared-MT light-pass, ambience-loop and pickup DropSound source consumers have landed (#194, #256, #416 closed); other first-divergence routes remain open.
