@@ -70,7 +70,12 @@ pub(crate) fn burst(
     };
     let config = crate::content::entity(npc.kind, npc.variant);
     // Challenge23 scales the amount by 8; this caller has no challenge owner.
-    let counts = sample(config.gib_amount, config.gib_flags, AmountScale::Ordinary, random)?;
+    let counts = sample(
+        config.gib_amount,
+        config.gib_flags,
+        AmountScale::Ordinary,
+        random,
+    )?;
     for (category, count) in counts.into_iter().enumerate() {
         for _ in 0..count {
             if category == 6 {
