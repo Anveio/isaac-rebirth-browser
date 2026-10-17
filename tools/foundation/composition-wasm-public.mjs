@@ -16,17 +16,37 @@ export function createPublicWasmRuntime({wasm,expectedWasmSha}) {
  const e=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(wasm)),{}).exports;
  const decode=(p,n)=>new TextDecoder().decode(new Uint8Array(e.memory.buffer,p,n));
  const snapshot=()=>JSON.parse(decode(e.snapshot_ptr(),e.snapshot_len()));
- function reset(initialSeed,bootEpochSeed,resources) {
+ function reset(initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences) {
   assert.ok(Number.isInteger(initialSeed)&&initialSeed>=1&&initialSeed<=0xffffffff);
   assert.ok(Number.isInteger(bootEpochSeed)&&bootEpochSeed>=0&&bootEpochSeed<=0xffffffff);
+  if(audioPreferences!==undefined) {
+   assert.deepEqual(Object.keys(audioPreferences).sort(),['musicVolume','sfxVolume']);
+   assert.ok([audioPreferences.sfxVolume,audioPreferences.musicVolume].every(value=>Number.isFinite(value)&&value>=0&&value<=1));
+  }
+  if(fullscreenPreferences!==undefined) {
+   assert.deepEqual(Object.keys(fullscreenPreferences),['fullscreen']);assert.equal(typeof fullscreenPreferences.fullscreen,'boolean');
+  }
+  const reset=(withResources)=>{
+   if(fullscreenPreferences!==undefined) {
+    const method=withResources?e.reset_with_boot_resources_and_fullscreen_preferences:e.reset_with_fullscreen_preferences;
+    assert.equal(typeof method,'function','Actual declared startup preferences require the real additive ABI');
+    return method(initialSeed,bootEpochSeed,Number(fullscreenPreferences.fullscreen),Number(audioPreferences!==undefined),audioPreferences?.sfxVolume??0,audioPreferences?.musicVolume??0);
+   }
+   if(audioPreferences!==undefined) {
+    const method=withResources?e.reset_with_boot_resources_and_audio_preferences:e.reset_with_audio_preferences;
+    assert.equal(typeof method,'function','Actual declared audio preferences require the real additive ABI');
+    return method(initialSeed,bootEpochSeed,audioPreferences.sfxVolume,audioPreferences.musicVolume);
+   }
+   return withResources?e.reset_with_boot_resources(initialSeed,bootEpochSeed):e.reset(initialSeed,bootEpochSeed);
+  };
   let result;
-  if(resources===undefined) result=e.reset(initialSeed,bootEpochSeed);
+  if(resources===undefined) result=reset(false);
   else {
    const bytes=new TextEncoder().encode(JSON.stringify(resources));
    assert.ok(bytes.length<=512*1024);
    const p=e.boot_resource_ptr(bytes.length);assert.ok(p);
    new Uint8Array(e.memory.buffer,p,bytes.length).set(bytes);
-   result=e.reset_with_boot_resources(initialSeed,bootEpochSeed);
+   result=reset(true);
   }
   assert.equal(result,0,decode(e.error_ptr(),e.error_len()));
  }
@@ -65,10 +85,17 @@ const inputPaths={wasm,case:casePath,xml:c.fixture.authoredResourcePath,stb:c.fi
 const before=Object.fromEntries(Object.entries(inputPaths).map(([k,p])=>[k,{path:p,sha256:sha(p)}]));
 const runtime=createPublicWasmRuntime({wasm,expectedWasmSha});
 const resources={challengesXml:fs.readFileSync(inputPaths.xml,'utf8'),specialRooms:[...fs.readFileSync(inputPaths.stb)]};
-const resetInput={initialSeed:1,bootEpochSeed:c.bootEpochSeed,resources};
+const audioPreferences={sfxVolume:c.sfxVolume,musicVolume:0},fullscreenPreferences={fullscreen:false};
+assert.ok(Number.isFinite(audioPreferences.sfxVolume)&&audioPreferences.sfxVolume>=0&&audioPreferences.sfxVolume<=1);
+const resetInput={initialSeed:1,bootEpochSeed:c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences};
+const producerBytes=fs.readFileSync(donor);
+fs.writeFileSync(out+'/composition-wasm-public-source.mjs',producerBytes,{flag:'wx'});
+const startupRecord={schema:1,protocol:'declared-preboot-audio-fullscreen-v1',phase:'before-reset',resetInput,
+ captureSource:{path:donor,sha256:createHash('sha256').update(producerBytes).digest('hex'),archive:'composition-wasm-public-source.mjs'}};
+fs.writeFileSync(out+'/declared-startup-inputs.json',JSON.stringify(startupRecord)+'\n',{flag:'wx'});
 fs.writeFileSync(out+'/declared-reset-input.json',JSON.stringify(resetInput)+'\n',{flag:'wx'});
 assert.ok(Buffer.byteLength(JSON.stringify(resetInput))<=512*1024);
-runtime.reset(1,c.bootEpochSeed,resources);
+runtime.reset(1,c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences);
 const journal=createPublicWasmJournal(out),append=journal.append;
 let presentation=0,gameplayPresentation=null,observations=0,completedTape=false;
 const commands=[],checkpoints=[];
@@ -80,9 +107,8 @@ function key(k,down){command({type:'key',code:code(k),down});}
 async function press(k,n,label,dense=false){key(k,true);if(dense){for(let i=0;i<12;i++){command({type:'tick',count:1});await observe('prelude');}}else command({type:'tick',count:12});key(k,false);if(dense){for(let i=0;i<n;i++){command({type:'tick',count:1});await observe('prelude');}}else command({type:'tick',count:n});const s=snapshot();checkpoints.push({label,presentation,screen:s.screen});}
 let failure;
 try{
- await append({kind:'start',scope:'Own natural Card/Pill Init through public menu/key/tick/resource inputs. No DOM/render acceptance and no Native state/RNG/timing inputs.',before,caseName:c.name,initialSeed:1,bootEpochSeed:c.bootEpochSeed});
- assert.ok(Number.isFinite(c.sfxVolume)&&c.sfxVolume>=0&&c.sfxVolume<=1);
- command({type:'audioVolume',sfx_volume:c.sfxVolume});
+ await append({kind:'start',scope:'Own natural Card/Pill Init through public menu/key/tick/resource inputs. No DOM/render acceptance and no Native state/RNG/timing inputs.',before,caseName:c.name,initialSeed:1,bootEpochSeed:c.bootEpochSeed,startupRecord});
+
  command({type:'tick',count:63});checkpoints.push({label:'title',presentation,screen:snapshot().screen});
  if(c.publicMenuRoute==='seeded-normal'){
   assert.equal(typeof c.publicSeedCode,'string');assert.match(c.publicSeedCode,/^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);
@@ -103,7 +129,7 @@ try{
 await append({kind:'beforeAssertions',completedTape,presentation,gameplayPresentation,observations,commands,checkpoints,failure});
 await journal.close({completed:completedTape&&!failure});
 const after=Object.fromEntries(Object.entries(inputPaths).map(([k,p])=>[k,{path:p,sha256:sha(p)}]));
-fs.writeFileSync(out+'/actual-replay-result.json',JSON.stringify({status:completedTape?'CAPTURE_COMPLETE':'FAIL',scope:'Functional public-WASM whole game only; independent Original comparison follows actual persisted output. DOM, renderer, screenshots, audio backend and PCM unavailable.',before,after,completedTape,presentation,gameplayPresentation,observations,commands,checkpoints,failure,captureBackend:'wasm-node'},null,2)+'\n',{flag:'wx'});
+fs.writeFileSync(out+'/actual-replay-result.json',JSON.stringify({startupProtocol:startupRecord.protocol,startupRecord,status:completedTape?'CAPTURE_COMPLETE':'FAIL',scope:'Functional public-WASM whole game only; independent Original comparison follows actual persisted output. DOM, renderer, screenshots, audio backend and PCM unavailable.',before,after,completedTape,presentation,gameplayPresentation,observations,commands,checkpoints,failure,captureBackend:'wasm-node'},null,2)+'\n',{flag:'wx'});
 assert.deepEqual(after,before);assert.equal(completedTape,true);assert.equal(gameplayPresentation,c.initialPhaseOffset+c.actions.reduce((n,a)=>n+a.presentations,0));
 console.log(JSON.stringify({completedTape,presentation,gameplayPresentation,observations,output:out}));
 }

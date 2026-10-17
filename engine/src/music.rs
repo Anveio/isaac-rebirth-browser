@@ -285,8 +285,15 @@ impl TryFrom<SavedMusicState> for MusicState {
 
 impl Default for MusicState {
     fn default() -> Self {
+        Self::with_volume(0.3)
+    }
+}
+
+impl MusicState {
+    /// Settings load precedes MenuInit's first61; retain its real Start/Gain.
+    pub fn with_volume(volume: f32) -> Self {
         let mut state = Self {
-            volume: 1.0,
+            volume: 0.3,
             music_enabled: true,
             active_channel: 0,
             current_id: 0,
@@ -305,6 +312,7 @@ impl Default for MusicState {
         };
         // Browser entry is first Title. The earlier native intro video/voiceover
         // is outside this entry point; no invented seek or tail is played.
+        state.set_volume(volume);
         state.crossfade(61);
         state.advance();
         state

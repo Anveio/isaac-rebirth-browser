@@ -13,6 +13,7 @@ pub enum Page {
     Title,
     Save,
     Game,
+    Options,
     Character,
     Challenge,
 }
@@ -23,6 +24,7 @@ impl Page {
             Screen::Title => Some(Self::Title),
             Screen::Profile => Some(Self::Save),
             Screen::Main => Some(Self::Game),
+            Screen::Options => Some(Self::Options),
             Screen::Character | Screen::Seed => Some(Self::Character),
             Screen::Challenge => Some(Self::Challenge),
             Screen::Playing => None,
@@ -235,6 +237,7 @@ impl MenuPresentation {
             Page::Title => [0.0, 0.0],
             Page::Save => [0.0, -270.0],
             Page::Game => [0.0, -810.0],
+            Page::Options => [-480.0, -1080.0],
             Page::Character => [if self.seed_view { -960.0 } else { -480.0 }, -810.0],
             Page::Challenge => [480.0, challenge_y(self.challenge_scroll)],
         }
@@ -301,6 +304,14 @@ impl MenuPresentation {
             self.blood += 0.05;
         } else if self.blood > 0.0 && !hard {
             self.blood -= 0.05;
+        }
+    }
+
+    /// Late page callbacks still store SetMenu immediately, without a second
+    /// MenuManager view/widget/clip update in the same iteration.
+    pub fn reconcile_page(&mut self, screen: Screen, input: Input) {
+        if let Some(page) = Page::of(screen) {
+            self.set_page(page, input);
         }
     }
 

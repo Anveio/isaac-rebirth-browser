@@ -1,4 +1,7 @@
-use rebirth_cleanroom::{Command, Game, MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS};
+use rebirth_cleanroom::{
+    fullscreen::FullscreenPreferences, options_menu::AudioPreferences, Command, Game,
+    MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS,
+};
 use serde::Deserialize;
 use std::io::{self, Read};
 #[derive(Deserialize)]
@@ -7,6 +10,10 @@ struct Replay {
     initial_seed: u32,
     #[serde(default)]
     boot_epoch_seed: u32,
+    #[serde(default)]
+    boot_audio_preferences: Option<AudioPreferences>,
+    #[serde(default)]
+    boot_fullscreen_preferences: Option<FullscreenPreferences>,
     commands: Vec<Command>,
 }
 fn main() {
@@ -45,7 +52,13 @@ fn main() {
         eprintln!("replay exceeds 36,000 total simulation steps");
         std::process::exit(1);
     }
-    let mut game = match Game::new_with_boot_epoch(replay.initial_seed, replay.boot_epoch_seed) {
+    let mut game = match Game::new_with_boot_preferences(
+        replay.initial_seed,
+        replay.boot_epoch_seed,
+        None,
+        replay.boot_audio_preferences,
+        replay.boot_fullscreen_preferences,
+    ) {
         Ok(game) => game,
         Err(error) => {
             eprintln!("{error}");

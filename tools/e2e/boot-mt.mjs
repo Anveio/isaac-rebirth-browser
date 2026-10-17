@@ -122,7 +122,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       const initialSeed = scenario.seedValue ?? native.seedValue;
       if (scenario.seedValue !== undefined) assert.equal(scenario.seedValue, native.seedValue);
       assert.equal(native.observedState.seedValue, native.seedValue);
-      const state = await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); return window.game.reset(initialSeed, { bootEpochSeed, trace: true }); }, { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
+      const state = await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); return window.game.reset(initialSeed, { bootEpochSeed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); }, { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
       const compareMenu = (state, label) => {
         menuStates.push({ label, state });
         const observed = observations.get(label), boot = state.bootLifecycle;
@@ -188,7 +188,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       assert.equal(trace.initialSeed, initialSeed); assert.equal(trace.bootEpochSeed, scenario.bootEpochSeed);
       assert.deepEqual(trace.commands, expectedCommands, 'Every requested DOM key/text/tick command must reach WASM in order');
       if (seedDialog) {
-        await page.evaluate(({ initialSeed, bootEpochSeed }) => window.game.reset(initialSeed, { bootEpochSeed, trace: true }), { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
+        await page.evaluate(({ initialSeed, bootEpochSeed }) => window.game.reset(initialSeed, { bootEpochSeed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }), { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
         for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
         const queued = await snapshot(page);

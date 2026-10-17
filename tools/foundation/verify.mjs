@@ -186,6 +186,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     assert.equal(actualTrace.states.length, commands.length + 1, "Replay comparison must retain every public command state");
     assert.ok(actualTrace.backendEvents.every(event => event.state), "Replay comparison must retain every actual music callback state");
     return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
+      bootAudioPreferences: actualTrace.bootAudioPreferences, bootFullscreenPreferences: actualTrace.bootFullscreenPreferences,
       frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
   };
   await enterSeededRun(page, manualSeedText, { onCommand: record, onCheckpoint: capture,
@@ -269,7 +270,7 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayBuilt = false;
-export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = []) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayBuilt) {
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
@@ -288,7 +289,7 @@ export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEv
     if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
   }
   assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline, bootAudioPreferences, bootFullscreenPreferences }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
@@ -324,11 +325,12 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     const run = await browserScenario(page);
     assert.deepEqual(run.frames.map((frame) => frame.label), CHECKPOINTS, "Every declared original checkpoint must be captured in order");
     assert.deepEqual(errors, [], "Browser keyboard/render pipeline cannot hide errors");
-    save(join(output, "commands.json"), { initialSeed: run.initialSeed, commands: run.commands });
+    save(join(output, "commands.json"), { initialSeed: run.initialSeed, bootEpochSeed: run.bootEpochSeed, commands: run.commands,
+      bootAudioPreferences: run.bootAudioPreferences, bootFullscreenPreferences: run.bootFullscreenPreferences });
     save(join(output, "wasm-states.json"), run.states);
     save(join(output, "command-performance.json"), { tickRate: run.tickRate, measurements: run.timings, nativePhaseComparison: "Unavailable: native observations are process lifetime CPU/RSS, not corresponding simulation/render phase timers" });
     try {
-      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents);
+      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents, run.bootAudioPreferences, run.bootFullscreenPreferences);
       save(join(output, "rust-states.json"), native);
       for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], run.states[index]), null, `Native Rust/WASM state divergence after command ${index}`);
       report.checks.push({ id: "actual-keyboard-menu-seed-movement-shooting", status: "pass", commands: run.commands.length, statesCompared: native.length, scope: "Exact native Rust/WASM foundation state; original game hidden state is not observed" });

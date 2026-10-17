@@ -5,3 +5,12 @@ main { width: min(100vw, calc(100vh * 16 / 9)); position: relative; }
 canvas { display: block; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; outline: none; }
 #status { position: absolute; left: 0; right: 0; top: 45%; color: #d7ceba; text-align: center; font: 16px monospace; }
 #status[hidden] { display: none; }
+
+#game-feedback { position: absolute; left: 8%; right: 8%; bottom: 2%; padding: 12px; color: #f8ead4; background: #201b18; border: 1px solid #d7ceba; font: 14px sans-serif; }
+#game-feedback[hidden] { display: none; }
+#game-feedback p { margin: 0 0 8px; }
+#game-feedback button { font: inherit; margin-right: 8px; cursor: pointer; }
+
+/* Fullscreen uses the real game root; the internal render surface stays960x540. */
+main:fullscreen { width: 100vw; height: 100vh; display: grid; place-items: center; background: #000; }
+main:fullscreen canvas { width: min(100vw, calc(100vh * 16 / 9)); max-height: 100vh; }

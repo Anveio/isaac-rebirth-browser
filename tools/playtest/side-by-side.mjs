@@ -136,7 +136,7 @@ async function browserFrames(browser, server, caseData, tape, directory) {
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed }); }, caseData);
+    await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); }, caseData);
     for (const action of tape) {
       if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
       else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);

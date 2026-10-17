@@ -116,7 +116,7 @@ function musicStarts(calls) {
   return starts;
 }
 
-const production = await startProductionServer(), browser = await chromium.launch(browserLaunchOptions());
+const production = await startProductionServer({ directory: value('--production-directory') }), browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256: librarySha,
   production: production.build, graphics: await inspectBrowserGraphics(browser),
   scope: 'Fresh public menu/seed/play/pause inputs; source45-track table, Title61 intro/loop,95 real completion/room queue, fresh normal first-floor main/layer streams, exact f32 fades and actual Web Audio/OpenAL PCM. Capture names never establish native Playing: actual System state/public log are retained. Native pre-Title100 voiceover tail is explicitly skipped at browser entry. Alternate floor generation, later room jingles, count-driven layer admission and pitch special modes remain separate scope.', caseFilter, cases: [] };
@@ -146,12 +146,12 @@ try {
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.addInitScript(installBrowserAudioObserver); await page.goto(production.url + '/?manual=1'); await waitForReady(page);
       const apiBegin = await page.evaluate(({ seed, boot, volume }) => { const begin = window.__audioApi.events.length;
-        window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true });
-        window.game.command({ type: 'audioVolume', sfx_volume: 0 }); if (volume === 0) window.game.command({ type: 'musicVolume', volume });
+        window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true,
+          audioPreferences: {sfxVolume: 0, musicVolume: volume}, fullscreenPreferences: {fullscreen: false} });
         return begin;
       }, { seed: native.seedValue, boot: scenario.bootEpochSeed, volume: scenario.volume });
       check('initial autoplay suspended', (await page.evaluate(() => window.game.audio())).contextState, 'suspended');
-      const commands = [{ type: 'audioVolume', sfx_volume: 0 }, ...(scenario.volume === 0 ? [{ type: 'musicVolume', volume: 0 }] : [])], states = [];
+      const commands = [], states = [];
       let intendedSeedEntry = false; const intendedPressed = new Set();
       for (const action of tape.browser) {
         if (action.type === 'step') { await step(page, action.frames); commands.push({ type: 'tick', count: action.frames }); }
@@ -240,9 +240,12 @@ try {
       }
       const trace = await page.evaluate(() => window.game.trace()); assert.equal(trace.enabled, true); assert.equal(trace.truncated, false);
       check('actual reset/run and boot inputs recorded', [trace.initialSeed, trace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
+      check('declared audio preferences applied before first admission', trace.bootAudioPreferences, {sfxVolume: 0, musicVolume: scenario.volume});
+      check('declared window default applied at reset', trace.bootFullscreenPreferences, {fullscreen: false});
+      check('actual Native public audio options', native.audioOptions, {sfxVolume: 0, musicVolume: scenario.volume});
       check('complete actual public DOM command tape', trace.commands, commands);
       assert.ok(trace.backendEvents.length >= 4, 'Actual music completion/intro-loop callbacks must be recorded');
-      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents);
+      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences);
       for (let i = 0; i < rust.length; i++) assert.equal(exactStateDifference(rust[i], trace.states[i]), null, `Actual callback replay divergence after public command${i}`);
       check('full public states replay actual backend callbacks', rust.length, trace.states.length);
       const api = await page.evaluate(async () => { await Promise.all(window.__audioApi.pending); return { events: window.__audioApi.events, truncated: window.__audioApi.truncated }; });

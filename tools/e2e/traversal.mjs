@@ -108,7 +108,6 @@ try {
       const keyCodes = { a: 'KeyA', w: 'KeyW', d: 'KeyD', s: 'KeyS', e: 'KeyE', Up: 'ArrowUp',
         Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', Escape: 'Escape' };
       const expectedCommands = [...manualSeedCommands(scenario.code),
-        ...(declaredSfxVolume !== undefined ? [{ type: 'audioVolume', sfx_volume: sfxVolume }] : []),
         ...[...setup, ...scenario.actions].flatMap(action => {
           if (action.type === 'step') return [{ type: 'tick', count: action.frames }];
           if (action.type === 'capture') return [];
@@ -123,10 +122,10 @@ try {
       page = await browser.newPage({ viewport: { width: 960, height: 540 } });
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({seed, bootEpochSeed}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed }); }, {seed: scenario.runSeed, bootEpochSeed});
-      let seeded = await enterSeededRun(page, scenario.code);
-      if (declaredSfxVolume !== undefined)
-        seeded = await page.evaluate(volume => window.game.command({ type: 'audioVolume', sfx_volume: volume }), sfxVolume);
+      await page.evaluate(({seed, bootEpochSeed, sfxVolume}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed,
+        audioPreferences: {sfxVolume, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); },
+        {seed: scenario.runSeed, bootEpochSeed, sfxVolume: declaredSfxVolume === undefined ? 0 : sfxVolume});
+      const seeded = await enterSeededRun(page, scenario.code);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
         trace: await page.evaluate(() => window.game.trace()), expectedCommands }, null, 2) + '\n');
       assertSeededRun(seeded, scenario.code, scenario.runSeed);

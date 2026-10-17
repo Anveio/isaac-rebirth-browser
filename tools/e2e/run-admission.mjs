@@ -163,7 +163,7 @@ try {
       page = await browser.newPage({viewport: {width: 960, height: 540}});
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(c => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed}); }, c);
+      await page.evaluate(c => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false}}); }, c);
       const deliver = async command => {
         if (command.type === 'tick') await page.evaluate(command => { window.game.command(command); }, command);
         else if (command.type === 'key') await page.keyboard[command.down ? 'down' : 'up'](command.code);
