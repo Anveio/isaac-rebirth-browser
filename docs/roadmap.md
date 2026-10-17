@@ -73,7 +73,7 @@ Counts of open bugs are as of the last full review.
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams; shared MT incomplete | 7 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | 1x1 and four large shapes; eight room types | 2 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 2 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 3 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 2 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 2 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
@@ -198,6 +198,7 @@ Next: Basement II to Caves (#413 first).
 | --- | --- | --- | --- |
 | #413 | P0 | Basement II boss trapdoor fails every tick; next stage only admits 1 to 2 | playtest |
 | #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
+| #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 
 ## Player
 
@@ -450,6 +451,7 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #598 pans the menu board between pages and animates the carousel; playtest 2026-10-17 `playtest/7b74719/` menus tour (with Challenges) is pixel-exact on 1781 of 1782 menu frames (#587, #588, #589 closed).
 - #329 removed the Dip-death freeze path with Gimpy/Infestation 2 (#295 awaiting confirmation).
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
