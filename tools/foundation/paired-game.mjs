@@ -12,6 +12,7 @@ import { manifestPath as browserManifestPath, readJsonEvidence, writeJsonEvidenc
 import { compareMtDraws } from './mt-draws.mjs';
 import { readNativeEvidence } from './native-evidence.mjs';
 import { pixelDifference } from './compare.mjs';
+import { flag, selectCases } from '../e2e/lib/cli.mjs';
 import { startProductionServer } from './production-server.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -305,7 +306,7 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory, reuseOriginalDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
-  originalSfxVolume, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
+  originalSfxVolume, filterCases = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
   glTrace = process.argv.includes('--gl-trace') }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
@@ -334,9 +335,12 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     report.build = server.build;
     report.captureSchedule = 'sequential independent Original then Browser, one Chromium lifetime per case';
     report.status = 'running';
-    const definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
+    let definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
     for (let index = 0; index < randomCount; index++) definitions.push({ id: 'paired-random-run', seed: replaySeeds[index] });
     for (const path of replayCases) definitions.push({ id: JSON.parse(readFileSync(path, 'utf8')).scenario.id, replayCase: path });
+    // Only the CLI opts in: wrapper drivers filter their own banks before
+    // handing them over as replay cases. Fresh OS-random cases all share one id.
+    if (filterCases) { definitions = selectCases(definitions, item => item.id); report.caseFilter = flag('--case'); }
     assert.ok(!reuseOriginalDirectory || definitions.length === 1, 'Closed Original reuse requires exactly one declared case');
     for (const [index, definition] of definitions.entries()) {
       const directory = join(output, `${String(index).padStart(2, '0')}-${definition.id}`);
@@ -438,7 +442,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const output = resolve(option('--output', `.cache/foundation/paired-${Date.now()}`));
     const report = await runPairedGate({ output, selected, randomCount, replaySeeds, replayCases,
       exactPixels: process.argv.includes('--require-exact-pixels'), productionDirectory: option('--production-directory'),
-      archiveNativeEvidence: process.argv.includes('--archive-native-evidence'),
+      archiveNativeEvidence: process.argv.includes('--archive-native-evidence'), filterCases: true,
       nativeFrameTimeout: Number(option('--native-frame-timeout', 60)) });
     console.log(JSON.stringify({ status: report.status, report: join(output, 'report.json'), artifact: report.build.sha256 }));
     process.exitCode = report.status === 'pass' ? 0 : 1;

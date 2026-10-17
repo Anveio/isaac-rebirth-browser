@@ -10,6 +10,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../foundation/composition-wasm-public.mjs';
@@ -18,7 +19,7 @@ const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
 const value = flag => { const index = process.argv.indexOf(flag); return index < 0 ? undefined : process.argv[index + 1]; };
 const wasmNode = value('--wasm-node'), wasmSha = value('--wasm-sha');
-const selectedName = value('--case'), reusedOriginal = value('--reuse-original');
+const selectedName = flag('--case'), reusedOriginal = value('--reuse-original');
 assert.equal(Boolean(wasmNode), Boolean(wasmSha), 'Explicit WASM and expected SHA are both required');
 assert.ok(!reusedOriginal || wasmNode && selectedName && value('--scenarios'),
   'One retained Original requires the functional backend and a declared bank/case');
@@ -32,7 +33,8 @@ else {
 }
 assert.equal(scenarios.schema, 1);
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 11);
+// A bank recorded under --case holds only the cases that ran.
+if (!scenarios.caseFilter) assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 11);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
 for (const item of scenarios.cases) {
   assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -40,25 +42,26 @@ for (const item of scenarios.cases) {
   assert.ok(Number.isInteger(item.seedValue) && item.seedValue > 0 && item.seedValue <= 0xffffffff);
   assert.ok([0, 1].includes(item.delay));
 }
+scenarios.cases = selectCases(scenarios.cases, item => item.name);
+if (selectedName) scenarios.caseFilter = selectedName;
+assert.ok(!reusedOriginal || scenarios.cases.length === 1, 'One retained Original requires --case selecting exactly one case');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 const server = wasmNode ? null : await startProductionServer();
 const browser = wasmNode ? null : await chromium.launch(browserLaunchOptions());
-const selectedCases = selectedName ? scenarios.cases.filter(item => item.name === selectedName) : scenarios.cases;
-assert.ok(!selectedName || selectedCases.length === 1, 'Requested case must exist exactly once');
 const report = {
   schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server?.build ?? null,
   graphics: browser ? await inspectBrowserGraphics(browser) : null,
   captureBackend: wasmNode ? 'wasm-node' : 'browser',
   ...(wasmNode ? { wasmArtifact: { path: resolve(wasmNode), sha256: wasmSha },
     unavailable: ['Browser DOM inputs', 'Renderer and PNGs', 'Audio backend and PCM'] } : {}),
-  allDeclaredCasesRetained: true, declaredOrder: selectedCases.map(item => item.name),
+  caseFilter: scenarios.caseFilter, allDeclaredCasesRetained: true, declaredOrder: scenarios.cases.map(item => item.name),
   scope: 'Live public-seed natural coin-room admission, seeds/subtypes, full-phase animation/contact/collection, inventory and actor cleanup. Unsupported typed selectors remain with their owning systems.',
   cases: [],
 };
 try {
-  for (const item of selectedCases) {
+  for (const item of scenarios.cases) {
     const directory = join(output, item.name);
     await mkdir(directory, { recursive: true });
     const caseResult = { ...item, cohort: item.cohort || 'hazard-free-coin', status: 'running', failures: [] };
