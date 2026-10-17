@@ -115,7 +115,7 @@ def observe(pid,context):
      # 52ee40 tests the pointer first and never uses an inactive touched byte.
      # Record that raw byte without asserting a nonexistent active bool.
      touched_raw=read(player+0x3064,1)[0]
-     touched=bools(player+0x3064,1)[0]if queued else None
+     touched=(bools(player+0x3064,1)[0]==1)if queued else None
      # Legacy shootingPressed is raw DB0:52F73D stores opposed shoot pairs,
      # not the BPL HasShoot value passed at530042/53004C. Keep its wire name.
      players.append({'ownedCounts':list(struct.unpack('<347i',read(player+0xe1c,347*4))),'queuedId':i32(queued+4)if queued else None,'queuedCharge':i32(player+0x3060),'queuedTouched':touched,'queuedTouchedRaw':touched_raw,'cacheFlags':struct.unpack('<I',read(player+0xd6c,4))[0],'activeId':i32(player+0xd74),'activeCharge':i32(player+0xd78),'pickupCooldown':i32(player+0x30d4),

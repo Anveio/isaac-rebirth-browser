@@ -401,10 +401,17 @@ real common SKU bodies, prices, paid grant/debit/copy and live reentry. The
 frozen lifecycle artifact qualifies one actual funded Bomb purchase: fresh
 v9 passes 117/117 source guards and 390/390 owned fields. The corrected
 canonical view retains eight failures; 52/59 RGBA diagnostics fail. Earlier
-v8 missing-overlap evidence stays red. Other SKU successes have source and
-Own preparation, not shared Native validation.
+v8 missing-overlap evidence stays red. First-four source-authored common-SKU
+fixtures on frozen5c33 establish free no-active refusal, affordable priced
+no-active refusal, an undercharged Battery grant and a paid collectible
+queue/deferred grant. All64 summary witness checks pass; the strict aggregate
+41,212/41,481 retains250 health and19 BF4 guard failures. Raw reports and
+representation/actual-owner readbacks remain separate; RGBA/PCM is ungraded.
+These are fixture witnesses, not whole retail-floor or current-main parity.
 
-Next: qualify Battery refusal/grant and other paid SKU callbacks; implement
+Next: promote source-only local fixture recipes and owned-schema coverage;
+qualify free-full/free-undercharged/paid-full Battery and other paid SKU
+callbacks; implement
 canonical Store Credit/Steam Sale and eligible achievements. Upgraded
 shops, unadmitted ABD contexts, charge/effect48, Continue, broader Full/Fast grid parity,
 complete audio/pixels, devil/angel chance and rooms, slots, beggars and
