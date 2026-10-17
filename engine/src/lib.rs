@@ -2289,6 +2289,99 @@ impl Game {
         self.refresh_stage_effects();
         Ok(suppressed_entities)
     }
+    /// Render keys (virtual+50) of the ordinary actors, then the manager's
+    /// render-array insertion and, on a full update, its 452760 sort.
+    /// Entity 441bd0 (Player, NPC, Familiar, Tear, Bomb, Pickup, Projectile):
+    /// floor(f32(y * 100 + 10030 + 0.5)) plus the integer Entity+460 addend,
+    /// compared unsigned. Entity_Player::Init 519350 sets that addend to 5
+    /// (519485) after Entity::Init clears it, so Isaac draws over an NPC
+    /// standing up to 0.05 below him; Fireplace AI 49a530 writes -1000
+    /// (49a681/49a886/49affe). Effect 4586c0 adds +7f8 to y, or keys
+    /// (Entity+8 & 0x3ff) + 100 when Init set +7d8; Knife 472620 and Laser
+    /// 475f70 add +7e4 to y and take no addend. `departure` is the player's
+    /// world y before a room change: the new room's actors are inserted
+    /// against that key, without sorting.
+    fn sort_render_array(&mut self, departure: Option<f32>, passes: bool) {
+        let key = |y: f32, offset: i32| {
+            ((((y * 100.0) + 10030.0) + 0.5).floor() as i64 as u32).wrapping_add(offset as u32)
+        };
+        let state = &self.state;
+        let scheduler = &state.actor_scheduler;
+        // Player x/y are screen units; the key reads world Entity+44c.
+        let player = key(departure.unwrap_or(bombs::player_world(state).y), 5);
+        let keys: Vec<(actors::ActorRef, u32)> = scheduler
+            .full_phase()
+            .into_iter()
+            .filter_map(|actor| {
+                let id = actor.id;
+                let value = match actor.kind {
+                    actors::ActorKind::Player => Some(player),
+                    actors::ActorKind::Npc => state.room.npcs.iter().find(|npc| npc.id == id).map(|npc| {
+                        let offset = npc.fireplace.as_ref().map_or(0, |fire| fire.render_order_offset);
+                        key(npc.position.y, offset)
+                    }),
+                    actors::ActorKind::Familiar => state
+                        .familiars
+                        .iter()
+                        .find(|familiar| familiar.id == id)
+                        .map(|familiar| key(familiar.position.y, 0)),
+                    actors::ActorKind::Tear => state
+                        .tears
+                        .iter()
+                        .find(|tear| tear.id == id)
+                        .map(|tear| key(tear.motion.position.y, 0)),
+                    actors::ActorKind::Bomb => state
+                        .bombs
+                        .iter()
+                        .find(|bomb| bomb.id == id)
+                        .map(|bomb| key(bomb.motion.position.y, 0)),
+                    actors::ActorKind::Pickup => state
+                        .room
+                        .pickups
+                        .iter()
+                        .find(|pickup| pickup.id == id)
+                        .map(|pickup| key(pickup.position.y, 0)),
+                    actors::ActorKind::Projectile => state
+                        .enemy_projectiles
+                        .iter()
+                        .find(|projectile| projectile.id == id)
+                        .map(|projectile| key(projectile.position.y, 0)),
+                    actors::ActorKind::Effect => {
+                        if let Some(effect) = state.sprite_effects.iter().find(|effect| effect.id == id) {
+                            if effect.raw_7d8 {
+                                scheduler.sequence_id(actor).map(|sequence| {
+                                    ((sequence & 0x3ff) + 100).wrapping_add(effect.render_order_offset as u32)
+                                })
+                            } else {
+                                Some(key(effect.position.y + effect.raw_7f8, effect.render_order_offset))
+                            }
+                        } else if let Some(ember) = state.fire_particles.iter().find(|ember| ember.id == id) {
+                            Some(key(ember.position.y, 0))
+                        } else {
+                            state
+                                .lasers
+                                .iter()
+                                .filter_map(|laser| laser.impact.as_ref())
+                                .find(|impact| impact.id == id)
+                                .map(|impact| key(impact.position.y + impact.depth, 0))
+                        }
+                    }
+                    actors::ActorKind::Knife => state
+                        .knives
+                        .iter()
+                        .find(|knife| knife.id == id)
+                        .map(|knife| key(knife.position.y + knife.raw_7e4, 0)),
+                    actors::ActorKind::Laser => state
+                        .lasers
+                        .iter()
+                        .find(|laser| laser.id == id)
+                        .map(|laser| key(laser.position.y + laser.render_sort_offset, 0)),
+                };
+                value.map(|value| (actor, value))
+            })
+            .collect();
+        self.state.actor_scheduler.sort_render(&keys, passes);
+    }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
         attack_runtime::reset_room_schedule(&mut self.state);
@@ -2689,6 +2782,7 @@ impl Game {
             return Ok(());
         }
         let room_before = self.state.current_room;
+        let departure_y = bombs::player_world(&self.state).y;
         let restoring = self
             .state
             .room_transition
@@ -2870,6 +2964,10 @@ impl Game {
                 if !restoring {
                     traversal::begin_boss_scene(&mut self.state);
                 }
+                // Room.Init inserts the new room's actors into the render
+                // array while Isaac still holds his departure position; the
+                // admitting update does not reorder it (later full updates do).
+                self.sort_render_array(Some(departure_y), false);
             }
             self.refresh_minimap();
             if self.state.room_transition.is_none() {
@@ -3174,6 +3272,10 @@ impl Game {
             actors::ActorKind::Laser => self.state.lasers.iter().any(|laser| laser.id == actor.id),
             _ => true,
         });
+        if phase == phase::Phase::Update {
+            // Manager Update454df0 ends with the render sort 452760 (45529a).
+            self.sort_render_array(None, true);
+        }
         if phase != phase::Phase::Skipped {
             self.state.music.advance();
         }

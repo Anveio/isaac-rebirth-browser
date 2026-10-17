@@ -434,7 +434,7 @@ export interface State {
     lifetimeDivisor: number; timeToLive: number; fullUpdates: number; animationClock: number; animationPlaying: boolean;
     dead: boolean; removed: boolean}[];
   familiars: Familiar[]; nextFamiliar: number; spriteEffects: SpriteEffect[]; nextEffect: number;
-  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number };
+  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number; render: ActorRef[] };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;

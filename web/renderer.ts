@@ -110,10 +110,12 @@ export class Renderer {
   private readonly slideNew: GLSurface;
   private slideKey: string | null = null;
   private slideNewReady = false;
-  private slideRecord: { npcs: Renderer["drawnNpcs"]; grid: Renderer["drawnGrid"] } = { npcs: [], grid: [] };
+  private slideRecord: { npcs: Renderer["drawnNpcs"]; grid: Renderer["drawnGrid"]; order: Renderer["drawnOrder"] } = { npcs: [], grid: [], order: [] };
   // Sprite scale of every NPC the latest frame drew, for live render contracts.
   private drawnNpcs: { kind: number; spawnSeed: number; scale: [number, number] }[] = [];
   private drawnGrid: { index: number; kind: number; animation: string; frame: number }[] = [];
+  // [entity type, spawn seed] of the player (seed null) and NPCs, in draw order.
+  private drawnOrder: [number, number | null][] = [];
   private constructor(private readonly canvas: HTMLCanvasElement, private readonly assets: Assets,
     private readonly graphics: GLMenuContext) {
     this.context = canvas.getContext("2d", { alpha: false })!;
@@ -133,7 +135,7 @@ export class Renderer {
     return new Renderer(canvas, assets, graphics);
   }
   draw(state: State): void {
-    this.drawnNpcs = []; this.drawnGrid = [];
+    this.drawnNpcs = []; this.drawnGrid = []; this.drawnOrder = [];
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
@@ -298,60 +300,16 @@ export class Renderer {
         (40 + trapdoor.gridIndex % grid.width * 40) * 0.65 + 32,
         (120 + Math.floor(trapdoor.gridIndex / grid.width) * 40) * 0.65 - 47, Math.floor(trapdoor.frame));
     this.pickups.draw(ctx, state);
-    for (const npc of state.room.npcs) {
-      // A dying boss (state 16) keeps drawing its death clip.
-      if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) continue;
-      // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
-      const scale = npc.spriteScale ?? npc.champion?.scale ?? 1;
-      // Sprite Color (+2d0): champion table colour or a timed hit flash.
-      const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
-      this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
-      const keeper = npc.keeper;
-      if (keeper) {
-        this.assets.draw(ctx, npc.variant === 0 ? "gfx/017.001_shopkeeper.anm2" : "gfx/017.002_secret room keeper.anm2", keeper.animation,
-          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
-          { scale, overrides: { 0: {
-            RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
-            AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
-            GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
-          } } });
-      } else if (npc.monstro) {
-        ctx.save();
-        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-        ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
-        this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
-          0, 0, npc.animationClock, { scale, color });
-        ctx.restore();
-      } else if (npc.dip) {
-        ctx.save();
-        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-        ctx.scale(npc.dip.flipX ? -1 : 1, 1);
-        this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
-          { scale, overrides: { 0: {
-            RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
-            BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
-            RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
-            BlueOffset: npc.dip.offsets[2]! * 255,
-          } } });
-        ctx.restore();
-      } else if (npc.fireplace) {
-        this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
-          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
-          { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
-      } else if (npc.actor) {
-        // Catalogue-driven families: the engine names the authored actor.
-        ctx.save();
-        ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-        ctx.scale(npc.flipX ? -1 : 1, 1);
-        this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
-        // ANM2 overlay slot (Gemini's head) draws over the main clip.
-        if (npc.overlay) this.assets.draw(ctx, npc.actor, npc.overlay.animation, 0, 0, npc.overlay.clock, { scale, color });
-        ctx.restore();
-      } else {
-        this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-          npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
-      }
-    }
+    // Room::Render walks the manager render array in order (452850/4528c0),
+    // so an entry later in it draws over an earlier one. The engine keeps the
+    // Player/NPC part of that array (Scheduler::sort_render); NPCs after the
+    // player draw right after him, over his sprite.
+    const order = state.actorScheduler.render;
+    const slot = (npc: State["room"]["npcs"][number]) => order.findIndex(actor => actor.kind === "npc" && actor.id === npc.id);
+    const playerSlot = hidePlayer ? -1 : order.findIndex(actor => actor.kind === "player");
+    const npcs = [...state.room.npcs].sort((a, b) => slot(a) - slot(b));
+    const overPlayer = playerSlot < 0 ? [] : npcs.filter(npc => slot(npc) > playerSlot);
+    for (const npc of npcs) if (!overPlayer.includes(npc)) this.drawNpc(ctx, npc);
     for (const knife of state.knives) {
       if (!knife.visible) continue;
       const sprite = knife.sprite, color = knife.currentColor, flips = sprite.layerFlips?.[0] ?? [false, false];
@@ -417,6 +375,7 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
     if (!hidePlayer) this.drawPlayer(ctx, state);
+    for (const npc of overPlayer) this.drawNpc(ctx, npc);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
       //The selected Regular/Blood authored layer receives its birth-owned ColorMod.
@@ -492,6 +451,62 @@ export class Renderer {
     this.drawFxRays(state);
   }
 
+  private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {
+    // A dying boss (state 16) keeps drawing its death clip.
+    if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) return;
+    // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
+    const scale = npc.spriteScale ?? npc.champion?.scale ?? 1;
+    // Sprite Color (+2d0): champion table colour or a timed hit flash.
+    const color = { tint: npc.spriteColor.current.tint, offsets: npc.spriteColor.current.offset };
+    this.drawnNpcs.push({ kind: npc.kind, spawnSeed: npc.spawnSeed, scale: [scale, scale] });
+    this.drawnOrder.push([npc.kind, npc.spawnSeed]);
+    const keeper = npc.keeper;
+    if (keeper) {
+      this.assets.draw(ctx, npc.variant === 0 ? "gfx/017.001_shopkeeper.anm2" : "gfx/017.002_secret room keeper.anm2", keeper.animation,
+        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
+        { scale, overrides: { 0: {
+          RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
+          AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
+          GreenOffset: keeper.offsets[1]! * 255, BlueOffset: keeper.offsets[2]! * 255,
+        } } });
+    } else if (npc.monstro) {
+      ctx.save();
+      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
+      this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
+        0, 0, npc.animationClock, { scale, color });
+      ctx.restore();
+    } else if (npc.dip) {
+      ctx.save();
+      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.scale(npc.dip.flipX ? -1 : 1, 1);
+      this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
+        { scale, overrides: { 0: {
+          RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
+          BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
+          RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
+          BlueOffset: npc.dip.offsets[2]! * 255,
+        } } });
+      ctx.restore();
+    } else if (npc.fireplace) {
+      this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
+        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
+        { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
+    } else if (npc.actor) {
+      // Catalogue-driven families: the engine names the authored actor.
+      ctx.save();
+      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.scale(npc.flipX ? -1 : 1, 1);
+      this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
+      // ANM2 overlay slot (Gemini's head) draws over the main clip.
+      if (npc.overlay) this.assets.draw(ctx, npc.actor, npc.overlay.animation, 0, 0, npc.overlay.clock, { scale, color });
+      ctx.restore();
+    } else {
+      this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
+        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
+    }
+  }
+
   /** FX ray render 547890 (from room render 5cd00d, after entities and
    * shading). The camera scroll (Room+15B8) moves the rays' anchor C; the
    * player's offset from the room centre P sets parallax and fades them. Each
@@ -539,7 +554,7 @@ export class Renderer {
       this.drawWorld(ctx, state, true);
       this.copyScreen(this.slideOld);
       this.slideKey = key; this.slideNewReady = false;
-      this.drawnNpcs = []; this.drawnGrid = [];
+      this.drawnNpcs = []; this.drawnGrid = []; this.drawnOrder = [];
       gl.clearRect(0, 0, 480, 270);
     }
     if (!transition || transition.phase !== "in" || this.slideKey !== key || transition.fromSlot < 0) {
@@ -550,10 +565,11 @@ export class Renderer {
       this.drawWorld(ctx, state);
       this.copyScreen(this.slideNew);
       this.slideNewReady = true;
-      this.slideRecord = { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid) };
+      this.slideRecord = { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid), order: structuredClone(this.drawnOrder) };
     }
     // The new room shown during the slide is that one snapshot draw.
     this.drawnNpcs = structuredClone(this.slideRecord.npcs); this.drawnGrid = structuredClone(this.slideRecord.grid);
+    this.drawnOrder = structuredClone(this.slideRecord.order);
     const limit = 7, k = transition.fullUpdates;
     const interpolated = state.systemClock.interpolationEnabled && state.systemClock.systemCounter % 2 === 0;
     const p = Math.fround((k + (interpolated && k < limit ? 0.5 : 0)) / limit);
@@ -579,7 +595,7 @@ export class Renderer {
     gl.scale(this.canvas.width / 480, this.canvas.height / 270);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid) }; }
+  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid), order: structuredClone(this.drawnOrder) }; }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {
@@ -730,6 +746,7 @@ export class Renderer {
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
     if (!state.player.visible) return;
+    this.drawnOrder.push([1, null]);
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;

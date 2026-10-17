@@ -100,6 +100,10 @@ pub struct Scheduler {
     actors: Vec<ActorRef>,
     identities: Vec<Identity>,
     room_next_sequence: u32,
+    /// EntityManager+80 render array of the ordinary actors; Room::Render
+    /// draws it in order (see `sort_render`).
+    #[serde(default)]
+    render: Vec<ActorRef>,
 }
 
 impl Scheduler {
@@ -177,6 +181,65 @@ impl Scheduler {
             matches!(actor.kind, ActorKind::Player | ActorKind::Familiar) || retained(actor)
         });
         self.room_next_sequence = 0;
+        //453ec0 empties the render array and re-appends the retained
+        // Player, Familiar and type8/subtype0 actors.
+        let actors = &self.actors;
+        self.render.retain(|actor| actors.contains(actor));
+    }
+
+    /// Maintain the EntityManager+80 render array that Room::Render walks in
+    /// order (452850/4528c0 call virtual+28 Render), so a later entry draws
+    /// over an earlier one. `keys` holds each ordinary actor's virtual+50
+    /// render key; actors without one stay out of the array.
+    ///
+    /// Insert 4524f0 places a new actor before the first entry whose key is
+    /// not below its own, so at equal keys the newer actor draws first.
+    /// Manager Update ends (45529a) with 452760: up to three passes swapping
+    /// adjacent entries only when the left key is strictly (unsigned) greater,
+    /// stopping after a pass with fewer than count/10+1 swaps. Equal keys keep
+    /// their order, and an actor whose key fell moves at most one slot left
+    /// per pass: entering a room, Isaac (inserted at his departure key) walks
+    /// back through the room's actors one slot per update. `passes` is false
+    /// for the admitting Room.Update, which inserts without sorting.
+    pub(crate) fn sort_render(&mut self, keys: &[(ActorRef, u32)], passes: bool) {
+        let key = |actor: ActorRef| {
+            keys.iter()
+                .find(|(other, _)| *other == actor)
+                .map(|(_, key)| *key)
+        };
+        let actors = &self.actors;
+        self.render
+            .retain(|actor| actors.contains(actor) && key(*actor).is_some());
+        for actor in self.actors.iter().copied() {
+            if self.render.contains(&actor) {
+                continue;
+            }
+            let Some(own) = key(actor) else {
+                continue;
+            };
+            let at = self
+                .render
+                .iter()
+                .position(|other| key(*other).is_some_and(|other| other >= own))
+                .unwrap_or(self.render.len());
+            self.render.insert(at, actor);
+        }
+        if !passes {
+            return;
+        }
+        let count = u32::try_from(self.render.len()).unwrap_or(u32::MAX);
+        for _ in 0..3 {
+            let mut swaps = 0u32;
+            for index in 1..self.render.len() {
+                if key(self.render[index - 1]) > key(self.render[index]) {
+                    self.render.swap(index - 1, index);
+                    swaps += 1;
+                }
+            }
+            if count / 10 + 1 > swaps {
+                break;
+            }
+        }
     }
 
     /// The original full loop stops at the last actor present on entry.
@@ -198,5 +261,7 @@ impl Scheduler {
                 .iter()
                 .any(|identity| identity.actor == *actor)
         });
+        let actors = &self.actors;
+        self.render.retain(|actor| actors.contains(actor));
     }
 }

@@ -13,6 +13,9 @@ export function check(rows, field, expected, actual) {
     status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
 }
 
+// An actor whose sprite overlaps the player's (both within 40 world units).
+const overlapping = (actor, player) => Math.abs(actor[0] - player[0]) < 40 && Math.abs(actor[1] - player[1]) < 40;
+
 const ROCK_ANIMATIONS = { 2: 'normal', 3: 'black', 4: 'tinted', 5: 'bombrock', 6: 'alt' };
 const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0, laser: 8 };
 
@@ -153,6 +156,24 @@ export function entityRows(rows, source, actual, spec, render) {
   if (spec.shape) roomArtRows(rows, source, actual);
   // The browser's own draw record for this capture: what it actually drew.
   check(rows, 'render.recorded', true, render !== undefined);
+  // Room::Render draws the manager render array (Room+15d0 +80/+8c) in order,
+  // so a later entry draws over an earlier one. Entity_Player and Entity_NPC
+  // share the y key 441bd0; Player.Init sets the +460 addend to 5 (519485).
+  // Draw order is visible only where sprites overlap: for each NPC within 40
+  // world units of the player on both axes in the original that both the
+  // original's array and the browser's draw hold, whether it draws over the
+  // player; graded whenever both drew the player.
+  const sorted = source.renderSortedEntities ?? [];
+  const nativePlayer = sorted.findIndex(actor => actor.type === 1);
+  if (render) check(rows, 'render.orderRecorded', true, Array.isArray(render.order) || undefined);
+  const drawn = render?.order ?? [];
+  const drawnPlayer = drawn.findIndex(([kind]) => kind === 1);
+  const drawnAt = actor => drawn.findIndex(([kind, seed]) => kind === actor.type && seed === actor.spawnSeed);
+  const shared = sorted.flatMap((actor, index) => actor.type >= 10 && actor.type < 1000 && drawnAt(actor) >= 0
+    && nativePlayer >= 0 && overlapping(actor.position, sorted[nativePlayer].position) ? [[actor, index]] : []);
+  if (nativePlayer >= 0 && drawnPlayer >= 0 && shared.length)
+    check(rows, 'render.npcsOverPlayer', shared.map(([actor, index]) => [actor.type, actor.spawnSeed, index > nativePlayer]),
+      shared.map(([actor]) => [actor.type, actor.spawnSeed, drawnAt(actor) > drawnPlayer]));
   // Intact rock-family grid entities: native Rock Render 56bf80 sets frame
   // variant of its type's grid_rock.anm2 animation (Init 56ed00). Destroyed
   // rubble needs per-piece offsets the engine does not model yet, and the
@@ -229,7 +250,8 @@ export function entityRows(rows, source, actual, spec, render) {
 /** Read a side's manifest, raw or from its archived receipt. */
 export const loadManifest = (directory, side) => readJsonEvidence(manifestPath(directory, side));
 
-export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType'];
+export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType', 'overPlayer', 'underPlayer'];
+
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {
@@ -239,10 +261,29 @@ export function markers(directory, spec) {
     const manifest = loadManifest(directory, side);
     const rows = side === 'original' ? manifest.debugObservations.map(row => row.observation?.gameplay)
       : manifest.frames.map(row => row.state);
+    const renders = side === 'original' ? [] : manifest.frames.map(row => row.render);
     const dead = new Set();
     let locked = false;
-    for (const row of rows) {
+    for (const [at, row] of rows.entries()) {
       if (!row || (side === 'original' ? row.status !== 'pass' : row.screen !== 'playing')) continue;
+      // Overlapping draw order: a spec actor drawn over (after) or under the
+      // player, from the original's render array or the browser's draw order.
+      if (side === 'original') {
+        const sorted = row.renderSortedEntities ?? [], player = sorted.findIndex(actor => actor.type === 1);
+        if (player >= 0) for (const [index, actor] of sorted.entries())
+          if (spec.matches(actor.type, actor.variant) && overlapping(actor.position, sorted[player].position)) {
+            seen.overPlayer ||= index > player; seen.underPlayer ||= index < player;
+          }
+      } else {
+        const order = renders[at]?.order ?? [], player = order.findIndex(([kind]) => kind === 1);
+        if (player >= 0) for (const actor of row.room.npcs.filter(actor => spec.matches(actor.kind, actor.variant))) {
+          const index = order.findIndex(([kind, seed]) => kind === actor.kind && seed === actor.spawnSeed);
+          // Port player x/y are screen units: world = ((x - 32) / 0.65, (y + 46) / 0.65).
+          if (index >= 0 && overlapping([actor.position.x, actor.position.y], [(row.player.x - 32) / 0.65, (row.player.y + 46) / 0.65])) {
+            seen.overPlayer ||= index > player; seen.underPlayer ||= index < player;
+          }
+        }
+      }
       const actors = side === 'original'
         ? row.entities.filter(actor => spec.matches(actor.type, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.pendingDamage, dead: actor.removed }))
         : row.room.npcs.filter(actor => !actor.removed && spec.matches(actor.kind, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.damage.pendingDamage, dead: actor.dead }));

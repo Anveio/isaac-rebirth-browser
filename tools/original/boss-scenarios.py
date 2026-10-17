@@ -94,8 +94,21 @@ def fight(entry, mode='sweep'):
 
     sweep: Scene, then shoot along every axis and idle.
     churn: stand still and turn the aim every 30 frames for 960 frames, so the
-      boss keeps summoning while its minions die (mid-room spawn churn)."""
+      boss keeps summoning while its minions die (mid-room spawn churn).
+    crossing: once the Scene hands back control, walk diagonally up and right
+      from a bottom entry and stand still without shooting, in the boss's
+      path: its body reaches Isaac from above (drawn under him), then passes
+      below him (drawn over him). Tuned to the FTJ9DSE0 Duke of Flies route,
+      whose first down-right leg crosses that spot; the case requires both
+      overlapping draw orders (entity.required)."""
     tape = []
+    if mode == 'crossing':
+        dense(tape, 110, 'boss-scene', 2)
+        tape += [key('w', True), key('d', True)]
+        dense(tape, 50, 'boss-cross-walk', 2)
+        tape += [key('w', False), key('d', False)]
+        dense(tape, 200, 'boss-cross', 2)
+        return tape
     if mode == 'churn':
         for turn in range(32):
             aim = AIM[turn % 4]
@@ -174,6 +187,8 @@ def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
                           'randomized': randomized}
     result['entity'] = {'type': boss[0], 'variant': boss[1], 'shape': [13, 7], 'slot': route['entrySlot'], 'boss': True,
                         'rooms': route['rooms'], 'routeFrames': recorded['frames'], 'selection': provenance}
+    if mode == 'crossing':
+        result['entity']['required'] = ['overPlayer', 'underPlayer']
     return result, None, recorded['checkpoints']
 
 
