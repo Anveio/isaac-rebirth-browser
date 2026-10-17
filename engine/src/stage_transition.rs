@@ -346,10 +346,12 @@ pub fn fade(transition: &StageTransition) -> f32 {
 
 /// Level::SetNextStage585620 for the admitted ordinary stages. Alternate
 /// stages need Seeds stage bit0 clear and a Manager unlock byte that a fresh
-/// profile does not own; Curse of the Labyrinth is not admitted.
+/// profile does not own; Curse of the Labyrinth is not admitted. Caves II
+/// (stage 4) has no admitted generator, so Caves I's trapdoor stays shut.
 pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
     match stage {
         1 => Ok(2),
+        2 => Ok(3),
         _ => Err(format!(
             "stage {stage} has no admitted next-stage generator"
         )),
