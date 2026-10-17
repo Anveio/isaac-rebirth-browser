@@ -45,9 +45,11 @@ const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `re
 // (~250 MB raw per case); the comparators read either form.
 const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
   productionDirectory,
+  publicClockSchedule: outerArgv.includes('--public-clock-schedule'),
   originalObserver: flag('--state-observer') || undefined,
   reuseOriginalDirectory: flag('--reuse-original'),
   nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
+  archiveNativeEvidence: outerArgv.includes('--archive-native-evidence'),
   archiveBrowserEvidence: true })
   : { status: 'fail', cases: [] };
 

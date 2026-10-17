@@ -130,6 +130,16 @@ export const SUITES = [
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
   suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
+  suite('footprint-admission', statePair, [
+    '--scenario-helper', helper('entity-scenarios.py'),
+    '--helper-arg', '--room-type', '--helper-arg', '6',
+    '--helper-arg', '--contrived', '--helper-arg', 'PHCVWE1C:1',
+    '--helper-arg', '--count', '--helper-arg', '1',
+    '--helper-arg', '--attempts', '--helper-arg', '256',
+    '--helper-arg', '--stop-after-capture', '--helper-arg', 'entry-40',
+    '--comparator', 'tools/foundation/footprint-admission-state-pair.mjs',
+    '--public-clock-schedule', '--archive-native-evidence', '--native-frame-timeout', '120'],
+    'Footprint cadence at admission: fixed regression and OS-random admitted miniboss room; exact initial NPC fields'),
   suite('entities', statePair, entities(),
     'Every authored entity, room-shape and boss spec in tools/e2e/entities/: admission, AI, damage, death and room state'),
   ...(await entitySpecs()).map(spec => suite(`entity-${spec.name}`, statePair, entities([spec.name]), spec.about, { alias: 'entities' })),
@@ -144,13 +154,13 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'ordinary-run', 'run-admission', 'floor'],
-  rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor'],
+  rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission'],
   stage: ['stage-exit', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
   items: ['items', 'item-composition', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars'],
   combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
-  monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities'],
+  monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],
   audio: ['audio', 'music'],
 };
 for (const [group, ids] of Object.entries(GROUPS)) for (const id of ids)
