@@ -215,8 +215,8 @@ impl Published {
 
 /// An input configuration file as the browser stores it: devices retained
 /// from earlier sessions, with whatever bindings they held, and usually the
-/// Keyboard's. The driver plays with the default keys, so a stored Keyboard
-/// keeps them, sometimes adding second keys no default binding uses.
+/// Keyboard's: the defaults, second keys no default uses, or every
+/// configurable action rebound to a distinct key.
 pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
     let mut devices: Vec<DeviceConfig> = (0..e.below(3))
         .map(|index| DeviceConfig {
@@ -237,10 +237,21 @@ pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
             .filter_map(|code| input::glfw_key(code))
             .filter(|key| !defaults.contains(key))
             .collect();
-        for action in CONFIGURABLE {
-            if !free.is_empty() && e.chance(1, 4) {
-                let key = free.swap_remove(e.index(free.len()));
-                keyboard.bindings[action][1] = key;
+        if e.chance(1, 3) {
+            let mut keys: Vec<i32> = CONFIGURABLE
+                .iter()
+                .map(|action| keyboard.bindings[*action][0])
+                .chain(free.iter().copied().take(CONFIGURABLE.len()))
+                .collect();
+            for action in CONFIGURABLE {
+                keyboard.bindings[action] = [keys.swap_remove(e.index(keys.len())), -1];
+            }
+        } else {
+            for action in CONFIGURABLE {
+                if !free.is_empty() && e.chance(1, 4) {
+                    let key = free.swap_remove(e.index(free.len()));
+                    keyboard.bindings[action][1] = key;
+                }
             }
         }
         let at = e.index(devices.len() + 1);
@@ -272,6 +283,9 @@ fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String
 
 impl Simulation {
     fn boot(tape: &Tape) -> Option<Self> {
+        // The census case opens before boot, so it records the properties
+        // boot meets.
+        coverage::begin_case();
         let (initial_seed, boot_epoch_seed) = (tape.initial_seed, tape.boot_epoch_seed);
         let booted = panic::catch_unwind(|| tape.boot());
         let details = json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed });
@@ -313,8 +327,9 @@ impl Simulation {
                 );
                 props::sometimes!(
                     tape.boot_audio_preferences.is_some()
-                        && tape.boot_fullscreen_preferences.is_some(),
-                    "game: a game boots with stored audio and fullscreen settings"
+                        && tape.boot_fullscreen_preferences.is_some()
+                        && tape.boot_input_configs.is_some(),
+                    "game: a game boots with stored audio, fullscreen and input settings"
                 );
                 let again = tape.boot();
                 props::always!(
@@ -322,7 +337,6 @@ impl Simulation {
                     "game: boot is a pure function of its seeds and stored settings"
                 );
                 invariants::state(&game.state);
-                coverage::begin_case();
                 coverage::observe(&game.state);
                 Some(Self {
                     game,

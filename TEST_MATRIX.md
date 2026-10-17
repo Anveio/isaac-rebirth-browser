@@ -720,7 +720,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: every nonzero seed and epoch boots to Title | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot publishes the first Title with its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot starts with the stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
-| Sometimes | game: a game boots with stored audio and fullscreen settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: a game boots with stored audio, fullscreen and input settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot is a pure function of its seeds and stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: controls lost outside a named hold come back within 600 full updates | [mod.rs](engine/dst/src/units/game/mod.rs) |
