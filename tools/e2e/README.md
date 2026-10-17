@@ -59,6 +59,28 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
 A slice is an inner-loop tool. Merging still needs the suites your change
 touches, compared against main.
 
+The `save-continue` suite runs public living Pause Quit, actual own-storage
+readmission/Continue and natural same-origin reload. Its default is the fixed
+moving-before-Save route plus one unfiltered OS seed; all inputs and draw bytes
+are retained before either game. No Native state enters Browser inputs.
+
+```sh
+npm run test:e2e -- save-continue --count 1 --no-build --production-directory FROZEN
+npm run test:e2e -- save-continue --scenarios references/isaac/cases/save-continue/recovery-initial-footprints-fixed-dl17.json --no-build --production-directory FROZEN
+```
+
+The current404a/1b30 first bank passes66 own Save guards and two natural reloads,
+while strict paired state remains1592/1714 (122 failures) and RGBA34 pass/28 fail.
+Original/browser placement/shared-MT differences and historical538c failures stay required;
+the own-world reload result is a separate scope. The listed-Bomb guard on0af
+reuses both recorded Native cases with all1714 rows,62 Browser PNGs and62 MT
+states unchanged; runtime2/2 and real Bomb/legacy-own-save refusal witnesses
+pass. The legacy witness uses a real same-origin app upgrade, without storage
+injection. [Save evidence and supported
+load domain](../../docs/save-continue.md) describes both. Reuse requires exactly
+one recorded case; the canonical runner owns its host slot. Fresh Native needs
+4 GiB after the production snapshot on the actual evidence filesystem.
+
 The existing death suite has a bounded actual-audio replay:
 
 ```sh

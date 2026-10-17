@@ -1,0 +1,2001 @@
+{
+  "schema": 1,
+  "scenario": {
+    "id": "save-initial-room-footprints-continue-300-settle",
+    "description": "Public ordinary walking produces actual Blood7 footprints before living Pause Quit; Continue rebuilds its owned room backdrop and natural own-storage reload remains mandatory.",
+    "systems": [
+      "save-continue",
+      "saved-run",
+      "menu-navigation",
+      "run-admission",
+      "grid-records",
+      "input-clock"
+    ],
+    "randomized": false
+  },
+  "seed": "T1PK6Y0W",
+  "seedValue": 2184569263,
+  "bootEpochSeed": 1700000000,
+  "initialSeed": 2184569263,
+  "bootstrap": {
+    "boundaryLabel": "title-ready",
+    "sourceOnlyPrelude": [
+      {
+        "type": "step",
+        "frames": 180
+      },
+      {
+        "type": "capture",
+        "label": "intro"
+      },
+      {
+        "type": "key",
+        "key": "Return",
+        "down": true
+      },
+      {
+        "type": "step",
+        "frames": 12
+      },
+      {
+        "type": "key",
+        "key": "Return",
+        "down": false
+      },
+      {
+        "type": "step",
+        "frames": 9
+      }
+    ],
+    "sourceContract": "First Title frame0/f32 white fade .975; cutscene is not implemented by the browser"
+  },
+  "tape": [
+    {
+      "type": "step",
+      "frames": 180
+    },
+    {
+      "type": "capture",
+      "label": "intro"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 9
+    },
+    {
+      "type": "capture",
+      "label": "title-ready"
+    },
+    {
+      "type": "step",
+      "frames": 63
+    },
+    {
+      "type": "capture",
+      "label": "title"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "profile"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "main"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character"
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 108
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "capture",
+      "label": "seed-entry"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character-seeded"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 300
+    },
+    {
+      "type": "capture",
+      "label": "gameplay-start"
+    },
+    {
+      "type": "step",
+      "frames": 57
+    },
+    {
+      "type": "capture",
+      "label": "save-run-ready"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 8
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-pre-pause"
+    },
+    {
+      "type": "key",
+      "key": "Escape",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "key",
+      "key": "Escape",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 28
+    },
+    {
+      "type": "capture",
+      "label": "save-pause-idle"
+    },
+    {
+      "type": "key",
+      "key": "Down",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "key",
+      "key": "Down",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "save-before-quit"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-01"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-02"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-03"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-12"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-24"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-36"
+    },
+    {
+      "type": "step",
+      "frames": 36
+    },
+    {
+      "type": "capture",
+      "label": "save-main-settled"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "save-before-continue"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-01"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-02"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-03"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-24"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-48"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-72"
+    },
+    {
+      "type": "step",
+      "frames": 300
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-playing"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 8
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-movement"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-coast"
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-fire"
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-fire-release"
+    }
+  ],
+  "pairedTape": [
+    {
+      "type": "capture",
+      "label": "title-ready"
+    },
+    {
+      "type": "step",
+      "frames": 63
+    },
+    {
+      "type": "capture",
+      "label": "title"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "profile"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "main"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character"
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Tab",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 108
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "t",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "1",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "p",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "k",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "6",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "y",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "0",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "w",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 6
+    },
+    {
+      "type": "capture",
+      "label": "seed-entry"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 72
+    },
+    {
+      "type": "capture",
+      "label": "character-seeded"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 300
+    },
+    {
+      "type": "capture",
+      "label": "gameplay-start"
+    },
+    {
+      "type": "step",
+      "frames": 57
+    },
+    {
+      "type": "capture",
+      "label": "save-run-ready"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 8
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-pre-pause"
+    },
+    {
+      "type": "key",
+      "key": "Escape",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "key",
+      "key": "Escape",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 28
+    },
+    {
+      "type": "capture",
+      "label": "save-pause-idle"
+    },
+    {
+      "type": "key",
+      "key": "Down",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "key",
+      "key": "Down",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "save-before-quit"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-01"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-02"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-03"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-12"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-24"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-quit-edge-36"
+    },
+    {
+      "type": "step",
+      "frames": 36
+    },
+    {
+      "type": "capture",
+      "label": "save-main-settled"
+    },
+    {
+      "type": "step",
+      "frames": 2
+    },
+    {
+      "type": "capture",
+      "label": "save-before-continue"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-01"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-02"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-03"
+    },
+    {
+      "type": "key",
+      "key": "Return",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-24"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-48"
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "step",
+      "frames": 1
+    },
+    {
+      "type": "capture",
+      "label": "save-continue-edge-72"
+    },
+    {
+      "type": "step",
+      "frames": 300
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-playing"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 8
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-movement"
+    },
+    {
+      "type": "key",
+      "key": "d",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-coast"
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": true
+    },
+    {
+      "type": "step",
+      "frames": 12
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-fire"
+    },
+    {
+      "type": "key",
+      "key": "Right",
+      "down": false
+    },
+    {
+      "type": "step",
+      "frames": 24
+    },
+    {
+      "type": "capture",
+      "label": "save-continued-fire-release"
+    }
+  ],
+  "comparisons": {
+    "fullFrameRGBA": "strict diagnostic at every paired capture; no tolerance",
+    "state": "source title/fader clocks, player motion, pause/controller, red HP/damage countdown and active tear/bomb counts",
+    "completeOriginalStateParity": false
+  },
+  "saveContinueContract": {
+    "version": 1,
+    "profile": 1,
+    "normalRun": true,
+    "challengeId": 0,
+    "seedEffectMode": 0,
+    "character": "Isaac",
+    "scope": "Supported initial normal Isaac room; actual own Save at living Quit, same-process readmission/Continue, public controls, and natural same-origin reload; no arbitrary saved actor/item/room admission.",
+    "mainReadmissionSelection": "Actual5A4427 loaded-valid branch selectsContinue1 without an extra Down input; requireactualowner",
+    "sameProcess": true,
+    "nativeFilesAreNeverBrowserInputs": true,
+    "beforeSave": "save-before-quit",
+    "afterSave": "save-main-settled",
+    "afterContinue": "save-continued-playing",
+    "fileSuccess": "Actual same-slot run/profile files, not dirty/in-memory flags alone",
+    "placement": "Saved P is observed but not assumed to restore; actual ordinary previous-index door chooser is the source law.",
+    "captureScope": "Predeclared public input tape, independent of Original observation. Strict source/canonical/pixel failures remain retained.",
+    "nativeUnusedRow": 127,
+    "stationaryBeforeSave": false,
+    "continuedControls": "At save-continued-playing require actual controlsEnabled before the unchanged public D movement. Actual right-door traversal must be validated with owned floor/door/transition geometry, not assumed local-x monotonicity; that guard successor is separately Source-reviewed.",
+    "sourceSettlePresentations": 300
+  }
+}

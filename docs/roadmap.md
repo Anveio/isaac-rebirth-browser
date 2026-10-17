@@ -89,7 +89,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
-| [Saves and metagame](#saves-and-metagame) | Missing | In-run save records only; public durable Continue missing | 1 |
+| [Saves and metagame](#saves-and-metagame) | Partial | Origin-local initial-room Save/Continue and own reload; Native restoration gaps remain | 1 |
 | [Co-op](#co-op) | Missing | None | 0 |
 | [Test routes and tooling](#test-routes-and-tooling) | n/a | Live e2e, DST, playtest | 3 |
 
@@ -534,9 +534,18 @@ No open bugs.
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
-Port: in-run SavedGame records and the no-achievements seeded badge. Missing:
-durable browser profile, continue, unlocks, achievements, challenges beyond
-Challenge1 ingress.
+Port: in-run SavedGame records, origin-local initial-room Save/Continue and
+natural own-storage reload, plus the no-achievements seeded badge. The fixed
+moving route and first unfiltered OS case pass 66 own-storage checks and two
+natural reloads on immutable1b30; strict paired state remains1592/1714 with122
+failures, including24 post-Continue Player/tear differences in the fixed case.
+RGBA remains34 pass/28 fail. Shared-MT cursor and continuation consumption are
+unresolved; no complete restoration or gameplay parity is claimed. Other saved
+rooms/items/actors, durable progression/unlock callbacks and challenges beyond
+Challenge1 ingress remain open. The listed-Bomb/unknown-legacy guard on0af
+replays all1714 rows,62 Browser PNGs and62 MT states exactly against1b30;
+public Bomb and real legacy-own-save upgrade refusal witnesses pass. See
+[Save scope and replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

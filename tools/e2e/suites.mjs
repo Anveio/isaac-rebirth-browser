@@ -55,6 +55,8 @@ export const SUITES = [
   // checks; the tapes and cases are identical with or without them.
   suite('controls', e2e('controls'), ['--count', '1'],
     'Keyboard menu9/10,24x2 bindings, Back/save, duplicate refusal, Defaults, Escape and actual movement; four fixed plus unfiltered OS'),
+  suite('save-continue', e2e('save-continue'), ['--count', '1'],
+    'Living Quit/Continue and natural own-storage reload; fixed footprints plus unfiltered OS public seeds'),
   suite('ordinary-run', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'],
     'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
@@ -164,7 +166,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
-  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'ordinary-run', 'run-admission', 'floor', 'options-audio'],
+  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission'],
   stage: ['stage-exit', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],

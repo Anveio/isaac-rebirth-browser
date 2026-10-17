@@ -162,8 +162,10 @@ export class MenuRenderer {
 
   private main(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
     this.assets.draw(ctx, `${MENU}gamemenu.anm2`, "Idle", x, y, state.mainSelection, {
+      //5A464A..4692 sets layer2 independently of cursor layer6:
+      //saved-valid selects its actual frame0, absent selects frame1.
       overrides: {
-        2: { XCrop: 160, YCrop: 336 },
+        2: { XCrop: state.savedRunSummary === null ? 160 : 32, YCrop: 336 },
       },
     });
   }
