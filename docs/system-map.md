@@ -689,6 +689,13 @@ damage/death/drop callbacks remain separate.
 and [NPC boundaries](../references/isaac/foundation/combat/npcs/verification.json)
 record each immutable build's scope.
 
+Horf12's final dead Full update now dispatches its AI before retirement while
+preserving the living no-APPEAR path. The [scoped Horf evidence](npc-evidence.md#horfs-final-dead-update)
+retains 77,793 passing enemy rows and every existing base failure across two
+fixed routes and one recorded OS route. The separate natural-death Shop case
+retains its failures; direct final-shot/MT, status and default base-kill
+qualification remain open.
+
 A fresh full key cohort on the menu/seed-dialog/NPC/secret composite passes
 another 1,690 phases, including two new recorded OS-random seeds. Direct free
 treasure-room coins now admit without shop pricing; the retained N90GNCJW door

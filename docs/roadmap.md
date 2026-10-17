@@ -303,6 +303,11 @@ Spitty 31, Fire Place 33, Level 2 Fly 214, Dip 217, Wall Hugger 218, Gurgling
 champions, Chapter 2+ enemies. Bulk enemy imports are owned by
 the user's import workflow (see AGENTS.md).
 
+Horf's final dead Full update now runs its AI before retirement. Scoped
+[regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
+77,793 passing enemy rows; default base-kill effects, complete status handling
+and direct final-shot/shared-MT qualification remain open.
+
 Next: the rest of the Basement/Cellar spawn table.
 
 | Bug | Sev | Symptom | Source |

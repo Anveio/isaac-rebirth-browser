@@ -25,3 +25,27 @@ This does not establish complete enemy parity. Shared-stream origins, complete p
 The direct comparator removes stale output and requires an exit code of zero with no signal for acceptance. Regular Bomb seed production is not yet admitted: its observed source seed is a named unaccepted diagnostic, while amount, flags and real native/port attacker references remain required. The corrected comparator replays against immutable fresh captures with both capture and comparator hashes preserved.
 
 Final compact proof is retained in `references/isaac/foundation/combat/npcs/verification.json`. The focused immutable production `3ecd76dd…` passes all 9,344 required contact/bomb/tear fields (2,432 / 1,259 / 5,653), with paired checkpoints 30/32, 26/26 and 68/68. The two contact player-position failures remain required. Final door-slot production `571d1566…` executes all 371 recorded H2 checkpoints and again shows both games' zero-count countdown9 through0, the next-full clear boundary, and eligible doors60/74 changing state1/class4 → state2/class4 → state2/class5. Its synchronized gate remains red: 399 of 10,301 required fields and paired8/371. The mandatory center route retains 95 of 1,999 required-field failures and paired17/58. Source/body/comparator hashes and exact boundary rows are preserved; local paired reports retain these functional regressions.
+
+## Horf's final dead update
+
+Horf12 now calls its existing AI once on the final dead Full update before
+retirement. Native dispatch 4fa3eb reaches Horf 4bfdb0 with the dead byte set;
+the AI still draws its angle and can advance a pending shot or request SFX146.
+The living callback keeps its existing no-APPEAR behavior. Other families and
+the default base-kill effects are separate work.
+
+The [retained three-case bank](../references/isaac/cases/entities/horf-final-dead-ai-regression-v1.json)
+contains two fixed routes and recorded OS seed RY9WPKNV. Fresh current-main
+captures and candidate replays against the same Originals preserve all 77,793
+passing entity rows and all 8,805 base fields. The 491 existing OS Player-motion
+failures at 111 checkpoints remain failures. All 891 Browser PNGs are identical
+to the parent; Native RGBA remains 21/891 exact. These routes retain living
+Horf actors throughout and establish regression coverage, without a direct
+Native final-dead callback witness.
+
+The separate natural Horf fight/clear Shop v9 case preserves all 1,190 canonical
+rows (1,068 pass/122 fail), 117 Source guards and 390 passing owned fields.
+Its sparse captures show Horf alive before clear and absent afterward; they do
+not prove a same-update final shot, exact shared MT, all status gates, default
+base-kill or full death/render/audio parity. Complete input/backend histories
+are retained; ordinary per-command state-history byte caps remain explicit.
