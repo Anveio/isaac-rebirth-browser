@@ -104,6 +104,30 @@ pub fn advance_world(
     Ok((position, velocity))
 }
 
+/// Ordinary Full manager callbacks defer their grid response until after
+/// entity contacts. This keeps the same movement arithmetic and projection.
+pub(crate) fn advance_without_grid(
+    player: &mut Player,
+    dx: i32,
+    dy: i32,
+    move_speed: f32,
+) -> Result<(), String> {
+    let position = WorldVector {
+        x: ((player.x - WORLD_ORIGIN_X) / WORLD_SCALE) as f32,
+        y: ((player.y - WORLD_ORIGIN_Y) / WORLD_SCALE) as f32,
+    };
+    let velocity = WorldVector {
+        x: (player.vx / WORLD_SCALE) as f32,
+        y: (player.vy / WORLD_SCALE) as f32,
+    };
+    let (position, velocity) = advance_world(position, velocity, dx, dy, move_speed)?;
+    player.x = f64::from(position.x) * WORLD_SCALE + WORLD_ORIGIN_X;
+    player.y = f64::from(position.y) * WORLD_SCALE + WORLD_ORIGIN_Y;
+    player.vx = f64::from(velocity.x) * WORLD_SCALE;
+    player.vy = f64::from(velocity.y) * WORLD_SCALE;
+    Ok(())
+}
+
 pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32, move_speed: f32) {
     let grid = player_grid(room);
     advance_in_grid(player, room, &grid, player_collider(), dx, dy, move_speed)
@@ -131,9 +155,9 @@ fn player_collider() -> &'static crate::grid::Collider {
     })
 }
 
-/// Player443d00(false), without Base motion or ordinary controls. Common
-/// Kill preserves the supported Isaac class5 and sample list, so corpses
-/// still receive the same ground query, even with zero velocity.
+/// Player443d00(false), without Base motion or ordinary controls. The
+/// manager queries the supported Isaac class5 and sample list after contacts,
+/// including a dead Player with zero or contact-written velocity.
 pub(crate) fn resolve_player_grid(player: &mut Player, room: &Room) {
     if player.grid_collision_class == Some(0) {
         return;
