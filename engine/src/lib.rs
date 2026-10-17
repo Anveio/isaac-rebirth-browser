@@ -2932,7 +2932,7 @@ impl Game {
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
         let existing = self.state.actor_scheduler.full_phase();
-        let mut dead_player_updated = false;
+        let mut player_updated = false;
         if phase == phase::Phase::Update {
             rock_blast::advance_bomb_rocks(&mut self.state)?;
             rock_blast::advance_markers(&mut self.state);
@@ -2944,10 +2944,10 @@ impl Game {
             }
             let mut counted = actors::FullCounts::default();
             for actor in existing.iter().copied() {
-                // Only a dead callback bypasses the existing living query.
-                // Earlier actor callbacks may have killed Player this Full.
-                if actor.kind == actors::ActorKind::Player && self.state.player.dead {
-                    dead_player_updated = true;
+                // Every actual Player callback defers its full grid query
+                // until the manager has completed all entity contacts.
+                if actor.kind == actors::ActorKind::Player {
+                    player_updated = true;
                 }
                 self.advance_actor(actor, phase, false, bomb_triggered)?;
                 self.count_updated_room_actor(actor, &mut counted);
@@ -3065,16 +3065,15 @@ impl Game {
                 self.collect_regular_pickup_at(index)?;
             }
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
+            if player_updated {
+                // Final manager454b1d..454b2f visits the retained Player
+                // first, including one killed during the contact pass.
+                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
+            }
             pickups::full_grid_contacts(&mut self.state)?;
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
             bombs::full_grid_contacts(&mut self.state)?;
-            if dead_player_updated {
-                // Final manager454b1d..454b2f includes dead Player443d00.
-                // Living callbacks still own their existing earlier query;
-                // general full-phase query relocation is a separate change.
-                motion::resolve_player_grid(&mut self.state.player, &self.state.room);
-            }
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -3351,7 +3350,12 @@ impl Game {
         bomb_triggered: bool,
     ) -> Result<(), String> {
         match actor.kind {
-            actors::ActorKind::Player => self.update_player(phase, bomb_triggered, true)?,
+            actors::ActorKind::Player => self.update_player_with_grid(
+                phase,
+                bomb_triggered,
+                true,
+                phase == phase::Phase::Update,
+            )?,
             actors::ActorKind::Familiar => {
                 familiars::advance_actor(&mut self.state, phase, actor.id)?
             }
@@ -3855,6 +3859,16 @@ impl Game {
         bomb_triggered: bool,
         controls_enabled: bool,
     ) -> Result<(), String> {
+        // Standalone transition callbacks retain their existing grid path.
+        self.update_player_with_grid(phase, bomb_triggered, controls_enabled, false)
+    }
+    fn update_player_with_grid(
+        &mut self,
+        phase: phase::Phase,
+        bomb_triggered: bool,
+        controls_enabled: bool,
+        defer_full_grid: bool,
+    ) -> Result<(), String> {
         if phase == phase::Phase::Update {
             self.state.player_animation.advance_full();
             if matches!(
@@ -4200,13 +4214,24 @@ impl Game {
             self.state.player_stats.move_speed,
         )?
         .1;
-        motion::advance(
-            &mut self.state.player,
-            &self.state.room,
-            dx,
-            dy,
-            self.state.player_stats.move_speed,
-        );
+        if defer_full_grid {
+            // Actions, later actors and contacts see provisional full-pass
+            // vectors; manager454b2f owns the subsequent grid response.
+            motion::advance_without_grid(
+                &mut self.state.player,
+                dx,
+                dy,
+                self.state.player_stats.move_speed,
+            )?;
+        } else {
+            motion::advance(
+                &mut self.state.player,
+                &self.state.room,
+                dx,
+                dy,
+                self.state.player_stats.move_speed,
+            );
+        }
         spider_webs::finish_player_update(&mut self.state);
         if controls_enabled && bomb_triggered && bomb_admitted {
             bombs::place(&mut self.state, phase)?;

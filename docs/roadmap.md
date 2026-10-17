@@ -212,6 +212,14 @@ the supported items, red/soul/black/eternal health, damage and immunity,
 death animation. Missing: base transformations such as Guppy, revival
 items, broader damage sources.
 
+The Player Full-grid change moves
+ordinary Full Player ground response after entity contacts. Its isolated 9841
+candidate versus actual 5c33 gains 36 scalar passes with zero prior-pass losses;
+the 40-gain prediction, 38 scalar failures, both Fast coverage guards and 238/266
+RGBA failures remain red. Same-Native Shop and fixed declared-clock death
+controls preserve their fields and actual Browser PNGs. [scoped source/evidence](player-death.md#player-full-grid-after-contacts)
+does not establish complete physics or current-main acceptance.
+
 Next: transformations once their items exist.
 
 | Bug | Sev | Symptom | Source |
@@ -398,7 +406,7 @@ Own preparation, not shared Native validation.
 
 Next: qualify Battery refusal/grant and other paid SKU callbacks; implement
 canonical Store Credit/Steam Sale and eligible achievements. Upgraded
-shops, unadmitted ABD contexts, charge/effect48, Continue, living Full grid,
+shops, unadmitted ABD contexts, charge/effect48, Continue, broader Full/Fast grid parity,
 complete audio/pixels, devil/angel chance and rooms, slots, beggars and
 challenge rooms remain separate.
 

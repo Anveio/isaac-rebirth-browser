@@ -59,8 +59,9 @@ Player damage and receives the four-unit radial impulse; suppressing that
 impulse would omit source behavior. The dead callback now integrates native
 f32 position before clearing velocity, without ordinary controls or immunity
 advancement. RoomFast runs the retained ground query after that callback.
-A full Player callback entered dead has skipped the existing living-motion
-query, so the full manager restores its query after contacts. Common Kill
+In the historical guarded493 leaf, a full Player callback entered dead skipped
+the existing living-motion query, so the full manager restored its query after
+contacts. The Player Full-grid change below relocates the ordinary living query too. Common Kill
 retains Isaac's class5 and collision samples, so zero velocity still permits
 bounded penetration correction. The existing player collider supplies that
 query.
@@ -191,14 +192,78 @@ selected routes before launching either game; no inputs are silently thinned. Pi
 `--exit-audio` replays only canonical death fields and pixel diagnostics; it
 does not qualify the supplementary audio contracts from snapshots alone.
 
-The port's existing living-player grid query still runs before full-phase
-entity contacts. A Player killed later during contacts has already received
-that query and does not receive a second bounded correction in this leaf.
-Moving all living full-phase queries to the source final pass remains a
-separate physics change; near-solid contact-death ordering is unaccepted.
-The player-death producer's scoped clock qualification follows below. No
-counter or position is copied or fitted from original observations. NO_KILL, held-arrow, Soul health, revival and full diary art are
-not accepted by the historical cohort above.
+## Player Full grid after contacts
+
+The Player Full-grid change defers the ordinary Full Player ground query until
+entity contacts have completed. The retained Player is queried first at the
+manager's final fence (454b1d–454b2f), before the other final ground queries.
+Living movement and actions therefore see provisional vectors, including
+new Bomb/Tear births. A callback entered dead, or a Player killed later during
+contacts, receives that same single query; class0 keeps its existing bypass.
+The Fast query and standalone transition callbacks retain their existing paths.
+This source change is separate from the historical guarded493 qualification.
+This qualification covers the Full-grid change and its listed controls.
+
+The exact two-file patch `4ec7d9784403db5663218f97598b37ec45eb03f66df8a0f6d97143c9a3ad5b66`
+is frozen in candidate
+`9841c7de5255936b0052488c8280eff0adf8b2cf0a413e37f70422f403a5bfca`.
+Its actual Browser parent is integrated production
+`5c33bb75136bab9b5052ccae337d40aad3d958a07e48bc117183375b115f061f`
+(1,407 files each), rather than the older bf303 or 703 artifacts. Four unchanged
+public tapes reuse their independently validated Native captures; no new
+Native, entropy or clock schedule was introduced.
+
+All 266 checkpoints and 15,510 scalar keys/Native expectations are retained.
+Passing fields improve from 15,436 to 15,472: 17 Bomb positions, 17 Bomb
+velocities and two Tear positions become passing. There are **36 gains**, zero
+lost prior passes and zero changed remaining failure values. The original
+**40-gain prediction remains FAIL**. All 38 scalar failures remain required:
+34 Bomb birthGameUpdate rows (17 per phase), plus tears.alive and
+tear.admission at Full grid-producer-held-2 and grid-producer-held-3 (four rows,
+Native 0/Browser 1). Both Full coverage guards pass; both Fast cases retain their
+required same-birth Native solid-response failure. The complete bank remains
+**FAIL**. Canonical checkpoint passes are 230/266; strict RGBA remains 28 exact
+passes and **238 failures**. Of the Browser PNGs, 232/266 are byte-identical to
+the actual parent. Source, artifact and cached Native identities stay stable.
+
+The same-Native Shop v9 control against that actual 5c33 parent preserves all
+1,190 historical flat-comparer rows, their Native expectations and actuals:
+1,068 pass and 122 remain red, with zero gains/losses or changed remaining
+failures. Its separately owned 117 source and 390 typed fields pass; all 59
+Browser PNG bytes are identical (the retained RGBA diagnostics remain seven
+exact and 52 red). This does not regrade the corrected nested Shop comparison
+or qualify complete Shop parity.
+
+Two fixed declared-clock death controls additionally capture both actual 5c33
+parent and candidate9841 against the same unchanged current-clock Native
+references. Restart passes 740 checkpoints/13,837 fields and Exit passes
+741 checkpoints/13,140 fields on both builds: **26,977/26,977 fields** and
+1,481 checkpoints per side, with zero changed keys, Native expectations,
+actual values or prior-pass losses. Both required death/popup guards, Native
+provenance/acknowledgement/capture validation and actual Browser public tick
+plans pass. All 1,481 Browser PNG bytes match the actual parent; 2,962 full
+PNGs remain retained and SHA-verified. RGBA differences are **not computed**
+for this control. Production703 remains separate historical clock evidence.
+
+The four input-only cases were kept with the unchanged canonical case:keep
+command and preserve their exact source timing declarations:
+
+- [Bomb Full](../references/isaac/cases/paired/player-full-grid-bomb-phase-0.json)
+- [Bomb Fast](../references/isaac/cases/paired/player-full-grid-bomb-phase-1.json)
+- [Tear Full](../references/isaac/cases/paired/player-full-grid-tear-phase-0.json)
+- [Tear Fast](../references/isaac/cases/paired/player-full-grid-tear-phase-1.json)
+
+For example, replay public inputs and ordinary paired checks with
+`npm run test:e2e -- paired --replay-cases references/isaac/cases/paired/player-full-grid-bomb-phase-0.json`.
+The additional grid-timing comparer and mandatory same-birth coverage laws
+remain bound to the retained scoped capture harness; keeping an input case
+does not promote those extra guards into the ordinary paired driver. No new
+framework or comparison law is introduced here. Complete physics, near-solid
+late-contact death, Shared-MT, audio/PCM and pixel acceptance remain open.
+NO_KILL, held-arrow, Soul health, revival and full diary art are not accepted
+by these controls. No counter or position is copied from Native into WASM.
+
+The player-death producer's earlier scoped clock qualification follows below.
 
 
 The paired death producer now declares its complete public wall-clock plan
