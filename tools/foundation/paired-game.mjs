@@ -1,3 +1,5 @@
+import { captureSaveOwn, reloadOwnSavedWorld } from './save-continue-browser.mjs';
+import { validateSaveCapture } from './save-continue-guards.mjs';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -222,7 +224,8 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
 }
 
 export async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
-  audioPreferences = {sfxVolume: 0, musicVolume: 0}, captureControlsOwners = false) {
+  audioPreferences = {sfxVolume: 0, musicVolume: 0}, captureControlsOwners = false, saveContinue = false) {
+  assert.equal(typeof saveContinue, 'boolean', 'Save/Continue owner capture is an explicit opt-in');
   mkdirSync(directory, { recursive: true });
   assert.equal(typeof captureControlsOwners, 'boolean');
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
@@ -312,7 +315,7 @@ export async function browserCapture(browser, server, caseData, directory, archi
         const path = join(directory, action.label + '.png');
         writeFileSync(path, bytes);
         frames.push({ label: action.label, path, sha256: digest(bytes), browserPresentation: presentations,
-          state: captured.state, ...(captureControlsOwners ? {controls: captured.controls} : {}), render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
+          state: captured.state, ...(saveContinue ? {ownSave: await captureSaveOwn(page, directory, action.label, captured.state)} : {}), ...(captureControlsOwners ? {controls: captured.controls} : {}), render: captured.render, ...(captureBrowserAudio ? {browserAudio: captured.browserAudio} : {}) });
       }
     }
     if (mtDraws) save(join(directory, 'mt-draws.json'), await evaluateJson(page, () => window.game.mtDraws.take()));
@@ -340,11 +343,40 @@ export async function browserCapture(browser, server, caseData, directory, archi
     const final = frames.at(-1)?.state;
     assert.equal(final?.runSeedValue, caseData.seedValue, 'Browser must read back the public manually entered run seed');
     const requestedSeed = caseData.seed.replaceAll(' ', '').toUpperCase();
-    assert.equal(final?.seedText, requestedSeed, 'Browser must read back every requested seed character');
-    assert.equal(final?.seedValid, true, 'Browser must validate the requested seed');
+    if (saveContinue) {
+      //Menu reconstruction clears its transient dialog. Require the actual
+      //pre-admission Seed checkpoint and the independent committed run below.
+      const entered = frames.filter(frame => frame.label === 'seed-entry');
+      assert.equal(entered.length, 1, 'Save route requires its actual seed-dialog checkpoint');
+      assert.equal(entered[0].state.screen, 'seed');
+      assert.equal(entered[0].state.runTick, 0);
+      assert.equal(entered[0].state.seededRun, false);
+      assert.equal(entered[0].state.seedText, requestedSeed);
+      assert.equal(entered[0].state.seedValid, true);
+      assert.ok(frames.indexOf(entered[0]) < frames.findIndex(frame => frame.label === 'gameplay-start'), 'Seed dialog must precede fresh admission');
+    } else {
+      assert.equal(final?.seedText, requestedSeed, 'Browser must read back every requested seed character');
+      assert.equal(final?.seedValid, true, 'Browser must validate the requested seed');
+    }
     assert.equal(final?.seededRun, true, 'Browser must commit the public manual seed entry');
     assert.equal(final?.runSeed, requestedSeed, 'Browser must read back the committed public run code');
-  } catch (error) { failures.push(String(error.message)); }
+    if (saveContinue) {
+      const ownChecks = await validateSaveCapture(frames, directory, caseData);
+      //Both independent world witnesses execute before aggregating failures.
+      await reloadOwnSavedWorld(page, directory, caseData);
+      assert.ok(ownChecks.every(row => row.status === 'pass'), 'Actual mandatory own-save guards');
+    }
+  } catch (error) {
+    failures.push(String(error.message));
+    if (saveContinue) {
+      try {
+        await writeJsonEvidence(join(directory, 'actual-save-failure-readback.json.gz'), await evaluateJson(page, () => ({
+          feedback: window.game?.feedback(), saveGames: window.game?.saveGames(),
+          snapshotJson: window.game?.snapshotJson(), trace: window.game?.trace(),
+        })));
+      } catch (retentionError) { failures.push('Actual Save failure evidence retention failed: ' + String(retentionError)); }
+    }
+  }
   finally {
     if (captureControlsOwners) {
       try {
@@ -516,10 +548,11 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, captureControlsOwners = false, movementComparator, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
   originalSfxVolume, originalMusicVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
-  glTrace = process.argv.includes('--gl-trace') }) {
+  glTrace = process.argv.includes('--gl-trace'), saveContinue = false }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
+  assert.equal(typeof saveContinue, 'boolean', 'Save/Continue capture is an explicit gate opt-in');
   assert.equal(typeof captureAudioOwners, 'boolean', 'Audio owner instrumentation is an explicit gate opt-in');
   assert.equal(typeof captureControlsOwners, 'boolean', 'Controls owners require explicit opt-in');
   assert.ok(movementComparator === undefined || typeof movementComparator === 'function', 'Aggregate movement must be a callable comparator');
@@ -533,6 +566,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     nativeFrameTimeout, originalSfxVolume, publicClockSchedule, declaredAudioPreferences: audioPreferences,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     ...(captureAudioOwners && {captureAudioOwners}), ...(captureControlsOwners && {captureControlsOwners}),
+    ...(saveContinue && {saveContinue}),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -599,6 +633,14 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         for (const action of caseData.pairedTape)
           if (action.type === 'key') browserKeyCode(action.key);
         process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
+        if (saveContinue && !reuseOriginalDirectory) {
+          //The immutable production snapshot already exists. Refuse before
+          //Native launch if its declared reserve cannot actually be kept.
+          const disk = statfsSync(directory), freeBytes = disk.bavail * disk.bsize;
+          const requiredBytes = 4 * 2 ** 30;
+          save(join(directory, 'native-disk-admission.json'), {freeBytes, requiredBytes, afterImmutableProductionSnapshot: true, nativeProcessLaunched: false});
+          assert.ok(freeBytes >= requiredBytes, 'Save Native reserve must hold after the production snapshot');
+        }
         // Both independent captures are still attempted after a rejection.
         // Original settles before Chromium starts; each Browser closes before
         // the next Original. Both use declared inputs; comparison laws stay unchanged.
@@ -613,7 +655,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
             browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
-              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners),
+              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners, saveContinue),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };

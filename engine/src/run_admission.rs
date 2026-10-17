@@ -87,6 +87,19 @@ impl RunAdmission {
         Ok(())
     }
 
+    ///Saved54ECE0 ->54EF5E invokes the same54EAA0 fade initializer with
+    ///the actual.04 operand, after reconstruction and its immediate Room.Update.
+    pub fn initialize_saved(&mut self, player: &mut Player) -> Result<(), String> {
+        if self.requested_time_anchor_ms.is_none() {
+            return Err("Continue initialization requires its actual menu clock anchor".into());
+        }
+        self.initial_fade = 1.0;
+        self.fade_rate = 0.04_f32;
+        player.controls_enabled = false;
+        self.completion_callbacks_pending = false;
+        Ok(())
+    }
+
     /// Called only in the full branch. A completed fade allows Game age to
     /// increment and full actors to advance in this same dispatch.
     pub fn blocks_full_update(&mut self, player: &mut Player) -> Result<bool, String> {

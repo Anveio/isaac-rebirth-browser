@@ -136,6 +136,7 @@ pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
 pub mod run_quit;
+pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
@@ -529,6 +530,9 @@ pub struct RunStartRequest {
     pub fade_alpha: f32,
     /// System pending request is consumed at the following system dispatch.
     pub system_pending: bool,
+    ///594690 chooses saved54ECE0 rather than NewRun54EB20 at the next System dispatch.
+    #[serde(default)]
+    pub resume_saved: bool,
     ///594620 actual challenge argument; None is the existing New Run route.
     pub challenge_id: Option<u32>,
     ///593470 retains the chosen loading texture independently of later seed changes.
@@ -637,6 +641,14 @@ fn pause_stat_frame(value: f32) -> u8 {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct State {
     pub schema: u32,
+    ///A completed Save/Clear requests origin-local IO once; it is not Game age.
+    #[serde(default)]
+    pub save_revision: u64,
+    #[serde(default)]
+    pub save_readmission_pending: bool,
+    pub save_write_pending: bool,
+    #[serde(default)]
+    pub saved_load_valid: Option<bool>,
     pub tick_rate: u32,
     pub tick: u32,
     pub menu_animation_tick: u32,
@@ -741,6 +753,9 @@ pub struct State {
     pub game_shake: Option<game_shake::GameShake>,
     pub floor: floor::Floor,
     pub current_room: usize,
+    ///Actual supported Level previous/entry stores; legacy or unowned writers stay absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub saved_room_entry: Option<save_profiles::RoomEntry>,
     pub visited_rooms: BTreeSet<usize>,
     pub room_display_flags: Vec<u32>,
     pub revealed_secret_connections: BTreeSet<[usize; 2]>,
@@ -843,6 +858,16 @@ pub struct Game {
     pub saved_game: mt::SavedGameSeeds,
     pub boot_level_grid: mt::DescriptorSeeds,
     pub saved_run: Option<saved_game::SavedRun>,
+    #[serde(default)]
+    pub menu_readmission: Option<save_profiles::MenuReadmission>,
+    #[serde(skip)]
+    save_io_enabled: bool,
+    #[serde(skip)]
+    save_write_request: Option<save_profiles::SaveWriteRequest>,
+    #[serde(skip)]
+    command_origin_screen: Option<Screen>,
+    #[serde(default, with = "save_profiles::shared")]
+    pub saved_profiles: Option<std::sync::Arc<save_profiles::Profiles>>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
     pub challenge_catalog: challenges::Catalog,
     /// Process-lifetime GetRoomByIdx static; later runs reuse it.
@@ -993,6 +1018,10 @@ impl Game {
         let mut game = Self {
             state: State {
                 schema: 1,
+                save_revision: 0,
+                save_readmission_pending: false,
+                save_write_pending: false,
+                saved_load_valid: Some(false),
                 tick_rate: TICK_RATE,
                 tick: 0,
                 menu_animation_tick: 0,
@@ -1081,6 +1110,7 @@ impl Game {
                 room_display_flags: vec![0; floor.descriptors.len()],
                 floor,
                 current_room,
+                saved_room_entry: None,
                 visited_rooms: BTreeSet::from([current_room]),
                 revealed_secret_connections: BTreeSet::new(),
                 persisted_rooms: BTreeMap::new(),
@@ -1129,6 +1159,11 @@ impl Game {
             saved_game,
             boot_level_grid,
             saved_run: None,
+            menu_readmission: None,
+            save_io_enabled: false,
+            save_write_request: None,
+            command_origin_screen: None,
+            saved_profiles: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
             challenge_catalog,
             room_lookup_dummy_constructed: false,
@@ -1139,15 +1174,33 @@ impl Game {
     }
     /// Invalid commands leave all state, including held keys, unchanged.
     pub fn command(&mut self, command: Command) -> Result<(), String> {
-        let mut next = self.clone();
-        next.apply(command)?;
-        if next.state.screen != self.state.screen {
-            next.state.menu_animation_tick = 0;
+        if self.menu_readmission.is_some() || self.save_write_request.is_some() {
+            return Err("complete actual own save IO before another public command".into());
         }
-        next.refresh_stage_effects();
+        let mut next = self.clone();
+        next.command_origin_screen = Some(self.state.screen);
+        next.apply(command)?;
+        next.finish_public_command();
         *self = next;
         Ok(())
     }
+
+    ///The public command postlude runs once after all actual IO boundaries,
+    ///not at an intermediate return from a batched Tick.
+    fn finish_public_command(&mut self) {
+        if self.menu_readmission.is_some() || self.save_write_request.is_some() {
+            return;
+        }
+        if self
+            .command_origin_screen
+            .take()
+            .is_some_and(|screen| screen != self.state.screen)
+        {
+            self.state.menu_animation_tick = 0;
+        }
+        self.refresh_stage_effects();
+    }
+
     fn apply(&mut self, command: Command) -> Result<(), String> {
         self.state.begin_command();
         match command {
@@ -1234,25 +1287,54 @@ impl Game {
                         .checked_add(count)
                         .ok_or("tear IDs exhausted")?;
                 }
-                for _ in 0..count {
-                    let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
-                    let room_before = self.state.current_room;
-                    self.tick(timestamp_millis)?;
-                    // Room render 5d1a70 runs its light pass on every presented
-                    // gameplay frame, after that frame's updates. The frame
-                    // that changes rooms renders the entered room twice (the
-                    // native trace shows two back-to-back passes there).
-                    if presented && self.state.screen == Screen::Playing {
-                        room_lights::present(&mut self.state);
-                        if self.state.current_room != room_before {
-                            room_lights::present(&mut self.state);
-                        }
-                    }
-                }
+                self.advance_public_ticks(count, timestamp_millis)?;
             }
         }
         Ok(())
     }
+    fn advance_public_ticks(
+        &mut self,
+        count: u32,
+        timestamp_millis: Option<u64>,
+    ) -> Result<(), String> {
+        if let Some(request) = &mut self.save_write_request {
+            //A just-resumed System iteration may itself have requested a
+            //write. Preserve every remaining tick until that attempt completes.
+            if request.remaining_ticks.is_some() {
+                return Err("save write already owns a tick continuation".into());
+            }
+            request.remaining_ticks = Some(count);
+            return Ok(());
+        }
+        for offset in 0..count {
+            let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
+            let room_before = self.state.current_room;
+            self.tick(timestamp_millis)?;
+            if let Some(request) = &mut self.menu_readmission {
+                //This interval's clock input was consumed, but its System
+                //iteration has not advanced. Resolve IO before any next tick.
+                request.remaining_ticks = count - offset;
+                request.timestamp_millis = timestamp_millis;
+                return Ok(());
+            }
+            if presented && self.state.screen == Screen::Playing {
+                room_lights::present(&mut self.state);
+                if self.state.current_room != room_before {
+                    room_lights::present(&mut self.state);
+                }
+            }
+            if let Some(request) = &mut self.save_write_request {
+                //This System iteration completed. Its actual immutable write
+                //must be attempted before any further requested iteration.
+                //Timestamped public Tick requires count1, so no timestamp is
+                //reused by the remaining batch.
+                request.remaining_ticks = Some(count - offset - 1);
+                return Ok(());
+            }
+        }
+        Ok(())
+    }
+
     fn key_press(&mut self, code: &str) -> Result<(), String> {
         if self.state.screen != Screen::Playing
             && (self.state.run_start_request.input_pending || self.state.run_start_request.fading)
@@ -1336,6 +1418,23 @@ impl Game {
                         self.state.main_selection = 2;
                     }
                 }
+                "Enter" if self.state.main_selection == 1 => {
+                    if self.state.saved_load_valid != Some(true)
+                        || self.state.save_readmission_pending
+                    {
+                        return Err("Continue requires actual successful own profile load".into());
+                    }
+                    let record = self.current_profile_save()?;
+                    record.admit_initial_room()?;
+                    //Main5A47B0 decodes the retained saved string for593470;
+                    //the later loader independently invokes the Seeds setter.
+                    self.state
+                        .boot_lifecycle
+                        .commit_character_seed(record.context.run_seed_value)?;
+                    self.state.run_start_request.resume_saved = true;
+                    self.state.run_start_request.challenge_id = None;
+                    self.state.run_start_request.input_pending = true;
+                }
                 "Enter" if self.state.main_selection == 0 => self.state.screen = Screen::Character,
                 "Enter" if self.state.main_selection == 2 => {
                     //59cef0 initializes selectedID1/counter0 when Menu5 opens.
@@ -1353,7 +1452,7 @@ impl Game {
                     self.state.screen = Screen::Challenge;
                 }
                 "Enter" if self.state.main_selection == 4 => self.state.screen = Screen::Options,
-                "Enter" => return Err("this foundation implements the New Run menu action".into()),
+                "Enter" => return Err("this menu action is outside the supported runtime".into()),
                 _ => {}
             },
             // Options owns the released System poll, including held repeat.
@@ -1865,6 +1964,9 @@ impl Game {
         //Neither fresh Level nor a reused manager owns empty query buckets.
         self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
+        self.state.saved_room_entry = Some(save_profiles::RoomEntry::initial(
+            self.state.floor.descriptors[self.state.current_room].grid_index,
+        )?);
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
         self.state.revealed_secret_connections.clear();
@@ -1960,10 +2062,288 @@ impl Game {
         Ok(())
     }
 
+    fn current_profile_save(&self) -> Result<save_profiles::RunRecord, String> {
+        self.saved_profiles
+            .as_ref()
+            .and_then(|profiles| profiles.profiles.get(usize::from(self.state.profile - 1)))
+            .and_then(|profile| profile.saved.clone())
+            .ok_or_else(|| "Continue requires this profile's actual retained save".into())
+    }
+
+    ///54ECE0 loads saved persistent stores into freshly constructed owners.
+    ///No Game/State snapshot is installed and no NewRun/starting grant runs.
+    fn continue_run(&mut self) -> Result<(), String> {
+        let record = self.current_profile_save()?;
+        record.admit_initial_room()?;
+        let run = &record.run;
+        let context = &record.context;
+        let mut run_seeds = seed::RunSeeds::new(context.run_seed_value)?;
+        run_seeds.admit_menu_seed_effect(&run.run_seed)?;
+        //54EE90 initializes ItemPool from SavedED94, then581CF0 restores
+        //its actual saved tables. It does not request NewRun's14th seed draw.
+        let _constructed_pools = items::ItemPools::new(
+            run.item_pools.seed,
+            &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
+        )?;
+        //54EEA7 passes actual Seeds+44/GameA1D4 as constructor seed;
+        //Saved889C is the separately admitted Isaac player type0.
+        let mut player_items = player_items::PlayerItems::new(run_seeds.initialized_fields[12])?;
+        run.player_items
+            .restore_after_constructor(&mut player_items)?;
+        player_items.manager_rng = context
+            .player_manager_rng
+            .ok_or("saved manager RNG is unknown")?;
+        self.state.run_seeds = Some(run_seeds);
+        self.state.run_seed_value = context.run_seed_value;
+        self.state.run_seed = run.run_seed.clone();
+        self.state.seeded_run = run.seeded_run;
+        self.state.achievement_eligibility = !run.seeded_run;
+        self.state.character = context.character.clone();
+        self.state.difficulty = context.difficulty.clone();
+        self.state.challenge_id = context.challenge_id;
+        self.state.challenge_run_parameters = None;
+        self.state.source_shot_speed_minimum = Some(false);
+        self.state.source_damage_maximum = Some(false);
+        self.state.source_fire_delay_minimum = Some(false);
+        self.state.acquisition_history = run.acquisition_history.clone();
+        self.state.item_pools = Some(run.item_pools.clone());
+        self.state.player_items = Some(player_items);
+        self.player_manager_secondary_rng.seed = self.saved_game.player_rng_seed;
+        self.state.player = Player::starting();
+        self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
+        //5116B0 restores health/inventory stores; movement, clips, death,
+        //input and sprite clocks retain their actual new-Player owners.
+        //511937..958 zeroes all four words before the normal-Isaac
+        //Max508540→Red508230→savedmask→Soul5083B0 helper sequence.
+        self.state.player.hp = 0;
+        self.state.player.max_hp = 0;
+        self.state.player.soul_hp = 0;
+        self.state.player.black_heart_mask = 0;
+        player_items::add_max_hearts(&mut self.state.player, i32::from(run.player.max_hp));
+        player_items::add_red_hearts(&mut self.state.player, i32::from(run.player.hp));
+        self.state.player.black_heart_mask = run.player.black_heart_mask;
+        player_items::add_soul_hearts(&mut self.state.player, run.player.soul_hp);
+        self.state.player.eternal_hearts = run.player.eternal_hearts;
+        self.state.player.golden_key = run.player.golden_key;
+        self.state.player.transformation_counts = run.player.transformation_counts;
+        self.state.inventory = run.inventory.clone();
+        if let Some(history) = self
+            .state
+            .player_items
+            .as_mut()
+            .and_then(|owner| owner.query_history.as_mut())
+        {
+            history.damage_health_known = true;
+        }
+        self.state.player_stats = player_stats::PlayerStats::default();
+        self.state.player_stats.luck = Some(0.0);
+        self.state.player.flying = Some(false);
+        self.state.player.grid_collision_class = Some(5);
+        self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
+        self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
+        self.state.actor_scheduler = actors::Scheduler::default();
+        self.state.actor_scheduler.admit(actors::ActorRef {
+            kind: actors::ActorKind::Player,
+            id: 0,
+        })?;
+        self.state.tears.clear();
+        self.state.next_tear = 1;
+        self.state.enemy_projectiles.clear();
+        self.state.next_enemy_projectile = 1;
+        self.state.fire_particles.clear();
+        self.state.sprite_effects.clear();
+        self.state.next_effect = 1;
+        laser_runtime::reset_room(&mut self.state)?;
+        self.state.knives.clear();
+        self.state.familiars.clear();
+        self.state.next_familiar = 1;
+        self.state.attack_runtime = attack_runtime::AttackRuntime::fresh_player();
+        self.state.next_laser = 1;
+        self.state.bombs.clear();
+        self.state.explosions.clear();
+        self.state.next_bomb = 1;
+        self.state.next_pickup = 1;
+        self.state.fire_cooldown = -1;
+        self.state.max_fire_delay = 10;
+        self.state.head_timer = -1;
+        self.state.damage_cooldown = 0;
+        self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
+        self.state.bomb_action_was_down = self.held(8);
+        self.state.player_death = player_death::PlayerDeath::default();
+        self.state.player_animation = player_animation::PlayerAnimation::default();
+        self.state.run_introduction = RunIntroduction::stage(false);
+        self.state.boss_bar = BossBar::default();
+        self.state.pause_menu = PauseMenu::hidden();
+        self.state.run_quit = run_quit::RunQuit::fresh();
+        self.state.stage_transition = stage_transition::StageTransition::default();
+        self.state.room_transition = None;
+        self.state.departure_velocity = None;
+        self.state.departure_position = None;
+        self.state.knife_query_partition = None;
+        self.state.stage = run.stage;
+        self.state.stage_seed = context.stage_seed;
+        self.state.floor = run.floor.clone();
+        self.state.current_room = run.current_room;
+        self.state.saved_room_entry = context.level_entry.clone();
+        self.state.visited_rooms = context.visited_rooms.clone();
+        self.state.room_display_flags = context.room_display_flags.clone();
+        self.state.revealed_secret_connections = context.revealed_secret_connections.clone();
+        self.state.persisted_rooms = context.persisted_rooms.clone();
+        self.state.level_progress = context.level_progress.clone();
+        self.state.game_update_count = run.game_update_count;
+        mt::note_update(run.game_update_count);
+        self.state.run_tick = 0;
+        self.state.screen = Screen::Playing;
+        self.state.paused = false;
+        //58C9F2 resets135 real descriptors before58CB69 copies saved records.
+        //The discarded initialization still consumes its actual shared words.
+        let _cleared = self.state.boot_lifecycle.initialize_level_grid();
+        self.boot_level_grid = self.saved_game.descriptor_seeds.clone();
+        self.state
+            .boot_lifecycle
+            .update_level_grid_samples(&self.boot_level_grid);
+        if !self.room_lookup_dummy_constructed {
+            mt::DescriptorSeeds::construct_lookup_dummy(&mut self.state.boot_lifecycle.shared);
+            self.room_lookup_dummy_constructed = true;
+        }
+        self.state.room = Room::from_floor_descriptor_with_special(
+            &self.state.floor,
+            self.state.current_room,
+            self.special_room_assets.as_deref().map(Vec::as_slice),
+        )?;
+        self.state.room.initialization_game_update = Some(run.game_update_count);
+        self.state.room.source_tear_slowdown_2494 = Some(0);
+        self.state.room.combat_clear = run.room.combat_clear;
+        ambience::reset_room(&mut self.state);
+        //5CEF3E→5C5B30 reloads backdrop FX on every Room.Init, including
+        //visited descriptors. The distinct5CF618 gate skips first-visit critters.
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
+        grid_records::restore_records(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            &run.grid_records,
+            run.game_update_count,
+        )?;
+        let selectors = self
+            .state
+            .room
+            .spawns
+            .as_ref()
+            .ok_or("saved Room has no selectors")?
+            .selectors
+            .clone();
+        let viewer = bombs::player_world(&self.state);
+        self.admit_room_pickups_owned(&selectors, run.game_update_count, true, viewer, true)?;
+        //The Room.Init placement call sees constructor3074=false and returns.
+        item_queries::note_room_placement(&mut self.state);
+        if let Some(id) = music::stage_track(self.state.stage, false) {
+            self.state.music.room(id);
+        }
+        //515F20 requests the complete cache after saved stores, then3074=true.
+        self.state
+            .player_items
+            .as_mut()
+            .expect("loaded Player")
+            .unevaluated_cache_flags = u32::MAX;
+        player_stats::evaluate_cache(&mut self.state)?;
+        if self
+            .state
+            .player_items
+            .as_ref()
+            .expect("loaded Player")
+            .unevaluated_cache_flags
+            != 0
+        {
+            return Err("Continue post-load cache has an unresolved actual callback".into());
+        }
+        self.state.player.initialized_3074 = true;
+        self.place_continued_player()?;
+        item_queries::note_room_placement(&mut self.state);
+        self.state.camera = Some(camera::Camera::new(&self.state.room, None));
+        //54EF4E→584200 reaches the same actual Room.Update callback without
+        //advancing System or Game counters.54EF5E then starts the initial fade.
+        self.advance_room_runtime(phase::Phase::Update, false)?;
+        self.state
+            .run_admission
+            .initialize_saved(&mut self.state.player)?;
+        self.state.run_start_request.resume_saved = false;
+        //594BE4 joins594AD3 AFTER the saved loader's immediate callback;
+        //the actual odd System pre-counter advances once at594BF0.
+        self.state.system_clock.align_run_start()?;
+        self.refresh_minimap();
+        Ok(())
+    }
+
+    fn place_continued_player(&mut self) -> Result<(), String> {
+        let entry = self
+            .state
+            .saved_room_entry
+            .as_ref()
+            .ok_or("saved Level entry is unknown")?;
+        let mut slot = entry.slot;
+        if slot == -1 {
+            //510AC8 scans actual bound Door pointers, not every possible slot.
+            //The first wins without RNG; each later wins unless RandomInt7=0.
+            for index in 0..8 {
+                if !self
+                    .state
+                    .room
+                    .appearance
+                    .doors
+                    .iter()
+                    .any(|door| usize::from(door.slot) == index)
+                {
+                    continue;
+                }
+                if slot == -1 || self.state.boot_lifecycle.shared.bounded(7) != 0 {
+                    slot = index as i32;
+                }
+            }
+            if slot == -1 {
+                slot = self.state.boot_lifecycle.shared.bounded(8) as i32;
+            }
+        }
+        let world = if entry.previous_room == -4
+            && self.state.current_room < self.state.floor.descriptors.len()
+            && (entry.position.x != 0.0 || entry.position.y != 0.0)
+        {
+            entry.position
+        } else {
+            let door = self
+                .state
+                .room
+                .appearance
+                .doors
+                .iter()
+                .find(|door| i32::from(door.slot) == slot)
+                .ok_or("Continue placement has no actual bound Door geometry")?;
+            let offset = match slot % 4 {
+                0 => motion::WorldVector { x: 40.0, y: 0.0 },
+                1 => motion::WorldVector { x: 0.0, y: 40.0 },
+                2 => motion::WorldVector { x: -40.0, y: 0.0 },
+                _ => motion::WorldVector { x: 0.0, y: -40.0 },
+            };
+            door.world_position + offset
+        };
+        self.state.player.x = f64::from(world.x) * 0.65 + 32.0;
+        self.state.player.y = f64::from(world.y) * 0.65 - 46.0;
+        self.state.player.vx = 0.0;
+        self.state.player.vy = 0.0;
+        Ok(())
+    }
+
     /// ChangeRoom5509eb saves the room being left (5182c3 -> 58d921 ->
     /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
     /// Selector, door and wall constructors follow in fresh admission.
     fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
+        //Other Level entry stores require the actual doorway/save owner;
+        //a previously known initial value must not survive room travel.
+        self.state.saved_room_entry = None;
         let left = self
             .state
             .persisted_rooms
@@ -2002,6 +2382,7 @@ impl Game {
     /// ordinary Level rows and PlayerManager state in that source order.
     fn save_supported_run(&mut self) -> Result<(), String> {
         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+        self.state.saved_load_valid = Some(false);
         // Game.Save 54f33b copies the actual modeled ItemPool before Room.Save.
         // Retain its owned vectors/RNGs; copying neither reseeds nor samples.
         let item_pools = self
@@ -2045,7 +2426,205 @@ impl Game {
         self.state
             .boot_lifecycle
             .update_saved_game_samples(&self.saved_game);
+        self.retain_profile_save()?;
         Ok(())
+    }
+
+    ///The caller has completed54F230's actual save copy. File transport
+    ///does not invent another Save, consume RNG or serialize the live Game.
+    fn retain_profile_save(&mut self) -> Result<(), String> {
+        let record = save_profiles::RunRecord {
+            run: self
+                .saved_run
+                .clone()
+                .ok_or("profile save requires the completed run copy")?,
+            seeds: self.saved_game.clone(),
+            summary: self
+                .state
+                .saved_run_summary
+                .clone()
+                .ok_or("profile save is missing its completed summary")?,
+            context: save_profiles::RunContext::capture(&self.state),
+        };
+        record.validate()?;
+        let retained = self.saved_profiles.get_or_insert_with(|| {
+            std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
+        });
+        let profiles = std::sync::Arc::make_mut(retained);
+        let slot = usize::from(self.state.profile - 1);
+        profiles.profiles[slot] = save_profiles::ProfileRecord {
+            profile: self.state.profiles[slot].clone(),
+            saved: Some(record),
+        };
+        self.state.save_revision = self
+            .state
+            .save_revision
+            .checked_add(1)
+            .ok_or("save revision exhausted")?;
+        self.request_save_write()
+    }
+
+    ///Profile load follows the actual destination Clear. The file replaces
+    ///only its serialized stores; the unlisted ordinary rows remain cleared.
+    fn load_profile_save(&mut self, profile: u8) -> Result<(), String> {
+        if !(1..=3).contains(&profile) {
+            return Err("profile load requires a real slot".into());
+        }
+        if let Some(record) = self
+            .saved_profiles
+            .as_ref()
+            .and_then(|profiles| profiles.profiles[usize::from(profile - 1)].saved.as_ref())
+        {
+            self.saved_game
+                .load_serialized_stores(&record.seeds, record.run.floor.descriptors.len())?;
+        }
+        self.install_loaded_profile_metadata(profile)
+    }
+
+    ///Called only after the actual selected load has completed. This also
+    ///serves fresh-menu callbacks without copying their seed stores twice.
+    fn install_loaded_profile_metadata(&mut self, profile: u8) -> Result<(), String> {
+        self.state.saved_load_valid = Some(false);
+        if !(1..=3).contains(&profile) {
+            return Err("profile load requires a real slot".into());
+        }
+        let Some(record) = self
+            .saved_profiles
+            .as_ref()
+            .and_then(|profiles| profiles.profiles[usize::from(profile - 1)].saved.as_ref())
+        else {
+            return Ok(());
+        };
+        self.saved_run = Some(record.run.clone());
+        self.state.saved_run_summary = Some(record.summary.clone());
+        self.state.saved_load_valid = Some(true);
+        self.state
+            .boot_lifecycle
+            .update_saved_game_samples(&self.saved_game);
+        Ok(())
+    }
+
+    ///Application boot input contains only this browser's versioned profile
+    ///document. It cannot replace gameplay or the running System/clock owner.
+    pub fn import_save_data(&mut self, bytes: &[u8]) -> Result<(), String> {
+        if self.state.screen != Screen::Title || self.state.run_start_request.fading {
+            return Err("saved profiles can only load into a fresh Title Game".into());
+        }
+        let profiles = save_profiles::Profiles::from_bytes(bytes)?;
+        self.state.profiles = profiles
+            .profiles
+            .iter()
+            .map(|record| record.profile.clone())
+            .collect();
+        self.saved_profiles = Some(std::sync::Arc::new(profiles));
+        Ok(())
+    }
+
+    pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
+        if let Some(request) = &self.save_write_request {
+            return Ok(request.packet.as_ref().clone());
+        }
+        self.serialize_profile_data()
+    }
+
+    fn serialize_profile_data(&self) -> Result<Vec<u8>, String> {
+        let fresh;
+        let profiles = match self.saved_profiles.as_deref() {
+            Some(profiles) => profiles,
+            None => {
+                fresh = save_profiles::Profiles::fresh(&self.state.profiles);
+                &fresh
+            }
+        };
+        profiles.validate()?;
+        let bytes = serde_json::to_vec(&profiles).map_err(|error| error.to_string())?;
+        if bytes.len() > save_profiles::MAX_BYTES {
+            return Err("saved profiles exceed the supported 4 MiB format".into());
+        }
+        Ok(bytes)
+    }
+
+    ///A real application storage owner declares this capability before any
+    ///public run. Default standalone/native replay has no host IO dependency.
+    pub fn enable_save_io(&mut self, protocol: u32) -> Result<(), String> {
+        if protocol != 1 {
+            return Err("unsupported own Save IO protocol".into());
+        }
+        if self.state.screen != Screen::Title
+            || self.state.save_revision != 0
+            || self.menu_readmission.is_some()
+            || self.save_write_request.is_some()
+        {
+            return Err("own save IO must be declared at fresh Title".into());
+        }
+        self.save_io_enabled = true;
+        Ok(())
+    }
+
+    fn request_save_write(&mut self) -> Result<(), String> {
+        if !self.save_io_enabled {
+            return Ok(());
+        }
+        if self.save_write_request.is_some() {
+            //Never collapse distinct callbacks into the newest revision. An
+            //unowned same-iteration second write is refused atomically.
+            return Err("complete the actual Save/Clear write before another callback".into());
+        }
+        let packet = self.serialize_profile_data()?;
+        self.save_write_request = Some(save_profiles::SaveWriteRequest {
+            protocol: 1,
+            revision: self.state.save_revision,
+            packet: std::sync::Arc::new(packet),
+            remaining_ticks: None,
+        });
+        self.state.save_write_pending = true;
+        Ok(())
+    }
+
+    ///Host success/failure belongs to actual IO evidence, not loaded validity.
+    ///Both outcomes resume; a later real read decides whether older bytes load.
+    pub fn complete_save_write(
+        &mut self,
+        revision: u64,
+        _write_succeeded: bool,
+    ) -> Result<(), String> {
+        let mut next = self.clone();
+        let request = next
+            .save_write_request
+            .take()
+            .ok_or("no pending save write")?;
+        if !next.save_io_enabled || request.protocol != 1 || request.revision != revision {
+            return Err("stale save write acknowledgement".into());
+        }
+        next.state.save_write_pending = false;
+        if let Some(remaining) = request.remaining_ticks {
+            next.advance_public_ticks(remaining, None)?;
+        }
+        next.finish_public_command();
+        *self = next;
+        Ok(())
+    }
+
+    ///Retain the same invalidation after the caller executes594910's actual
+    ///55CE40→55BD80 destination Clear. This transport adds no shared draws.
+    fn invalidate_profile_run(&mut self) -> Result<(), String> {
+        self.saved_run = None;
+        self.state.saved_load_valid = Some(false);
+        self.state.saved_run_summary = None;
+        self.state.run_quit.save_enabled = Some(false);
+        let retained = self.saved_profiles.get_or_insert_with(|| {
+            std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
+        });
+        let profiles = std::sync::Arc::make_mut(retained);
+        let slot = usize::from(self.state.profile - 1);
+        profiles.profiles[slot].saved = None;
+        profiles.profiles[slot].profile = self.state.profiles[slot].clone();
+        self.state.save_revision = self
+            .state
+            .save_revision
+            .checked_add(1)
+            .ok_or("save revision exhausted")?;
+        self.request_save_write()
     }
     fn held(&self, action: usize) -> bool {
         self.state.keyboard.held(action, &self.state.pressed)
@@ -2117,6 +2696,17 @@ impl Game {
         critter_counter: u32,
         loader: bool,
         critter_viewer: motion::WorldVector,
+    ) -> Result<usize, String> {
+        self.admit_room_pickups_owned(selectors, critter_counter, loader, critter_viewer, false)
+    }
+
+    fn admit_room_pickups_owned(
+        &mut self,
+        selectors: &[room_spawns::SpawnSelector],
+        critter_counter: u32,
+        loader: bool,
+        critter_viewer: motion::WorldVector,
+        saved_room: bool,
     ) -> Result<usize, String> {
         //453EC0 finished its ordinary-list reset and callbacks.
         ordinary_placement::begin_fresh_room(&mut self.state);
@@ -2355,12 +2945,20 @@ impl Game {
                     && descriptor.template.room_type != 16
             })
         {
-            grid_records::admit_boundary(
-                &mut self.state.room,
-                &mut self.state.boot_lifecycle.shared,
-                self.state.game_update_count,
-                !loader,
-            )?;
+            if saved_room {
+                grid_records::admit_restored_boundary(
+                    &mut self.state.room,
+                    &mut self.state.boot_lifecycle.shared,
+                    self.state.game_update_count,
+                )?;
+            } else {
+                grid_records::admit_boundary(
+                    &mut self.state.room,
+                    &mut self.state.boot_lifecycle.shared,
+                    self.state.game_update_count,
+                    !loader,
+                )?;
+            }
         }
         // Room.Init5cf550 then links pits over every grid entity in order.
         if let Some(grid) = self.state.room.grid.as_mut() {
@@ -2402,7 +3000,11 @@ impl Game {
         }
         // First-visit ambient critters close Room.Init5cf64f inside this full
         // update, after the selector entities took their manager sequences.
-        critters::spawn(&mut self.state, critter_counter, loader, critter_viewer)?;
+        //5CF618 sends an already visited descriptor directly to5CFB36.
+        //Its saved Room never repeats first-visit ambient producers.
+        if !saved_room {
+            critters::spawn(&mut self.state, critter_counter, loader, critter_viewer)?;
+        }
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
         Ok(suppressed_entities)
@@ -2582,10 +3184,16 @@ impl Game {
                     .expect("pending menu initializer")
                     .initialization
                 {
-                    menu_lifecycle::Initialization::LoadFreshProfile { .. } => {
+                    menu_lifecycle::Initialization::LoadFreshProfile { profile } => {
                         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
                         self.saved_run = None;
                         self.state.saved_run_summary = None;
+                        self.load_profile_save(profile)?;
+                        self.state.main_selection = if self.state.saved_load_valid == Some(true) {
+                            1
+                        } else {
+                            0
+                        };
                     }
                     menu_lifecycle::Initialization::ResetCharacterSeed => {
                         self.state.boot_lifecycle.reset_character_seed();
@@ -2608,6 +3216,143 @@ impl Game {
     ///594CB0 ->5949A0 ->54F3F0. The supported in-memory save happens
     ///before Stop resets modeled Game fields. Binary encoders55B7B0/55B890,
     ///audio virtual5E1D00 and manager Uninit callbacks remain separate owners.
+    fn request_menu_readmission(&mut self) -> Result<(), String> {
+        if self.menu_readmission.is_some() {
+            return Err("duplicate menu readmission request".into());
+        }
+        //59A51A precedes profile reads. No new System interval runs while
+        //the application performs the actual synchronous own-store read.
+        self.state.music.crossfade(61);
+        if !self.save_io_enabled {
+            //No nonexistent application callback may stall ordinary replay.
+            //This backend has no own stored document, not an inferred success.
+            return self.reconstruct_menu_from_profiles(self.state.profile, None);
+        }
+        self.state.save_readmission_pending = true;
+        self.state.saved_load_valid = Some(false);
+        self.menu_readmission = Some(save_profiles::MenuReadmission {
+            protocol: 1,
+            request_revision: self.state.save_revision,
+            profile: self.state.profile,
+            remaining_ticks: 0,
+            timestamp_millis: None,
+        });
+        Ok(())
+    }
+
+    ///Revision matches the outstanding request only. Stored profiles may
+    ///legitimately be older after a failed write; never require their revision.
+    pub fn complete_menu_readmission(
+        &mut self,
+        revision: u64,
+        bytes: Option<&[u8]>,
+    ) -> Result<bool, String> {
+        if self.save_write_request.is_some() {
+            return Err("attempt actual save write before menu readmission".into());
+        }
+        let mut next = self.clone();
+        let request = next
+            .menu_readmission
+            .take()
+            .ok_or("no pending menu readmission")?;
+        if request.protocol != 1
+            || request.request_revision != revision
+            || request.remaining_ticks == 0
+        {
+            return Err("stale or incomplete menu readmission response".into());
+        }
+        let (profiles, rejected) = match bytes.map(save_profiles::Profiles::from_bytes).transpose()
+        {
+            Ok(profiles) => (profiles, false),
+            Err(_) => (None, true),
+        };
+        next.reconstruct_menu_from_profiles(request.profile, profiles)?;
+        //Resume this exact interrupted System iteration: its public clock
+        //was already advanced. Remaining requested ticks keep their timestamps.
+        next.tick_after_menu_requests()?;
+        next.advance_public_ticks(request.remaining_ticks - 1, request.timestamp_millis)?;
+        next.finish_public_command();
+        *self = next;
+        Ok(!rejected)
+    }
+
+    ///One source-producing fresh-menu callback sequence. No-host replay
+    ///has no observed durable file and therefore cannot enable Continue.
+    fn reconstruct_menu_from_profiles(
+        &mut self,
+        profile: u8,
+        profiles: Option<save_profiles::Profiles>,
+    ) -> Result<(), String> {
+        self.saved_profiles = profiles.map(std::sync::Arc::new);
+        if let Some(profiles) = self.saved_profiles.as_deref() {
+            self.state.profiles = profiles
+                .profiles
+                .iter()
+                .map(|r| r.profile.clone())
+                .collect();
+        } else {
+            self.state.profiles = (1..=3)
+                .map(|slot| Profile {
+                    slot,
+                    unlocked_characters: vec!["Isaac".into()],
+                    selected_character: "Isaac".into(),
+                    achievements: vec![false; 179],
+                    counters: vec![0; 95],
+                })
+                .collect();
+        }
+        self.state.profile = profile;
+        self.state.menu_presentation.reinitialize();
+        self.state.title_animation_frame = 0;
+        //Native SaveMenu.Init performs all four Clear/load calls. The
+        //validated own bytes issue the callback, never the pending Save DTO.
+        let profiles = self.saved_profiles.clone();
+        self.saved_game =
+            self.state
+                .boot_lifecycle
+                .initialize_menu_saves(profile, |slot, destination| {
+                    if let Some(record) = profiles
+                        .as_ref()
+                        .and_then(|p| {
+                            slot.checked_sub(1)
+                                .and_then(|s| p.profiles.get(usize::from(s)))
+                        })
+                        .and_then(|p| p.saved.as_ref())
+                    {
+                        destination.load_serialized_stores(
+                            &record.seeds,
+                            record.run.floor.descriptors.len(),
+                        )?;
+                    }
+                    Ok(())
+                })?;
+        self.saved_run = None;
+        self.state.saved_run_summary = None;
+        self.install_loaded_profile_metadata(profile)?;
+        self.state.main_selection = if self.state.saved_load_valid == Some(true) {
+            1
+        } else {
+            0
+        };
+        //Main follows Save; Character then resets its public entry fields,
+        //takes its one real shared sample, and Secrets takes179 bounded calls.
+        self.state.seed_text.clear();
+        self.state.seed_valid = false;
+        self.state.boot_lifecycle.reset_character_seed();
+        self.load_menu_character();
+        self.state.boot_lifecycle.reset_secret_poses();
+        self.state.options_menu.reinitialize();
+        self.state.controls_menu.reinitialize();
+        self.state.menu_fade = MenuFade {
+            active: true,
+            alpha: 1.0,
+            color: [0.0, 0.0, 0.0, 1.0],
+        };
+        self.state.screen = Screen::Main;
+        self.state.save_readmission_pending = false;
+        Ok(())
+    }
+
     fn finish_pause_quit(&mut self) -> Result<(), String> {
         match self.state.run_quit.save_enabled {
             Some(true) if !self.state.player.dead => {
@@ -2621,6 +3366,7 @@ impl Game {
                 self.saved_game = self.state.boot_lifecycle.clear_saved_game();
                 self.saved_run = None;
                 self.state.saved_run_summary = None;
+                self.invalidate_profile_run()?;
                 self.state.run_quit.save_outcome = Some(run_quit::SaveOutcome::DeadRunCleared);
             }
             _ => return Err("Pause Quit has no admitted live/dead save disposition".into()),
@@ -2644,19 +3390,7 @@ impl Game {
         self.state.run_start_request = RunStartRequest::default();
         self.state.paused = false;
         self.state.pause_menu = PauseMenu::hidden();
-        //MenuInit59A4D0 starts track61; SetMenu(3) from its index0 emits
-        //no forward-confirm sound.59B0F0 receives opaque black67C8F8.
-        self.state.music.crossfade(61);
-        self.state.menu_fade = MenuFade {
-            active: true,
-            alpha: 1.0,
-            color: [0.0, 0.0, 0.0, 1.0],
-        };
-        self.state.screen = Screen::Main;
-        self.state.menu_presentation.reinitialize();
-        self.state.options_menu.reinitialize();
-        self.load_menu_character();
-        self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
+        self.request_menu_readmission()?;
         Ok(())
     }
     fn tick(&mut self, timestamp_millis: Option<u64>) -> Result<(), String> {
@@ -2686,32 +3420,20 @@ impl Game {
                     self.state.run_start_request = RunStartRequest::default();
                     self.state.paused = false;
                     self.state.pause_menu = PauseMenu::hidden();
-                    // Popup557650 queues menu3;59cac0 stores it in Menu+38,
-                    // the same native Main family observed by the paired gate.
-                    self.state.screen = Screen::Main;
-                    self.state.menu_presentation.reinitialize();
-                    self.state.options_menu.reinitialize();
-                    // Menu was destroyed on run entry.594D40 constructs it;
-                    //59AB7C initializes the offscreen Title at frame0, and
-                    //59AD17/59B0F0 begin the requested opaque-black fade.
-                    self.state.title_animation_frame = 0;
-                    self.state.menu_fade = MenuFade {
-                        active: true,
-                        alpha: 1.0,
-                        color: [0.0, 0.0, 0.0, 1.0],
-                    };
-                    // A Random run stored its resolved character; the menus
-                    // return to the profile's own selection.
-                    self.load_menu_character();
-                    // Fresh MenuInit59A4D2/59A51A requests Music61.
-                    // SetMenu0-to3 skips the forward-confirm SFX8 branch.
-                    self.state.music.crossfade(61);
+                    self.request_menu_readmission()?;
                 }
             }
         }
+        if self.menu_readmission.is_some() {
+            return Ok(());
+        }
         if self.state.run_start_request.system_pending {
             self.state.run_start_request.system_pending = false;
-            self.start_run()?;
+            if self.state.run_start_request.resume_saved {
+                self.continue_run()?;
+            } else {
+                self.start_run()?;
+            }
         }
         //595110 consumes menu requests on the full System path (including
         //enabled interpolation), never on the disabled odd/skipped path.
@@ -2719,7 +3441,16 @@ impl Game {
             && self.state.system_clock.next_phase() != phase::Phase::Skipped
         {
             self.finish_pause_quit()?;
+            return if self.menu_readmission.is_some() {
+                Ok(())
+            } else {
+                self.tick_after_menu_requests()
+            };
         }
+        self.tick_after_menu_requests()
+    }
+
+    fn tick_after_menu_requests(&mut self) -> Result<(), String> {
         let audio_counter = self.state.system_clock.system_counter;
         let phase = self.state.system_clock.advance()?;
         if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
@@ -2743,7 +3474,7 @@ impl Game {
                         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
                         self.saved_run = None;
                         self.state.saved_run_summary = None;
-                        self.state.run_quit.save_enabled = Some(false);
+                        self.invalidate_profile_run()?;
                     }
                     self.state.run_quit.begin();
                 }
@@ -3300,6 +4031,21 @@ impl Game {
             mt::note_update(self.state.game_update_count);
             critters::replay_loader_update(&mut self.state)?;
         }
+        self.advance_room_runtime(phase, bomb_triggered)?;
+        if phase != phase::Phase::Skipped {
+            self.state.music.advance();
+        }
+        self.advance_camera(phase);
+        Ok(())
+    }
+    ///The existing Room5D12A0 runtime body, shared by the normal Game
+    ///dispatch and54EF4E's actual post-Continue callback. System time, Game
+    ///age, music advancement and the initial fade remain caller-owned.
+    fn advance_room_runtime(
+        &mut self,
+        phase: phase::Phase,
+        bomb_triggered: bool,
+    ) -> Result<(), String> {
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
@@ -3551,10 +4297,6 @@ impl Game {
             // Manager Update454df0 ends with the render sort 452760 (45529a).
             self.sort_render_array(None, true);
         }
-        if phase != phase::Phase::Skipped {
-            self.state.music.advance();
-        }
-        self.advance_camera(phase);
         Ok(())
     }
     /// StageTransition::Update5e38b0 and the Game callbacks it dispatches.
@@ -3616,6 +4358,9 @@ impl Game {
         //Neither fresh Level nor a reused manager owns empty query buckets.
         self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
+        self.state.saved_room_entry = Some(save_profiles::RoomEntry::initial(
+            self.state.floor.descriptors[self.state.current_room].grid_index,
+        )?);
         self.state.visited_rooms = BTreeSet::from([self.state.current_room]);
         self.state.room_display_flags = vec![0; self.state.floor.descriptors.len()];
         self.state.revealed_secret_connections.clear();
@@ -4302,7 +5047,14 @@ impl Game {
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
         spider_webs::begin_player_update(&mut self.state, phase)?;
+        let had_game_over = self.state.player_death.game_over.is_some();
         if player_death::advance(&mut self.state, phase) {
+            if !had_game_over && self.state.player_death.game_over.is_some() {
+                //558900's GameOver Init reaches594910 at558A79.55CE40
+                //removes its own file then tail-calls the actual55BD80 Clear.
+                self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+                self.invalidate_profile_run()?;
+            }
             if phase == phase::Phase::Interpolate {
                 // RoomFast5cd975 dispatches Player, then443d00(false).
                 motion::resolve_player_grid(&mut self.state.player, &self.state.room);
@@ -4804,6 +5556,7 @@ thread_local! {
     static GAME: RefCell<Option<Game>> = const { RefCell::new(None) };
     static REQUEST: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static BOOT_RESOURCE: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
+    static SAVE_INPUT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
@@ -5071,6 +5824,152 @@ pub extern "C" fn request_ptr(length: usize) -> *mut u8 {
         bytes.resize(length, 0);
         bytes.as_mut_ptr()
     })
+}
+
+///Separate save transport; public command and authored-resource bounds remain
+///unchanged. Import is accepted only by the fresh Title profile owner.
+#[no_mangle]
+pub extern "C" fn save_input_ptr(length: usize) -> *mut u8 {
+    if length > save_profiles::MAX_BYTES {
+        return std::ptr::null_mut();
+    }
+    SAVE_INPUT.with(|input| {
+        let mut bytes = input.borrow_mut();
+        bytes.resize(length, 0);
+        bytes.as_mut_ptr()
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn load_save_data() -> u32 {
+    let result = SAVE_INPUT.with(|input| {
+        GAME.with(|game| {
+            game.borrow_mut()
+                .as_mut()
+                .ok_or("engine has not been reset".to_owned())?
+                .import_save_data(&input.borrow())
+        })
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn enable_saved_game_io(protocol: u32) -> u32 {
+    let result = GAME.with(|game| {
+        game.borrow_mut()
+            .as_mut()
+            .ok_or("engine has not reset".to_string())?
+            .enable_save_io(protocol)
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|e| e.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|e| *e.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn complete_saved_game_write(low: u32, high: u32, succeeded: u32) -> u32 {
+    let result = GAME.with(|game| {
+        if succeeded > 1 {
+            return Err("invalid actual write result".to_string());
+        }
+        let mut game = game.borrow_mut();
+        let game = game.as_mut().ok_or("engine has not reset".to_string())?;
+        game.complete_save_write(u64::from(low) | (u64::from(high) << 32), succeeded == 1)?;
+        Ok(())
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|e| e.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|e| *e.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn complete_save_menu_readmission(
+    revision_low: u32,
+    revision_high: u32,
+    loaded: u32,
+) -> u32 {
+    let revision = u64::from(revision_low) | (u64::from(revision_high) << 32);
+    let result = if loaded > 1 {
+        Err("invalid menu IO outcome".to_owned())
+    } else {
+        SAVE_INPUT.with(|input| {
+            let bytes = input.borrow();
+            GAME.with(|game| {
+                game.borrow_mut()
+                    .as_mut()
+                    .ok_or("engine has not been reset".to_owned())?
+                    .complete_menu_readmission(
+                        revision,
+                        if loaded == 1 {
+                            Some(bytes.as_slice())
+                        } else {
+                            None
+                        },
+                    )
+            })
+        })
+    };
+    match result {
+        Ok(true) => {
+            ERROR.with(|e| e.borrow_mut().clear());
+            0
+        }
+        Ok(false) => {
+            ERROR.with(|e| *e.borrow_mut() = b"actual own saved document was rejected".to_vec());
+            2
+        }
+        Err(message) => {
+            ERROR.with(|e| *e.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn save_data_ptr() -> *const u8 {
+    let result = GAME.with(|game| {
+        game.borrow()
+            .as_ref()
+            .ok_or("engine has not been reset".to_owned())?
+            .export_save_data()
+    });
+    match result {
+        Ok(bytes) => {
+            ERROR.with(|error| error.borrow_mut().clear());
+            SNAPSHOT.with(|output| {
+                *output.borrow_mut() = bytes;
+                output.borrow().as_ptr()
+            })
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            SNAPSHOT.with(|output| output.borrow_mut().clear());
+            std::ptr::null()
+        }
+    }
 }
 ///Separate bounded buffer for complete authored resources. Ordinary Command
 ///requests retain their64KiB cap; resource bytes only enter a fresh Game reset.

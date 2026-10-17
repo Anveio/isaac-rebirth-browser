@@ -795,8 +795,20 @@ decorations and the actual signed 448-word Room cost owner. Six fresh pairs
 match all 2,688 cost words, six complete occupancy sets and 360 semantic record
 fields; 228 seed/record failures remain blocking. Its strict W0 case passes
 18/18 on the same leaf artifact. Other backdrop/shape decorations and grid callbacks,
-post-acquisition Player state, load/continue and
-durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
+post-acquisition Player state and complete saved-world restoration remain open.
+The public initial-room Save/Continue increment now writes bounded origin-local
+slots and reconstructs the world through Main and natural same-origin reload.
+On current404a/immutable1b30, fixed moving plus first unfiltered OS DL17GHC7
+pass66/66 own-storage guards and two natural reloads; runtime2/2 passes.
+Strict paired state is1592/1714 with122 failures:49 retained families per case
+plus24 real fixed-context post-Continue Player/tear differences. RGBA34 pass/28
+fail and Original/browser shared-MT and continued-body differences remain. Unsupported saved
+actors/items/rooms and complete progression remain open.
+The listed-Bomb/unknown-legacy guard on0af reuses both recorded Native cases:
+all1714 ordered rows,62 Browser PNGs and62 MT states equal1b30. Public Bomb
+and real own legacy-save app-upgrade refusals pass; stored bytes remain intact.
+[Save/Continue scope](save-continue.md) preserves exact current and historical
+producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
 Ordinary backdrop-1 Block3 construction now owns raw1900/0/0 initialization

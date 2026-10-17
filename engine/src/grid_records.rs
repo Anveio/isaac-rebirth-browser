@@ -218,6 +218,47 @@ impl GridEntity {
     }
 }
 
+///Room5CEF9C replays actual nonzero descriptor records in ascending cell
+///order before selectors. Geometry placeholders have no constructed owner;
+///a supported nonzero record replaces them through the real factory/Init.
+pub fn restore_records(
+    room: &mut Room,
+    shared: &mut Mt19937,
+    records: &[Option<GridRecord>],
+    game_update: u32,
+) -> Result<(), String> {
+    let grid = room
+        .grid
+        .as_mut()
+        .ok_or("saved record replay requires Room grid")?;
+    let costs = room
+        .path_costs
+        .as_mut()
+        .ok_or("saved record replay requires Room costs")?;
+    if records.len() != grid.cells.len() {
+        return Err("saved GridRecord count differs from Room dimensions".into());
+    }
+    for (index, record) in records.iter().enumerate() {
+        let record = record
+            .as_ref()
+            .ok_or("saved occupied GridRecord owner is unknown")?;
+        if record.kind == 0 {
+            continue;
+        }
+        let mut entity = GridEntity {
+            kind: record.kind,
+            variant: record.variant,
+            state: 0,
+            collision_class: 0,
+            spawn_seed: 0,
+            source_owner: None,
+        };
+        entity.init_record(shared, record, game_update, costs, index)?;
+        grid.cells[index].entity = Some(entity);
+    }
+    Ok(())
+}
+
 /// Raw grid types whose Room.Init factory builds a GridBase object, so its
 /// constructor 560ff0 draws two raw words. Raw1400 Fire becomes an NPC.
 pub fn constructs_grid_object(entity_type: u16) -> bool {
@@ -354,6 +395,26 @@ pub fn admit_boundary(
     game_update: u32,
     entered: bool,
 ) -> Result<(), String> {
+    admit_boundary_owned(room, shared, game_update, entered, false)
+}
+
+///Saved record replay precedes the ordinary door pass.5C56FF reuses its
+///actual restored Door, then561040 reinitializes it from one new raw word.
+pub fn admit_restored_boundary(
+    room: &mut Room,
+    shared: &mut Mt19937,
+    game_update: u32,
+) -> Result<(), String> {
+    admit_boundary_owned(room, shared, game_update, false, true)
+}
+
+fn admit_boundary_owned(
+    room: &mut Room,
+    shared: &mut Mt19937,
+    game_update: u32,
+    entered: bool,
+    restored: bool,
+) -> Result<(), String> {
     let descriptor = room
         .descriptor
         .as_ref()
@@ -403,8 +464,11 @@ pub fn admit_boundary(
             .filter(|entity| entity.kind == 16)
             .ok_or("enabled door lacks actual door geometry")?;
         let (state, cost) = (entity.state, costs.get(index)?);
-        entity.construct_owner(shared)?;
-        // Room5c5722 draws a fresh caller seed after actual construction.
+        if !restored || entity.source_owner.is_none() {
+            entity.construct_owner(shared)?;
+        }
+        //Room5C5722 draws a fresh caller seed after construction or actual
+        //saved-Door reuse; InitSeed runs in both branches.
         entity.init_seed(shared.next_u32(), game_update, costs, index)?;
         if entered {
             entity.state = state;
