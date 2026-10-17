@@ -1126,7 +1126,7 @@ impl ControlledKnifeCallerPlan {
         }
         //519FC0's preceding217 luck proc runs only with actual held input.
         //The active323 charging prefix is likewise separate from this caller.
-        if held_input && (queries.have(217)? || owner.active_id == 323) {
+        if held_input && (queries.have(217)? || crate::active_charges::active_id(owner)? == 323) {
             return None;
         }
         let requested_satellites = if queries.have(153)? {

@@ -24,6 +24,41 @@ npm run test:e2e                            # everything
 npm run test:e2e -- --affected              # only the suites your change reaches
 ```
 
+### Running a slice
+
+A small change rarely needs every suite or every case. These narrow a run:
+
+```sh
+npm run test:e2e -- --groups                     # the logical groups and their suites
+npm run test:e2e -- @items @audio                # every suite in those groups
+npm run test:e2e -- @combat --list               # what a selection would run
+npm run test:e2e -- keys --case 'random-*'       # only matching cases (comma-separated, * wildcard)
+npm run test:e2e -- --rerun-failed               # failed suites of the newest run, on the same cases
+npm run test:e2e -- --rerun-failed .cache/e2e/run-…
+```
+
+- **Groups** (`GROUPS` in [`suites.mjs`](suites.mjs)) are `@boot`, `@rooms`,
+  `@stage`, `@pickups`, `@items`, `@combat`, `@monsters` and `@audio`. A suite
+  may sit in several; the registry refuses a suite in none.
+- **`--case PATTERNS`** matches the id each suite prints for a case and names its
+  directory by. Names differ by driver: `scenario.id` for paired-game and
+  state-pair suites (`health-soul-phase0`, `gaper-random-0`), `name` elsewhere
+  (`random-0`, `fixed-epoch`), the seed code for traversal-family and floor
+  suites. A pattern matching nothing fails with the known ids. The suite
+  validates its whole generated bank first, so contrived and OS-random
+  composition checks still hold. It then records only the cases that ran,
+  marked `caseFilter`, so the printed replay reruns exactly those. A bank marked
+  `caseFilter` skips whole-bank count and composition checks on replay; every
+  per-case check still applies. Fresh `paired` cases all share the id
+  `paired-random-run`, and a filtered `floor` run draws no fresh seeds (replay
+  one with `--scenarios … --case`).
+- **`--rerun-failed`** reruns each failed suite with the replay flags its run
+  recorded. A suite that died before recording its bank runs fresh. A failed run
+  prints this command.
+
+A slice is an inner-loop tool. Merging still needs the suites your change
+touches, compared against main.
+
 ### Only what your change touches
 
 ```sh

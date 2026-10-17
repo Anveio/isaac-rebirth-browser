@@ -17,6 +17,8 @@ audio = load('pocket_literal_audio_owners', 'audio-observer.py')
 
 def observe(pid, context):
     selected = dict(context, heldPocketRecords=True)
+    if context.get('pillRangeUse') is True:
+        selected['persistentItemInputs'] = True
     results = {}
     for name, module in (('pickup', pickups), ('items', items)):
         try:

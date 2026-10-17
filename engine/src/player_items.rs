@@ -182,6 +182,9 @@ pub struct PlayerItems {
     pub pickup_animation_guard: bool,
     pub pickup_presentation: Option<PickupPresentation>,
     pub collection_delay: i32,
+    ///Validity only; canonical values remain the existing active words.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active_charge_history: Option<crate::active_charges::History>,
     pub active_id: u32,
     pub active_charge: i32,
     pub active_subordinate_charge: i32,
@@ -267,6 +270,7 @@ impl PlayerItems {
             pickup_animation_guard: false,
             pickup_presentation: None,
             collection_delay: 0,
+            active_charge_history: Some(crate::active_charges::History::fresh()),
             active_id: 0,
             active_charge: 0,
             active_subordinate_charge: 0,
@@ -891,6 +895,27 @@ pub(crate) fn add_collectible(
         .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
+    //Use the reached Add descriptor, not query uncertainty or a second
+    //ID exclusion list. These closed bodies do not write active words.
+    let charge_words_preserved = keep_default_passive_inputs
+        || matches!(
+            source_effect,
+            Some(PassiveGrantSourceEffect::ItemRngCardSpawn)
+        )
+        || plain_active_grant
+        || (normal_isaac && normal_entity && treatment.is_some());
+    if !charge_words_preserved {
+        crate::active_charges::invalidate_owner(
+            owner,
+            &[
+                crate::active_charges::Word::ActiveId,
+                crate::active_charges::Word::Charge,
+                crate::active_charges::Word::Subordinate,
+                crate::active_charges::Word::Reserve,
+            ],
+            crate::active_charges::Frontier::GrantEffect { collectible_id: id },
+        );
+    }
     if !query_stores_preserved {
         //An actual unclosed Add dispatch may reach another counter writer.
         //Closed default/194/treatment/plain-active footprints preserve the array.

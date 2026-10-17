@@ -119,6 +119,12 @@ pub(crate) enum Birth {
     /// A mid-room NPC the spawner parents to itself and adopts as its child
     /// (SetParent447fc0 + SetChild447f40), updated at once (vtable+0x18).
     Child(SpawnSelector),
+    /// Envy's split child 48c9d0: config row `variant % 10`, the split
+    /// variant, the parent's seed, APPEAR cleared, updated at once.
+    EnvyChild { position: WorldVector, variant: u32, seed: u32 },
+    /// Super Envy's third child: bounded(2) at admission (after the first
+    /// two children's nested Updates), spawned when level < roll + 1.
+    EnvyThird { position: WorldVector, variant: u32, seed: u32, level: u32 },
     /// A mid-room NPC parented to the spawner, without entity collision,
     /// hidden and with APPEAR cleared (Gemini's umbilical cord pieces).
     Attached(SpawnSelector),
@@ -234,6 +240,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::maggots::FAMILY,
     &crate::duke::FAMILY,
     &crate::gemini::FAMILY,
+    &crate::envy::FAMILY,
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
 ];

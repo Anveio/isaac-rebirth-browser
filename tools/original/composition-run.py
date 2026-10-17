@@ -183,6 +183,14 @@ def main():
         sfx = case.get('sfxVolume')
         if type(sfx) not in (int, float) or not 0 <= sfx <= 1:
             raise ValueError('Pocket fixture must declare its matched public SFX volume')
+    pill_use = case.get('pillUse')
+    if pill_use is not None:
+        if (args.pockets != 'collection' or case['publicMenuRoute'] != 'seeded-normal'
+                or pill_use.get('schema') != 'source-public-pill-range-use-v1'
+                or pill_use.get('effectId') not in (11, 12)
+                or type(pill_use.get('pillColor')) is not int
+                or not 1 <= pill_use['pillColor'] <= 9):
+            raise ValueError('Positive Pill use requires its declared public collection route')
     contract = case.get('requires', {}).get('sourceExpectedActorContract')
     if not args.pockets and (not isinstance(contract, dict) or type(contract.get('family')) is not int):
         raise ValueError('A source-backed actor-family obligation is required before fixture preparation')
@@ -289,6 +297,8 @@ def main():
         metadata['requiredPocketContract'] = pocket_contract
         metadata['declaredSfxVolume'] = case['sfxVolume']
         metadata['scope'] = 'Source-authored public pocket fixture; declared normal/Challenge route, no Native output input'
+    if pill_use is not None:
+        metadata['requiredPillUseContract'] = pill_use
     metadata_path = output / 'composition-input.json'
     metadata_path.write_text(json.dumps(metadata, indent=2) + '\n')
     if args.prepare_only:
@@ -306,6 +316,9 @@ def main():
         context['compositionSourceFields'] = source_fields
         if args.pockets:
             context['heldPocketRecords'] = True
+            if pill_use is not None:
+                context['pillRangeUse'] = True
+                context['persistentItemInputs'] = True
             context['pickupResourceSound'] = True
         return old_observation(observer, pid, context)
     clock.checked_observation = source_observation

@@ -11,6 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
 import { compareSavedRoomGrid } from '../foundation/saved-grid-compare.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -29,25 +30,29 @@ const output = resolve(value('--output') || join(ROOT, ambientGrid ? '.cache/e2e
 const count = Number(value('--count') || 4);
 assert.ok(Number.isInteger(count) && count >= 2 && count <= 16);
 let cases = [{ name: 'zero-epoch', bootEpochSeed: 0, initialSeed: 1 }, { name: 'fixed-epoch', bootEpochSeed: 1700000000, initialSeed: 0xffffffff }, ...Array.from({ length: count }, (_, index) => ({ name: `random-${index}`, bootEpochSeed: randomInt(0x100000000), initialSeed: randomInt(1, 0x100000000) }))];
-if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')).cases;
-assert.ok(Array.isArray(cases) && cases.length >= 4 && cases.length <= 18);
+// A bank recorded under --case holds only the cases that ran.
+let caseFilter;
+if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
+assert.ok(Array.isArray(cases) && (caseFilter || cases.length >= 4 && cases.length <= 18));
 assert.equal(new Set(cases.map(c => c.name)).size, cases.length);
 for (const c of cases) {
   assert.ok(/^[a-zA-Z0-9_-]{1,32}$/.test(c.name));
   assert.ok(Number.isInteger(c.initialSeed) && c.initialSeed > 0 && c.initialSeed <= 0xffffffff);
   assert.ok(Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff);
 }
+cases = selectCases(cases, c => c.name);
+caseFilter = flag('--case') ?? caseFilter;
 // Construct both plans before either trace. No Tab, glyph or manual commitment.
 const commands = [];
 for (let index = 0; index < 4; index++) commands.push({ type: 'key', code: 'Enter', down: true }, { type: 'tick', count: 12 }, { type: 'key', code: 'Enter', down: false }, { type: 'tick', count: index === 3 ? 300 : 72 });
 const nativeTape = [{ type: 'step', frames: 180 }, { type: 'capture', label: 'intro' }, { type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: 72 }, { type: 'capture', label: 'title' }];
 for (const [index, label] of ['profile', 'main', 'character', 'gameplay-start'].entries()) nativeTape.push({ type: 'key', key: 'Return', down: true }, { type: 'step', frames: 12 }, { type: 'key', key: 'Return', down: false }, { type: 'step', frames: index === 3 ? 300 : 72 }, { type: 'capture', label });
 await mkdir(output, { recursive: true });
-await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Node crypto OS entropy for independent boot epoch and browser reset seed; no requested run seed', cases }, null, 2) + '\n');
+await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'Node crypto OS entropy for independent boot epoch and browser reset seed; no requested run seed', caseFilter, cases }, null, 2) + '\n');
 await assertOriginalBinary();
 const production = await startProductionServer({ directory: value('--production-directory') });
 const browser = await chromium.launch(browserLaunchOptions());
-const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build, graphics: await inspectBrowserGraphics(browser), scope: 'Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.', cases: [] };
+const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build, graphics: await inspectBrowserGraphics(browser), caseFilter, scope: 'Ordinary public no-dialog Character-to-run admission uses the generated menu seed, preserving unseeded eligibility. Complete shared MT, saved/menu fields, nine grid pairs and179 stat poses compare through Character; actual run seed/code/stage and System admission are blocking. Run shared-MT differences remain explicit diagnostics; no original state becomes browser input.', cases: [] };
 report.nativeReference = originalBank ? { mode: 'reused-original-bank', directory: originalBank, reportSha256: createHash('sha256').update(bankReportBytes).digest('hex'), originalReportStatus: bankReport.status } : { mode: 'fresh-owned-original-processes' };
 if (levelDescriptors) report.scope += ' Level descriptor lifecycle additionally compares nine source Level seed pairs through menus and after actual Game admission; the real internal table is regenerated by587ec0 before floor construction. Full post-admission shared MT is retained and compared, with later room/effect differences explicit.';
 if (gridRecords) report.scope += ' Supported fresh GridBase owners execute actual construction and primary overrides in source authored/door/wall order before Save. Complete seven-field records for sampled actual room cells additionally compare against native Level and Saved records, with active-row seeds/whole occupancy still blocking. Padding seed pairs remain blocking; no padding-record metadata acceptance or durable continue/load is claimed.';

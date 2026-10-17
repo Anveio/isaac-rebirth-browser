@@ -10,6 +10,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -61,15 +62,19 @@ let cases = [
   { name: 'fixed-epoch', bootEpochSeed: 1700000000, code: 'ZG800TRJ' },
   ...vectors.map((vector, i) => ({ name: `random-${i}`, bootEpochSeed: randomInt(0x100000000), code: vector.code.replaceAll(' ', ''), seedValue: vector.seedValue })),
 ];
-if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')).cases;
-assert.ok(Array.isArray(cases) && cases.length >= 4 && cases.length <= 18);
+// A bank recorded under --case holds only the cases that ran.
+let caseFilter;
+if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
+assert.ok(Array.isArray(cases) && (caseFilter || cases.length >= 4 && cases.length <= 18));
 assert.equal(new Set(cases.map(c => c.name)).size, cases.length);
 for (const c of cases) {
   assert.ok(/^[a-zA-Z0-9_-]{1,32}$/.test(c.name) && typeof c.code === 'string' && c.code.length === 8);
   assert.ok(Number.isInteger(c.bootEpochSeed) && c.bootEpochSeed >= 0 && c.bootEpochSeed <= 0xffffffff);
 }
+cases = selectCases(cases, c => c.name);
+caseFilter = flag('--case') ?? caseFilter;
 await assertOriginalBinary();
-await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', cases }, null, 2) + '\n');
+await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', caseFilter, cases }, null, 2) + '\n');
 
 const SCOPES = {
   boot: 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.',
@@ -79,7 +84,7 @@ const SCOPES = {
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 2, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: production.build,
-  graphics: await inspectBrowserGraphics(browser), modes, scope: Object.fromEntries(modes.map(mode => [mode, SCOPES[mode]])), cases: [] };
+  graphics: await inspectBrowserGraphics(browser), caseFilter, modes, scope: Object.fromEntries(modes.map(mode => [mode, SCOPES[mode]])), cases: [] };
 
 // One fresh original per case, on the default tape plus (for seed-dialog) the
 // reopen captures. Every mode is then graded against the same native manifest.

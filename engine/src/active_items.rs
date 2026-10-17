@@ -3,10 +3,8 @@
 //! in both presentations, while its main sprite advances only on full updates.
 use crate::{audio::SoundRequest, items, player_animation::Clip, player_items, State};
 
-/// 509e10 clamps to the authored maximum; a rising normal charge requests
-/// partial171 or full218 sound before storing the new charge. The actual
-/// charge is signed. Reserve/costume/passive charging leaves retain their
-/// separate owners and are not reconstructed from observed charge deltas.
+/// Canonical509E10 target setter. This replaces only the existing setter;
+/// canonical D74/D78/D8C remain in PlayerItems. Source text, not built yet.
 pub(crate) fn set_charge(state: &mut State, requested: i32) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
@@ -14,43 +12,185 @@ pub(crate) fn set_charge(state: &mut State, requested: i32) -> Result<(), String
     if owner.active_id == 0 {
         return Ok(());
     }
-    let config = items::definition(owner.active_id).ok_or("active ItemConfig absent")?;
-    let charge = requested.min(config.max_charges);
-    if charge > owner.active_charge && !matches!(owner.active_id, 164 | 289) {
-        state.audio.admit(
-            &mut state.boot_lifecycle.shared,
-            state.system_clock.system_counter - 1,
-            SoundRequest {
-                id: if requested >= config.max_charges {
-                    218
-                } else {
-                    171
-                },
-                volume: 1.0,
-                delay: 2,
-                looping: false,
-                pitch: 1.0,
-            },
+    let active_id = owner.active_id;
+    let config = items::definition(active_id).ok_or("active ItemConfig absent")?;
+    let maximum = config.max_charges;
+    let charge = requested.min(maximum);
+    let rising = charge > owner.active_charge;
+    if rising {
+        //573290 precedes even the164/289 no-sound exception. The source
+        //HUD flash is a separate unresolved presentation, not a lost charge.
+        crate::active_charges::note_effect(
+            state,
+            crate::active_charges::EffectFrontier::HudFlash573290,
         );
+        if !matches!(active_id, 164 | 289) {
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter.wrapping_sub(1),
+                SoundRequest {
+                    id: if requested >= maximum { 218 } else { 171 },
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
+        }
     }
     state
         .player_items
         .as_mut()
         .expect("checked Player owner")
         .active_charge = charge;
+    //Have63 is pure for this literal ID. If the computed overflow cannot
+    //reach its body, no missing unrelated query is needed to complete D78.
+    let overflow = requested.wrapping_sub(charge).max(0).min(maximum);
+    if overflow <= 0 || matches!(active_id, 164 | 289 | 294 | 338) {
+        return Ok(());
+    }
+    let owner = state.player_items.as_ref().expect("checked Player owner");
+    let have_battery = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    )
+    .have(63);
+    match have_battery {
+        Some(false) => return Ok(()),
+        None => {
+            //The already completed D78 prefix survives. Only the reached
+            //conditional reserve write and its source request/birth remain
+            //unavailable; this is not global query or charge invalidation.
+            crate::active_charges::invalidate(
+                state,
+                &[crate::active_charges::Word::Reserve],
+                crate::active_charges::Frontier::Query {
+                    source_pc: 0x509e8d,
+                    field: "Have63 overflow branch".into(),
+                },
+            );
+            crate::active_charges::note_effect(
+                state,
+                crate::active_charges::EffectFrontier::BatteryEffect48,
+            );
+            return Ok(());
+        }
+        Some(true) => {}
+    }
+    crate::active_charges::note_effect(
+        state,
+        crate::active_charges::EffectFrontier::HudFlash573290,
+    );
+    state.audio.admit(
+        &mut state.boot_lifecycle.shared,
+        state.system_clock.system_counter.wrapping_sub(1),
+        SoundRequest {
+            id: 170,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    let owner = state.player_items.as_mut().expect("checked Player owner");
+    //509F0D adds the bounded amount to the CURRENT reserve; it does not
+    //clamp their sum to maximum. With max4/reserve1, amount4 produces5.
+    owner.reserve_charge = owner.reserve_charge.wrapping_add(overflow);
+    //509F14 obtains exactly one world seed after the sound and reserve
+    //write. Effect1000/48 is not Pickup90 and its missing factory/offset/
+    //7F8 controller cannot be replaced with a guessed pickup actor.
+    let _seed = state.boot_lifecycle.shared.next_u32();
+    crate::active_charges::note_effect(
+        state,
+        crate::active_charges::EffectFrontier::BatteryEffect48,
+    );
     Ok(())
 }
 
-/// The plain5295c0 branch spends the current charge and transfers the owned
-/// reserve. Battery/trinket modifiers and their real effect births are later
-/// leaves; the ordinary no-modifier use admitted here has no extra SFX or RNG.
+///5295C0's reserve transfer and source116 extra-charge branch. Trinket4's
+///nested Use44 remains an explicit earlier effect frontier, not a fabricated
+///charge value. This draft replaces the existing plain discharge only.
 fn discharge(state: &mut State) -> Result<(), String> {
-    let reserve = state
-        .player_items
-        .as_ref()
-        .expect("checked owner")
-        .reserve_charge;
-    set_charge(state, reserve)?;
+    let owner = state.player_items.as_ref().expect("checked owner");
+    if !crate::active_charges::owns(owner, crate::active_charges::Word::ActiveId) {
+        return Ok(());
+    }
+    if owner.active_id == 0 {
+        return Ok(());
+    }
+    let config = items::definition(owner.active_id).ok_or("active ItemConfig absent")?;
+    if !crate::active_charges::owns(owner, crate::active_charges::Word::Reserve) {
+        crate::active_charges::invalidate(
+            state,
+            &[crate::active_charges::Word::Charge],
+            crate::active_charges::Frontier::Query {
+                source_pc: 0x52961b,
+                field: "current reserve discharge target".into(),
+            },
+        );
+        crate::active_charges::note_effect(
+            state,
+            crate::active_charges::EffectFrontier::BatteryEffect48,
+        );
+        return Ok(());
+    }
+    let reserve = owner.reserve_charge;
+    let mut target = reserve;
+    if reserve.wrapping_add(1) < config.max_charges {
+        let nine_volt = crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .have(116);
+        match nine_volt {
+            Some(false) => {}
+            Some(true) => {
+                target = reserve.wrapping_add(1);
+                state.audio.admit(
+                    &mut state.boot_lifecycle.shared,
+                    state.system_clock.system_counter.wrapping_sub(1),
+                    SoundRequest {
+                        id: 170,
+                        volume: 1.0,
+                        delay: 2,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+                let _seed = state.boot_lifecycle.shared.next_u32();
+                crate::active_charges::note_effect(
+                    state,
+                    crate::active_charges::EffectFrontier::BatteryEffect48,
+                );
+            }
+            None => {
+                crate::active_charges::invalidate(
+                    state,
+                    &[crate::active_charges::Word::Charge],
+                    crate::active_charges::Frontier::Query {
+                        source_pc: 0x52963a,
+                        field: "Have116 discharge target".into(),
+                    },
+                );
+                //The unknown reached branch may request170 and initialize
+                //Effect48 before509E10. Keep that producer/draw footprint
+                //unavailable, then retain the later literal reserve clear.
+                crate::active_charges::note_effect(
+                    state,
+                    crate::active_charges::EffectFrontier::BatteryEffect48,
+                );
+                let owner = state.player_items.as_mut().expect("checked owner");
+                owner.reserve_charge = 0;
+                owner.active_flag_3076 = false;
+                return Ok(());
+            }
+        }
+    }
+    set_charge(state, target)?;
     let owner = state.player_items.as_mut().expect("checked owner");
     owner.reserve_charge = 0;
     owner.active_flag_3076 = false;
@@ -143,6 +283,19 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         //Trinket4. Its unclosed writer may change canonical Pill words,
         //independently of whether query history is still available.
         crate::pill_effect_history::forget(owner);
+        crate::active_charges::invalidate_owner(
+            owner,
+            &[
+                crate::active_charges::Word::ActiveId,
+                crate::active_charges::Word::Charge,
+                crate::active_charges::Word::Subordinate,
+                crate::active_charges::Word::Reserve,
+            ],
+            crate::active_charges::Frontier::ActiveUse {
+                active_id: 45,
+                source_pc: 0x529600,
+            },
+        );
         if let Some(history) = &mut owner.query_history {
             history.forget_unowned_effect();
         }

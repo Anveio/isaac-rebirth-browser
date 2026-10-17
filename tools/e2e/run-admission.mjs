@@ -12,6 +12,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA } from './lib/original.mjs';
 
@@ -25,9 +26,9 @@ const bank = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--s
   : JSON.parse((await run('python3', ['tools/original/run-admission-scenarios.py', '--count', value('--count') || '2'], {cwd: ROOT})).stdout);
 assert.equal(bank.schema, 1);
 assert.equal(bank.clockInput.presentationIntervalNanoseconds, 16_667_000);
-assert.ok(Array.isArray(bank.cases) && bank.cases.length >= 4 && bank.cases.length <= 18);
+// A bank recorded under --case holds only the cases that ran.
+assert.ok(Array.isArray(bank.cases) && (bank.caseFilter || bank.cases.length >= 4 && bank.cases.length <= 18));
 assert.equal(new Set(bank.cases.map(c => c.name)).size, bank.cases.length);
-await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + '\n');
 for (const c of bank.cases) {
   assert.match(c.name, /^[a-zA-Z0-9_-]{1,40}$/);
   assert.match(c.code, /^[A-Z0-9]{8}$/);
@@ -37,6 +38,9 @@ for (const c of bank.cases) {
   assert.ok(c.heldKey === null || ['d', 's'].includes(c.heldKey));
   assert.ok(Array.isArray(c.tape));
 }
+bank.cases = selectCases(bank.cases, c => c.name);
+if (flag('--case')) bank.caseFilter = flag('--case');
+await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + '\n');
 if (process.argv.includes('--prepare-only')) {
   console.log(JSON.stringify({status: 'prepared', cases: bank.cases.map(c => ({name: c.name, code: c.code})), output}));
   process.exit(0);
@@ -47,7 +51,7 @@ const report = {schema: 1, status: 'running', scope: 'Live real original and pro
   exclusions: ['Source585500/593660 stage-title and input-reset callbacks remain explicitly pending in runtime; this slice does not accept their visual or cache effects.',
     'Native introductory cutscene and absolute pre-Title system counter are omitted; raw source/browser counters and relative clocks remain observable.',
     'Unmapped room/NPC/background-effect constructors, rendering and complete gameplay parity remain separate.'],
-  production: production.build, clockInput: bank.clockInput, cases: []};
+  production: production.build, clockInput: bank.clockInput, caseFilter: bank.caseFilter, cases: []};
 try {
   browser = await chromium.launch(browserLaunchOptions());
   report.graphics = await inspectBrowserGraphics(browser);
