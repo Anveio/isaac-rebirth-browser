@@ -10,8 +10,6 @@ use crate::effects::{Rect, Viewport};
 use crate::{content, motion, Player};
 use serde::{Deserialize, Serialize};
 
-pub const ROOM_COLUMNS: u8 = 17;
-pub const ROOM_ROWS: u8 = 11;
 pub const ROOM_TILE_SIZE: f64 = 26.0;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -339,7 +337,7 @@ fn choose_wall(rng: &mut DecorationRng, parameters: WallParameters) -> u8 {
     }
 }
 
-fn floor_patches(rng: &mut DecorationRng) -> [u8; 4] {
+fn floor_patches(rng: &mut DecorationRng) -> Vec<u8> {
     // Random(floors) advances the original stream even with floors=1.
     rng.next();
     let mut catalogue: Vec<u8> = (0..6).collect();
@@ -350,8 +348,80 @@ fn floor_patches(rng: &mut DecorationRng) -> [u8; 4] {
         let other = rng.next() as usize % (index + 1);
         catalogue.swap(index, other);
     }
-    // The final overlapping strip shares one choice across both lower halves.
-    [catalogue[0], catalogue[1], catalogue[2], catalogue[2]]
+    catalogue
+}
+
+/// The grid factory owns the canonical native allocation bound. Atlas caps
+/// additionally require the recovered centre/edge strips to have an interior.
+/// Smaller future shapes need their own source contour, never unsigned wrap.
+fn validate_backdrop_dimensions(width: u8, height: u8) -> Result<(), String> {
+    crate::grid::validate_room_dimensions(u16::from(width) + 2, u16::from(height) + 2)?;
+    if width <= 7 || height <= 4 {
+        return Err("unadmitted narrow backdrop atlas geometry".into());
+    }
+    Ok(())
+}
+
+/// Backdrop::pre_render_floor428020 uses the actual padded grid dimensions.
+/// Its centre patches precede the right strip, bottom strip and final corner.
+/// The final corner reuses the last bottom-strip patch without another draw.
+fn tile_floor(rng: &mut DecorationRng, width: u8, height: u8) -> Vec<RoomQuad> {
+    let catalogue = floor_patches(rng);
+    // Room+14/+18 include one boundary cell on each side. The render cache
+    // has one additional tile of wall depth on each side (42A1DE..42A201).
+    let right = i32::from(width) - 7;
+    let bottom = i32::from(height) - 4;
+    let offsets = |end: i32, step: i32| {
+        let mut result = Vec::new();
+        let mut at = 0;
+        while at < end {
+            result.push(at);
+            at += step;
+            // 4286F6/4290C5 retain the authored seam at the first overlap.
+            if at == step && end != step + 1 {
+                at += 1;
+            }
+        }
+        result
+    };
+    let columns = offsets(right, 6);
+    let rows = offsets(bottom, 3);
+    let mut quads = Vec::new();
+    let mut patch = 0;
+    let mut append = |column: i32, row: i32, flip_x: bool, flip_y: bool| {
+        let selected = catalogue[patch];
+        patch += 1;
+        quads.push(quad(
+            selected,
+            rect(52.0, 52.0, 182.0, 104.0),
+            rect(52.0 + f64::from(column) * 26.0,
+                 52.0 + f64::from(row) * 26.0, 182.0, 104.0),
+            flip_x,
+            flip_y,
+        ));
+    };
+    for &row in &rows {
+        for &column in &columns {
+            append(column, row, column != 0, row != 0);
+        }
+    }
+    // 429DF0 emits the right edge after all centre patches.
+    for &row in &rows {
+        append(right, row, true, row != 0);
+    }
+    // 4290E9 emits the bottom edge, then428727 reuses its last choice.
+    for &column in &columns {
+        append(column, bottom, column != 0, true);
+    }
+    quads.push(quad(
+        catalogue[patch - 1],
+        rect(52.0, 52.0, 182.0, 104.0),
+        rect(52.0 + f64::from(right) * 26.0,
+             52.0 + f64::from(bottom) * 26.0, 182.0, 104.0),
+        true,
+        true,
+    ));
+    quads
 }
 
 fn rect(x: f64, y: f64, width: f64, height: f64) -> Rect {
@@ -439,11 +509,15 @@ fn tile_walls(
     rng: &mut DecorationRng,
     walls: WallParameters,
     variant: Option<u8>,
+    width: u8,
+    height: u8,
 ) -> Vec<RoomQuad> {
     let wall = |rng: &mut DecorationRng| {
         let drawn = choose_wall(rng, walls);
         variant.unwrap_or(drawn)
     };
+    let right = f64::from(width + 2) * ROOM_TILE_SIZE;
+    let bottom = f64::from(height + 2) * ROOM_TILE_SIZE;
     let mut wall_quads = vec![
         quad(
             wall(rng),
@@ -455,48 +529,66 @@ fn tile_walls(
         quad(
             wall(rng),
             rect(0.0, 0.0, 52.0, 52.0),
-            rect(390.0, 0.0, 52.0, 52.0),
+            rect(right, 0.0, 52.0, 52.0),
             true,
             false,
         ),
         quad(
             wall(rng),
             rect(0.0, 0.0, 52.0, 52.0),
-            rect(0.0, 234.0, 52.0, 52.0),
+            rect(0.0, bottom, 52.0, 52.0),
             false,
             true,
         ),
         quad(
             wall(rng),
             rect(0.0, 0.0, 52.0, 52.0),
-            rect(390.0, 234.0, 52.0, 52.0),
+            rect(right, bottom, 52.0, 52.0),
             true,
             true,
         ),
     ];
-    for column in 0..13 {
+    for column in 0..width {
         let x = 52.0 + f64::from(column) * 26.0;
-        let source_x = 52.0 + f64::from(column.min(12 - column)) * 26.0;
+        // 424BF9 left seven cells,4256D3 alternating middle,425C53 right
+        // six cells. Each cell keeps its own conditional variant draws.
+        let (source_column, flip_x) = if column < 7 {
+            (column + 2, false)
+        } else if column < width - 6 {
+            (7 + column % 2, false)
+        } else {
+            (width - column + 1, true)
+        };
+        let source_x = f64::from(source_column) * 26.0;
         for bottom in [false, true] {
             wall_quads.push(quad(
                 wall(rng),
                 rect(source_x, 0.0, 26.0, 52.0),
-                rect(x, if bottom { 234.0 } else { 0.0 }, 26.0, 52.0),
-                column > 6,
+                rect(x, if bottom { f64::from(height + 2) * 26.0 } else { 0.0 }, 26.0, 52.0),
+                flip_x,
                 bottom,
             ));
         }
     }
-    for row in 0..7 {
+    for row in 0..height {
         let y = 52.0 + f64::from(row) * 26.0;
-        let source_y = 52.0 + f64::from(row.min(6 - row)) * 26.0;
+        // 425F60 top four cells,4266F4 alternating middle,424ED0 bottom
+        // three cells. This is atlas tiling, never stretched wall pixels.
+        let (source_row, flip_y) = if row < 4 {
+            (row + 2, false)
+        } else if row < height - 3 {
+            (4 + row % 2, false)
+        } else {
+            (height - row + 1, true)
+        };
+        let source_y = f64::from(source_row) * 26.0;
         for right in [false, true] {
             wall_quads.push(quad(
                 wall(rng),
                 rect(0.0, source_y, 52.0, 26.0),
-                rect(if right { 390.0 } else { 0.0 }, y, 52.0, 26.0),
+                rect(if right { f64::from(width + 2) * 26.0 } else { 0.0 }, y, 52.0, 26.0),
                 right,
-                row > 3,
+                flip_y,
             ));
         }
     }
@@ -568,6 +660,7 @@ impl Room {
         if stage > 2 || template.room_type != 5 || template.variant == 5000 {
             return Ok(());
         }
+        validate_backdrop_dimensions(template.width, template.height)?;
         let grid = crate::grid::Grid::new(
             self.grid
                 .clone()
@@ -586,6 +679,8 @@ impl Room {
                 variants: 1,
             },
             Some(3),
+            template.width,
+            template.height,
         );
         Ok(())
     }
@@ -723,7 +818,9 @@ impl Room {
             descriptor.decoration_seed,
             admitted.unwrap_or(BASEMENT),
             template.room_type,
-        );
+            template.width,
+            template.height,
+        )?;
         room.appearance.backdrop_id = backdrop_id;
         room.descriptor = Some(descriptor.clone());
         // Room load5cedf0..5ceec7 uses GridPosition(gridWidth+1)-(20,20)
@@ -883,49 +980,27 @@ impl Room {
     /// decoration seed. This is also the original-observation verification entry.
     /// The seed is not a run seed; this method does not generate floor topology.
     pub fn from_decoration_seed(decoration_seed: u32) -> Self {
-        Self::from_backdrop(decoration_seed, BASEMENT, 1)
+        Self::from_backdrop(decoration_seed, BASEMENT, 1, 13, 7)
+            .expect("starting-room dimensions fit the source backdrop")
     }
 
-    /// Backdrop::Init 42a170 for a 1x1 room: floors (428020), then walls
-    /// (424440), both on the backdrop RNG35 seeded by the decoration word.
-    fn from_backdrop(decoration_seed: u32, backdrop: Backdrop, room_type: u32) -> Self {
+    /// Backdrop::Init42A170: floor then walls on the same decoration RNG35.
+    /// Authored dimensions own art extent; the camera viewport stays480x270.
+    fn from_backdrop(
+        decoration_seed: u32,
+        backdrop: Backdrop,
+        room_type: u32,
+        width: u8,
+        height: u8,
+    ) -> Result<Self, String> {
+        validate_backdrop_dimensions(width, height)?;
         let walls = WallParameters::for_room(backdrop, room_type);
         let mut rng = DecorationRng::new(decoration_seed);
-        let [upper_left, upper_right, lower, _] = floor_patches(&mut rng);
+        let floor_quads = tile_floor(&mut rng, width, height);
         let wall_variant_catalog = walls.catalog(backdrop);
-        let floor_quads = vec![
-            quad(
-                upper_left,
-                rect(52.0, 52.0, 182.0, 104.0),
-                rect(52.0, 52.0, 182.0, 104.0),
-                false,
-                false,
-            ),
-            quad(
-                upper_right,
-                rect(52.0, 52.0, 182.0, 104.0),
-                rect(208.0, 52.0, 182.0, 104.0),
-                true,
-                false,
-            ),
-            quad(
-                lower,
-                rect(52.0, 52.0, 182.0, 104.0),
-                rect(52.0, 130.0, 182.0, 104.0),
-                false,
-                true,
-            ),
-            quad(
-                lower,
-                rect(52.0, 52.0, 182.0, 104.0),
-                rect(208.0, 130.0, 182.0, 104.0),
-                true,
-                true,
-            ),
-        ];
         // Random(walls) also advances the stream with Basement walls=1.
         rng.next();
-        let wall_quads = tile_walls(&mut rng, walls, None);
+        let wall_quads = tile_walls(&mut rng, walls, None, width, height);
         // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
         // fx entry from the decoration seed, shift index 35 (5494df): it does
         // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
@@ -972,7 +1047,7 @@ impl Room {
                 .map(|q| q.dest_rect.y + q.dest_rect.height)
                 .fold(f64::NEG_INFINITY, f64::max)
             - render_offset.y;
-        Room {
+        Ok(Room {
             descriptor: None,
             initialization_game_update: None,
             loaded: false,
@@ -1004,8 +1079,8 @@ impl Room {
         appearance: RoomAppearance {
             backdrop: backdrop.gfx.into(),
             backdrop_id: backdrop.id,
-            columns: ROOM_COLUMNS,
-            rows: ROOM_ROWS,
+            columns: width + 4,
+            rows: height + 4,
             tile_size: ROOM_TILE_SIZE,
                 origin,
             backdrop_patch_size: Viewport {
@@ -1023,7 +1098,14 @@ impl Room {
             doors: Vec::new(),
             fx: RoomFx {
                 ambient: [255, 255, 255],
-                shading: "gfx/backdrop/shading.png".into(),
+                // Room.Init5CEF16 selects the authored size-specific mask;
+                // its natural dimensions equal this backdrop cache extent.
+                shading: match (width, height) {
+                    (13, 14) => "gfx/backdrop/shading_1x2.png",
+                    (26, 7) => "gfx/backdrop/shading_2x1.png",
+                    (26, 14) => "gfx/backdrop/shading_2x2.png",
+                    _ => "gfx/backdrop/shading.png",
+                }.into(),
                 overlay: format!("gfx/overlays/basement/1x1_overlay_{overlay_variant}.png"),
                 overlay_origin,
                 // Absolute sprite render anchor, not initial-spawn displacement
@@ -1040,6 +1122,6 @@ impl Room {
             generation: "recovered-basement-backdrop;supplied-room-decoration-seed;provisional-fx-route".into(),
             fx_rays: None,
         },
-    }
+    })
     }
 }

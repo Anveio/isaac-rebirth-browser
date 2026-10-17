@@ -44,6 +44,46 @@ export function npcFields(native, actor, phase) {
   ];
 }
 
+/** Existing rectangular-room art contract, anchored to actual native bounds.
+ * This does not infer an irregular contour from obstacle grid entities. */
+export function roomArtRows(rows, source, actual) {
+  const room = source.room, art = actual.room.appearance;
+  check(rows, 'room.art.cacheDimensions', [room.gridWidth + 2, room.gridHeight + 2, 26],
+    art && [art.columns, art.rows, art.tileSize]);
+  const lower = room.boundsMin ?? room.boundsTopLeft;
+  const upper = room.boundsMax ?? room.boundsBottomRight;
+  const projected = lower && upper && art && [
+    lower[0] * .65 + 32 - art.origin.x, lower[1] * .65 - 47 - art.origin.y,
+    upper[0] * .65 + 32 - art.origin.x, upper[1] * .65 - 47 - art.origin.y];
+  const bounds = quads => quads?.length ? [
+    Math.min(...quads.map(quad => quad.destRect.x)), Math.min(...quads.map(quad => quad.destRect.y)),
+    Math.max(...quads.map(quad => quad.destRect.x + quad.destRect.width)),
+    Math.max(...quads.map(quad => quad.destRect.y + quad.destRect.height))] : undefined;
+  const covered = (quads, x, y) => quads?.some(({ destRect: rect }) =>
+    x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height);
+  check(rows, 'room.art.floorBounds', projected, bounds(art?.floorQuads));
+  check(rows, 'room.art.wallBounds', projected?.map((value, index) => value + (index < 2 ? -52 : 52)),
+    bounds(art?.wallQuads));
+  let floor = 0, walls = 0;
+  if (projected) {
+    const [left, top, right, bottom] = projected;
+    for (let row = 0; row < room.gridHeight - 2; row++) {
+      const y = top + (row + .5) * 26;
+      for (let column = 0; column < room.gridWidth - 2; column++)
+        floor += Number(covered(art.floorQuads, left + (column + .5) * 26, y));
+      walls += Number(covered(art.wallQuads, left - 26, y))
+        + Number(covered(art.wallQuads, right + 26, y));
+    }
+    for (let column = 0; column < room.gridWidth - 2; column++) {
+      const x = left + (column + .5) * 26;
+      walls += Number(covered(art.wallQuads, x, top - 26))
+        + Number(covered(art.wallQuads, x, bottom + 26));
+    }
+  }
+  check(rows, 'room.art.coveredFloorCells', (room.gridWidth - 2) * (room.gridHeight - 2), floor);
+  check(rows, 'room.art.coveredWallCells', 2 * (room.gridWidth + room.gridHeight - 4), walls);
+}
+
 /** Room lock, manager counts and door states. */
 export function roomRows(rows, source, actual) {
   check(rows, 'room.identity', source.room.descriptorIndex, actual.currentRoom);
@@ -110,6 +150,7 @@ export function entityRows(rows, source, actual, spec, render) {
     port.map(actor => [actor.kind, actor.variant, actor.spawnSeed]));
   check(rows, 'system.phase', phase, actual.systemClock.systemCounter % 2);
   roomRows(rows, source, actual);
+  if (spec.shape) roomArtRows(rows, source, actual);
   // The browser's own draw record for this capture: what it actually drew.
   check(rows, 'render.recorded', true, render !== undefined);
   // Intact rock-family grid entities: native Rock Render 56bf80 sets frame

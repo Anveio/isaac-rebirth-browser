@@ -56,6 +56,15 @@ pub struct DoorCollision {
     pub barred: bool,
 }
 
+/// Canonical native Room allocation bound shared by Init and backdrop art.
+pub(crate) fn validate_room_dimensions(width: u16, height: u16) -> Result<(), String> {
+    let count = usize::from(width) * usize::from(height);
+    if width < 3 || height < 3 || count > MAX_GRID_CELLS {
+        return Err("authored room grid exceeds native cell bounds".into());
+    }
+    Ok(())
+}
+
 /// Admit supported authored rocks and spikes with their actual local spawn seeds. The
 /// boundary/door entries are collision profiles; their independent actor RNG
 /// and callbacks are not represented by those geometry-only spawn seeds.
@@ -69,9 +78,7 @@ pub fn for_room(
     let width = u16::from(asset.template.width) + 2;
     let height = u16::from(asset.template.height) + 2;
     let count = usize::from(width) * usize::from(height);
-    if width < 3 || height < 3 || count > MAX_GRID_CELLS {
-        return Err("authored room grid exceeds native cell bounds".into());
-    }
+    validate_room_dimensions(width, height)?;
     let mut cells = vec![GridCell::default(); count];
     for (index, cell) in cells.iter_mut().enumerate() {
         let column = index % usize::from(width);
