@@ -69,7 +69,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 2 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 1 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -112,7 +112,6 @@ Next: options menu; death screen parity; intro cutscene.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #438 | P2 | PR609 passes run-admission equal-clock checks; the separate player-death clock producer remains unresolved | e2e run-admission, player-death |
 
 ## Input
 
@@ -466,7 +465,10 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
-- #349 restores ordinary-bomb ground response after NPC contacts and clamps to Room bounds; [scoped qualification](system-map.md#ordinary-bomb-late-grid-response-349) preserves the separate unresolved Hugger timing and existing regression failures.
+- #438 resolves the source-derived admission/death clock mismatch; [scoped clock evidence](player-death.md) retains the fresh OS cohort's required Original audio-observation failure, pixel reds and incomplete audio acceptance.
+- [PR615](https://github.com/Anveio/isaac-rebirth-browser/pull/615) restores the fresh Title/frame0 and black fade on GameOver Exit; clock and audio qualification remain separate.
+
+- [PR614](https://github.com/Anveio/isaac-rebirth-browser/pull/614) resolves #349 ordinary-bomb ground response after NPC contacts and Room clamping; [scoped qualification](system-map.md#ordinary-bomb-late-grid-response-349) preserves unresolved Hugger timing and existing regression failures.
 
 - #612 restores dead Player Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
 

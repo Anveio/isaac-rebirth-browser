@@ -1,8 +1,13 @@
 # Normal Isaac death
 
 The normal Player damage callback now carries the admitted caller's damage
-flags into Kill and Death. Both public death routes now execute in fresh
-original/browser pairs; the complete four-case gate remains red. Revival items,
+flags into Kill and Death. Both required public routes execute in actual
+original/browser pairs. The retained four-case selected-field gate now passes
+with the corrected public clock on the combined candidate below. The two new
+unfiltered OS cases remain **FAIL** on one required Original audio observation.
+Visual acceptance is still open: the registered Restart replay retains 733 of
+740 full-RGBA diagnostic failures. Complete audio acceptance, including the
+separate Exit music/SFX contracts below, also remains open. Revival items,
 other characters, cooperative players, black hearts, and complete diary content
 remain unimplemented.
 
@@ -38,7 +43,7 @@ item and boss diary selectors are tracked as incomplete. Pixel parity is
 unaccepted. Paired verification must keep functional failures blocking and
 retain the public input, audio/backend history and immutable build identities.
 
-The complete fresh four-case cohort uses reviewed source `5afa7dd` and immutable
+The historical complete fresh four-case cohort uses reviewed source `5afa7dd` and immutable
 production `c4685585`. Both public Restart and Exit reach their actual destination
 in both games; both retained OS cases remain alive. All 2,962 presentations and
 52,190 selected checks execute without capture errors. The gate retains 4,226
@@ -77,7 +82,8 @@ passing values or changed remaining failures. All 52,190 selected fields agree
 with the earlier unguarded production
 `0331a7ea6c716cdbf5bdc994dd4def92346374a0fad18e84cf1b483fccf5fcff`.
 
-The gate remains **FAIL** with 3,014 strict failures: 2,774 Game-age, 80
+At that unchanged-clock guarded493 checkpoint, the gate remained **FAIL**
+with 3,014 strict failures: 2,774 Game-age, 80
 Exit-title-frame, 80 Exit-fade-color, 40 Exit-fade-active and 40 Exit-fade-alpha.
 The guarded A/B replay uses the unchanged canonical capture, Original
 validator, bank/death coverage guards and field comparer. Full actual Browser
@@ -131,7 +137,79 @@ entity contacts. A Player killed later during contacts has already received
 that query and does not receive a second bounded correction in this leaf.
 Moving all living full-phase queries to the source final pass remains a
 separate physics change; near-solid contact-death ordering is unaccepted.
-The player-death producer's clock correction remains pending production
-qualification. No counter or position is copied or fitted from original
-observations. NO_KILL, held-arrow, Soul health, revival and full diary art are
+The player-death producer's scoped clock qualification follows below. No
+counter or position is copied or fitted from original observations. NO_KILL, held-arrow, Soul health, revival and full diary art are
 not accepted by the historical cohort above.
+
+
+The paired death producer now declares its complete public wall-clock plan
+before either capture. It requires the full Native tape to equal the declared
+source-only prelude plus paired suffix, and derives Native entry time from
+that prelude and the launcher's independently declared 30 bootstrap
+presentations and 16,667,000-nanosecond interval. Actual Native epoch,
+bootstrap, interval, acknowledgements and capture times must validate that
+prior declaration. They never choose Browser timestamps. Native evidence
+loading and clock validation stay deferred until Browser capture has closed.
+
+The shared paired gate keeps this schedule off by default; only this driver
+opts in. Clocked steps send the predeclared count-one timestamps through
+`game.step(1, timestampMillis)` without drawing. The complete actual command
+trace must equal the declaration. Omitting the optional timestamp retains the
+previous count-only bulk command. Splitting a group into count-one commands
+changes command/event batching; the qualification does not claim a
+transport change limited to timestamps. Field comparisons, required source
+observations, mandatory death coverage and existing pixel laws are unchanged.
+
+Production
+`70314c6fae40e3001df91b48b6af56f7ea6fcf2e1aa4f3aef6e53cb11ed34a9c`
+contains guarded493 main `a0fed798`, the separately owned ordinary-bomb349 and
+visual Exit candidates, and the optional public step timestamp. Its source
+binding and complete patch were recorded before the immutable copy. The
+capture producers are bound separately to their recorded source hashes;
+this is a combined-runtime qualification, not an isolated clock-runtime fix.
+`check:build`, including typecheck, passed.
+
+On that production artifact, the actual registered driver reruns the kept
+`death-spikes-restart` case with a fresh independent Original: all 740
+checkpoints and 13,837 canonical fields pass, with actual death/popup coverage,
+Native provenance and 765 clock acknowledgements/741 capture times validated.
+All actual Browser inputs/backend trace checks pass. Every full-RGBA diagnostic
+is computed and retained: seven exact passes and **733 exact failures**.
+These diagnostics do not establish visual acceptance.
+
+A separate export-only wrapper calls the unchanged canonical capture and
+clock-validation bodies, bank admission, field comparer and required-death
+coverage for all four kept cases. All 2,962 checkpoints and 52,190 fields pass;
+both required routes actually die, while both retained OS rows remain alive.
+Against the earlier d1a9b8d7 cohort there are zero changed Native expected
+values and zero prior-pass regressions: 2,774 Game-age failures and the
+separately owned 240 Exit-title/fade failures become passing. Complete actual
+Browser PNGs, manifests and traces remain local. This faster cohort explicitly
+does not compute pixel differences; the registered pixel reds remain red.
+
+One new canonical generator invocation records both unfiltered OS draws,
+`WKGV166F` and `7KMTELQG`, with complete invocation/log and bank SHA256
+`4875ada16b40c56155c7de02badb5ede4a3160a4dc213589fc6020d24a56feca`
+before fresh Native/Browser captures. Both input/provenance and complete clock
+plans validate. The first case passes 740/740 checkpoints and 12,517 fields.
+The second passes 740/741 checkpoints and 12,679 emitted fields, but remains
+**FAIL** at `hurt-89`: the required Original SFX30 observation has status
+`fail` and no volume/slot readback. All 25,196 emitted scalar comparisons pass;
+that does not qualify the rejected checkpoint. Both draws, the failed source
+observation and the cohort's failing status are retained without resampling,
+substitution or a status waiver.
+
+The complete generated four-case [public bank](../references/isaac/cases/player-death/recovery-death-public-clock-fresh-os.json)
+retains the same SHA256 above. Replay only the two fresh OS rows through
+`player-death --scenario-file references/isaac/cases/player-death/recovery-death-public-clock-fresh-os.json --case 'death-unfiltered-*'`.
+
+The audio observer's original exception was discarded by the historical death
+observer projection; it is unavailable in that capture. Future observations
+retain that existing error field, without changing status or comparison laws. Its failure occurs before the audio report publishes
+its global-volume/table readback; the retained evidence cannot conclusively
+identify a read/stop failure versus an early source-value assertion. No
+source audio-behavior mismatch, transient-read diagnosis or runtime-clock
+regression is established by this source-only required observation failure. SFX30
+snapshot checks do not establish complete backend/music parity. The two
+existing Browser runtime tests also pass on this frozen artifact using the
+default count-only step API; those UI tests make no Original-parity claim.

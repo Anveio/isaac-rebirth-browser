@@ -20,8 +20,11 @@ are held. Game age increments before normal room/grid callbacks.
 
 The elapsed clock is separate from phase counter and active Game age. Manual
 `step(count)` declares a presentation interval of 16,667,000 nanoseconds;
-the fraction survives integer-millisecond conversion. `trace.clockInput`
-retains this initial clock contract even when state history reaches its cap.
+the fraction survives integer-millisecond conversion. An optional second
+`timestampMillis` argument sends the same public timestamp through the
+rendering-disabled step path; omitting it retains the original count-only
+command. `trace.clockInput` retains this initial clock contract even when
+state history reaches its cap.
 Normal RAF ticks record an optional `timestampMillis: Date.now()` input.
 It must be a nonnegative JavaScript-safe integer and requires count one.
 Replay applies these actual timestamps, including backward jumps. No observed
@@ -129,6 +132,14 @@ report is
 This qualifies the equal-clock admission producer and that artifact. It does
 not regrade the earlier captures, fix a game runtime, qualify another suite's
 clock plan, or establish introductory cutscene or full-frame visual parity.
+
+The paired [normal-death gate](player-death.md) now independently declares and
+validates its own complete public clock plan, using the optional timestamped
+step path. Its retained four-case selected-field gate passes on a separately
+bound combined runtime; its fresh OS cohort retains one required Original
+audio-observation failure. Pixel and complete audio acceptance remain open.
+Other paired drivers retain the default count-only transport until their own
+clock contracts are qualified.
 
 ## Unsupported character requests
 
