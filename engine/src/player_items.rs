@@ -199,6 +199,9 @@ pub struct PlayerItems {
     ///profile achievements complete or admit any missing cache/weapon role.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub treatment240_frontiers: Option<crate::experimental_treatment::Frontiers>,
+    ///Actual reached Pill use leaves these distinct non-scalar owners open.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pill_use_frontiers: Option<crate::pockets::PillUseFrontiers>,
 }
 
 impl PlayerItems {
@@ -274,6 +277,7 @@ impl PlayerItems {
             active_flag_3076: false,
             unevaluated_cache_flags: 0,
             treatment240_frontiers: None,
+            pill_use_frontiers: None,
         })
     }
 
