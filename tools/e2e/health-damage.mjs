@@ -6,6 +6,7 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate, scopedState} from '../foundation/paired-game.mjs';
+import {flag, selectCases} from './lib/cli.mjs';
 import { ORIGINAL_SHA } from './lib/original.mjs';
 const option = (name, fallback) => {const at = process.argv.indexOf(name); return at < 0 ? fallback : process.argv[at + 1];};
 const output = resolve(option('--output', `.cache/e2e/health-damage/${Date.now()}-${process.pid}`));
@@ -18,7 +19,10 @@ const scenarios = scenarioFile ? JSON.parse(readFileSync(resolve(scenarioFile)))
   JSON.parse(execFileSync('python3', ['tools/original/health-damage-scenarios.py', '--count', option('--count', '2')],
     {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
 assert.equal(scenarios.schema, 1);
-assert.ok(Array.isArray(scenarios.cases) && scenarios.cases.length >= 6 && scenarios.cases.length <= 8);
+// A bank recorded under --case holds only the cases that ran; each one it holds
+// still meets its sealed fixture or recorded OS identity.
+const whole = !scenarios.caseFilter;
+assert.ok(Array.isArray(scenarios.cases) && (!whole || scenarios.cases.length >= 6 && scenarios.cases.length <= 8));
 const fixedBankPath = 'references/isaac/foundation/health-damage/first-prepared-cases.json';
 const fixedBank = JSON.parse(readFileSync(fixedBankPath));
 const mandatory = new Map(['soul', 'black'].flatMap(family => [0, 1].map(phase => {
@@ -29,23 +33,27 @@ const ids = scenarios.cases.map(c => c.scenario.id);
 assert.equal(new Set(ids).size, ids.length, 'Health case IDs must be unique');
 const identityFields = ['seed', 'seedValue', 'initialSeed', 'bootEpochSeed', 'bootstrap', 'tape', 'pairedTape', 'healthRoute', 'phaseOffset'];
 for (const [id, fixture] of mandatory) {
-  const selected = scenarios.cases.find(c => c.scenario.id === id); assert.ok(selected, `Missing mandatory ${id}`);
+  const selected = scenarios.cases.find(c => c.scenario.id === id); assert.ok(selected || !whole, `Missing mandatory ${id}`);
+  if (!selected) continue;
   for (const field of identityFields) assert.deepEqual(selected[field], fixture[field], `${id}: sealed identity and public phase tape`);
   assert.equal(selected.scenario.randomized, false);
 }
 const osCases = scenarios.cases.filter(c => !mandatory.has(c.scenario.id));
 assert.ok(Array.isArray(scenarios.randomVectors) && scenarios.randomVectors.length >= 2 && scenarios.randomVectors.length <= 4);
-assert.equal(osCases.length, scenarios.randomVectors.length, 'Retain every recorded OS outcome');
+if (whole) assert.equal(osCases.length, scenarios.randomVectors.length, 'Retain every recorded OS outcome');
 // Build declared OS tapes from recorded words without drawing new entropy or running either game.
 const declaredOs = JSON.parse(execFileSync('python3', ['-c',
   "import json,runpy,sys; m=runpy.run_path('tools/original/health-damage-scenarios.py',run_name='declared_health'); print(json.dumps([m['build'](f'health-unfiltered-{n}',v['code'],'soul' if n%2==0 else 'black',n%2,False) for n,v in enumerate(json.loads(sys.argv[1]))]))",
   JSON.stringify(scenarios.randomVectors)], {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
-for (const [index, selected] of osCases.entries()) {
-  assert.equal(selected.scenario.id, declaredOs[index].scenario.id);
+for (const [position, selected] of osCases.entries()) {
+  const index = whole ? position : declaredOs.findIndex(declared => declared.scenario.id === selected.scenario.id);
+  assert.equal(selected.scenario.id, declaredOs[index]?.scenario.id);
   assert.equal(selected.scenario.randomized, true);
   assert.equal(selected.seedValue, scenarios.randomVectors[index].seedValue);
   for (const field of identityFields) assert.deepEqual(selected[field], declaredOs[index][field], 'Recorded OS identity and declared public tape');
 }
+scenarios.cases = selectCases(scenarios.cases, c => c.scenario.id);
+if (flag('--case')) scenarios.caseFilter = flag('--case');
 save(resolve(output, 'scenarios.json'), scenarios);
 const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
 
@@ -224,7 +232,7 @@ function coverage(definition, directory) {
     checks, manifests: {original: source.evidence, browser: browser.evidence},
     status: checks.every(check => check.status === 'pass') ? 'pass' : 'fail'};
 }
-const result = {schema: 1, status: 'running', scenariosSha256: sha(readFileSync(resolve(output, 'scenarios.json'))),
+const result = {schema: 1, status: 'running', scenariosSha256: sha(readFileSync(resolve(output, 'scenarios.json'))), caseFilter: scenarios.caseFilter,
   cases: [], scope: 'Normal health containers/Hit/Book16, source NPC membership/HP/pending queue and actual SFX wrappers/browser audio owner. Functional fields and contrived execution are blocking; full pixels are retained diagnostics. Wrapper/backend identities are source observations, not a complete original output-PCM parity claim. No native state supplies runtime.'};
 save(resolve(output, 'report.json'), result);
 for (const [index, definition] of scenarios.cases.entries()) {

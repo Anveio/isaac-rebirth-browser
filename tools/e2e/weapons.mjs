@@ -11,6 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { TearContracts } from './tear-contracts.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 const ROOT=resolve(fileURLToPath(new URL('../..',import.meta.url)));
@@ -53,22 +54,25 @@ const vectors=JSON.parse(encoded.stdout).vectors;
 const directions=['Right','Left','Up','Down'];
 let cases=[{name:'full-first-shot',code:'QSYVKMSE',direction:'Right',delay:0},{name:'intermediate-first-shot',code:'ZG800TRJ',direction:'Right',delay:1},
  ...vectors.map((vector,index)=>({name:`random-${index}`,code:vector.code.replaceAll(' ',''),direction:directions[index%4],delay:index%2,seedValue:vector.seedValue}))];
+// A bank recorded under --case holds only the cases that ran.
+let caseFilter;
 if(value('--scenarios')){
  const replay=JSON.parse(await readFile(resolve(value('--scenarios')),'utf8'));
- assert.equal(replay.schema,1);assert.equal(replay.bootEpochSeed,epoch);cases=replay.cases;
+ assert.equal(replay.schema,1);assert.equal(replay.bootEpochSeed,epoch);cases=replay.cases;caseFilter=replay.caseFilter;
 }
-assert.ok(Array.isArray(cases)&&cases.length>=4&&cases.length<=18);
+assert.ok(Array.isArray(cases)&&(caseFilter||cases.length>=4&&cases.length<=18));
 assert.equal(new Set(cases.map(scenario=>scenario.name)).size,cases.length);
 for(const scenario of cases){
  assert.ok(/^[a-zA-Z0-9_-]{1,32}$/.test(scenario.name));
  assert.ok(typeof scenario.code==='string'&&scenario.code.length===8);
  assert.ok(directions.includes(scenario.direction)&&[0,1].includes(scenario.delay));
 }
+cases=selectCases(cases,scenario=>scenario.name);caseFilter=flag('--case')??caseFilter;
 await assertOriginalBinary();
-await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',cases},null,2)+'\n');
+await writeFile(join(output,'scenarios.json'),JSON.stringify({schema:1,bootEpochSeed:epoch,source:'Contrived full/intermediate births plus OS-random recorded seed coverage',caseFilter,cases},null,2)+'\n');
 const production=await startProductionServer();
 const browser=await chromium.launch(browserLaunchOptions());
-const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:lifecycle?'Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete':'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY',production:production.build,graphics:await inspectBrowserGraphics(browser),cases:[]};
+const report={schema:1,status:'running',originalBinarySha256:ORIGINAL_SHA,scope:lifecycle?'Live original/browser source tear ground/height recurrence, half prediction, PRE range/grid death and next-full removal, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY; RNG-dependent numeric mismatches are reported separately from these source contracts. Poof effects and complete shared stream parity remain incomplete':'Paired live original/browser weapon cooldown, held/released head clock, shot births, actor birth fence and horizontal birth positions, with exact requested DOM/tick provenance, seed readback and paired player XY/VXY',production:production.build,graphics:await inspectBrowserGraphics(browser),caseFilter,cases:[]};
 try {
  for(const scenario of cases){
   const directory=join(output,scenario.name);await mkdir(directory,{recursive:true});

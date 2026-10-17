@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { runPairedGate } from '../foundation/paired-game.mjs';
-import { flag, outputDirectory, writeJson } from './lib/cli.mjs';
+import { flag, outputDirectory, selectCases, writeJson } from './lib/cli.mjs';
 
 const helper = flag('--scenario-helper');
 // Repeatable pass-through arguments, e.g. `--helper-arg --type --helper-arg 10`,
@@ -25,11 +25,7 @@ const readJson = path => JSON.parse(readFileSync(resolve(path), 'utf8'));
 const scenarios = replayCases ? { schema: 1, cases: replayCases.split(',').map(readJson) }
   : recorded ? readJson(recorded)
   : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
-const selected = flag('--case');
-if (selected) {
-  scenarios.cases = scenarios.cases.filter(item => item.scenario.id === selected);
-  assert.equal(scenarios.cases.length, 1, `Unknown case ${selected}`);
-}
+scenarios.cases = selectCases(scenarios.cases, item => item.scenario.id);
 writeJson(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `replay-${index}.json`), item));
 
@@ -80,7 +76,7 @@ const cases = scenarios.cases.map((scenario, index) => {
 // discovery); they fail the suite without hiding the cases that did build.
 const helperFailures = scenarios.failures ?? [];
 const status = paired.status === 'pass' && !helperFailures.length && cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-writeJson(resolve(output, 'report.json'), { schema: 1, status, pairedStatus: paired.status, helperFailures, cases });
+writeJson(resolve(output, 'report.json'), { schema: 1, status, caseFilter: flag('--case'), pairedStatus: paired.status, helperFailures, cases });
 for (const item of cases) console.log(`${item.status}: ${item.id} (${item.failures}/${item.checks} checks failed)${item.error ? ` ${item.error}` : ''}`);
 for (const failure of helperFailures) console.log(`fail: ${JSON.stringify(failure)}`);
 for (const item of cases.filter(item => item.staleRecording)) console.log(`warning: ${item.id} replays port keys recorded on build ${item.staleRecording.recordedBuild.slice(0, 12)} against build ${build.slice(0, 12)}; its result does not compare the two builds — rerun without --scenarios`);

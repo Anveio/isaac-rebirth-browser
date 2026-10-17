@@ -6,6 +6,7 @@ import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate} from '../foundation/paired-game.mjs';
+import {flag,selectCases} from './lib/cli.mjs';
 const option=(name,fallback)=>{const at=process.argv.indexOf(name);if(at<0)return fallback;assert.ok(process.argv[at+1]);return process.argv[at+1];};
 const output=resolve(option('--output','.cache/e2e/hearts'));mkdirSync(output,{recursive:true});
 const save=(p,v)=>writeFileSync(p,JSON.stringify(v,null,2)+'\n');
@@ -13,7 +14,10 @@ const artifactBytes=p=>existsSync(p)?readFileSync(p):gunzipSync(readFileSync(p+'
 const artifactDigest=p=>createHash('sha256').update(artifactBytes(p)).digest('hex');
 const prepared=option('--scenarios');
 const scenarios=prepared?JSON.parse(readFileSync(resolve(prepared),'utf8')):JSON.parse(execFileSync('python3',['tools/original/heart-scenarios.py','--count',option('--count','2')],{encoding:'utf8'}));
-assert.equal(scenarios.schema,1);assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=6&&scenarios.cases.length<=8);
+// A bank recorded under --case holds only the cases that ran; each one it holds
+// still meets its fixture and OS-retention checks.
+const whole=!scenarios.caseFilter;
+assert.equal(scenarios.schema,1);assert.ok(Array.isArray(scenarios.cases)&&(!whole||scenarios.cases.length>=6&&scenarios.cases.length<=8));
 const fixedBankPath='references/isaac/foundation/hearts/first-prepared-cases.json';
 const fixedBank=JSON.parse(readFileSync(fixedBankPath,'utf8'));
 const mandatory=new Map(['red','soul'].flatMap(kind=>[0,1].map(phase=>{
@@ -22,14 +26,16 @@ const mandatory=new Map(['red','soul'].flatMap(kind=>[0,1].map(phase=>{
 })));
 const ids=scenarios.cases.map(c=>c.scenario.id);assert.equal(new Set(ids).size,ids.length,'Heart case IDs must be unique');
 for(const[id,fixture]of mandatory){
- const selected=scenarios.cases.find(c=>c.scenario.id===id);assert.ok(selected,`Missing mandatory ${id}`);
+ const selected=scenarios.cases.find(c=>c.scenario.id===id);assert.ok(selected||!whole,`Missing mandatory ${id}`);if(!selected)continue;
  for(const field of ['seed','seedValue','initialSeed','bootEpochSeed','bootstrap','tape','pairedTape'])
   assert.deepEqual(selected[field],fixture[field],`${id}: immutable fixture identity and declared phase-offset tape`);
  assert.equal(selected.scenario.randomized,false,`${id}: fixed cases cannot become random diagnostics`);
 }
 const osCases=scenarios.cases.filter(c=>!mandatory.has(c.scenario.id));
-assert.ok(osCases.length>=2&&osCases.length<=4&&osCases.every(c=>c.scenario.randomized===true),'Every bank requires at least two recorded OS cases');
-assert.deepEqual(scenarios.unfilteredOsSeedValues,osCases.map(c=>c.seedValue),'Every recorded unfiltered OS outcome must be retained');
+assert.ok((!whole||osCases.length>=2&&osCases.length<=4)&&osCases.every(c=>c.scenario.randomized===true),'Every bank requires at least two recorded OS cases');
+if(whole)assert.deepEqual(scenarios.unfilteredOsSeedValues,osCases.map(c=>c.seedValue),'Every recorded unfiltered OS outcome must be retained');
+else assert.ok(osCases.every(c=>scenarios.unfilteredOsSeedValues.includes(c.seedValue)),'Every recorded OS case must be a recorded unfiltered outcome');
+scenarios.cases=selectCases(scenarios.cases,c=>c.scenario.id);if(flag('--case'))scenarios.caseFilter=flag('--case');
 save(resolve(output,'scenarios.json'),scenarios);
 const tapes=scenarios.cases.map((c,i)=>{const p=resolve(output,`replay-${i}.json`);save(p,c);return p;});
 const paired=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:tapes,productionDirectory:option('--production-directory'),nativeFrameTimeout:Number(option('--native-frame-timeout','60'))});
@@ -82,5 +88,5 @@ for(const [index,c] of scenarios.cases.entries()){
  result.manifestHashes=Object.fromEntries(Object.entries(result.manifestHashes).map(([name,read])=>{try{return[name,read()];}catch{return[name,null];}}));
  save(resolve(directory,'heart-state.json'),result);results.push({id:result.id,status:result.status,fields:checks.length,failures:checks.filter(r=>r.status==='fail').length,execution,error,report:resolve(directory,'heart-state.json')});
 }
-const report={schema:1,status:paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-spawn-seed-identity-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups. Local30 four-word state and source collection SFX are not compared by this leaf.'};
+const report={schema:1,status:paired.status==='pass'&&results.every(r=>r.status==='pass')?'pass':'fail',pairedStatus:paired.status,caseFilter:scenarios.caseFilter,cases:results,scope:'Required paired healthcontainer/immunity/room/Heartbody-spawn-seed-identity-class-animation-collection fields, contrived actualadmission/damage/collection and2unfilteredrecordedOScases. Modifier-completefactory, wholeHUD/informationqueue13, readmission andsoul/blackdamagepriority remain explicit source-qualified follow-ups. Local30 four-word state and source collection SFX are not compared by this leaf.'};
 save(resolve(output,'report.json'),report);console.log(JSON.stringify(report));process.exitCode=report.status==='pass'?0:1;
