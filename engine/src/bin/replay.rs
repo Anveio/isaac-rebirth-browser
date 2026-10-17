@@ -16,7 +16,15 @@ struct Replay {
     boot_fullscreen_preferences: Option<FullscreenPreferences>,
     #[serde(default)]
     boot_input_configs: Option<rebirth_cleanroom::keyboard::InputConfigs>,
+    #[serde(default)]
+    boot_elapsed: Option<BootElapsed>,
     commands: Vec<Command>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BootElapsed {
+    milliseconds: u32,
+    sub_millisecond_nanoseconds: u32,
 }
 fn main() {
     let mut input = String::new();
@@ -68,6 +76,14 @@ fn main() {
             std::process::exit(1);
         }
     };
+    if let Some(elapsed) = replay.boot_elapsed {
+        if let Err(error) =
+            game.set_boot_elapsed(elapsed.milliseconds, elapsed.sub_millisecond_nanoseconds)
+        {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    }
     println!("{}", game.json());
     for command in replay.commands {
         if let Err(error) = game.command(command) {

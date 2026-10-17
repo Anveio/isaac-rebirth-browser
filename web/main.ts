@@ -1,5 +1,5 @@
 import './style.css';
-import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs } from './engine';
+import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs, type BootElapsed } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
@@ -232,7 +232,7 @@ async function boot() {
       if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
       automaticPaused = false; accumulator = 0; previous = performance.now();
     },
-    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences; inputConfigs?: InputConfigs } = {}) => {
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; bootElapsed?: BootElapsed; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences; inputConfigs?: InputConfigs } = {}) => {
       fullscreen.assertIdleForReset();
       preferences.resetDispatch();
       inputConfigIO.resetDispatch();
@@ -243,7 +243,7 @@ async function boot() {
       // saved or independently declared Fullscreen input exists.
       const loadedFullscreenPreferences = options.fullscreenPreferences ?? stored?.fullscreen ?? {fullscreen: false};
       currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
-        loadedFullscreenPreferences, loadedInputConfigs ?? undefined);
+        loadedFullscreenPreferences, loadedInputConfigs ?? undefined, options.bootElapsed);
       if (!saveGames.load(engine)) reportSaveFailure();
       currentState = engine.snapshot();
       feedback.resetDispatch();

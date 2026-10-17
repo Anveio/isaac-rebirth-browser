@@ -661,6 +661,7 @@ pub struct State {
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
+    /// Equals native Game+ce9f4; read it through `native_game_frame`.
     pub game_update_count: u32,
     pub screen: Screen,
     pub profile: u8,
@@ -821,6 +822,18 @@ pub struct State {
     pub boss_bar: BossBar,
     pub pause_menu: PauseMenu,
 }
+
+impl State {
+    /// Native Game+ce9f4 as full callbacks read it. Game54fa82 increments it
+    /// before the PlayerManager/Room callbacks and this port increments
+    /// `game_update_count` at the same point, so the two are equal: a fresh
+    /// run's first gameplay update reads the same value in both games once the
+    /// reset clock carries the declared boot elapsed time (#438). An older
+    /// `+1` here compensated for that harness clock offset; never re-add one.
+    pub(crate) fn native_game_frame(&self) -> u32 {
+        self.game_update_count
+    }
+}
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase", deny_unknown_fields)]
 pub enum Command {
@@ -896,6 +909,21 @@ impl State {
 impl Game {
     pub fn new(initial_seed: u32) -> Result<Self, String> {
         Self::new_with_boot_epoch(initial_seed, 0)
+    }
+    /// See `RunAdmission::set_boot_elapsed`; valid only before any command.
+    pub fn set_boot_elapsed(
+        &mut self,
+        milliseconds: u32,
+        sub_millisecond_nanoseconds: u32,
+    ) -> Result<(), String> {
+        if self.state.tick != 0 {
+            return Err("boot elapsed time must be declared before any command".into());
+        }
+        self.state.run_admission.set_boot_elapsed(
+            self.state.boot_epoch_seed,
+            milliseconds,
+            sub_millisecond_nanoseconds,
+        )
     }
     pub fn new_with_boot_epoch(initial_seed: u32, boot_epoch_seed: u32) -> Result<Self, String> {
         Self::new_with_challenges(
@@ -2023,7 +2051,7 @@ impl Game {
         // 5cf5c6 constructs/registers actors before loaded5cf614 and Save.
         // This startup caller has no virtual18 or doorway manager update.
         // Room.Init's ambient critters follow inside admission; Game+ce9f4 reads0.
-        let counter = self.state.game_update_count;
+        let counter = self.state.native_game_frame();
         // The run's starting room sees the player already at its start.
         let viewer = bombs::player_world(&self.state);
         let suppressed_entities = self.admit_room_pickups(&selectors, counter, true, viewer)?;
@@ -2688,7 +2716,7 @@ impl Game {
     /// authored order. Persist that order with the room rather than regrouping
     /// NPCs and pickups when rebuilding the shared actor scheduler.
     /// `critter_counter` is Game+ce9f4 while this Room.Init runs and `loader`
-    /// marks the run loader's starting room (see critters::spawn).
+    /// marks the run loader's starting room.
     /// `critter_viewer` is where Room.Init's critter updates see the player.
     pub fn admit_room_pickups(
         &mut self,
@@ -3003,7 +3031,7 @@ impl Game {
         //5CF618 sends an already visited descriptor directly to5CFB36.
         //Its saved Room never repeats first-visit ambient producers.
         if !saved_room {
-            critters::spawn(&mut self.state, critter_counter, loader, critter_viewer)?;
+            critters::spawn(&mut self.state, critter_counter, critter_viewer)?;
         }
         self.state.room.boss_count = self.state.room.manager_counts.boss_total().max(0) as u32;
         self.refresh_stage_effects();
@@ -3896,7 +3924,7 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count.wrapping_add(1);
+                    let counter = self.state.native_game_frame();
                     let viewer = self
                         .state
                         .departure_position
@@ -4029,7 +4057,6 @@ impl Game {
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
             mt::note_update(self.state.game_update_count);
-            critters::replay_loader_update(&mut self.state)?;
         }
         self.advance_room_runtime(phase, bomb_triggered)?;
         if phase != phase::Phase::Skipped {
@@ -4754,6 +4781,7 @@ impl Game {
             .iter()
             .map(|knife| (knife.position, knife.collision_radius))
             .collect();
+        let game_counter = self.state.native_game_frame();
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -4762,9 +4790,7 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                // Native Game+ce9f4 is one more than game_update_count (the
-                // run-loader origin); AI frame gates read the native value.
-                game_counter: self.state.game_update_count.wrapping_add(1),
+                game_counter,
                 player,
                 player_velocity,
                 grid: &grid,
@@ -5561,6 +5587,25 @@ thread_local! {
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
         serde_json::to_vec(input::PUBLIC_KEYS.as_slice()).expect("key codes serialize");
+}
+///Additive: a controlled harness's declared boot elapsed time, set right after
+///reset and before any command.
+#[no_mangle]
+pub extern "C" fn set_boot_elapsed(milliseconds: u32, sub_millisecond_nanoseconds: u32) -> u32 {
+    let result = GAME.with(|state| match state.borrow_mut().as_mut() {
+        Some(game) => game.set_boot_elapsed(milliseconds, sub_millisecond_nanoseconds),
+        None => Err("boot elapsed time requires a reset game".into()),
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {

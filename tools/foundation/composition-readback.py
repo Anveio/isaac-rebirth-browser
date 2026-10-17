@@ -281,7 +281,10 @@ def declared_startup():
     expect((record['schema'], record['protocol'], record['phase']),
            (1, 'declared-preboot-audio-fullscreen-v1', 'before-reset'))
     expect(record['resetInput'], reset)
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'})
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'})
+    # verify.mjs resetBootElapsed(DECLARED_NATIVE_INTRO): Title's first render after the declared intro.
+    expect(set(reset['bootElapsed']), {'milliseconds', 'subMillisecondNanoseconds'})
+    assert all(isinstance(value, int) and value >= 0 for value in reset['bootElapsed'].values())
     expect(reset['initialSeed'], 1)
     expect(reset['bootEpochSeed'], case['bootEpochSeed'])
     expected_audio = {'sfxVolume': case['sfxVolume'] if pocket else 0, 'musicVolume': 0}
@@ -381,7 +384,7 @@ def wasm_node_readback():
         expect(digest(Path(record['path'])), record['sha256'])
     expect(digest(a.wasm_artifact), a.wasm_sha)
     reset = json.loads((browser_dir / 'declared-reset-input.json').read_bytes())
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'}
            if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
     if startup_record is None:
         assert 'startupProtocol' not in result and 'startupRecord' not in result
@@ -494,7 +497,7 @@ def browser_readback():
         expect(browser['declaredResourceHashes']['specialRooms'], digest(Path(case['fixture']['specialRoomsPath'])))
         if 'specialRoomsSha256' in case['fixture']:
             expect(browser['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
-    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'}
            if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
     expect(set(resources['resources']), {'challengesXml', 'specialRooms'} if case['fixture'].get('specialRoomsPath') else {'challengesXml'})
     assert browser['declaredFullResetJsonBytes'] <= 512 * 1024
