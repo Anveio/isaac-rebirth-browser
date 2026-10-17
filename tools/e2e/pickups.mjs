@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { snapshot, stepSnapshot } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../foundation/composition-wasm-public.mjs';
@@ -119,6 +119,7 @@ try {
     assert.equal(baseline.observation.memoryWritten, false);
     assert.equal(baseline.observation.nativePhase.systemIterations % 2, 0);
     const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row.observation]));
+    const bootElapsed = resetBootElapsed(native.tape);
     const page = browser ? await browser.newPage() : null;
     const errors = [];
     const states = [];
@@ -143,15 +144,15 @@ try {
     try {
       let start;
       if (runtime) {
-        runtime.reset(item.seedValue, scenarios.bootEpochSeed);
+        runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, bootElapsed);
         for (const command of manualSeedCommands(item.code)) issue(command);
         start = await actualNodeSnapshot();
       } else {
         await page.goto(`${server.url}/?manual=1`);
         await waitForReady(page);
-        await page.evaluate(({ seedValue, bootEpochSeed }) => {
-          window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
-        }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+        await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+          window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed });
+        }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed });
         start = await enterSeededRun(page, item.code);
       }
       assert.equal(start.screen, 'playing');

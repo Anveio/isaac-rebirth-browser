@@ -198,14 +198,22 @@ for checking your own change.
      helper for multi-room routes;
    - `runPairedGate` from `tools/foundation/paired-game.mjs` for paired tapes,
      or a mode flag on an existing driver (`items.mjs --stat-cache`).
-3. Drive the page through [`lib/game.mjs`](lib/game.mjs): `stepSnapshot(page)`
+3. Reset the browser with the original's clock at the reset boundary:
+   `window.game.reset(seed, { bootEpochSeed, bootElapsed: resetBootElapsed(nativeTape), trace: true })`.
+   `resetBootElapsed` (in `tools/foundation/verify.mjs`) derives it from the
+   case's declared native tape: the 30 loader presentations, the tape's frames
+   through the intro-skip release, and the 9 presentations until the Title
+   first renders (the browser reset point). Never pass a fitted constant;
+   without it, run-start timers such as the initial fade land one full update
+   late and periodic Game+ce9f4 gates drift.
+4. Drive the page through [`lib/game.mjs`](lib/game.mjs): `stepSnapshot(page)`
    for per-frame comparisons (one round trip carrying the engine's JSON),
    `step(page, n)` when no state is needed. Use [`lib/cli.mjs`](lib/cli.mjs)
    for flags and output directories.
-4. Give it contrived cases and a `--count` of fuzz cases. Write
+5. Give it contrived cases and a `--count` of fuzz cases. Write
    `scenarios.json` to the output directory and accept `--scenarios` to replay
    it.
-5. Record each mismatch as a field failure, with the presentation, actual and
+6. Record each mismatch as a field failure, with the presentation, actual and
    expected values. Keep comparing after the first mismatch so one run shows
    the whole divergence.
 

@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady } from '../foundation/verify.mjs';
+import { resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -117,7 +117,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       const initialSeed = scenario.seedValue ?? native.seedValue;
       if (scenario.seedValue !== undefined) assert.equal(scenario.seedValue, native.seedValue);
       assert.equal(native.observedState.seedValue, native.seedValue);
-      const state = await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); return window.game.reset(initialSeed, { bootEpochSeed, trace: true }); }, { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
+      const state = await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => { window.game.pause(); return window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true }); }, { initialSeed, bootElapsed: resetBootElapsed(native.tape), bootEpochSeed: scenario.bootEpochSeed });
       const compareMenu = (state, label) => {
         menuStates.push({ label, state });
         const observed = observations.get(label), boot = state.bootLifecycle;
@@ -183,7 +183,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       assert.equal(trace.initialSeed, initialSeed); assert.equal(trace.bootEpochSeed, scenario.bootEpochSeed);
       assert.deepEqual(trace.commands, expectedCommands, 'Every requested DOM key/text/tick command must reach WASM in order');
       if (seedDialog) {
-        await page.evaluate(({ initialSeed, bootEpochSeed }) => window.game.reset(initialSeed, { bootEpochSeed, trace: true }), { initialSeed, bootEpochSeed: scenario.bootEpochSeed });
+        await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true }), { initialSeed, bootElapsed: resetBootElapsed(native.tape), bootEpochSeed: scenario.bootEpochSeed });
         for (let index = 0; index < 3; index++) await page.keyboard.press('Enter');
         await page.keyboard.press('Tab'); await page.keyboard.type(scenario.code); await page.keyboard.press('Enter');
         const queued = await snapshot(page);

@@ -20,7 +20,7 @@ import { gzipSync } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../../foundation/browser.mjs';
 import { startProductionServer } from '../../foundation/production-server.mjs';
-import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../../foundation/verify.mjs';
+import { assertInputProvenance, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../../foundation/verify.mjs';
 import { ROOT, flag, outputDirectory, writeJson } from './cli.mjs';
 import { stepSnapshot } from './game.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../../foundation/composition-wasm-public.mjs';
@@ -171,6 +171,7 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
   assert.equal(baseline.observation.nativePhase.systemIterations % 2, 0);
   suite.checkBaseline?.(baseline);
   const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
+  const bootElapsed = resetBootElapsed(native.tape);
 
   //The complete Native process and source validation finish before a
   //Browser is admitted. Keep only the actual rows used below.
@@ -195,9 +196,9 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
       runtime = createPublicWasmRuntime({ wasm: resolve(wasmNode), expectedWasmSha: wasmSha });
       journal = createPublicWasmJournal(directory);
       //The same public reset as the existing Browser path; no resource or state override.
-      runtime.reset(item.seedValue, scenarios.bootEpochSeed);
+      runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, bootElapsed);
       await writeJson(join(directory, 'declared-reset-input.json'),
-        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed });
     } else {
     browser = await chromium.launch(browserLaunchOptions());
     caseResult.graphics = await inspectBrowserGraphics(browser);
@@ -205,9 +206,9 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
     page.on('pageerror', error => errors.push(String(error)));
     await page.goto(`${server.url}/?manual=1`);
     await waitForReady(page);
-    await page.evaluate(({ seedValue, bootEpochSeed }) => {
-      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
-    }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+    await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed });
+    }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed });
     }
     // Menu/seed/run intervals and every tick are declared before execution;
     // deferred Music run admission is never bypassed.

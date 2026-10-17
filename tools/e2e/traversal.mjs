@@ -9,7 +9,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
-import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 import { compareChests } from './chest-checks.mjs';
 import { snapshot, step } from './lib/game.mjs';
@@ -119,7 +119,8 @@ try {
       page = await browser.newPage({ viewport: { width: 960, height: 540 } });
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({seed, bootEpochSeed}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed }); }, {seed: scenario.runSeed, bootEpochSeed});
+      await page.evaluate(({seed, bootEpochSeed, bootElapsed}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed, bootElapsed }); },
+        {seed: scenario.runSeed, bootEpochSeed, bootElapsed: resetBootElapsed(scenario.tape)});
       let seeded = await enterSeededRun(page, scenario.code);
       if (declaredSfxVolume !== undefined)
         seeded = await page.evaluate(volume => window.game.command({ type: 'audioVolume', sfx_volume: volume }), sfxVolume);

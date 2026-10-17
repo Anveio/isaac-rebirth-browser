@@ -316,7 +316,10 @@ def wasm_node_readback():
         expect(digest(Path(record['path'])), record['sha256'])
     expect(digest(a.wasm_artifact), a.wasm_sha)
     reset = json.loads((browser_dir / 'declared-reset-input.json').read_bytes())
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources'})
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'bootElapsed'})
+    # verify.mjs resetBootElapsed(DECLARED_NATIVE_INTRO): Title's first render after the declared intro.
+    expect(set(reset['bootElapsed']), {'milliseconds', 'subMillisecondNanoseconds'})
+    assert all(isinstance(value, int) and value >= 0 for value in reset['bootElapsed'].values())
     expect(reset['initialSeed'], 1)
     expect(reset['bootEpochSeed'], case['bootEpochSeed'])
     resources = reset['resources']

@@ -418,12 +418,15 @@ export interface State {
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
+/** A controlled harness's declared time between the boot epoch and this reset. */
+export interface BootElapsed { milliseconds: number; subMillisecondNanoseconds: number; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
+  set_boot_elapsed: (milliseconds: number, subMillisecondNanoseconds: number) => number;
   command: () => number; snapshot_ptr: () => number; snapshot_len: () => number;
   frame_snapshot_ptr: () => number; background_stains_ptr: (from: number) => number;
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
@@ -467,7 +470,7 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, bootElapsed?: BootElapsed): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     let result: number;
@@ -483,6 +486,14 @@ export class Engine {
       result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    if (bootElapsed !== undefined) {
+      const { milliseconds, subMillisecondNanoseconds } = bootElapsed;
+      if (![milliseconds, subMillisecondNanoseconds].every(value => Number.isInteger(value) && value >= 0 && value <= 0xffffffff))
+        throw new Error("Boot elapsed time must be unsigned 32-bit milliseconds and nanoseconds");
+      if (typeof this.wasm.set_boot_elapsed !== "function") throw new Error("WASM boot clock ingress is stale; rebuild with npm run build:wasm");
+      if (this.wasm.set_boot_elapsed(milliseconds, subMillisecondNanoseconds) !== 0)
+        throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    }
     this.stains = { room: null, initialization: null, list: [] };
     return this.snapshot();
   }

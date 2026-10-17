@@ -1,5 +1,5 @@
 import './style.css';
-import { Engine, type Command, type State, type ResourceInputs } from './engine';
+import { Engine, type Command, type State, type ResourceInputs, type BootElapsed } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
@@ -108,8 +108,8 @@ async function boot() {
     step: (count = 1) => structuredClone(dispatch({ type: 'tick', count }, false)),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
-    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs } = {}) => {
-      currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources);
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; bootElapsed?: BootElapsed; resources?: ResourceInputs } = {}) => {
+      currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, options.bootElapsed);
       audio.reset(options.trace === true);
       initialSeed = seed;
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
