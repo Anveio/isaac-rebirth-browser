@@ -1,6 +1,8 @@
 import type { Command, MusicBackendCommand, State } from './engine';
 
 type Event = { kind: 'blockedMusicBackend'; status: 'fail'; command: MusicBackendCommand; audioTime: number }
+  | {kind:'inputConfigurationFailure'; status:'fail'; operation:'load' | 'save'; error:string}
+  | { kind: 'unavailableControl'; status: 'fail'; action: number; message: string }
   | { kind: 'platformFailure'; status: 'fail'; operation: 'fullscreen'; error: string }
   | { kind: 'unavailableOption'; status: 'fail'; sequence: number; row: number; message: string }
   | { kind: 'runtimeFailure'; status: 'fail'; command: Command | null; error: string; lastBrowserState: { screen: State['screen']; tick: number } };
@@ -50,6 +52,22 @@ export class Feedback {
       const focused = this.box.contains(document.activeElement);
       this.box.hidden = true;
       if (focused) this.canvas.focus();
+    }
+  }
+
+  inputConfigurationFailure(operation: 'load' | 'save', error: string): void {
+    this.record({kind:'inputConfigurationFailure',status:'fail',operation,error});
+    if (!this.runtimeFailed) this.show('inputConfigurationFailure', operation === 'load'
+      ? 'Keyboard bindings could not be loaded. Default bindings are active.'
+      : 'Keyboard bindings could not be saved. The bindings in this session still work.');
+  }
+
+  consumeControls(actions: number[]): void {
+    const names: Record<number,string> = {11:'Drop',12:'Pause',13:'Map',16:'Restart',17:'Fullscreen shortcut',18:'Mute'};
+    for (const action of actions) {
+      const message = `${names[action] ?? 'This control'} is not available yet.`;
+      this.record({kind:'unavailableControl',status:'fail',action,message});
+      if (!this.runtimeFailed) this.show('unavailableControl',message);
     }
   }
 

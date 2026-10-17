@@ -123,7 +123,7 @@ pub(crate) fn prepare_callback(
             down: false,
         }
     } else {
-        ShootButtons::read(&state.pressed)
+        ShootButtons::read(state)
     };
     let step = crate::attack_runtime::ordinary_shooting_aim(
         buttons.aim(),

@@ -14,6 +14,8 @@ pub enum Page {
     Save,
     Game,
     Options,
+    Controls,
+    Keyboard,
     Character,
     Challenge,
 }
@@ -25,6 +27,8 @@ impl Page {
             Screen::Profile => Some(Self::Save),
             Screen::Main => Some(Self::Game),
             Screen::Options => Some(Self::Options),
+            Screen::Controls => Some(Self::Controls),
+            Screen::Keyboard => Some(Self::Keyboard),
             Screen::Character | Screen::Seed => Some(Self::Character),
             Screen::Challenge => Some(Self::Challenge),
             Screen::Playing => None,
@@ -193,6 +197,8 @@ pub struct MenuPresentation {
     pub seed_view: bool,
     /// 59CBC0's Challenge target from the selected challenge.
     pub challenge_scroll: u32,
+    #[serde(default = "keyboard_origin")]
+    pub keyboard_scroll: f32,
     /// MenuManager+21: widgets are shown until a key is pressed on a settled page.
     pub widgets_shown: bool,
     /// MenuManager+2C/+30 Back and Select widget drop below their rest.
@@ -219,6 +225,7 @@ impl MenuPresentation {
             page,
             seed_view: false,
             challenge_scroll: 0,
+            keyboard_scroll: keyboard_origin(),
             widgets_shown: true,
             widgets: [90.0, 90.0],
             save: SaveSelect::reset(file),
@@ -238,6 +245,8 @@ impl MenuPresentation {
             Page::Save => [0.0, -270.0],
             Page::Game => [0.0, -810.0],
             Page::Options => [-480.0, -1080.0],
+            Page::Controls => [-480.0, -1620.0],
+            Page::Keyboard => [-480.0, self.keyboard_scroll],
             Page::Character => [if self.seed_view { -960.0 } else { -480.0 }, -810.0],
             Page::Challenge => [480.0, challenge_y(self.challenge_scroll)],
         }
@@ -304,6 +313,14 @@ impl MenuPresentation {
             self.blood += 0.05;
         } else if self.blood > 0.0 && !hard {
             self.blood -= 0.05;
+        }
+    }
+
+    ///59CC60 changes page10's destination and marks the view moving.
+    pub fn set_keyboard_scroll(&mut self, position: f32) {
+        if self.keyboard_scroll != position {
+            self.keyboard_scroll = position;
+            self.moving = true;
         }
     }
 
@@ -384,4 +401,9 @@ pub struct Input {
     pub seed: bool,
     pub challenge: u32,
     pub hard: bool,
+}
+
+///MenuInit59A748 and59CC60 use the same page10 baseline.
+fn keyboard_origin() -> f32 {
+    -1890.0
 }

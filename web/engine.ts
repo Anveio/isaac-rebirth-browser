@@ -1,6 +1,6 @@
 import wasmUrl from "./generated/engine.wasm?url";
 
-export type Screen = "title" | "profile" | "main" | "options" | "character" | "challenge" | "seed" | "playing";
+export type Screen = "title" | "profile" | "main" | "options" | "controls" | "keyboard" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
   entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
@@ -325,11 +325,11 @@ export interface StageEffects {
   actorTint: [number, number, number];
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
-export type MenuPage = "title" | "save" | "game" | "options" | "character" | "challenge";
+export type MenuPage = "title" | "save" | "game" | "options" | "controls" | "keyboard" | "character" | "challenge";
 export interface MenuClip { animation: string; frame: number; playing: boolean }
 /** MenuManager view, Back/Select widgets, File select and Character carousel. */
 export interface MenuPresentation {
-  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number;
+  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number; keyboardScroll: number;
   widgetsShown: boolean; widgets: [number, number];
   save: { file: number; menu: MenuClip; drawings: [MenuClip, MenuClip, MenuClip] };
   carousel: { angle: number; portraits: [number, number][] };
@@ -423,7 +423,10 @@ export interface State {
   sourceFireDelayMinimum?: boolean;
   playerStats: {shotSpeed: number; damage: number; tearHeight: number; tearFallingSpeed: number; tearFallingAcceleration: number; moveSpeed: number; luck: number | null};
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
-  publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; enterWasDown: boolean; spaceWasDown: boolean; escapeWasDown: boolean; pocketWasDown: boolean };
+  publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; held: boolean[]; triggered: boolean[]; rawKey: number | null; physicalWasDown: string[] };
+  keyboard: {bindings: number[][]};
+  inputConfigs: InputConfigs;
+  controlsMenu: {deviceSelection: number; deviceHeld: number; selectedDevice: number | null; selection: number; column: number; waiting: boolean; nextSaveSequence: number; saveRequests: {sequence: number; configs: InputConfigs}[]; unavailableActions: number[]};
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | null; frame: number; playing: boolean; guard: boolean };
 
   gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
@@ -445,11 +448,13 @@ export interface State {
   runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
+export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }
 export interface AudioPreferences { sfxVolume: number; musicVolume: number; }
 export interface FullscreenPreferences { fullscreen: boolean; }
 export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
+  reset_with_input_configs: (initialSeed: number, bootEpochSeed: number) => number;
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
   reset_with_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
@@ -481,7 +486,7 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences) {
+  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
@@ -491,7 +496,7 @@ export class Engine {
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
       || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
-    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences); return engine;
+    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs); return engine;
   }
   private static validateSeed(initialSeed: number) {
     if (!Number.isInteger(initialSeed) || initialSeed < 1 || initialSeed > 0xffffffff)
@@ -501,7 +506,7 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     if (audioPreferences !== undefined && (!audioPreferences ||
@@ -523,7 +528,22 @@ export class Engine {
         audioPreferences?.sfxVolume ?? 0, audioPreferences?.musicVolume ?? 0);
     };
     let result: number;
-    if (resources === undefined) result = fullscreenPreferences !== undefined ? displayReset(false)
+    if (inputConfigs !== undefined) {
+      if (typeof this.wasm.reset_with_input_configs !== 'function') throw new Error('WASM keyboard boot ingress is stale; rebuild');
+      if (resources !== undefined) {
+        const resourceBytes = new TextEncoder().encode(JSON.stringify(resources));
+        if (resourceBytes.length > 512*1024) throw new Error('Boot resource input exceeds512KiB');
+        const resourcePointer = this.wasm.boot_resource_ptr(resourceBytes.length);
+        if (resourcePointer === 0) throw new Error('WASM resource allocation failed');
+        new Uint8Array(this.wasm.memory.buffer,resourcePointer,resourceBytes.length).set(resourceBytes);
+      }
+      const bytes = new TextEncoder().encode(JSON.stringify({withResources:resources !== undefined, audioPreferences, fullscreenPreferences, inputConfigs}));
+      if (bytes.length > 65536) throw new Error('Keyboard startup inputs exceed64KiB');
+      const pointer = this.wasm.request_ptr(bytes.length);
+      if (pointer === 0) throw new Error('Keyboard startup input allocation failed');
+      new Uint8Array(this.wasm.memory.buffer,pointer,bytes.length).set(bytes);
+      result = this.wasm.reset_with_input_configs(initialSeed,bootEpochSeed);
+    } else if (resources === undefined) result = fullscreenPreferences !== undefined ? displayReset(false)
       : audioPreferences === undefined ? this.wasm.reset(initialSeed, bootEpochSeed)
       : this.wasm.reset_with_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     else {

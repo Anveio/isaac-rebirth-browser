@@ -43,14 +43,53 @@ export async function pairedScenarioDeclarations() {
   return python(['--list']);
 }
 
-const namedKeys = { Return: 'Enter', Escape: 'Escape', Tab: 'Tab', BackSpace: 'Backspace',
-  space: 'Space',
-  Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight' };
+// Public Original tapes use real X11 keysym names. Translate their physical
+// positions to the engine-owned KeyboardEvent.code catalog, never logical aliases.
+const namedKeys = {
+  space: 'Space', apostrophe: 'Quote', comma: 'Comma', minus: 'Minus', period: 'Period', slash: 'Slash',
+  semicolon: 'Semicolon', equal: 'Equal', bracketleft: 'BracketLeft', backslash: 'Backslash',
+  bracketright: 'BracketRight', grave: 'Backquote',
+  Escape: 'Escape', Return: 'Enter', Tab: 'Tab', BackSpace: 'Backspace', Insert: 'Insert', Delete: 'Delete',
+  Right: 'ArrowRight', Left: 'ArrowLeft', Down: 'ArrowDown', Up: 'ArrowUp',
+  Prior: 'PageUp', Next: 'PageDown', Home: 'Home', End: 'End',
+  Caps_Lock: 'CapsLock', Scroll_Lock: 'ScrollLock', Num_Lock: 'NumLock', Print: 'PrintScreen', Pause: 'Pause',
+  KP_Decimal: 'NumpadDecimal', KP_Divide: 'NumpadDivide', KP_Multiply: 'NumpadMultiply',
+  KP_Subtract: 'NumpadSubtract', KP_Add: 'NumpadAdd', KP_Enter: 'NumpadEnter', KP_Equal: 'NumpadEqual',
+  Shift_L: 'ShiftLeft', Control_L: 'ControlLeft', Alt_L: 'AltLeft', Super_L: 'MetaLeft',
+  Shift_R: 'ShiftRight', Control_R: 'ControlRight', Alt_R: 'AltRight', Super_R: 'MetaRight', Menu: 'ContextMenu',
+};
 function keyCode(key) {
-  if (namedKeys[key]) return namedKeys[key];
+  if (Object.hasOwn(namedKeys, key)) return namedKeys[key];
   if (/^[a-z]$/i.test(key)) return 'Key' + key.toUpperCase();
   if (/^[0-9]$/.test(key)) return 'Digit' + key;
-  throw new Error(`No public browser key transport for ${key}`);
+  if (/^F(?:[1-9]|1[0-9]|2[0-4])$/.test(key)) return key;
+  if (/^KP_[0-9]$/.test(key)) return 'Numpad' + key.slice(3);
+  throw new Error(`No public physical browser key transport for X11 keysym ${key}`);
+}
+class UnsupportedBrowserKeyTransport extends Error {
+  constructor(code) {
+    super(`Installed Playwright keyboard transport does not expose ${code}`);
+    this.name = 'UnsupportedBrowserKeyTransport';
+    this.physicalCode = code;
+  }
+}
+function browserKeyCode(key) {
+  const code = keyCode(key);
+  // This installed Playwright layout ends at F12 and omits NumpadEqual. Keep
+  // canonical engine ingress, but do not replace missing DOM events with aliases.
+  if (/^F(?:1[3-9]|2[0-4])$/.test(code) || code === 'NumpadEqual')
+    throw new UnsupportedBrowserKeyTransport(code);
+  return code;
+}
+function modifierName(code) {
+  return /^(Shift|Control|Alt|Meta)(Left|Right)$/.exec(code)?.[1];
+}
+function seedInputText(code, modifiers) {
+  if (modifiers.has('Control') || modifiers.has('Alt') || modifiers.has('Meta')) return null;
+  if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+  if (/^Digit[0-9]$/.test(code) && !modifiers.has('Shift')) return code.slice(5);
+  if (/^Numpad[0-9]$/.test(code) && modifiers.has('Shift')) return code.slice(6);
+  return null;
 }
 
 // Where a case's games start playing their own keys (its first
@@ -180,9 +219,12 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
   assert.ok(audioPreferences && typeof audioPreferences === 'object' && !Array.isArray(audioPreferences));
   assert.deepEqual(Object.keys(audioPreferences).sort(), ['musicVolume', 'sfxVolume']);
   assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value >= 0 && value <= 1));
-  const startup = {audioPreferences: {...audioPreferences}, fullscreenPreferences: {fullscreen: false}};
+  const startup = {audioPreferences: {...audioPreferences}, fullscreenPreferences: {fullscreen: false}, inputConfigs: {devices: []}};
   save(join(directory, 'declared-startup-preferences.json'), startup);
   const expectedPressed = new Set();
+  // DOM held keys and Playwright modifier flags are distinct from engine pressed
+  // state: seed text does not create a physical engine keydown.
+  const browserPressed = new Set(), browserModifiers = new Set();
   let expectedSeedDialog = false;
   const failures = [];
   try {
@@ -211,20 +253,28 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
         }
         presentations += action.frames;
       } else if (action.type === 'key') {
-        const code = keyCode(action.key);
-        // Derive the requested seed-entry protocol from the public tape. The
-        // browser's actual screen must not redefine a missed input as expected.
-        const text = expectedSeedDialog && /^[a-z0-9]$/i.test(action.key);
-        await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
-        if (text) {
-          if (action.down) expectedCommands.push({ type: 'text', text: action.key.toUpperCase() });
-          else if (expectedPressed.delete(code)) expectedCommands.push({ type: 'key', code, down: false });
-        } else {
-          expectedCommands.push({ type: 'key', code, down: action.down });
-          const newlyPressed = action.down && !expectedPressed.has(code);
-          if (action.down) expectedPressed.add(code); else expectedPressed.delete(code);
-          if (newlyPressed && code === 'Tab') expectedSeedDialog = !expectedSeedDialog;
-          else if (newlyPressed && (code === 'Enter' || code === 'Escape')) expectedSeedDialog = false;
+        const code = browserKeyCode(action.key);
+        const repeat = action.down && browserPressed.has(code);
+        const modifier = modifierName(code);
+        if (action.down) browserPressed.add(code); else browserPressed.delete(code);
+        if (modifier) {
+          if (action.down) browserModifiers.add(modifier); else browserModifiers.delete(modifier);
+        }
+        // Derive text/edges from declared public events and the driver's actual
+        // modifier protocol. No observed screen or State can redefine missed input.
+        const text = expectedSeedDialog ? seedInputText(code, browserModifiers) : null;
+        await page.keyboard[action.down ? 'down' : 'up'](code);
+        if (!action.down) {
+          if (expectedPressed.delete(code)) expectedCommands.push({ type: 'key', code, down: false });
+        } else if (!repeat) {
+          if (text !== null) expectedCommands.push({ type: 'text', text });
+          else {
+            expectedCommands.push({ type: 'key', code, down: true });
+            const newlyPressed = !expectedPressed.has(code);
+            expectedPressed.add(code);
+            if (newlyPressed && code === 'Tab') expectedSeedDialog = !expectedSeedDialog;
+            else if (newlyPressed && (code === 'Enter' || code === 'Escape')) expectedSeedDialog = false;
+          }
         }
         inputs.push({ ...action, normalizedCode: code, browserPresentation: presentations });
       } else {
@@ -264,6 +314,7 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     assert.equal(trace.initialSeed, caseData.initialSeed);
     assert.deepEqual(trace.bootAudioPreferences, startup.audioPreferences, 'Actual boot must retain the independently declared audio settings');
     assert.deepEqual(trace.bootFullscreenPreferences, startup.fullscreenPreferences, 'Actual reset must retain its declared window default');
+    assert.deepEqual(trace.bootInputConfigs, startup.inputConfigs, 'Fresh Original profiles require independently declared fresh keyboard defaults');
     assert.deepEqual(trace.commands, expectedCommands, 'Every intended DOM input/interval must reach the actual WASM trace');
     const final = frames.at(-1)?.state;
     assert.equal(final?.runSeedValue, caseData.seedValue, 'Browser must read back the public manually entered run seed');
@@ -467,6 +518,9 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           publicClockPlan = declarePublicClockPlan(caseData);
           save(join(directory, 'public-clock-plan.json'), publicClockPlan);
         }
+        // Reject unavailable physical DOM transport before either game capture.
+        for (const action of caseData.pairedTape)
+          if (action.type === 'key') browserKeyCode(action.key);
         process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
         // Both independent captures are still attempted after a rejection.
         // Original settles before Chromium starts; each Browser closes before
@@ -527,6 +581,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       } catch (error) {
         result = {id: definition.id, seed: caseData?.seed, seedValue: caseData?.seedValue,
           directory, status: 'fail', error: String(error), checks: [],
+          ...(error instanceof UnsupportedBrowserKeyTransport && {inputTransportFailure: {kind: 'unsupportedBrowserPhysicalCode', code: error.physicalCode}}),
           original: {status: native?.status || 'fail', error: native?.error},
           browser: {status: candidate?.status || 'fail', failures: candidate?.failures},
           scope: 'Declared case aborted; retained raw/partial captures have no complete paired acceptance'};
