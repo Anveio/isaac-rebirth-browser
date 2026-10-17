@@ -160,18 +160,36 @@ acknowledgements/eight capture times pass; the Browser records all 1,631 public
 ticks and seven complete capture states. Input and backend traces are
 untruncated. Aggregate state history reaches its recorded byte cap after 409
 states; all seven independent checkpoint states and 15 actual Native/Browser
-PNGs remain retained. RGBA differences are not computed. These bounded
+PNGs remain retained. RGBA differences were not computed for that initial
+prefix capture. These bounded
 controller/request/start checks do not establish audible or PCM equality,
 complete music lifecycle/device equivalence, complete Shared-MT parity or a
 count of rejected Native request attempts. The separate fresh-OS SFX30
 observation failure and historical pixel failures remain unchanged.
 
+A subsequent registered `player-death --exit-audio` replay on the same frozen
+f837 artifact passes all seven checkpoints, 95 canonical fields and 14 audio
+checks against a fresh Native. Those 95 and 14 field rows are identical to the
+prior f837 capture. Mandatory actual Exit-to-Main execution, zero observed
+forward SFX8 events/starts and both sets of three earlier controls pass.
+Native provenance and 690 clock acknowledgements/eight capture times validate;
+the Browser retains all 1,631 ticks and seven capture states. Input, backend
+and actual API traces are untruncated; aggregate state history retains the
+same documented byte cap. All seven strict RGBA diagnostics are now computed:
+Title-ready and dispatch1/2/4 are exact, while gameplay-start, death-settled and
+request-1 remain red (four exact passes, three failures). The initial prefix's
+uncomputed pixels and the separate historical pixel failures are not regraded.
+
 The [kept seven-capture input bank](../references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json)
 contains only the public case, without local observation paths. Replay it with
-`player-death --scenario-file references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json`.
-That registered replay checks the canonical death fields and computes pixel
-diagnostics; the additional 14 owner/backend checks above come from the
-separately bound audio capture, not from snapshot-only replay acceptance.
+`player-death --exit-audio --scenario-file references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json`.
+The explicit mode preserves canonical fields, public-clock validation and
+mandatory death and actual Exit-to-Main coverage, and repeats all 14 bounded
+actual owner/backend checks with both sets of three earlier SFX8 controls and
+zero observed Browser forward SFX8 events. It rejects a full tape or other
+selected routes before launching either game; no inputs are silently thinned. Pixel diagnostics are computed and retained separately. Omitting
+`--exit-audio` replays only canonical death fields and pixel diagnostics; it
+does not qualify the supplementary audio contracts from snapshots alone.
 
 The port's existing living-player grid query still runs before full-phase
 entity contacts. A Player killed later during contacts has already received

@@ -59,6 +59,24 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
 A slice is an inner-loop tool. Merging still needs the suites your change
 touches, compared against main.
 
+The existing death suite has a bounded actual-audio replay:
+
+```sh
+npm run test:e2e -- player-death --exit-audio --scenario-file references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json
+```
+
+`--exit-audio` requires that explicitly marked one-case seven-capture Exit
+prefix; it rejects a full death tape or other selected routes before launching
+either game. It preserves the canonical public clock, field checks and actual
+death/popup coverage, requires actual deferred Exit to Main, adds all 14 bounded Music/SFX8 checks and requires three
+earlier actual unique-owner SFX8 starts in each runtime. Existing Native
+forwarding OpenAL instrumentation and same-call Browser API observations remain
+blocking, including zero observed Browser forward SFX8 events, complete traces,
+unmuted volume, destination and actual buffer hashes. Missing owner evidence cannot imply zero starts. Full pixels
+remain retained diagnostics; these checks do not claim audible/PCM equality,
+complete music lifecycle or full Shared-MT parity. Default death-bank/OS-random
+admission and the separate `audio` suite's menu/PCM schema are unchanged.
+
 ### Only what your change touches
 
 ```sh
