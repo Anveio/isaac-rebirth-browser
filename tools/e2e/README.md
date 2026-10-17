@@ -77,6 +77,23 @@ remain retained diagnostics; these checks do not claim audible/PCM equality,
 complete music lifecycle or full Shared-MT parity. Default death-bank/OS-random
 admission and the separate `audio` suite's menu/PCM schema are unchanged.
 
+The bounded `footprint-admission` suite mixes a fixed regression route with one
+Source-selected OS-random adjacent miniboss room. It stops at `entry-40` before
+shooting and requires actual room6/living-NPC admission plus every initial NPC
+field through the shared exact entity comparator. Replay the retained fixed
+and failing OS draw without replacement:
+
+```sh
+npm run test:e2e -- footprint-admission --scenarios references/isaac/cases/footprint-admission/recorded-fixed-and-hh936e8z-entry40-v1.json
+```
+
+The saved `HH936E8Z` case retains its 78 initial Envy position/velocity failures
+on counter artifact `40295031` and fresh PR629 artifact `f0eb9e70`; the latter
+adds passing mandatory draw-order observations without changing an earlier row.
+The mixed suite remains red. This
+is short admission coverage, without fight/death/clear acceptance. See
+[the artifact-bound results](../../docs/player-footprints.md).
+
 ### Only what your change touches
 
 ```sh

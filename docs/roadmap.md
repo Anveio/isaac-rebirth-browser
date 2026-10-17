@@ -326,7 +326,7 @@ The Duke of Flies 67, Gemini 79, Dingle 261 and Envy/Super Envy 51;
 VS scene from boss portraits. Envy's new live cases remain red, and Super
 Envy's short upper-door admission prefix passes 5,301 fields after the
 [footprint counter fix](player-footprints.md), with 12 gains and no losses;
-full fight, children and clear remain unqualified (#605). Missing: other Chapter 1 bosses
+full fight, children and clear remain unqualified (#605). The bounded registered admission suite catches the historical parent bug; its unchanged recorded `HH936E8Z` OS case still fails78 initial Envy position/velocity rows on counter4029, with actual room/NPC admission passing. Fresh PR629 artifact f0eb retains those same78 failures and adds115/113 passing draw-order-presence rows without changing earlier fields; no overlapping order coverage is claimed. Missing: other Chapter 1 bosses
 (Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), later bosses
 including Gurdy/Gurdy Jr., remaining champion variants and Super Gluttony.
 
