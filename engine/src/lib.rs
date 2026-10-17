@@ -854,6 +854,20 @@ pub struct Game {
     special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
 }
 
+impl State {
+    /// Clears what each command publishes afresh for the host: sound and
+    /// music events, SFX volume callbacks, settings and input-configuration
+    /// saves, and unavailable-action reports. A batched Tick publishes every
+    /// iteration's.
+    pub fn begin_command(&mut self) {
+        self.audio.begin_command();
+        self.options_menu.begin_command();
+        self.controls_menu.begin_command();
+        self.fullscreen.begin_command();
+        self.music.begin_command();
+    }
+}
+
 impl Game {
     pub fn new(initial_seed: u32) -> Result<Self, String> {
         Self::new_with_boot_epoch(initial_seed, 0)
@@ -1135,11 +1149,7 @@ impl Game {
         Ok(())
     }
     fn apply(&mut self, command: Command) -> Result<(), String> {
-        self.state.audio.begin_command();
-        self.state.options_menu.begin_command();
-        self.state.controls_menu.begin_command();
-        self.state.fullscreen.begin_command();
-        self.state.music.begin_command();
+        self.state.begin_command();
         match command {
             Command::MusicVolume { volume } => {
                 if !volume.is_finite() || !(0.0..=1.0).contains(&volume) {

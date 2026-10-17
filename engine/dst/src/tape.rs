@@ -3,7 +3,10 @@
 //! A retained tape is exactly the input `engine/src/bin/replay.rs` accepts and
 //! the browser's `game.reset(seed, ...)` plus commands reproduces, so a DST
 //! finding replays outside the harness without translation.
-use rebirth_cleanroom::Command;
+use rebirth_cleanroom::{
+    fullscreen::FullscreenPreferences, keyboard::InputConfigs, options_menu::AudioPreferences,
+    Command, Game,
+};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -12,6 +15,14 @@ use std::path::{Path, PathBuf};
 pub struct Tape {
     pub initial_seed: u32,
     pub boot_epoch_seed: u32,
+    /// The settings the browser stored from its last Options save.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boot_audio_preferences: Option<AudioPreferences>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boot_fullscreen_preferences: Option<FullscreenPreferences>,
+    /// The input configuration file (inputconfigs.dat) the browser stored.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boot_input_configs: Option<InputConfigs>,
     pub commands: Vec<Command>,
 }
 
@@ -20,13 +31,65 @@ impl Tape {
         Self {
             initial_seed,
             boot_epoch_seed,
+            boot_audio_preferences: None,
+            boot_fullscreen_preferences: None,
+            boot_input_configs: None,
             commands: Vec::new(),
         }
+    }
+
+    /// The same boot with no commands yet.
+    pub fn start(&self) -> Self {
+        Self {
+            commands: Vec::new(),
+            ..self.clone()
+        }
+    }
+
+    /// The boot `replay.rs` and the browser's reset perform for this tape.
+    pub fn boot(&self) -> Result<Game, String> {
+        Game::new_with_input_configs(
+            self.initial_seed,
+            self.boot_epoch_seed,
+            None,
+            self.boot_audio_preferences,
+            self.boot_fullscreen_preferences,
+            self.boot_input_configs.clone(),
+        )
     }
 
     pub fn read(path: &Path) -> Result<Self, String> {
         let text = std::fs::read_to_string(path).map_err(|error| error.to_string())?;
         serde_json::from_str(&text).map_err(|error| error.to_string())
+    }
+
+    /// The browser's reset export for this boot (`web/engine.ts`).
+    pub fn reset(&self) -> Reset {
+        let audio = self.boot_audio_preferences;
+        if let Some(configs) = &self.boot_input_configs {
+            let request = serde_json::json!({
+                "withResources": false,
+                "audioPreferences": audio,
+                "fullscreenPreferences": self.boot_fullscreen_preferences,
+                "inputConfigs": configs,
+            });
+            return Reset::InputConfigs {
+                request: serde_json::to_vec(&request).expect("boot request serializes"),
+            };
+        }
+        match (self.boot_fullscreen_preferences, audio) {
+            (Some(display), _) => Reset::Display {
+                fullscreen: u32::from(display.fullscreen),
+                has_audio: u32::from(audio.is_some()),
+                sfx_volume: audio.map_or(0.0, |audio| audio.sfx_volume),
+                music_volume: audio.map_or(0.0, |audio| audio.music_volume),
+            },
+            (None, Some(audio)) => Reset::Audio {
+                sfx_volume: audio.sfx_volume,
+                music_volume: audio.music_volume,
+            },
+            (None, None) => Reset::Plain,
+        }
     }
 
     /// Writes `<directory>/<name>.json` and returns its path.
@@ -37,4 +100,26 @@ impl Tape {
         std::fs::write(&path, text + "\n").map_err(|error| error.to_string())?;
         Ok(path)
     }
+}
+
+/// A reset export's arguments after the two seeds. A stored input
+/// configuration takes the request-buffer reset, which carries every stored
+/// setting; otherwise a stored fullscreen setting takes the display reset,
+/// which also carries any audio settings.
+pub enum Reset {
+    Plain,
+    Audio {
+        sfx_volume: f32,
+        music_volume: f32,
+    },
+    Display {
+        fullscreen: u32,
+        has_audio: u32,
+        sfx_volume: f32,
+        music_volume: f32,
+    },
+    /// `reset_with_input_configs`, after `request_ptr` receives `request`.
+    InputConfigs {
+        request: Vec<u8>,
+    },
 }

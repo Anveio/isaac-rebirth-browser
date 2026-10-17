@@ -89,8 +89,8 @@ indexes each one's declared properties from source.
 | `contact` | the mass contact responses (`combat.rs`, source 445710) for player–NPC, player–pickup, player–projectile, tear–NPC and NPC or bomb–NPC pairs, over arbitrary radii, masses, speeds and separations | computed in f64 from the inputs: the response runs exactly for strictly overlapping circles; rejected and non-overlapping pairs stay bit-for-bit unchanged; positions and velocities change only along the centre line (allowing for the f32 cancellation the source's fast-separating scaling shares); separation keeps the pair's centre of mass in place; the impulse conserves momentum, the player taking half its share, and carries the relative speed split by mass; an ordinary pair ends exactly a radius sum apart; a blocked player keeps its motion and the collider is offered exactly the displacement applied; an NPC pair resolves the same whichever body comes first. The fast-separating branch's overlap scaling (1 + 2·dot) is statically recovered and checked only through these conservation laws |
 | `pathfinder` | FindGridPath's flood (`pathfinder::flood_costs`, 5b498f) over room-shaped and arbitrary cost grids | an independent node-weighted Dijkstra: every label is the cell's shortest distance whatever order heap ties take; only open cells of the grid change; the owner is visited exactly when it lies within half the room's cells; without it the flood visits exactly the cells nearer than that cutoff, with it every cell nearer than the expansion that visits the owner and none farther, and that expansion runs to its end; purity; grids outside admission are rejected |
 | `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
-| `game` | the whole engine through public commands | per-step state invariants, per-command transition contracts (menus, run-start hold, pause, boss scenes, stage descents, death and GameOver), rejection of malformed inputs, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
-| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game |
+| `game` | the whole engine through public commands, booted with or without the settings and input configuration the browser stored | per-step state invariants, per-command transition contracts (menus including Options, Controls and Keyboard bindings, run-start hold, pause, boss scenes, stage descents, death and GameOver), boot with stored settings, rejection of malformed inputs, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
+| `abi` | the exported C ABI the browser bridge drives | framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game; the settings resets boot with their stored settings, publish the same state from the authored resources, and refuse presence flags other than zero or one and stored volumes outside the unit interval, keeping the previous game; the input-configuration reset boots with the stored configuration and the same state from the authored resources, and refuses more than 32 retained devices, duplicate or unprintable names, Keyboard bindings outside GLFW's keys and unknown request fields, keeping the previous game |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
@@ -101,8 +101,25 @@ menus: in play it would simulate ten minutes in one command, repeated by every
 replay and the interpreted WASM differential. Each case
 follows one persona (direct play, menu explorer or seeded run), sends
 browser-style host-timestamped frames (with jitter, hitches and rollbacks) or
-controlled steps, and steers by the published state. In a room it plays
-before it leaves:
+controlled steps, and steers by the published state. The menu explorer
+also opens Main's Challenge and Options menus. Options, Controls and
+Keyboard act on keys held at a tick (the released System poll), so
+there the driver holds its presses into ticks, sometimes long enough to
+reach Options' hold repeat. In the Keyboard menu it binds keys, including
+its own play keys, so bindings go missing and back is refused until it
+binds them again or resets. It plays with the default keys, so it usually
+resets them before leaving; a case that leaves with custom bindings plays
+on with keys that may no longer do what it means (a binding-aware driver
+is follow-up work). The menus' contracts:
+* an Options tick steps only the volume on the selected row, and leaving
+  Options saves the settings it leaves with;
+* bindings and the stored input configuration change only in the Keyboard
+  menu, which binds the awaited key to the selected action alone (clearing
+  it from every other configurable action) or resets the defaults;
+* the Keyboard menu leaves only with every configurable action bound, and
+  then saves every retained device with the bindings it leaves with.
+
+In a room it plays before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a
   wider range against a boss and never stands still against one, but strafes
   only to align, escape a corner or dodge: tears inherit 1.2× the player's
@@ -160,7 +177,8 @@ after a descent`, and `new run from the menus after a descent` when it went
 through the menus), a run started from Random (`Random run`) and its
 GameOver popup's Exit to the menus (`menus after a Random run's GameOver`),
 a fire cooldown left above a newly lowered fire delay (`fire cooldown above
-the max fire delay`), and each property met (`property:<message>`). The summary
+the max fire delay`), an Options setting held past its hold-repeat threshold
+(`Options hold repeat`), and each property met (`property:<message>`). The summary
 line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. Unsimulated kinds are split
@@ -191,11 +209,18 @@ Beyond its invariants, every `game` tape is checked by:
   through JSON and the engine's own deserialization validators.
 * **Batched ticks.** A sampled `Tick` of up to 32 steps is re-run as that many
   single ticks and must reach the identical game. Only command-level
-  publication may differ: the batch carries every step's sound and music
-  events, and a screen change resets the menu animation counter at the
-  command boundary.
-* **C ABI differential.** The tape drives the exported `reset`/`request_ptr`/
-  `command`/`snapshot_*` functions exactly as `web/engine.ts` does.
+  publication may differ: the batch publishes every step's outputs in order
+  (what `State::begin_command` clears: sound and music events, SFX volume
+  callbacks, settings and input-configuration saves, and unavailable-action
+  reports), and a screen change resets the menu
+  animation counter at the command boundary. The same engine method defines
+  which outputs a key ignored during a boss scene or the run-start fade may
+  clear, so a new output cannot drift out of either check.
+* **C ABI differential.** The tape drives the exported reset the browser picks
+  for its stored settings (`reset`, `reset_with_audio_preferences`,
+  `reset_with_fullscreen_preferences`, or `reset_with_input_configs` after
+  `request_ptr` receives the stored input configuration and settings), then
+  `request_ptr`/`command`/`snapshot_*`, exactly as `web/engine.ts` does.
 * **Shipped-WASM differential.** With `--wasm web/generated/engine.wasm` (the
   default in `npm run test:dst`) each tape also runs through the production
   artifact in the deterministic `wasmi` interpreter; every outcome, the
@@ -207,8 +232,13 @@ Beyond its invariants, every `game` tape is checked by:
 ### Tapes and the corpus
 
 Game tapes use the engine's replay format (`initialSeed`, `bootEpochSeed`,
-`commands`), so a finding replays through the browser's
-`game.reset(seed, { bootEpochSeed })` plus `game.command(...)`, or through
+the optional `bootAudioPreferences`, `bootFullscreenPreferences` and
+`bootInputConfigs` a generated case stores half, a third and a third of
+the time, and `commands`). A stored input configuration retains other
+devices' arbitrary bindings and usually the Keyboard's: the defaults, with
+some second keys no default uses. So
+a finding replays through the browser's `game.reset(...)` with the same
+seeds and settings plus `game.command(...)`, or through
 `engine/src/bin/replay.rs` once its rejected commands are removed (rejections
 leave state unchanged). A case that violates any property retains its tape
 under the run's output directory. Every tape in
@@ -274,9 +304,14 @@ its replay first reaches that stage, so the cut follows the tape through
 every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
-descent, restart and Random-exit regressions, the Monstro, Larry Jr. and
-Gemini kills, the Dingle and Gurglings entries (`"from": null` chases from
-a fresh boot), and the Charger entry. Chargers live in a room chain
+descent, active-item descent, restart, Random-exit, Number One cooldown and
+Envy split-death regressions, the Monstro, Larry Jr. and Gemini kills, the
+Dingle and Gurglings entries and the Options menu (`"from": null` chases
+from a fresh boot), and the Charger entry. Few generated cases reach
+Options at the fifth Main row, so `coverage-options-menu` holds a setting
+past the hold repeat, binds a key in the Keyboard menu, is refused leaving
+it with an action unbound, leaves it with its bindings saved and leaves
+Options through its save on every run. Chargers live in a room chain
 generated floors seldom place, so no fresh-boot branch met one in 192; the
 Charger recipe branches from the Larry Jr. tape's run start
 (`screen:Playing`), whose floor holds that chain, and 12 of 64 branches met
