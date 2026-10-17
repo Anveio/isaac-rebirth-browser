@@ -38,6 +38,17 @@ parity, player world position/velocity and relative clocks remain required;
 every mismatch is retained. Complete selected snapshots, commands and backend
 callback states are streamed losslessly with independently recorded hashes.
 
+The producer declares each Browser presentation's public `timestampMillis`
+before launching the original. Its schedule uses only the selected boot epoch,
+the original launcher's declared 30 bootstrap presentations, and the declared
+Native and Browser tape intervals through `before-run-confirmation`. It
+derives the Browser's first Title time from those public lifecycle boundaries;
+it does not copy an observed clock or request anchor. The complete Native tape
+and timestamped Browser command plan are retained in `public-clock-plan.json`.
+The actual original bootstrap, presentation counts and elapsed nanoseconds must
+then validate that declaration, while the Browser trace must preserve every
+timestamped command exactly. Existing gameplay comparisons remain unchanged.
+
 The first frozen four-case cohort executes all 1,368 dense phases and 12,504
 checks on artifact `fa86a65280ede95da479a4ce98839ae30969fdc9b9bfdb8f42911c25bb0c55c6`.
 All four gates remain failed with 640 required differences: 308 relative-clock,
@@ -71,6 +82,53 @@ Early pause remains unaccepted: the current zero-tick Escape handler can open
 pause before the initial full guard, whereas the source fade guard precedes
 pause admission. The pending `593660` reset also prevents claiming general
 held movement/aim semantics at the completion boundary from controls alone.
+
+## Public clock origin mismatch (#438)
+
+An unchanged `88b3ec75` build reproduces all 640 historical differences on
+the checked-in four-case bank: 243/77/243/77 failures, with all 342 phases per
+case retained. This is the longstanding baseline, not a new game regression.
+Its local report and original/Browser histories remain under
+`.cache/e2e/run-admission-438-main88b3ec75/run-admission/`. Replay the declared
+bank with `npm run test:e2e -- run-admission --scenarios
+references/isaac/foundation/run-admission/scenarios.json`; the producer now
+uses the complete public clock schedule described above.
+
+The former Browser tape started its clock at first Title, whereas the Native
+tape included 30 bootstrap presentations, 180 introductory presentations and
+84 through its Title checkpoint. Browser advanced 63 presentations to that
+checkpoint. The omitted public interval is therefore 231 presentations, or
+3,850,077,000 nanoseconds. The 77,000-nanosecond fraction matters because the
+original independently truncates absolute wall time to milliseconds at the
+menu request and at each full fade guard.
+
+For the fixed even-phase tape, confirmation is Browser presentation 664 and
+Native presentation 895 from their former clock origins, with fractional
+milliseconds of 888,000 and 965,000 nanoseconds. After 105 presentations,
+Native crosses the next integer millisecond and Browser does not, explaining
+the first clock mismatch at run step 106. After 180 presentations, the
+independent integer readings produce elapsed 3,001 versus 3,000 milliseconds,
+explaining the first fade mismatch at step 181 and age/controls at step 229.
+Fresh original observations confirm these predictions from the public tapes.
+
+The correction supplies the same independently declared public wall time to
+both games through the existing timestamp command. It changes no runtime
+clock, fade threshold, f32 subtraction, age counter or comparison tolerance.
+The first Title time can vary with public intro-skip input, so neither 231
+presentations nor 77,000 nanoseconds becomes a runtime constant. Historical
+reports retain their original failures; other live producers must establish
+their own complete public clock schedule before claiming age parity.
+
+The corrected producer passes all four replayed cases on the same immutable
+`88b3ec75` artifact
+`8beae6bbe77714fb59236a91510cf4fa6892be28326b645db77798f6c8a789ae`:
+1,368 dense phases, the unchanged 12,504 required comparisons and zero
+differences. Both actual input histories validate in every case. The local
+report is
+`.cache/e2e/run-admission-438-public-clock-replay-main88b3ec75/run-admission/report.json`.
+This qualifies the equal-clock admission producer and that artifact. It does
+not regrade the earlier captures, fix a game runtime, qualify another suite's
+clock plan, or establish introductory cutscene or full-frame visual parity.
 
 ## Unsupported character requests
 
