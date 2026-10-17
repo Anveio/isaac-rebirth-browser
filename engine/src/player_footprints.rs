@@ -11,13 +11,15 @@ const TINT: [f32; 4] = [0.0, 0.0, 0.0, 0.7];
 /// Player531850 calls 50c000 at 531c8f, after its shot callbacks. Only the
 /// full update spawns: the intermediate pass sharing that counter does not.
 /// `velocity` is the player's velocity after input and before this update's
-/// grid collision, which 531c8f precedes.
-pub(crate) fn advance(state: &mut State, velocity: WorldVector) -> Result<(), String> {
-    // 50bef0(-1): IsFrame444890(6, 0) reads Game+ce9f4 directly.
-    // Ordinary Full dispatch already increments it before Player callbacks;
-    // ChangeRoom's admitted Room.Update uses the unchanged counter.
-    // A clear Player+d68 byte is required; no supported player sets it.
-    let counter = state.game_update_count;
+/// grid collision, which 531c8f precedes. `counter` is the Game+ce9f4 value
+/// the caller's dispatch reads (see the callers).
+pub(crate) fn advance(
+    state: &mut State,
+    velocity: WorldVector,
+    counter: u32,
+) -> Result<(), String> {
+    // 50bef0(-1): IsFrame444890(6, 0) reads Game+ce9f4 directly. A clear
+    // Player+d68 byte is required; no supported player sets it.
     if !counter.is_multiple_of(6) {
         return Ok(());
     }
