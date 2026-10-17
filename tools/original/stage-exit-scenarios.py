@@ -38,10 +38,11 @@ ANCHOR_IDLE = 120
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
 
 
-def record(base, *args, rooms='0', arrival=''):
+def record(base, *args, rooms='0', arrival='', production_directory=None):
     with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
         json.dump(base, handle); handle.flush()
-        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *map(str, args)],
+        production = ['--production-directory', str(production_directory)] if production_directory else []
+        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *production, *map(str, args)],
                                 cwd=ROOT, capture_output=True, text=True, timeout=3600)
     lines = result.stdout.strip().splitlines()
     if not lines:
@@ -58,7 +59,7 @@ def frames(actions):
     return sum(action['frames'] for action in actions if action['type'] == 'step')
 
 
-def fought(fixture):
+def fought(fixture, production_directory=None):
     """The shared route plus each game's own fight, recorded once per fixture.
 
     The port's fight is its own closed-loop keys (boss-route-record.mjs
@@ -80,9 +81,14 @@ def fought(fixture):
     # originalHealth [red, maxRed, soul]: the original's fight ends below full
     # health, so a port fight at full health takes one bomb blast (--hurt).
     red, maximum, soul = fixture.get('originalHealth', [0, 0, 0])
-    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *(['--hurt'] if red + soul < maximum else []))
+    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
+                  *(['--hurt'] if red + soul < maximum else []), production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
+    build = port.get('build')
+    if not isinstance(build, str) or len(build) != 64 or any(char not in '0123456789abcdef' for char in build):
+        raise ValueError('Port fight must identify its actual production artifact')
+    result['portRecordedBuild'] = build
     fights = {'tape': fixture['originalFight'], 'pairedTape': keys_only(port['actions'])}
     for name, fight in fights.items():
         if frames(fight) + 240 > WINDOW:
@@ -106,7 +112,7 @@ def near(points):
             if any(((40 + col * 40 - x) ** 2 + (120 + row * 40 - y) ** 2) ** 0.5 < 30 for x, y in points)]
 
 
-def case(fixture, base, fights, identifier, randomized, idle, via):
+def case(fixture, base, fights, identifier, randomized, idle, via, production_directory=None):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
         # `exit-start` labels the padding step rather than a capture: where
@@ -126,9 +132,12 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
-                  *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor')
+                  *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor',
+                  production_directory=production_directory)
     if tail['status'] != 'pass':
         return None, f"port-exit: {tail['reason']}"
+    if tail.get('build') != base.get('portRecordedBuild'):
+        raise ValueError('Port fight and exit must be recorded on the same production artifact')
     anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
     actions = keys_only(tail['actions'][:anchor]) + tail['actions'][anchor:]
     routes.dense(actions, 120, 'basement-ii', 4)
@@ -146,7 +155,13 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     # replay on another build feeds them to a different game (state-pair warns).
     result['portRecordedBuild'] = tail.get('build')
     result['stageExit'] = {'fixture': fixture['name'], 'rooms': fixture['rooms'], 'window': WINDOW, 'idle': idle, 'via': via,
-                           'fightFrames': {name: frames(fight) for name, fight in fights.items()}}
+                           'fightFrames': {name: frames(fight) for name, fight in fights.items()},
+                           'recordedBuilds': {'fight': base['portRecordedBuild'], 'exit': tail['build']}}
+    if 'carriedActiveItemId' in fixture:
+        item_id = fixture['carriedActiveItemId']
+        if type(item_id) is not int or not 1 <= item_id <= 346:
+            raise ValueError('The carried active item must be an authored positive collectible ID')
+        result['stageExit']['carriedActiveItemId'] = item_id
     return result, None
 
 
@@ -154,13 +169,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contrived', action='append', default=[], metavar='FIXTURE', help='fixture name under references/.../stage-exit')
     parser.add_argument('--count', type=int, default=1, help='OS-random approach cases per fixture')
+    parser.add_argument('--production-directory', help='Existing immutable production artifact for both public-input recordings')
     args = parser.parse_args()
     entropy = random.SystemRandom()
     cases, failures = [], []
     for name in args.contrived:
         fixture = {**json.loads((FIXTURES / f'{name}.json').read_text()), 'name': name}
-        base, fights = fought(fixture)
-        built, reason = case(fixture, base, fights, f'{name}-contrived', False, 0, None)
+        base, fights = fought(fixture, args.production_directory)
+        built, reason = case(fixture, base, fights, f'{name}-contrived', False, 0, None, args.production_directory)
         if built is None:
             raise ValueError(f'Contrived stage exit {name} failed: {reason}')
         cases.append(built)
@@ -170,7 +186,7 @@ def main():
                 blocked = AWARD_CELLS | set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', [])))
                 cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
-                                     [40 + cell % 15 * 40, 120 + cell // 15 * 40])
+                                     [40 + cell % 15 * 40, 120 + cell // 15 * 40], args.production_directory)
                 if built is not None or not reason.startswith('port-exit'):
                     break
             if built is None:
