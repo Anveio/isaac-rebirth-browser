@@ -131,7 +131,10 @@ the one global MT19937 every effect, sound and particle draws from.
 
 Port: seed codec and entry, run/stage/descriptor streams, ItemPool and Player
 child RNGs, and one shared MT owner for boot, menu, audio, tears and admitted
-actors. Missing: special seeds, and many shared-MT consumers, so the port's
+actors. Fresh Character admission also forwards its owned menu code through
+the seed-effect lookup; the [scoped live owner comparison](run-admission.md#fresh-character-seed-effect-owner)
+does not establish special-seed effects or later placement behavior.
+Missing: special seeds, and many shared-MT consumers, so the port's
 MT stream drifts from the original during play. Every missing consumer is a
 P2 bug here even when its caller lives in another subsystem.
 
