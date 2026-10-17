@@ -13,6 +13,17 @@ const helper = flag('--scenario-helper');
 // let one registry line drive a generic helper and comparator per entity.
 const repeated = name => process.argv.flatMap((arg, index) => arg === name ? [process.argv[index + 1]] : []);
 const helperArgs = repeated('--helper-arg'), comparatorArgs = repeated('--comparator-arg');
+// Pass-through values can themselves name --production-directory. Resolve
+// this outer option before authoring, excluding only the two forwarded lists.
+const outerArgv = [];
+for (let index = 0; index < process.argv.length; index++) {
+  const arg = process.argv[index];
+  if (arg === '--helper-arg' || arg === '--comparator-arg') {
+    assert.ok(index + 1 < process.argv.length, `Missing value for ${arg}`);
+    index++;
+  } else outerArgv.push(arg);
+}
+const productionDirectory = flag('--production-directory', undefined, outerArgv);
 const comparator = flag('--comparator');
 assert.ok(helper && comparator, 'state-pair requires --scenario-helper and --comparator');
 const name = basename(comparator, '.mjs');
@@ -33,7 +44,8 @@ const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `re
 // Browser manifests and traces are gzipped losslessly as they are written
 // (~250 MB raw per case); the comparators read either form.
 const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'paired'), selected: [], randomCount: 0, replayCases: tapes,
-  productionDirectory: flag('--production-directory'),
+  productionDirectory,
+  originalObserver: flag('--state-observer') || undefined,
   reuseOriginalDirectory: flag('--reuse-original'),
   nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
   archiveBrowserEvidence: true })

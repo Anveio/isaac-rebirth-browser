@@ -183,7 +183,15 @@ def observe(pid,context):
  except Exception as error:report['status']='fail';report['error']=repr(error)
  finally:
   if stopped:os.kill(pid,signal.SIGCONT)
- if report['status']=='pass'and report.get('gamePresent'):
+ #The core fields above are valid on every actual gameplay stage. A caller
+ #that needs only those owners may explicitly omit the separate stage1-only
+ #pickup-world reader; the default acquisition/world contract is unchanged.
+ include_world = context.get('includePickupWorld', True)
+ if type(include_world) is not bool:
+  report['status']='fail';report['error']='includePickupWorld must be an explicit bool'
+ if include_world is False:
+  report['worldScope']='Explicit core item owners only; no pickup-world observation requested'
+ if report['status']=='pass'and report.get('gamePresent')and include_world:
   report['world']=world_reader.observe(pid,context)
   if report['world']['status']!='pass':report['status']='fail';report['error']='Native world observer failed'
  return report

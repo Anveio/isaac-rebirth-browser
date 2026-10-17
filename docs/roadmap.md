@@ -189,7 +189,9 @@ name streak, chapter order, Womb/Utero to Sheol/Cathedral, final floors,
 endings.
 
 Port: boss clear award (with poop occupants), trapdoor, stage transition and
-the Basement I to Basement II step. Missing: every step after Basement II,
+the Basement I to Basement II step. The [carried-active follow-up](stage-exit-evidence.md)
+passes 48 mandatory identity/charge/reserve/ownership/descent checks across
+two active routes on frozen f837, with an ordinary control. Missing: every step after Basement II,
 alternate stages, endings.
 
 Next: coordinate later-stage admission with the level workstream (#413).
@@ -443,7 +445,7 @@ Challenge1 ingress.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #499 | P2 | PR503 removes the active-ID stage-save refusal; a natural active-item descent fixture and fuzz variation remain owed | issue; e2e stage-exit pending |
+| #499 | P2 | PR503 removes the active-ID stage-save refusal; the bounded Lemon Mishap descent and recorded OS approach now pass 48 actual carried-word/descent checks on frozen f837. Random-held-active-item fuzz remains owed; later stages, other active effects and pixels remain separate | [scoped evidence](stage-exit-evidence.md); e2e stage-exit |
 
 ## Co-op
 
