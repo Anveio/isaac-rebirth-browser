@@ -3782,6 +3782,8 @@ impl Game {
                 Some(
                     player_animation::Clip::UseItem
                         | player_animation::Clip::Hit
+                        | player_animation::Clip::Sad
+                        | player_animation::Clip::Happy
                         | player_animation::Clip::Trapdoor
                         | player_animation::Clip::Appear
                 )
@@ -4126,7 +4128,7 @@ impl Game {
             bombs::place(&mut self.state, phase)?;
         }
         active_items::advance(&mut self.state, controls_enabled)?;
-        pockets::note_unowned_use(&mut self.state, controls_enabled);
+        pockets::use_pocket(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {
             player.body_facing = if dx < 0 {
