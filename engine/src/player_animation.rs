@@ -27,6 +27,23 @@ pub(crate) fn force_pickup(state: &mut crate::State) {
     }
 }
 
+///50A680/50A6C0 admit the response sound before force-playing Sad/Happy.
+///The Pill caller owns effect ordering, tint, name text and held slots.
+pub(crate) fn pill_response(state: &mut crate::State, positive: bool) {
+    state.audio.admit(
+        &mut state.boot_lifecycle.shared,
+        state.system_clock.system_counter.wrapping_sub(1),
+        crate::audio::SoundRequest {
+            id: if positive { 268 } else { 267 },
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    force_play(state, if positive { Clip::Happy } else { Clip::Sad });
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub enum Clip {
     Trapdoor,
@@ -34,6 +51,8 @@ pub enum Clip {
     Death,
     UseItem,
     Hit,
+    Sad,
+    Happy,
 }
 
 impl Clip {
@@ -44,6 +63,8 @@ impl Clip {
             Self::Death => "Death",
             Self::UseItem => "UseItem",
             Self::Hit => "Hit",
+            Self::Sad => "Sad",
+            Self::Happy => "Happy",
         }
     }
     fn frames(self) -> u32 {
@@ -53,6 +74,8 @@ impl Clip {
             Self::Death => crate::content::PLAYER_DEATH_FRAMES,
             Self::UseItem => crate::content::PLAYER_USEITEM_FRAMES,
             Self::Hit => crate::content::PLAYER_HIT_FRAMES,
+            Self::Sad => crate::content::PLAYER_SAD_FRAMES,
+            Self::Happy => crate::content::PLAYER_HAPPY_FRAMES,
         }
     }
 }

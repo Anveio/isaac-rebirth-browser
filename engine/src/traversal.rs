@@ -333,6 +333,9 @@ pub(crate) fn advance_transition(
         .find(|door| door.slot == transition.target_slot)
         .expect("reciprocal generated ordinary doorway is authored");
     let normal = outward(transition.target_slot);
+    // ChangeRoom runs Room.Init before PlayerManager moves the player to the
+    // entry door (5bf220 -> 510550); Room.Init's critters see it here.
+    state.departure_position = Some(crate::bombs::player_world(state));
     state.player.x = f64::from(door.world_position.x - normal.x * 40.0) * 0.65 + 32.0;
     state.player.y = f64::from(door.world_position.y - normal.y * 40.0) * 0.65 - 46.0;
     state.player.vx = 0.0;
