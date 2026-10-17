@@ -133,6 +133,7 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
+| #647 | P2 | Options page draws no Map Opacity, Filter, Gamma or Pop-ups values | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
 
 ## Input
 
