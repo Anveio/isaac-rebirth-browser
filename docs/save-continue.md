@@ -3,7 +3,7 @@
 The browser stores three origin-local save slots and reconstructs a supported
 initial normal Isaac room through public Pause Quit, Main Continue and a real
 page reload. This is a partial implementation. Complete Native restoration,
-shared-MT alignment and later-room/item/actor saves remain open.
+broader shared-MT consumers and later-room/item/actor saves remain open.
 
 The versioned, bounded Save packet contains explicit Player, ItemPool,
 Level/Room/GridRecord and profile owners. It does not replace the running
@@ -32,7 +32,58 @@ factories and progression remain explicit unsupported load domains. The packet
 validator and this narrower load admission are separate; a durable packet does
 not by itself establish an implemented Continue caller for every saved state.
 
-## Closed live scope
+## Saved ambient restoration
+
+The successor `137b5e4c` restores Tiny Bug1000/21, Tiny Fly1000/33 and
+Wall Bug1000/68, subtype0, from owned saved records. Records retain manager
+order, position, spawn seed and RNG30 state. Continue runs fresh Init and its
+source callbacks before restoring the saved RNG; it does not copy animation
+state or rerun the first-visit spawn callback. Unknown saved families remain
+unsupported. A legacy packet without ambient ownership is unknown, and its
+Continue request is refused while its stored bytes remain intact.
+
+The ordinary scheduler restores physical positions before the Full/Fast split,
+and critters use the already-incremented Game Full counter. Stop reconstructs
+a Room whose Backdrop constructor owns one raw shared seed; the same callback
+runs before Quit, Death Exit and Restart destination admission. The generated
+seed is retained in the Backdrop owner, including zero.
+
+A fresh current-main build and runtime2/2 pass. Both retained input cases reuse
+their unchanged independent Original captures. All 1,714 inherited ordered rows
+and Native expected values remain: **1,644 pass / 70 fail**, with 52 gains and
+zero lost passes versus `0af25692`. This fixes the 24 fixed-case post-Continue
+Player/tear failures and 28 unused-row127 seed failures. All 14 OS player-Y
+regressions found on the intermediate `adfb14de` candidate are recovered; that
+failed candidate and its reports remain preserved.
+
+The additional 2,034 shared-MT/ambient rows pass 2,006 and fail 28, with 854
+gains and zero losses against the same projection of closed parent captures.
+All 48 measured shared-MT checkpoints match the original cursor and all 624
+words. The 28 remaining additive failures are exact binary32 velocity-word
+differences in three fixed-case ambient bodies before Quit; none occurs after
+Quit or Continue. The OS case passes all 507 additional rows. No tolerance or
+original expected value is changed.
+
+Actual own-save guards pass 66/66 and both natural reloads pass. A real
+same-origin upgrade from `0af25692` confirms that missing legacy ambient
+ownership produces visible refusal before any world request, retaining the
+actual own packet. This witness performs no storage injection. Strict RGBA
+remains 34 pass/28 fail, with no changed verdicts. The 70 inherited failures
+remain 14 typed menu/gameplay-scope errors, 28 literal seed-text separator
+differences and 28 last-penalty-stage differences. Complete gameplay, broader
+saved actors/items/rooms and PCM remain unqualified.
+
+The generic Browser seed-provenance check now uses the unique actual
+`gameplay-start` snapshot when Exit finishes on Main, whose reconstructed
+Character dialog has cleared its transient text. Final committed run-code
+checks remain required. The retained seven-capture Exit/audio case passes all
+95 canonical and 14 audio comparisons on both current-main `253f6a3b` and
+`137b5e4c`, with every expected value, actual value and verdict identical.
+Actual death/Exit, public clocks and three earlier SFX8 positive owners pass;
+pixels remain 4 pass / 3 fail. The earlier rejected capture and its ungraded
+audio remain preserved. This covers Exit, without a Restart or full PCM claim.
+
+## Earlier live scope
 
 The first current404a producer with the explicit Save opt-in ran immutable
 `1b30a0fb` (1,407 files). The registered `save-continue` gate captured one
@@ -74,7 +125,8 @@ packet lacks the count and Continue is refused. Both refusals retain their
 actual failure feedback and own stored bytes; they do not claim resumed
 unsupported gameplay or fault-injected storage coverage.
 
-The strict paired result remains **FAIL: 1,592/1,714 rows pass, 122 fail**.
+The `1b30a0fb`/`0af25692` strict paired result remains preserved as
+**FAIL: 1,592/1,714 rows pass, 122 fail**.
 The fixed case passes 784/857; the OS case passes 808/857. Each retains seven
 canonical one-way gameplay-family scope failures, fourteen unused-row127 seed
 failures, fourteen literal saved-seed text spacing differences and fourteen
@@ -103,13 +155,10 @@ side retains seven Native RGBA matches and five differences; the supplementary
 Native MT readout retains ten word-array passes and ten cursor failures. This
 is a pre-Quit no-loss proof, not a regrade of the full 122 Save failures.
 
-Initial-room ambient effects remain a concrete restoration frontier: Native
-saves and readmits Tiny Bug1000/21, Tiny Fly1000/33 and Wall Bug1000/68 through
-its saved-entity vector; this initial Browser load does not restore them. The
-fixed case has seven such continued Native bodies and the OS case has two,
-while Browser has none. Their constructor/Init/update and shared-MT effects
-need a separately owned saved-ambient implementation; the first-visit spawn
-callback must not be rerun as a substitute.
+The earlier captures exposed seven continued Native ambient bodies in the
+fixed case and two in the OS case, while `1b30a0fb`/`0af25692` restored none.
+The successor above implements that saved-ambient owner; these earlier reports
+retain their original artifact scope and failures.
 
 Private readouts and journals remain local. The public retained bank contains
 only the declared inputs and original OS draw receipt. It carries no Native

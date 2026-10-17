@@ -12,6 +12,78 @@ export function saveOwnerState(source,actual,gameplay,candidate) {
   //one-way gameplay boundary does not understand returning to a menu.
   required('canonical-paired-scope',()=>{checks.push(...scopedState(source,actual,gameplay,candidate));});
   if(!candidate.label.startsWith('save-')&&candidate.label!=='gameplay-start')return checks;
+  // Additive actual owners. Keep every historical canonical/Save row above
+  // and below, including all failures; this law is identical for both legs.
+  required('actual-shared-MT-owners',()=>{
+    const native=source.saveOwn?.sharedMT, browser=actual.bootLifecycle?.shared;
+    for(const owner of [native,browser]){
+      assert.ok(owner&&Number.isInteger(owner.index)&&owner.index>=0&&owner.index<=624);
+      assert.ok(Array.isArray(owner.words)&&owner.words.length===624&&owner.words.every(x=>Number.isInteger(x)&&x>=0&&x<=0xffffffff));
+    }
+    add('actual-shared-MT.index',native.index,browser.index);
+    add('actual-shared-MT.words',native.words,browser.words);
+  });
+  if(source.saveOwn?.systemState===2)required('actual-ambient-manager-owners',()=>{
+    assert.equal(source.gameplay?.status,'pass');assert.equal(source.gameplay.memoryWritten,false);
+    assert.ok(Array.isArray(source.gameplay.entities)&&Array.isArray(actual.spriteEffects));
+    assert.ok(Array.isArray(actual.actorScheduler?.actors)&&Array.isArray(actual.actorScheduler.identities));
+    const nativeCounter=source.gameplay.nativePhase?.systemIterations,browserCounter=actual.systemClock?.systemCounter;
+    for(const counter of [nativeCounter,browserCounter])assert.ok(Number.isInteger(counter)&&counter>=0&&counter<=0xffffffff,'Actual System counter owner');
+    const phase=nativeCounter%2;
+    add('ambient.system-phase',phase,browserCounter%2);
+    const f32Words=values=>{
+      assert.ok(Array.isArray(values)&&values.length===2&&values.every(Number.isFinite),'Actual finite f32 vector owner');
+      const view=new DataView(new ArrayBuffer(4));
+      return values.map(value=>{view.setFloat32(0,value,true);assert.ok(Number.isFinite(view.getFloat32(0,true)));return view.getUint32(0,true);});
+    };
+    for(const entity of source.gameplay.entities){
+      for(const key of ['type','variant','subtype'])assert.ok(Number.isInteger(entity[key])&&entity[key]>=0&&entity[key]<=0xffffffff);
+    }
+    assert.ok(source.gameplay.entities.some(entity=>entity.type===1),'Actual live Native Player manager member');
+    const variants=new Set([21,33,68]);
+    const native=source.gameplay.entities.filter(row=>row.type===1000&&variants.has(row.variant));
+    const effects=new Map(actual.spriteEffects.map(row=>[row.id,row]));
+    assert.equal(effects.size,actual.spriteEffects.length,'Unique actual Browser effect handles');
+    const browser=actual.actorScheduler.actors.filter(row=>row.kind==='effect').map(actor=>{
+      const effect=effects.get(actor.id);assert.ok(effect,'Actual manager/body join');
+      const identity=actual.actorScheduler.identities.find(row=>row.actor.kind==='effect'&&row.actor.id===actor.id);
+      assert.ok(identity&&Number.isInteger(identity.sequenceId));
+      return {...effect,sequenceId:identity.sequenceId};
+    }).filter(row=>row.critter&&variants.has(row.variant));
+    const keys=rows=>{const seen=new Map();return rows.map(row=>{
+      for(const key of ['variant','subtype','spawnSeed','sequenceId'])assert.ok(Number.isInteger(row[key])&&row[key]>=0&&row[key]<=0xffffffff);
+      const key=JSON.stringify([row.variant,row.subtype,row.spawnSeed]);const occurrence=seen.get(key)??0;seen.set(key,occurrence+1);
+      return [1000,row.variant,row.subtype,row.spawnSeed,occurrence];
+    });};
+    add('ambient.listed-count',native.length,browser.length);
+    add('ambient.manager-order',keys(native),keys(browser));
+    // Do not pair siblings by seed alone or reorder either game's manager.
+    // Every Native slot remains mandatory even when Browser dropped it.
+    for(let i=0;i<native.length;i++){
+      const n=native[i],b=browser[i],prefix=`ambient[${i}].`;
+      const sourcePosition=n.position,sourceVelocity=n.velocity;
+      assert.ok([sourcePosition,sourceVelocity].every(v=>Array.isArray(v)&&v.length===2&&v.every(Number.isFinite)));
+      if(b)assert.ok([b.position?.x,b.position?.y,b.presentedPosition?.x,b.presentedPosition?.y,b.velocity?.x,b.velocity?.y].every(Number.isFinite));
+      const browserPosition=b?(phase===0?[b.presentedPosition.x,b.presentedPosition.y]:[b.position.x,b.position.y]):undefined;
+      const browserVelocity=b?[b.velocity.x,b.velocity.y]:undefined;
+      for(const [field,expected,observed] of [['position',sourcePosition,browserPosition],['velocity',sourceVelocity,browserVelocity]]){
+        add(prefix+field+'.f32Words',f32Words(expected),observed===undefined?undefined:f32Words(observed));
+        Object.assign(checks.at(-1),{rawNativeF32Values:expected,rawBrowserDtoValues:observed??null,nativeSystemIterations:nativeCounter,browserSystemCounter:browserCounter});
+        if(field==='position')Object.assign(checks.at(-1),{browserPositionOwner:phase===0?'presentedPosition':'position',rawBrowserPosition:b?[b.position.x,b.position.y]:null,rawBrowserPresentedPosition:b?[b.presentedPosition.x,b.presentedPosition.y]:null,scope:'Actual Native Entity+448 world vector versus actual Browser phase owner; exact binary32 words, no epsilon'});
+      }
+      assert.equal(typeof n.removed,'boolean','Actual Native31F owner');
+      if(b){assert.equal(typeof b.removed,'boolean');assert.equal(typeof b.critter.dying,'boolean');}
+      for(const [field,expected,observed] of [
+        ['sequenceId',n.sequenceId,b?.sequenceId],['variant',n.variant,b?.variant],['subtype',n.subtype,b?.subtype],
+        ['spawnSeed',n.spawnSeed,b?.spawnSeed],['actorRngState',n.actorRngState,b?.actorRng?.state],
+        ['birthGameUpdate',n.birthGameUpdate,b?.birthGameUpdate],['active',n.active,b?.active],['removed',n.removed,b?(b.removed||b.critter.dying):undefined],
+        ['entityCollisionClass',n.entityCollisionClass,b?.entityCollisionClass],['renderOrderOffset',n.renderOrderOffset,b?.renderOrderOffset],
+      ]){
+        assert.notEqual(expected,undefined,'Actual Native owner '+field);
+        add(prefix+field,expected,observed);
+      }
+    }
+  });
   required('actual-Save-owner-and-IO',()=>{
     const native=source.saveOwn;assert.equal(native?.status,'pass');assert.equal(native.memoryWritten,false);assert.equal(native.executableMappingsRead,false);
     assert.ok([0,1,2,3].includes(native.systemState));assert.equal(native.selectedProfile,1);

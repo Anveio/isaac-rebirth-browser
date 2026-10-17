@@ -76,7 +76,13 @@ the own-world reload result is a separate scope. The listed-Bomb guard on0af
 reuses both recorded Native cases with all1714 rows,62 Browser PNGs and62 MT
 states unchanged; runtime2/2 and real Bomb/legacy-own-save refusal witnesses
 pass. The legacy witness uses a real same-origin app upgrade, without storage
-injection. [Save evidence and supported
+injection. The saved-ambient successor137b replays the same fixed/OS inputs:
+all1714 inherited rows remain,1644pass/70fail,52gains and zero lost passes.
+The additional2034 MT/ambient rows pass2006/fail28; all48 measured shared-MT
+checkpoints match cursor and624words. All28 additive failures are fixed-case
+pre-Quit velocity words. OwnSave66/66, both reloads and a real old0af legacy
+ambient-absence refusal pass. The intermediate adfb14 OS regressions and every
+older failure remain preserved; RGBA stays34pass/28fail. [Save evidence and supported
 load domain](../../docs/save-continue.md) describes both. Reuse requires exactly
 one recorded case; the canonical runner owns its host slot. Fresh Native needs
 4 GiB after the production snapshot on the actual evidence filesystem.

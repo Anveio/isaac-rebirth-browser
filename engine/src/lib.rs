@@ -2238,7 +2238,18 @@ impl Game {
             .selectors
             .clone();
         let viewer = bombs::player_world(&self.state);
-        self.admit_room_pickups_owned(&selectors, run.game_update_count, true, viewer, true)?;
+        self.admit_room_pickups_owned(
+            &selectors,
+            run.game_update_count,
+            true,
+            viewer,
+            Some(
+                context
+                    .ambient_records
+                    .as_deref()
+                    .ok_or("Continue saved ambient ownership is unknown")?,
+            ),
+        )?;
         //The Room.Init placement call sees constructor3074=false and returns.
         item_queries::note_room_placement(&mut self.state);
         if let Some(id) = music::stage_track(self.state.stage, false) {
@@ -2396,6 +2407,9 @@ impl Game {
             &self.state.room,
             self.state.current_room,
         )?;
+        //Room.Save5CE418 captures actor records before PlayerManager.Save
+        //can flush later grant callbacks. This is not a later live-state clone.
+        let ambient_records = critters::capture_saved_records(&self.state);
         // Constructor 587ec0 initializes unused grid indices to -1; 58ced0
         // excludes only -3 special records. Fresh normal Level copies all135.
         let rooms: Vec<_> = (0..mt::ROOM_DESCRIPTOR_CAPACITY).collect();
@@ -2426,13 +2440,16 @@ impl Game {
         self.state
             .boot_lifecycle
             .update_saved_game_samples(&self.saved_game);
-        self.retain_profile_save()?;
+        self.retain_profile_save(ambient_records)?;
         Ok(())
     }
 
     ///The caller has completed54F230's actual save copy. File transport
     ///does not invent another Save, consume RNG or serialize the live Game.
-    fn retain_profile_save(&mut self) -> Result<(), String> {
+    fn retain_profile_save(
+        &mut self,
+        ambient_records: Option<Vec<critters::SavedAmbientRecord>>,
+    ) -> Result<(), String> {
         let record = save_profiles::RunRecord {
             run: self
                 .saved_run
@@ -2444,7 +2461,7 @@ impl Game {
                 .saved_run_summary
                 .clone()
                 .ok_or("profile save is missing its completed summary")?,
-            context: save_profiles::RunContext::capture(&self.state),
+            context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
         record.validate()?;
         let retained = self.saved_profiles.get_or_insert_with(|| {
@@ -2697,7 +2714,7 @@ impl Game {
         loader: bool,
         critter_viewer: motion::WorldVector,
     ) -> Result<usize, String> {
-        self.admit_room_pickups_owned(selectors, critter_counter, loader, critter_viewer, false)
+        self.admit_room_pickups_owned(selectors, critter_counter, loader, critter_viewer, None)
     }
 
     fn admit_room_pickups_owned(
@@ -2706,8 +2723,9 @@ impl Game {
         critter_counter: u32,
         loader: bool,
         critter_viewer: motion::WorldVector,
-        saved_room: bool,
+        saved_ambient: Option<&[critters::SavedAmbientRecord]>,
     ) -> Result<usize, String> {
+        let saved_room = saved_ambient.is_some();
         //453EC0 finished its ordinary-list reset and callbacks.
         ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
@@ -2981,6 +2999,11 @@ impl Game {
         self.state.room.authored_actor_order = order;
         self.state.next_pickup = next;
         self.rebuild_room_actor_schedule()?;
+        if let Some(records) = saved_ambient {
+            //5CF585 restores ordinary records before descriptor3C first-visit
+            //gating; the old ambient producer must never run on Continue.
+            critters::restore_saved_records(&mut self.state, records)?;
+        }
         self.state.room.complete_initialization();
         // Room.Init 5cf628: the first visit to a boss room slams its
         // portcullis (SFX 190, 5d0687) after the grid records; 5d0690 then
@@ -3353,6 +3376,13 @@ impl Game {
         Ok(())
     }
 
+    /// Stop54F590 ->584140 ->5CDE50 reconstructs the Room.
+    /// Backdrop423FA0 owns one raw seed before fresh menu/new-run admission.
+    fn reconstruct_stopped_room_backdrop(&mut self) {
+        let boot = &mut self.state.boot_lifecycle;
+        boot.backdrop_seed = boot.shared.next_u32();
+    }
+
     fn finish_pause_quit(&mut self) -> Result<(), String> {
         match self.state.run_quit.save_enabled {
             Some(true) if !self.state.player.dead => {
@@ -3384,6 +3414,7 @@ impl Game {
         self.state.source_cache_run_flags = Some(0);
         // Stop54F571 ->576B70 follows the actual Save copy above.
         self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
+        self.reconstruct_stopped_room_backdrop();
         self.state.run_admission.initial_fade = 0.0;
         self.state.run_quit.fade_alpha = 0.0;
         self.state.run_quit.system_pending = false;
@@ -3407,6 +3438,7 @@ impl Game {
             self.state.acquisition_history =
                 Some(acquisition_history::AcquisitionHistory::default());
             self.state.information_animation.clear();
+            self.reconstruct_stopped_room_backdrop();
             match request {
                 player_death::Request::Restart => {
                     if !self.state.seeded_run {
@@ -3721,6 +3753,7 @@ impl Game {
             bombs::restore_shot_fast_positions(&mut self.state);
             epic_fetus::restore_fast_positions(&mut self.state)?;
             explosion_effects::restore_fast_positions(&mut self.state)?;
+            critters::restore_fast_positions(&mut self.state);
         }
         //54F920's shared HUD streak precedes54F938 and every later
         //GameFull popup/transition/pause guard. Fast has no HUD update.
@@ -4029,7 +4062,6 @@ impl Game {
                 .checked_add(1)
                 .ok_or("game update counter exhausted")?;
             mt::note_update(self.state.game_update_count);
-            critters::replay_loader_update(&mut self.state)?;
         }
         self.advance_room_runtime(phase, bomb_triggered)?;
         if phase != phase::Phase::Skipped {
