@@ -59,7 +59,19 @@ def frames(actions):
 
 
 def fought(fixture):
-    """The shared route plus each game's own fight, recorded once per fixture."""
+    """The shared route plus each game's own fight, recorded once per fixture.
+
+    The port's fight is its own closed-loop keys (boss-route-record.mjs
+    --fight). After the clear they also shoot out any poop the port's fight
+    dropped in the cell inside an open doorway: the shared re-anchor walk
+    needs that doorway clear, and the original's fixture fight left it so.
+    Those keys only shape the port's own segment; no engine rule changes.
+
+    Basement II's generation reads the Player's health and coins at the
+    transition (a Challenge room needs full health, a stage-2 Arcade more
+    than four coins), which each game's own fight decides. A fixture's
+    original fight must leave the same full-health and coin thresholds as
+    the port's, or the next floor's rooms diverge."""
     result = routes.paired.build('paired-bomb-moving-even', fixture['seed'])
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')

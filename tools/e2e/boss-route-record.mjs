@@ -224,6 +224,23 @@ try {
     if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
     const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
     const pedestal = [...AWARD_CELLS.filter(cell => cell > 60), ...AVOID];
+    // Re-entering the room re-closes the trapdoor, which opens only once no
+    // player stands within 50 units (TrapDoor 571225). Step two cells away
+    // from it and wait for the open clip before the approach.
+    if (state.trapdoor.state !== 1) {
+      const clear = cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120
+        && state.grid.solid[cell] !== '1' && ![...AWARD_CELLS, ...AVOID].includes(cell);
+      const away = [index - 2, index + 2, index + 30, index - 30].find(clear);
+      if (away === undefined) throw new Error('No cell two away from the closed trapdoor');
+      const spot = { x: 40 + away % 15 * 40, y: 120 + Math.floor(away / 15) * 40 };
+      await centreWalk(spot, [...AWARD_CELLS, ...AVOID], () => Math.hypot(spot.x - state.player.x, spot.y - state.player.y) <= 4,
+        `No way off the closed trapdoor in ${EXIT} frames`);
+      await hold([]);
+      for (let left = 300; state.trapdoor.state !== 1; left--) {
+        if (left <= 0) throw new Error('The trapdoor did not reopen in 300 frames');
+        await step(1); state = await view();
+      }
+    }
     await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`);
     await hold([]);
     for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {
