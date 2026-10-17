@@ -107,10 +107,10 @@ Keyboard act on keys held at a tick (the released System poll), so
 there the driver holds its presses into ticks, sometimes long enough to
 reach Options' hold repeat. In the Keyboard menu it binds keys, including
 its own play keys, so bindings go missing and back is refused until it
-binds them again or resets. It plays with the default keys, so it usually
-resets them before leaving; a case that leaves with custom bindings plays
-on with keys that may no longer do what it means (a binding-aware driver
-is follow-up work). The menus' contracts:
+resets them. It names its play keys by their default binding and presses
+each through the key now bound to its action, so a case that leaves with
+custom bindings, or boots with them, plays on with them (rebound cases
+reach about as many census keys as default ones). The menus' contracts:
 * an Options tick steps only the volume on the selected row, and leaving
   Options saves the settings it leaves with;
 * bindings and the stored input configuration change only in the Keyboard
@@ -235,8 +235,9 @@ Game tapes use the engine's replay format (`initialSeed`, `bootEpochSeed`,
 the optional `bootAudioPreferences`, `bootFullscreenPreferences` and
 `bootInputConfigs` a generated case stores half, a third and a third of
 the time, and `commands`). A stored input configuration retains other
-devices' arbitrary bindings and usually the Keyboard's: the defaults, with
-some second keys no default uses. So
+devices' arbitrary bindings and usually the Keyboard's: the defaults,
+second keys no default uses, or every configurable action rebound to a
+distinct key. So
 a finding replays through the browser's `game.reset(...)` with the same
 seeds and settings plus `game.command(...)`, or through
 `engine/src/bin/replay.rs` once its rejected commands are removed (rejections

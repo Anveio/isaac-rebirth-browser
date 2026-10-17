@@ -215,8 +215,8 @@ impl Published {
 
 /// An input configuration file as the browser stores it: devices retained
 /// from earlier sessions, with whatever bindings they held, and usually the
-/// Keyboard's. The driver plays with the default keys, so a stored Keyboard
-/// keeps them, sometimes adding second keys no default binding uses.
+/// Keyboard's: the defaults, second keys no default uses, or every
+/// configurable action rebound to a distinct key.
 pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
     let mut devices: Vec<DeviceConfig> = (0..e.below(3))
         .map(|index| DeviceConfig {
@@ -237,10 +237,21 @@ pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
             .filter_map(|code| input::glfw_key(code))
             .filter(|key| !defaults.contains(key))
             .collect();
-        for action in CONFIGURABLE {
-            if !free.is_empty() && e.chance(1, 4) {
-                let key = free.swap_remove(e.index(free.len()));
-                keyboard.bindings[action][1] = key;
+        if e.chance(1, 3) {
+            let mut keys: Vec<i32> = CONFIGURABLE
+                .iter()
+                .map(|action| keyboard.bindings[*action][0])
+                .chain(free.iter().copied().take(CONFIGURABLE.len()))
+                .collect();
+            for action in CONFIGURABLE {
+                keyboard.bindings[action] = [keys.swap_remove(e.index(keys.len())), -1];
+            }
+        } else {
+            for action in CONFIGURABLE {
+                if !free.is_empty() && e.chance(1, 4) {
+                    let key = free.swap_remove(e.index(free.len()));
+                    keyboard.bindings[action][1] = key;
+                }
             }
         }
         let at = e.index(devices.len() + 1);
