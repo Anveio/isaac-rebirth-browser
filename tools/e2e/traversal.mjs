@@ -12,6 +12,7 @@ import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 import { compareChests } from './chest-checks.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step } from './lib/game.mjs';
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -33,12 +34,15 @@ const python = async args => JSON.parse((await run('python3', [helper, ...args],
 await mkdir(output, { recursive: true });
 const bank = value('--scenarios') ? JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')) : await python(['--count', value('--count') || '1']);
 assert.equal(bank.schema, 1);
-assert.ok(bank.cases.length >= 2 && bank.cases.length <= 6, 'Require contrived and independently recorded source routes');
+// A bank recorded under --case holds only the cases that ran.
+if (!bank.caseFilter) assert.ok(bank.cases.length >= 2 && bank.cases.length <= 6, 'Require contrived and independently recorded source routes');
 assert.equal(new Set(bank.cases.map(entry => entry.runSeed)).size, bank.cases.length);
+bank.cases = selectCases(bank.cases, scenario => scenario.code);
+if (flag('--case')) bank.caseFilter = flag('--case');
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(bank, null, 2) + '\n');
 const production = await startProductionServer();
 const browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
-const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length,
+const report = { schema: 1, status: 'running', skipped: 0, selected: bank.cases.length, caseFilter: bank.caseFilter,
   scope: bank.contract === 'large-geometry'
     ? 'Fresh Isaac enters an authored ordinary13x14 room through public movement, follows both radius-inset vertical boundary planes and returns. Exact full/intermediate player motion, native dimensions/bounds, complete authored door indices/positions/endpoints, source descriptor/spawn/visited/minimap joins and supported Rock state are required. Actual normal Chest5/50 constructor, Appear/Idle clocks, radius and collision classes are joined every selected phase. Default CameraStyle1 requires bounded scrolling, exact native endpoints, complete history and freeze/admission lifecycle plus actual viewport visibility at three source-projected phases; interior camera float differences remain diagnostic.'
     : bank.contract === 'chest-opening'

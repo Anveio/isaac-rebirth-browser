@@ -12,6 +12,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
 import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -28,16 +29,19 @@ const scenarios = value('--scenarios') ? JSON.parse(await readFile(resolve(value
     {cwd: ROOT, timeout: 600000})).stdout);
 assert.equal(scenarios.schema, 1); assert.equal(scenarios.mode, 'familiar-appearance');
 assert.equal(scenarios.bootEpochSeed, 1700000000);
-assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
+// A bank recorded under --case holds only the cases that ran.
+if (!scenarios.caseFilter) assert.ok(scenarios.cases.length >= 4 && scenarios.cases.length <= 6);
 assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
-assert.ok(scenarios.cases.filter(item => item.entropy === 'OS secrets').length >= 2);
+if (!scenarios.caseFilter) assert.ok(scenarios.cases.filter(item => item.entropy === 'OS secrets').length >= 2);
+scenarios.cases = selectCases(scenarios.cases, item => item.name);
+if (flag('--case')) scenarios.caseFilter = flag('--case');
 await writeFile(join(output, 'scenarios.json'), JSON.stringify(scenarios, null, 2) + '\n');
 await assertOriginalBinary();
 const server = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = {schema: 1, status: 'running', production: server.build,
   nativeBinarySha256: ORIGINAL_SHA, graphics: await inspectBrowserGraphics(browser),
-  scope: 'Natural free grant/cache, child270 and every actual Familiar/effect presence, source actor order/room sequence, full/fast motion, appearance/countdown/sprite/Poof callback and retirement. Placement and Poof seed differences are mandatory failures. Full624-word MT and absolute Game ages stay explicit diagnostics until missing causal consumers are implemented. Path/target/contact/heal/modifiers and other Familiar subclasses remain unaccepted.', cases: []};
+  scope: 'Natural free grant/cache, child270 and every actual Familiar/effect presence, source actor order/room sequence, full/fast motion, appearance/countdown/sprite/Poof callback and retirement. Placement and Poof seed differences are mandatory failures. Full624-word MT and absolute Game ages stay explicit diagnostics until missing causal consumers are implemented. Path/target/contact/heal/modifiers and other Familiar subclasses remain unaccepted.', caseFilter: scenarios.caseFilter, cases: []};
 
 const modelActor = (state, ref) => {
   let actor, type;

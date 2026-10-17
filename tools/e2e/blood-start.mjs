@@ -9,6 +9,7 @@ import { pipeline } from 'node:stream/promises';
 import { createGzip, createGunzip } from 'node:zlib';
 import { runPairedGate } from '../foundation/paired-game.mjs';
 import { bloodStartComparator } from '../foundation/blood-start-state-pair.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 
 const option = (name, fallback) => { const at = process.argv.indexOf(name); if (at < 0) return fallback;
   assert.ok(process.argv[at + 1]); return process.argv[at + 1]; };
@@ -18,15 +19,14 @@ const save = (path, document) => writeFileSync(path, JSON.stringify(document, nu
 const bank = JSON.parse(execFileSync('python3', ['tools/original/blood-start-scenarios.py'], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 assert.equal(bank.cases.length, 4);
 assert.deepEqual(bank.cases.map(row => row.bloodStartInputPhaseOffset), [0, 1, 0, 1]);
-const selected = option('--case');
-const cases = selected ? bank.cases.filter(row => row.scenario.id === selected) : bank.cases;
-assert.ok(cases.length > 0 && (!selected || cases.length === 1));
+const cases = bank.cases = selectCases(bank.cases, row => row.scenario.id);
+if (flag('--case')) bank.caseFilter = flag('--case');
 save(resolve(output, 'scenarios.json'), bank);
 if (process.argv.includes('--list')) {
   console.log(JSON.stringify(bank.cases.map(row => ({ id: row.scenario.id, seed: row.seed,
     randomized: row.scenario.randomized, captures: row.pairedTape.filter(action => action.type === 'capture').length }))));
 } else {
-  const report = { schema: 1, status: 'running', startedAt: new Date().toISOString(), cases: [],
+  const report = { schema: 1, status: 'running', startedAt: new Date().toISOString(), caseFilter: bank.caseFilter, cases: [],
     scope: 'Partial actual Monstro BloodStart17/SFX72/42. Every selected outcome and existing core mismatch remains blocking; no Explosion/gib/final-heart/Grid17 or whole-state claim.' };
   save(resolve(output, 'report.json'), report);
   for (const [index, definition] of cases.entries()) {

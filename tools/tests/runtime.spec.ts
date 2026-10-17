@@ -26,10 +26,21 @@ test("releasing a held bomb key in seed entry preserves text-only typing and the
     const game = (window as any).game;
     game.pause(); game.reset(3350817387, { trace: true });
   });
-  for (let index = 0; index < 3; index++) await page.keyboard.press("Enter");
+  const step = async (count: number) => page.evaluate(count => (window as any).game.step(count), count);
+  const press = async (code: string, settle: number) => {
+    await page.keyboard.down(code); await step(12);
+    await page.keyboard.up(code); if (settle) await step(settle);
+  };
+  // Follow the public menu tape's declared intervals, including New Run's
+  // deferred admission, while keeping automatic simulation paused.
+  await step(63);
+  for (const screen of ["profile", "main", "character"]) {
+    await press("Enter", 72);
+    expect((await page.evaluate(() => (window as any).game.snapshot())).screen).toBe(screen);
+  }
   await page.keyboard.down("KeyE");
   expect((await page.evaluate(() => (window as any).game.snapshot())).pressed).toContain("KeyE");
-  await page.keyboard.press("Tab"); await page.keyboard.up("KeyE");
+  await press("Tab", 108); await page.keyboard.up("KeyE");
   const released = await page.evaluate(() => ({
     state: (window as any).game.snapshot(), trace: (window as any).game.trace(),
   }));
@@ -41,10 +52,16 @@ test("releasing a held bomb key in seed entry preserves text-only typing and the
   const typed = await page.evaluate(() => (window as any).game.trace());
   expect(typed.commands.slice(released.trace.commands.length)).toEqual([...seed].map(text => ({ type: "text", text })));
   expect(typed.truncated).toBe(false);
-  await page.keyboard.press("Enter"); await page.keyboard.press("Enter");
+  await press("Enter", 72);
+  const committed = await page.evaluate(() => (window as any).game.snapshot());
+  expect(committed.screen).toBe("character");
+  expect(committed.seededRun).toBe(true);
+  await press("Enter", 300);
   const before = await page.evaluate(() => (window as any).game.snapshot());
   expect(before.screen).toBe("playing"); expect(before.inventory.bombs).toBe(1);
-  await page.keyboard.press("KeyE");
+  expect(before.pressed).not.toContain("KeyE");
+  expect(before.bombs).toHaveLength(0);
+  await press("KeyE", 0);
   const after = await page.evaluate(() => (window as any).game.snapshot());
   expect(after.inventory.bombs).toBe(0); expect(after.bombs).toHaveLength(1);
   expect(after.pressed).not.toContain("KeyE");

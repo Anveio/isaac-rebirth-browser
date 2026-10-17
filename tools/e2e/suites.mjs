@@ -135,3 +135,21 @@ export const SUITES = [
 export const RUNNABLE = SUITES.filter(item => !item.alias);
 
 export const suiteById = new Map(SUITES.map(item => [item.id, item]));
+
+// Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
+// in several; every runnable suite sits in at least one.
+export const GROUPS = {
+  boot: ['paired', 'regressions', 'boot-mt', 'ordinary-run', 'run-admission', 'floor'],
+  rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor'],
+  stage: ['stage-exit', 'monstro'],
+  pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
+  items: ['items', 'item-composition', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
+    'active-item-use', 'familiars'],
+  combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
+  monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities'],
+  audio: ['audio', 'music'],
+};
+for (const [group, ids] of Object.entries(GROUPS)) for (const id of ids)
+  if (!suiteById.get(id) || suiteById.get(id).alias) throw new Error(`Group ${group} names unknown or alias suite ${id}`);
+const ungrouped = RUNNABLE.filter(item => !Object.values(GROUPS).some(ids => ids.includes(item.id)));
+if (ungrouped.length) throw new Error(`Suites in no group (add them to GROUPS): ${ungrouped.map(item => item.id).join(', ')}`);

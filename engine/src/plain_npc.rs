@@ -121,22 +121,27 @@ pub(crate) fn walk_frame(npc: &mut Npc, horizontal: &str, vertical: &str, thresh
 
 /// 4fc3d6: a boss plays "Death"; Larry Jr. (4fc8e8) picks DeathBody01 for
 /// a segment with a parent and DeathHead otherwise.
-fn death_clip(npc: &Npc) -> &'static str {
-    if content::clip(&npc.actor, "Death").is_some() {
+fn death_clip(npc: &Npc) -> Option<&'static str> {
+    let clip = if content::clip(&npc.actor, "Death").is_some() {
         "Death"
     } else if npc.parent.is_some() {
         "DeathBody01"
     } else {
         "DeathHead"
-    }
+    };
+    content::clip(&npc.actor, clip).map(|_| clip)
 }
 
 /// A dead boss plays its death clip in state16 before 4f2d10 removes it.
 fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
     let mut frame = npc.death_frame;
     if crate::boss_death::step(npc, &mut frame, &mut friction)? == 0 {
-        let clip = death_clip(npc);
-        play(npc, clip, false);
+        match death_clip(npc) {
+            Some(clip) => play(npc, clip, false),
+            // A boss without a death clip (Envy) takes the generic 4fcb30
+            // branch: the boss callback and removal at frame 0.
+            None => npc.animation_playing = false,
+        }
     }
     npc.death_frame = frame;
     update_sprite(npc)?;
