@@ -3749,7 +3749,11 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
-            entities::Birth::FlyExplosion { seed, position, color } => {
+            entities::Birth::FlyExplosion {
+                seed,
+                position,
+                color,
+            } => {
                 familiars::NpcEffectAdmission {
                     game_update_count: self.state.game_update_count,
                     next_effect: &mut self.state.next_effect,
