@@ -177,6 +177,7 @@ export async function nativeCapture(caseData, directory, nativeFrameTimeout, ori
     assert.ok(audioOwnerTrace, 'Options owners require the actual audio observer library');
     args.push('--audio-options-owners');
   }
+  if (caseData.tnt?.observeEveryTapeStep === true) args.push('--observe-every-step');
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
   if (originalMusicVolume !== undefined) {

@@ -831,6 +831,24 @@ all 1,190 existing comparisons, 59 Browser shared-MT snapshots and 59 PNGs;
 damage/destruction remain separate. [Block evidence](block-grid-evidence.md)
 records the accepted constructor scope and next observed prerequisite.
 
+The [bounded TNT common-callback result](tnt-grid-evidence.md) on frozen
+e3fa5336/1,408 files (WASM e505236c) passes 41,659 required checks:21,038 fixed
+and 20,621 first recorded OS boot 4011211959/idle 8, with fresh Native and actual
+Browser captures,401 clock acknowledgments and 40 selected Native captures.
+All 22,535 prior passes remain exact with zero losses;19,113 added rows pass,
+and 11 invalid live-four guards now pass actual Penny conservation while the
+old raw failures remain unchanged. Separate corrected-clock ordinary-room
+Node and fresh-Native/DOM controls each pass 278 checkpoints,99,406 inherited
+fields and 279 added clock rows, recovering 162 marker failures with zero lost
+parent passes. Broader recorded11-rock/six-bomb/four-key controls preserve
+all1,687,079 inherited field keys and all passing values;8,811 added absolute-clock
+fields pass. The252 known Rock failures remain, with64 already-failing tinted
+positions changed against actual137b and no changed expectations.
+Transient18 seed/callback is UNOBSERVED; capped history,
+fullRGBA, rare50/41 pool/pickup350, mixed-grid order, Player/NPC damage, reentry and
+whole MT remain open. This is no whole-game/current-main qualification.
+
+
 The historical CI matrix discovered thirty-six live suites and ran separate
 jobs with `fail-fast: false`, preserving each result and evidence. Agents now
 own relevant local regression checks before merging; there is no automated

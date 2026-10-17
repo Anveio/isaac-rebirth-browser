@@ -1,8 +1,10 @@
 # Base Rebirth browser port
 
 Work from base Rebirth; keep Afterbirth and Afterbirth+ overlays separate. This
-repository and the owner's original assets/captures remain private. The shipped
-runtime is reconstructed Rust/WASM; native binaries are reference material.
+repository is public; the owner's original resources and captures stay local
+and private. Never add original resource payloads or private captures to commits.
+The shipped runtime is reconstructed Rust/WASM; native binaries are reference
+material.
 
 Keep `TEST_MATRIX.md` synchronized with executable scenarios using
 `npm run matrix:update`. Record implementation, original evidence, passing

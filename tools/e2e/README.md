@@ -105,6 +105,62 @@ remain retained diagnostics; these checks do not claim audible/PCM equality,
 complete music lifecycle or full Shared-MT parity. Default death-bank/OS-random
 admission and the separate `audio` suite's menu/PCM schema are unchanged.
 
+The `tnt` suite declares the complete fixed-plus-one-OS bank before either
+game. Both cases use the natural TNT room reached from run `B911933Y`; the
+second retains the first full-width OS boot seed and bounded 0..15-presentation
+idle hold before firing. This varies boot/shared-MT and public callback phase,
+not the room/run-seed catalogue. No outcome, route or rare reward is filtered
+or resampled. Any traversal or mandatory coverage failure remains a failure.
+
+```sh
+npm run test:e2e -- tnt --no-build --production-directory FROZEN
+npm run test:e2e -- tnt --scenarios SAVED_BANK --no-build --production-directory FROZEN
+npm run test:e2e -- tnt --scenarios SAVED_BANK --case tnt-right-entry-shoot-music1-v2 --no-build --production-directory FROZEN
+```
+
+Replay validates the full retained bank before `--case` selection, draws no
+entropy and rejects empty banks or unknown/mixed-invalid patterns. The complete
+`scenarios.json` and separate `selection.json` preserve filtered replay scope.
+`--count` is fresh-only and this bounded gate admits exactly one random case.
+Native reuse requires recorded input, one selected case, exact archived
+Source/library/case/clock identity and prior passing actual provenance/clock.
+Fresh Native retains the 4 GiB reserve after the immutable production copy. The registered runner
+owns the sole host slot; the driver does not acquire a nested slot. Without
+`--production-directory`, the gate uses the normal built `dist/` snapshot.
+
+Canonical public inputs, all clock acknowledgments, actual final run-seed
+readback and selected standard fields remain mandatory. The added read-only
+Native controller and actual Browser step-return owners require fuse3/2/1/0,
+one blast, impulse on four initially stationary subtype1 Pennies with inventory0,
+strict per-step inventory/Collect/ANM/retirement conservation, effect1 and 2..4 Wood27 births,
+retained seed/sequence/motion/lifetime, path costs and actual configured182
+request/backend/selected submitted PCM. Neither side supplies the other's
+inputs. Full-history caps retain their actual diagnostic status. Transient18
+seed/callback remains explicitly unobserved in presentation-end RAM, never
+zero/pass. Rare50/41 pool/pickup350, mixed-grid order, Player damage, room
+reentry, whole shared MT and fullRGBA remain open.
+
+The bounded live result on frozen `e3fa5336`/1,408 files (WASM `e505236c`)
+passes all 41,659 required checks:21,038 fixed and 20,621 first recorded OS
+boot 4011211959/idle 8. Both fresh Native and actual Browser captures pass,
+with 401 clock acknowledgments/40 selected Native captures and no new entropy.
+All 22,535 earlier passes retain exact expected/actual/status values, with no
+missing prior keys, changed expectations or lost passes. The 19,113 new ledger
+rows pass;11 invalid four-live-after-Collect guards now require actual Penny
+conservation, with every earlier raw report preserved. The input-only whole
+bank is retained as
+[recorded fixed and first OS inputs](../../references/isaac/cases/tnt/recorded-fixed-and-epoch4011211959-idle8-v1.json).
+Separate corrected-clock ordinary-room Node/public-WASM and fresh-Native/DOM
+controls each pass 278 checkpoints,99,406 inherited fields and 279 added absolute
+clock rows, recovering 162 old candidate marker failures with zero parent-pass
+losses. Broader recorded11-rock/six-bomb/four-key controls retain every passing
+field and all1,687,079 inherited keys;8,811 added absolute-clock rows pass.
+The252 known Rock failures remain, including64 already-failing tinted-position
+values changed against actual137b. Keys use fresh Native/DOM plus same-Native
+old-driver137b Node controls; broader Rock/bomb checks use retained Native and
+public WASM. No whole-game or current-main acceptance follows; see
+[TNT scope](../../docs/tnt-grid-evidence.md).
+
 The `options-audio` suite uses the canonical paired capture and public clock
 with actual Options audio/Back owner observations. Its default bank contains
 the fixed audio-arrow regression plus one unfiltered OS seed, boot epoch and
@@ -506,7 +562,11 @@ No game field, public input, clock, RNG stream or capacity floor changes.
 Existing room-frame suites also accept `--wasm-node WASM --wasm-sha SHA`.
 They replay the same declared menu/key/tick commands through the public ABI
 with the same seed and boot epoch, then use the existing per-frame comparer
-and suite minima. They add no resource or state override.
+and suite minima. Both Node and DOM declare timestamps from the public intro
+and menu tape before execution. Actual Native acknowledgments/capture times
+validate that plan before Port playback; strict absolute Full counts at entry
+and every presentation supplement the existing relative clock checks. Native
+readback never chooses a Browser input. They add no resource or state override.
 `--reuse-original DIR` requires this backend and validates the retained
 Original case and public tape against the requested declaration before using
 its observations. A matching port replay is never its own reference.

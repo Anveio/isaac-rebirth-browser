@@ -187,6 +187,24 @@ fn admit_explosion(
     Ok(id)
 }
 
+/// TNT admits its actual explosion and crater BEFORE554490. Unlike555300,
+/// this GameSpawn18 call does not append a dynamic room crater record.
+pub(crate) fn admit_tnt_children(state: &mut State, position: WorldVector) -> Result<bool, String> {
+    if !admits_room(state) {
+        frontier(state, "tntExplosionRoomHistory");
+        return Ok(false);
+    }
+    state
+        .next_effect
+        .checked_add(2)
+        .ok_or("TNT child handles exhausted")?;
+    let seed = state.boot_lifecycle.shared.next_u32();
+    admit_explosion(state, seed, position, AttackColor::WHITE)?;
+    let seed = state.boot_lifecycle.shared.next_u32();
+    admit_crater(state, seed, position)?;
+    Ok(true)
+}
+
 ///Actual common child demands occur AFTER554490 and its nested callbacks.
 ///False is an explicit unperformed branch, never an accepted partial blast.
 pub(crate) fn explode_neutral(

@@ -95,6 +95,8 @@ export const SUITES = [
   suite('hearts', e2e('hearts'), ['--count', '2'], 'Natural Heart pickups through the shared collection guard'),
   suite('troll-bombs', e2e('troll-bombs'), ['--count', '2'], 'Troll/Megatroll conversion and lifetime'),
   suite('rock-blast', e2e('rock-blast'), ['--count', '2'], 'Ordinary rock destruction by bombs'),
+  suite('tnt', e2e('tnt'), [],
+    'Natural TNT common callback: fixed plus first unfiltered OS boot/idle phase; actual fuse, impulse, effect and SFX182 owners'),
   suite('items', e2e('items'), ['--count', '2'], 'Item pools and treasure-room pedestals'),
   suite('common-sku', e2e('common-sku'), ['--count', '1'],
     'Source-authored normal SKU fixtures: four branches plus recorded OS idle-approach controls'),
@@ -172,7 +174,7 @@ export const GROUPS = {
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
   items: ['items', 'item-composition', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars'],
-  combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
+  combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'tnt', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
   monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],
   audio: ['audio', 'music', 'options-audio'],
 };

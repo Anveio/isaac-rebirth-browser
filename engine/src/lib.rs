@@ -144,6 +144,7 @@ mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
 mod target_eligibility;
+pub mod tnt;
 pub mod traversal;
 pub mod wall_hugger;
 mod weapon_plan;
@@ -334,8 +335,9 @@ pub struct Tear {
     pub animation_tier: u8,
     pub collision_radius: f32,
     pub grid_contact: bool,
-    /// 542f70: the tear died on a grid contact above height -60, so its
-    /// death probes the grid for Hurt (5430a5).
+    /// 542f70: this tear attempted its known grid-death Hurt branch before
+    /// that callback's ground integration. The later poof/removal callback
+    /// does not repeat it; unknown source_variant remains unknown.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub grid_death: bool,
     pub motion: projectiles::TearMotion,
@@ -4081,7 +4083,7 @@ impl Game {
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
-        grid_records::advance_tnt(&mut self.state, phase);
+        tnt::advance(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
@@ -4524,6 +4526,35 @@ impl Game {
                 {
                     return controlled_tear::advance(&mut self.state, phase, actor.id);
                 }
+                // 542F70..5430A5 consumes the prior Full grid contact and
+                // calls Hurt before Base447190 integrates this tear. Poof
+                // and removal remain at the next Full dead-entry callback.
+                let mut grid_death = false;
+                if phase == phase::Phase::Update && !newborn {
+                    let hit = self
+                        .state
+                        .tears
+                        .iter()
+                        .find(|tear| tear.id == actor.id)
+                        .filter(|tear| {
+                            tear.motion.lifetime == projectiles::Lifetime::Alive
+                                && tear.grid_contact
+                                && tear.source_variant.is_some_and(|variant| variant != 9)
+                                && tear.attack_flags.0 & (0x8_0000 | 0x2_0000_0000) == 0
+                                && tear.motion.height > -60.0
+                                && tear.motion.height <= -5.0
+                        })
+                        .map(|tear| {
+                            (
+                                tear.motion.position,
+                                1 + i32::from(tear.collision_damage > 10.0),
+                            )
+                        });
+                    if let Some((position, damage)) = hit {
+                        tear_grid_hurt(&mut self.state, position, damage)?;
+                        grid_death = true;
+                    }
+                }
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
                         self.state
@@ -4538,13 +4569,11 @@ impl Game {
                     None
                 };
                 let mut death = None;
-                let mut grid_hurt = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
                         let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
-                        let height = tear.motion.height;
                         let lifetime = tear.motion.advance(phase, tear.grid_contact)?;
                         if lifetime == projectiles::Lifetime::Removed && dying {
                             death = Some(tear_deaths::Death {
@@ -4552,14 +4581,8 @@ impl Game {
                                 height: tear.motion.height,
                                 scale: tear.scale,
                             });
-                            if tear.grid_death {
-                                grid_hurt = Some((
-                                    tear.motion.position,
-                                    1 + i32::from(tear.collision_damage > 10.0),
-                                ));
-                            }
                         } else if !dying && lifetime == projectiles::Lifetime::Dying {
-                            tear.grid_death = tear.grid_contact && height > -60.0;
+                            tear.grid_death = grid_death;
                         }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
@@ -4573,9 +4596,6 @@ impl Game {
                 }
                 if let Some(death) = death {
                     tear_deaths::emit(&mut self.state, death)?;
-                }
-                if let Some((position, damage)) = grid_hurt {
-                    tear_grid_hurt(&mut self.state, position, damage)?;
                 }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
@@ -6112,9 +6132,9 @@ pub extern "C" fn public_keys_len() -> usize {
     PUBLIC_KEYS_JSON.with(Vec::len)
 }
 
-/// 5430a5: after its splash, a tear that died on the grid hurts the cell
-/// under it or, failing that, the cells 10 to either side, stopping at the
-/// first that takes the damage.
+/// 5430a5: the alive callback marks a grid death and immediately hurts the
+/// cell under its pre-integration position or the four adjacent probes.
+/// Poof and removal belong to the next Full callback's dead-entry branch.
 fn tear_grid_hurt(
     state: &mut State,
     position: motion::WorldVector,
