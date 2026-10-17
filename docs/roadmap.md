@@ -111,13 +111,24 @@ bounded same-Native Options fields and both unchanged Browser runtime tests.
 Default paired-kernel replays preserve all prior values: fixed 5999/5999 passes;
 recorded HH936E8Z keeps its 78 failures among 6060 checks, with no lost passes.
 Historical 3a9 runtime/SFX/free-SKU checks keep their separate artifact scope.
-The Options readers/comparer/clock tools are still ignored: durable promotion
-and a permanent registered Options suite remain debt. Controls, Map Opacity,
-Filter, Gamma and Popups callbacks, shaders, OS and reload stay separate. Missing: intro cutscene (the paired tapes
+The registered `options-audio` suite owns actual request/query/gain/reset, Back
+persistence and final public run-seed observations. Its first a716/99f fixed plus
+unfiltered OS result passes 866/866 fields. Fresh main634-based 4ca Native/Browser
+integration replays the same fixed plus recorded JWMM YY0Y bank with no new draws
+or filtering: 866/866 pass and all 32 Browser PNG bytes equal 99f. Fresh Native
+identities and journal labels differ; verdicts do not. Both 400-state history caps
+and 16/32 pixel diagnostics remain failed. The [public replay bank](../references/isaac/cases/options-audio/recorded-fixed-jwmm-epoch-holds-v1.json)
+keeps the inputs. Keyboard Controls now owns
+the 24-action/two-column editor and its persistence; its [artifact-bound fixed,
+unfiltered OS and Full/Fast bomb results](controls-keyboard.md) remain separate
+from other systems. Fresh main173 artifact 4ca passes runtime 2/2 and exact fixed
+W→I plus recorded OS replay (1,568 fields unchanged and 44 identical Browser PNGs).
+Map Opacity, Filter, Gamma and Popups callbacks,
+shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Next: promote durable Options acceptance tools; qualify Controls
-and Map Opacity as separate follow-ups; death screen parity; intro cutscene.
+Next: promote durable Controls acceptance tools; complete Controls
+reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
 See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 
 | Bug | Sev | Symptom | Source |
@@ -128,8 +139,18 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 
 Rebirth scope: keyboard, controllers, mouse, remapping, fullscreen.
 
-Port: keyboard actions through the native action map, with phase-aware
-polling. Missing: controllers, mouse, remapping, drop/map/restart actions.
+Port: configurable 24-action/two-column keyboard mapping, raw key selection,
+duplicate clearing, completeness/Defaults and Back persistence. The Browser
+captures focused physical keys and releases owned keys on focus loss. Actual
+gameplay consumers use phase-aware action polling and physical bomb edges.
+The main632-based artifact passes four fixed cases (2,904 fields), one fresh
+unfiltered OS case (784 fields), runtime 2/2 and both default bomb phases with
+370 rows unchanged against its parent. Fresh main173 artifact 4ca independently
+passes runtime 2/2 and the fixed W→I plus recorded OS replays: 1,568 fields
+unchanged from d10. Other d10 results retain their artifact scope.
+Missing: controllers, mouse, reload acceptance and remaining remapped action
+callbacks, including drop/map/restart. Strict pixels and history caps remain red;
+see [Controls scope](controls-keyboard.md).
 
 Next: drop (Ctrl), map (Tab) and restart (R) actions; gamepad.
 

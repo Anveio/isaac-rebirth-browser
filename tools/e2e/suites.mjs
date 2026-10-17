@@ -129,6 +129,8 @@ export const SUITES = [
   suite('run-admission', e2e('run-admission'), ['--count', '2'],
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
+  suite('options-audio', e2e('options-audio'), ['--count', '1'],
+    'Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed'),
   suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
   suite('footprint-admission', statePair, [
     '--scenario-helper', helper('entity-scenarios.py'),
@@ -153,7 +155,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
-  boot: ['paired', 'regressions', 'boot-mt', 'ordinary-run', 'run-admission', 'floor'],
+  boot: ['paired', 'regressions', 'boot-mt', 'ordinary-run', 'run-admission', 'floor', 'options-audio'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission'],
   stage: ['stage-exit', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
@@ -161,7 +163,7 @@ export const GROUPS = {
     'active-item-use', 'familiars'],
   combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
   monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],
-  audio: ['audio', 'music'],
+  audio: ['audio', 'music', 'options-audio'],
 };
 for (const [group, ids] of Object.entries(GROUPS)) for (const id of ids)
   if (!suiteById.get(id) || suiteById.get(id).alias) throw new Error(`Group ${group} names unknown or alias suite ${id}`);

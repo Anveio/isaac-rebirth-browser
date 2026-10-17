@@ -25,6 +25,8 @@ export class MenuRenderer {
     if (visible(viewX + 960, viewY + 810)) this.seed(ctx, state, viewX + 960, viewY + 810);
     if (visible(viewX, viewY + 270)) this.profile(ctx, state, viewX, viewY + 270);
     if (visible(viewX + 480, viewY + 1080, 380)) this.options(ctx, state, viewX + 480, viewY + 1080);
+    if (visible(viewX + 480, viewY + 1620)) this.controls(ctx, state, viewX + 480, viewY + 1620);
+    if (visible(viewX + 480, viewY + 1890, 810)) this.keyboard(ctx, state, viewX + 480, viewY + 1890);
     this.widgets(ctx, state);
     ctx.save();
     ctx.imageSmoothingEnabled = true;
@@ -122,6 +124,40 @@ export class MenuRenderer {
     //5A79D9/5A7F70: source Settings fullscreen uses inverted layer frames.
     this.assets.draw(ctx, path, "Idle", x, y, state.fullscreen.requested ? 0 : 1, {layers: [6]});
     this.assets.draw(ctx, path, "Idle", x, y, state.optionsMenu.selection, {layers: [8]});
+  }
+
+  private controls(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
+    this.assets.draw(ctx, `${MENU}controllerselectmenu.anm2`, 'Idle', x, y, 0);
+    //Only the actual admitted Keyboard is connected. Retained file devices
+    //cannot become invented connected controller rows.
+    this.assets.font(ctx, 'teammeatfont12', 'Keyboard', x + 280, y + 63, {color:'#362f2d'});
+  }
+
+  private keyboard(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
+    const path = `${MENU}keyconfigmenu.anm2`;
+    this.assets.draw(ctx,path,'Idle',x,y,0,{layers:[0,9,8,7,2,1,3,4]});
+    const names = ['Move up','Move down','Move left','Move right','Shoot up','Shoot down','Shoot left','Shoot right',
+      'Bomb','Item','Pill / card','Drop (unavailable)','Map (unavailable)','Fullscreen (unavailable)','Restart (unavailable)','Mute (unavailable)','Pause (unavailable)'];
+    const actions = [2,3,0,1,6,7,4,5,8,9,10,11,13,17,16,18,12];
+    const labels: Record<number,string> = {'-1':'---',32:'Space',256:'Esc',257:'Enter',258:'Tab',259:'Backspace',
+      260:'Insert',261:'Delete',262:'Right',263:'Left',264:'Down',265:'Up',266:'Page up',267:'Page down',
+      268:'Home',269:'End',340:'Left Shift',341:'Left Ctrl',342:'Left Alt',343:'Left Super',
+      344:'Right Shift',345:'Right Ctrl',346:'Right Alt',347:'Right Super',348:'Menu'};
+    const label = (key: number) => labels[key] ?? (key >= 65 && key <= 90 || key >= 48 && key <= 57
+      ? String.fromCharCode(key) : key >= 290 && key <= 313 ? `F${key-289}` : `Key ${key}`);
+    for (let row=0;row<17;row++) {
+      const at = y + 54 + row*21;
+      this.assets.font(ctx,'teammeatfont12',names[row]!,x+92,at,{color:'#362f2d'});
+      for (let column=0;column<2;column++) {
+        const selected = state.controlsMenu.selection === row && state.controlsMenu.column === column;
+        const text = selected && state.controlsMenu.waiting ? 'Press key' : label(state.keyboard.bindings[actions[row]!]![column]!);
+        //Native column1 is selected by Left; column0 by Right.
+        this.assets.font(ctx,'teammeatfont12',`${selected ? '> ' : ''}${text}`,x+(column === 1 ? 235 : 335),at,
+          {color:selected ? '#8c2a24' : '#362f2d'});
+      }
+    }
+    const row = state.controlsMenu.selection;
+    this.assets.draw(ctx,path,'Idle',x,y,0,{layers:[6],overrides:{6:{YPosition:row === 17 ? 452 : 70+row*21}}});
   }
 
   private main(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {

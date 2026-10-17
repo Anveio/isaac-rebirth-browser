@@ -9,6 +9,7 @@ use crate::entropy::Entropy;
 use rebirth_cleanroom::bombs::player_world;
 use rebirth_cleanroom::grid::Grid;
 use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
+use rebirth_cleanroom::keyboard::Keyboard;
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::music::BackendEvent;
 use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
@@ -27,6 +28,25 @@ const OTHER_KEYS: [&str; 7] = [
     "F5",
     "Digit1",
     "Numpad0",
+];
+/// Keys the driver binds in the Keyboard menu: its own play keys, so a
+/// rebinding moves one of them, and keys no default binds.
+const BINDABLE: [&str; 15] = [
+    "KeyW",
+    "KeyA",
+    "KeyS",
+    "KeyD",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "KeyE",
+    "Space",
+    "KeyQ",
+    "KeyZ",
+    "KeyX",
+    "Escape",
+    "Enter",
 ];
 const MOVES: [&str; 4] = ["KeyW", "KeyA", "KeyS", "KeyD"];
 const AIMS: [&str; 4] = ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"];
@@ -250,6 +270,17 @@ impl Driver {
                 14 => self.press("Escape", 0),
                 _ => self.ticks(e),
             },
+            // The menu explorer opens Main's other menus too: Challenge and
+            // Options (and their Controls and Keyboard pages).
+            Screen::Main if self.persona == Persona::Explorer && self.menu_budget > 0 => {
+                self.menu_budget -= 1;
+                match e.below(20) {
+                    0..=7 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),
+                    8..=14 => self.press("Enter", e.range(0, 2)),
+                    15 => self.press("Escape", 0),
+                    _ => self.ticks(e),
+                }
+            }
             Screen::Main => {
                 if state.main_selection == 0 {
                     match e.below(20) {
@@ -260,14 +291,72 @@ impl Driver {
                     }
                 } else {
                     match e.below(20) {
-                        // Challenge opens a menu; the other actions are rejected.
-                        0..=1 => self.press("Enter", 0),
+                        // Challenge and Options open menus; the other actions
+                        // are rejected. Options polls the held Enter that
+                        // opened it (59B454).
+                        0..=1 => self.press("Enter", e.range(0, 2)),
                         2..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), 0),
                         14 => self.press("Escape", 0),
                         _ => self.ticks(e),
                     }
                 }
             }
+            // Options acts on keys held at a tick (the released System poll),
+            // so presses hold into ticks; long holds reach the hold repeat.
+            Screen::Options => match e.below(20) {
+                0..=6 => self.press(
+                    e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]),
+                    e.range(1, 3),
+                ),
+                7..=11 => {
+                    let hold = if e.chance(1, 6) {
+                        e.range(48, 90)
+                    } else {
+                        e.range(1, 3)
+                    };
+                    self.press(e.pick(&["ArrowLeft", "ArrowRight", "KeyA", "KeyD"]), hold)
+                }
+                12..=13 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                14..=16 => self.press("Escape", e.range(1, 3)),
+                _ => self.ticks(e),
+            },
+            // Controls lists the connected devices (the Keyboard alone) and,
+            // like Options, acts on keys held at a tick: confirm opens the
+            // Keyboard's bindings, back returns to Options.
+            Screen::Controls => match e.below(20) {
+                0..=6 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                7..=12 => self.press("Escape", e.range(1, 3)),
+                13..=14 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), e.range(1, 60)),
+                _ => self.ticks(e),
+            },
+            // Awaiting a key, the next fresh key binds to the selected action.
+            Screen::Keyboard if state.controls_menu.waiting => {
+                let code = if e.chance(1, 2) {
+                    *e.pick(&BINDABLE)
+                } else {
+                    *e.pick(&PUBLIC_KEYS)
+                };
+                self.press(code, e.range(1, 3))
+            }
+            // The driver plays with the default keys, so it usually restores
+            // them before leaving: the reset row is one Up from the first.
+            // Back is refused while an action has no key.
+            Screen::Keyboard if state.keyboard != Keyboard::default() && !e.chance(1, 8) => {
+                let code = match state.controls_menu.selection {
+                    _ if !state.keyboard.complete() && e.chance(1, 6) => "Escape",
+                    17 => "Enter",
+                    0..=8 => "ArrowUp",
+                    _ => "ArrowDown",
+                };
+                self.press(code, e.range(1, 3))
+            }
+            Screen::Keyboard => match e.below(20) {
+                0..=7 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), e.range(1, 3)),
+                8..=9 => self.press(e.pick(&["ArrowLeft", "ArrowRight"]), e.range(1, 3)),
+                10..=12 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                13..=15 => self.press("Escape", e.range(1, 3)),
+                _ => self.ticks(e),
+            },
             Screen::Challenge => match e.below(20) {
                 0..=5 => self.press("Enter", 0),
                 6..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),

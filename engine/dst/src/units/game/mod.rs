@@ -15,8 +15,18 @@ use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::json_diff;
 use crate::props;
-use crate::tape::Tape;
+use crate::tape::{Reset, Tape};
+use rebirth_cleanroom::audio::{SoundEvent, VolumeCallback};
+use rebirth_cleanroom::controls_menu;
+use rebirth_cleanroom::fullscreen::{self, FullscreenPreferences};
+use rebirth_cleanroom::input;
+use rebirth_cleanroom::keyboard::{
+    DeviceConfig, InputConfigs, Keyboard, CONFIGURABLE, DEFAULT_PAIRS,
+};
+use rebirth_cleanroom::music::MusicEvent;
+use rebirth_cleanroom::options_menu::{AudioPreferences, SaveRequest, UnavailableRequest};
 use rebirth_cleanroom::{Command, Game, Screen, State};
+use serde::Serialize;
 use serde_json::json;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::panic::{self, AssertUnwindSafe};
@@ -29,7 +39,7 @@ pub fn run(case: &mut Case) {
     let prefix = resume.as_ref().map_or(&[][..], |tape| &tape.commands[..]);
     let tape = match (replay, &resume) {
         (Some(tape), _) => tape,
-        (None, Some(resume)) => Tape::new(resume.initial_seed, resume.boot_epoch_seed),
+        (None, Some(resume)) => resume.start(),
         (None, None) => {
             let e = &mut *case.entropy;
             let initial_seed = e.nonzero_u32();
@@ -38,11 +48,27 @@ pub fn run(case: &mut Case) {
                 1 => 1_700_000_000 + e.range(0, 200_000_000),
                 _ => e.u32(),
             };
-            Tape::new(initial_seed, boot_epoch_seed)
+            let mut tape = Tape::new(initial_seed, boot_epoch_seed);
+            // The browser boots with the settings its last Options save stored.
+            if e.chance(1, 2) {
+                tape.boot_audio_preferences = Some(AudioPreferences {
+                    sfx_volume: stored_volume(e),
+                    music_volume: stored_volume(e),
+                });
+            }
+            if e.chance(1, 3) {
+                tape.boot_fullscreen_preferences = Some(FullscreenPreferences {
+                    fullscreen: e.chance(1, 2),
+                });
+            }
+            if e.chance(1, 3) {
+                tape.boot_input_configs = Some(stored_input_configs(e));
+            }
+            tape
         }
     };
     let violations = props::violations();
-    let Some(mut simulation) = Simulation::boot(tape.initial_seed, tape.boot_epoch_seed) else {
+    let Some(mut simulation) = Simulation::boot(&tape) else {
         return;
     };
     let mut driver = driver::Driver::new(case.entropy);
@@ -153,15 +179,101 @@ fn round_trip_difference<T: std::fmt::Debug>(
     }
 }
 
+/// What commands publish for the host, in order (`State::begin_command`
+/// clears it as each command starts).
+#[derive(Default, PartialEq, Serialize)]
+struct Published {
+    sounds: Vec<SoundEvent>,
+    music: Vec<MusicEvent>,
+    volume_callbacks: Vec<VolumeCallback>,
+    saves: Vec<SaveRequest>,
+    unavailable: Vec<UnavailableRequest>,
+    fullscreen: Vec<fullscreen::Request>,
+    input_saves: Vec<controls_menu::SaveRequest>,
+    unavailable_actions: Vec<usize>,
+}
+
+impl Published {
+    fn extend(&mut self, state: &State) {
+        self.sounds.extend(state.audio.events.iter().cloned());
+        self.music.extend(state.music.events.iter().cloned());
+        self.volume_callbacks
+            .extend(state.audio.volume_callbacks.iter().cloned());
+        self.saves
+            .extend(state.options_menu.save_requests.iter().cloned());
+        self.unavailable
+            .extend(state.options_menu.unavailable_requests.iter().cloned());
+        self.fullscreen
+            .extend(state.fullscreen.requests.iter().cloned());
+        let controls = &state.controls_menu;
+        self.input_saves
+            .extend(controls.save_requests.iter().cloned());
+        self.unavailable_actions
+            .extend(controls.unavailable_actions.iter().copied());
+    }
+}
+
+/// An input configuration file as the browser stores it: devices retained
+/// from earlier sessions, with whatever bindings they held, and usually the
+/// Keyboard's. The driver plays with the default keys, so a stored Keyboard
+/// keeps them, sometimes adding second keys no default binding uses.
+pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
+    let mut devices: Vec<DeviceConfig> = (0..e.below(3))
+        .map(|index| DeviceConfig {
+            name: format!("Controller {index}"),
+            bindings: std::array::from_fn(|_| {
+                std::array::from_fn(|_| match e.below(8) {
+                    0 => e.u32() as i32,
+                    _ => e.range(0, 349) as i32 - 1,
+                })
+            }),
+        })
+        .collect();
+    if e.chance(3, 4) {
+        let mut keyboard = Keyboard::default();
+        let defaults: Vec<i32> = DEFAULT_PAIRS.iter().map(|(_, key)| *key).collect();
+        let mut free: Vec<i32> = input::PUBLIC_KEYS
+            .iter()
+            .filter_map(|code| input::glfw_key(code))
+            .filter(|key| !defaults.contains(key))
+            .collect();
+        for action in CONFIGURABLE {
+            if !free.is_empty() && e.chance(1, 4) {
+                let key = free.swap_remove(e.index(free.len()));
+                keyboard.bindings[action][1] = key;
+            }
+        }
+        let at = e.index(devices.len() + 1);
+        devices.insert(
+            at,
+            DeviceConfig {
+                name: "Keyboard".into(),
+                bindings: keyboard.bindings,
+            },
+        );
+    }
+    InputConfigs { devices }
+}
+
+/// A volume as the browser stores it: an Options step, an endpoint, or any
+/// four-decimal value within the unit interval.
+fn stored_volume(e: &mut Entropy) -> f32 {
+    match e.below(4) {
+        0 => *e.pick(&[0.0, 1.0]),
+        1 => e.below(11) as f32 / 10.0,
+        _ => e.below(10_001) as f32 / 10_000.0,
+    }
+}
+
 fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String>, String> {
     panic::catch_unwind(AssertUnwindSafe(|| game.command(command)))
         .map_err(|_| harness::take_panic())
 }
 
 impl Simulation {
-    fn boot(initial_seed: u32, boot_epoch_seed: u32) -> Option<Self> {
-        let booted =
-            panic::catch_unwind(|| Game::new_with_boot_epoch(initial_seed, boot_epoch_seed));
+    fn boot(tape: &Tape) -> Option<Self> {
+        let (initial_seed, boot_epoch_seed) = (tape.initial_seed, tape.boot_epoch_seed);
+        let booted = panic::catch_unwind(|| tape.boot());
         let details = json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed });
         match booted {
             Ok(Ok(game)) => {
@@ -173,17 +285,48 @@ impl Simulation {
                     "game: boot publishes the first Title with its seeds",
                     details
                 );
-                let again = Game::new_with_boot_epoch(initial_seed, boot_epoch_seed);
+                // Settings5B9930 applies the stored settings to their owners
+                // before MenuInit's first Music.
+                // The Keyboard owner starts from the stored Keyboard device's
+                // bindings, or the defaults, and every device is retained.
+                let state = &game.state;
+                let configs = tape.boot_input_configs.clone().unwrap_or_default();
+                props::always!(
+                    tape.boot_audio_preferences.is_none_or(|audio| {
+                        state.audio.sfx_volume == audio.sfx_volume
+                            && state.music.volume == audio.music_volume
+                    }) && tape
+                        .boot_fullscreen_preferences
+                        .is_none_or(|display| state.fullscreen.requested == display.fullscreen)
+                        && state.keyboard == configs.keyboard()
+                        && state.input_configs == configs,
+                    "game: boot starts with the stored settings",
+                    json!({
+                        "audio": tape.boot_audio_preferences,
+                        "fullscreen": tape.boot_fullscreen_preferences,
+                        "inputConfigs": tape.boot_input_configs,
+                        "sfx": state.audio.sfx_volume,
+                        "music": state.music.volume,
+                        "requested": state.fullscreen.requested,
+                        "keyboard": state.keyboard,
+                    })
+                );
+                props::sometimes!(
+                    tape.boot_audio_preferences.is_some()
+                        && tape.boot_fullscreen_preferences.is_some(),
+                    "game: a game boots with stored audio and fullscreen settings"
+                );
+                let again = tape.boot();
                 props::always!(
                     again.as_ref().ok() == Some(&game),
-                    "game: boot is a pure function of its seeds"
+                    "game: boot is a pure function of its seeds and stored settings"
                 );
                 invariants::state(&game.state);
                 coverage::begin_case();
                 coverage::observe(&game.state);
                 Some(Self {
                     game,
-                    tape: Tape::new(initial_seed, boot_epoch_seed),
+                    tape: tape.start(),
                     trace: Vec::new(),
                     uncontrolled_since: None,
                 })
@@ -275,13 +418,13 @@ impl Simulation {
     }
 
     /// A batched Tick runs the same system iterations as that many single
-    /// Ticks. Only command-level publication differs: the batch carries every
-    /// iteration's sound and music events, and a screen change resets the
-    /// menu animation counter at the command boundary.
+    /// Ticks. Only command-level publication differs: the batch publishes
+    /// every iteration's outputs (`State::begin_command`) in order, and a
+    /// screen change resets the menu animation counter at the command
+    /// boundary.
     fn batch_matches_single_ticks(&self, before: &Game, count: u32) {
         let mut singles = before.clone();
-        let mut sounds = Vec::new();
-        let mut music = Vec::new();
+        let mut published = Published::default();
         let mut screen_changed = false;
         let mut failed_at = None;
         for index in 0..count {
@@ -295,15 +438,17 @@ impl Simulation {
                 break;
             }
             screen_changed |= singles.state.screen != screen;
-            sounds.extend(singles.state.audio.events.iter().cloned());
-            music.extend(singles.state.music.events.iter().cloned());
+            published.extend(&singles.state);
         }
-        singles.state.audio.events = sounds;
-        singles.state.music.events = music;
+        let mut batched = Published::default();
+        batched.extend(&self.game.state);
+        let mut batch = self.game.clone();
+        batch.state.begin_command();
+        singles.state.begin_command();
         if screen_changed {
-            singles.state.menu_animation_tick = self.game.state.menu_animation_tick;
+            singles.state.menu_animation_tick = batch.state.menu_animation_tick;
         }
-        let equal = failed_at.is_none() && singles == self.game;
+        let equal = failed_at.is_none() && singles == batch && published == batched;
         props::always!(
             equal,
             "game: a batched Tick simulates exactly what single Ticks do",
@@ -311,8 +456,11 @@ impl Simulation {
                 "count": count,
                 "singleFailedAt": failed_at,
                 "difference": (!equal && failed_at.is_none()).then(|| {
-                    let batch = serde_json::to_value(&self.game).unwrap_or_default();
-                    let single = serde_json::to_value(&singles).unwrap_or_default();
+                    let (batch, single) = if singles == batch {
+                        (json!(batched), json!(published))
+                    } else {
+                        (json!(batch), json!(singles))
+                    };
                     json_diff::first(&batch, &single).map(|(path, batch, single)| {
                         json!({ "path": path, "batch": batch, "single": single })
                     })
@@ -386,9 +534,7 @@ impl Simulation {
 
     /// The same tape on a fresh boot reproduces every outcome and state.
     fn replay_matches(&self) {
-        let Ok(mut game) =
-            Game::new_with_boot_epoch(self.tape.initial_seed, self.tape.boot_epoch_seed)
-        else {
+        let Ok(mut game) = self.tape.boot() else {
             return;
         };
         let mut divergence = None;
@@ -411,9 +557,7 @@ impl Simulation {
     /// no simulation state lives outside the serialized game.
     fn continuation_matches(&self, e: &mut Entropy) {
         let commands = &self.tape.commands;
-        let Ok(mut game) =
-            Game::new_with_boot_epoch(self.tape.initial_seed, self.tape.boot_epoch_seed)
-        else {
+        let Ok(mut game) = self.tape.boot() else {
             return;
         };
         let midpoint = if commands.is_empty() {
@@ -448,7 +592,38 @@ impl Simulation {
     /// dispatch on every outcome and on the final published snapshot.
     fn abi_matches(&self) {
         use rebirth_cleanroom as abi;
-        if abi::reset(self.tape.initial_seed, self.tape.boot_epoch_seed) != 0 {
+        let (seed, epoch) = (self.tape.initial_seed, self.tape.boot_epoch_seed);
+        let reset = match self.tape.reset() {
+            Reset::Plain => abi::reset(seed, epoch),
+            Reset::Audio {
+                sfx_volume,
+                music_volume,
+            } => abi::reset_with_audio_preferences(seed, epoch, sfx_volume, music_volume),
+            Reset::Display {
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+            } => abi::reset_with_fullscreen_preferences(
+                seed,
+                epoch,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+            ),
+            Reset::InputConfigs { request } => {
+                let pointer = abi::request_ptr(request.len());
+                if pointer.is_null() {
+                    props::always!(false, "game: the C ABI agrees with direct dispatch");
+                    return;
+                }
+                // SAFETY: request_ptr returned a buffer of exactly request.len().
+                unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
+                abi::reset_with_input_configs(seed, epoch)
+            }
+        };
+        if reset != 0 {
             props::always!(false, "game: the C ABI agrees with direct dispatch");
             return;
         }

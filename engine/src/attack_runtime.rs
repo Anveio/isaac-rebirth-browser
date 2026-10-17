@@ -21,12 +21,12 @@ pub(crate) struct ShootButtons {
 
 impl ShootButtons {
     /// Actual public keyboard actions4/5/6/7 retain independent held values.
-    pub(crate) fn read(pressed: &std::collections::BTreeSet<String>) -> Self {
+    pub(crate) fn read(state: &State) -> Self {
         Self {
-            left: pressed.contains("ArrowLeft"),
-            right: pressed.contains("ArrowRight"),
-            up: pressed.contains("ArrowUp"),
-            down: pressed.contains("ArrowDown"),
+            left: state.keyboard.held(4, &state.pressed),
+            right: state.keyboard.held(5, &state.pressed),
+            up: state.keyboard.held(6, &state.pressed),
+            down: state.keyboard.held(7, &state.pressed),
         }
     }
 
@@ -294,16 +294,15 @@ pub(crate) fn update_movement_direction(state: &mut State, controls: bool) -> Re
         return Err("current movement direction requires its actual positive input scale".into());
     }
     let enabled = controls && state.player.controls_enabled && state.player.input_cooldown <= 0;
-    let pressed = &state.pressed;
     let x = if enabled {
-        f32::from(u8::from(pressed.contains("KeyD")))
-            - f32::from(u8::from(pressed.contains("KeyA")))
+        f32::from(u8::from(state.keyboard.held(1, &state.pressed)))
+            - f32::from(u8::from(state.keyboard.held(0, &state.pressed)))
     } else {
         0.0
     } * scale;
     let y = if enabled {
-        f32::from(u8::from(pressed.contains("KeyS")))
-            - f32::from(u8::from(pressed.contains("KeyW")))
+        f32::from(u8::from(state.keyboard.held(3, &state.pressed)))
+            - f32::from(u8::from(state.keyboard.held(2, &state.pressed)))
     } else {
         0.0
     } * scale;

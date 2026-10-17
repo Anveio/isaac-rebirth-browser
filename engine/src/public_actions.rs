@@ -1,7 +1,4 @@
-//! Fresh default keyboard action triggers owned by the released System poll.
-//! Native Keyboard defaults bind action14 to both Space and Return, and15 to
-//! Escape. Each physical key keeps its own previous state, so pressing Return
-//! while holding Space still triggers the same source action.
+//! Released System poll of actual physical keys through the one Keyboard owner.
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -14,30 +11,33 @@ pub struct PublicActions {
     pub active_triggered: bool,
     pub pocket_pressed: bool,
     pub pocket_triggered: bool,
-    enter_was_down: bool,
-    space_was_down: bool,
-    escape_was_down: bool,
-    pocket_was_down: bool,
+    pub held: [bool; 24],
+    pub triggered: [bool; 24],
+    pub raw_key: Option<i32>,
+    physical_was_down: BTreeSet<String>,
 }
-
 impl PublicActions {
-    /// System5950e0 -> InputPoll60ffe0 runs on both presentations with the
-    /// declared default interpolation. Disabled interpolation skips the odd
-    /// System poll; callers must not advance this owner on Phase::Skipped.
-    pub fn advance(&mut self, pressed: &BTreeSet<String>) {
-        let enter = pressed.contains("Enter");
-        let space = pressed.contains("Space");
-        let escape = pressed.contains("Escape");
-        let pocket = pressed.contains("KeyQ");
-        self.menu_confirm = (enter && !self.enter_was_down) || (space && !self.space_was_down);
-        self.menu_back = escape && !self.escape_was_down;
-        self.active_pressed = space;
-        self.active_triggered = space && !self.space_was_down;
-        self.pocket_pressed = pocket;
-        self.pocket_triggered = pocket && !self.pocket_was_down;
-        self.enter_was_down = enter;
-        self.space_was_down = space;
-        self.escape_was_down = escape;
-        self.pocket_was_down = pocket;
+    ///System5950E0 -> InputPoll60FFE0 runs on both presented parities and is
+    ///not advanced on Phase::Skipped. Trigger is per physical key, not the
+    ///edge of the OR of an action's two columns (Space-held + Enter-fresh).
+    pub fn advance(&mut self, pressed: &BTreeSet<String>, keyboard: &crate::keyboard::Keyboard) {
+        for action in 0..24 {
+            self.held[action] = keyboard.held(action, pressed);
+            self.triggered[action] = keyboard.triggered(action, pressed, &self.physical_was_down);
+        }
+        //62B420 scans0..348 in native numeric order, independent of DOM or
+        //public command arrival order. Escape256 remains a binding candidate.
+        self.raw_key = (0..=crate::input::GLFW_KEY_LAST).find(|key| {
+            crate::input::code_for_glfw(*key).is_some_and(|code| {
+                pressed.contains(code) && !self.physical_was_down.contains(code)
+            })
+        });
+        self.menu_confirm = self.triggered[14];
+        self.menu_back = self.triggered[15];
+        self.active_pressed = self.held[9];
+        self.active_triggered = self.triggered[9];
+        self.pocket_pressed = self.held[10];
+        self.pocket_triggered = self.triggered[10];
+        self.physical_was_down.clone_from(pressed);
     }
 }

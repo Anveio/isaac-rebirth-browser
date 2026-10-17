@@ -7,8 +7,7 @@
 //! natively speak for the artifact browsers run.
 use crate::json_diff;
 use crate::props;
-use crate::tape::Tape;
-use rebirth_cleanroom::Game;
+use crate::tape::{Reset, Tape};
 use serde_json::{json, Value};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use wasmi::{Engine, Instance, Linker, Memory, Store, TypedFunc};
@@ -23,6 +22,9 @@ struct Exports {
     store: Store<()>,
     memory: Memory,
     reset: TypedFunc<(u32, u32), u32>,
+    reset_with_audio_preferences: TypedFunc<(u32, u32, f32, f32), u32>,
+    reset_with_fullscreen_preferences: TypedFunc<(u32, u32, u32, u32, f32, f32), u32>,
+    reset_with_input_configs: TypedFunc<(u32, u32), u32>,
     request_ptr: TypedFunc<u32, u32>,
     command: TypedFunc<(), u32>,
     snapshot_ptr: TypedFunc<(), u32>,
@@ -80,6 +82,9 @@ impl Module {
                 .get_memory(&store, "memory")
                 .ok_or("engine.wasm exports no memory")?,
             reset: export!("reset"),
+            reset_with_audio_preferences: export!("reset_with_audio_preferences"),
+            reset_with_fullscreen_preferences: export!("reset_with_fullscreen_preferences"),
+            reset_with_input_configs: export!("reset_with_input_configs"),
             request_ptr: export!("request_ptr"),
             command: export!("command"),
             snapshot_ptr: export!("snapshot_ptr"),
@@ -132,12 +137,49 @@ impl Module {
                 json!({ "step": "publicKeys", "wasm": String::from_utf8_lossy(&keys) }),
             ));
         }
-        if wasm
-            .reset
-            .call(&mut wasm.store, (tape.initial_seed, tape.boot_epoch_seed))
-            .map_err(trap)?
-            != 0
-        {
+        let seeds = (tape.initial_seed, tape.boot_epoch_seed);
+        let reset = match tape.reset() {
+            Reset::Plain => wasm.reset.call(&mut wasm.store, seeds),
+            Reset::Audio {
+                sfx_volume,
+                music_volume,
+            } => wasm.reset_with_audio_preferences.call(
+                &mut wasm.store,
+                (seeds.0, seeds.1, sfx_volume, music_volume),
+            ),
+            Reset::Display {
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+            } => wasm.reset_with_fullscreen_preferences.call(
+                &mut wasm.store,
+                (
+                    seeds.0,
+                    seeds.1,
+                    fullscreen,
+                    has_audio,
+                    sfx_volume,
+                    music_volume,
+                ),
+            ),
+            Reset::InputConfigs { request } => {
+                let pointer = wasm
+                    .request_ptr
+                    .call(&mut wasm.store, request.len() as u32)
+                    .map_err(trap)?;
+                if pointer == 0 {
+                    return Ok(Some(
+                        json!({ "step": "reset", "reason": "request allocation" }),
+                    ));
+                }
+                wasm.memory
+                    .write(&mut wasm.store, pointer as usize, &request)
+                    .map_err(|error| error.to_string())?;
+                wasm.reset_with_input_configs.call(&mut wasm.store, seeds)
+            }
+        };
+        if reset.map_err(trap)? != 0 {
             return Ok(Some(json!({ "step": "reset" })));
         }
         let count = tape.commands.len();
@@ -203,7 +245,7 @@ impl Exports {
 /// Names a snapshot divergence: replays the native engine through `step` and
 /// returns the first JSON path whose value differs from the WASM snapshot.
 fn first_difference(tape: &Tape, step: usize, wasm: &[u8]) -> Value {
-    let Ok(mut game) = Game::new_with_boot_epoch(tape.initial_seed, tape.boot_epoch_seed) else {
+    let Ok(mut game) = tape.boot() else {
         return Value::Null;
     };
     for command in &tape.commands[..=step] {

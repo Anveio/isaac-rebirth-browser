@@ -56,6 +56,7 @@ mod technology2;
 pub use entities::{implemented_npc_kinds, supports_npc_selector};
 mod contact_candidates;
 mod controlled_knife_homing;
+pub mod controls_menu;
 pub mod envy;
 pub mod familiars;
 pub mod fireplaces;
@@ -81,6 +82,7 @@ mod item_pipeline;
 mod item_queries;
 pub mod items;
 pub mod keepers;
+pub mod keyboard;
 mod knife_path;
 pub mod knives;
 pub mod larry;
@@ -163,6 +165,8 @@ pub enum Screen {
     Profile,
     Main,
     Options,
+    Controls,
+    Keyboard,
     Character,
     Challenge,
     Seed,
@@ -652,6 +656,12 @@ pub struct State {
     #[serde(default)]
     pub options_menu: options_menu::OptionsMenu,
     #[serde(default)]
+    pub controls_menu: controls_menu::ControlsMenu,
+    #[serde(default)]
+    pub keyboard: keyboard::Keyboard,
+    #[serde(default)]
+    pub input_configs: keyboard::InputConfigs,
+    #[serde(default)]
     pub fullscreen: fullscreen::FullscreenState,
     pub challenge_selection: Option<u32>,
     ///Real Config achievement requirements queried for the fresh menu rows.
@@ -844,6 +854,20 @@ pub struct Game {
     special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
 }
 
+impl State {
+    /// Clears what each command publishes afresh for the host: sound and
+    /// music events, SFX volume callbacks, settings and input-configuration
+    /// saves, and unavailable-action reports. A batched Tick publishes every
+    /// iteration's.
+    pub fn begin_command(&mut self) {
+        self.audio.begin_command();
+        self.options_menu.begin_command();
+        self.controls_menu.begin_command();
+        self.fullscreen.begin_command();
+        self.music.begin_command();
+    }
+}
+
 impl Game {
     pub fn new(initial_seed: u32) -> Result<Self, String> {
         Self::new_with_boot_epoch(initial_seed, 0)
@@ -856,6 +880,7 @@ impl Game {
             None,
             None,
             None,
+            keyboard::InputConfigs::default(),
         )
     }
     pub fn new_with_resources(
@@ -883,6 +908,29 @@ impl Game {
         preferences: Option<options_menu::AudioPreferences>,
         fullscreen: Option<fullscreen::FullscreenPreferences>,
     ) -> Result<Self, String> {
+        Self::new_with_input_configs(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            None,
+        )
+    }
+    ///Global file-derived Keyboard configuration is immutable boot input,
+    ///admitted before the actual input owner is constructed.
+    pub fn new_with_input_configs(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: Option<keyboard::InputConfigs>,
+    ) -> Result<Self, String> {
+        let input_configs = input_configs
+            .map(keyboard::InputConfigs::validate)
+            .transpose()?
+            .unwrap_or_default();
         let preferences = preferences
             .map(options_menu::AudioPreferences::validate)
             .transpose()?;
@@ -905,6 +953,7 @@ impl Game {
             special,
             preferences,
             fullscreen,
+            input_configs,
         )
     }
     fn new_with_challenges(
@@ -914,6 +963,7 @@ impl Game {
         special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
         preferences: Option<options_menu::AudioPreferences>,
         fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: keyboard::InputConfigs,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
@@ -967,6 +1017,9 @@ impl Game {
                 profile: 1,
                 main_selection: 0,
                 options_menu: options_menu::OptionsMenu::default(),
+                controls_menu: controls_menu::ControlsMenu::default(),
+                keyboard: input_configs.keyboard(),
+                input_configs,
                 fullscreen: fullscreen::FullscreenState::from_preferences(fullscreen)?,
                 challenge_selection: None,
                 challenge_unlocked: Vec::new(),
@@ -1096,10 +1149,7 @@ impl Game {
         Ok(())
     }
     fn apply(&mut self, command: Command) -> Result<(), String> {
-        self.state.audio.begin_command();
-        self.state.options_menu.begin_command();
-        self.state.fullscreen.begin_command();
-        self.state.music.begin_command();
+        self.state.begin_command();
         match command {
             Command::MusicVolume { volume } => {
                 if !volume.is_finite() || !(0.0..=1.0).contains(&volume) {
@@ -1235,6 +1285,11 @@ impl Game {
         if self.state.screen == Screen::Playing && self.state.run_quit.active() {
             return Ok(());
         }
+        //Legacy Title/Profile/Main/Character/Seed/Pause navigation stays in
+        //this existing physical-key seam in this bounded leaf. Gameplay and
+        //Menu9/10 use the actual keyboard owner; reconfiguring movement must
+        //not silently rewrite these physical public menu commands. Full source
+        //replacement of legacy WASD menu aliases remains a separate frontier.
         let previous_screen = self.state.screen;
         match self.state.screen {
             Screen::Title => {
@@ -1302,7 +1357,7 @@ impl Game {
                 _ => {}
             },
             // Options owns the released System poll, including held repeat.
-            Screen::Options => {}
+            Screen::Options | Screen::Controls | Screen::Keyboard => {}
             Screen::Challenge => match code {
                 "Escape" => self.state.screen = Screen::Main,
                 "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
@@ -1751,7 +1806,7 @@ impl Game {
         self.state.next_bomb = 1;
         self.state.damage_cooldown = 0;
         self.state.bomb_placement_cooldown = bombs::BombPlacementCooldown::default();
-        self.state.bomb_action_was_down = self.held("KeyE");
+        self.state.bomb_action_was_down = self.held(8);
         //54FC2B starts the initial stage streak only after the opaque fade.
         self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
@@ -1992,8 +2047,8 @@ impl Game {
             .update_saved_game_samples(&self.saved_game);
         Ok(())
     }
-    fn held(&self, code: &str) -> bool {
-        self.state.pressed.contains(code)
+    fn held(&self, action: usize) -> bool {
+        self.state.keyboard.held(action, &self.state.pressed)
     }
     /// The supported free regular callback is shared by ordinary full
     /// contacts and the actual Room.Update admission tail.
@@ -2671,7 +2726,9 @@ impl Game {
             self.state.music.room(96);
         }
         if phase != phase::Phase::Skipped {
-            self.state.public_actions.advance(&self.state.pressed);
+            self.state
+                .public_actions
+                .advance(&self.state.pressed, &self.state.keyboard);
             if self.state.screen == Screen::Playing && self.state.run_quit.input_pending {
                 self.state.run_quit.input_pending = false;
                 if self.state.paused
@@ -2717,8 +2774,9 @@ impl Game {
             self.state.music.flush_pending();
         }
         self.flush_menu_initializations(audio_counter)?;
-        let bomb_down = self.held("KeyE");
-        let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
+        let bomb_down = self.held(8);
+        let bomb_triggered =
+            phase != phase::Phase::Skipped && self.state.public_actions.triggered[8];
         self.state.bomb_action_was_down = bomb_down;
         // MenuManager+38 before this iteration's input picks the page update, so
         // the update that reads Start still advances the title clip and a
@@ -2741,6 +2799,12 @@ impl Game {
         let options_callback = phase != phase::Phase::Skipped
             && self.state.screen == Screen::Options
             && self.state.menu_presentation.page == menu_presentation::Page::Options;
+        let controls_callback = phase != phase::Phase::Skipped
+            && matches!(
+                (self.state.screen, self.state.menu_presentation.page),
+                (Screen::Controls, menu_presentation::Page::Controls)
+                    | (Screen::Keyboard, menu_presentation::Page::Keyboard)
+            );
         self.state
             .menu_presentation
             .advance(self.state.screen, menu_input);
@@ -2756,7 +2820,21 @@ impl Game {
             match action {
                 options_menu::Action::None => {}
                 options_menu::Action::Controls => {
-                    self.state.options_menu.request_unavailable(0)?;
+                    self.state.screen = Screen::Controls;
+                    self.state
+                        .menu_presentation
+                        .reconcile_page(self.state.screen, menu_input);
+                    self.state.audio.admit(
+                        &mut self.state.boot_lifecycle.shared,
+                        audio_counter,
+                        audio::SoundRequest {
+                            id: 8,
+                            volume: 1.0,
+                            delay: 0,
+                            looping: false,
+                            pitch: 1.0,
+                        },
+                    );
                 }
                 options_menu::Action::Fullscreen => {
                     self.state.fullscreen.toggle()?;
@@ -2788,6 +2866,73 @@ impl Game {
                 }
                 options_menu::Action::UnsupportedSetting(row) => {
                     self.state.options_menu.request_unavailable(row)?;
+                }
+            }
+        }
+        if controls_callback {
+            let action = if self.state.screen == Screen::Controls {
+                self.state
+                    .controls_menu
+                    .devices(&self.state.public_actions)?
+            } else {
+                self.state.controls_menu.configure(
+                    &self.state.public_actions,
+                    &mut self.state.keyboard,
+                    &mut self.state.input_configs,
+                )?
+            };
+            match action {
+                controls_menu::Action::None => {}
+                controls_menu::Action::Keyboard => self.state.screen = Screen::Keyboard,
+                controls_menu::Action::Devices => self.state.screen = Screen::Controls,
+                controls_menu::Action::Options => self.state.screen = Screen::Options,
+                controls_menu::Action::Refused => {
+                    self.state.audio.admit(
+                        &mut self.state.boot_lifecycle.shared,
+                        audio_counter,
+                        audio::SoundRequest {
+                            id: 187,
+                            volume: 1.0,
+                            delay: 2,
+                            looping: false,
+                            pitch: 1.0,
+                        },
+                    );
+                }
+            }
+            if matches!(
+                action,
+                controls_menu::Action::Keyboard
+                    | controls_menu::Action::Devices
+                    | controls_menu::Action::Options
+            ) {
+                //SetMenu59CAC0 admits8 for every actual nonzero page change.
+                self.state.audio.admit(
+                    &mut self.state.boot_lifecycle.shared,
+                    audio_counter,
+                    audio::SoundRequest {
+                        id: 8,
+                        volume: 1.0,
+                        delay: 0,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+            }
+            self.state
+                .menu_presentation
+                .set_keyboard_scroll(self.state.controls_menu.keyboard_scroll());
+            self.state
+                .menu_presentation
+                .reconcile_page(self.state.screen, menu_input);
+        }
+        if phase != phase::Phase::Skipped && self.state.screen == Screen::Playing {
+            //No source callback has been admitted for these global actions.
+            //Their real held/triggered owners remain observable; each actual
+            //attempt emits an explicit capability failure, never a fake effect.
+            for action in [11, 12, 13, 16, 17, 18] {
+                if self.state.public_actions.triggered[action] {
+                    self.state.controls_menu.unavailable_actions.push(action);
                 }
             }
         }
@@ -3353,8 +3498,8 @@ impl Game {
         self.refresh_minimap();
         if phase.updates_nonplayers() {
             npcs::advance_room_clear(&mut self.state)?;
-            let dx = i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"));
-            let dy = i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"));
+            let dx = i32::from(self.held(1)) - i32::from(self.held(0));
+            let dy = i32::from(self.held(3)) - i32::from(self.held(2));
             doors::check_unlock(&mut self.state, dx, dy);
             traversal::check_departure(
                 &mut self.state,
@@ -3556,10 +3701,8 @@ impl Game {
             return;
         }
         let aim = motion::WorldVector {
-            x: f32::from(u8::from(self.held("ArrowRight")))
-                - f32::from(u8::from(self.held("ArrowLeft"))),
-            y: f32::from(u8::from(self.held("ArrowDown")))
-                - f32::from(u8::from(self.held("ArrowUp"))),
+            x: f32::from(u8::from(self.held(5))) - f32::from(u8::from(self.held(4))),
+            y: f32::from(u8::from(self.held(7))) - f32::from(u8::from(self.held(6))),
         };
         let known_constructor = self.state.camera.is_some();
         let camera = self
@@ -4140,10 +4283,7 @@ impl Game {
                 self.state.player_animation.current = None;
             }
         }
-        let released_shoot = !(self.held("ArrowUp")
-            || self.held("ArrowDown")
-            || self.held("ArrowLeft")
-            || self.held("ArrowRight"));
+        let released_shoot = !(self.held(6) || self.held(7) || self.held(4) || self.held(5));
         let bomb_callback_owned = !bomb_triggered
             || !controls_enabled
             || !self.state.player.controls_enabled
@@ -4228,7 +4368,7 @@ impl Game {
                     let buttons = if let Some(step) = &technology2_step {
                         step.buttons
                     } else {
-                        attack_runtime::ShootButtons::read(&self.state.pressed)
+                        attack_runtime::ShootButtons::read(&self.state)
                     };
                     let callback_aim =
                         if plan.controller == weapon_plan::ControllerChannel::OrdinaryKnife {
@@ -4441,12 +4581,12 @@ impl Game {
         }
 
         let dx = if controls_enabled {
-            i32::from(self.held("KeyD")) - i32::from(self.held("KeyA"))
+            i32::from(self.held(1)) - i32::from(self.held(0))
         } else {
             0
         };
         let dy = if controls_enabled {
-            i32::from(self.held("KeyS")) - i32::from(self.held("KeyW"))
+            i32::from(self.held(3)) - i32::from(self.held(2))
         } else {
             0
         };
@@ -4526,13 +4666,13 @@ impl Game {
                 .is_some_and(|items| items.pickup_animation_guard);
         let aim = if !controls_enabled || animation_guard {
             None
-        } else if self.held("ArrowLeft") {
+        } else if self.held(4) {
             Some(Direction::Left)
-        } else if self.held("ArrowRight") {
+        } else if self.held(5) {
             Some(Direction::Right)
-        } else if self.held("ArrowUp") {
+        } else if self.held(6) {
             Some(Direction::Up)
-        } else if self.held("ArrowDown") {
+        } else if self.held(7) {
             Some(Direction::Down)
         } else {
             None
@@ -4660,7 +4800,7 @@ thread_local! {
     static SNAPSHOT: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static ERROR: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static PUBLIC_KEYS_JSON: Vec<u8> =
-        serde_json::to_vec(&input::PUBLIC_KEYS).expect("key codes serialize");
+        serde_json::to_vec(input::PUBLIC_KEYS.as_slice()).expect("key codes serialize");
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {
@@ -4820,6 +4960,53 @@ fn reset_with_fullscreen_inputs(
             }),
         )
     };
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+///Additive inputconfigs.dat boot ingress. REQUEST carries only declared
+///startup inputs, never a live binding/state setter. Legacy reset ABIs remain.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct InputConfigBoot {
+    #[serde(default)]
+    with_resources: bool,
+    #[serde(default)]
+    audio_preferences: Option<options_menu::AudioPreferences>,
+    #[serde(default)]
+    fullscreen_preferences: Option<fullscreen::FullscreenPreferences>,
+    input_configs: keyboard::InputConfigs,
+}
+#[no_mangle]
+pub extern "C" fn reset_with_input_configs(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    let result = REQUEST.with(|request| {
+        let boot: InputConfigBoot =
+            serde_json::from_slice(&request.borrow()).map_err(|error| error.to_string())?;
+        let resources = if boot.with_resources {
+            Some(BOOT_RESOURCE.with(|buffer| {
+                serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+                    .map_err(|error| error.to_string())
+            })?)
+        } else {
+            None
+        };
+        Game::new_with_input_configs(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            boot.audio_preferences,
+            boot.fullscreen_preferences,
+            Some(boot.input_configs),
+        )
+    });
     match result {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));

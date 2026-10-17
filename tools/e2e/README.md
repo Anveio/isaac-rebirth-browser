@@ -77,6 +77,46 @@ remain retained diagnostics; these checks do not claim audible/PCM equality,
 complete music lifecycle or full Shared-MT parity. Default death-bank/OS-random
 admission and the separate `audio` suite's menu/PCM schema are unchanged.
 
+The `options-audio` suite uses the canonical paired capture and public clock
+with actual Options audio/Back owner observations. Its default bank contains
+the fixed audio-arrow regression plus one unfiltered OS seed, boot epoch and
+recorded navigation hold. The critical 237 burst stays unchanged; held menu
+navigation varies below the source repeat threshold. Every case completes the
+public Tab/seed/normal-start route and requires actual final run-seed readback.
+
+```sh
+npm run test:e2e -- options-audio --no-build --production-directory FROZEN
+npm run test:e2e -- options-audio --scenarios SAVED_BANK --case audio-arrows-back-v1 --no-build --production-directory FROZEN
+npm run test:e2e -- options-audio --scenarios references/isaac/cases/options-audio/recorded-fixed-jwmm-epoch-holds-v1.json --no-build --production-directory FROZEN
+```
+
+Requests, configured-wrapper identity, actual IsPlaying/gain writes, class
+stops, pool resets, submitted sample PCM and Browser API witnesses remain
+separate mandatory evidence. Native physical stops and Browser old-voice
+stops have independent source-derived stage counts. Missing owner evidence,
+wrong labels, an incomplete input/backend journal or a missed playing window
+fails the case. The bounded actual step-return journal supplies Back witnesses; the selected
+request windows still require every actual command state, including keys, to
+survive the unchanged 32 MiB history cap. Pixel
+comparisons and the full-history cap retain their actual diagnostic results;
+there is no full audible mix, complete MT, other-row or reload acceptance.
+
+`--reuse-original PATH/TO/CASE/original` requires one selected exact case and
+the matching archived observer identity, library, clock, public preferences
+and prior validated Native status. Legacy captures without this identity are
+rejected before Browser launch. Fresh Native capture requires 4 GiB free after
+the production snapshot; fixed replay validation does not establish OS coverage.
+The first registered producer on a716 with frozen 99f passes the fixed case
+and one unfiltered recorded seed/epoch/hold case: 866/866 functional checks.
+Both full-history caps and 16 of 32 pixel comparisons remain failed diagnostics.
+Fresh main634-based Controls-source integration on frozen 4ca replays that same
+fixed plus recorded JWMM YY0Y bank, without new draws or filtering: 866/866 pass.
+All 32 Browser PNG bytes equal 99f; fresh Native object identities and journal
+sequence labels differ, with zero verdict changes. The current full-history caps
+remain failed at 400/1112 and 400/1142 states; 16/32 pixel diagnostics remain failed.
+The kept input-only bank above reproduces both cases. Historical results retain
+their original producer/artifact scope.
+
 The bounded `footprint-admission` suite mixes a fixed regression route with one
 Source-selected OS-random adjacent miniboss room. It stops at `entry-40` before
 shooting and requires actual room6/living-NPC admission plus every initial NPC
