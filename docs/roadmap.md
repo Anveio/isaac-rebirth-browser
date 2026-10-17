@@ -78,7 +78,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
-| [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
+| [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
 | [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
@@ -242,7 +242,10 @@ Rebirth scope: placement, fuse, blast, damage, craters, bomb items and
 variants (Troll, Mega, Bobby, Butt, ...).
 
 Port: placement, fuse, motion, blast damage to player, NPCs and grid, Troll
-and Mega Troll conversion. Missing: bomb-modifying items, craters, Bomb Bum
+and Mega Troll conversion. Ordinary class5 Full ground response now follows
+entity contacts and both phases clamp to actual Room bounds; [scoped #349
+evidence](system-map.md#ordinary-bomb-late-grid-response-349) retains unresolved
+center/near-wall NPC timing. Missing: bomb-modifying items, craters, Bomb Bum
 and other variants.
 
 No open bugs. Bomb contact bugs are under *Collision and physics*.
@@ -257,7 +260,6 @@ including large rooms.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #349 | P2 | Placed bombs skip the post-contact grid pass, so an NPC can push one into a wall | DST |
 | #365 | P2 | Player-pushed chests sink into walls or open doorways; original behavior needs a live comparison before changing the constraint | DST; original comparison pending |
 | #218 | P2 | Original leaves about 2 px of player/NPC overlap for one update; the port separates at once | e2e |
 | #190 | P2 | Player/grid contact slides sub-unit amounts at rock edges in large rooms | e2e |
@@ -463,6 +465,8 @@ Bugs in a test route or tool rather than in the game.
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
 
 ## Recently fixed
+
+- #349 restores ordinary-bomb ground response after NPC contacts and clamps to Room bounds; [scoped qualification](system-map.md#ordinary-bomb-late-grid-response-349) preserves the separate unresolved Hugger timing and existing regression failures.
 
 - #612 restores dead Player Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
 
