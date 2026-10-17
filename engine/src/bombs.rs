@@ -1029,6 +1029,10 @@ pub(crate) fn explode_tnt(state: &mut State, position: WorldVector) -> Result<()
     )
 }
 
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each argument is a separate input of the 554490 explosion routine: position, radius, damage, source, copied EntityRef, damage flags and the line-check switch TNT disables"
+)]
 fn explode_with_kind(
     state: &mut State,
     position: WorldVector,
