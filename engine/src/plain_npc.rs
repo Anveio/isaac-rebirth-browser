@@ -388,9 +388,11 @@ fn champion_hooks(
     world: &mut NpcWorld,
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
+    // Effect admission retains the actual Game+ce9f4 callback counter.
+    let game_counter = world.effects.game_update_count;
     if npc.champion.as_ref().map(|champion| champion.color) != Some(2)
         || npc.entity_flags() & 0x4000 != 0
-        || !world.game_counter.is_multiple_of(7)
+        || !game_counter.is_multiple_of(7)
     {
         return Ok(());
     }
@@ -400,7 +402,7 @@ fn champion_hooks(
         .admit_green_creep(seed, npc.position, (npc.kind, npc.variant))?;
     if world
         .effects
-        .advance_creep_initial(creep, random, world.game_counter, world.player)?
+        .advance_creep_initial(creep, random, game_counter, world.player)?
     {
         births.push(Birth::CreepHit);
     }
