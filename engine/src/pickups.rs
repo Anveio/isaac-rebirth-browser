@@ -270,6 +270,10 @@ pub(crate) fn regular_subtype_with_inputs(
     spawn_seed: u32,
     inputs: RegularSubtypeInputs,
 ) -> Result<Option<u32>, String> {
+    //4FF32B..342 passes Battery90 subtype through without a draw.
+    if variant == 90 {
+        return Ok(Some(subtype));
+    }
     if subtype != 0 {
         if variant == 20 && subtype == 1 {
             //5002fe..33b also transforms an explicitly authored penny.
@@ -411,6 +415,11 @@ pub struct SavedRegularPickup {
     pub rng_seed: u32,
     pub charge: i32,
     pub touched: bool,
+    ///Opaque native ABD byte copied by Room.Save; legacy absence is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub save_byte_abd: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_price: Option<crate::shop::SavedPrice>,
 }
 
 /// Actual weak words copied by Pickup::Morph500A8F..AAE/500BB5..BD4.
@@ -469,12 +478,17 @@ pub struct Pickup {
     pub birth_game_update: u32,
     pub charge: i32,
     pub touched: bool,
+    ///Opaque native ABD byte copied by Room.Save; legacy absence is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub save_byte_abd: Option<u8>,
     #[serde(default)]
     pub regular_collision: Option<RegularCollision>,
     #[serde(default)]
     pub regular_rng: Option<crate::items::Rng>,
     #[serde(default)]
     pub chest: Option<crate::chests::Chest>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_price: Option<crate::shop::Price>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub morph_links: Option<MorphLinks>,
 }
@@ -505,7 +519,7 @@ impl Pickup {
     /// Ordinary admitted pickups use the common free ground-motion branch.
     /// Collectible home return and Chest callbacks keep their own owners.
     pub(crate) fn has_regular_physics(&self) -> bool {
-        matches!(self.variant, 10 | 20 | 30 | 40 | 70 | 300)
+        matches!(self.variant, 10 | 20 | 30 | 40 | 70 | 90 | 300)
     }
 
     ///Free natural Card/Pill Init uses the canonical preconversion and pool
@@ -578,6 +592,21 @@ impl Pickup {
         appear: bool,
         state: &crate::State,
     ) -> Result<Option<Self>, String> {
+        if selector.entity_type == 5 && selector.variant == 90 {
+            //Challenge33 has its separate pricing owner, as for other families.
+            if state.challenge_id == 33 {
+                return Ok(None);
+            }
+            let mut pickup = Self::spawn(
+                id,
+                90,
+                u32::from(selector.subtype),
+                selector.position,
+                appear,
+            )?;
+            pickup.initialize_spawn_seed(selector.spawn_seed)?;
+            return Ok(Some(pickup));
+        }
         if selector.entity_type != 5 || !matches!(selector.variant, 10 | 20 | 30 | 40) {
             return Self::from_selector(id, selector, appear);
         }
@@ -714,7 +743,7 @@ impl Pickup {
             spritesheet_item_id: visual,
             position,
             presented_position: position,
-            anchor_position: if matches!(variant, 10 | 20 | 30 | 40 | 70 | 300) {
+            anchor_position: if matches!(variant, 10 | 20 | 30 | 40 | 70 | 90 | 300) {
                 WorldVector { x: 0.0, y: 0.0 }
             } else {
                 position
@@ -743,7 +772,9 @@ impl Pickup {
             birth_game_update: 0,
             charge: 0,
             touched: false,
-            regular_collision: matches!(variant, 10 | 20 | 30 | 40 | 70 | 300).then_some(
+            //Pickup.Init4FF4E1 owns this exact zero, independently of type/SKU.
+            save_byte_abd: Some(0),
+            regular_collision: matches!(variant, 10 | 20 | 30 | 40 | 70 | 90 | 300).then_some(
                 RegularCollision {
                     grid_collision_class: 5,
                     entity_collision_class: if animation == "Idle" { 4 } else { 0 },
@@ -751,6 +782,7 @@ impl Pickup {
             ),
             regular_rng: None,
             chest: None,
+            shop_price: None,
             morph_links: None,
         })
     }
@@ -784,6 +816,8 @@ impl Pickup {
         next.presented_position = self.presented_position;
         next.velocity = self.velocity;
         next.touched = self.touched;
+        //Morph500AC8/ACF saves ABD across virtual Init,500BE6/BEB restores it.
+        next.save_byte_abd = self.save_byte_abd;
         next.charge = config.max_charges;
         next.birth_game_update = game_update;
         next.morph_links = Some(links);
@@ -814,7 +848,19 @@ impl Pickup {
         if self.removed || !phase.updates_nonplayers() {
             return;
         }
-        if self.variant == 100 {
+        if self.has_regular_physics()
+            && self.anchor_position.x == 0.0
+            && self.anchor_position.y == 0.0
+        {
+            self.anchor_position = self.position;
+        }
+        if self.variant == 100
+            || self
+                .shop_price
+                .as_ref()
+                .is_some_and(|price| price.value != 0)
+        {
+            // Pickup506FC3 routes every nonzero AC0 here, not only100.
             // Pickup507170 assigns anchor-position before Base447190 applies
             // current friction to velocity and moves. Base restores configured
             // friction, then507029 multiplies it by the actual source .965.
@@ -827,12 +873,6 @@ impl Pickup {
             self.current_friction = self.configured_friction * 0.965;
             self.project();
         } else if self.has_regular_physics() {
-            // Pickup506f9d compares the ordinary zero anchor before Base.
-            // The true branch5075d2 copies the current physical position;
-            // intermediate prediction never initializes this owner.
-            if self.anchor_position.x == 0.0 && self.anchor_position.y == 0.0 {
-                self.anchor_position = self.position;
-            }
             //506ff9 invokes Base447190 before507029 sets the next turn's
             //temporary friction. Velocity is physical; fast prediction never
             //feeds its presented position back into this full integration.
@@ -925,6 +965,14 @@ impl Pickup {
     /// Free regular coins, keys and bombs. Other families keep typed room selectors
     /// until their source collection rules and live gates are admitted.
     pub fn try_collect(&mut self, inventory: &mut Inventory, player: &mut Player) -> bool {
+        if !self.try_grant(inventory, player) {
+            return false;
+        }
+        self.finish_collect();
+        true
+    }
+
+    pub(crate) fn try_grant(&mut self, inventory: &mut Inventory, player: &mut Player) -> bool {
         if !self.can_collect || self.collected || self.removed || self.collection_delay != 0 {
             return false;
         }
@@ -946,7 +994,6 @@ impl Pickup {
             }
             _ => return false,
         }
-        self.finish_collect();
         true
     }
 
@@ -954,6 +1001,19 @@ impl Pickup {
     /// actual Player50c880 eligibility and contacts; health capacity is tested
     /// here before mutation. Existing health helpers retain black-slot order.
     pub(crate) fn try_collect_heart(
+        &mut self,
+        player: &mut Player,
+        red_multiplier: i32,
+        level_progress: &mut crate::level_progress::LevelProgress,
+    ) -> bool {
+        if !self.try_grant_heart(player, red_multiplier, level_progress) {
+            return false;
+        }
+        self.finish_collect();
+        true
+    }
+
+    pub(crate) fn try_grant_heart(
         &mut self,
         player: &mut Player,
         red_multiplier: i32,
@@ -995,7 +1055,6 @@ impl Pickup {
         }
         //504e67 precedes the actual Collect504480 callback.
         level_progress.heart_collected = true;
-        self.finish_collect();
         true
     }
 
@@ -1031,7 +1090,10 @@ pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), Strin
         else {
             return Err("scheduled pickup missing at room save".into());
         };
-        if !pickup.has_regular_physics() || pickup.collected || pickup.removed {
+        if (!pickup.has_regular_physics() && pickup.shop_price.is_none())
+            || pickup.collected
+            || pickup.removed
+        {
             continue;
         }
         let rng = pickup
@@ -1046,6 +1108,14 @@ pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), Strin
             rng_seed: rng.state,
             charge: pickup.charge,
             touched: pickup.touched,
+            save_byte_abd: pickup.save_byte_abd,
+            shop_price: pickup
+                .shop_price
+                .as_ref()
+                .map(|price| crate::shop::SavedPrice {
+                    value: price.value,
+                    slot: price.slot,
+                }),
         });
     }
     state.room.saved_regular_pickups = records;
@@ -1060,7 +1130,9 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
     let mut admitted = Vec::with_capacity(records.len());
     let mut handles = BTreeSet::new();
     for record in records {
-        if !matches!(record.variant, 10 | 20 | 30 | 40 | 70 | 300) || !handles.insert(record.handle)
+        if !(matches!(record.variant, 10 | 20 | 30 | 40 | 70 | 90 | 300)
+            || (record.variant == 100 && record.shop_price.is_some()))
+            || !handles.insert(record.handle)
         {
             return Err("invalid saved regular pickup record".into());
         }
@@ -1090,6 +1162,12 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
         pickup.birth_game_update = state.game_update_count;
         pickup.charge = record.charge;
         pickup.touched = record.touched;
+        if let Some(price) = record.shop_price {
+            crate::shop::readmit_price(state, &mut pickup, price)?;
+        }
+        //5C5956 restores the saved byte after fresh Init. A legacy unknown
+        //record must not inherit Init's known0 as if that byte were saved.
+        pickup.save_byte_abd = record.save_byte_abd;
         admitted.push(pickup);
     }
     let ids = admitted.iter().map(|pickup| pickup.id).collect();
@@ -1099,7 +1177,7 @@ pub(crate) fn readmit_regular_records(state: &mut crate::State) -> Result<Vec<u3
         .collect();
     let old_pickups = std::mem::take(&mut state.room.pickups);
     for pickup in old_pickups {
-        if !pickup.has_regular_physics() {
+        if !pickup.has_regular_physics() && pickup.shop_price.is_none() {
             state.room.pickups.push(pickup);
         } else if let Some(restored) = replacements.remove(&pickup.id) {
             state.room.pickups.push(restored);
@@ -1169,6 +1247,11 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     let Some(index) = state.room.pickups.iter().position(|pickup| pickup.id == id) else {
         return Ok(());
     };
+    //Manager454E8F skips actual inactive actors before their callbacks.
+    //Contact-time Remove can leave the body listed until the next Full sweep.
+    if state.room.pickups[index].removed {
+        return Ok(());
+    }
     state.room.pickups[index].advance(phase, state.game_update_count);
     if phase == Phase::Update {
         drop_sound(state, index);
@@ -1193,7 +1276,7 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     }
     let pickup = &mut state.room.pickups[index];
     if phase != Phase::Interpolate
-        || !pickup.has_regular_physics()
+        || !(pickup.has_regular_physics() || pickup.shop_price.is_some())
         || !has_ground_class(pickup)
         || pickup.removed
     {
@@ -1209,8 +1292,22 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     resolve_grid(pickup, &grid, true)
 }
 
-/// 4545d0 finishes all entity contacts, then454b10 invokes442b90 for the live
-/// nonplayer list. New births get this grid pass without a full actor update.
+/// Full manager4551E0/4551FD stably compacts inactive actors after their
+/// admission-fenced callbacks and before455292 entity contacts. A Remove
+/// during contacts remains listed until the next Full sweep; Non-Full does not
+/// erase it. Keep scheduler membership and actual Room bodies in one fence.
+pub(crate) fn retire_full(state: &mut crate::State) {
+    state.room.pickups.retain(|pickup| !pickup.removed);
+    let pickups = &state.room.pickups;
+    state.actor_scheduler.retain(|actor| {
+        actor.kind != crate::actors::ActorKind::Pickup
+            || pickups.iter().any(|pickup| pickup.id == actor.id)
+    });
+}
+
+/// 4545d0 finishes all entity contacts, then454b10 invokes442b90 for every
+/// listed nonplayer, without testing31E/31F. New and contact-removed bodies
+/// get this grid pass without another full actor update.
 pub(crate) fn full_grid_contacts(state: &mut crate::State) -> Result<(), String> {
     if !state.room.pickups.iter().any(has_ground_class) {
         return Ok(());
@@ -1231,11 +1328,10 @@ pub(crate) fn full_grid_contacts(state: &mut crate::State) -> Result<(), String>
 }
 
 fn has_ground_class(pickup: &Pickup) -> bool {
-    !pickup.removed
-        && pickup
-            .regular_collision
-            .as_ref()
-            .is_some_and(|collision| collision.grid_collision_class == 5)
+    pickup
+        .regular_collision
+        .as_ref()
+        .is_some_and(|collision| collision.grid_collision_class == 5)
 }
 
 /// Pool+20 is constructed before callbacks at4545d0. Its snapshot excludes
@@ -1533,4 +1629,218 @@ pub(crate) fn admit_collectible(
     };
     state.room.authored_actor_order.push(actor);
     state.actor_scheduler.admit(actor)
+}
+
+/// Collect504480 family audio after either successful grant lifecycle.
+pub(crate) fn collect_sound(state: &mut crate::State, index: usize) {
+    // Collect504480 routes key ->504720 and bomb ->5046d0
+    // after inventory mutation, before the System increment.
+    let pickup = &state.room.pickups[index];
+    let sound = match pickup.variant {
+        10 => Some((
+            match pickup.subtype {
+                3 => 54,
+                4 => 266,
+                _ => 185,
+            },
+            1.0,
+        )),
+        //Collect504510: only successful free Coin20/1..4 reaches here.
+        //The actual subtype owns the configured sound, not its amount.
+        20 => match pickup.subtype {
+            1 | 4 => Some((234, 1.0)),
+            2 => Some((232, 1.0)),
+            3 => Some((199, 1.0)),
+            _ => None,
+        },
+        30 if pickup.subtype == 2 => Some((204, 1.0)),
+        30 => Some((58, 0.85)),
+        40 => Some((201, 1.0)),
+        70 => Some((252, 1.0)),
+        300 => Some((8, 1.0)),
+        100 if state
+            .room
+            .descriptor
+            .as_ref()
+            .is_some_and(|room| room.template.room_type == 2) =>
+        {
+            Some((130, 0.5))
+        }
+        _ => None,
+    };
+    if let Some((id, volume)) = sound {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            crate::audio::SoundRequest {
+                id,
+                volume,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+}
+
+///5053BE..5402,50587A..58AE select509E10's absolute requested charge.
+///Unknown canonical operands remain explicit before any paid grant/debit.
+pub(crate) fn battery_target(state: &crate::State) -> Result<Option<i32>, &'static str> {
+    use crate::active_charges::{owns, Word};
+    let owner = state.player_items.as_ref().ok_or("batteryPlayerOwner")?;
+    if !owns(owner, Word::ActiveId) {
+        return Err("batteryActiveId");
+    }
+    if owner.active_id == 0 {
+        return Ok(None);
+    }
+    let config = crate::items::definition(owner.active_id).ok_or("batteryActiveConfig")?;
+    if !owns(owner, Word::Charge) {
+        return Err("batteryCharge");
+    }
+    if config.max_charges > owner.active_charge {
+        return Ok(Some(config.max_charges));
+    }
+    let have = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    )
+    .have(63)
+    .ok_or("batteryHave63")?;
+    if !have {
+        return Ok(None);
+    }
+    if !owns(owner, Word::Reserve) {
+        return Err("batteryReserve");
+    }
+    Ok((config.max_charges > owner.reserve_charge).then_some(config.max_charges.wrapping_mul(2)))
+}
+
+///Free Battery contact keeps the existing free Collect lifecycle. The paid
+///owner calls the same target/setter before copy+debit+immediate retirement.
+pub(crate) fn collect_battery(state: &mut crate::State, index: usize) -> Result<(), String> {
+    //4453A0 dead Player veto precedes the Pickup callback and AD0.
+    if state.player.dead {
+        return Ok(());
+    }
+    let player_position = crate::bombs::player_world(state);
+    let pickup_position = state.room.pickups[index].position;
+    let pickup_radius = state.room.pickups[index].collision_radius;
+    if collect_battery_callback(state, index)? != PlayerContactDecision::AllowPhysicalResponse {
+        return Ok(());
+    }
+    player_physical_response(
+        state,
+        index,
+        player_position,
+        pickup_position,
+        pickup_radius,
+    )
+}
+
+fn collect_battery_callback(
+    state: &mut crate::State,
+    index: usize,
+) -> Result<PlayerContactDecision, String> {
+    let pickup = &state.room.pickups[index];
+    if pickup.variant != 90
+        || pickup.removed
+        || pickup.collected
+        || pickup
+            .regular_collision
+            .as_ref()
+            .is_none_or(|collision| collision.entity_collision_class != 4)
+        || !pickup.touches(&state.player)
+    {
+        return Ok(PlayerContactDecision::NotReached);
+    }
+    let delay = pickup
+        .pocket_contact_delay
+        .ok_or("Battery AD0 history unavailable")?;
+    if delay > 0 {
+        state.room.pickups[index].pocket_contact_delay = Some(10);
+        return Ok(PlayerContactDecision::VetoPhysicalResponse);
+    }
+    if state
+        .player
+        .entity_source
+        .is_none_or(|source| source.entity_type != 1 || source.variant != 0)
+    {
+        return Ok(PlayerContactDecision::Unowned);
+    }
+    let pickup = &state.room.pickups[index];
+    if pickup.collection_delay > 0 || !player_can_collect(state) {
+        return Ok(PlayerContactDecision::AllowPhysicalResponse);
+    }
+    if !pickup.can_collect {
+        return Ok(PlayerContactDecision::Unowned);
+    }
+    let Some(target) = battery_target(state).map_err(str::to_owned)? else {
+        return Ok(PlayerContactDecision::AllowPhysicalResponse);
+    };
+    crate::active_items::set_charge(state, target)?;
+    //Collect504480 has no90 sound; charge setter owns its actual request.
+    state.room.pickups[index].finish_collect();
+    Ok(PlayerContactDecision::VetoPhysicalResponse)
+}
+
+///445710 uses pre-callback overlap and post-callback masses/velocities only
+///after AL0. Shared unchanged Pocket/Battery response; paid callbacks veto it.
+///No new solver, clamp, collision sample or physics constant is introduced.
+pub(crate) fn player_physical_response(
+    state: &mut crate::State,
+    index: usize,
+    player_position: WorldVector,
+    pickup_position: WorldVector,
+    pickup_radius: f32,
+) -> Result<(), String> {
+    //A missing legacy grid/flying/class owner cannot become ground geometry.
+    if state.player.flying != Some(false) || state.player.grid_collision_class != Some(5) {
+        return Ok(());
+    }
+    let Some(frame) = state.room.grid.clone() else {
+        return Ok(());
+    };
+    let grid = crate::grid::Grid::new(frame)?;
+    static PLAYER_COLLIDER: std::sync::OnceLock<crate::grid::Collider> = std::sync::OnceLock::new();
+    let collider = PLAYER_COLLIDER.get_or_init(|| {
+        crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
+            scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
+            points: 40,
+        })
+        .expect("authored normal Isaac geometry")
+    });
+    let mut player = crate::combat::ContactBody {
+        id: 0,
+        entity_type: 1,
+        position: player_position,
+        velocity: crate::bombs::player_velocity(state),
+        radius: crate::content::PLAYER_COLLISION_RADIUS_WORLD as f32,
+        mass: crate::content::PLAYER_COLLISION_MASS_WORLD as f32,
+    };
+    let pickup = &state.room.pickups[index];
+    let mut body = crate::combat::ContactBody {
+        id: pickup.id,
+        entity_type: 5,
+        position: pickup_position,
+        velocity: pickup.velocity,
+        radius: pickup_radius,
+        mass: pickup.collision_mass,
+    };
+    crate::combat::resolve_player_pickup_contact(&mut player, &mut body, |shift| {
+        collider.blocks_player_shift(&grid, player_position, shift)
+    })?;
+    state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
+    state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
+    state.player.vx = f64::from(player.velocity.x) * 0.65;
+    state.player.vy = f64::from(player.velocity.y) * 0.65;
+    let pickup = &mut state.room.pickups[index];
+    pickup.position = body.position;
+    pickup.presented_position = body.position;
+    pickup.velocity = body.velocity;
+    pickup.project();
+    Ok(())
 }
