@@ -43,6 +43,10 @@ const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
+// --via-candidates X,Y;X,Y;... (an OS-shuffled order) takes the first one the
+// exit can use as its waypoint; the result reports it as `via`.
+const VIA_CANDIDATES = (flag('--via-candidates', '') || '').split(';').filter(Boolean).map(item => item.split(',').map(Number));
+let chosenVia = VIA ? { x: VIA[0], y: VIA[1] } : null;
 const IDLE = Number(flag('--idle', '0'));
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
@@ -309,15 +313,24 @@ try {
         await step(STRIDE); state = await view();
       }
     };
-    if (VIA) {
-      const via = { x: VIA[0], y: VIA[1] };
-      // The turn there overshoots about ten units: a waypoint beside an
-      // interior cell the port's own fight left solid would touch it in the
-      // port alone (#649), so the helper draws another. Walls are in both.
-      const cell = Math.round((via.y - 120) / 40) * 15 + Math.round((via.x - 40) / 40);
-      const interior = next => next % 15 > 0 && next % 15 < 14 && next > 14 && next < 120;
-      if ([cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1'))
-        throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
+    // The turn at a waypoint overshoots about ten units: one on or beside an
+    // interior cell the port's own fight left solid would touch it in the
+    // port alone (#649). Walls are in both games.
+    const cellOfPoint = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
+    const interior = next => next % 15 > 0 && next % 15 < 14 && next > 14 && next < 120;
+    const usable = point => {
+      const cell = cellOfPoint(point);
+      return state.grid.solid[cell] !== '1'
+        && ![cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1');
+    };
+    if (!chosenVia && VIA_CANDIDATES.length) {
+      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }));
+      if (!found) throw new Error('exit via: no candidate waypoint clear of solid cells');
+      chosenVia = { x: found[0], y: found[1] };
+    }
+    if (chosenVia) {
+      const via = chosenVia;
+      if (!usable(via)) throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
       await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
         `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
     }
@@ -358,5 +371,6 @@ try {
   await browser.close();
   await server.close();
 }
-process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256 }) + '\n');
+process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
+  via: chosenVia && [chosenVia.x, chosenVia.y] }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;
