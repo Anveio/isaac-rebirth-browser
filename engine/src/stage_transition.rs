@@ -41,6 +41,14 @@ pub struct Trapdoor {
 }
 
 impl Trapdoor {
+    /// InitSubclass570fd0: state0 (571049) and Play Closed without force.
+    pub(crate) fn reinitialize(&mut self) {
+        self.state = 0;
+        self.clip = TrapdoorClip::Closed;
+        self.frame = 0.0;
+        self.playing = true;
+    }
+
     fn world_position(&self, width: usize) -> WorldVector {
         WorldVector {
             x: (40 + self.grid_index % width * 40) as f32,

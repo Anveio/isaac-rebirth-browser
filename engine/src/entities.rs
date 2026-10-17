@@ -121,10 +121,19 @@ pub(crate) enum Birth {
     Child(SpawnSelector),
     /// Envy's split child 48c9d0: config row `variant % 10`, the split
     /// variant, the parent's seed, APPEAR cleared, updated at once.
-    EnvyChild { position: WorldVector, variant: u32, seed: u32 },
+    EnvyChild {
+        position: WorldVector,
+        variant: u32,
+        seed: u32,
+    },
     /// Super Envy's third child: bounded(2) at admission (after the first
     /// two children's nested Updates), spawned when level < roll + 1.
-    EnvyThird { position: WorldVector, variant: u32, seed: u32, level: u32 },
+    EnvyThird {
+        position: WorldVector,
+        variant: u32,
+        seed: u32,
+        level: u32,
+    },
     /// A mid-room NPC parented to the spawner, without entity collision,
     /// hidden and with APPEAR cleared (Gemini's umbilical cord pieces).
     Attached(SpawnSelector),

@@ -5,10 +5,12 @@
 // helper rejects any seed whose original does not arrive in the boss room.
 //
 //   node tools/e2e/boss-route-record.mjs --case CASE.json --rooms 6,7,9,0 [--production-directory dist]
-//     [--collect 7] [--arrival boss-room-arrival]
+//     [--collect 7] [--take 3] [--arrival boss-room-arrival]
 //
 // --collect names rooms whose key pickups the player walks over before leaving
 // them; a key-locked door on the route is then pushed open with a held key.
+// --take names rooms whose collectible pedestals (5.100 with an item) the
+// player walks onto, picking each up, before leaving them.
 // --arrival names the final checkpoint (shop routes use `shop-arrival`).
 // --idle FRAMES holds no keys for FRAMES after the last doorway settles, before
 // the arrival checkpoint: entering through a door places the player exactly,
@@ -28,7 +30,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { flag } from './lib/cli.mjs';
+import { flag, hasFlag } from './lib/cli.mjs';
 import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
@@ -36,6 +38,7 @@ const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
 const collect = new Set((flag('--collect', '') || '').split(',').filter(Boolean).map(Number));
+const take = new Set((flag('--take', '') || '').split(',').filter(Boolean).map(Number));
 const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
@@ -48,12 +51,28 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --hurt: the original's fixture fight ends below full health. Basement II's
+// generation reads it (a Challenge room needs full health), so a port fight
+// that ends at full health takes one blast of its own bomb before parking.
+const HURT = hasFlag('--hurt');
+// Boss-room cells whose centre lies within 30 units of one of the port's own
+// floor pickups (hearts, coins): a heart taken in one game alone changes the
+// health Basement II's generation reads, so the shared walks keep off them.
+const pickupCells = state => {
+  const cells = [];
+  for (let row = 1; row < 8; row++) for (let col = 1; col < 14; col++) {
+    if (state.pickups.some(p => p.variant !== 100 && Math.hypot(40 + col * 40 - p.x, 120 + row * 40 - p.y) < 30)) cells.push(row * 15 + col);
+  }
+  return cells;
+};
+// The centre of the room grid cell holding a point.
+const centreOf = point => ({ x: Math.round((point.x - 40) / 40) * 40 + 40, y: Math.round((point.y - 120) / 40) * 40 + 120 });
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
 // The player re-plans on every other frame; the tape holds keys in between.
 const STRIDE = 2;
 const namedKeys = { Return: 'Enter', Up: 'ArrowUp', Down: 'ArrowDown', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
 // DOM codes back to the tape's X11 names.
-const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' };
+const tapeKey = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', KeyE: 'e', ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right' };
 
 // Walk toward a key pickup, routing through fireplaces; a fire standing in the
 // next cell is shot out along its axis instead of walked into.
@@ -112,17 +131,36 @@ try {
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
+    // Each game's fight leaves its own poops, and a diagonal shortcut that
+    // grazes a corner solid in one game alone would slow only that game's
+    // player: walks in a cleared boss room target the next route cell's
+    // centre once the player stands at the current one.
+    let centre = centreOf(state.player);
+    const centreKeys = (grid, door) => {
+      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) centre = waypoint(grid, state.player, door, 1);
+      return centre.x === door.x && centre.y === door.y ? doorKeys(grid, state.player, door) : toward(state.player, centre, 2);
+    };
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
-      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30);
+      const key = collect.has(state.room) && state.pickups.find(p => p.variant === 30)
+        || take.has(state.room) && state.pickups.find(p => p.variant === 100 && p.subtype > 0);
       const usable = /^open/i.test(door.state) || (door.state === 'KeyClosed' && state.keys > 0);
+      // A pedestal, taken or not, is solid but not a grid object. The take
+      // walk can end past it inside its cell; step out sideways first.
+      const cell = (x, y) => Math.round((y - 120) / 40) * state.grid.w + Math.round((x - 40) / 40);
+      const pedestals = state.grid ? state.pickups.filter(p => p.variant === 100).map(p => cell(p.x, p.y)) : [];
+      const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
-        // A cleared boss room's open trapdoor must not be walked over.
-        : !usable ? [] : doorKeys(state.trapdoor ? avoiding(state.grid, [...AWARD_CELLS, ...AVOID]) : state.grid, state.player, door));
+        // A cleared boss room's shared keys step from cell centre to cell
+        // centre, off its open trapdoor, until the doorway is next. A centre
+        // beside the trapdoor is 40 units from it, outside its entry radius.
+        : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
+          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)]), door)
+          : doorKeys(avoiding(state.grid, pedestals), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -151,21 +189,63 @@ try {
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
     }
     checkpoint('clear');
-    await walk({ x: 80, y: 400 }, AWARD_CELLS, 600, 'corner walk');
+    // A poop the port's own fight drops in the cell inside an open doorway
+    // would wall off the shared re-anchor walk. The port shoots it out from
+    // a free side cell before parking; the original's fixture fight is fixed.
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      const cellAt = (x, y) => Math.round((y - 120) / 40) * state.grid.w + Math.round((x - 40) / 40);
+      const across = door.side === 'up' || door.side === 'down';
+      const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
+      const inner = { x: door.x + inward[0], y: door.y + inward[1] };
+      for (const sign of [-1, 1]) {
+        if (state.grid.solid[cellAt(inner.x, inner.y)] !== '1') break;
+        const stand = across ? { x: inner.x + sign * 40, y: inner.y } : { x: inner.x, y: inner.y + sign * 40 };
+        const blocked = [...AWARD_CELLS, ...pickupCells(state), ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))];
+        if (state.grid.solid[cellAt(stand.x, stand.y)] === '1' || blocked.includes(cellAt(stand.x, stand.y))) continue;
+        await walk(stand, blocked, 600, 'doorway poop');
+        const aim = across ? (sign < 0 ? 'ArrowRight' : 'ArrowLeft') : (sign < 0 ? 'ArrowDown' : 'ArrowUp');
+        for (let left = 600; state.grid.solid[cellAt(inner.x, inner.y)] === '1'; left -= STRIDE) {
+          if (left <= 0) throw new Error(`Doorway poop at (${inner.x}, ${inner.y}) still stands`);
+          await hold([aim]); await step(STRIDE); state = await view();
+        }
+        await hold([]);
+      }
+    }
+    if (HURT && state.player.full) {
+      // A cell two or more from the walls and three from the trapdoor and
+      // pedestal, so the blast reaches neither nor a wall's secret door.
+      const far = (cell, from) => Math.hypot((cell % 15 - from % 15) * 40, (Math.floor(cell / 15) - Math.floor(from / 15)) * 40) >= 120;
+      const spots = [];
+      for (let r = 2; r <= 6; r++) for (let c = 2; c <= 12; c++) {
+        const cell = r * 15 + c;
+        if (state.grid.solid[cell] !== '1' && far(cell, state.trapdoor.gridIndex) && far(cell, 97)) spots.push(cell);
+      }
+      const near = cell => Math.hypot(40 + cell % 15 * 40 - state.player.x, 120 + Math.floor(cell / 15) * 40 - state.player.y);
+      const spot = spots.sort((a, b) => near(a) - near(b))[0];
+      if (spot === undefined) throw new Error('No open cell for the health-matching bomb');
+      await walk({ x: 40 + spot % 15 * 40, y: 120 + Math.floor(spot / 15) * 40 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'bomb spot');
+      await hold([]); await step(10);
+      await hold(['KeyE']); await step(1); await hold([]);
+      for (let left = 300; state.player.full; left--) {
+        if (left <= 0) throw new Error('The health-matching bomb did not hurt the player');
+        await step(1); state = await view();
+      }
+      await step(30); state = await view();
+    }
+    await walk({ x: 80, y: 400 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
     state = await view();
     checkpoint('corner');
   }
   if (EXIT) {
-    // The shared exit keys step from cell centre to cell centre. Each game's
-    // fight leaves its own poops, and a diagonal shortcut that grazes a corner
-    // solid in one game alone would slow only that game's player.
+    // The shared exit keys step from cell centre to cell centre, as the
+    // cleared boss room's door walk does above.
     const centreWalk = async (goal, cells, arrived, failure) => {
-      let target = { x: Math.round((state.player.x - 40) / 40) * 40 + 40, y: Math.round((state.player.y - 120) / 40) * 40 + 120 };
+      let target = centreOf(state.player);
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, cells), state.player, goal, 1);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, [...cells, ...pickupCells(state)]), state.player, goal, 1);
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }
@@ -179,6 +259,23 @@ try {
     if (index === undefined) throw new Error('The cleared boss room has no trapdoor');
     const door = { x: 40 + index % 15 * 40, y: 120 + Math.floor(index / 15) * 40 };
     const pedestal = [...AWARD_CELLS.filter(cell => cell > 60), ...AVOID];
+    // Re-entering the room re-closes the trapdoor, which opens only once no
+    // player stands within 50 units (TrapDoor 571225). Step two cells away
+    // from it and wait for the open clip before the approach.
+    if (state.trapdoor.state !== 1) {
+      const clear = cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120
+        && state.grid.solid[cell] !== '1' && ![...AWARD_CELLS, ...AVOID].includes(cell);
+      const away = [index - 2, index + 2, index + 30, index - 30].find(clear);
+      if (away === undefined) throw new Error('No cell two away from the closed trapdoor');
+      const spot = { x: 40 + away % 15 * 40, y: 120 + Math.floor(away / 15) * 40 };
+      await centreWalk(spot, [...AWARD_CELLS, ...AVOID], () => Math.hypot(spot.x - state.player.x, spot.y - state.player.y) <= 4,
+        `No way off the closed trapdoor in ${EXIT} frames`);
+      await hold([]);
+      for (let left = 300; state.trapdoor.state !== 1; left--) {
+        if (left <= 0) throw new Error('The trapdoor did not reopen in 300 frames');
+        await step(1); state = await view();
+      }
+    }
     await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`);
     await hold([]);
     for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {

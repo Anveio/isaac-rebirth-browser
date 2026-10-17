@@ -11,7 +11,23 @@ only an actual report establishes its outcome. Rust/WASM replay equality checks
 the port's determinism, while original logs, graphics and controls establish
 independent reference evidence.
 
-## Current gameplay qualification
+## Source implementation and live scope
+
+Merged source and a passing captured artifact are separate qualifications. The
+records below retain their own source, WASM and input bindings; none is an
+automatic rerun on advancing `main` or confirmation of the served build.
+
+| Area | Implemented source | Independent live scope and remaining work |
+| --- | --- | --- |
+| Rectangular room art | [PR576](https://github.com/Anveio/isaac-rebirth-browser/pull/576) sizes floor, wall, boss-wall and shading assembly from the four base rectangles: 13x7, 13x14, 26x7 and 26x14. | The qualified c194/a985/W8c7 WF82 replay passes 635/635 Original/public-WASM State comparisons and 571 camera-history phases, reaching standard and tall rooms. [PR582](https://github.com/Anveio/isaac-rebirth-browser/pull/582) records that scope without a new run. Wide/double and boss-specific live art, completed current-build Browser camera PNGs and full-frame equality remain unqualified by those reports. |
+| Browser GPU masks | The existing presentation test compares retained independent native shadow/light targets. | The fresh recovery run on production `8beae6bbe77714fb59236a91510cf4fa6892be28326b645db77798f6c8a789ae` (1,407 files) passes all nine selected cases with zero skipped. Original state parity and simulation-tick delivery remain false. This is retained-target Browser equality, not a fresh Native capture or wide/double/overlay RGBA qualification. |
+| Wide/double bounds and coverage | The existing room specs compare cache dimensions, floor/wall bounds and covered floor/wall cells with independent native bounds. | On the same recovery artifact, `room-26x7-random-0` / 6RG7LV8Z passes 3,150/3,150 art comparisons (630 per predicate); `room-26x14-random-0` / V01TLK80 passes 2,870/2,870 (574 per predicate). Both cases remain red: wide has 2,199/28,690 field failures and 196/637 paired matches; double has 2,229/32,971 failures and 188/581 paired matches. Decoration, projectile-seed, camera-scroll and player-position failures remain preserved. Actual Original/Browser PNGs are retained; no RGBA, shading or overlay equality follows. |
+| Overlays | Main still selects the Basement 1x1 overlay and its 663x429 crop for every rectangle. | Size-specific overlay selection/crop and camera-shake routing remain separate source work; an independently built candidate does not establish integration or live images. No positive base narrow/L contour evidence is established. |
+| Pill and cache owners | Canonical Pill28 history, reached Range, Range Down/Up use, independent active words, reached Move Speed and the controlled Knife's canonical active identity are merged through PRs572/580/586/595–597. | [PR586](https://github.com/Anveio/isaac-rebirth-browser/pull/586) reports 5,639 passing checks on its frozen candidate; [PR602](https://github.com/Anveio/isaac-rebirth-browser/pull/602) persists `pill-range-use` and reports a 1,409-check retained-Original replay on c224/ee04/Wfa54. These do not qualify the whole current runtime, other Pill effects, complete ceremony, pixels or PCM. |
+| Menus and imported bosses | Menu page/carousel presentation and Envy/Super Envy source are merged. | [PR601](https://github.com/Anveio/isaac-rebirth-browser/pull/601) records 1,781/1,782 menu frames and closes #587–589; [#600](https://github.com/Anveio/isaac-rebirth-browser/issues/600) retains the stage-streak placement gap. [PR605](https://github.com/Anveio/isaac-rebirth-browser/pull/605) retains Envy failures of 475/14,893, 468/14,982 and 2/13,320; Super Envy room coverage remains pending. |
+| Gameplay frontiers | Unsupported next-stage trapdoors now refuse descent; held active IDs survive the supported stage-save normalization. | [#413](https://github.com/Anveio/isaac-rebirth-browser/issues/413) remains a later-stage frontier, rather than the old repeated-tick freeze. [#499](https://github.com/Anveio/isaac-rebirth-browser/issues/499) still owes a live active-item descent fixture after PR503. [PR609](https://github.com/Anveio/isaac-rebirth-browser/pull/609) passes the source-derived run-admission clock cohort; [#438](https://github.com/Anveio/isaac-rebirth-browser/issues/438) still tracks the separate death producer. [Dead-callback motion](player-death.md) fixes517 Y checks in the scoped [#493](https://github.com/Anveio/isaac-rebirth-browser/issues/493) replay; living contact/grid ordering and placed-bomb late grid contact [#349](https://github.com/Anveio/isaac-rebirth-browser/issues/349) remain unresolved. |
+
+## Retained d995/Wd869 qualification snapshot
 
 Public main `d995a582` includes refused-pedestal runtime PR557 and
 optional Node tools PR558. Primary/playable remains `4543c59b`, serving the
@@ -195,11 +211,11 @@ The Wave1/Wave2 snapshots below are historical results from the earlier test
 policy. Their removed unit/integrity suites are not current executable gates.
 Consult the latest paired report for current implementation outcomes.
 
-## Monstro BloodStart source leaf
+## Retained Monstro BloodStart source leaf
 
 The new partial producer routes ordinary Monstro’s real BloodStart random branches through Effect17, SFX72 and Effect42 in their original order. It preserves the actual authored NullId0 guide, separate cached spawner/link fields, signed scales and layer flips, and distinct active/dead lifecycle. The required `test:e2e:blood-start` gate retains contrived978 and recorded OSBLL routes with both input phases; it requires actual Death-interval execution and matched bodies. Private all-target Rust check and strictClippy pass at `d28154f`; production/WASM and fresh game qualification remain pending. Explosion2/77/category5 remains an explicit runtime error before any final reward, and existing native-prefix failures remain blocking. The final-heart/delayed-clear/Grid17 owners are separate; no boss-clear or stage-completion claim follows from this leaf.
 
-## Current source and actual-game qualification
+## Retained 3df99031 source and actual-game qualification
 
 Current main `3df99031` includes ordinary Player Brimstone299, per-field comparer
 continuation311, the FireDelay descriptor304, optional regular Tear variant298

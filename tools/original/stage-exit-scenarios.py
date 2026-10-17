@@ -59,12 +59,28 @@ def frames(actions):
 
 
 def fought(fixture):
-    """The shared route plus each game's own fight, recorded once per fixture."""
+    """The shared route plus each game's own fight, recorded once per fixture.
+
+    The port's fight is its own closed-loop keys (boss-route-record.mjs
+    --fight). After the clear they also shoot out any poop the port's fight
+    dropped in the cell inside an open doorway: the shared re-anchor walk
+    needs that doorway clear, and the original's fixture fight left it so.
+    Those keys only shape the port's own segment; no engine rule changes.
+
+    Basement II's generation reads the Player's health and coins at the
+    transition (a Challenge room needs full health, a stage-2 Arcade more
+    than four coins), which each game's own fight decides. A fixture's
+    original fight must leave the same full-health and coin thresholds as
+    the port's, or the next floor's rooms diverge; a fixture whose original
+    ends hurt says so (originalHealth) and the port's segment matches it."""
     result = routes.paired.build('paired-bomb-moving-even', fixture['seed'])
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1] + fixture['route']
-    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW)
+    # originalHealth [red, maxRed, soul]: the original's fight ends below full
+    # health, so a port fight at full health takes one bomb blast (--hurt).
+    red, maximum, soul = fixture.get('originalHealth', [0, 0, 0])
+    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *(['--hurt'] if red + soul < maximum else []))
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     fights = {'tape': fixture['originalFight'], 'pairedTape': keys_only(port['actions'])}
@@ -83,12 +99,11 @@ def padding(total):
     return steps + [{'type': 'step', 'frames': total - frames(steps), 'label': 'exit-start'}]
 
 
-def clearance(fixture):
-    """The original's solid cells and their eight neighbours (a 15-wide boss
-    room). The port, which records the walk, does not hold these cells, so
-    the walk keeps a cell of margin around them."""
-    return sorted({cell + dr * 15 + dc for cell in fixture.get('originalSolid', [])
-                   for dr in (-1, 0, 1) for dc in (-1, 0, 1)})
+def near(points):
+    """Boss-room cells whose centre lies within 30 units of a pickup: a
+    Player stepping from centre to centre there would touch it."""
+    return [row * 15 + col for row in range(1, 8) for col in range(1, 14)
+            if any(((40 + col * 40 - x) ** 2 + (120 + row * 40 - y) ** 2) ** 0.5 < 30 for x, y in points)]
 
 
 def case(fixture, base, fights, identifier, randomized, idle, via):
@@ -105,9 +120,10 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     # from one state. The legs' own route captures still carry the fight
     # offset and are dropped; `re-anchor` is the first paired capture.
     # The original's own fight can leave solid cells (a Larry Jr. tail poop)
-    # that the port's fight does not; the shared walk keeps clear of them.
+    # that the port's fight does not; the shared walk routes around them, and
+    # stepping from cell centre to cell centre keeps it off their corners.
     back = f"0,{fixture['rooms'][-2]},0"
-    avoid = clearance(fixture)
+    avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
                   *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor')
@@ -151,7 +167,7 @@ def main():
         for index in range(args.count):
             # A few draws, since a drawn waypoint can sit on an authored rock.
             for _ in range(3):
-                blocked = AWARD_CELLS | set(clearance(fixture))
+                blocked = AWARD_CELLS | set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', [])))
                 cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
                                      [40 + cell % 15 * 40, 120 + cell // 15 * 40])
