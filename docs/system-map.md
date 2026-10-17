@@ -799,6 +799,14 @@ post-acquisition Player state, load/continue and
 durable browser saves remain open. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
 
+Ordinary backdrop-1 Block3 construction now owns raw1900/0/0 initialization
+and its state-1 path cost. A retained public route compares eight actual
+Original objects: all 64 observed fields match. The isolated leaf preserves
+all 1,190 existing comparisons, 59 Browser shared-MT snapshots and 59 PNGs;
+123 canonical and 52 pixel failures remain. Special descendants, restore and
+damage/destruction remain separate. [Block evidence](block-grid-evidence.md)
+records the accepted constructor scope and next observed prerequisite.
+
 The historical CI matrix discovered thirty-six live suites and ran separate
 jobs with `fail-fast: false`, preserving each result and evidence. Agents now
 own relevant local regression checks before merging; there is no automated
