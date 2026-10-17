@@ -2,6 +2,8 @@
 //
 //   npm run test:e2e                         every suite, one at a time
 //   npm run test:e2e -- keys doors           selected suites
+//   npm run test:e2e -- @items @audio        logical groups (tools/e2e/suites.mjs GROUPS)
+//   npm run test:e2e -- --groups             groups and their suites
 //   npm run test:e2e -- --jobs 2             suites in parallel (logs go to files)
 //   npm run test:e2e -- keys --count 4       extra flags override the suite's defaults
 //   npm run test:e2e -- keys --scenarios .cache/e2e/<run>/keys/scenarios.json
@@ -20,7 +22,7 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { acquireHostSlot } from './lib/host-slots.mjs';
 import { freeBytes, pruneRuns, slimSuite, sweepProductionSnapshots } from './lib/retention.mjs';
-import { RUNNABLE, SUITES, suiteById } from './suites.mjs';
+import { GROUPS, RUNNABLE, SUITES, suiteById } from './suites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const writeJson = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
@@ -39,11 +41,18 @@ for (let index = 0; index < argv.length; index++) {
   else if (arg === '--affected') affected = true;
   else if (arg === '--base') base = argv[++index];
   else if (arg === '--suite') ids.push(...argv[++index].split(','));
+  else if (arg === '--groups') { console.log(JSON.stringify(GROUPS, null, 2)); process.exit(0); }
   else if (!arg.startsWith('--') && !suiteArgs.length) ids.push(...arg.split(','));
   else suiteArgs.push(arg);
 }
 if (!Number.isInteger(jobs) || jobs < 1) { console.error('--jobs must be a positive integer'); process.exit(2); }
 if (!Number.isInteger(keepRuns) || keepRuns < 1) { console.error('--keep-runs must be a positive integer'); process.exit(2); }
+// `@group` expands to its suites; a suite named twice runs once.
+for (const id of ids.filter(id => id.startsWith('@'))) if (!GROUPS[id.slice(1)]) {
+  console.error(`Unknown group ${id}; known: ${Object.keys(GROUPS).map(group => `@${group}`).join(' ')}`);
+  process.exit(2);
+}
+ids.splice(0, ids.length, ...new Set(ids.flatMap(id => id.startsWith('@') ? GROUPS[id.slice(1)] : [id])));
 const unknown = ids.filter(id => !suiteById.has(id));
 if (unknown.length) {
   console.error(`Unknown suite ${unknown.join(', ')}; known: ${SUITES.map(suite => suite.id).join(', ')}`);
