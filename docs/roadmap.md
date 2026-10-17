@@ -68,7 +68,7 @@ Counts of open bugs are as of the last full review.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character and seed menus; pause | 4 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams; shared MT incomplete | 7 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -107,7 +107,10 @@ Next: options menu; death screen parity; intro cutscene.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
+| #587 | P1 | Menu page changes (title, file select, main, character, seed) cut instead of panning | playtest 2026-10-17 `playtest/menus/` menus-tour |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
+| #588 | P2 | Character select draws stat icons over a locked character's unlock text | playtest 2026-10-17 `playtest/menus/` menus-tour |
+| #589 | P3 | Seed entry shows underscore placeholders the original doesn't draw | playtest 2026-10-17 `playtest/menus/` menus-tour |
 
 ## Input
 
