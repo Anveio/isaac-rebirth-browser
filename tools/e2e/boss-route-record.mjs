@@ -55,6 +55,16 @@ const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number)
 // generation reads it (a Challenge room needs full health), so a port fight
 // that ends at full health takes one blast of its own bomb before parking.
 const HURT = hasFlag('--hurt');
+// Boss-room cells whose centre lies within 30 units of one of the port's own
+// floor pickups (hearts, coins): a heart taken in one game alone changes the
+// health Basement II's generation reads, so the shared walks keep off them.
+const pickupCells = state => {
+  const cells = [];
+  for (let row = 1; row < 8; row++) for (let col = 1; col < 14; col++) {
+    if (state.pickups.some(p => p.variant !== 100 && Math.hypot(40 + col * 40 - p.x, 120 + row * 40 - p.y) < 30)) cells.push(row * 15 + col);
+  }
+  return cells;
+};
 // The centre of the room grid cell holding a point.
 const centreOf = point => ({ x: Math.round((point.x - 40) / 40) * 40 + 40, y: Math.round((point.y - 120) / 40) * 40 + 120 });
 const avoiding = (grid, cells) => grid && { ...grid, solid: [...grid.solid].map((c, i) => (cells.includes(i) ? '1' : c)).join('') };
@@ -149,7 +159,7 @@ try {
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
-          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals]), door)
+          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)]), door)
           : doorKeys(avoiding(state.grid, pedestals), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
@@ -190,7 +200,7 @@ try {
       for (const sign of [-1, 1]) {
         if (state.grid.solid[cellAt(inner.x, inner.y)] !== '1') break;
         const stand = across ? { x: inner.x + sign * 40, y: inner.y } : { x: inner.x, y: inner.y + sign * 40 };
-        const blocked = [...AWARD_CELLS, ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))];
+        const blocked = [...AWARD_CELLS, ...pickupCells(state), ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))];
         if (state.grid.solid[cellAt(stand.x, stand.y)] === '1' || blocked.includes(cellAt(stand.x, stand.y))) continue;
         await walk(stand, blocked, 600, 'doorway poop');
         const aim = across ? (sign < 0 ? 'ArrowRight' : 'ArrowLeft') : (sign < 0 ? 'ArrowDown' : 'ArrowUp');
@@ -213,7 +223,7 @@ try {
       const near = cell => Math.hypot(40 + cell % 15 * 40 - state.player.x, 120 + Math.floor(cell / 15) * 40 - state.player.y);
       const spot = spots.sort((a, b) => near(a) - near(b))[0];
       if (spot === undefined) throw new Error('No open cell for the health-matching bomb');
-      await walk({ x: 40 + spot % 15 * 40, y: 120 + Math.floor(spot / 15) * 40 }, AWARD_CELLS, 600, 'bomb spot');
+      await walk({ x: 40 + spot % 15 * 40, y: 120 + Math.floor(spot / 15) * 40 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'bomb spot');
       await hold([]); await step(10);
       await hold(['KeyE']); await step(1); await hold([]);
       for (let left = 300; state.player.full; left--) {
@@ -222,7 +232,7 @@ try {
       }
       await step(30); state = await view();
     }
-    await walk({ x: 80, y: 400 }, AWARD_CELLS, 600, 'corner walk');
+    await walk({ x: 80, y: 400 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
     state = await view();
@@ -235,7 +245,7 @@ try {
       let target = centreOf(state.player);
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, cells), state.player, goal, 1);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, [...cells, ...pickupCells(state)]), state.player, goal, 1);
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }

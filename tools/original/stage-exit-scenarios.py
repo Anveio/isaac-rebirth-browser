@@ -99,6 +99,13 @@ def padding(total):
     return steps + [{'type': 'step', 'frames': total - frames(steps), 'label': 'exit-start'}]
 
 
+def near(points):
+    """Boss-room cells whose centre lies within 30 units of a pickup: a
+    Player stepping from centre to centre there would touch it."""
+    return [row * 15 + col for row in range(1, 8) for col in range(1, 14)
+            if any(((40 + col * 40 - x) ** 2 + (120 + row * 40 - y) ** 2) ** 0.5 < 30 for x, y in points)]
+
+
 def case(fixture, base, fights, identifier, randomized, idle, via):
     result = json.loads(json.dumps(base))
     for name, fight in fights.items():
@@ -116,7 +123,7 @@ def case(fixture, base, fights, identifier, randomized, idle, via):
     # that the port's fight does not; the shared walk routes around them, and
     # stepping from cell centre to cell centre keeps it off their corners.
     back = f"0,{fixture['rooms'][-2]},0"
-    avoid = fixture.get('originalSolid', [])
+    avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
                   *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor')
@@ -160,7 +167,7 @@ def main():
         for index in range(args.count):
             # A few draws, since a drawn waypoint can sit on an authored rock.
             for _ in range(3):
-                blocked = AWARD_CELLS | set(fixture.get('originalSolid', []))
+                blocked = AWARD_CELLS | set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', [])))
                 cell = entropy.choice([c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked])
                 built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241),
                                      [40 + cell % 15 * 40, 120 + cell // 15 * 40])
