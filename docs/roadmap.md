@@ -247,7 +247,6 @@ Next: coordinate later-stage admission with the level workstream (#413).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P1 | Basement II's open trapdoor refuses descent because the next generator is unadmitted; 2efbef1 guards the old repeated-tick freeze | issue; docs/dst.md |
-| #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 
 ## Player
@@ -593,6 +592,8 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
+- #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
 - #438 resolves the source-derived admission/death clock mismatch; [scoped clock evidence](player-death.md) retains the fresh OS cohort's required Original audio-observation failure, pixel reds and incomplete audio acceptance.
 - [PR615](https://github.com/Anveio/isaac-rebirth-browser/pull/615) restores the fresh Title/frame0 and black fade on GameOver Exit; clock and audio qualification remain separate.
 
