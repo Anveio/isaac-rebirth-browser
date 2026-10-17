@@ -1523,6 +1523,213 @@ impl RangeReadQueries for crate::item_queries::AppearanceQueries<'_> {
     }
 }
 
+/// Source512C42..5130B8, including the two out-of-line TEMP suffixes.
+/// This read-only view borrows existing values and their independent owners.
+/// A missing reached operand does not imply zero or an empty source map.
+trait MoveSpeedSource {
+    fn raw_count(&self, id: u32) -> Option<i32>;
+    fn temporary_count(&self, id: u32) -> Option<i32>;
+    fn temporary_present(&self, id: u32) -> Option<bool>;
+    fn have(&self, id: u32) -> Option<bool>;
+    fn has_trinket(&self, id: u32) -> Option<bool>;
+    fn pill_word(&self, effect: usize) -> Option<i32>;
+    fn source_d44(&self) -> Option<i32>;
+    fn source_d28(&self) -> Option<i32>;
+    fn source_d5c(&self) -> Option<f32>;
+    fn player_type_bfc(&self) -> Option<u32>;
+    fn active_id_d74(&self) -> Option<u32>;
+}
+
+#[derive(Clone, Copy)]
+struct MoveSpeedReadPlan {
+    value: f32,
+}
+
+impl MoveSpeedReadPlan {
+    fn read(source: &impl MoveSpeedSource) -> Option<Self> {
+        //512C59..C6E accumulates signed integers before CVTSI2SS.
+        let mut initial = source.raw_count(119)?;
+        initial = initial.wrapping_add(source.raw_count(27)?);
+        initial = initial.wrapping_add(source.raw_count(232)?);
+        //512C75 copies D44 into the character table's separate index9.
+        //The normal-Isaac output below uses actual table index0, not D44.
+        let _source_d44 = source.source_d44()?;
+        let temporary66 = source.temporary_count(66)?;
+        let pill14 = source.pill_word(14)?;
+        initial = initial.wrapping_add(temporary66);
+        initial = initial.wrapping_add(source.raw_count(28)?);
+        let mut value = initial as f32;
+        value += pill14 as f32 * 0.5_f32;
+        value -= source.pill_word(13)? as f32 * 0.4_f32;
+        value += source.raw_count(340)? as f32;
+        value += source.raw_count(12)? as f32;
+        value += source.temporary_count(12)? as f32;
+        value += source.raw_count(71)? as f32;
+        value += source.temporary_count(71)? as f32;
+        value += source.raw_count(101)? as f32;
+        value += source.temporary_count(122)? as f32;
+        value += source.raw_count(120)? as f32;
+        value += source.temporary_count(120)? as f32;
+        value += source.raw_count(143)? as f32;
+        let temporary143 = source.temporary_count(143)?;
+        let roid = source.raw_count(14)? as f32;
+        let mut reduction = source.raw_count(13)?;
+        reduction = reduction.wrapping_add(source.raw_count(121)?);
+        value += temporary143 as f32;
+        value *= 0.3_f32;
+        value += roid.min(1.0_f32) * 0.6_f32;
+        reduction = reduction.wrapping_add(source.temporary_count(121)?);
+        let subtraction = if reduction > 0 {
+            0.1_f32
+        } else {
+            //513DA0 uses the signed wrapping total, including negatives.
+            0.1_f32 * reduction as f32
+        };
+        let player_type = source.player_type_bfc()?;
+        value -= subtraction;
+        let speed_ball = source.raw_count(70)? as f32 * 0.4_f32;
+        //Source table8E6820 word0 is actual +0.0; other characters need
+        //their own selected table inputs and are not silently Isaac.
+        if player_type != 0 {
+            return None;
+        }
+        value += 0.0_f32;
+        let slow = source.raw_count(90)?.wrapping_add(source.raw_count(129)?);
+        value += speed_ball;
+        value += source.raw_count(79)? as f32 * 0.2_f32;
+        value += source.raw_count(82)? as f32 * 0.3_f32;
+        value = value.min(1.0_f32) + 1.0_f32;
+        value -= slow as f32 * 0.2_f32;
+        value += source.raw_count(189)? as f32 * 0.2_f32;
+        value += source.source_d28()? as f32 * 0.2_f32;
+
+        //512EE4's false edge reaches TEMP298; no eager second lookup.
+        if source.temporary_present(77)? || source.temporary_present(298)? {
+            value = 0.28_f32 + value;
+        }
+        if source.has_trinket(37)? {
+            value = 0.15_f32 + value;
+        }
+        if source.temporary_present(83)? {
+            value -= 0.18_f32;
+        }
+        if source.have(230)? {
+            value += 0.2_f32;
+        }
+        //Read the same canonical D74 value only through its per-word owner.
+        //A current raw ID or query-map completeness cannot establish it.
+        if matches!(source.active_id_d74()?, 181 | 130) {
+            value = value.max(1.5_f32);
+        }
+        if source.have(299)? {
+            value -= 0.3_f32;
+            if source.temporary_present(299)? {
+                //514D5D reaches this separate float only on both positives.
+                let source_d5c = source.source_d5c()?;
+                if !source_d5c.is_finite() {
+                    return None;
+                }
+                value += source_d5c;
+            }
+        }
+        if source.have(300)? {
+            value += 0.25_f32;
+        }
+        if source.have(306)? {
+            value += 0.2_f32;
+        }
+        if source.have(307)? {
+            value += 0.1_f32;
+        }
+        if source.have(314)? {
+            value -= 0.4_f32;
+        }
+        if !value.is_finite() {
+            return None;
+        }
+        Some(Self {
+            value: value.clamp(0.1_f32, 2.0_f32),
+        })
+    }
+
+    fn resolve(self) -> f32 {
+        self.value
+    }
+}
+
+///One temporary borrow of canonical values; no second stat/input store.
+struct RuntimeMoveSpeedSource<'a> {
+    inputs: ItemInputs<'a>,
+    queries: crate::item_queries::AppearanceQueries<'a>,
+    player_type: Option<u32>,
+}
+
+impl MoveSpeedSource for RuntimeMoveSpeedSource<'_> {
+    fn raw_count(&self, id: u32) -> Option<i32> {
+        self.queries.raw_count(id as usize)
+    }
+    fn temporary_count(&self, id: u32) -> Option<i32> {
+        self.queries.temporary_count(id)
+    }
+    fn temporary_present(&self, id: u32) -> Option<bool> {
+        self.queries.temporary_present(id)
+    }
+    fn have(&self, id: u32) -> Option<bool> {
+        self.queries.have(id as usize)
+    }
+    fn has_trinket(&self, id: u32) -> Option<bool> {
+        self.queries.has_trinket(id)
+    }
+    fn pill_word(&self, effect: usize) -> Option<i32> {
+        crate::pill_effect_history::callback_word(self.inputs.owner, effect)
+    }
+    fn source_d44(&self) -> Option<i32> {
+        self.inputs
+            .owner
+            .move_speed_inputs
+            .map(|words| words.source_d44)
+    }
+    fn source_d28(&self) -> Option<i32> {
+        self.inputs
+            .owner
+            .move_speed_inputs
+            .map(|words| words.source_d28)
+    }
+    fn source_d5c(&self) -> Option<f32> {
+        //There is currently no source-owned D5C writer/history. This is
+        //reached only on Have299 && TEMP299; no zero or D44 substitution.
+        None
+    }
+    fn player_type_bfc(&self) -> Option<u32> {
+        self.player_type
+    }
+    fn active_id_d74(&self) -> Option<u32> {
+        //Dependency: the existing canonical per-word charge-history owner.
+        crate::active_charges::active_id(self.inputs.owner)
+    }
+}
+
+impl MoveSpeedReadPlan {
+    fn read_reached(
+        inputs: ItemInputs<'_>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+        player_type: Option<u32>,
+        source: CacheSourceInputs,
+    ) -> Option<Self> {
+        if !source
+            .entity
+            .is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
+        {
+            return None;
+        }
+        Self::read(&RuntimeMoveSpeedSource {
+            inputs,
+            queries,
+            player_type,
+        })
+    }
+}
+
 /// Recompute requested mapped callbacks from actual item inputs, retaining
 /// partial values and pending bits for every unimplemented callback owner.
 /// This extraction preserves Source110 arithmetic and predicates exactly.
@@ -1579,6 +1786,12 @@ pub(crate) fn resolve_scalars(
             None
         };
         let range_admitted = range_plan.is_some();
+        let move_speed_plan = if stage == CacheStage::MoveSpeed {
+            MoveSpeedReadPlan::read_reached(inputs, queries, source_player_type, source)
+        } else {
+            None
+        };
+        let move_speed_admitted = move_speed_plan.is_some();
         let shot_speed_admitted = shot_speed_plan.is_some();
         let damage_admitted = damage_plan.is_some();
         let supported: &[u32] = match stage {
@@ -1653,6 +1866,9 @@ pub(crate) fn resolve_scalars(
                     resolved_speed += input.source_d28 as f32 * 0.2_f32;
                 }
                 values.stats.move_speed = resolved_speed.clamp(0.1, 2.0);
+                if let Some(plan) = move_speed_plan {
+                    values.stats.move_speed = plan.resolve();
+                }
                 &[14, 27, 28, 143]
             }
             _ => continue,
@@ -1666,16 +1882,7 @@ pub(crate) fn resolve_scalars(
                 CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
                 CacheStage::Damage => damage_admitted,
                 CacheStage::Range => range_admitted,
-                CacheStage::MoveSpeed => {
-                    source_player_type == Some(0)
-                        && inputs
-                            .owner
-                            .move_speed_inputs
-                            .is_some_and(|terms| terms.source_d44 == 0)
-                        && crate::pill_effect_history::callback_word(inputs.owner, 13) == Some(0)
-                        && crate::pill_effect_history::callback_word(inputs.owner, 14) == Some(0)
-                        && inputs.admits_scalar_stage(stage, supported)
-                }
+                CacheStage::MoveSpeed => move_speed_admitted,
                 CacheStage::ShotSpeed => shot_speed_admitted,
                 _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
             }
@@ -1684,7 +1891,8 @@ pub(crate) fn resolve_scalars(
             if matches!(
                 stage,
                 CacheStage::ShotSpeed | CacheStage::Damage | CacheStage::Range
-            ) {
+            ) || (stage == CacheStage::MoveSpeed && move_speed_admitted)
+            {
                 reached_completed |= flag;
             }
         }
