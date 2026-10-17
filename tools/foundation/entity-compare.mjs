@@ -13,6 +13,9 @@ export function check(rows, field, expected, actual) {
     status: expected !== undefined && actual !== undefined && JSON.stringify(expected) === JSON.stringify(actual) ? 'pass' : 'fail' });
 }
 
+// An actor whose sprite overlaps the player's (both within 40 world units).
+const overlapping = (actor, player) => Math.abs(actor[0] - player[0]) < 40 && Math.abs(actor[1] - player[1]) < 40;
+
 const ROCK_ANIMATIONS = { 2: 'normal', 3: 'black', 4: 'tinted', 5: 'bombrock', 6: 'alt' };
 const DAMAGE_FLAGS = { tear: 0, bomb: 4, fireContact: 2, roomEffect: 0, laser: 8 };
 
@@ -156,16 +159,18 @@ export function entityRows(rows, source, actual, spec, render) {
   // Room::Render draws the manager render array (Room+15d0 +80/+8c) in order,
   // so a later entry draws over an earlier one. Entity_Player and Entity_NPC
   // share the y key 441bd0; Player.Init sets the +460 addend to 5 (519485).
-  // For each NPC both the original's array and the browser's draw hold,
-  // whether it draws over the player; graded whenever both drew the player.
+  // Draw order is visible only where sprites overlap: for each NPC within 40
+  // world units of the player on both axes in the original that both the
+  // original's array and the browser's draw hold, whether it draws over the
+  // player; graded whenever both drew the player.
   const sorted = source.renderSortedEntities ?? [];
   const nativePlayer = sorted.findIndex(actor => actor.type === 1);
   if (render) check(rows, 'render.orderRecorded', true, Array.isArray(render.order) || undefined);
   const drawn = render?.order ?? [];
   const drawnPlayer = drawn.findIndex(([kind]) => kind === 1);
   const drawnAt = actor => drawn.findIndex(([kind, seed]) => kind === actor.type && seed === actor.spawnSeed);
-  const shared = sorted.flatMap((actor, index) =>
-    actor.type >= 10 && actor.type < 1000 && drawnAt(actor) >= 0 ? [[actor, index]] : []);
+  const shared = sorted.flatMap((actor, index) => actor.type >= 10 && actor.type < 1000 && drawnAt(actor) >= 0
+    && nativePlayer >= 0 && overlapping(actor.position, sorted[nativePlayer].position) ? [[actor, index]] : []);
   if (nativePlayer >= 0 && drawnPlayer >= 0 && shared.length)
     check(rows, 'render.npcsOverPlayer', shared.map(([actor, index]) => [actor.type, actor.spawnSeed, index > nativePlayer]),
       shared.map(([actor]) => [actor.type, actor.spawnSeed, drawnAt(actor) > drawnPlayer]));
@@ -247,8 +252,6 @@ export const loadManifest = (directory, side) => readJsonEvidence(manifestPath(d
 
 export const MARKERS = ['admission', 'damage', 'death', 'retirement', 'clear', 'shape', 'bossRoom', 'roomType', 'overPlayer', 'underPlayer'];
 
-// A spec actor whose sprite overlaps the player's (both within 40 world units).
-const overlapping = (actor, player) => Math.abs(actor[0] - player[0]) < 40 && Math.abs(actor[1] - player[1]) < 40;
 
 /** Lifecycle markers each game reaches on its own over a whole case. */
 export function markers(directory, spec) {

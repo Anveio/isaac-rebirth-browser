@@ -100,8 +100,8 @@ pub struct Scheduler {
     actors: Vec<ActorRef>,
     identities: Vec<Identity>,
     room_next_sequence: u32,
-    /// EntityManager+80 render array, kept for the Player and Entity_NPC
-    /// actors only; Room::Render draws it in order (see `sort_render`).
+    /// EntityManager+80 render array of the ordinary actors; Room::Render
+    /// draws it in order (see `sort_render`).
     #[serde(default)]
     render: Vec<ActorRef>,
 }
@@ -181,24 +181,32 @@ impl Scheduler {
             matches!(actor.kind, ActorKind::Player | ActorKind::Familiar) || retained(actor)
         });
         self.room_next_sequence = 0;
-        //453ec0 empties the render array and re-appends the retained actors.
-        self.render.retain(|actor| actor.kind == ActorKind::Player);
+        //453ec0 empties the render array and re-appends the retained
+        // Player, Familiar and type8/subtype0 actors.
+        let actors = &self.actors;
+        self.render.retain(|actor| actors.contains(actor));
     }
 
     /// Maintain the EntityManager+80 render array that Room::Render walks in
     /// order (452850/4528c0 call virtual+28 Render), so a later entry draws
-    /// over an earlier one. `key` is the actor's virtual+50 render key, or
-    /// None for actors outside the tracked Player/Entity_NPC set.
+    /// over an earlier one. `keys` holds each ordinary actor's virtual+50
+    /// render key; actors without one stay out of the array.
     ///
     /// Insert 4524f0 places a new actor before the first entry whose key is
     /// not below its own, so at equal keys the newer actor draws first.
     /// Manager Update ends (45529a) with 452760: up to three passes swapping
     /// adjacent entries only when the left key is strictly (unsigned) greater,
-    /// stopping after a pass with fewer than count/10+1 swaps. Equal keys
-    /// therefore keep their previous order. The original array also holds
-    /// tears, effects, pickups and other kinds, which can delay a crossing
-    /// when the pass budget runs out; only this sub-array is modelled.
-    pub(crate) fn sort_render(&mut self, key: impl Fn(ActorRef) -> Option<u32>) {
+    /// stopping after a pass with fewer than count/10+1 swaps. Equal keys keep
+    /// their order, and an actor whose key fell moves at most one slot left
+    /// per pass: entering a room, Isaac (inserted at his departure key) walks
+    /// back through the room's actors one slot per update. `passes` is false
+    /// for the admitting Room.Update, which inserts without sorting.
+    pub(crate) fn sort_render(&mut self, keys: &[(ActorRef, u32)], passes: bool) {
+        let key = |actor: ActorRef| {
+            keys.iter()
+                .find(|(other, _)| *other == actor)
+                .map(|(_, key)| *key)
+        };
         let actors = &self.actors;
         self.render
             .retain(|actor| actors.contains(actor) && key(*actor).is_some());
@@ -215,6 +223,9 @@ impl Scheduler {
                 .position(|other| key(*other).is_some_and(|other| other >= own))
                 .unwrap_or(self.render.len());
             self.render.insert(at, actor);
+        }
+        if !passes {
+            return;
         }
         let count = u32::try_from(self.render.len()).unwrap_or(u32::MAX);
         for _ in 0..3 {
