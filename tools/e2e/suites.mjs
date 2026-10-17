@@ -15,6 +15,7 @@
 //   replay  flag that replays the suite's recorded scenarios.json
 //           (default --scenarios; paired-game suites replay case.json tapes;
 //           false when the driver has no replay input yet)
+//   env     extra environment for the driver and the games it launches
 
 import { entitySpecs } from './entities.mjs';
 
@@ -129,7 +130,12 @@ export const SUITES = [
   suite('run-admission', e2e('run-admission'), ['--count', '2'],
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
-  suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks'),
+  // The original streams and starts music on worker threads that keep real
+  // clocks, so this suite keeps the clock gate at full presentation cost
+  // instead of dropping released frames (foundation-clock-gate.c): faster
+  // frames would outrun the native PCM upload the suite requires.
+  suite('music', e2e('music'), ['--count', '2'], 'Music channels, fades and queued tracks',
+    { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
   suite('footprint-admission', statePair, [
     '--scenario-helper', helper('entity-scenarios.py'),
     '--helper-arg', '--room-type', '--helper-arg', '6',
