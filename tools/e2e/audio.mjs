@@ -88,7 +88,7 @@ function sampleStarts(calls) {
 // This is independent of AudioRuntime's diagnostics and never changes inputs,
 // buffers, parameters, admission, random state, or output scheduling.
 
-const production = await startProductionServer();
+const production = await startProductionServer({ directory: value('--production-directory') });
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256, production: production.build,
   graphics: await inspectBrowserGraphics(browser), scope: 'All 169 configured SFX and 303 sample wrappers; actual forward menu/character sound admissions and native OpenAL/browser Web Audio PCM starts. Complete shared MT is gated at Title/profile; later Main initialization and run random routing remain explicit diagnostics. Stable character sound admissions must each consume exactly one shared draw. Music/gameplay SFX callers are separate work.', caseFilter, cases: [] };
@@ -113,13 +113,13 @@ try {
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.addInitScript(installBrowserAudioObserver);
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({ seed, boot, volume }) => { window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true });
-        window.game.command({ type: 'audioVolume', sfx_volume: volume }); }, { seed: native.seedValue, boot: scenario.bootEpochSeed, volume: scenario.volume });
+      await page.evaluate(({ seed, boot, volume }) => { window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true,
+        audioPreferences: {sfxVolume: volume, musicVolume: 1}, fullscreenPreferences: {fullscreen: false} }); }, { seed: native.seedValue, boot: scenario.bootEpochSeed, volume: scenario.volume });
       check('initial autoplay suspended', (await page.evaluate(() => window.game.audio())).contextState, 'suspended');
       await page.locator('#game').click();
       await page.waitForFunction(() => window.game.audio().contextState === 'running');
       const states = []; let previousTap, intendedSeedEntry = false;
-      const intendedPressed = new Set(), expectedCommands = [{ type: 'audioVolume', sfx_volume: scenario.volume }];
+      const intendedPressed = new Set(), expectedCommands = [];
       for (const action of tape.browser) {
         if (action.type === 'step') { await step(page, action.frames); expectedCommands.push({ type: 'tick', count: action.frames }); }
         else if (action.type === 'key') {
@@ -213,6 +213,9 @@ try {
       check('browser actual public seed readback', (await snapshot(page)).runSeedValue, native.seedValue);
       const wasmTrace = await page.evaluate(() => window.game.trace());
       check('actual reset/run and boot inputs recorded', [wasmTrace.initialSeed, wasmTrace.bootEpochSeed], [native.seedValue, scenario.bootEpochSeed]);
+      check('declared audio preferences applied before first admission', wasmTrace.bootAudioPreferences, {sfxVolume: scenario.volume, musicVolume: 1});
+      check('declared window default applied at reset', wasmTrace.bootFullscreenPreferences, {fullscreen: false});
+      check('actual Native public audio options', native.audioOptions, {sfxVolume: scenario.volume, musicVolume: 1});
       check('all public inputs and intervals reached production WASM', wasmTrace.commands, expectedCommands);
       check('actual WASM input trace bounded', [wasmTrace.enabled, wasmTrace.inputTraceTruncated], [true, false]);
       result.traceHistory = { truncated: wasmTrace.truncated, inputTraceTruncated: wasmTrace.inputTraceTruncated,

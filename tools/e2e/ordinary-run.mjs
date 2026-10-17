@@ -85,7 +85,7 @@ try {
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(`${production.url}/?manual=1`); await waitForReady(page);
       // Both browser inputs come only from the saved public case, never native.
-      await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed }); }, scenario);
+      await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); }, scenario);
       const compareMenu = async label => {
         const state = await snapshot(page), observed = observations.get(label), boot = state.bootLifecycle;
         checkpoints.push({ label, state }); assert.ok(observed && observed.status === 'pass');

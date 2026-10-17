@@ -24,6 +24,7 @@ export class MenuRenderer {
     if (visible(viewX + 480, viewY + 810)) this.character(ctx, state, viewX + 480, viewY + 810);
     if (visible(viewX + 960, viewY + 810)) this.seed(ctx, state, viewX + 960, viewY + 810);
     if (visible(viewX, viewY + 270)) this.profile(ctx, state, viewX, viewY + 270);
+    if (visible(viewX + 480, viewY + 1080, 380)) this.options(ctx, state, viewX + 480, viewY + 1080);
     this.widgets(ctx, state);
     ctx.save();
     ctx.imageSmoothingEnabled = true;
@@ -105,6 +106,22 @@ export class MenuRenderer {
     ctx.drawImage(widget, 96, 0, 112, 128, 384, 179 + select, 112, 128);
     this.assets.font(ctx, "teammeatfont12", "Esc", 20, 242 + back, { color: "#362f2d" });
     this.assets.font(ctx, "teammeatfont12", "Space", 423, 242 + select, { color: "#362f2d" });
+  }
+
+  private options(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
+    const path = `${MENU}optionsmenu.anm2`;
+    // Main-family constructor5A6950 uses the authored normal paper. The
+    // missing setting consumers are not represented by fabricated gauges.
+    const owned = new Set([3, 4, 5, 6, 7, 8, 20]);
+    const actor = sceneData[path as keyof typeof sceneData];
+    const layers = actor.Layers.map(layer => layer.Id).filter(id => !owned.has(id));
+    this.assets.draw(ctx, path, "Idle", x, y, 0, {layers});
+    const gauge = (value: number) => Math.floor(Math.fround(Math.fround(value * 10) + 0.5));
+    this.assets.draw(ctx, path, "Idle", x, y, gauge(state.audio.sfxVolume), {layers: [3]});
+    this.assets.draw(ctx, path, "Idle", x, y, gauge(state.music.musicEnabled ? state.music.volume : 0), {layers: [4]});
+    //5A79D9/5A7F70: source Settings fullscreen uses inverted layer frames.
+    this.assets.draw(ctx, path, "Idle", x, y, state.fullscreen.requested ? 0 : 1, {layers: [6]});
+    this.assets.draw(ctx, path, "Idle", x, y, state.optionsMenu.selection, {layers: [8]});
   }
 
   private main(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {

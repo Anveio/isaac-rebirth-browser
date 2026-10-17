@@ -146,14 +146,14 @@ try {
     try {
       let start;
       if (runtime) {
-        runtime.reset(item.seedValue, scenarios.bootEpochSeed);
+        runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, {sfxVolume: 0, musicVolume: 0}, {fullscreen: false});
         for (const command of manualSeedCommands(item.code)) issue(command);
         start = await actualNodeSnapshot();
       } else {
         await page.goto(`${server.url}/?manual=1`);
         await waitForReady(page);
         await page.evaluate(({ seedValue, bootEpochSeed }) => {
-          window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
+          window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
         }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
         start = await enterSeededRun(page, item.code);
       }

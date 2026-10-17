@@ -1,6 +1,6 @@
 import wasmUrl from "./generated/engine.wasm?url";
 
-export type Screen = "title" | "profile" | "main" | "character" | "challenge" | "seed" | "playing";
+export type Screen = "title" | "profile" | "main" | "options" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
   entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
@@ -153,8 +153,13 @@ export interface SoundEvent {
   sequence: number; id: number; sampleIndex: number; systemCounter: number; halfTick: number;
   looping: boolean; pitch: number; gain: number;
 }
+export interface VolumeCallback {
+  sequence: number; beforeSoundSequence: number; volume: number;
+  loadedSlotVolumes: Record<string, number>;
+}
 export interface AudioState {
   sfxVolume: number; nextSequence: number; events: SoundEvent[];
+  nextVolumeSequence: number; volumeCallbacks: VolumeCallback[];
   pending: { id: number; volume: number; delay: number; looping: boolean; pitch: number }[];
   slots: Record<string, { lastTick: number | null; nextAllowed: number; lastVolume: number; loaded: boolean;
     samples: { looping: boolean; gain: number; pitch: number }[] }>;
@@ -257,7 +262,7 @@ export interface Floor {
 }
 /** Room ambience loops 5c6980: eased volume, pitch and whether the loop plays. */
 export interface AmbienceLoop { volume: number; pitch: number; playing: boolean; }
-export interface Ambience { fire: AmbienceLoop; swarm: AmbienceLoop; }
+export interface Ambience { fire: AmbienceLoop; swarm: AmbienceLoop; updateSequence: number; }
 export interface Room {
   left: number; right: number; top: number; bottom: number; appearance: RoomAppearance;
   descriptor: RoomDescriptor | null;
@@ -320,7 +325,7 @@ export interface StageEffects {
   actorTint: [number, number, number];
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
-export type MenuPage = "title" | "save" | "game" | "character" | "challenge";
+export type MenuPage = "title" | "save" | "game" | "options" | "character" | "challenge";
 export interface MenuClip { animation: string; frame: number; playing: boolean }
 /** MenuManager view, Back/Select widgets, File select and Character carousel. */
 export interface MenuPresentation {
@@ -355,7 +360,7 @@ export interface State {
     completionCallbacksPending: boolean };
   audio: AudioState;
   music: MusicState;
-  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; characterSelection: number; character: string; difficulty: string;
+  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
@@ -440,10 +445,16 @@ export interface State {
   runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
+export interface AudioPreferences { sfxVolume: number; musicVolume: number; }
+export interface FullscreenPreferences { fullscreen: boolean; }
 export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
+  reset_with_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
+  reset_with_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
+  reset_with_boot_resources_and_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
+  reset_with_boot_resources_and_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
@@ -470,7 +481,7 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs) {
+  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
@@ -480,7 +491,7 @@ export class Engine {
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
       || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
-    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources); return engine;
+    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences); return engine;
   }
   private static validateSeed(initialSeed: number) {
     if (!Number.isInteger(initialSeed) || initialSeed < 1 || initialSeed > 0xffffffff)
@@ -490,11 +501,31 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
+    if (audioPreferences !== undefined && (!audioPreferences ||
+      Object.keys(audioPreferences).sort().join(',') !== 'musicVolume,sfxVolume' ||
+      ![audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value >= 0 && value <= 1)))
+      throw new Error('Initial audio preferences must contain finite SFX/Music volumes within 0..1');
+    if (audioPreferences !== undefined && (typeof this.wasm.reset_with_audio_preferences !== 'function' ||
+      typeof this.wasm.reset_with_boot_resources_and_audio_preferences !== 'function'))
+      throw new Error('WASM audio preference ingress is stale; rebuild with npm run build:wasm');
+    if (fullscreenPreferences !== undefined && (!fullscreenPreferences || typeof fullscreenPreferences !== 'object' || Array.isArray(fullscreenPreferences) ||
+      Object.keys(fullscreenPreferences).join(',') !== 'fullscreen' || typeof fullscreenPreferences.fullscreen !== 'boolean'))
+      throw new Error('Initial fullscreen preference requires exactly one boolean');
+    if (typeof this.wasm.reset_with_fullscreen_preferences !== 'function' ||
+      typeof this.wasm.reset_with_boot_resources_and_fullscreen_preferences !== 'function')
+      throw new Error('WASM fullscreen preference owner is stale; rebuild with npm run build:wasm');
+    const displayReset = (withResources: boolean) => {
+      const reset = withResources ? this.wasm.reset_with_boot_resources_and_fullscreen_preferences : this.wasm.reset_with_fullscreen_preferences;
+      return reset(initialSeed, bootEpochSeed, Number(fullscreenPreferences!.fullscreen), Number(audioPreferences !== undefined),
+        audioPreferences?.sfxVolume ?? 0, audioPreferences?.musicVolume ?? 0);
+    };
     let result: number;
-    if (resources === undefined) result = this.wasm.reset(initialSeed, bootEpochSeed);
+    if (resources === undefined) result = fullscreenPreferences !== undefined ? displayReset(false)
+      : audioPreferences === undefined ? this.wasm.reset(initialSeed, bootEpochSeed)
+      : this.wasm.reset_with_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     else {
       if (typeof this.wasm.reset_with_boot_resources !== "function" || typeof this.wasm.boot_resource_ptr !== "function")
         throw new Error("WASM resource ingress is stale; rebuild with npm run build:wasm");
@@ -503,7 +534,9 @@ export class Engine {
       const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed);
+      result = fullscreenPreferences !== undefined ? displayReset(true)
+        : audioPreferences === undefined ? this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed)
+        : this.wasm.reset_with_boot_resources_and_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     }
     if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
     this.stains = { room: null, initialization: null, list: [] };

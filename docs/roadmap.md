@@ -104,10 +104,21 @@ the menu board pans between pages, with File select clips, the character
 carousel, Back/Select widgets and hard-mode fades
 (`engine/src/menu_presentation.rs`, frame-exact on the menus tour); run
 introduction banner; pause menu; Challenge page and declared Challenge1 XML
-ingress. Missing: intro cutscene (the paired tapes skip it), options, stats
-and win screen. General challenge rules remain separate from menu presentation.
+ingress. The separate Options leaf owns eight-row navigation, actual
+SFX/Music settings, pre-constructor preferences, Back save and a fullscreen
+intent/result bridge. The 402af-based artifact 99f passes build and all 428
+bounded same-Native Options fields and both unchanged Browser runtime tests.
+Default paired-kernel replays preserve all prior values: fixed 5999/5999 passes;
+recorded HH936E8Z keeps its 78 failures among 6060 checks, with no lost passes.
+Historical 3a9 runtime/SFX/free-SKU checks keep their separate artifact scope.
+The Options readers/comparer/clock tools are still ignored: durable promotion
+and a permanent registered Options suite remain debt. Controls, Map Opacity,
+Filter, Gamma and Popups callbacks, shaders, OS and reload stay separate. Missing: intro cutscene (the paired tapes
+skip it), stats and win screen. General challenge rules remain separate.
 
-Next: options menu; death screen parity; intro cutscene.
+Next: promote durable Options acceptance tools; qualify Controls
+and Map Opacity as separate follow-ups; death screen parity; intro cutscene.
+See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

@@ -1,5 +1,5 @@
 import catalogue from './audio-data.json';
-import type { Ambience, SoundEvent } from './engine';
+import type { Ambience, SoundEvent, VolumeCallback } from './engine';
 import { MusicRuntime } from './music';
 
 const urls = import.meta.glob('../references/isaac/rebirth/resources/sfx/**/*.wav', {
@@ -58,6 +58,9 @@ export class AudioRuntime {
   private lastSequence = -1;
   private traceEnabled = false;
   private trace: OutputEvent[] = [];
+  private lastVolumeSequence = -1;
+  private volumeTrace: { sequence: number; beforeSoundSequence: number; updates: {slot: number; path: string; voice: number; gain: number}[] }[] = [];
+  private volumeTraceTruncated = false;
   private traceTruncated = false;
   private constructor(private readonly context: AudioContext, private readonly samples: Map<string, Sample>, readonly music: MusicRuntime) {}
 
@@ -80,13 +83,46 @@ export class AudioRuntime {
     await this.music.unlock();
   }
 
-  consume(events: readonly SoundEvent[]): void {
+  consume(events: readonly SoundEvent[], callbacks: readonly VolumeCallback[] = []): void {
+    let index = 0;
+    const applyThrough = (beforeSequence: number) => {
+      while (index < callbacks.length && callbacks[index]!.beforeSoundSequence <= beforeSequence)
+        this.volume(callbacks[index++]!);
+    };
     for (const event of events) {
+      applyThrough(event.sequence);
       if (event.sequence <= this.lastSequence) continue;
       this.lastSequence = event.sequence;
       // A suspended context retains the same bounded voice graph. The trusted
       // gesture resumes that graph; no second admission or burst queue is used.
       this.play(event);
+    }
+    // A volume setter with no sound admission still invokes the callback.
+    applyThrough(Infinity);
+  }
+
+  private volume(callback: VolumeCallback): void {
+    if (callback.sequence <= this.lastVolumeSequence) return;
+    this.lastVolumeSequence = callback.sequence;
+    const updates: {slot: number; path: string; voice: number; gain: number}[] = [];
+    //5E1DB0 loops loaded IDs and every configured sample in source order.
+    //Alias IDs can share one currently playing backend; retain each write.
+    for (const [id, requestedVolume] of Object.entries(callback.loadedSlotVolumes).sort(([a], [b]) => Number(a) - Number(b))) {
+      const sound = catalogue.sounds.find(sound => sound.id === Number(id));
+      if (!sound) throw new Error("Volume callback requires a configured sound slot");
+      for (const sample of sound.samples) for (let voiceIndex = 0; voiceIndex < this.voices.length; voiceIndex++) {
+        const voice = this.voices[voiceIndex];
+        if (!voice || voice.path !== sample.path) continue;
+        //Backend voices exist only from actual start until actual ended/stop.
+        //No logical slot sample or estimated engine lifetime substitutes here.
+        const gain = Math.fround(Math.fround(requestedVolume) * Math.fround(callback.volume));
+        voice.gain.gain.value = gain;
+        updates.push({slot: Number(id), path: sample.path, voice: voiceIndex, gain});
+      }
+    }
+    if (this.traceEnabled) {
+      if (this.volumeTrace.length === TRACE_LIMIT) this.volumeTraceTruncated = true;
+      else this.volumeTrace.push({sequence: callback.sequence, beforeSoundSequence: callback.beforeSoundSequence, updates});
     }
   }
 
@@ -149,6 +185,7 @@ export class AudioRuntime {
   reset(trace = false): void {
     for (let i = 0; i < this.voices.length; i++) this.release(i);
     this.lastSequence = -1;
+    this.lastVolumeSequence = -1; this.volumeTrace = []; this.volumeTraceTruncated = false;
     this.traceEnabled = trace; this.trace = []; this.traceTruncated = false;
     this.music.reset(trace);
   }
@@ -158,6 +195,7 @@ export class AudioRuntime {
       loadedSamples: this.samples.size, voiceCapacity: this.voices.length,
       waitingForUnlock: this.context.state === 'running' ? 0 : this.voices.filter(Boolean).length,
       activeVoices: this.voices.map((voice, index) => voice && { voice: index, path: voice.path }).filter(Boolean),
-      events: structuredClone(this.trace), truncated: this.traceTruncated, music: this.music.snapshot() };
+      events: structuredClone(this.trace), truncated: this.traceTruncated,
+      volumeCallbacks: structuredClone(this.volumeTrace), volumeCallbacksTruncated: this.volumeTraceTruncated, music: this.music.snapshot() };
   }
 }

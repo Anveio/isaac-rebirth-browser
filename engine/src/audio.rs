@@ -47,6 +47,17 @@ pub struct SoundEvent {
     pub gain: f32,
 }
 
+///5B97A0/5E1DB0 callback, ordered before the next admitted sound sequence.
+///Loaded slots retain their request volume; actual playing ownership is backend.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct VolumeCallback {
+    pub sequence: u64,
+    pub before_sound_sequence: u64,
+    pub volume: f32,
+    pub loaded_slot_volumes: BTreeMap<u32, f32>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(
     rename_all = "camelCase",
@@ -60,6 +71,8 @@ pub struct AudioState {
     // The current command's admissions, consumed once by browser playback.
     pub events: Vec<SoundEvent>,
     pub pending: Vec<SoundRequest>,
+    pub next_volume_sequence: u64,
+    pub volume_callbacks: Vec<VolumeCallback>,
 }
 
 #[derive(Deserialize)]
@@ -70,6 +83,10 @@ struct SavedAudioState {
     next_sequence: u64,
     events: Vec<SoundEvent>,
     pending: Vec<SoundRequest>,
+    #[serde(default)]
+    next_volume_sequence: u64,
+    #[serde(default)]
+    volume_callbacks: Vec<VolumeCallback>,
 }
 
 impl TryFrom<SavedAudioState> for AudioState {
@@ -120,12 +137,33 @@ impl TryFrom<SavedAudioState> for AudioState {
         {
             return Err("audio continuation has invalid pending requests".into());
         }
+        let mut previous_callback = None;
+        let mut previous_boundary = 0;
+        for callback in &saved.volume_callbacks {
+            if callback.sequence >= saved.next_volume_sequence
+                || previous_callback.is_some_and(|sequence| callback.sequence <= sequence)
+                || callback.before_sound_sequence < previous_boundary
+                || callback.before_sound_sequence > saved.next_sequence
+                || !callback.volume.is_finite()
+                || !(0.0..=1.0).contains(&callback.volume)
+                || callback
+                    .loaded_slot_volumes
+                    .iter()
+                    .any(|(id, volume)| !saved.slots.contains_key(id) || !volume.is_finite())
+            {
+                return Err("audio continuation has invalid volume callbacks".into());
+            }
+            previous_callback = Some(callback.sequence);
+            previous_boundary = callback.before_sound_sequence;
+        }
         Ok(Self {
             sfx_volume: saved.sfx_volume,
             slots: saved.slots,
             next_sequence: saved.next_sequence,
             events: saved.events,
             pending: saved.pending,
+            next_volume_sequence: saved.next_volume_sequence,
+            volume_callbacks: saved.volume_callbacks,
         })
     }
 }
@@ -157,11 +195,13 @@ impl Default for AudioState {
             })
             .collect();
         Self {
-            sfx_volume: 1.0,
+            sfx_volume: 0.3,
             slots,
             next_sequence: 0,
             events: Vec::new(),
             pending: Vec::new(),
+            next_volume_sequence: 0,
+            volume_callbacks: Vec::new(),
         }
     }
 }
@@ -213,8 +253,32 @@ impl AudioState {
         Some(event)
     }
 
+    pub fn set_volume(&mut self, volume: f32) -> Result<(), String> {
+        if !volume.is_finite() || !(0.0..=1.0).contains(&volume) {
+            return Err("SFX volume must be finite and within 0..1".into());
+        }
+        let sequence = self.next_volume_sequence;
+        self.next_volume_sequence = sequence
+            .checked_add(1)
+            .ok_or("SFX volume callback sequence exhausted")?;
+        self.sfx_volume = volume;
+        self.volume_callbacks.push(VolumeCallback {
+            sequence,
+            before_sound_sequence: self.next_sequence,
+            volume,
+            loaded_slot_volumes: self
+                .slots
+                .iter()
+                .filter(|(_, slot)| slot.loaded)
+                .map(|(id, slot)| (*id, slot.last_volume))
+                .collect(),
+        });
+        Ok(())
+    }
+
     pub fn begin_command(&mut self) {
         self.events.clear();
+        self.volume_callbacks.clear();
     }
 
     pub fn flush_pending(&mut self, shared: &mut Mt19937, system_counter: u32) {

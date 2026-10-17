@@ -109,7 +109,7 @@ try {
       page.on('pageerror', error => errors.push(String(error)));
       await page.goto(server.url + '/?manual=1'); await waitForReady(page);
       await page.evaluate(({seedValue, bootEpochSeed}) => {
-        window.game.pause(); window.game.reset(seedValue, {trace: true, bootEpochSeed});
+        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 1, musicVolume: 1}, fullscreenPreferences: {fullscreen: false} });
       }, {seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed});
       const start = await enterSeededRun(page, item.code); assertSeededRun(start, item.code, item.seedValue);
       const expected = [...manualSeedCommands(item.code)]; let presentation = 0;

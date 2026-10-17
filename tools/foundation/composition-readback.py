@@ -264,8 +264,54 @@ def native_readback():
         assert Path(frame['path']).is_file(), 'Actual original screenshot required'
 
 
-def declared_port_commands():
-    commands = ([{'type': 'audioVolume', 'sfx_volume': case['sfxVolume']}] if pocket else [])
+def declared_startup():
+    """Choose a version by retained pre-reset declaration/source metadata, never
+    by the observed presence or absence of a successful volume command."""
+    reset = json.loads((browser_dir / 'declared-reset-input.json').read_bytes())
+    record_file = browser_dir / 'declared-startup-inputs.json'
+    if not record_file.exists():
+        #Historical producer grammar remains explicit and strict. A new
+        #manifest with deleted metadata cannot masquerade as this old prefix.
+        expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources'})
+        if browser is not None:
+            assert 'startupProtocol' not in browser and 'startupRecord' not in browser
+        return None
+    record = json.loads(record_file.read_bytes())
+    expect(set(record), {'schema', 'protocol', 'phase', 'resetInput', 'captureSource'})
+    expect((record['schema'], record['protocol'], record['phase']),
+           (1, 'declared-preboot-audio-fullscreen-v1', 'before-reset'))
+    expect(record['resetInput'], reset)
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'})
+    expect(reset['initialSeed'], 1)
+    expect(reset['bootEpochSeed'], case['bootEpochSeed'])
+    expected_audio = {'sfxVolume': case['sfxVolume'] if pocket else 0, 'musicVolume': 0}
+    expect(reset['audioPreferences'], expected_audio)
+    expect(reset['fullscreenPreferences'], {'fullscreen': False})
+    expect(set(record['captureSource']), {'path', 'sha256', 'archive'})
+    producer = 'composition-wasm-public' if a.wasm_node else 'composition-capture'
+    expect(Path(record['captureSource']['path']).name, producer + '.mjs')
+    expect(record['captureSource']['archive'], producer + '-source.mjs')
+    capture_source = browser_dir / record['captureSource']['archive']
+    assert capture_source.is_file() and not capture_source.is_symlink()
+    #The actual producer retained these executing bytes before reset. Do not
+    #require its mutable canonical execution path to remain unchanged forever.
+    expect(digest(capture_source), record['captureSource']['sha256'])
+    #Require the actual independently launched Native profile's options, not
+    #only the declaration that requested them. No Native output enters runtime.
+    actual_options = configparser.ConfigParser()
+    assert actual_options.read(native_dir / 'profile/data/binding of isaac rebirth/options.ini')
+    for name, value in [('SFXVolume', expected_audio['sfxVolume']), ('MusicVolume', 0), ('Fullscreen', 0)]:
+        expect(actual_options.getfloat('Options', name), value)
+    if browser is not None:
+        expect(browser['startupProtocol'], record['protocol'])
+        expect(browser['startupRecord'], record)
+        expect(browser['trace']['bootAudioPreferences'], reset['audioPreferences'])
+        expect(browser['trace']['bootFullscreenPreferences'], reset['fullscreenPreferences'])
+    return record
+
+
+def declared_port_commands(preboot=False):
+    commands = ([{'type': 'audioVolume', 'sfx_volume': case['sfxVolume']}] if pocket and not preboot else [])
     commands.append({'type': 'tick', 'count': 63})
     key_codes = {'Return': 'Enter', 'Tab': 'Tab', 'Down': 'ArrowDown', 'Up': 'ArrowUp', 'Left': 'ArrowLeft',
                  'Right': 'ArrowRight', 'space': 'Space'}
@@ -317,6 +363,7 @@ def wasm_node_readback():
     assert a.wasm_artifact and a.wasm_sha
     result_path = browser_dir / 'actual-replay-result.json'
     result = json.loads(result_path.read_bytes())
+    startup_record = declared_startup()
     expect(result['captureBackend'], 'wasm-node')
     expect(result['status'], 'CAPTURE_COMPLETE')
     expect(result['completedTape'], True)
@@ -324,18 +371,30 @@ def wasm_node_readback():
     expect(result['before'], result['after'])
     expect(result['before']['wasm'], dict(path=str(a.wasm_artifact.resolve()), sha256=a.wasm_sha))
     expect(result['before']['case'], dict(path=str(a.case.resolve()), sha256=digest(a.case)))
-    for record in result['before'].values():
+    if startup_record is not None:
+        expect(result['before']['donor'], {key: startup_record['captureSource'][key] for key in ('path', 'sha256')})
+    for name, record in result['before'].items():
+        #New captures retain the exact executing producer before reset. Later
+        #legitimate edits to its canonical path cannot invalidate those bytes.
+        if name == 'donor' and startup_record is not None:
+            continue
         expect(digest(Path(record['path'])), record['sha256'])
     expect(digest(a.wasm_artifact), a.wasm_sha)
     reset = json.loads((browser_dir / 'declared-reset-input.json').read_bytes())
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources'})
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+           if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
+    if startup_record is None:
+        assert 'startupProtocol' not in result and 'startupRecord' not in result
+    else:
+        expect(result['startupProtocol'], startup_record['protocol'])
+        expect(result['startupRecord'], startup_record)
     expect(reset['initialSeed'], 1)
     expect(reset['bootEpochSeed'], case['bootEpochSeed'])
     resources = reset['resources']
     expect(resources['challengesXml'].encode(), Path(case['fixture']['authoredResourcePath']).read_bytes())
     expect(bytes(resources['specialRooms']), Path(case['fixture']['specialRoomsPath']).read_bytes())
     expect(set(resources), {'challengesXml', 'specialRooms'})
-    expected_commands, _dom_keys, gameplay_start = declared_port_commands()
+    expected_commands, _dom_keys, gameplay_start = declared_port_commands(preboot=startup_record is not None)
     expect(result['commands'], expected_commands)
     final_gp = case['initialPhaseOffset'] + sum(action['presentations'] for action in case['actions'])
     expect(result['gameplayPresentation'], final_gp)
@@ -371,6 +430,10 @@ def wasm_node_readback():
     expect(last, 'beforeAssertions')
     expect(start['before'], result['before'])
     expect(start['caseName'], case['name'])
+    if startup_record is None:
+        assert 'startupRecord' not in start
+    else:
+        expect(start['startupRecord'], startup_record)
     expect((start['initialSeed'], start['bootEpochSeed']), (1, case['bootEpochSeed']))
     expect(prelude, list(range(gameplay_start - 311, gameplay_start + 1)))
     expect(states, [(gameplay_start + gp, gp) for gp in range(final_gp + 1)])
@@ -410,7 +473,8 @@ def browser_readback():
     expect(trace['commands'], browser['expectedCommands'])
     # Independently declare the actual DOM bootstrap and densely released game
     # intervals. No captured native seed, stats or actor fields appear here.
-    commands, dom_keys, gameplay_start = declared_port_commands()
+    startup_record = declared_startup()
+    commands, dom_keys, gameplay_start = declared_port_commands(preboot=startup_record is not None)
     expect(trace['commands'], commands)
     expect([(event['code'], event['down']) for event in browser['actualDomInputs']],
            dom_keys)
@@ -430,7 +494,8 @@ def browser_readback():
         expect(browser['declaredResourceHashes']['specialRooms'], digest(Path(case['fixture']['specialRoomsPath'])))
         if 'specialRoomsSha256' in case['fixture']:
             expect(browser['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
-    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources'})
+    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+           if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
     expect(set(resources['resources']), {'challengesXml', 'specialRooms'} if case['fixture'].get('specialRoomsPath') else {'challengesXml'})
     assert browser['declaredFullResetJsonBytes'] <= 512 * 1024
 
@@ -450,6 +515,11 @@ def browser_progress_readback():
     expect(rows[0]['kind'], 'start')
     expect(rows[0]['value']['declarationName'], case['name'])
     expect(rows[0]['value']['resetInput'], json.loads((browser_dir / 'declared-reset-input.json').read_bytes()))
+    startup_record = declared_startup()
+    if startup_record is None:
+        assert 'startupRecord' not in rows[0]['value']
+    else:
+        expect(rows[0]['value']['startupRecord'], startup_record)
     expect(rows[0]['value']['declaredResourceHashes'], browser['declaredResourceHashes'])
     for kind, field in [('preludeState', 'preludeStates'), ('state', 'states'), ('capture', 'captures')]:
         expect([row['value'] for row in rows if row['kind'] == kind], browser[field])

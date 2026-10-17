@@ -170,11 +170,18 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest, manifestPath, evidence };
 }
 
-async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan) {
+async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
+  audioPreferences = {sfxVolume: 0, musicVolume: 0}) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
   const frames = [], inputs = [], expectedCommands = [];
+  // Independent launcher inputs, never Original readback; before either capture.
+  assert.ok(audioPreferences && typeof audioPreferences === 'object' && !Array.isArray(audioPreferences));
+  assert.deepEqual(Object.keys(audioPreferences).sort(), ['musicVolume', 'sfxVolume']);
+  assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value >= 0 && value <= 1));
+  const startup = {audioPreferences: {...audioPreferences}, fullscreenPreferences: {fullscreen: false}};
+  save(join(directory, 'declared-startup-preferences.json'), startup);
   const expectedPressed = new Set();
   let expectedSeedDialog = false;
   const failures = [];
@@ -182,10 +189,10 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed, mtDraws }) => {
-      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true });
+    await page.evaluate(({ initialSeed, bootEpochSeed, mtDraws, startup }) => {
+      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true, ...startup });
       if (mtDraws) window.game.mtDraws.enable();
-    }, { ...caseData, mtDraws });
+    }, { ...caseData, mtDraws, startup });
     let presentations = 0;
     let publicTickIndex = 0;
     for (const action of caseData.pairedTape) {
@@ -255,6 +262,8 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
     'Every actual backend event requires its recorded WASM state');
     assert.equal(trace.bootEpochSeed, caseData.bootEpochSeed);
     assert.equal(trace.initialSeed, caseData.initialSeed);
+    assert.deepEqual(trace.bootAudioPreferences, startup.audioPreferences, 'Actual boot must retain the independently declared audio settings');
+    assert.deepEqual(trace.bootFullscreenPreferences, startup.fullscreenPreferences, 'Actual reset must retain its declared window default');
     assert.deepEqual(trace.commands, expectedCommands, 'Every intended DOM input/interval must reach the actual WASM trace');
     const final = frames.at(-1)?.state;
     assert.equal(final?.runSeedValue, caseData.seedValue, 'Browser must read back the public manually entered run seed');
@@ -392,10 +401,12 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
   assert.equal(typeof captureAudioOwners, 'boolean', 'Audio owner instrumentation is an explicit gate opt-in');
   assert.ok(!captureAudioOwners || (captureBrowserAudio && originalSfxVolume === 1), 'Audio owners require actual Browser audio and explicit public SFX volume1');
+  const audioPreferences = {sfxVolume: originalSfxVolume ?? 0, musicVolume: captureAudioOwners ? 1 : 0};
+  assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value >= 0 && value <= 1));
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: reuseOriginalDirectory ? 'closed independent Original paired with fresh immutable Browser capture' : 'fresh original process paired with immutable browser production artifact',
-    nativeFrameTimeout, originalSfxVolume, publicClockSchedule,
+    nativeFrameTimeout, originalSfxVolume, publicClockSchedule, declaredAudioPreferences: audioPreferences,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     ...(captureAudioOwners && {captureAudioOwners}),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
@@ -471,7 +482,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
             browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
-              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan),
+              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };
@@ -482,6 +493,10 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         candidate = browserResult.status === 'fulfilled' ? browserResult.value
           : {status: 'fail', failures: [String(browserResult.reason)], frames: []};
         if (native.deferredEvidence) native = await native.deferredEvidence();
+        // Deferred evidence stays after Browser close. Validate launcher inputs;
+        // Original readback cannot repair or alter the already executed reset.
+        try { assert.deepEqual(native.manifest?.audioOptions, audioPreferences, 'Actual Native public audio settings match the independent declaration'); }
+        catch (error) { native.status = 'fail'; native.error = [native.error, String(error.message)].filter(Boolean).join('; '); }
         if (publicClockPlan) {
           try {
             publicClockValidation = validateNativeClockPlan(caseData, publicClockPlan, native);

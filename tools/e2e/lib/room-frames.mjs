@@ -197,9 +197,9 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
       runtime = createPublicWasmRuntime({ wasm: resolve(wasmNode), expectedWasmSha: wasmSha });
       journal = createPublicWasmJournal(directory);
       //The same public reset as the existing Browser path; no resource or state override.
-      runtime.reset(item.seedValue, scenarios.bootEpochSeed);
+      runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, {sfxVolume: 0, musicVolume: 0}, {fullscreen: false});
       await writeJson(join(directory, 'declared-reset-input.json'),
-        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
     } else {
     browser = await chromium.launch(browserLaunchOptions());
     caseResult.graphics = await inspectBrowserGraphics(browser);
@@ -208,7 +208,7 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
     await page.goto(`${server.url}/?manual=1`);
     await waitForReady(page);
     await page.evaluate(({ seedValue, bootEpochSeed }) => {
-      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
+      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
     }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
     }
     // Menu/seed/run intervals and every tick are declared before execution;

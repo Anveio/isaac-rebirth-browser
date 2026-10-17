@@ -32,6 +32,9 @@ pub struct Loop {
 pub struct Ambience {
     pub fire: Loop,
     pub swarm: Loop,
+    ///Port backend dispatch sequence; not an observed native game counter.
+    #[serde(default)]
+    pub update_sequence: u64,
 }
 
 /// Room.Init 5c4a00 zeroes both volumes; playing loops keep playing.
@@ -44,6 +47,11 @@ pub(crate) fn reset_room(state: &mut State) {
 /// stage transition here (its menu, pause and other inputs are not modeled and
 /// are clear in ordinary room play).
 pub(crate) fn update(state: &mut State, paused: bool) {
+    state.ambience.update_sequence = state
+        .ambience
+        .update_sequence
+        .checked_add(1)
+        .expect("ambience backend dispatch sequence exhausted");
     let (fire_target, swarm_target, swarm_pitch) = if paused {
         (0.0, 0.0, 0.0)
     } else {

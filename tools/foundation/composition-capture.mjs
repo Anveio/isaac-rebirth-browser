@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {writeJsonEvidence} from './browser-evidence.mjs';
 import {BrowserProgress} from './composition-progress.mjs';
 
@@ -77,11 +78,20 @@ export async function captureComposition(browser, server, declaration, directory
     declaredResourceHashes.specialRooms = hash(stb);
   }
   const initialSeed = 1; // Independently declared reset placeholder, never native admitted seed.
-  const resetInput = {initialSeed,bootEpochSeed:declaration.bootEpochSeed,resources};
+  const audioPreferences = {sfxVolume: declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1' ? declaration.sfxVolume : 0, musicVolume: 0};
+  assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value>=0 && value<=1));
+  const resetInput = {initialSeed,bootEpochSeed:declaration.bootEpochSeed,resources,audioPreferences,fullscreenPreferences:{fullscreen:false}};
   const resourceBytes = Buffer.byteLength(JSON.stringify(resources));
   const resetBytes = Buffer.byteLength(JSON.stringify(resetInput));
   assert.ok(resourceBytes <= 512 * 1024 && resetBytes <= 512 * 1024 && xml.length <= 64 * 1024);
+  //Retain the exact executing producer bytes before reset. Later legitimate
+  //canonical edits cannot invalidate an immutable capture's protocol proof.
+  const captureSourceBytes = await readFile(new URL(import.meta.url));
+  await writeFile(join(directory,'composition-capture-source.mjs'),captureSourceBytes,{flag:'wx'});
   await save(join(directory,'declared-reset-input.json'),resetInput);
+  const startupRecord = {schema:1,protocol:'declared-preboot-audio-fullscreen-v1',phase:'before-reset',resetInput,
+    captureSource:{path:fileURLToPath(import.meta.url),sha256:hash(captureSourceBytes),archive:'composition-capture-source.mjs'}};
+  await save(join(directory,'declared-startup-inputs.json'),startupRecord);
   const context = await browser.newContext({viewport:{width:960,height:540}});
   let page;
   try {page=await context.newPage();}
@@ -129,18 +139,13 @@ export async function captureComposition(browser, server, declaration, directory
     return checkpoint(label);
   };
   try {
-    await progress.append('start',{declarationName:declaration.name,declaredResourceHashes,resetInput});
+    await progress.append('start',{declarationName:declaration.name,declaredResourceHashes,resetInput,startupRecord});
     await page.goto(server.url+'/?manual=1');
     await page.waitForFunction(()=>['true','failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(()=>document.body.dataset.ready),'true');
-    await page.evaluate(({initialSeed,bootEpochSeed,resources})=>{
-      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,trace:true});
+    await page.evaluate(({initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences})=>{
+      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,audioPreferences,fullscreenPreferences,trace:true});
     },resetInput);
-    if (declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1') {
-      assert.ok(Number.isFinite(declaration.sfxVolume) && declaration.sfxVolume>=0 && declaration.sfxVolume<=1);
-      await page.evaluate(volume=>window.game.command({type:'audioVolume',sfx_volume:volume}),declaration.sfxVolume);
-      commands.push({type:'audioVolume',sfx_volume:declaration.sfxVolume});
-    }
     // Native intro is separately declared. The shared public path begins at
     // the existing first-Title boundary, not at an invented common boot tick.
     await step(63);await checkpoint('title');
@@ -222,7 +227,7 @@ export async function captureComposition(browser, server, declaration, directory
     // partial captures keep their real states, commands and remaining trace.
     try {
       const evidence = await writeJsonEvidence(join(directory,'browser-evidence.json.gz'),{
-        schema:1,captureStatus:completedTape?'complete':'partial',
+        schema:1,startupProtocol:startupRecord.protocol,startupRecord,captureStatus:completedTape?'complete':'partial',
         states:progress.values('state'),preludeStates:progress.values('preludeState'),captures:progress.values('capture'),trace,traceError,
         expectedCommands:commands,actualDomInputs:inputs,errors,declaredResourceHashes,
         independentInitialSeed:initialSeed,declaredBootEpochSeed:declaration.bootEpochSeed,
@@ -247,6 +252,8 @@ export async function captureComposition(browser, server, declaration, directory
     assert.equal(traceInfo.arrayCounts.commands,commands.length);assert.deepEqual(traceInfo.commandErrors,[]);
     assert.equal(trace.initialSeed,initialSeed);
     assert.equal(trace.bootEpochSeed,declaration.bootEpochSeed);
+    assert.deepEqual(trace.bootAudioPreferences,resetInput.audioPreferences);
+    assert.deepEqual(trace.bootFullscreenPreferences,resetInput.fullscreenPreferences);
     assert.ok(traceInfo.arrayCounts.backendEvents>0&&traceInfo.backendStatesComplete);
     assert.equal(stateCount,1+declaration.initialPhaseOffset+declaration.actions.reduce((n,a)=>n+a.presentations,0));
     assert.equal(preludeStateCount,312,'Every real run-confirm/admission presentation is retained');

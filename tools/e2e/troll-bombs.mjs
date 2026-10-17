@@ -118,7 +118,7 @@ try {
       await page.goto(`${server.url}/?manual=1`);
       await waitForReady(page);
       await page.evaluate(({ seedValue, bootEpochSeed }) => {
-        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed });
+        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
       }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
       // Source-qualified menu/seed/run intervals and every tick are declared
       // before execution; deferred Music run admission is never bypassed.

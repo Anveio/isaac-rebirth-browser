@@ -62,6 +62,7 @@ pub mod fireplaces;
 pub mod floor;
 pub mod fly_effects;
 mod fmath;
+pub mod fullscreen;
 pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
@@ -101,6 +102,7 @@ pub mod mt;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
+pub mod options_menu;
 pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod phase;
@@ -160,6 +162,7 @@ pub enum Screen {
     Title,
     Profile,
     Main,
+    Options,
     Character,
     Challenge,
     Seed,
@@ -646,6 +649,10 @@ pub struct State {
     pub screen: Screen,
     pub profile: u8,
     pub main_selection: u8,
+    #[serde(default)]
+    pub options_menu: options_menu::OptionsMenu,
+    #[serde(default)]
+    pub fullscreen: fullscreen::FullscreenState,
     pub challenge_selection: Option<u32>,
     ///Real Config achievement requirements queried for the fresh menu rows.
     pub challenge_unlocked: Vec<bool>,
@@ -847,6 +854,8 @@ impl Game {
             boot_epoch_seed,
             challenges::Catalog::authored()?,
             None,
+            None,
+            None,
         )
     }
     pub fn new_with_resources(
@@ -854,20 +863,57 @@ impl Game {
         boot_epoch_seed: u32,
         resources: challenges::ResourceInputs,
     ) -> Result<Self, String> {
-        let catalog = resources.catalog()?;
-        let special = resources
-            .special_rooms
-            .as_deref()
-            .map(room_assets::decode)
-            .transpose()?
-            .map(std::sync::Arc::new);
-        Self::new_with_challenges(initial_seed, boot_epoch_seed, catalog, special)
+        Self::new_with_boot_inputs(initial_seed, boot_epoch_seed, Some(resources), None)
+    }
+    /// File-derived public settings are admitted before the first Title Music.
+    /// Native replay uses the same owner as the browser's additive reset ABI.
+    pub fn new_with_boot_inputs(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+    ) -> Result<Self, String> {
+        Self::new_with_boot_preferences(initial_seed, boot_epoch_seed, resources, preferences, None)
+    }
+    /// Additive display preference ingress; legacy audio-only callers are unchanged.
+    pub fn new_with_boot_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+    ) -> Result<Self, String> {
+        let preferences = preferences
+            .map(options_menu::AudioPreferences::validate)
+            .transpose()?;
+        let (catalog, special) = if let Some(resources) = resources {
+            let catalog = resources.catalog()?;
+            let special = resources
+                .special_rooms
+                .as_deref()
+                .map(room_assets::decode)
+                .transpose()?
+                .map(std::sync::Arc::new);
+            (catalog, special)
+        } else {
+            (challenges::Catalog::authored()?, None)
+        };
+        Self::new_with_challenges(
+            initial_seed,
+            boot_epoch_seed,
+            catalog,
+            special,
+            preferences,
+            fullscreen,
+        )
     }
     fn new_with_challenges(
         initial_seed: u32,
         boot_epoch_seed: u32,
         challenge_catalog: challenges::Catalog,
         special_room_assets: Option<std::sync::Arc<Vec<room_assets::RoomAsset>>>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
@@ -885,6 +931,15 @@ impl Game {
         )?;
         let camera = Some(camera::Camera::new(&room, None));
         let stage_effects = StageEffects::basement(&player, &room.appearance.fx, 0);
+        //Settings5B9930 runs before MenuInit's first61 request. Apply to the
+        //real owners while no samples are loaded, before Music initialization.
+        let mut audio = audio::AudioState::default();
+        if let Some(values) = preferences {
+            audio.set_volume(values.sfx_volume)?;
+        }
+        let music = preferences.map_or_else(music::MusicState::default, |values| {
+            music::MusicState::with_volume(values.music_volume)
+        });
         let mut game = Self {
             state: State {
                 schema: 1,
@@ -911,6 +966,8 @@ impl Game {
                 screen: Screen::Title,
                 profile: 1,
                 main_selection: 0,
+                options_menu: options_menu::OptionsMenu::default(),
+                fullscreen: fullscreen::FullscreenState::from_preferences(fullscreen)?,
                 challenge_selection: None,
                 challenge_unlocked: Vec::new(),
                 challenge_id: 0,
@@ -929,9 +986,9 @@ impl Game {
                 source_damage_maximum: None,
                 source_fire_delay_minimum: None,
                 saved_run_summary: None,
-                audio: audio::AudioState::default(),
+                audio,
                 pending_menu_initializations: Vec::new(),
-                music: music::MusicState::default(),
+                music,
                 run_seed_value: initial_seed,
                 run_seeds: None,
                 // Game553DB5 ->576AC0 owns the initially empty history.
@@ -1040,6 +1097,8 @@ impl Game {
     }
     fn apply(&mut self, command: Command) -> Result<(), String> {
         self.state.audio.begin_command();
+        self.state.options_menu.begin_command();
+        self.state.fullscreen.begin_command();
         self.state.music.begin_command();
         match command {
             Command::MusicVolume { volume } => {
@@ -1057,7 +1116,7 @@ impl Game {
                 if !sfx_volume.is_finite() || !(0.0..=1.0).contains(&sfx_volume) {
                     return Err("SFX volume must be finite and within 0..1".into());
                 }
-                self.state.audio.sfx_volume = sfx_volume;
+                self.state.audio.set_volume(sfx_volume)?;
             }
             Command::Key { code, down } => {
                 if !input::is_public_key(&code) {
@@ -1238,9 +1297,12 @@ impl Game {
                         .collect::<Result<Vec<_>, _>>()?;
                     self.state.screen = Screen::Challenge;
                 }
+                "Enter" if self.state.main_selection == 4 => self.state.screen = Screen::Options,
                 "Enter" => return Err("this foundation implements the New Run menu action".into()),
                 _ => {}
             },
+            // Options owns the released System poll, including held repeat.
+            Screen::Options => {}
             Screen::Challenge => match code {
                 "Escape" => self.state.screen = Screen::Main,
                 "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
@@ -1412,6 +1474,7 @@ impl Game {
                     | (Screen::Profile, Screen::Main)
                     | (Screen::Main, Screen::Character)
                     | (Screen::Main, Screen::Challenge)
+                    | (Screen::Main, Screen::Options)
             ) {
             Some(8)
         } else {
@@ -2536,6 +2599,7 @@ impl Game {
         };
         self.state.screen = Screen::Main;
         self.state.menu_presentation.reinitialize();
+        self.state.options_menu.reinitialize();
         self.load_menu_character();
         self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
         Ok(())
@@ -2571,6 +2635,7 @@ impl Game {
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
                     self.state.menu_presentation.reinitialize();
+                    self.state.options_menu.reinitialize();
                     // Menu was destroyed on run entry.594D40 constructs it;
                     //59AB7C initializes the offscreen Title at frame0, and
                     //59AD17/59B0F0 begin the requested opaque-black fade.
@@ -2671,9 +2736,61 @@ impl Game {
             challenge: self.state.challenge_selection.unwrap_or(0),
             hard: self.state.difficulty == "hard",
         };
+        //59B454 samples the dispatch page once. Main's opening Enter must
+        //not also confirm Controls in the newly selected Options page.
+        let options_callback = phase != phase::Phase::Skipped
+            && self.state.screen == Screen::Options
+            && self.state.menu_presentation.page == menu_presentation::Page::Options;
         self.state
             .menu_presentation
             .advance(self.state.screen, menu_input);
+        if options_callback {
+            let action = self.state.options_menu.advance(
+                &self.state.public_actions,
+                &self.state.pressed,
+                &mut self.state.audio,
+                &mut self.state.music,
+                &mut self.state.boot_lifecycle.shared,
+                audio_counter,
+            )?;
+            match action {
+                options_menu::Action::None => {}
+                options_menu::Action::Controls => {
+                    self.state.options_menu.request_unavailable(0)?;
+                }
+                options_menu::Action::Fullscreen => {
+                    self.state.fullscreen.toggle()?;
+                }
+                options_menu::Action::SaveAndBack => {
+                    self.state.options_menu.request_save(
+                        &self.state.audio,
+                        &self.state.music,
+                        &self.state.fullscreen,
+                    )?;
+                    self.state.screen = Screen::Main;
+                    //59CAC0 stores the new page now; next iteration's view
+                    //uses Main. No second view/widget/animation advance.
+                    self.state
+                        .menu_presentation
+                        .reconcile_page(self.state.screen, menu_input);
+                    //5B8DB0 Save precedes SetMenu59CAC0's immediate SFX8.
+                    self.state.audio.admit(
+                        &mut self.state.boot_lifecycle.shared,
+                        audio_counter,
+                        audio::SoundRequest {
+                            id: 8,
+                            volume: 1.0,
+                            delay: 0,
+                            looping: false,
+                            pitch: 1.0,
+                        },
+                    );
+                }
+                options_menu::Action::UnsupportedSetting(row) => {
+                    self.state.options_menu.request_unavailable(row)?;
+                }
+            }
+        }
         if phase != phase::Phase::Skipped && self.state.screen != Screen::Playing {
             let request = &mut self.state.run_start_request;
             if request.fading {
@@ -4538,6 +4655,158 @@ pub extern "C" fn abi_version() -> u32 {
 #[no_mangle]
 pub extern "C" fn reset(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
     match Game::new_with_boot_epoch(initial_seed, boot_epoch_seed) {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// Additive public preference ingress, separate from authored resources.
+/// Loading settings after reset would erase the real firstTitle Music events.
+#[no_mangle]
+pub extern "C" fn reset_with_audio_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    reset_with_audio_inputs(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        sfx_volume,
+        music_volume,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_audio_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_audio_inputs(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            sfx_volume,
+            music_volume,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+fn reset_with_audio_inputs(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    let preferences = options_menu::AudioPreferences {
+        sfx_volume,
+        music_volume,
+    };
+    match Game::new_with_boot_inputs(initial_seed, boot_epoch_seed, resources, Some(preferences)) {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// Display preferences are input values, never supplied window acknowledgements.
+#[no_mangle]
+pub extern "C" fn reset_with_fullscreen_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    reset_with_fullscreen_inputs(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_fullscreen_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_fullscreen_inputs(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            fullscreen,
+            has_audio,
+            sfx_volume,
+            music_volume,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+fn reset_with_fullscreen_inputs(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+) -> u32 {
+    let result = if fullscreen > 1 || has_audio > 1 {
+        Err("Initial fullscreen/audio presence flags must be exactly zero or one".into())
+    } else {
+        let audio = (has_audio == 1).then_some(options_menu::AudioPreferences {
+            sfx_volume,
+            music_volume,
+        });
+        Game::new_with_boot_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            audio,
+            Some(fullscreen::FullscreenPreferences {
+                fullscreen: fullscreen == 1,
+            }),
+        )
+    };
+    match result {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));
             ERROR.with(|error| error.borrow_mut().clear());
