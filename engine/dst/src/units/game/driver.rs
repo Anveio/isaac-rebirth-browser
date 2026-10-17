@@ -9,6 +9,7 @@ use crate::entropy::Entropy;
 use rebirth_cleanroom::bombs::player_world;
 use rebirth_cleanroom::grid::Grid;
 use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
+use rebirth_cleanroom::keyboard::Keyboard;
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::music::BackendEvent;
 use rebirth_cleanroom::run_admission::MAX_SAFE_TIMESTAMP_MS;
@@ -27,6 +28,25 @@ const OTHER_KEYS: [&str; 7] = [
     "F5",
     "Digit1",
     "Numpad0",
+];
+/// Keys the driver binds in the Keyboard menu: its own play keys, so a
+/// rebinding moves one of them, and keys no default binds.
+const BINDABLE: [&str; 15] = [
+    "KeyW",
+    "KeyA",
+    "KeyS",
+    "KeyD",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "KeyE",
+    "Space",
+    "KeyQ",
+    "KeyZ",
+    "KeyX",
+    "Escape",
+    "Enter",
 ];
 const MOVES: [&str; 4] = ["KeyW", "KeyA", "KeyS", "KeyD"];
 const AIMS: [&str; 4] = ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"];
@@ -287,6 +307,41 @@ impl Driver {
                 }
                 12..=13 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
                 14..=16 => self.press("Escape", e.range(1, 3)),
+                _ => self.ticks(e),
+            },
+            // Controls lists the connected devices (the Keyboard alone) and,
+            // like Options, acts on keys held at a tick: confirm opens the
+            // Keyboard's bindings, back returns to Options.
+            Screen::Controls => match e.below(20) {
+                0..=6 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                7..=12 => self.press("Escape", e.range(1, 3)),
+                13..=14 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), e.range(1, 60)),
+                _ => self.ticks(e),
+            },
+            // Awaiting a key, the next fresh key binds to the selected action.
+            Screen::Keyboard if state.controls_menu.waiting => {
+                let code = if e.chance(1, 2) {
+                    *e.pick(&BINDABLE)
+                } else {
+                    *e.pick(&PUBLIC_KEYS)
+                };
+                self.press(code, e.range(1, 3))
+            }
+            // The driver plays with the default keys, so it usually restores
+            // them before leaving: the reset row is one Up from the first.
+            Screen::Keyboard if state.keyboard != Keyboard::default() && !e.chance(1, 8) => {
+                let code = match state.controls_menu.selection {
+                    17 => "Enter",
+                    0..=8 => "ArrowUp",
+                    _ => "ArrowDown",
+                };
+                self.press(code, e.range(1, 3))
+            }
+            Screen::Keyboard => match e.below(20) {
+                0..=7 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), e.range(1, 3)),
+                8..=9 => self.press(e.pick(&["ArrowLeft", "ArrowRight"]), e.range(1, 3)),
+                10..=12 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                13..=15 => self.press("Escape", e.range(1, 3)),
                 _ => self.ticks(e),
             },
             Screen::Challenge => match e.below(20) {

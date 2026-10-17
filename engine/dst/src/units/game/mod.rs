@@ -17,7 +17,12 @@ use crate::json_diff;
 use crate::props;
 use crate::tape::{Reset, Tape};
 use rebirth_cleanroom::audio::{SoundEvent, VolumeCallback};
+use rebirth_cleanroom::controls_menu;
 use rebirth_cleanroom::fullscreen::{self, FullscreenPreferences};
+use rebirth_cleanroom::input;
+use rebirth_cleanroom::keyboard::{
+    DeviceConfig, InputConfigs, Keyboard, CONFIGURABLE, DEFAULT_PAIRS,
+};
 use rebirth_cleanroom::music::MusicEvent;
 use rebirth_cleanroom::options_menu::{AudioPreferences, SaveRequest, UnavailableRequest};
 use rebirth_cleanroom::{Command, Game, Screen, State};
@@ -55,6 +60,9 @@ pub fn run(case: &mut Case) {
                 tape.boot_fullscreen_preferences = Some(FullscreenPreferences {
                     fullscreen: e.chance(1, 2),
                 });
+            }
+            if e.chance(1, 3) {
+                tape.boot_input_configs = Some(stored_input_configs(e));
             }
             tape
         }
@@ -181,6 +189,8 @@ struct Published {
     saves: Vec<SaveRequest>,
     unavailable: Vec<UnavailableRequest>,
     fullscreen: Vec<fullscreen::Request>,
+    input_saves: Vec<controls_menu::SaveRequest>,
+    unavailable_actions: Vec<usize>,
 }
 
 impl Published {
@@ -195,7 +205,54 @@ impl Published {
             .extend(state.options_menu.unavailable_requests.iter().cloned());
         self.fullscreen
             .extend(state.fullscreen.requests.iter().cloned());
+        let controls = &state.controls_menu;
+        self.input_saves
+            .extend(controls.save_requests.iter().cloned());
+        self.unavailable_actions
+            .extend(controls.unavailable_actions.iter().copied());
     }
+}
+
+/// An input configuration file as the browser stores it: devices retained
+/// from earlier sessions, with whatever bindings they held, and usually the
+/// Keyboard's. The driver plays with the default keys, so a stored Keyboard
+/// keeps them, sometimes adding second keys no default binding uses.
+pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
+    let mut devices: Vec<DeviceConfig> = (0..e.below(3))
+        .map(|index| DeviceConfig {
+            name: format!("Controller {index}"),
+            bindings: std::array::from_fn(|_| {
+                std::array::from_fn(|_| match e.below(8) {
+                    0 => e.u32() as i32,
+                    _ => e.range(0, 349) as i32 - 1,
+                })
+            }),
+        })
+        .collect();
+    if e.chance(3, 4) {
+        let mut keyboard = Keyboard::default();
+        let defaults: Vec<i32> = DEFAULT_PAIRS.iter().map(|(_, key)| *key).collect();
+        let mut free: Vec<i32> = input::PUBLIC_KEYS
+            .iter()
+            .filter_map(|code| input::glfw_key(code))
+            .filter(|key| !defaults.contains(key))
+            .collect();
+        for action in CONFIGURABLE {
+            if !free.is_empty() && e.chance(1, 4) {
+                let key = free.swap_remove(e.index(free.len()));
+                keyboard.bindings[action][1] = key;
+            }
+        }
+        let at = e.index(devices.len() + 1);
+        devices.insert(
+            at,
+            DeviceConfig {
+                name: "Keyboard".into(),
+                bindings: keyboard.bindings,
+            },
+        );
+    }
+    InputConfigs { devices }
 }
 
 /// A volume as the browser stores it: an Options step, an endpoint, or any
@@ -230,21 +287,28 @@ impl Simulation {
                 );
                 // Settings5B9930 applies the stored settings to their owners
                 // before MenuInit's first Music.
+                // The Keyboard owner starts from the stored Keyboard device's
+                // bindings, or the defaults, and every device is retained.
                 let state = &game.state;
+                let configs = tape.boot_input_configs.clone().unwrap_or_default();
                 props::always!(
                     tape.boot_audio_preferences.is_none_or(|audio| {
                         state.audio.sfx_volume == audio.sfx_volume
                             && state.music.volume == audio.music_volume
                     }) && tape
                         .boot_fullscreen_preferences
-                        .is_none_or(|display| state.fullscreen.requested == display.fullscreen),
+                        .is_none_or(|display| state.fullscreen.requested == display.fullscreen)
+                        && state.keyboard == configs.keyboard()
+                        && state.input_configs == configs,
                     "game: boot starts with the stored settings",
                     json!({
                         "audio": tape.boot_audio_preferences,
                         "fullscreen": tape.boot_fullscreen_preferences,
+                        "inputConfigs": tape.boot_input_configs,
                         "sfx": state.audio.sfx_volume,
                         "music": state.music.volume,
                         "requested": state.fullscreen.requested,
+                        "keyboard": state.keyboard,
                     })
                 );
                 props::sometimes!(
@@ -548,6 +612,16 @@ impl Simulation {
                 sfx_volume,
                 music_volume,
             ),
+            Reset::InputConfigs { request } => {
+                let pointer = abi::request_ptr(request.len());
+                if pointer.is_null() {
+                    props::always!(false, "game: the C ABI agrees with direct dispatch");
+                    return;
+                }
+                // SAFETY: request_ptr returned a buffer of exactly request.len().
+                unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
+                abi::reset_with_input_configs(seed, epoch)
+            }
         };
         if reset != 0 {
             props::always!(false, "game: the C ABI agrees with direct dispatch");

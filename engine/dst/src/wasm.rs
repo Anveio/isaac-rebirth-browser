@@ -24,6 +24,7 @@ struct Exports {
     reset: TypedFunc<(u32, u32), u32>,
     reset_with_audio_preferences: TypedFunc<(u32, u32, f32, f32), u32>,
     reset_with_fullscreen_preferences: TypedFunc<(u32, u32, u32, u32, f32, f32), u32>,
+    reset_with_input_configs: TypedFunc<(u32, u32), u32>,
     request_ptr: TypedFunc<u32, u32>,
     command: TypedFunc<(), u32>,
     snapshot_ptr: TypedFunc<(), u32>,
@@ -83,6 +84,7 @@ impl Module {
             reset: export!("reset"),
             reset_with_audio_preferences: export!("reset_with_audio_preferences"),
             reset_with_fullscreen_preferences: export!("reset_with_fullscreen_preferences"),
+            reset_with_input_configs: export!("reset_with_input_configs"),
             request_ptr: export!("request_ptr"),
             command: export!("command"),
             snapshot_ptr: export!("snapshot_ptr"),
@@ -161,6 +163,21 @@ impl Module {
                     music_volume,
                 ),
             ),
+            Reset::InputConfigs { request } => {
+                let pointer = wasm
+                    .request_ptr
+                    .call(&mut wasm.store, request.len() as u32)
+                    .map_err(trap)?;
+                if pointer == 0 {
+                    return Ok(Some(
+                        json!({ "step": "reset", "reason": "request allocation" }),
+                    ));
+                }
+                wasm.memory
+                    .write(&mut wasm.store, pointer as usize, &request)
+                    .map_err(|error| error.to_string())?;
+                wasm.reset_with_input_configs.call(&mut wasm.store, seeds)
+            }
         };
         if reset.map_err(trap)? != 0 {
             return Ok(Some(json!({ "step": "reset" })));

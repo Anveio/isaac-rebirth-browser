@@ -7,9 +7,11 @@
 use crate::entropy::Entropy;
 use crate::harness::Case;
 use crate::props;
+use crate::units::game::stored_input_configs;
 use rebirth_cleanroom as abi;
+use rebirth_cleanroom::keyboard::ACTIONS;
 use rebirth_cleanroom::{Command, State, ABI_VERSION};
-use serde_json::json;
+use serde_json::{json, Value};
 
 /// web/engine.ts refuses larger requests before calling `request_ptr`.
 const MAX_REQUEST: usize = 65_536;
@@ -194,6 +196,103 @@ pub fn run(case: &mut Case) {
     }
     let authored = resources(e);
     settings(e, &authored);
+    input_configs(e, &authored);
+}
+
+/// The input-configuration reset `web/engine.ts` boots with when the browser
+/// stored an inputconfigs.dat: `reset_with_input_configs` reads the stored
+/// configuration, any stored settings and whether to boot from the authored
+/// resources from the request buffer. The file holds at most 32 retained
+/// devices besides the Keyboard, under unique printable names, and Keyboard
+/// bindings among GLFW's keys; anything else is refused, keeping the
+/// previous game.
+fn input_configs(e: &mut Entropy, authored: &[u8]) {
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    let configs = stored_input_configs(e);
+    let reset = |with_resources: bool, configs: &Value| {
+        let request = json!({ "withResources": with_resources, "inputConfigs": configs });
+        let bytes = serde_json::to_vec(&request).expect("boot request serializes");
+        reset_from_request(&bytes, seed, epoch)
+    };
+    let stored = json!(configs);
+    let plain = reset(false, &stored);
+    let booted = snapshot();
+    props::always!(
+        plain == Some(0)
+            && abi::error_len() == 0
+            && serde_json::from_slice::<State>(&booted).is_ok_and(|state| {
+                state.input_configs == configs && state.keyboard == configs.keyboard()
+            }),
+        "abi: an input-configuration reset boots with the stored configuration",
+        json!({ "configs": configs, "result": plain, "error": error() })
+    );
+    let resourced = load(authored, || reset(true, &stored).unwrap_or(2));
+    props::always!(
+        resourced == Some(0) && snapshot() == booted,
+        "abi: an input-configuration boot from the authored resources publishes the plain boot's state",
+        json!({ "result": resourced, "error": error() })
+    );
+
+    let previous = snapshot();
+    let device =
+        |name: String, key: i32| json!({ "name": name, "bindings": vec![[key, -1]; ACTIONS] });
+    let (case, result) = match e.below(5) {
+        0 => {
+            let devices: Vec<Value> = (0..33)
+                .map(|index| device(format!("Pad {index}"), -1))
+                .collect();
+            (
+                "33 retained devices",
+                reset(false, &json!({ "devices": devices })),
+            )
+        }
+        1 => {
+            let name = (*e.pick(&["Keyboard", "Pad"])).to_owned();
+            let devices = [device(name.clone(), -1), device(name, -1)];
+            (
+                "duplicate names",
+                reset(false, &json!({ "devices": devices })),
+            )
+        }
+        2 => {
+            let name = match e.below(3) {
+                0 => String::new(),
+                1 => "Pad\n".to_owned(),
+                _ => "P".repeat(257),
+            };
+            (
+                "unprintable name",
+                reset(false, &json!({ "devices": [device(name, -1)] })),
+            )
+        }
+        3 => {
+            let key = *e.pick(&[-2, 349, i32::MIN]);
+            let devices = [device("Keyboard".into(), key)];
+            ("keyboard key", reset(false, &json!({ "devices": devices })))
+        }
+        _ => {
+            let request = json!({ "withResources": false, "inputConfigs": configs, "extra": true });
+            let bytes = serde_json::to_vec(&request).expect("boot request serializes");
+            ("unknown field", reset_from_request(&bytes, seed, epoch))
+        }
+    };
+    props::always!(
+        result == Some(1) && !error().is_empty() && snapshot() == previous,
+        "abi: an input-configuration reset refuses a configuration inputconfigs.dat cannot hold, keeping the previous game",
+        json!({ "case": case, "result": result })
+    );
+}
+
+/// Fills the request buffer with an input-configuration boot request, then
+/// resets from it.
+fn reset_from_request(request: &[u8], seed: u32, epoch: u32) -> Option<u32> {
+    let pointer = abi::request_ptr(request.len());
+    if pointer.is_null() {
+        return None;
+    }
+    // SAFETY: request_ptr returned a writable buffer of exactly request.len().
+    unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
+    Some(abi::reset_with_input_configs(seed, epoch))
 }
 
 /// The settings resets `web/engine.ts` boots with from the stored Options

@@ -856,8 +856,9 @@ pub struct Game {
 
 impl State {
     /// Clears what each command publishes afresh for the host: sound and
-    /// music events, SFX volume callbacks and settings requests. A batched
-    /// Tick publishes every iteration's.
+    /// music events, SFX volume callbacks, settings and input-configuration
+    /// saves, and unavailable-action reports. A batched Tick publishes every
+    /// iteration's.
     pub fn begin_command(&mut self) {
         self.audio.begin_command();
         self.options_menu.begin_command();

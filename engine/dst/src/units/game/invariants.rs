@@ -3,6 +3,7 @@ use crate::props;
 use rebirth_cleanroom::actors::ActorKind;
 use rebirth_cleanroom::floor::Floor;
 use rebirth_cleanroom::input;
+use rebirth_cleanroom::keyboard::{Keyboard, CONFIGURABLE};
 use rebirth_cleanroom::motion::WorldVector;
 use rebirth_cleanroom::player_death;
 use rebirth_cleanroom::run_admission::{MAX_SAFE_TIMESTAMP_MS, PRESENTATION_INTERVAL_NS};
@@ -164,7 +165,7 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>, af
 /// The original's key-driven menu graph. Edges the port has yet to
 /// implement (Continue, the pause menu's Exit) are included so that porting
 /// them is not a failure. Key handlers move most menus at the key event;
-/// Options acts on keys held at a tick.
+/// Options, Controls (device select) and Keyboard act on keys held at a tick.
 fn menu_edge(from: Screen, to: Screen) -> bool {
     matches!(
         (from, to),
@@ -179,6 +180,10 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
             | (Screen::Challenge, Screen::Main)
             | (Screen::Main, Screen::Options)
             | (Screen::Options, Screen::Main)
+            | (Screen::Options, Screen::Controls)
+            | (Screen::Controls, Screen::Options)
+            | (Screen::Controls, Screen::Keyboard)
+            | (Screen::Keyboard, Screen::Controls)
             | (Screen::Character, Screen::Main)
             | (Screen::Character, Screen::Seed)
             | (Screen::Seed, Screen::Character)
@@ -189,6 +194,7 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
 pub fn transition(before: &State, command: &Command, after: &State) {
     death(before, command, after);
     room_clear(before, command, after);
+    keyboard_menu(before, after);
     // A shot sets the fire cooldown to the max fire delay it fires with, and
     // the cooldown then only counts down. The max delay itself may drop under
     // a running cooldown: a collectible queued during its pickup animation
@@ -665,6 +671,65 @@ fn options(before: &State, after: &State) {
     }
 }
 
+/// The Keyboard menu (Menu10, 5A4FF0), which acts at a tick. A binding takes the awaited
+/// key for the selected action and column, and 5A4BC0 first clears that key
+/// from every configurable action; the reset row restores the defaults
+/// (61FDA0). Back is refused while a configurable action has no key, and
+/// otherwise saves every retained device with the Keyboard's bindings.
+fn keyboard_menu(before: &State, after: &State) {
+    if before.screen != Screen::Keyboard {
+        props::always!(
+            after.keyboard == before.keyboard && after.input_configs == before.input_configs,
+            "game: bindings and the stored input configuration change only in the keyboard menu",
+            json!({ "screen": before.screen })
+        );
+        return;
+    }
+    let menu = &before.controls_menu;
+    if after.keyboard != before.keyboard {
+        let action = CONFIGURABLE.get(menu.selection).copied();
+        let bound = action.map(|action| after.keyboard.get(action)[menu.column]);
+        let rebound = menu.waiting
+            && !after.controls_menu.waiting
+            && action.zip(bound).is_some_and(|(action, key)| {
+                key >= 0
+                    && CONFIGURABLE.iter().all(|other| {
+                        after
+                            .keyboard
+                            .get(*other)
+                            .iter()
+                            .enumerate()
+                            .all(|(column, slot)| {
+                                *slot != key || (*other == action && column == menu.column)
+                            })
+                    })
+            });
+        props::always!(
+            rebound || after.keyboard == Keyboard::default(),
+            "game: the keyboard menu binds the awaited key to the selected action alone, or resets the defaults",
+            json!({ "selection": menu.selection, "column": menu.column, "waiting": menu.waiting, "bound": bound })
+        );
+        props::sometimes!(rebound, "game: a key is bound in the keyboard menu");
+    }
+    if after.screen == Screen::Controls {
+        let saved = after.controls_menu.save_requests.last();
+        props::always!(
+            before.keyboard.complete()
+                && saved.is_some_and(|saved| {
+                    saved.configs == after.input_configs
+                        && saved.configs.keyboard() == after.keyboard
+                }),
+            "game: leaving the keyboard menu saves the complete bindings it leaves with",
+            json!({ "saved": saved, "keyboard": after.keyboard })
+        );
+    } else if !before.keyboard.complete() && after.keyboard == before.keyboard {
+        props::sometimes!(
+            after.public_actions.menu_back,
+            "game: the keyboard menu stays open on back while an action has no key"
+        );
+    }
+}
+
 /// Normal Isaac death (`engine/src/player_death.rs`): GameOver freezes
 /// gameplay (Game54f760 returns before the run tick), the menu key handler
 /// ignores input, and the released System popup's Restart or Exit request is
@@ -790,11 +855,13 @@ pub fn state(state: &State) {
         (1..=3).contains(&state.profile)
             && state.main_selection < 5
             && state.options_menu.selection < 8
+            && state.controls_menu.selection < 18
+            && state.controls_menu.column < 2
             && usize::from(state.character_selection) < catalog
             && (state.difficulty == "normal" || state.difficulty == "hard")
             && state.profiles.len() == 3,
         "game: menu selections stay within their menus",
-        json!({ "profile": state.profile, "main": state.main_selection, "options": state.options_menu.selection, "character": state.character_selection, "difficulty": state.difficulty })
+        json!({ "profile": state.profile, "main": state.main_selection, "options": state.options_menu.selection, "controls": [state.controls_menu.selection, state.controls_menu.column], "character": state.character_selection, "difficulty": state.difficulty })
     );
     if state.screen != Screen::Playing {
         props::always!(

@@ -157,7 +157,7 @@
   {
     "out": "coverage-options-menu.json",
     "from": null,
-    "steps": 1500,
+    "steps": 2000,
     "final_extend": 30,
     "stages": [
       [
@@ -165,6 +165,18 @@
       ],
       [
         "Options hold repeat"
+      ],
+      [
+        "screen:Keyboard"
+      ],
+      [
+        "property:game: a key is bound in the keyboard menu"
+      ],
+      [
+        "property:game: the keyboard menu stays open on back while an action has no key"
+      ],
+      [
+        "property:game: leaving the keyboard menu saves the complete bindings it leaves with"
       ],
       [
         "property:game: Options saves and returns to the main menu"
