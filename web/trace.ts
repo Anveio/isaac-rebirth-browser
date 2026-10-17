@@ -6,8 +6,8 @@ import type { Command, MusicBackendCommand, State } from "./engine";
 // states survive a capped ordinary state history.
 export class ReplayTrace {
   private readonly commands: Command[] = [];
-  private readonly states: State[] = [];
-  private readonly backendEvents: { afterCommandCount: number; command: MusicBackendCommand; audioTime: number; state?: State }[] = [];
+  private readonly states: string[] = [];
+  private readonly backendEvents: { afterCommandCount: number; command: MusicBackendCommand; audioTime: number; state?: string }[] = [];
   private inputEncodedBytes = 0;
   private stateEncodedBytes = 0;
   private backendStateEncodedBytes = 0;
@@ -62,14 +62,14 @@ export class ReplayTrace {
     return false;
   }
 
-  private recordState(state: State): State | null {
+  private recordState(state: State): string | null {
     if (this.stateHistoryTruncationReason) return null;
-    const bytes = this.bytes(state);
+    const { text, bytes } = this.serializeState(state);
     if (this.stateEncodedBytes + bytes > this.maxBytes) {
       this.stateHistoryTruncationReason = 'bytes'; return null;
     }
     this.stateEncodedBytes += bytes;
-    return structuredClone(state);
+    return text;
   }
 
   recordBackend(command: MusicBackendCommand, state: State, audioTime: number): void {
@@ -79,14 +79,14 @@ export class ReplayTrace {
       this.backendStateTruncationReason ??= 'input';
       return;
     }
-    let recordedState: State | null = null;
+    let recordedState: string | null = null;
     if (!this.backendStateTruncationReason) {
-      const bytes = this.bytes(state);
+      const { text, bytes } = this.serializeState(state);
       if (this.backendStateEncodedBytes + bytes > this.maxBackendStateBytes)
         this.backendStateTruncationReason = 'bytes';
       else {
         this.backendStateEncodedBytes += bytes;
-        recordedState = structuredClone(state);
+        recordedState = text;
       }
     }
     this.backendEvents.push({ ...structuredClone(event), ...(recordedState ? { state: recordedState } : {}) });
@@ -105,8 +105,27 @@ export class ReplayTrace {
       backendStateEncodedBytes: this.backendStateEncodedBytes, maxBackendStateEncodedBytes: this.maxBackendStateBytes,
       encodedBytes: this.inputEncodedBytes + this.stateEncodedBytes + this.backendStateEncodedBytes,
       maxEncodedBytes: this.maxInputBytes + this.maxBytes + this.maxBackendStateBytes,
-      maxCommands: this.maxCommands, commands: structuredClone(this.commands), states: structuredClone(this.states),
-      backendEvents: structuredClone(this.backendEvents) };
+      maxCommands: this.maxCommands, commands: structuredClone(this.commands), states: this.states.map(text => JSON.parse(text) as State),
+      backendEvents: this.backendEvents.map(({ state, ...event }) => ({
+        ...structuredClone(event), ...(state ? { state: JSON.parse(state) as State } : {}),
+      })) };
+  }
+
+  // Engine snapshots and their stain records are JSON values. Retain their
+  // serialized form instead of a second expanded graph until trace export.
+  private serializeState(state: State): { text: string; bytes: number } {
+    const canonical = JSON.stringify(state);
+    const bytes = new TextEncoder().encode(canonical).byteLength;
+    // JSON's ordinary spelling collapses -0. Keep that number in snapshot()
+    // while charging the same canonical JSON bytes as the existing budget.
+    let marker = "\u0000trace-negative-zero";
+    while (canonical.includes(JSON.stringify(marker))) marker += "0";
+    let negativeZero = false;
+    const encoded = JSON.stringify(state, (_key, value: unknown) => {
+      if (Object.is(value, -0)) { negativeZero = true; return marker; }
+      return value;
+    });
+    return { text: negativeZero ? encoded.replaceAll(JSON.stringify(marker), "-0") : canonical, bytes };
   }
 
   private bytes(value: unknown): number { return new TextEncoder().encode(JSON.stringify(value)).byteLength; }
