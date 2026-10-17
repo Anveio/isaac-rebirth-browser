@@ -270,13 +270,17 @@ export function compareCapturedFrames(frames, original, output) {
   return { checks, exactOriginalPixels: allExact };
 }
 
-let nativeReplayBuilt = false;
+let nativeReplayExecutable;
 export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
-  if (!nativeReplayBuilt) {
+  if (!nativeReplayExecutable) {
+    const metadata = spawnSync("cargo", ["metadata", "--locked", "--manifest-path", "engine/Cargo.toml", "--no-deps", "--format-version", "1"], { cwd: ROOT, encoding: "utf8" });
+    assert.equal(metadata.status, 0, metadata.stderr);
+    const targetDirectory = JSON.parse(metadata.stdout).target_directory;
+    assert.ok(typeof targetDirectory === "string" && targetDirectory.length > 0, "Cargo metadata must identify the replay target directory");
     const build = spawnSync("cargo", ["build", "--locked", "--manifest-path", "engine/Cargo.toml", "--bin", "replay"], { cwd: ROOT, encoding: "utf8" });
     assert.equal(build.status, 0, build.stderr);
-    nativeReplayBuilt = true;
+    nativeReplayExecutable = join(targetDirectory, "debug", process.platform === "win32" ? "replay.exe" : "replay");
   }
   const timeline = [], publicStateIndices = [0], backendStateIndices = []; let eventIndex = 0;
   assert.ok(Array.isArray(backendEvents) && commands.length + backendEvents.length <= 36000, 'Replay command budget includes audio callbacks');
@@ -290,7 +294,7 @@ export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEv
     if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
   }
   assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
-  const replay = spawnSync(join(ROOT, "engine/target/debug/replay"), [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(nativeReplayExecutable, [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
