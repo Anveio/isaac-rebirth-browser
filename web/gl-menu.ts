@@ -1,6 +1,6 @@
 import sceneData from "./scene-data.json";
 import fontData from "./font-data.json";
-import type { Assets } from "./animation";
+import { normalizeAssetPath as normalize, type Assets } from "./animation";
 import { loadRawPNG, type RawImage } from "./png";
 
 interface DrawState { transform: number[]; alpha: number; smoothing: boolean; fillStyle: string; }
@@ -8,7 +8,6 @@ interface Texture { handle: WebGLTexture; width: number; height: number; texture
 export interface GLSurface { texture: WebGLTexture; framebuffer: WebGLFramebuffer; depth: WebGLRenderbuffer; width: number; height: number; }
 export type BlendName = "zero" | "one" | "srcAlpha" | "oneMinusSrcAlpha" | "dstAlpha" | "oneMinusDstAlpha" | "srcColor" | "oneMinusSrcColor" | "dstColor" | "oneMinusDstColor";
 export type AlphaComparison = "never" | "less" | "equal" | "lessEqual" | "greater" | "notEqual" | "greaterEqual" | "always";
-const normalize = (path: string) => path.replaceAll("\\", "/").replace(/\/\.\//g, "/").replace(/\/\.$/, "").replace(/^resources\//i, "").toLowerCase();
 
 /** A textured-quad context using straight RGBA uploads and standard GL blending. */
 export class GLMenuContext {
