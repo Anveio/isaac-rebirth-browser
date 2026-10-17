@@ -10,6 +10,12 @@ struct Request {
     stage_seed: u32,
     #[serde(default)]
     spawns: bool,
+    /// A later normal floor (2..4) with the retained game flags and a fresh
+    /// character's health and coins; omitted, Basement I.
+    #[serde(default)]
+    stage: Option<u32>,
+    #[serde(default)]
+    game_flags: u64,
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,7 +35,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("floor request exceeds 4096 bytes".into());
     }
     let request: Request = serde_json::from_str(&input)?;
-    let floor = rebirth_cleanroom::floor::generate_basement(request.stage_seed)?;
+    let floor = match request.stage {
+        None => rebirth_cleanroom::floor::generate_basement(request.stage_seed)?,
+        Some(stage) => rebirth_cleanroom::floor::generate_normal_basement(
+            rebirth_cleanroom::floor::NormalBasementRequest {
+                stage,
+                stage_seed: request.stage_seed,
+                game_flags: request.game_flags,
+                red_hp: 6,
+                max_red_hp: 6,
+                soul_hp: 0,
+                coins: 0,
+            },
+        )?,
+    };
     if !request.spawns {
         println!("{}", serde_json::to_string(&floor)?);
         return Ok(());
