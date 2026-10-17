@@ -178,7 +178,7 @@ pub(crate) fn no_grid_query(_: &mut Npc, _: &Grid) -> Result<(), String> {
 /// Class3 flyers with authored sample points (the Duke of Flies): 442c3b
 /// clamps the center, then only wall and door samples reflect (442b90).
 pub(crate) fn wall_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    let points = npc.config().grid_points;
     if npc.grid_collision_class != 3 || points == 0 {
         return clamp_walls(npc, grid);
     }
@@ -202,7 +202,7 @@ pub(crate) fn wall_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
 pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
     // 442bc0 clears +34c even when this pass has no collision samples.
     npc.grid_collided = false;
-    let points = crate::content::entity(npc.kind, npc.variant).grid_points;
+    let points = npc.config().grid_points;
     if npc.grid_collision_class != 5 || points == 0 {
         return clamp_walls(npc, grid);
     }

@@ -127,5 +127,16 @@
         "fire cooldown above the max fire delay"
       ]
     ]
+  },
+  {
+    "out": "regression-envy-split-death.json",
+    "stages": [
+      [
+        "npc:51"
+      ],
+      [
+        "removed:51"
+      ]
+    ]
   }
 ]

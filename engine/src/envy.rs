@@ -164,9 +164,14 @@ pub(crate) fn child_selector(position: WorldVector, variant: u32, seed: u32) -> 
     }
 }
 
+/// The config row a head of runtime variant `v + 10·level` was born from.
+pub(crate) fn config_variant(variant: u32) -> u32 {
+    variant % 10
+}
+
 /// The class 3 wall collider for 12 points, keyed on the config row.
 fn walls(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    let points = content::entity(51, npc.variant % 10).grid_points;
+    let points = npc.config().grid_points;
     if npc.grid_collision_class != 3 || points == 0 {
         return crate::entities::clamp_walls(npc, grid);
     }

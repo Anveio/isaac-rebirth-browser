@@ -1,7 +1,7 @@
 //! Entity_NPC::Init47f500 champion roll for ordinary (non-boss) NPCs.
 //! A local RNG(spawn seed, shift preset1) draws the roll and the color; color
 //! init effects follow the source handlers. Colors 9/10/11 draw the shared MT.
-use crate::{content, items, mt::Mt19937, npcs::Npc, player_items::PlayerItems};
+use crate::{items, mt::Mt19937, npcs::Npc, player_items::PlayerItems};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -52,7 +52,7 @@ pub(crate) struct Roll<'a> {
 /// Rolls and applies a champion after the family constructor, in authored
 /// selector order. Returns whether the NPC became a champion.
 pub(crate) fn roll(npc: &mut Npc, shared: &mut Mt19937, context: &Roll) -> Result<bool, String> {
-    let config = content::entity(npc.kind, npc.variant);
+    let config = npc.config();
     if config.boss || !config.champion {
         return Ok(false);
     }

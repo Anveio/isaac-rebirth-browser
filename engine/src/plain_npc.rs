@@ -350,7 +350,7 @@ fn advance_full(
         npc.dead = true;
         // Die 445c60: the death sound (44641d, louder with gibs), the gibs,
         // then the real Blood Splat seed.
-        let gibs = content::entity(npc.kind, npc.variant).gib_amount > 0;
+        let gibs = npc.config().gib_amount > 0;
         world.audio.admit(
             random,
             world.system_counter,
