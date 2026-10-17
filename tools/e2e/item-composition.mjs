@@ -12,6 +12,9 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { captureComposition } from '../foundation/composition-capture.mjs';
 
 const pocketMode = flag('--pockets');
+const pillUseMode = hasFlag('--pill-use');
+assert.ok(!pillUseMode || pocketMode === 'collection',
+  'Positive Pill use requires the public collection mode');
 const wasmNode = flag('--wasm-node');
 const wasmSha = flag('--wasm-sha');
 const reusedOriginal = flag('--reuse-original');
@@ -23,9 +26,10 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection] [--pill-use] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
-  console.log(`Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
+  console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
+    : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
   process.exit(0);
 }
 const output = outputDirectory(pocketMode ? 'pockets-' + pocketMode : 'item-composition');
@@ -51,6 +55,10 @@ if (pocketMode) sourceFiles.push('tools/original/pocket-scenarios.py',
   'tools/foundation/pocket-state-pair.py', 'tools/original/native-journal-zstd.py',
   'tools/original/state-observer.py', 'references/isaac/foundation/pockets/history/scenarios.json');
 const filePins = async paths => Object.fromEntries(await Promise.all(paths.map(async path => [path, hash(await readFile(path))])));
+if (pillUseMode) sourceFiles.push('tools/foundation/pill-range-use-state-pair.py',
+  'tools/original/pill-range-use-scenarios.py',
+  'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
+  'references/isaac/rebirth/resources/challenges.xml');
 if (wasmNode) sourceFiles.push('tools/foundation/composition-wasm-public.mjs');
 const sourcePins = () => filePins(sourceFiles.map(path => join(ROOT, path)));
 
@@ -84,10 +92,10 @@ try {
     report.inputMode = 'recorded bank; no new entropy';
   } else {
     const generated = join(output, 'declared-inputs');
-    const result = await child('python3', [join(ROOT, pocketMode
+    const result = await child('python3', [join(ROOT, pillUseMode ? 'tools/original/pill-range-use-scenarios.py' : pocketMode
       ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
       '--output', generated, '--count', flag('--count', '2'),
-      ...(pocketMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
+      ...(pocketMode && !pillUseMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
     report.inputMode = 'fixed cases plus every freshly journaled unfiltered OS projection';
@@ -109,6 +117,9 @@ try {
       assert.equal(Number.isFinite(declaration.sfxVolume), true);
       assert.ok(declaration.sfxVolume >= 0 && declaration.sfxVolume <= 1);
     }
+    assert.equal(Boolean(declaration.pillUse), pillUseMode,
+      'Real consumption requires its separate use reader');
+    if (pillUseMode) assert.equal(declaration.pillUse.schema, 'source-public-pill-range-use-v1');
     return { ...declaration, fixture };
   });
   if (cases.some(item => item.requires?.spoonBender3Functional !== undefined)) {
@@ -197,8 +208,9 @@ try {
       } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); }
       for (const [key, tool, args] of [
         ['captureReadback', 'composition-readback.py', ['--directory', directory, ...(wasmNode?['--wasm-node','--wasm-artifact',resolve(wasmNode),'--wasm-sha',wasmSha]:[]), ...(reusedOriginal?['--original-directory',originalDirectory]:[])]],
-        ['comparison', pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
-          '--browser', join(portDirectory,wasmNode?'actual-replay-result.json':'browser-evidence.json.gz'), ...(wasmNode?['--wasm-node']:[])]],
+        ['comparison', pillUseMode ? 'pill-range-use-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
+          '--browser', join(portDirectory,wasmNode?'actual-replay-result.json':'browser-evidence.json.gz'),
+          ...(pillUseMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
       ]) {
         try {
           result[key] = await child('python3', [join(ROOT, 'tools/foundation', tool),

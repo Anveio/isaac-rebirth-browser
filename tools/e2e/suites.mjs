@@ -97,6 +97,8 @@ export const SUITES = [
     'Card/Pill Init and random IDs through procedural source groups', { alias: 'pockets' }),
   suite('pocket-collection', e2e('item-composition'), ['--pockets', 'collection', '--count', '1'],
     'Card/Pill held records, two capacity spills, presentation and sound requests', { alias: 'pockets' }),
+  suite('pill-range-use', e2e('item-composition'), ['--pockets', 'collection', '--pill-use', '--count', '1'],
+    'Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),

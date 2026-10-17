@@ -145,6 +145,18 @@ def observe(pid,context):
       players[-1]['heldPocketRecords']=[{'slot':slot,'sourceIdOffset':0x3044+slot*8,
        'id':struct.unpack_from('<i',held,slot*8)[0],'typeTagRaw':held[slot*8+4]}
        for slot in range(2)]
+     if context.get('persistentItemInputs',False):
+      #Actual raw Player words only. Absent port owners are never inputs;
+      #this optional observation performs14 bounded4-byte native reads.
+      players[-1]['persistentItemInputs']={
+       'sourceD2c':i32(player+0xd2c),'sourceD34':i32(player+0xd34),
+       'source13b4':i32(player+0x13b4),'source13b8':i32(player+0x13b8),
+       'sourceD28':i32(player+0xd28),'sourceD44':i32(player+0xd44),
+       'source13bc':i32(player+0x13bc),'source13c0':i32(player+0x13c0),
+       'sourceD30':i32(player+0xd30),'sourceD38':i32(player+0xd38),
+       'sourceD3c':i32(player+0xd3c),'sourceD40':i32(player+0xd40),
+       'sourceD58':f32(player+0xd58),'source13cc':i32(player+0x13cc),
+       'source13d0':i32(player+0x13d0),'sourceC70':i32(player+0xc70)}
      temp_begin,temp_end=u64(player+0xd00),u64(player+0xd08)
      if temp_end<temp_begin or(temp_end-temp_begin)%16 or(temp_end-temp_begin)//16>347:raise ValueError('Temporary record array outside bound')
      for record in range(temp_begin,temp_end,16):
