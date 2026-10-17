@@ -10,6 +10,7 @@ gfx/1000.005_blood particle.anm2
 gfx/1000.027_wood particle.anm2
 gfx/1000.043_poop explosion.anm2
 gfx/1000.002_blood explosion.anm2
+gfx/1000.003_fly explosion.anm2
 gfx/1000.021_tiny bug.anm2
 gfx/1000.033_tiny fly.anm2
 gfx/1000.012_tear poofa.anm2

@@ -36,6 +36,8 @@ pub enum Controller {
         /// +7d4 frame on which the floor stamp is taken.
         stamp_frame: u32,
     },
+    /// Fly Explosion 1000.3 (case 45abe3): a dead fly's base-kill puff.
+    FlyExplosion,
 }
 
 /// What a tiny fly's update sees of the room.
@@ -197,6 +199,24 @@ impl NpcEffectAdmission<'_> {
         let index = self.effects.len() - 1;
         smoke(&mut self.effects[index])?;
         Ok(id)
+    }
+
+    /// Base kill 4fb0a2 of a dead fly-family NPC: Spawn550a40 of 1000.3 with
+    /// the drawn seed (Init draws nothing), then SetColor 4fb11e of the
+    /// actor's SplatColor. The effect has no immediate update.
+    pub(crate) fn admit_fly_explosion(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        tint: [f32; 4],
+        offsets: [f32; 3],
+    ) -> Result<u32, String> {
+        let id = self.next_id()?;
+        let mut effect = base(id, 3, seed, position, self.game_update_count);
+        effect.sprite.tint = tint;
+        effect.sprite.offsets = offsets;
+        effect.fly_effect = Some(Controller::FlyExplosion);
+        self.admit_actor(effect)
     }
 
     /// A killed tiny fly's 1000.2: seed, scale 0.3, then its first update
@@ -429,6 +449,17 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     }
     match state.sprite_effects[index].fly_effect.clone() {
         Some(Controller::Smoke { .. }) => smoke(&mut state.sprite_effects[index]),
+        Some(Controller::FlyExplosion) => {
+            // 45abe3: rotation from +814 (zero, never written for a kill
+            // puff), then removal once the clip finishes. No draws.
+            let effect = &mut state.sprite_effects[index];
+            base_update(effect)?;
+            if !effect.sprite.playing {
+                effect.removed = true;
+                effect.active = false;
+            }
+            Ok(())
+        }
         Some(Controller::BloodExplosion { stamp_frame }) => {
             let effect = &mut state.sprite_effects[index];
             base_update(effect)?;

@@ -3972,6 +3972,20 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::FlyExplosion {
+                seed,
+                position,
+                color,
+            } => {
+                familiars::NpcEffectAdmission {
+                    game_update_count: self.state.game_update_count,
+                    next_effect: &mut self.state.next_effect,
+                    effects: &mut self.state.sprite_effects,
+                    scheduler: &mut self.state.actor_scheduler,
+                }
+                .admit_fly_explosion(seed, position, color.tint, color.offset)?;
+                Ok(())
+            }
             entities::Birth::GridHurt { position, damage } => {
                 let descriptor = self
                     .state

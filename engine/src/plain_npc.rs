@@ -231,8 +231,9 @@ pub(crate) fn advance_with(
 
 /// `advance` for a family whose AI handles its own death: Entity_NPC::Update
 /// calls update_ai once more with dead set (the base kill follows the AI).
-/// A boss's post-AI handling then enters state16 in that same update; a
-/// non-boss retires unless its AI cleared dead.
+/// A boss's post-AI handling then enters state16 in that same update. Every
+/// non-boss gets that dead update in `advance_full`, opted in or not: it
+/// retires unless its AI cleared dead.
 pub(crate) fn advance_dead_ai(
     npc: &mut Npc,
     phase: Phase,
@@ -274,14 +275,13 @@ fn advance_full(
             }
             return dying_boss(npc, friction);
         }
-        // 4fa3eb runs update_ai with dead set before the post-AI handling
-        // removes the actor; an AI that clears dead (Gaper's Morph) lives on.
-        if dead_ai {
-            ai(npc, random, world, births, &mut friction)?;
-        }
+        // Dead NPCs keep negative HP through the next intermediate phase.
+        // 4fa3eb then runs update_ai with dead set for every family before
+        // the post-AI handling; an AI that clears dead (Gaper's Morph) lives
+        // on, otherwise the base kill retires the actor.
+        ai(npc, random, world, births, &mut friction)?;
         if npc.dead {
-            // Dead NPCs keep negative HP through the next intermediate phase
-            // and retire at the following full pass.
+            base_kill(npc, random, births);
             npc.removed = true;
             return Ok(());
         }
@@ -371,6 +371,26 @@ fn advance_full(
         return Err("NPC source motion overflowed actual world vectors".into());
     }
     Ok(())
+}
+
+/// Base kill 4fa95e of a dead NPC's update. The fly family (4fbf48..4fbf75
+/// -> 4fb0a2: types 13, 14, 18, 214, 222 and 249) draws a seed and spawns
+/// Fly Explosion 1000.3 at the actor's position plus its current layer-0
+/// centre (4fa9b1..4faa49, added at 4fb0bc), then SetColor 4fb11e copies the
+/// actor's SplatColor. The explosion follows the AI's own births: a dead
+/// Pooter's last shot is spawned inside its AI, before the base kill. Types
+/// 94/85/215/250 (1000.38 at 4faa5a), the gib branch from 4fbf7b and the
+/// room-age-900 branch at 4fab00 remain unadmitted.
+fn base_kill(npc: &Npc, random: &mut Mt19937, births: &mut Vec<Birth>) {
+    if matches!(npc.kind, 13 | 14 | 18 | 214 | 222 | 249) {
+        let seed = random.next_u32();
+        let [x, y] = content::main_layer_centre(&npc.actor, &npc.animation, npc.animation_frame);
+        births.push(Birth::FlyExplosion {
+            seed,
+            position: npc.position + WorldVector { x, y },
+            color: npc.splat_color,
+        });
+    }
 }
 
 /// is_frame444890: Game+ce9f4 plus the actor's manager sequence, modulo n.

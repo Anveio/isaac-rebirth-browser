@@ -422,12 +422,13 @@ export class Renderer {
         continue;
       }
       if (effect.flyEffect) {
-        // Duke effects: the smoke draws 40 above its ground (+458) with its
-        // colour multiplying every layer; a dying tiny fly's Main layer falls
-        // onto its shadow (LayerState+0x30).
+        // Duke effects and a dead fly's 1000.3 puff: the smoke draws 40 above
+        // its ground (+458) with its colour multiplying every layer; a dying
+        // tiny fly's Main layer falls onto its shadow (LayerState+0x30).
         const sprite = effect.sprite;
         const actor = effect.variant === 1 ? "gfx/1000.001_bomb explosion.anm2"
-          : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
+          : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2"
+          : effect.variant === 3 ? "gfx/1000.003_fly explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
         const fall = sprite.layerOffsets?.[0]?.[1];
         const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
           [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));

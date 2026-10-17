@@ -137,6 +137,13 @@ pub(crate) enum Birth {
     /// A mid-room NPC parented to the spawner, without entity collision,
     /// hidden and with APPEAR cleared (Gemini's umbilical cord pieces).
     Attached(SpawnSelector),
+    /// Base kill 4fb0a2: Fly Explosion 1000.3 with the seed drawn at the
+    /// kill, its position and the actor's SplatColor.
+    FlyExplosion {
+        seed: u32,
+        position: WorldVector,
+        color: crate::sprite_color::Color,
+    },
 }
 
 pub(crate) type Advance =
