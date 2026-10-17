@@ -2490,14 +2490,9 @@ impl Game {
                     // A Random run stored its resolved character; the menus
                     // return to the profile's own selection.
                     self.load_menu_character();
-                    self.state.audio.pending.push(audio::SoundRequest {
-                        id: 8,
-                        volume: 1.0,
-                        delay: 0,
-                        looping: false,
-                        pitch: 1.0,
-                    });
-                    self.state.music.crossfade(1);
+                    // Fresh MenuInit59A4D2/59A51A requests Music61.
+                    // SetMenu0-to3 skips the forward-confirm SFX8 branch.
+                    self.state.music.crossfade(61);
                 }
             }
         }

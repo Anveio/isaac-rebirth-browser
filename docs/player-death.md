@@ -6,8 +6,8 @@ original/browser pairs. The retained four-case selected-field gate now passes
 with the corrected public clock on the combined candidate below. The two new
 unfiltered OS cases remain **FAIL** on one required Original audio observation.
 Visual acceptance is still open: the registered Restart replay retains 733 of
-740 full-RGBA diagnostic failures. Complete audio acceptance, including the
-separate Exit music/SFX contracts below, also remains open. Revival items,
+740 full-RGBA diagnostic failures. The bounded Exit music/SFX contracts below
+now pass; complete audio acceptance remains open. Revival items,
 other characters, cooperative players, black hearts, and complete diary content
 remain unimplemented.
 
@@ -127,10 +127,51 @@ remain local. RGBA differences were not computed for this focused replay.
 The aggregate state-history trace reaches its recorded byte cap; all 741
 independent checkpoint states remain complete in the manifest.
 
-Exit audio remains a separate source gap: fresh MenuInit requests Music61 and
-SetMenu0-to3 emits no forward SFX8, while the current Exit path requests Music1
-and SFX8. The focused replay's SFX30 checks do not qualify those backend
+At that visual checkpoint, Exit audio remained a separate source gap: fresh
+MenuInit requests Music61 and SetMenu0-to3 emits no forward SFX8, while the
+port requested Music1 and SFX8. Its SFX30 checks did not qualify those backend
 contracts. The historical four-case results above retain their original reds.
+
+The Exit path now requests Music61 and omits that forward-confirm SFX8 request.
+A separate seven-capture public prefix first reproduces the audio gap on
+production703: all 95 canonical fields pass, but only 10 of 14 bounded audio
+checks pass. Native has zero uniquely attributed configured SFX8 starts in
+the Exit dispatch window versus one actual Browser request/API start; Native
+Music61 differs from Browser Music1 at dispatch1, dispatch2 and dispatch4.
+Both runtimes retain three earlier actual SFX8 starts as positive controls.
+
+The identical tape and declared public clock then pass against a fresh Native
+and immutable production
+`f837cf593084788c7ab9ebcc135458c0d55fbc52afbd4e3c378d6ab9357b10f8`
+(1,407 files; `check:build` passed), containing only the separately bound Exit
+audio leaf beyond its recorded runtime base. All 95 canonical rows remain
+identical to production703, including Native expectations. All 14 audio checks
+pass: the four baseline failures become passing, while the ten prior-passing
+rows are unchanged. Music61 agrees at all three dispatch captures; both games
+have zero actual SFX8 starts in the window, and the Browser emits no SFX8
+request there. All three earlier unique-owner SFX8 controls remain mandatory
+in each runtime; Browser controls reach the actual output graph with retained
+PCM hashes. SFX volume is explicitly one in both games, with the Native slot
+loaded and past cooldown. This is actual owner/backend evidence, not a
+negative inference from muted slot bytes.
+
+Natural death/popup coverage, fresh Native provenance and 690 clock
+acknowledgements/eight capture times pass; the Browser records all 1,631 public
+ticks and seven complete capture states. Input and backend traces are
+untruncated. Aggregate state history reaches its recorded byte cap after 409
+states; all seven independent checkpoint states and 15 actual Native/Browser
+PNGs remain retained. RGBA differences are not computed. These bounded
+controller/request/start checks do not establish audible or PCM equality,
+complete music lifecycle/device equivalence, complete Shared-MT parity or a
+count of rejected Native request attempts. The separate fresh-OS SFX30
+observation failure and historical pixel failures remain unchanged.
+
+The [kept seven-capture input bank](../references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json)
+contains only the public case, without local observation paths. Replay it with
+`player-death --scenario-file references/isaac/cases/player-death/recovery-death-exit-audio-prefix.json`.
+That registered replay checks the canonical death fields and computes pixel
+diagnostics; the additional 14 owner/backend checks above come from the
+separately bound audio capture, not from snapshot-only replay acceptance.
 
 The port's existing living-player grid query still runs before full-phase
 entity contacts. A Player killed later during contacts has already received
