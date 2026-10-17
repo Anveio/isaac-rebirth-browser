@@ -339,10 +339,11 @@ pub fn admit_boundary(
     if descriptor.template.room_type == 16 {
         return Err("special room wall replacements are outside fresh grid ownership".into());
     }
-    // Catalogue0 (special STB, holding the start room) and1 (Basement) share
-    // the stage1 Basement backdrop and its shape0 ambient producer.
-    if descriptor.asset_stage > 1 || descriptor.template.shape_index() != 0 {
-        return Err("ambient grid admission requires a fresh Basement shape0 room".into());
+    // Catalogues 0 (special STB, holding the start room), 1 (Basement) and
+    // 3 (Caves) share the shape0 ambient producer; 5cf45b..5cf46d skips only
+    // backdrops 11 and 13, which no admitted stage selects.
+    if !matches!(descriptor.asset_stage, 0 | 1 | 3) || descriptor.template.shape_index() != 0 {
+        return Err("ambient grid admission requires a fresh Basement or Caves shape0 room".into());
     }
     let grid = room
         .grid

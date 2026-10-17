@@ -2350,7 +2350,7 @@ impl Game {
             .descriptor
             .as_ref()
             .is_some_and(|descriptor| {
-                descriptor.asset_stage <= 1
+                matches!(descriptor.asset_stage, 0 | 1 | 3)
                     && descriptor.template.shape_index() == 0
                     && descriptor.template.room_type != 16
             })
