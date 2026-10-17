@@ -1,0 +1,4367 @@
+{
+  "schema": 1,
+  "suite": "tnt",
+  "declarationMode": "fixed-plus-unfiltered-epoch-idle-v1",
+  "randomCount": 1,
+  "entropy": "First two logical OS draws retained; no resampling or Native-dependent continuation",
+  "cases": [
+    {
+      "schema": 1,
+      "seed": "B911933Y",
+      "seedValue": 26,
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 2184569263,
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ]
+      },
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-room-before-fire"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-60"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-90"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-130"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-140"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-150"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-160"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-after-settle"
+        }
+      ],
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-room-before-fire"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-60"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-90"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-130"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-140"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-150"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-160"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-after-settle"
+        }
+      ],
+      "scenario": {
+        "id": "tnt-right-entry-shoot-music1-v2",
+        "source": "Fixed public Source-derived neighboring room and weighted TNT selection; not Native outcome selection",
+        "coverageRequired": [
+          "actual natural TNT admission at authored center",
+          "public Tear Hurt reaches state4",
+          "actual countdown 3/2/1/0 and one blast",
+          "actual effect1/Wood27 seed/callback/lifetime and post-blast path costs",
+          "actual stationary coin bodies receive the blast impulse",
+          "actual configured SFX182 request/backend/selected PCM",
+          "no repeated blast after settle"
+        ],
+        "unqualified": [
+          "transient18 seed/callback unobserved at presentation-end RAM",
+          "rare50/41 trinket pool continuation",
+          "mixed grid callback order",
+          "whole shared MT/RGBA"
+        ]
+      },
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "declaredAudioOptions": {
+        "sfxVolume": 1,
+        "musicVolume": 1
+      },
+      "declaredFullscreen": false,
+      "declarationMode": "source-plan-only-public-tnt-music1-v2",
+      "entropyDraws": [],
+      "id": "tnt-right-entry-shoot-music1-v2",
+      "tnt": {
+        "schema": 1,
+        "observeEveryTapeStep": true,
+        "gridIndex": 67,
+        "descriptorIndex": 7,
+        "catalogIndex": 280,
+        "coinCount": 4,
+        "scope": "TNT fuse/blast/coins/effect1/Wood27/SFX182; transient18 seed/callback, rare trinket pool and mixed-grid order unqualified"
+      }
+    },
+    {
+      "schema": 1,
+      "seed": "B911933Y",
+      "seedValue": 26,
+      "bootEpochSeed": 4011211959,
+      "initialSeed": 2184569263,
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ]
+      },
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-room-before-fire"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-60"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-90"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-130"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-140"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-150"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-160"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-after-settle"
+        }
+      ],
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 63
+        },
+        {
+          "type": "capture",
+          "label": "title"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "profile"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "main"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "b",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "9",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "3",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "y",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 27
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 30
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-room-before-fire"
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-1"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-30"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-60"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-90"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-120"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-130"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-140"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-150"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "tnt-fire-160"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "capture",
+          "label": "tnt-after-settle"
+        }
+      ],
+      "scenario": {
+        "id": "tnt-unfiltered-epoch-idle-0",
+        "source": "Fixed public Source-derived neighboring room and weighted TNT selection; not Native outcome selection",
+        "coverageRequired": [
+          "actual natural TNT admission at authored center",
+          "public Tear Hurt reaches state4",
+          "actual countdown 3/2/1/0 and one blast",
+          "actual effect1/Wood27 seed/callback/lifetime and post-blast path costs",
+          "actual stationary coin bodies receive the blast impulse",
+          "actual configured SFX182 request/backend/selected PCM",
+          "no repeated blast after settle"
+        ],
+        "unqualified": [
+          "transient18 seed/callback unobserved at presentation-end RAM",
+          "rare50/41 trinket pool continuation",
+          "mixed grid callback order",
+          "whole shared MT/RGBA"
+        ]
+      },
+      "startup": {
+        "audioPreferences": {
+          "sfxVolume": 1,
+          "musicVolume": 1
+        },
+        "fullscreenPreferences": {
+          "fullscreen": false
+        },
+        "inputConfigs": {
+          "devices": []
+        }
+      },
+      "declaredAudioOptions": {
+        "sfxVolume": 1,
+        "musicVolume": 1
+      },
+      "declaredFullscreen": false,
+      "declarationMode": "source-plan-only-public-tnt-music1-v2",
+      "entropyDraws": [
+        {
+          "name": "bootEpochSeed",
+          "source": "OS secrets.randbits(32)",
+          "value": 4011211959
+        },
+        {
+          "name": "beforeFireIdleFrames",
+          "source": "OS secrets.randbelow(16)",
+          "value": 8
+        }
+      ],
+      "id": "tnt-unfiltered-epoch-idle-0",
+      "tnt": {
+        "schema": 1,
+        "observeEveryTapeStep": true,
+        "gridIndex": 67,
+        "descriptorIndex": 7,
+        "catalogIndex": 280,
+        "coinCount": 4,
+        "scope": "TNT fuse/blast/coins/effect1/Wood27/SFX182; transient18 seed/callback, rare trinket pool and mixed-grid order unqualified"
+      },
+      "parameters": {
+        "beforeFireIdleFrames": 8
+      }
+    }
+  ]
+}

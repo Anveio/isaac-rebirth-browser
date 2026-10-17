@@ -326,11 +326,28 @@ Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
 Port: ordinary/tinted rocks and supported tinted rewards, authored bomb rocks,
-spikes, poop (authored too), TNT (intact collision only), spider webs, trapdoor,
-ordinary backdrop-1 Block initialization, decorations, grid records and costs.
-The [Block constructor comparison](block-grid-evidence.md) preserves its existing
-gameplay and pixel failures. Missing: TNT fuse/countdown and blast,
-broader pit/block behavior, buttons, crawlspace ladders and poop variants.
+spikes, poop (authored too), TNT signed fuse/countdown and nonrare Full blast,
+spider webs, trapdoor, ordinary backdrop-1 Block initialization, decorations,
+grid records and costs. The [Block constructor comparison](block-grid-evidence.md)
+preserves its existing gameplay and pixel failures. Missing: broader pit/block
+behavior, buttons, crawlspace ladders and poop variants.
+The [bounded TNT comparison](tnt-grid-evidence.md) on frozen `e3fa5336`/1,408
+files (WASM `e505236c`) passes 41,659 required checks on the unchanged recorded
+fixed-plus-first-OS bank:21,038 fixed and 20,621 boot 4011211959/idle 8. All 22,535
+prior passes remain identical, with zero lost rows or changed expectations;
+19,113 added rows pass and 11 invalid live-four guards now use actual Penny
+conservation. Earlier raw failures remain unchanged. Separate corrected-clock
+ordinary-room Node and fresh-Native/DOM controls each pass 278 checkpoints,
+99,406 inherited fields and 279 added clock rows, recovering 162 old marker
+failures with no lost parent passes. Broader recorded11-rock/six-bomb/four-key
+controls preserve all1,687,079 inherited field keys and all passing values;
+8,811 added absolute-clock fields pass. The252 known Rock failures remain,
+including64 already-failing tinted-position values changed against actual137b.
+Transient18 seed/callback remains
+UNOBSERVED; history caps, fullRGBA, rare50/41 pool/pickup350, mixed-grid order,
+Player/NPC damage, reentry and whole shared MT remain open. No whole-game or
+current-main qualification is inferred.
+
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
