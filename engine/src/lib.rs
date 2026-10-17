@@ -2478,6 +2478,15 @@ impl Game {
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
                     self.state.menu_presentation.reinitialize();
+                    // Menu was destroyed on run entry.594D40 constructs it;
+                    //59AB7C initializes the offscreen Title at frame0, and
+                    //59AD17/59B0F0 begin the requested opaque-black fade.
+                    self.state.title_animation_frame = 0;
+                    self.state.menu_fade = MenuFade {
+                        active: true,
+                        alpha: 1.0,
+                        color: [0.0, 0.0, 0.0, 1.0],
+                    };
                     // A Random run stored its resolved character; the menus
                     // return to the profile's own selection.
                     self.load_menu_character();
