@@ -324,7 +324,9 @@ boss health bar, boss rush.
 Port (8 families): Monstro 20, Larry Jr. 19, Grub 239, Gluttony 49,
 The Duke of Flies 67, Gemini 79, Dingle 261 and Envy/Super Envy 51;
 VS scene from boss portraits. Envy's new live cases remain red, and Super
-Envy room coverage remains pending (#605). Missing: other Chapter 1 bosses
+Envy's short upper-door admission prefix passes 5,301 fields after the
+[footprint counter fix](player-footprints.md), with 12 gains and no losses;
+full fight, children and clear remain unqualified (#605). Missing: other Chapter 1 bosses
 (Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), later bosses
 including Gurdy/Gurdy Jr., remaining champion variants and Super Gluttony.
 
@@ -336,8 +338,9 @@ FAIL. Independent Super Envy planning retained all 32,768 door-slot outcomes
 and selected first eligible ordinal 3,497, `PHCVWE1C` (run seed 1714079471,
 stage seed 2559733126), via the upper door from start room 6 to room 4.
 Eligible ordinal 7,028 remains surplus and cannot replace a later failed
-selected route. This Source cohort carries no Original/browser qualification;
-the selected route's public-input fight and parity checks are separate work.
+selected route. The short selected-route admission comparison is qualified
+separately above; the full public-input fight and parity checks remain failed
+or pending. The Source discovery cohort itself is not gameplay qualification.
 No draw was retried, refilled or selected from an original-game outcome.
 
 Next: remaining Chapter 1 bosses.
