@@ -164,7 +164,8 @@ after a descent`, and `new run from the menus after a descent` when it went
 through the menus), a run started from Random (`Random run`) and its
 GameOver popup's Exit to the menus (`menus after a Random run's GameOver`),
 a fire cooldown left above a newly lowered fire delay (`fire cooldown above
-the max fire delay`), and each property met (`property:<message>`). The summary
+the max fire delay`), an Options setting held past its hold-repeat threshold
+(`Options hold repeat`), and each property met (`property:<message>`). The summary
 line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. Unsimulated kinds are split
@@ -285,9 +286,12 @@ its replay first reaches that stage, so the cut follows the tape through
 every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
-descent, restart and Random-exit regressions, the Monstro, Larry Jr. and
-Gemini kills, the Dingle and Gurglings entries (`"from": null` chases from
-a fresh boot), and the Charger entry. Chargers live in a room chain
+descent, active-item descent, restart, Random-exit, Number One cooldown and
+Envy split-death regressions, the Monstro, Larry Jr. and Gemini kills, the
+Dingle and Gurglings entries and the Options menu (`"from": null` chases
+from a fresh boot), and the Charger entry. Few generated cases reach
+Options at the fifth Main row, so `coverage-options-menu` holds a setting
+past the hold repeat and leaves through the save on every run. Chargers live in a room chain
 generated floors seldom place, so no fresh-boot branch met one in 192; the
 Charger recipe branches from the Larry Jr. tape's run start
 (`screen:Playing`), whose floor holds that chain, and 12 of 64 branches met

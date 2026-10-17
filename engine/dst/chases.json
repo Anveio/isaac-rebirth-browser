@@ -153,5 +153,22 @@
         "stage:2"
       ]
     ]
+  },
+  {
+    "out": "coverage-options-menu.json",
+    "from": null,
+    "steps": 1500,
+    "final_extend": 30,
+    "stages": [
+      [
+        "screen:Options"
+      ],
+      [
+        "Options hold repeat"
+      ],
+      [
+        "property:game: Options saves and returns to the main menu"
+      ]
+    ]
   }
 ]

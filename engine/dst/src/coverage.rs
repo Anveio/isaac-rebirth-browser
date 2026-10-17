@@ -116,6 +116,11 @@ pub fn observe(state: &State) {
     if random {
         keys.push("Random run".to_owned());
     }
+    // A setting held past Options' hold-repeat threshold (5A7560).
+    let options = &state.options_menu;
+    if state.screen == Screen::Options && options.left_held.max(options.right_held) > 49 {
+        keys.push("Options hold repeat".to_owned());
+    }
     if state.screen == Screen::Playing {
         // The floor's stage: a descent shows as `stage:2`, and a run started
         // after one as `new run after a descent`, from the menus also as
