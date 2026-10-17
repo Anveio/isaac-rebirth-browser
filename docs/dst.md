@@ -274,8 +274,12 @@ every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, restart and Random-exit regressions, the Monstro, Larry Jr. and
-Gemini kills, and the Dingle and Gurglings entries (`"from": null` chases
-from a fresh boot).
+Gemini kills, the Dingle and Gurglings entries (`"from": null` chases from
+a fresh boot), and the Charger entry. Chargers live in a room chain
+generated floors seldom place, so no fresh-boot branch met one in 192; the
+Charger recipe branches from the Larry Jr. tape's run start
+(`screen:Playing`), whose floor holds that chain, and 12 of 64 branches met
+one.
 Boss fights and descents are the first coverage a shared-MT change moves, so
 one command rebuilds all of them:
 
