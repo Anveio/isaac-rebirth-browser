@@ -323,6 +323,18 @@ Envy room coverage remains pending (#605). Missing: other Chapter 1 bosses
 (Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), later bosses
 including Gurdy/Gurdy Jr., remaining champion variants and Super Gluttony.
 
+A separately closed Source-only cohort retained all 8,192 OS draws before
+floor evaluation. Independent Shop planning evaluated every draw and selected
+0 of 2 required routes (6,378 unsupported template contexts, 1,807 missing
+route rooms and seven unsupported enclosure geometries), so the cohort remains
+FAIL. Independent Super Envy planning retained all 32,768 door-slot outcomes
+and selected first eligible ordinal 3,497, `PHCVWE1C` (run seed 1714079471,
+stage seed 2559733126), via the upper door from start room 6 to room 4.
+Eligible ordinal 7,028 remains surplus and cannot replace a later failed
+selected route. This Source cohort carries no Original/browser qualification;
+the selected route's public-input fight and parity checks are separate work.
+No draw was retried, refilled or selected from an original-game outcome.
+
 Next: remaining Chapter 1 bosses.
 
 | Bug | Sev | Symptom | Source |
@@ -410,6 +422,9 @@ no-active refusal, an undercharged Battery grant and a paid collectible
 queue/deferred grant. All64 summary witness checks pass; the strict aggregate
 41,212/41,481 retains250 health and19 BF4 guard failures. Raw reports and
 representation/actual-owner readbacks remain separate; RGBA/PCM is ungraded.
+The registered `common-sku` replay now preserves all 1,749 free-no-active rows
+and, on frozencc38, passes 29 additional actual seed-effect owner checks.
+The remaining fixed cases and default OS approach are not newly qualified.
 These are fixture witnesses, not whole retail-floor or current-main parity.
 
 Next: promote source-only local fixture recipes and owned-schema coverage;
