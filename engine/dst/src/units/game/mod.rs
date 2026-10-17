@@ -283,6 +283,9 @@ fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String
 
 impl Simulation {
     fn boot(tape: &Tape) -> Option<Self> {
+        // The census case opens before boot, so it records the properties
+        // boot meets.
+        coverage::begin_case();
         let (initial_seed, boot_epoch_seed) = (tape.initial_seed, tape.boot_epoch_seed);
         let booted = panic::catch_unwind(|| tape.boot());
         let details = json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed });
@@ -324,8 +327,9 @@ impl Simulation {
                 );
                 props::sometimes!(
                     tape.boot_audio_preferences.is_some()
-                        && tape.boot_fullscreen_preferences.is_some(),
-                    "game: a game boots with stored audio and fullscreen settings"
+                        && tape.boot_fullscreen_preferences.is_some()
+                        && tape.boot_input_configs.is_some(),
+                    "game: a game boots with stored audio, fullscreen and input settings"
                 );
                 let again = tape.boot();
                 props::always!(
@@ -333,7 +337,6 @@ impl Simulation {
                     "game: boot is a pure function of its seeds and stored settings"
                 );
                 invariants::state(&game.state);
-                coverage::begin_case();
                 coverage::observe(&game.state);
                 Some(Self {
                     game,

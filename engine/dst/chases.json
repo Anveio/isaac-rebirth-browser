@@ -182,5 +182,19 @@
         "property:game: Options saves and returns to the main menu"
       ]
     ]
+  },
+  {
+    "out": "coverage-stored-settings.json",
+    "from": null,
+    "steps": 1500,
+    "final_extend": 600,
+    "stages": [
+      [
+        "property:game: a game boots with stored audio, fullscreen and input settings"
+      ],
+      [
+        "screen:Playing"
+      ]
+    ]
   }
 ]

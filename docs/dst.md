@@ -312,7 +312,9 @@ from a fresh boot), and the Charger entry. Few generated cases reach
 Options at the fifth Main row, so `coverage-options-menu` holds a setting
 past the hold repeat, binds a key in the Keyboard menu, is refused leaving
 it with an action unbound, leaves it with its bindings saved and leaves
-Options through its save on every run. Chargers live in a room chain
+Options through its save on every run. `coverage-stored-settings` boots
+with stored audio, fullscreen and input settings and plays into a run, so
+that boot runs on every run too. Chargers live in a room chain
 generated floors seldom place, so no fresh-boot branch met one in 192; the
 Charger recipe branches from the Larry Jr. tape's run start
 (`screen:Playing`), whose floor holds that chain, and 12 of 64 branches met
