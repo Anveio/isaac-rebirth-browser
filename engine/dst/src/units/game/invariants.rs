@@ -1140,6 +1140,7 @@ pub fn state(state: &State) {
             .iter()
             .any(|pickup| pickup.id == actor.id),
         ActorKind::Npc => state.room.npcs.iter().any(|npc| npc.id == actor.id),
+        ActorKind::Slot => state.room.slots.iter().any(|slot| slot.id == actor.id),
         ActorKind::Projectile => state
             .enemy_projectiles
             .iter()

@@ -38,6 +38,9 @@ pub struct Room {
     #[serde(default)]
     pub dynamic_crater_records: Option<Vec<crate::explosion_effects::DynamicCraterRecord>>,
     pub npcs: Vec<crate::npcs::Npc>,
+    /// Entity_Slot machines and beggars admitted from the authored layout.
+    #[serde(default)]
+    pub slots: Vec<crate::slots::Slot>,
     /// Append-only within a room. The per-frame WASM snapshot elides them
     /// (see `frame_snapshot_ptr`); the browser reads new ones incrementally.
     #[serde(
@@ -1083,6 +1086,7 @@ impl Room {
             saved_regular_pickups: Vec::new(),
             dynamic_crater_records: Some(Vec::new()),
             npcs: Vec::new(),
+            slots: Vec::new(),
             background_stains: Vec::new(),
             authored_actor_order: Vec::new(),
             manager_counts: crate::actors::ManagerCounts::default(),

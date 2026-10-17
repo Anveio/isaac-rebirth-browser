@@ -1022,6 +1022,7 @@ pub(crate) fn explode_with_copied_source(
         &clear,
     )?;
     crate::pickups::bomb_hit(state, position, radius, damage, 4, &clear)?;
+    crate::slots::bomb_hit(state, position, radius, &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
         isaac_blast_velocity(
