@@ -114,7 +114,11 @@ impl Admission<'_> {
 
     /// Die 445c60 and the airborne 4634b5 spawn 1000.5 with the gib category
     /// as subtype; the caller separately invokes Update where the source does.
-    pub fn admit_blood_particle(&mut self, birth: ParticleBirth, subtype: u32) -> Result<u32, String> {
+    pub fn admit_blood_particle(
+        &mut self,
+        birth: ParticleBirth,
+        subtype: u32,
+    ) -> Result<u32, String> {
         let id = self.admit(
             5,
             Controller::Particle5(BloodParticle {
@@ -124,7 +128,10 @@ impl Admission<'_> {
             }),
             birth,
         )?;
-        self.effects.last_mut().expect("admitted blood particle").subtype = subtype;
+        self.effects
+            .last_mut()
+            .expect("admitted blood particle")
+            .subtype = subtype;
         Ok(id)
     }
 
@@ -296,7 +303,10 @@ pub(crate) fn advance_blood_particle(state: &mut crate::State, id: u32) -> Resul
 
 /// The 45d9b8 controller. Returns the spawn request of an airborne ordinary
 /// particle (its stage before the increment).
-fn blood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<Option<AirborneSpawns>, String> {
+fn blood_update(
+    effect: &mut SpriteEffect,
+    shared: &mut Mt19937,
+) -> Result<Option<AirborneSpawns>, String> {
     let child = effect.spawner_type == 1000;
     let position = effect.position;
     let spawner = Parent {
@@ -361,8 +371,8 @@ fn blood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<Optio
                         effect.flags |= 8;
                     }
                 } else {
-                    let config = familiars::definition(1000, 5)
-                        .ok_or("actual5 landing catalogue absent")?;
+                    let config =
+                        familiars::definition(1000, 5).ok_or("actual5 landing catalogue absent")?;
                     let clip = config
                         .clips
                         .iter()
