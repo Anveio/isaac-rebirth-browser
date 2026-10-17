@@ -549,6 +549,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     assert.ok(!replaySeeds.length || replaySeeds.length === randomCount, 'Replay seed count must match randomized case count');
     const output = resolve(option('--output', `.cache/foundation/paired-${Date.now()}`));
     const report = await runPairedGate({ output, selected, randomCount, replaySeeds, replayCases,
+      publicClockSchedule: process.argv.includes('--public-clock-schedule'),
       exactPixels: process.argv.includes('--require-exact-pixels'), productionDirectory: option('--production-directory'),
       archiveNativeEvidence: process.argv.includes('--archive-native-evidence'), filterCases: true,
       nativeFrameTimeout: Number(option('--native-frame-timeout', 60)) });

@@ -145,6 +145,7 @@ def main():
     parser.add_argument('--attempts', type=int, default=4000)
     parser.add_argument('--room-type', type=int, help='authored room type to enter (default ordinary 1, or 1/6 at 13x7)')
     parser.add_argument('--shape', default='13x7', help='authored room WIDTHxHEIGHT (13x7, 13x14, 26x7, 26x14)')
+    parser.add_argument('--stop-after-capture', choices=['entry-1', 'entry-40'], help='end both public tapes at first entry or after its existing settle; default keeps the complete route')
     args = parser.parse_args()
     entity = (args.type, args.variant if args.type is not None else None)
     shape = tuple(int(part) for part in args.shape.split('x'))
@@ -156,6 +157,16 @@ def main():
             raise ValueError(f'Contrived {code} slot {slot} does not admit {entity} in a {args.shape} room')
         cases.append(case(f'contrived-{index}', code, int(slot), entity, {'entropy': 'contrived spec seed'}, False, shape))
     cases += discover(entity, args.count, args.attempts, shape, args.room_type) if args.count else []
+    if args.stop_after_capture is not None:
+        for recorded in cases:
+            for name in ('tape', 'pairedTape'):
+                matches = [index for index, action in enumerate(recorded[name])
+                           if action.get('type') == 'capture' and action.get('label') == args.stop_after_capture]
+                if len(matches) != 1:
+                    raise ValueError(f'{name} requires one capture {args.stop_after_capture!r}')
+                recorded[name] = recorded[name][:matches[0] + 1]
+            recorded['entity']['stopAfterCapture'] = args.stop_after_capture
+            runner.validate_tape(recorded['tape'])
     print(json.dumps({'schema': 1, 'entity': {'type': args.type, 'variant': entity[1], 'shape': list(shape)}, 'cases': cases}))
 
 

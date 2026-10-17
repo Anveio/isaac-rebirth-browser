@@ -185,6 +185,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `run-admission` | Initial run admission: menu confirmation clock anchor and Player control enable timing | [run-admission.mjs](tools/e2e/run-admission.mjs) `--count 2` |
 | `audio` | SFX admission and Web Audio output | [audio.mjs](tools/e2e/audio.mjs) `--count 2` |
 | `music` | Music channels, fades and queued tracks | [music.mjs](tools/e2e/music.mjs) `--count 2` |
+| `footprint-admission` | Footprint cadence at admission: fixed regression and OS-random admitted miniboss room; exact initial NPC fields | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --room-type --helper-arg 6 --helper-arg --contrived --helper-arg PHCVWE1C:1 --helper-arg --count --helper-arg 1 --helper-arg --attempts --helper-arg 256 --helper-arg --stop-after-capture --helper-arg entry-40 --comparator tools/foundation/footprint-admission-state-pair.mjs --public-clock-schedule --archive-native-evidence --native-frame-timeout 120` |
 | `entities` | Every authored entity, room-shape and boss spec in tools/e2e/entities/: admission, AI, damage, death and room state | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entities-scenarios.py --comparator tools/foundation/entity-state-pair.mjs --native-frame-timeout 120` |
 
 ## Executable coverage
