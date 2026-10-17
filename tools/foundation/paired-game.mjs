@@ -62,11 +62,72 @@ function independentDraws(caseData, directory) {
   return { label: after, gameUpdateCount: frame.state.gameUpdateCount };
 }
 
-async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false) {
+// Opt-in paired clocks use only the declared source-only prelude and the
+// native launcher defaults, then require the actual clock acknowledgements.
+function declarePublicClockPlan(data) {
+  const nativeBootstrapPresentations = 30; // foundation-clock-run.py step30
+  const presentationIntervalNanoseconds = 16_667_000; // launcher's --step-ns default
+  assert.ok(Number.isInteger(data.bootEpochSeed) && data.bootEpochSeed >= 0 && data.bootEpochSeed <= 0xffffffff);
+  const prelude = data.bootstrap?.sourceOnlyPrelude;
+  assert.ok(Array.isArray(prelude) && Array.isArray(data.pairedTape) && Array.isArray(data.tape));
+  assert.deepEqual(data.tape, [...prelude, ...data.pairedTape], 'Full public tape must exactly retain its declared source-only prelude and paired suffix');
+  assert.deepEqual(data.pairedTape[0], {type: 'capture', label: data.bootstrap.boundaryLabel});
+  let total = 0;
+  for (const action of data.tape) {
+    assert.ok(['step', 'key', 'capture'].includes(action.type));
+    if (action.type === 'step') {
+      assert.ok(Number.isSafeInteger(action.frames) && action.frames > 0 && action.frames <= 36000);
+      total += action.frames;
+    }
+  }
+  assert.ok(total <= 36000);
+  const nativeEntryPresentation = nativeBootstrapPresentations + prelude.reduce((sum, action) => sum + (action.type === 'step' ? action.frames : 0), 0);
+  const nativeAcknowledgements = [0, nativeBootstrapPresentations].map(presentedFrame => ({presentedFrame, virtualElapsedNs: presentedFrame * presentationIntervalNanoseconds}));
+  const nativeCaptures = [];
+  let frame = nativeBootstrapPresentations;
+  for (const action of data.tape) {
+    if (action.type === 'step') {
+      frame += action.frames;
+      nativeAcknowledgements.push({presentedFrame: frame, virtualElapsedNs: frame * presentationIntervalNanoseconds});
+    } else if (action.type === 'capture') nativeCaptures.push({label: action.label, presentedFrame: frame, virtualElapsedNs: frame * presentationIntervalNanoseconds});
+  }
+  const browserTickCommands = [];
+  frame = nativeEntryPresentation;
+  for (const action of data.pairedTape) if (action.type === 'step') {
+    for (let index = 0; index < action.frames; index++) {
+      frame++;
+      const timestampMillis = data.bootEpochSeed * 1000 + Math.floor(frame * presentationIntervalNanoseconds / 1e6);
+      assert.ok(Number.isSafeInteger(timestampMillis) && timestampMillis >= 0);
+      browserTickCommands.push({type: 'tick', count: 1, timestampMillis});
+    }
+  }
+  return {schema: 1, scope: 'Independent public clock declaration before either capture; no observed Native clock or counter is an input',
+    bootEpochSeed: data.bootEpochSeed, nativeBootstrapPresentations, presentationIntervalNanoseconds,
+    nativeEntryPresentation, sourceOnlyPrelude: prelude, pairedTape: data.pairedTape,
+    nativeAcknowledgements, nativeCaptures, browserTickCommands};
+}
+
+function validateNativeClockPlan(data, plan, native) {
+  assert.equal(native.status, 'pass');
+  assert.equal(native.provenance?.status, 'pass', 'Existing canonical Native provenance remains required');
+  const manifest = native.manifest;
+  assert.deepEqual(manifest.tape, data.tape);
+  assert.equal(manifest.bootEpochSeed, plan.bootEpochSeed);
+  assert.equal(manifest.bootstrapPresentedFrames, plan.nativeBootstrapPresentations);
+  assert.equal(manifest.clock.stepNs, plan.presentationIntervalNanoseconds);
+  assert.deepEqual(manifest.presentations.map(({presentedFrame, virtualElapsedNs}) => ({presentedFrame, virtualElapsedNs})), plan.nativeAcknowledgements);
+  assert.deepEqual(manifest.frames.map(({label, presentedFrame, virtualElapsedNs}) => ({label, presentedFrame, virtualElapsedNs})), plan.nativeCaptures);
+  return {status: 'pass', acknowledgements: plan.nativeAcknowledgements.length, captures: plan.nativeCaptures.length,
+    scope: 'Actual independent Native acknowledgement/capture times validate the prior public declaration; no readback changes a Browser command'};
+}
+
+async function nativeCapture(caseData, directory, nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTrace, deferEvidence = false, reuseExisting = false, publicClockPlan) {
   mkdirSync(directory, { recursive: true });
   const args = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', join(dirname(directory), 'tape.json'),
     '--state-observer', originalObserver, '--frame-timeout', String(nativeFrameTimeout), '--output', directory];
+  if (publicClockPlan) args.push('--boot-epoch-seed', String(publicClockPlan.bootEpochSeed),
+    '--step-ns', String(publicClockPlan.presentationIntervalNanoseconds));
   if (archiveNativeEvidence) args.push('--archive-evidence');
   if (originalSfxVolume !== undefined) args.push('--sfx-volume', String(originalSfxVolume));
   if (mtDraws) args.push('--mt-trace');
@@ -104,7 +165,7 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
   return { status: error || provenance.status !== 'pass' ? 'fail' : 'pass', error, provenance, directory, manifest, manifestPath, evidence };
 }
 
-async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws) {
+async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan) {
   mkdirSync(directory, { recursive: true });
   const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
   const page = await context.newPage();
@@ -121,13 +182,22 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
       if (mtDraws) window.game.mtDraws.enable();
     }, { ...caseData, mtDraws });
     let presentations = 0;
+    let publicTickIndex = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {
         // Steps transfer no state: serializing a full snapshot per step costs
         // several times the step itself (see tools/e2e/lib/game.mjs).
-        await page.evaluate(count => { window.game.step(count); }, action.frames);
+        if (publicClockPlan) {
+          const commands = publicClockPlan.browserTickCommands.slice(publicTickIndex, publicTickIndex + action.frames);
+          assert.equal(commands.length, action.frames);
+          await page.evaluate(commands => { for (const command of commands) window.game.step(1, command.timestampMillis); }, commands);
+          publicTickIndex += action.frames;
+          expectedCommands.push(...commands);
+        } else {
+          await page.evaluate(count => { window.game.step(count); }, action.frames);
+          expectedCommands.push({ type: 'tick', count: action.frames });
+        }
         presentations += action.frames;
-        expectedCommands.push({ type: 'tick', count: action.frames });
       } else if (action.type === 'key') {
         const code = keyCode(action.key);
         // Derive the requested seed-entry protocol from the public tape. The
@@ -168,6 +238,10 @@ async function browserCapture(browser, server, caseData, directory, archiveBrows
       const evidence = await writeJsonEvidence(join(directory, 'trace.json.gz'), trace);
       save(join(directory, 'trace-archive.json'), evidence);
     } else save(join(directory, 'trace.json'), trace);
+    if (publicClockPlan) {
+      assert.equal(publicTickIndex, publicClockPlan.browserTickCommands.length, 'Every declared public timestamp must be consumed');
+      assert.deepEqual(trace.commands.filter(command => command.type === 'tick'), publicClockPlan.browserTickCommands);
+    }
     assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
     assert.equal(trace.backendStateTruncated, false, 'Every actual backend callback must retain its complete snapshot');
     assert.equal(trace.backendStateTruncationReason, null);
@@ -306,14 +380,15 @@ function comparePair(caseData, native, browser, directory, exactPixels, stateCom
 export async function runPairedGate({ output, selected, randomCount = 2, replaySeeds = [], replayCases = [], exactPixels = false, productionDirectory, reuseOriginalDirectory,
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false,
-  originalSfxVolume, filterCases = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
+  originalSfxVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
   glTrace = process.argv.includes('--gl-trace') }) {
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
+  assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
   mkdirSync(output, { recursive: true });
   let server, browser;
   const report = { schema: 1, status: 'starting', mode: reuseOriginalDirectory ? 'closed independent Original paired with fresh immutable Browser capture' : 'fresh original process paired with immutable browser production artifact',
-    nativeFrameTimeout, originalSfxVolume,
+    nativeFrameTimeout, originalSfxVolume, publicClockSchedule,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
@@ -346,7 +421,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       const directory = join(output, `${String(index).padStart(2, '0')}-${definition.id}`);
       const args = ['--scenario', definition.id, '--output', directory];
       if (definition.seed) args.push('--seed', definition.seed);
-      let caseData, result, native, candidate;
+      let caseData, result, native, candidate, publicClockPlan, publicClockValidation;
       try {
         if (definition.replayCase) {
           caseData = JSON.parse(readFileSync(definition.replayCase, 'utf8'));
@@ -363,12 +438,16 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           report.reusedOriginal = { directory: source, caseSha256: digest(readFileSync(join(directory, 'case.json'))),
             scope: 'Caller-pinned completed independent Original; Browser inputs still come only from the declared case bank' };
         }
+        if (publicClockSchedule) {
+          publicClockPlan = declarePublicClockPlan(caseData);
+          save(join(directory, 'public-clock-plan.json'), publicClockPlan);
+        }
         process.stdout.write(`Paired ${definition.id} seed ${caseData.seed}\n`);
         // Both independent captures are still attempted after a rejection.
         // Original settles before Chromium starts; each Browser closes before
-        // the next Original. Inputs and comparison laws remain unchanged.
+        // the next Original. Both use declared inputs; comparison laws stay unchanged.
         const [nativeResult] = await Promise.allSettled([
-          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory)),
+          nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan),
         ]);
         native = nativeResult.status === 'fulfilled' ? nativeResult.value
           : {status: 'fail', error: String(nativeResult.reason), directory: join(directory, 'original')};
@@ -377,7 +456,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
-            browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws),
+            browserCapture(browser, server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };
@@ -388,13 +467,27 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         candidate = browserResult.status === 'fulfilled' ? browserResult.value
           : {status: 'fail', failures: [String(browserResult.reason)], frames: []};
         if (native.deferredEvidence) native = await native.deferredEvidence();
+        if (publicClockPlan) {
+          try {
+            publicClockValidation = validateNativeClockPlan(caseData, publicClockPlan, native);
+          } catch (error) {
+            native.status = 'fail';
+            native.error = [native.error, String(error.message)].filter(Boolean).join('; ');
+            publicClockValidation = {status: 'fail', error: String(error.message)};
+          }
+          save(join(directory, 'native-public-clock-validation.json'), publicClockValidation);
+        }
         const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator);
         result = { id: definition.id, seed: caseData.seed, seedValue: caseData.seedValue, bootEpochSeed: caseData.bootEpochSeed,
           caseSha256: digest(readFileSync(join(directory, 'case.json'))),
           directory, original: { status: native.status, error: native.error, provenance: native.provenance,
-            manifestPath: native.manifestPath, evidence: native.evidence },
+            manifestPath: native.manifestPath, evidence: native.evidence,
+            ...(publicClockPlan && {publicClockValidation}) },
           browser: { status: candidate.status, failures: candidate.failures }, checks,
-          status: native.status === 'pass' && candidate.status === 'pass' && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
+          ...(publicClockPlan && {publicClockPlan: {path: join(directory, 'public-clock-plan.json'), nativeEntryPresentation: publicClockPlan.nativeEntryPresentation}}),
+          status: native.status === 'pass' && candidate.status === 'pass'
+            && (!publicClockPlan || publicClockValidation?.status === 'pass')
+            && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
         if (mtDraws) {
           try {
             result.mtDraws = compareMtDraws(join(directory, 'original', 'mt-trace'),

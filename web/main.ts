@@ -105,7 +105,8 @@ async function boot() {
     // Automation steps leave drawing to the animation-frame loop (and to
     // capture(), which draws the state it encodes): one software-GL draw per
     // stepped frame dominated live suite time.
-    step: (count = 1) => structuredClone(dispatch({ type: 'tick', count }, false)),
+    step: (count = 1, timestampMillis?: number) => structuredClone(dispatch(timestampMillis === undefined
+      ? { type: 'tick', count } : { type: 'tick', count, timestampMillis }, false)),
     pause: () => { automaticPaused = true; accumulator = 0; },
     resume: () => { automaticPaused = false; accumulator = 0; previous = performance.now(); },
     reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs } = {}) => {

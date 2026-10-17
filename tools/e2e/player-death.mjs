@@ -59,7 +59,8 @@ function compare(source,actual,gameplay){
  return checks;
 }
 const report=await runPairedGate({output:resolve(output,'paired'),selected:[],randomCount:0,replayCases:paths,
- originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,archiveBrowserEvidence:true});
+ productionDirectory:option('--production-directory'),
+ originalObserver:'tools/original/player-death-observe.py',stateComparator:compare,archiveBrowserEvidence:true,publicClockSchedule:true});
 const coverage=scenarios.cases.map((c,n)=>{
  try {
  const native=manifest(resolve(report.cases[n].directory,'original/manifest.json'));
@@ -72,6 +73,6 @@ const coverage=scenarios.cases.map((c,n)=>{
   return {id:c.scenario.id,required:requiredIds.has(c.scenario.id)||c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
  }
 });
-const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,caseFilter:scenarios.caseFilter,coverage,scope:'Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
+const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,caseFilter:scenarios.caseFilter,coverage,scope:'Independently declared public wall-clock inputs on both games. Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
 if(scenarioInput)result.scenarioInput={path:resolve(scenarioFile),sha256:createHash('sha256').update(scenarioInput).digest('hex'),bytes:scenarioInput.length};
 save(resolve(output,'report.json'),result);console.log(JSON.stringify(result));process.exitCode=result.status==='pass'?0:1;
