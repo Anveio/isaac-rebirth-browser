@@ -315,8 +315,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 68 | 51 | 2 |
-| `abi` | the exported C ABI transport the browser bridge drives | 15 | 3 | 0 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 74 | 55 | 2 |
+| `abi` | the exported C ABI transport the browser bridge drives | 21 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -619,7 +619,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: the fire cooldown never rises above a max fire delay the command held | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: Tick advances the tick and system clocks by its count (plus run-start alignment) | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the menu animation clock advances with Tick and restarts on screen changes | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
-| Always | game: a Tick moves between menu screens only by starting a run | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: a Tick moves between menu screens only by starting a run or along the key graph on a held key | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: unpaused gameplay advances the run clock once per tick, except while the nightmare scene plays | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: the nightmare scene between stages holds the run clock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: within a run the floor only deepens, keeps its layout while its stage and seed hold, and full updates never rewind | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -656,6 +656,14 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: combat-shut doors reopen only when the room clears or a secret is revealed | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a boss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a miniboss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: an Options tick changes only the volume on its selected row | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: leaving Options saves the settings it leaves with | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: Options saves and returns to the main menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: bindings and the stored input configuration change only in the keyboard menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: the keyboard menu binds the awaited key to the selected action alone, or resets the defaults | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: a key is bound in the keyboard menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: leaving the keyboard menu saves the complete bindings it leaves with | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Sometimes | game: the keyboard menu stays open on back while an action has no key | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: the player dies | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a death reaches GameOver | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: keys never navigate while GameOver shows | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -711,7 +719,9 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a bomb destroys an ordinary rock | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: every nonzero seed and epoch boots to Title | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot publishes the first Title with its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
-| Always | game: boot is a pure function of its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: boot starts with the stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: a game boots with stored audio and fullscreen settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: boot is a pure function of its seeds and stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: controls lost outside a named hold come back within 600 full updates | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
@@ -737,6 +747,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: an input-configuration reset boots with the stored configuration | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: an input-configuration boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: an input-configuration reset refuses a configuration inputconfigs.dat cannot hold, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a settings reset boots with the stored settings | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a settings boot from the authored resources publishes the plain settings boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a settings reset refuses flags other than zero or one and stored volumes outside the unit interval, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: boot resource buffers are bounded at 512 KiB | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a game booted from the authored resources plays exactly like the plain boot | [abi.rs](engine/dst/src/units/abi.rs) |
