@@ -11,6 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
+import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
@@ -29,7 +30,8 @@ let cases = [
   ...generated.vectors.map((vector, i) => ({ name: `random-${i}`, code: vector.code.replaceAll(' ', ''), bootEpochSeed: randomInt(0x100000000), volume: 1,
     taps: Array.from({ length: 4 }, () => randomInt(2) ? ['Left', 'Right'] : ['Right', 'Left']).flat() })),
 ];
-if (value('--scenarios')) cases = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')).cases;
+let caseFilter;
+if (value('--scenarios')) ({ cases, caseFilter } = JSON.parse(await readFile(resolve(value('--scenarios')), 'utf8')));
 assert.ok(Array.isArray(cases) && cases.length >= 1 && cases.length <= 18);
 assert.equal(new Set(cases.map(c => c.name)).size, cases.length);
 for (const c of cases) {
@@ -38,9 +40,11 @@ for (const c of cases) {
   assert.ok(c.volume === 0 || c.volume === 1);
   assert.ok(Array.isArray(c.taps) && c.taps.length >= 2 && c.taps.length <= 32 && c.taps.every(key => ['Left', 'Right'].includes(key)));
 }
+cases = selectCases(cases, c => c.name);
+caseFilter = flag('--case') ?? caseFilter;
 const catalogue = JSON.parse(await readFile(join(ROOT, 'web/audio-data.json')));
 await assertOriginalBinary();
-await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto boot epochs/menu taps', cases }, null, 2) + '\n');
+await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto boot epochs/menu taps', caseFilter, cases }, null, 2) + '\n');
 await run('cc', ['-std=c11', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared', 'tools/original/audio-trace.c', '-o', join(output, 'audio-trace.so'), '-ldl', '-pthread'], { cwd: ROOT });
 const observerLibrarySha256 = sha(await readFile(join(output, 'audio-trace.so')));
 
@@ -87,7 +91,7 @@ function sampleStarts(calls) {
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
 const report = { schema: 1, status: 'running', originalBinarySha256: ORIGINAL_SHA, observerLibrarySha256, production: production.build,
-  graphics: await inspectBrowserGraphics(browser), scope: 'All 169 configured SFX and 303 sample wrappers; actual forward menu/character sound admissions and native OpenAL/browser Web Audio PCM starts. Complete shared MT is gated at Title/profile; later Main initialization and run random routing remain explicit diagnostics. Stable character sound admissions must each consume exactly one shared draw. Music/gameplay SFX callers are separate work.', cases: [] };
+  graphics: await inspectBrowserGraphics(browser), scope: 'All 169 configured SFX and 303 sample wrappers; actual forward menu/character sound admissions and native OpenAL/browser Web Audio PCM starts. Complete shared MT is gated at Title/profile; later Main initialization and run random routing remain explicit diagnostics. Stable character sound admissions must each consume exactly one shared draw. Music/gameplay SFX callers are separate work.', caseFilter, cases: [] };
 try {
   for (const scenario of cases) {
     const directory = join(output, scenario.name); await mkdir(directory, { recursive: true });

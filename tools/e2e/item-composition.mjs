@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, open, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { ROOT, flag, hasFlag, outputDirectory } from './lib/cli.mjs';
+import { ROOT, flag, hasFlag, outputDirectory, selectCases } from './lib/cli.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
@@ -105,7 +105,7 @@ try {
   assert.equal(bank.schema, 1);
   assert.ok(Array.isArray(bank.cases) && bank.cases.length > 0);
   assert.equal(new Set(bank.cases.map(item => item.name)).size, bank.cases.length);
-  const cases = bank.cases.map(declaration => {
+  let cases = bank.cases.map(declaration => {
     assert.match(declaration.name, /^[A-Za-z0-9_-]{1,80}$/);
     const fixture = { ...declaration.fixture };
     for (const key of ['authoredResourcePath', 'specialRoomsPath']) {
@@ -141,8 +141,10 @@ try {
     sourceFiles.push('tools/foundation/composition-controlled-knife-satellites.py');
     report.sourceBefore = await sourcePins();
   }
+  cases = selectCases(cases, item => item.name);
+  report.caseFilter = flag('--case') ?? bank.caseFilter;
   const scenarios = join(output, 'scenarios.json');
-  await save(scenarios, { ...bank, cases });
+  await save(scenarios, { ...bank, caseFilter: report.caseFilter, cases });
   report.recordedBank = { path: bankPath, sha256: hash(bankBytes), replayPath: scenarios };
   resources = [...new Set(cases.flatMap(item => [item.fixture.authoredResourcePath, item.fixture.specialRoomsPath].filter(Boolean)))];
   report.resourcePinsBefore = await filePins(resources);

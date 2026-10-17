@@ -21,7 +21,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../../foundation/browser.mjs';
 import { startProductionServer } from '../../foundation/production-server.mjs';
 import { assertInputProvenance, enterSeededRun, manualSeedCommands, waitForReady } from '../../foundation/verify.mjs';
-import { ROOT, flag, outputDirectory, writeJson } from './cli.mjs';
+import { ROOT, flag, outputDirectory, selectCases, writeJson } from './cli.mjs';
 import { stepSnapshot } from './game.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../../foundation/composition-wasm-public.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './original.mjs';
@@ -32,7 +32,9 @@ const python = async (script, args) => (await run('python3', [script, ...args], 
 function validateScenarios(scenarios, [min, max]) {
   assert.equal(scenarios.schema, 1);
   assert.equal(scenarios.bootEpochSeed, 1700000000);
-  assert.ok(scenarios.cases.length >= min && scenarios.cases.length <= max, `Expected ${min}..${max} cases`);
+  // A bank recorded under --case holds only the cases that ran; its full bank
+  // met the count when it was recorded.
+  if (!scenarios.caseFilter) assert.ok(scenarios.cases.length >= min && scenarios.cases.length <= max, `Expected ${min}..${max} cases`);
   assert.equal(new Set(scenarios.cases.map(item => item.name)).size, scenarios.cases.length);
   for (const item of scenarios.cases) {
     assert.match(item.name, /^[a-zA-Z0-9_-]{1,32}$/);
@@ -303,9 +305,10 @@ export async function runRoomFrameSuite(suite) {
   const recorded = flag('--scenarios');
   const scenarios = JSON.parse(recorded ? await readFile(recorded, 'utf8') : await python(suite.helper, ['--count', flag('--count', '2')]));
   validateScenarios(scenarios, suite.cases);
+  scenarios.cases = selectCases(scenarios.cases, item => item.name);
   const selected = flag('--case');
-  assert.ok(!reusedOriginal || selected, 'One retained Original requires one explicit --case');
-  if (selected) assert.ok(scenarios.cases.some(item => item.name === selected), `Unknown recorded case ${selected}`);
+  if (selected) scenarios.caseFilter = selected;
+  assert.ok(!reusedOriginal || (selected && scenarios.cases.length === 1), 'One retained Original requires --case selecting exactly one case');
   await assertOriginalBinary();
   await writeJson(join(output, 'scenarios.json'), scenarios);
 
@@ -322,7 +325,7 @@ export async function runRoomFrameSuite(suite) {
     ...(qualifiedSha ? {qualifiedBuildIdentity:{sha256:qualifiedSha,files:Number(qualifiedFiles)}} : {}),
   });
   const report = { schema: 2, suite: suite.name, status: 'running', originalBinarySha256: ORIGINAL_SHA, production: server?.build ?? null,
-    graphics: null, scope: suite.scope, selectedCase: selected, cases: [] };
+    graphics: null, scope: suite.scope, caseFilter: scenarios.caseFilter, cases: [] };
   report.captureBackend = wasmNode ? 'wasm-node' : 'browser';
   if (wasmNode) {
     report.wasmArtifact = { path: resolve(wasmNode), sha256: createHash('sha256').update(await readFile(resolve(wasmNode))).digest('hex') };
@@ -337,7 +340,6 @@ export async function runRoomFrameSuite(suite) {
     if (qualifiedSha && !wasmNode) assert.deepEqual({sha256:server.build.sha256,files:server.build.files},
       {sha256:qualifiedSha,files:Number(qualifiedFiles)}, 'Actual immutable production identity matches declaration');
     for (const item of scenarios.cases) {
-      if (selected && item.name !== selected) continue;
       const directory = join(output, item.name);
       await mkdir(directory, { recursive: true });
       const caseResult = { ...item, status: 'running', failures: [] };

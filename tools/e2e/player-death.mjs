@@ -6,6 +6,7 @@ import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate,scopedState} from '../foundation/paired-game.mjs';
+import {flag,selectCases} from './lib/cli.mjs';
 const option=(name,fallback)=>{const i=process.argv.indexOf(name);return i<0?fallback:process.argv[i+1];};
 const output=resolve(option('--output',`.cache/e2e/player-death/${Date.now()}-${process.pid}`));mkdirSync(output,{recursive:true});
 const save=(p,d)=>writeFileSync(p,JSON.stringify(d,null,2)+'\n');
@@ -13,15 +14,19 @@ const manifest=p=>JSON.parse((existsSync(p)?readFileSync(p):gunzipSync(readFileS
 const scenarioFile=option('--scenario-file',undefined);
 const scenarioInput=scenarioFile?readFileSync(resolve(scenarioFile)):undefined;
 const scenarios=JSON.parse(scenarioInput||execFileSync('python3',['tools/original/player-death-scenarios.py','--count',option('--count','2')],{encoding:'utf8',maxBuffer:8*1024*1024}));
-assert.ok(Array.isArray(scenarios.cases)&&scenarios.cases.length>=4,'Death gate requires both contrived routes and at least two recorded random cases');
+// A bank recorded under --case holds only the cases that ran; each one it holds
+// still meets its mandatory-death and OS-row checks.
+const whole=!scenarios.caseFilter;
+assert.ok(Array.isArray(scenarios.cases)&&(!whole||scenarios.cases.length>=4),'Death gate requires both contrived routes and at least two recorded random cases');
 const requiredIds=new Set(['death-spikes-restart','death-spikes-exit']);
 const ids=scenarios.cases.map(c=>c.scenario?.id);
 assert.ok(ids.every(id=>typeof id==='string')&&new Set(ids).size===ids.length,'Every declared death case requires a unique ID');
-for(const id of requiredIds)assert.ok(scenarios.cases.some(c=>c.scenario.id===id&&c.deathRequired===true),'Both mandatory public popup actions require actual death regardless of supplied bank metadata');
+for(const id of requiredIds){const found=scenarios.cases.find(c=>c.scenario.id===id);assert.ok(found?found.deathRequired===true:!whole,'Both mandatory public popup actions require actual death regardless of supplied bank metadata');}
 const randomCases=scenarios.cases.filter(c=>/^death-unfiltered-\d+$/.test(c.scenario.id));
-assert.ok(randomCases.length>=2&&randomCases.every(c=>
+assert.ok((!whole||randomCases.length>=2)&&randomCases.every(c=>
  c.entropy?.source==='OS secrets; unfiltered nonzero32-bit public seed'&&
  c.entropy.draw?.seedValue===c.seedValue),'At least two complete recorded unfiltered OS rows must remain in the bank');
+scenarios.cases=selectCases(scenarios.cases,c=>c.scenario.id);if(flag('--case'))scenarios.caseFilter=flag('--case');
 save(resolve(output,'scenarios.json'),scenarios);
 const paths=scenarios.cases.map((c,n)=>{const p=resolve(output,`replay-${n}.json`);save(p,c);return p;});
 function compare(source,actual,gameplay){
@@ -67,6 +72,6 @@ const coverage=scenarios.cases.map((c,n)=>{
   return {id:c.scenario.id,required:requiredIds.has(c.scenario.id)||c.deathRequired,executedInBoth:false,status:'fail',error:String(error)};
  }
 });
-const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,coverage,scope:'Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
+const result={schema:1,status:report.status==='pass'&&coverage.every(c=>c.status==='pass')?'pass':'fail',pairedStatus:report.status,caseFilter:scenarios.caseFilter,coverage,scope:'Normal Isaac death/57-frame authored clip, GameOver freeze and public deferred popup actions. Contrived death coverage and all source/player/menu/audio fields are blocking; full pixels remain diagnostics. Every unfiltered OS outcome and original/backend/input evidence retained; complete revival/diary/other-character acceptance pending.'};
 if(scenarioInput)result.scenarioInput={path:resolve(scenarioFile),sha256:createHash('sha256').update(scenarioInput).digest('hex'),bytes:scenarioInput.length};
 save(resolve(output,'report.json'),result);console.log(JSON.stringify(result));process.exitCode=result.status==='pass'?0:1;

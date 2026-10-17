@@ -6,6 +6,7 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gunzipSync} from 'node:zlib';
 import {runPairedGate, scopedState} from '../foundation/paired-game.mjs';
+import {flag, selectCases} from './lib/cli.mjs';
 
 const option = (name, fallback) => {
   const at = process.argv.indexOf(name);
@@ -18,6 +19,8 @@ mkdirSync(output, {recursive: true});
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
 const scenarios = JSON.parse(execFileSync('python3', ['tools/original/dip-scenarios.py', '--count', option('--count', '2')],
   {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
+scenarios.cases = selectCases(scenarios.cases, scenario => scenario.scenario.id);
+if (flag('--case')) scenarios.caseFilter = flag('--case');
 save(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((value, n) => {
   const path = resolve(output, `case-${n}.json`); save(path, value); return path;
@@ -192,7 +195,7 @@ const execution = scenarios.cases.map((scenario, n) => {
       ['admission', 'full', 'fast', 'poof', 'idle', 'move', 'death', 'retirement', 'explosion43'].every(key => side[key]))) ? 'pass' : 'fail'};
 });
 const report = {schema: 1, status: paired.status === 'pass' && execution.every(row => row.status === 'pass') ? 'pass' : 'fail',
-  pairedStatus: paired.status, declaredCaseCount: scenarios.cases.length, randomVectors: scenarios.randomVectors, execution,
+  pairedStatus: paired.status, caseFilter: scenarios.caseFilter, declaredCaseCount: scenarios.cases.length, randomVectors: scenarios.randomVectors, execution,
   scope: 'Both games execute the same public tapes. All actor/HP/AI/geometry/queue/Poop58/43 comparisons remain required; contrived43 execution is mandatory and random seeds are unfiltered. Source-backed death effects require fresh game acceptance; inherited modifiers/colors remain incomplete, with all actual failures retained.'};
 save(resolve(output, 'report.json'), report);
 console.log(JSON.stringify(report));
