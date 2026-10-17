@@ -321,6 +321,11 @@ pub(crate) fn advance_transition(
     };
     // Reentry owns a new Room.Init timestamp, independent of saved geometry.
     state.room.initialization_game_update = Some(state.game_update_count);
+    // Room.Init rebuilds each saved grid object: TrapDoor InitSubclass570fd0
+    // writes state0 and plays Closed again, however open it was when left.
+    if let Some(trapdoor) = &mut state.room.trapdoor {
+        trapdoor.reinitialize();
+    }
     state.room.source_tear_slowdown_2494 = Some(0);
     state.room.loaded = false;
     state.room.initialize_path_costs();

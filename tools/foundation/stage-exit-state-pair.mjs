@@ -59,6 +59,10 @@ for (const label of labels) {
   // entry frame (and so the StageTransition counter) follows from it.
   diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
     [state.player.x, state.player.y]);
+  // Each fight also leaves its own health, which Basement II's generation
+  // reads (a Challenge room needs full health).
+  diagnostic(label, 'player.health', [player.redHp, player.maxRedHp, player.soulHp],
+    [state.player.hp, state.player.maxHp, state.player.soulHp]);
   const clip = PLAYER_CLIPS.includes(player.animation) ? player.animation : null;
   const actualClip = PLAYER_CLIPS.includes(state.playerAnimation.current) ? state.playerAnimation.current : null;
   check(label, 'player.clip', clip, actualClip);
