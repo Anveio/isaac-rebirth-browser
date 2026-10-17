@@ -136,6 +136,7 @@ pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
 pub mod run_quit;
+pub mod save_host;
 pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
