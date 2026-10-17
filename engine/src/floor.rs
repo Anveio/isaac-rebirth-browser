@@ -49,6 +49,9 @@ pub struct Descriptor {
     pub decoration_seed: u32,
     pub spawn_seed: u32,
     pub following_seed: u32,
+    /// Descriptor+D0/E8/EC Shop stock; legacy history remains unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop: Option<crate::shop::Stock>,
     /// Keys of the actual descriptor+88 persistent-spawn map. Level reset
     /// 5882f0..588314 owns an empty map; legacy restores have no owner.
     /// This key view does not certify saved actor payloads or re-Init.
@@ -446,6 +449,7 @@ fn record(
         decoration_seed,
         spawn_seed,
         following_seed,
+        shop: Some(crate::shop::Stock::fresh()),
         persistent_spawn_cells: Some(PersistentSpawnCells {
             present: Vec::new(),
             unknown: Vec::new(),

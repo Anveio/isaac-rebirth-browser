@@ -85,7 +85,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
 | [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill, held Save and Range Down/Up use | 0 |
-| [Special rooms and economy](#special-rooms-and-economy) | Partial | Treasure, secret, curse rooms; shop room without sales | 0 |
+| [Special rooms and economy](#special-rooms-and-economy) | Partial | Normal Shop stock/prices and scoped paid Bomb witness; other economy frontiers remain | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
@@ -388,11 +388,19 @@ sacrifice rooms, arcades (slots, fortune teller, blood bank, beggars),
 libraries, challenge rooms, Isaac's bedroom, Boss Rush.
 
 Port: treasure, secret, super secret, curse, library and sacrifice rooms
-enter; shop room and Shopkeeper enter but nothing is for sale. Missing:
-prices and purchases, devil/angel chance and rooms, slots and beggars,
-challenge rooms.
+enter. [Normal Shop economy](shop-economy.md) has descriptor-owned stock,
+real common SKU bodies, prices, paid grant/debit/copy and live reentry. The
+frozen lifecycle artifact qualifies one actual funded Bomb purchase: fresh
+v9 passes 117/117 source guards and 390/390 owned fields. The corrected
+canonical view retains eight failures; 52/59 RGBA diagnostics fail. Earlier
+v8 missing-overlap evidence stays red. Other SKU successes have source and
+Own preparation, not shared Native validation.
 
-Next: shop purchases; devil/angel chance after the boss.
+Next: qualify Battery refusal/grant and other paid SKU callbacks; implement
+canonical Store Credit/Steam Sale and eligible achievements. Upgraded
+shops, unadmitted ABD contexts, charge/effect48, Continue, living Full grid,
+complete audio/pixels, devil/angel chance and rooms, slots, beggars and
+challenge rooms remain separate.
 
 No open bugs.
 

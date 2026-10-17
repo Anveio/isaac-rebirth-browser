@@ -321,6 +321,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         animation_frame: 0.0,
         animation_playing: true,
         pocket: None,
+        regular: None,
     });
     owner.unevaluated_cache_flags |= config.cache_flags;
     owner.active_flag_3076 = true;
