@@ -159,7 +159,8 @@ floor stage played (`stage:<n>`), a run started after a descent (`new run
 after a descent`, and `new run from the menus after a descent` when it went
 through the menus), a run started from Random (`Random run`) and its
 GameOver popup's Exit to the menus (`menus after a Random run's GameOver`),
-and each property met (`property:<message>`). The summary
+a fire cooldown left above a newly lowered fire delay (`fire cooldown above
+the max fire delay`), and each property met (`property:<message>`). The summary
 line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. Unsimulated kinds are split

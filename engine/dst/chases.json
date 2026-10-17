@@ -116,5 +116,16 @@
         "npc:23"
       ]
     ]
+  },
+  {
+    "out": "regression-number-one-cooldown.json",
+    "stages": [
+      [
+        "screen:Playing"
+      ],
+      [
+        "fire cooldown above the max fire delay"
+      ]
+    ]
   }
 ]
