@@ -11,7 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { waitForReady } from '../foundation/verify.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, step } from './lib/game.mjs';
+import { snapshot, step, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -182,7 +182,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       assert.equal(final.runSeedValue, native.seedValue);
       assert.equal(final.seedText, scenario.code.toUpperCase()); assert.equal(final.runSeed, scenario.code.toUpperCase());
       assert.equal(final.seedValid, true); assert.equal(final.seededRun, true);
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       await writeFile(join(directory, 'trace.json'), JSON.stringify(trace) + '\n');
       assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
       assert.equal(trace.initialSeed, initialSeed); assert.equal(trace.bootEpochSeed, scenario.bootEpochSeed);
@@ -196,7 +196,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
         assert.equal(queued.pendingMenuInitializations.at(-1)?.initialization.seed, native.seedValue);
         await step(page, 1);
         compareMenu(await snapshot(page), 'character-seeded');
-        const queuedTrace = await page.evaluate(() => window.game.trace());
+        const queuedTrace = await readTrace(page);
         const queuedCommands = [];
         for (const code of ['Enter', 'Enter', 'Enter', 'Tab']) queuedCommands.push({ type: 'key', code, down: true }, { type: 'key', code, down: false });
         for (const character of scenario.code) queuedCommands.push({ type: 'text', text: character.toUpperCase() });
@@ -219,7 +219,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       await writeFile(join(directory, 'expected-commands.json'), JSON.stringify(expectedCommands, null, 2) + '\n');
       await writeFile(join(directory, 'browser-menu-states.json'), JSON.stringify({ schema: 1, checkpoints: menuStates }, null, 2) + '\n');
       if (page) {
-        await page.evaluate(() => window.game.trace()).then(trace => writeFile(join(directory, 'last-trace.json'), JSON.stringify(trace) + '\n')).catch(error => { result.status = 'fail'; result.traceCaptureError = String(error); });
+        await readTrace(page).then(trace => writeFile(join(directory, 'last-trace.json'), JSON.stringify(trace) + '\n')).catch(error => { result.status = 'fail'; result.traceCaptureError = String(error); });
       }
       if (page) await page.close().catch(error => { result.status = 'fail'; result.cleanupError = String(error); });
     }

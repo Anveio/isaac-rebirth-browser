@@ -8,6 +8,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from "./browser.mjs";
 import { startProductionServer } from "./production-server.mjs";
 import { flag, selectCases } from "../e2e/lib/cli.mjs";
 import { assertSeededRun, browserScenario } from "./verify.mjs";
+import { readTrace } from '../e2e/lib/game.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const fields = ["gridIndex", "roomInitSeed", "decorationSeed", "spawnSeed", "followingSeed", "doorMask"];
@@ -43,7 +44,7 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
         let starting;
         const run = await browserScenario(page, { initialSeed: original.runSeed, bootEpochSeed: original.bootEpochSeed, manualSeedText: original.seed,
           onCheckpoint: async (frame) => { if (frame.label === "gameplay-start") starting = frame.state; } });
-        const trace = await page.evaluate(() => window.game.trace());
+        const trace = await readTrace(page);
         const caseDirectory = join(dirname(output), original.seed.replaceAll(" ", ""));
         mkdirSync(caseDirectory, { recursive: true });
         writeFileSync(join(caseDirectory, "browser-input.json"), JSON.stringify({ schema: 1, trace,

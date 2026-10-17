@@ -11,7 +11,7 @@ import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/brow
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { snapshot, stepSnapshot, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 import { createPublicWasmRuntime, createPublicWasmJournal } from '../foundation/composition-wasm-public.mjs';
 
@@ -217,7 +217,7 @@ try {
       assert.equal(states[firstCollection - 1].systemClock.systemCounter % 2, 1, 'Source pickup contact is full-only');
       let trace;
       if (runtime) assert.deepEqual(commands, expected, 'Every actual public ABI command equals the declared tape');
-      else { trace = await page.evaluate(() => window.game.trace()); assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed); }
+      else { trace = await readTrace(page); assertInputProvenance(trace, expected, item.seedValue, scenarios.bootEpochSeed); }
       const finalState = runtime ? await actualNodeSnapshot() : await snapshot(page);
       assertSeededRun(finalState, item.code, item.seedValue);
       assert.deepEqual(errors, []);
@@ -240,7 +240,7 @@ try {
         assert.deepEqual(after, sourceDigests, 'Actual protected Native/tool/WASM inputs remain unchanged');
       } else {
         // Evidence capture must not replace the case's real error with its own.
-        const trace = await page.evaluate(() => window.game.trace()).catch(error => ({ unavailable: String(error) }));
+        const trace = await readTrace(page).catch(error => ({ unavailable: String(error) }));
         await writeFile(join(directory, 'browser-states.json'), JSON.stringify({ schema: 1, states, trace }, null, 2) + '\n');
         await page.close();
       }

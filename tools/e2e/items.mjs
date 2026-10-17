@@ -13,7 +13,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
-import { snapshot, stepSnapshot } from './lib/game.mjs';
+import { snapshot, stepSnapshot, readTrace } from './lib/game.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -476,7 +476,7 @@ try {
       }
       // Preserve the completed independent browser capture before a required
       // coverage or provenance assertion can fail.
-      const trace = await page.evaluate(() => window.game.trace());
+      const trace = await readTrace(page);
       await archiveBrowser(trace, 'complete');
       Object.assign(result, {checks, comparedPresentations: presentations + 1,
         passedPresentations, admittedPedestals: admitted, selectedItemIds: [...selectedItemIds],
@@ -539,7 +539,7 @@ try {
     finally {
       if (page && !result.browserEvidence) {
         let trace = null, traceError;
-        try { trace = await page.evaluate(() => window.game.trace()); }
+        try { trace = await readTrace(page); }
         catch (error) { traceError = String(error); }
         try { await archiveBrowser(trace, 'partial', traceError); }
         catch (error) { result.status = 'fail'; result.browserArchiveError = String(error); }
