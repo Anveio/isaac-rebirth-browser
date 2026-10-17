@@ -1,5 +1,38 @@
 # Initial run admission clocks
 
+## Fresh Character seed-effect owner
+
+Fresh Character NewRun now forwards the actual committed menu code to the
+existing seed-effect lookup before startup RNG initialization. The compact
+menu code must match its numeric run seed; only the source separator is added.
+Character confirmation forwards this owner through 594620/54EB20 to 5E1470,
+which writes Seeds+48 (Game+A1D8). This field is independent of ChallengeID.
+Fresh generated menu codes use the same owner. The lookup consumes no RNG;
+Restart, imported legacy state and special-seed behavior retain their separate
+frontiers. An unknown owner is never replaced with an inferred zero.
+
+Frozen `cc38` (1,407 files) passes a fresh build and an actual Chromium/Mesa
+replay of the retained Original free-no-active SKU case. All 1,749 existing
+functional comparisons preserve their values and results, and all 29 direct
+Native Game+A1D8 / Browser `runSeeds.sourceEffectMode` comparisons pass. The
+registered unchanged-main `9841` control passes the same 1,749 functional
+checks; its missing seed-effect owner remains a required comparison failure.
+The canonical SKU comparer adds the owner check separately so its failure
+cannot suppress existing comparisons. Closed-journal regrading executes 1,778
+checks on each artifact: 9841 retains 29 missing-owner failures, while cc38
+passes all 1,778. Every existing row, actual value, expectation and result is
+identical; only the 29 new owner rows improve. Complete Native/Browser transport and
+archive validation remain required; no new Original capture was made.
+
+Replay the kept public input with `npm run test:e2e -- common-sku --scenarios
+references/isaac/cases/common-sku/source-fixtures-v1.json --case
+battery90-free-no-active`. This scoped owner witness does not qualify ordinary
+room-clear placement, untyped-entry live behavior, the other SKU branches,
+special seed effects, complete shared MT, pixels or PCM. Historical SKU health
+and pickup-guard failures remain unchanged.
+
+## Run initialization and clocks
+
 The actual menu confirmation calls `59b110 -> 593470` before fresh Game
 initialization. After selecting the load image, `593470` writes its own
 `gettimeofday` milliseconds to System+2f2b8. The runtime stores that anchor

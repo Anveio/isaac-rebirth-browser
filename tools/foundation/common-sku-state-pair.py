@@ -229,6 +229,14 @@ for label in labels:
     before_holder=[]
     required(label,'complete typed actual owners',compare_row)
     if before_holder:before=before_holder[0]
+    def seed_effect_owner():
+        source=o['commonSkuItemOwners']
+        assert source['status']=='pass' and boolean(source['gamePresent'])
+        check(label,'source seed-effect mode owner',integer(s['runSeeds']['sourceEffectMode']),
+              integer(source['rawGameA1D8']))
+    #Keep the independent owner obligation separate: a missing mode must not
+    #prevent the existing gameplay comparisons from executing.
+    required(label,'source seed-effect mode owner',seed_effect_owner)
 
 def source_witness():
     assert before is not None and target_seed is not None and contact

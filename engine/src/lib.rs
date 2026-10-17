@@ -1601,10 +1601,14 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
-        //Fresh59D080 constructs an empty Challenge code, then uses
-        //5E1170's9B formatter before forwarding the actual setter.
-        //Restart, typed and legacy paths have separate input owners.
-        if self.state.screen == Screen::Challenge && challenge.is_some() {
+        if self.state.screen == Screen::Character {
+            //59EE70 commits the actual typed code;59F617 forwards this same
+            //menu string through594620/54EB20 to the5E1470 seed setter.
+            //Fresh generated codes use that menu owner after5E1170 as well.
+            run_seeds.admit_menu_seed_effect(&self.state.boot_lifecycle.menu_seed_text)?;
+        } else if self.state.screen == Screen::Challenge && challenge.is_some() {
+            //Fresh59D080 uses5E1170's9B formatter for its actual setter.
+            //Restart and legacy paths retain their separate input owners.
             run_seeds.admit_formatted_seed_effect()?;
         }
         self.state.item_pools = Some(items::ItemPools::new(
