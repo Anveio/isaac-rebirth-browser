@@ -931,9 +931,10 @@ impl Room {
             &authored,
             descriptor.spawn_seed,
         )?);
-        room.appearance.tutorial = descriptor.asset_stage == 0
-            && descriptor.template.room_type == 1
-            && descriptor.template.variant == 2;
+        // Room.Init 4288b5..4293b3 loads backdrop/controls.png only on stage 1
+        // (Game+0) in the starting room (Game+8188 == Game+8148); later
+        // floors' starting rooms share the template but draw a plain floor.
+        room.appearance.tutorial = floor.stage == 1 && index == floor.starting_descriptor;
         room.appearance.template = format!(
             "{}.{}({})",
             descriptor.template.room_type, descriptor.template.variant, descriptor.template.name
