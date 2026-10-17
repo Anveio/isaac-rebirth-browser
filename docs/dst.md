@@ -142,6 +142,9 @@ boss room entry:
 - Larry Jr. lost half its segments in 46 of 64, and the deaths spawn kind 21.
 - Gemini's main body died in 2 of 128, which retires its cord.
 - Dingle still wins every fight it starts (128 of 128).
+- The Gurglings (237.1), met in a boss room by `coverage-1f62ae0612d613b8`,
+  survived all 256 branches on ff24cc6, though 6 to 10 of each 64 brought the
+  boss below half health.
 
 On c8931a8, with Gapers admitted, Monstro died in 1 of 64 branches. On
 4543c59, with poop, TNT and webs admitted, Duke of Flies' room was cleared in
