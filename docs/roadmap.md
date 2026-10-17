@@ -127,8 +127,7 @@ Map Opacity, Filter, Gamma and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Next: promote durable Controls acceptance tools; complete Controls
-reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
+Next: complete Controls reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
 See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 
 | Bug | Sev | Symptom | Source |
@@ -148,6 +147,19 @@ unfiltered OS case (784 fields), runtime 2/2 and both default bomb phases with
 370 rows unchanged against its parent. Fresh main173 artifact 4ca independently
 passes runtime 2/2 and the fixed W→I plus recorded OS replays: 1,568 fields
 unchanged from d10. Other d10 results retain their artifact scope.
+The registered Controls gate on main0ad artifact `2a706930` passes all four fixed
+routes plus unfiltered OS `M3MJ EY2Z`/epoch `670687023`: 3,688/3,688 fields,
+302 trusted physical edges and zero Browser errors. All 83 fixed Browser PNG
+bytes and 2,904 ordered field values match historical witnesses. Fresh shared
+Options fixed/JWMM regression passes 866/866; raw Native identities/sequence
+labels differ, with zero verdict changes and 32 identical Browser PNG bytes.
+Controls RGBA 45/60 pass/fail, Options 16/16 and all history-cap failures remain.
+Current capture-tool integration on producer `404a5617` replays the same seven
+recorded cases with fresh Native processes: 4,554/4,554 fields pass, all 137
+Browser PNG files match main0ad, and Options verdicts remain unchanged despite
+50 raw pointer/sequence differences. The outer raw-index guard fails; its
+independent diagnostic verifies unchanged staged entries, Source and inputs.
+Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, reload acceptance and remaining remapped action
 callbacks, including drop/map/restart. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).

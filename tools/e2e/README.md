@@ -101,6 +101,9 @@ survive the unchanged 32 MiB history cap. Pixel
 comparisons and the full-history cap retain their actual diagnostic results;
 there is no full audible mix, complete MT, other-row or reload acceptance.
 
+The registered Options suite keeps full Native rendering and window queries,
+as the music suite does, to preserve the real-clock music upload schedule.
+
 `--reuse-original PATH/TO/CASE/original` requires one selected exact case and
 the matching archived observer identity, library, clock, public preferences
 and prior validated Native status. Legacy captures without this identity are
@@ -133,6 +136,41 @@ adds passing mandatory draw-order observations without changing an earlier row.
 The mixed suite remains red. This
 is short admission coverage, without fight/death/clear acceptance. See
 [the artifact-bound results](../../docs/player-footprints.md).
+
+The keyboard Controls gate keeps four fixed routes plus one unfiltered OS run
+seed/boot epoch by default. It records every public input before either game;
+a failure never selects a replacement draw. Executing producer/observer Source is
+archived before generation or replay, its dynamic identity is retained, and
+unchanged Source is required at completion. Empty replay paths fail before any
+generation; this registered producer requires fresh Native evidence.
+Replaying the retained public bank:
+
+```sh
+npm run test:e2e -- controls --scenarios references/isaac/cases/controls/recorded-four-fixed-and-9xzmzpr0-v1.json
+npm run test:e2e -- controls --scenarios references/isaac/cases/controls/recorded-os-m3mjey2z-v1.json
+```
+
+The required owners are actual menu9/10, all24x2 keyboard bindings, physical
+held/edge state, Back save and independent native-file/origin-storage readback.
+Movement/coasting is mandatory on W→I, both-column and Defaults routes; Escape
+binding owns only its declared menu and final normal seeded-run suffix. The
+duplicate refusal requires actual SFX187 slot/cooldown and measured Menu clock
+origins; it does not rewrite the original three failed clock rows. Every pixel
+mismatch and history-cap failure remains visible. Reload, alternate physical
+confirm/raw-priority interactions, controller/hotplug, disabled-interpolation/
+Skipped behavior and complete pixels/PCM remain separate coverage.
+
+The first registered run on main0ad-based artifact `2a706930` passes all five
+cases: 3,688/3,688 fields and 109 checkpoints. The recorded OS input is
+`M3MJ EY2Z`/boot epoch `670687023`, retained as the one-case filtered replay above; the complete five-case generated
+bank remains in private evidence and the prior 9XZM bank stays unchanged. All 302 actual physical edges are complete and
+trusted, with no Browser errors. The four fixed routes preserve every ordered
+field, expectation, actual and verdict, and all 83 Browser PNG bytes, against
+their historical witnesses. Movement aggregate checkpoint names differ on two
+routes. Strict RGBA remains 45 pass/60 fail and all five history caps fail.
+Fresh fixed/JWMM Options regression passes 866/866 and preserves 32 Browser PNG
+bytes; 64 raw Native pointer/sequence rows differ with zero verdict changes.
+Both Options history caps and 16/32 pixel failures remain.
 
 ### Only what your change touches
 
