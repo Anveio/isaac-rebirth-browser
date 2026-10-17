@@ -75,7 +75,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
 | [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 3 |
-| [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 4 |
+| [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 4 |
@@ -112,7 +112,7 @@ Next: options menu; death screen parity; intro cutscene.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #438 | P2 | Run-admission comparison retains clock/fade/age differences; equal-clock replay is pending | e2e run-admission, player-death |
+| #438 | P2 | PR609 passes run-admission equal-clock checks; the separate player-death clock producer remains unresolved | e2e run-admission, player-death |
 
 ## Input
 
@@ -218,7 +218,6 @@ Next: transformations once their items exist.
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
-| #493 | P2 | Lethal spike motion differs from the original; the source cause and live correction remain unresolved | e2e player-death |
 
 ## Weapons and tears
 
@@ -464,6 +463,8 @@ Bugs in a test route or tool rather than in the game.
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
 
 ## Recently fixed
+
+- #612 restores dead Player Base carried motion and ground response (#493): the scoped four-case replay fixes517 Y differences, with all unrelated clock/Exit failures preserved.
 
 - #527 completes Flags32 for items 48/222; the three recorded regular-fire regression cases return to zero failures (#372 closed).
 - Shared-MT light-pass, ambience-loop and pickup DropSound source consumers have landed (#194, #256, #416 closed); other first-divergence routes remain open.
