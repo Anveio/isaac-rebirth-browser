@@ -73,6 +73,9 @@ pub struct RunContext {
     pub room_display_flags: Vec<u32>,
     pub revealed_secret_connections: BTreeSet<[usize; 2]>,
     pub persisted_rooms: BTreeMap<usize, crate::Room>,
+    ///Actual Room.Save actor records; missing legacy ownership stays unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ambient_records: Option<Vec<crate::critters::SavedAmbientRecord>>,
 }
 
 ///Actual Level818C/8198/819C stores at a supported admission boundary.
@@ -100,7 +103,10 @@ impl RoomEntry {
 }
 
 impl RunContext {
-    pub fn capture(state: &State) -> Self {
+    pub fn capture(
+        state: &State,
+        ambient_records: Option<Vec<crate::critters::SavedAmbientRecord>>,
+    ) -> Self {
         Self {
             character: state.character.clone(),
             difficulty: state.difficulty.clone(),
@@ -120,6 +126,7 @@ impl RunContext {
             room_display_flags: state.room_display_flags.clone(),
             revealed_secret_connections: state.revealed_secret_connections.clone(),
             persisted_rooms: state.persisted_rooms.clone(),
+            ambient_records,
         }
     }
 }
@@ -229,6 +236,9 @@ impl RunRecord {
             || self.summary.game_update_count != run.game_update_count
         {
             return Err("saved run has incomplete or inconsistent Level/Game owners".into());
+        }
+        if let Some(records) = &context.ambient_records {
+            crate::critters::validate_saved_records(records)?;
         }
         for (index, descriptor) in descriptors.iter().enumerate() {
             if descriptor.index != index
@@ -343,7 +353,10 @@ impl RunRecord {
         if entry != &RoomEntry::initial(descriptor.grid_index)? {
             return Err("Continue entry requires its supported initial Level owner".into());
         }
-        //This caller has no saved actor/familiar reconstruction owner yet.
+        crate::critters::validate_saved_records(context.ambient_records.as_deref().ok_or(
+            "Continue requires owned saved ambient records; missing legacy data is unknown",
+        )?)?;
+        //This caller has no other saved actor/familiar reconstruction owner yet.
         //Its fully neutral item domain is established by actual saved stores,
         //not by the destination constructor's apparent current loadout.
         let items = &run.player_items;

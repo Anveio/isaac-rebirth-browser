@@ -807,6 +807,18 @@ actors/items/rooms and complete progression remain open.
 The listed-Bomb/unknown-legacy guard on0af reuses both recorded Native cases:
 all1714 ordered rows,62 Browser PNGs and62 MT states equal1b30. Public Bomb
 and real own legacy-save app-upgrade refusals pass; stored bytes remain intact.
+The saved-ambient successor137b restores owned1000/21,33,68 records through
+fresh Init and saved RNG30, corrects the Full/Fast position boundary and the
+Stop Room/Backdrop seed constructor. On the unchanged fixed/OS Original inputs,
+all1714 inherited rows remain:1644 pass/70 fail,52 gains/zero lost passes.
+The additional2034 shared-MT/ambient rows pass2006/fail28; all48 measured
+cursor/624-word checkpoints match. All28 additive failures precede Quit in
+fixed-case ambient velocity words; OS507/507 passes. OwnSave66/66, both natural
+reloads and real old0af legacy ambient-owner refusal pass; RGBA34/28 retains
+all verdicts. Intermediate adfb OS14 lost passes are recovered and its failed
+reports remain preserved. Broader saved actors/items/rooms and progression,
+14 canonical menu/gameplay-scope errors,28 seed separators and28 penalty-stage
+rows remain open.
 [Save/Continue scope](save-continue.md) preserves exact current and historical
 producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.

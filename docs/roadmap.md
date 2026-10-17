@@ -535,18 +535,22 @@ No open bugs.
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
-Port: in-run SavedGame records, origin-local initial-room Save/Continue and
-natural own-storage reload, plus the no-achievements seeded badge. The fixed
-moving route and first unfiltered OS case pass 66 own-storage checks and two
-natural reloads on immutable1b30; strict paired state remains1592/1714 with122
-failures, including24 post-Continue Player/tear differences in the fixed case.
-RGBA remains34 pass/28 fail. Shared-MT cursor and continuation consumption are
-unresolved; no complete restoration or gameplay parity is claimed. Other saved
-rooms/items/actors, durable progression/unlock callbacks and challenges beyond
-Challenge1 ingress remain open. The listed-Bomb/unknown-legacy guard on0af
-replays all1714 rows,62 Browser PNGs and62 MT states exactly against1b30;
-public Bomb and real legacy-own-save upgrade refusal witnesses pass. See
-[Save scope and replay](save-continue.md).
+Port: in-run SavedGame records, origin-local initial-room Save/Continue,
+natural reload and owned Tiny Bug/Fly/Wall Bug saved records through fresh Init.
+The successor137b also restores the physical/fast boundary and Stop Room's
+Backdrop seed constructor. The unchanged fixed/OS Original inputs retain all1714
+inherited rows:1644 pass/70 fail,52 gains and zero lost passes versus0af. All14
+OS regressions on the intermediate adfb candidate are recovered; its failures
+remain preserved. Additional MT/ambient rows pass2006/2034; all48 measured
+shared cursors and624-word states match. The28 added failures are fixed-case
+pre-Quit ambient velocity words; OS507/507 passes. OwnSave66/66, both reloads
+and real legacy missing-ambient-owner refusal pass; RGBA remains34 pass/28 fail.
+The70 inherited failures remain14 canonical menu/gameplay-scope errors,
+28 seed separator rows and28 last-penalty-stage rows. Other saved rooms/items/
+actors, complete progression/unlocks, broader RNG/PCM and challenges beyond
+Challenge1 ingress remain open. Historical1b30/0af122 failures and listed-Bomb/
+legacy-refusal evidence retain their exact scope. See [Save scope and
+replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
