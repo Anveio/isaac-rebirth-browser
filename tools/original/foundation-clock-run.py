@@ -118,6 +118,7 @@ def main():
     parser.add_argument('--gl-trace', type=Path, help='Optional documented graphics API observer to chain; no game instructions/state')
     parser.add_argument('--audio-trace', type=Path, help='Optional forwarding OpenAL API observer to chain; no game instructions/state')
     parser.add_argument('--audio-sfx-owners', action='store_true', help='Opt-in actual configured-SFX table owner at forwarded backend starts; requires --audio-trace, preserves ambiguous aliases')
+    parser.add_argument('--audio-options-owners', action='store_true', help='Opt-in actual Options237 request/query/gain/reset owners; requires --audio-trace and --audio-sfx-owners')
     parser.add_argument('--mt-trace', action='store_true', help='Chain the shared-MT draw observer; writes OUTPUT/mt-trace/trace-<pid>.bin')
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
@@ -318,8 +319,14 @@ def main():
             env['ISAAC_AUDIO_SFX_OWNERS'] = '1'
         else:
             env.pop('ISAAC_AUDIO_SFX_OWNERS', None)
-    elif args.audio_sfx_owners:
-        raise SystemExit('--audio-sfx-owners requires --audio-trace')
+        if args.audio_options_owners:
+            if not args.audio_sfx_owners:
+                raise SystemExit('--audio-options-owners requires --audio-sfx-owners')
+            env['ISAAC_AUDIO_OPTIONS_OWNERS'] = '1'
+        else:
+            env.pop('ISAAC_AUDIO_OPTIONS_OWNERS', None)
+    elif args.audio_sfx_owners or args.audio_options_owners:
+        raise SystemExit('Audio owners require --audio-trace')
     if args.mt_trace:
         trace = out / 'mt-trace'
         trace.mkdir(exist_ok=True)
@@ -343,6 +350,7 @@ def main():
               'requestedViewport': {'width': args.width, 'height': args.height, 'maxRenderScale': args.max_render_scale},
               'profile': {'fresh': True, 'isolated': True}, 'tape': tape, 'frames': frames,
               'audioOptions': {'sfxVolume': args.sfx_volume, 'musicVolume': args.music_volume},
+              **({'optionsAudioOwnerObserver': 1} if args.audio_options_owners else {}),
               'inputs': events, 'presentations': acknowledgements,
               'clock': {'scope': 'main-thread wall-clock ABI; worker/CPU clocks unchanged', 'nominalStepsPerSecond': args.fps, 'stepNs': args.step_ns,
                         'mainThreadSleeps': 'recorded then returned without host delay', 'realPerformance': 'controller wall clock'},

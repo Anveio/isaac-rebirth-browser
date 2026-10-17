@@ -29,6 +29,8 @@ static FILE *events;
 static pid_t owner_pid, main_tid;
 static uint64_t sequence;
 static int source_owners;
+static int options_owners;
+static void options_sfx237_owner(ALuint source, uintptr_t owner, uintptr_t caller, uintptr_t parent, uintptr_t pool_index);
 static ALuint owned_sources[4096];
 static size_t owned_source_count;
 static int source_allocation_overflow;
@@ -53,6 +55,7 @@ __attribute__((constructor)) static void initialize_trace(void) {
     events = fopen(filename, "a");
     if (!events) return;
     source_owners = getenv("ISAAC_AUDIO_SFX_OWNERS") && !strcmp(getenv("ISAAC_AUDIO_SFX_OWNERS"), "1");
+    options_owners = getenv("ISAAC_AUDIO_OPTIONS_OWNERS") && !strcmp(getenv("ISAAC_AUDIO_OPTIONS_OWNERS"), "1");
     owner_pid = getpid();
     main_tid = (pid_t)syscall(SYS_gettid);
     fprintf(events, "{\"schema\":1,\"api\":\"trace-start\",\"pid\":%d,\"mainTid\":%d,\"scope\":\"Forwarded public OpenAL calls and PCM arguments; original hash/direct-child/gate identity validated by paired source observer\"}\n", owner_pid, main_tid);
@@ -159,7 +162,7 @@ void alSourcei(ALuint source, ALenum parameter, ALint value) {
     }
 }
 
-void alSourcef(ALuint source, ALenum parameter, ALfloat value) {
+__attribute__((used, noinline)) static void observe_al_source_f(ALuint source, ALenum parameter, ALfloat value, uintptr_t caller, uintptr_t wrapper, uintptr_t parent) {
     RESOLVE(alSourcef, void (*real)(ALuint, ALenum, ALfloat));
     real(source, parameter, value);
     if (begin_event("alSourcef")) {
@@ -167,8 +170,30 @@ void alSourcef(ALuint source, ALenum parameter, ALfloat value) {
         fprintf(events, ",\"source\":%u,\"parameter\":%d,\"value\":", source, parameter);
         if (isfinite(value)) fprintf(events, "%.9g", (double)value); else fputs("null", events);
         fprintf(events, ",\"valueBits\":%u", bits);
+        if (options_owners && (caller == 0x5e1e37UL || caller == 0x5e1a76UL ||
+            (caller == 0x610dcfUL && (parent == 0x5a81f4UL || parent == 0x5a8337UL))) && parameter == 0x100a)
+            options_sfx237_owner(source, wrapper, caller, parent, 0);
         end_event();
     }
+}
+
+/* Gain612eb0 -> backend610c00 tailcalls alSourcef; the real caller remains
+ * 5e1e37 and callee-saved R12 remains the configured wrapper. XMM0 and all
+ * actual API arguments are forwarded unchanged. Configured request5e1980
+ * uses RBX for its chosen wrapper and reaches gain with return5e1a76.
+ * A first stored gain may emit no API at handle0; BasePlay later applies it
+ * at610dcf, with RBX=backend and the actual Options return32bytes above RSP. */
+__attribute__((naked)) void alSourcef(ALuint source __attribute__((unused)), ALenum parameter __attribute__((unused)), ALfloat value __attribute__((unused))) {
+    __asm__ __volatile__("movq (%rsp), %rdx\n\t"
+                         "movq %r12, %rcx\n\t"
+                         "xorl %r8d, %r8d\n\t"
+                         "cmpq $0x5e1a76, %rdx\n\t"
+                         "je 1f\n\t"
+                         "cmpq $0x610dcf, %rdx\n\t"
+                         "jne 2f\n\t"
+                         "movq 32(%rsp), %r8\n\t"
+                         "1: movq %rbx, %rcx\n\t"
+                         "2: jmp observe_al_source_f\n\t");
 }
 
 #define SOURCE_WRAPPER(name) \
@@ -231,6 +256,67 @@ static void quoted_bytes(const unsigned char *text, size_t length) {
     }
     fputc('"', events);
 }
+/* This leaf observes one Source-located configured wrapper, not all aliases
+ * or an inferred ID selected from PCM. The prior real start must independently
+ * have the existing UNIQUE_ACTUAL_TABLE_REFERENCE owner for237. */
+static int options_read(uintptr_t address, void *target, size_t length, size_t *bytes) {
+    if (*bytes > 1024 || length > 1024 - *bytes) return 0;
+    *bytes += length;
+    return own_read(address, target, length);
+}
+static void options_sfx237_owner(ALuint source, uintptr_t owner, uintptr_t caller, uintptr_t parent, uintptr_t pool_index) {
+    uintptr_t system = 0, backend = 0, vtable = 0, path = 0, input_backend = owner;
+    uint32_t actual_source = 0, counter = 0, volume = 0, backend_gain = 0, pool_source = 0;
+    unsigned char slot[0x158], text[512]; uint64_t length = 0; size_t bytes = 0;
+    int materialized = caller == 0x610dcfUL, restart_stop = caller == 0x62a2c9UL, pool_reset = caller == 0x610a87UL;
+    int backend_input = materialized || restart_stop || pool_reset;
+    fprintf(events, ",\"optionsOwner\":{\"schema\":\"actual-options-sfx237-owner-v2\",\"callSite\":\"0x%lx\",\"parentCallSite\":\"0x%lx\",\"actualInputOwnerAddress\":\"0x%lx\",\"ownerInputRole\":\"%s\"",
+            (unsigned long)caller, (unsigned long)parent, (unsigned long)owner,
+            pool_reset ? "actual-pool-manager-rbx" : backend_input ? "actual-backend-rbx" : "actual-wrapper-r12-or-rbx");
+    if ((pid_t)syscall(SYS_gettid) != main_tid ||
+        !((caller == 0x610d14UL && parent == 0x5e1e14UL) ||
+          ((caller == 0x5e1e37UL || caller == 0x5e1a76UL || restart_stop || pool_reset) && !parent) ||
+          (materialized && (parent == 0x5a81f4UL || parent == 0x5a8337UL)))) {
+        fputs(",\"status\":\"UNKNOWN_UNSELECTED_CALLER_OR_THREAD\"}", events); return;
+    }
+    const char *operation = caller == 0x610d14UL ? "global-volume-is-playing" :
+        caller == 0x5e1e37UL ? "global-volume-live-gain" : caller == 0x5e1a76UL ? "configured-feedback-admitted-gain" :
+        materialized ? "backend-play-materialized-gain" : restart_stop ? "sample-restart-stop" : "pool-reset-before-binding";
+    fprintf(events, ",\"operation\":\"%s\"", operation);
+    if (!options_read(0x8ed560UL, &system, sizeof(system), &bytes) || !system) goto unknown;
+    uintptr_t slot_at = system + 0x12c20UL + 237UL * 0x158UL;
+    if (!backend_input && owner != slot_at + 0x10) {
+        fprintf(events, ",\"bytesRead\":%zu,\"status\":\"UNSELECTED_CONFIGURED_WRAPPER\"}", bytes); return;
+    }
+    if (pool_reset) {
+        if (owner != 0x934940UL || pool_index >= 16 ||
+            !options_read(owner + 0x88 + pool_index * 8, &input_backend, sizeof(input_backend), &bytes) ||
+            !options_read(owner + 0x108 + pool_index * 4, &pool_source, sizeof(pool_source), &bytes) || pool_source != source) goto unknown;
+        fprintf(events, ",\"actualPoolIndex\":%lu,\"actualPoolSource\":%u,\"sourceHandleBinding\":\"pending-pool-claim\"", (unsigned long)pool_index, pool_source);
+    }
+    if (!options_read(slot_at, slot, sizeof(slot), &bytes)) goto unknown;
+    backend = pointer64(slot + 0x10); path = pointer64(slot + 8);
+    if (backend_input && backend != input_backend) {
+        fprintf(events, ",\"bytesRead\":%zu,\"status\":\"UNSELECTED_CONFIGURED_BACKEND\"}", bytes); return;
+    }
+    if (word32(slot + 0x148) != 1 || slot[0x150] != 1 || !backend ||
+        !options_read(backend, &vtable, sizeof(vtable), &bytes) || vtable != 0x67cf10UL ||
+        !options_read(backend + 0x78, &actual_source, sizeof(actual_source), &bytes) ||
+        (!pool_reset && actual_source != source) ||
+        !options_read(backend + 0x7c, &backend_gain, sizeof(backend_gain), &bytes) ||
+        !options_read(system + 0x2efa0, &counter, sizeof(counter), &bytes) ||
+        !options_read(system + 0x2df94, &volume, sizeof(volume), &bytes) || path < 24 ||
+        !options_read(path - 24, &length, sizeof(length), &bytes) || !length || length > sizeof(text) ||
+        !options_read(path, text, (size_t)length, &bytes)) goto unknown;
+    fprintf(events, ",\"id\":237,\"sampleIndex\":0,\"wrapperAddress\":\"0x%lx\",\"backendObject\":\"0x%lx\",\"backendClassVtable\":\"0x%lx\",\"actualBackendSource\":%u,\"systemCounter\":%u,\"globalVolumeBits\":%u,\"requestedVolumeBits\":%u,\"wrapperGainBits\":%u,\"backendGainBits\":%u,\"path\":",
+            (unsigned long)(slot_at + 0x10), (unsigned long)backend, (unsigned long)vtable, actual_source, counter, volume,
+            word32(slot + 0x14c), word32(slot + 0x10 + 0x18), backend_gain);
+    quoted_bytes(text, (size_t)length);
+    fprintf(events, ",\"bytesRead\":%zu,\"maxBytes\":1024,\"status\":\"ACTUAL_CONFIGURED_237_WRAPPER\"}", bytes); return;
+unknown:
+    fprintf(events, ",\"bytesRead\":%zu,\"maxBytes\":1024,\"status\":\"UNKNOWN_REQUIRED_READ_OR_SOURCE_IDENTITY\"}", bytes);
+}
+
 static void configured_sfx_owner(ALuint source, uintptr_t backend, uintptr_t caller) {
     fprintf(events, ",\"sfxOwner\":{\"schema\":\"actual-openal-sfx-owner-v1\",\"callSite\":\"0x%lx\",\"backendObject\":\"0x%lx\"",
             (unsigned long)caller, (unsigned long)backend);
@@ -343,8 +429,53 @@ __attribute__((naked)) void alSourcePlay(ALuint source __attribute__((unused))) 
                          "jmp observe_al_source_play\n\t");
 }
 
+/* Global-volume scan5e1e0f calls IsPlaying612e20, which tailcalls610cf0.
+ * That backend calls real alGetSourcei once (return610d14), then compares its
+ * actual output with AL_PLAYING. Its untouched caller is32bytes above the API
+ * entry stack (5e1e14); R12 is the actual sample wrapper. No extra query. */
+__attribute__((used, noinline)) static void observe_al_get_source_i(ALuint source, ALenum parameter, ALint *value, uintptr_t caller, uintptr_t parent, uintptr_t wrapper) {
+    RESOLVE(alGetSourcei, void (*real)(ALuint, ALenum, ALint *));
+    real(source, parameter, value);
+    if (!options_owners || caller != 0x610d14UL || parent != 0x5e1e14UL || parameter != 0x1010) return;
+    if (begin_event("alGetSourcei")) {
+        fprintf(events, ",\"source\":%u,\"parameter\":%d,\"value\":", source, parameter);
+        if (value) fprintf(events, "%d", *value); else fputs("null", events);
+        options_sfx237_owner(source, wrapper, caller, parent, 0);
+        end_event();
+    }
+}
+__attribute__((naked)) void alGetSourcei(ALuint source __attribute__((unused)), ALenum parameter __attribute__((unused)), ALint *value __attribute__((unused))) {
+    __asm__ __volatile__("movq (%rsp), %rcx\n\t"
+                         "xorl %r8d, %r8d\n\t"
+                         "xorl %r9d, %r9d\n\t"
+                         "cmpq $0x610d14, %rcx\n\t"
+                         "jne 1f\n\t"
+                         "movq 32(%rsp), %r8\n\t"
+                         "movq %r12, %r9\n\t"
+                         "1: jmp observe_al_get_source_i\n\t");
+}
+
 SOURCE_WRAPPER(alSourcePause)
-SOURCE_WRAPPER(alSourceStop)
+/* Capture actual callsite and callee-saved owners before a C prologue.
+ * Class restart62a2c9 owns RBX=backend. Pool reset610a87 owns RBX=manager,
+ * R14=index; its selected backend is already in the actual pool table.
+ * No extra query, command, source stop or API argument is introduced. */
+__attribute__((used, noinline)) static void observe_al_source_stop(ALuint source, uintptr_t caller, uintptr_t owner, uintptr_t pool_index) {
+    RESOLVE(alSourceStop, void (*real)(ALuint)); real(source);
+    if (begin_event("alSourceStop")) {
+        fprintf(events, ",\"source\":%u", source);
+        if (options_owners) fprintf(events, ",\"callSite\":\"0x%lx\"", (unsigned long)caller);
+        if (options_owners && (caller == 0x62a2c9UL || caller == 0x610a87UL))
+            options_sfx237_owner(source, owner, caller, 0, pool_index);
+        end_event();
+    }
+}
+__attribute__((naked)) void alSourceStop(ALuint source __attribute__((unused))) {
+    __asm__ __volatile__("movq (%rsp), %rsi\n\t"
+                         "movq %rbx, %rdx\n\t"
+                         "movq %r14, %rcx\n\t"
+                         "jmp observe_al_source_stop\n\t");
+}
 
 void alSourceQueueBuffers(ALuint source, ALsizei count, const ALuint *buffers) {
     RESOLVE(alSourceQueueBuffers, void (*real)(ALuint, ALsizei, const ALuint *));
