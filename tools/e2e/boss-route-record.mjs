@@ -175,6 +175,28 @@ try {
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
     }
     checkpoint('clear');
+    // A poop the port's own fight drops in the cell inside an open doorway
+    // would wall off the shared re-anchor walk. The port shoots it out from
+    // a free side cell before parking; the original's fixture fight is fixed.
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      const cellAt = (x, y) => Math.round((y - 120) / 40) * state.grid.w + Math.round((x - 40) / 40);
+      const across = door.side === 'up' || door.side === 'down';
+      const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
+      const inner = { x: door.x + inward[0], y: door.y + inward[1] };
+      for (const sign of [-1, 1]) {
+        if (state.grid.solid[cellAt(inner.x, inner.y)] !== '1') break;
+        const stand = across ? { x: inner.x + sign * 40, y: inner.y } : { x: inner.x, y: inner.y + sign * 40 };
+        const blocked = [...AWARD_CELLS, ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))];
+        if (state.grid.solid[cellAt(stand.x, stand.y)] === '1' || blocked.includes(cellAt(stand.x, stand.y))) continue;
+        await walk(stand, blocked, 600, 'doorway poop');
+        const aim = across ? (sign < 0 ? 'ArrowRight' : 'ArrowLeft') : (sign < 0 ? 'ArrowDown' : 'ArrowUp');
+        for (let left = 600; state.grid.solid[cellAt(inner.x, inner.y)] === '1'; left -= STRIDE) {
+          if (left <= 0) throw new Error(`Doorway poop at (${inner.x}, ${inner.y}) still stands`);
+          await hold([aim]); await step(STRIDE); state = await view();
+        }
+        await hold([]);
+      }
+    }
     await walk({ x: 80, y: 400 }, AWARD_CELLS, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
