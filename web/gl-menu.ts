@@ -69,9 +69,9 @@ export class GLMenuContext {
 
   static async load(assets: Assets, width = 960, height = 540, extraPaths: string[] = []): Promise<GLMenuContext> {
     const context = new GLMenuContext(width, height), paths = new Set<string>([
-      "gfx/ui/main menu/menuoverlay.png", "gfx/ui/main menu/menushadow.png", "gfx/ui/backselectwidget.png",
+      "gfx/ui/main menu/menuoverlay.png", "gfx/ui/main menu/menushadow.png", "gfx/ui/main menu/emptyscreen.png", "gfx/ui/backselectwidget.png",
     ]);
-    const menuActors = new Set(["titlemenu", "saveselectmenu", "saveselectmenu_drawing", "gamemenu", "charactermenu", "characterportraits", "completion_widget", "difficultywidget", "seedwidget", "seedentry", "winstreakwidget", "menushadow"]);
+    const menuActors = new Set(["titlemenu", "saveselectmenu", "saveselectmenu_drawing", "gamemenu", "charactermenu", "characterportraits", "completion_widget", "difficultywidget", "seedwidget", "seedentry", "winstreakwidget", "menushadow", "challengemenu"]);
     for (const [path, actor] of Object.entries(sceneData)) if (menuActors.has(path.replace("gfx/ui/main menu/", "").replace(".anm2", ""))) {
       for (const sheet of actor.Spritesheets) paths.add(normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`));
     }

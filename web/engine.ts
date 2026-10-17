@@ -311,6 +311,16 @@ export interface StageEffects {
   actorTint: [number, number, number];
   overlay: { asset: string; sourceCrop: Rect; offset: { x: number; y: number }; modulationRGBA: [number, number, number, number]; blend: Blend; simulationTick: number; motionEvidence: string };
 }
+export type MenuPage = "title" | "save" | "game" | "character" | "challenge";
+export interface MenuClip { animation: string; frame: number; playing: boolean }
+/** MenuManager view, Back/Select widgets, File select and Character carousel. */
+export interface MenuPresentation {
+  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number;
+  widgetsShown: boolean; widgets: [number, number];
+  save: { file: number; menu: MenuClip; drawings: [MenuClip, MenuClip, MenuClip] };
+  carousel: { angle: number; portraits: [number, number][] };
+  blood: number; hardOverlay: number; hardWidget: boolean;
+}
 export interface State {
   knifeQueryPartition?: { gameCounter: number; actors: ActorRef[]; buckets: number[][] };
   weaponCache: {primary: number; flagsC98: [number,number]; colorCa0: AttackColor; colorCcc: AttackColor};
@@ -327,6 +337,7 @@ export interface State {
   enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
+  menuPresentation: MenuPresentation;
   runStartRequest: { inputPending: boolean; fading: boolean; fadeAlpha: number; systemPending: boolean; challengeId: number | null; loadingImageIndex?: number };
   runQuit: { inputPending: boolean; fadeAlpha: number; fadeRate: number; systemPending: boolean; saveEnabled: boolean | null; saveOutcome: "supportedRunCopied" | "deadRunCleared" | null };
   systemClock: { systemCounter: number; interpolationEnabled: boolean };
