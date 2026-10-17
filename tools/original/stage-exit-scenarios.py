@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Public-input tapes that clear a boss room, enter its trapdoor and reach Basement II.
+"""Public-input tapes that clear a boss room, enter its trapdoor and reach the next floor.
 
 Both games walk the same recorded route into the boss room (the reference
 fixture). The fight cannot be one shared tape: no fixed key sequence kills the
@@ -11,6 +11,13 @@ port replays keys recorded closed-loop in the production build
 corner and are padded to the same frame count. After `exit-start` both games
 receive identical keys, recorded in the port with --exit, onto the award
 trapdoor and through the stage transition. Only the shared tail is graded.
+
+A descent fixture (`descent`, one entry per floor) carries the run further
+before the shared tail: each game clears Basement I's boss room, takes its
+trapdoor, walks Basement II's room chain and clears that boss room too, all
+with its own keys (the original's are the fixture's fixed `originalFight`).
+The shared tail then re-anchors in the last boss room and grades its exit
+into the floor after it.
 
 Contrived cases walk straight to the trapdoor. OS-random cases draw an idle
 wait and a waypoint for the approach; every recorded case replays exactly.
@@ -30,9 +37,14 @@ spec.loader.exec_module(routes)
 FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
+# Frames a descent adds per earlier floor for its trapdoor, the stage
+# transition and the next floor's route into its boss room.
+EXIT_LEG = 3000
 PADDING_STEP = 600
 # Frames both games stand still after re-entering the boss room.
 ANCHOR_IDLE = 120
+# Dense capture labels and floor names after the shared exit, by arrival stage.
+ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -59,6 +71,46 @@ def frames(actions):
     return sum(action['frames'] for action in actions if action['type'] == 'step')
 
 
+def window(fixture):
+    """Frames from boss-room-arrival to exit-start for this fixture's fights."""
+    floors = len(fixture.get('descent', [None]))
+    return WINDOW * floors + EXIT_LEG * (floors - 1)
+
+
+def final_rooms(fixture):
+    """The room chain of the floor whose boss room the shared tail leaves."""
+    return fixture['descent'][-1]['rooms'] if 'descent' in fixture else fixture['rooms']
+
+
+def hurt(health):
+    """--hurt when [red, maxRed, soul] ends a fight below full health."""
+    red, maximum, soul = health or [0, 0, 0]
+    return ['--hurt'] if red + soul < maximum else []
+
+
+def descended(result, fixture, production_directory):
+    """The port's own segment for a descent fixture, one closed-loop leg per
+    floor, each replaying the legs before it: the leg fights the boss room
+    clear and parks (with --hurt as that floor's original fight ends), and on
+    every floor but the last also takes the trapdoor; the next leg starts by
+    walking that floor's room chain into its boss room."""
+    actions, build = [], None
+    floors = fixture['descent']
+    for index, floor in enumerate(floors):
+        marker = f'descent-{index}'
+        case = {**result, 'pairedTape': result['pairedTape'] + keys_only(actions) + [{'type': 'capture', 'label': marker}]}
+        rooms = floor['rooms'][-1:] if index == 0 else floor['rooms']
+        leg = record(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
+                     *(['--exit', EXIT_LEG] if index + 1 < len(floors) else []),
+                     rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
+        if leg['status'] != 'pass':
+            raise RuntimeError(f"Port descent leg {index} for {fixture['name']} failed: {leg['reason']}")
+        if build not in (None, leg.get('build')):
+            raise ValueError('Every descent leg must be recorded on the same production artifact')
+        actions, build = actions + leg['actions'], leg.get('build')
+    return {'status': 'pass', 'actions': actions, 'build': build}
+
+
 def fought(fixture, production_directory=None):
     """The shared route plus each game's own fight, recorded once per fixture.
 
@@ -80,9 +132,11 @@ def fought(fixture, production_directory=None):
         result[name] = result[name][:end + 1] + fixture['route']
     # originalHealth [red, maxRed, soul]: the original's fight ends below full
     # health, so a port fight at full health takes one bomb blast (--hurt).
-    red, maximum, soul = fixture.get('originalHealth', [0, 0, 0])
-    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
-                  *(['--hurt'] if red + soul < maximum else []), production_directory=production_directory)
+    if 'descent' in fixture:
+        port = descended(result, fixture, production_directory)
+    else:
+        port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
+                      *hurt(fixture.get('originalHealth')), production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     build = port.get('build')
@@ -91,8 +145,8 @@ def fought(fixture, production_directory=None):
     result['portRecordedBuild'] = build
     fights = {'tape': fixture['originalFight'], 'pairedTape': keys_only(port['actions'])}
     for name, fight in fights.items():
-        if frames(fight) + 240 > WINDOW:
-            raise RuntimeError(f"{fixture['name']} {name} fight takes {frames(fight)} of {WINDOW} window frames")
+        if frames(fight) + 240 > window(fixture):
+            raise RuntimeError(f"{fixture['name']} {name} fight takes {frames(fight)} of {window(fixture)} window frames")
     return result, fights
 
 
@@ -118,7 +172,7 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
         # `exit-start` labels the padding step rather than a capture: where
         # each game's corner press releases depends on its fight, so the first
         # graded checkpoint comes after the trapdoor snaps the player.
-        result[name] = result[name] + fight + padding(WINDOW - frames(fight) + idle)
+        result[name] = result[name] + fight + padding(window(fixture) - frames(fight) + idle)
     # Re-anchor: each game parks after its own fight at a slightly different
     # sub-unit point, which can shift the trapdoor entry by a frame. Leaving
     # the boss room and coming back places both players exactly at the door,
@@ -128,7 +182,8 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     # The original's own fight can leave solid cells (a Larry Jr. tail poop)
     # that the port's fight does not; the shared walk routes around them, and
     # stepping from cell centre to cell centre keeps it off their corners.
-    back = f"0,{fixture['rooms'][-2]},0"
+    rooms = final_rooms(fixture)
+    back = f"{rooms[-1]},{rooms[-2]},{rooms[-1]}"
     avoid = sorted(set(fixture.get('originalSolid', [])) | set(near(fixture.get('originalPickups', []))))
     tail = record(result, '--from', 'exit-start', '--idle', ANCHOR_IDLE, '--exit', 1500,
                   *(['--via', f'{via[0]},{via[1]}'] if via else []),
@@ -140,12 +195,14 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
         raise ValueError('Port fight and exit must be recorded on the same production artifact')
     anchor = next(index for index, action in enumerate(tail['actions']) if action.get('label') == 're-anchor')
     actions = keys_only(tail['actions'][:anchor]) + tail['actions'][anchor:]
-    routes.dense(actions, 120, 'basement-ii', 4)
+    arrived = 1 + len(fixture.get('descent', [None]))
+    label, floor = ARRIVALS[arrived]
+    routes.dense(actions, 120, label, 4)
     for name in ('tape', 'pairedTape'):
         result[name] = result[name] + actions
     routes.runner.validate_tape(result['tape'])
     result['scenario'] = {'id': identifier,
-                          'description': f"Clear boss room {fixture['rooms'][-1]}, enter its trapdoor and arrive in Basement II",
+                          'description': f"Clear boss room {rooms[-1]}, enter its trapdoor and arrive in {floor}",
                           'systems': ['room-connectivity', 'grid-entities', 'run-introduction', 'entity-animation', 'input-determinism'], 'randomized': randomized}
     # Each game fights with its own keys, so red HP after the fight is not a
     # parity observation; the stage-exit comparator grades the exit itself.
@@ -154,7 +211,8 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     # The port's fight keys are closed-loop against this production build; a
     # replay on another build feeds them to a different game (state-pair warns).
     result['portRecordedBuild'] = tail.get('build')
-    result['stageExit'] = {'fixture': fixture['name'], 'rooms': fixture['rooms'], 'window': WINDOW, 'idle': idle, 'via': via,
+    result['stageExit'] = {'fixture': fixture['name'], 'rooms': rooms, 'arrivedStage': arrived, 'window': window(fixture),
+                           'idle': idle, 'via': via,
                            'fightFrames': {name: frames(fight) for name, fight in fights.items()},
                            'recordedBuilds': {'fight': base['portRecordedBuild'], 'exit': tail['build']}}
     if 'carriedActiveItemId' in fixture:
