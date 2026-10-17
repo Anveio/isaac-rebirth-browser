@@ -2316,10 +2316,15 @@ impl Game {
                 let id = actor.id;
                 let value = match actor.kind {
                     actors::ActorKind::Player => Some(player),
-                    actors::ActorKind::Npc => state.room.npcs.iter().find(|npc| npc.id == id).map(|npc| {
-                        let offset = npc.fireplace.as_ref().map_or(0, |fire| fire.render_order_offset);
-                        key(npc.position.y, offset)
-                    }),
+                    actors::ActorKind::Npc => {
+                        state.room.npcs.iter().find(|npc| npc.id == id).map(|npc| {
+                            let offset = npc
+                                .fireplace
+                                .as_ref()
+                                .map_or(0, |fire| fire.render_order_offset);
+                            key(npc.position.y, offset)
+                        })
+                    }
                     actors::ActorKind::Familiar => state
                         .familiars
                         .iter()
@@ -2347,15 +2352,23 @@ impl Game {
                         .find(|projectile| projectile.id == id)
                         .map(|projectile| key(projectile.position.y, 0)),
                     actors::ActorKind::Effect => {
-                        if let Some(effect) = state.sprite_effects.iter().find(|effect| effect.id == id) {
+                        if let Some(effect) =
+                            state.sprite_effects.iter().find(|effect| effect.id == id)
+                        {
                             if effect.raw_7d8 {
                                 scheduler.sequence_id(actor).map(|sequence| {
-                                    ((sequence & 0x3ff) + 100).wrapping_add(effect.render_order_offset as u32)
+                                    ((sequence & 0x3ff) + 100)
+                                        .wrapping_add(effect.render_order_offset as u32)
                                 })
                             } else {
-                                Some(key(effect.position.y + effect.raw_7f8, effect.render_order_offset))
+                                Some(key(
+                                    effect.position.y + effect.raw_7f8,
+                                    effect.render_order_offset,
+                                ))
                             }
-                        } else if let Some(ember) = state.fire_particles.iter().find(|ember| ember.id == id) {
+                        } else if let Some(ember) =
+                            state.fire_particles.iter().find(|ember| ember.id == id)
+                        {
                             Some(key(ember.position.y, 0))
                         } else {
                             state
