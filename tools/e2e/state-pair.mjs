@@ -26,6 +26,7 @@ const scenarios = replayCases ? { schema: 1, cases: replayCases.split(',').map(r
   : recorded ? readJson(recorded)
   : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 scenarios.cases = selectCases(scenarios.cases, item => item.scenario.id);
+if (flag('--case')) scenarios.caseFilter = flag('--case');
 writeJson(resolve(output, 'scenarios.json'), scenarios);
 const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `replay-${index}.json`), item));
 
@@ -76,7 +77,7 @@ const cases = scenarios.cases.map((scenario, index) => {
 // discovery); they fail the suite without hiding the cases that did build.
 const helperFailures = scenarios.failures ?? [];
 const status = paired.status === 'pass' && !helperFailures.length && cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-writeJson(resolve(output, 'report.json'), { schema: 1, status, caseFilter: flag('--case'), pairedStatus: paired.status, helperFailures, cases });
+writeJson(resolve(output, 'report.json'), { schema: 1, status, caseFilter: scenarios.caseFilter, pairedStatus: paired.status, helperFailures, cases });
 for (const item of cases) console.log(`${item.status}: ${item.id} (${item.failures}/${item.checks} checks failed)${item.error ? ` ${item.error}` : ''}`);
 for (const failure of helperFailures) console.log(`fail: ${JSON.stringify(failure)}`);
 for (const item of cases.filter(item => item.staleRecording)) console.log(`warning: ${item.id} replays port keys recorded on build ${item.staleRecording.recordedBuild.slice(0, 12)} against build ${build.slice(0, 12)}; its result does not compare the two builds — rerun without --scenarios`);
