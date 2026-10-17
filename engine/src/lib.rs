@@ -92,6 +92,7 @@ pub mod level2_flies;
 pub mod level_progress;
 pub mod maggots;
 pub mod menu_lifecycle;
+pub mod menu_presentation;
 pub mod monstro;
 mod monstros_lung;
 pub mod motion;
@@ -632,6 +633,7 @@ pub struct State {
     pub menu_animation_tick: u32,
     pub title_animation_frame: u32,
     pub menu_fade: MenuFade,
+    pub menu_presentation: menu_presentation::MenuPresentation,
     pub run_start_request: RunStartRequest,
     #[serde(default)]
     pub run_quit: run_quit::RunQuit,
@@ -889,6 +891,11 @@ impl Game {
                 menu_animation_tick: 0,
                 title_animation_frame: 0,
                 menu_fade: MenuFade::first_title(),
+                menu_presentation: menu_presentation::MenuPresentation::new(
+                    menu_presentation::Page::Title,
+                    1,
+                    character_catalog().len(),
+                ),
                 run_start_request: RunStartRequest::default(),
                 run_quit: run_quit::RunQuit::default(),
                 // The public runtime starts at the first rendered Title,
@@ -1189,8 +1196,14 @@ impl Game {
                     self.state.screen = Screen::Main;
                 }
                 "Escape" => self.state.screen = Screen::Title,
-                "ArrowLeft" | "KeyA" => self.state.profile = (self.state.profile + 1) % 3 + 1,
-                "ArrowRight" | "KeyD" => self.state.profile = self.state.profile % 3 + 1,
+                "ArrowLeft" | "KeyA" => {
+                    self.state.profile = (self.state.profile + 1) % 3 + 1;
+                    self.state.menu_presentation.save.select(self.state.profile);
+                }
+                "ArrowRight" | "KeyD" => {
+                    self.state.profile = self.state.profile % 3 + 1;
+                    self.state.menu_presentation.save.select(self.state.profile);
+                }
                 _ => {}
             },
             Screen::Main => match code {
@@ -2428,6 +2441,7 @@ impl Game {
             color: [0.0, 0.0, 0.0, 1.0],
         };
         self.state.screen = Screen::Main;
+        self.state.menu_presentation.reinitialize();
         self.load_menu_character();
         self.state.main_selection = if self.saved_run.is_some() { 1 } else { 0 };
         Ok(())
@@ -2462,6 +2476,7 @@ impl Game {
                     // Popup557650 queues menu3;59cac0 stores it in Menu+38,
                     // the same native Main family observed by the paired gate.
                     self.state.screen = Screen::Main;
+                    self.state.menu_presentation.reinitialize();
                     // A Random run stored its resolved character; the menus
                     // return to the profile's own selection.
                     self.load_menu_character();
@@ -2542,10 +2557,25 @@ impl Game {
         let bomb_down = self.held("KeyE");
         let bomb_triggered = bomb_down && !self.state.bomb_action_was_down;
         self.state.bomb_action_was_down = bomb_down;
-        if self.state.screen == Screen::Title && phase == phase::Phase::Update {
+        // MenuManager+38 before this iteration's input picks the page update, so
+        // the update that reads Start still advances the title clip and a
+        // return to Title starts advancing it one iteration later.
+        let title_page = self.state.menu_presentation.page == menu_presentation::Page::Title;
+        if self.state.screen != Screen::Playing && title_page && phase == phase::Phase::Update {
             self.state.title_animation_frame = (self.state.title_animation_frame + 1) % 40;
         }
         self.state.menu_fade.advance();
+        let menu_input = menu_presentation::Input {
+            even: phase == phase::Phase::Update,
+            key_held: !self.state.pressed.is_empty(),
+            character: usize::from(self.state.character_selection),
+            seed: self.state.screen == Screen::Seed,
+            challenge: self.state.challenge_selection.unwrap_or(0),
+            hard: self.state.difficulty == "hard",
+        };
+        self.state
+            .menu_presentation
+            .advance(self.state.screen, menu_input);
         if phase != phase::Phase::Skipped && self.state.screen != Screen::Playing {
             let request = &mut self.state.run_start_request;
             if request.fading {
