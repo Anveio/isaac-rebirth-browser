@@ -163,7 +163,8 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>, af
 
 /// The original's key-driven menu graph. Edges the port has yet to
 /// implement (Continue, the pause menu's Exit) are included so that porting
-/// them is not a failure.
+/// them is not a failure. Key handlers move most menus at the key event;
+/// Options acts on keys held at a tick.
 fn menu_edge(from: Screen, to: Screen) -> bool {
     matches!(
         (from, to),
@@ -176,6 +177,8 @@ fn menu_edge(from: Screen, to: Screen) -> bool {
             | (Screen::Main, Screen::Character)
             | (Screen::Main, Screen::Challenge)
             | (Screen::Challenge, Screen::Main)
+            | (Screen::Main, Screen::Options)
+            | (Screen::Options, Screen::Main)
             | (Screen::Character, Screen::Main)
             | (Screen::Character, Screen::Seed)
             | (Screen::Seed, Screen::Character)
@@ -239,12 +242,17 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 json!({ "count": count, "before": before.menu_animation_tick, "after": after.menu_animation_tick })
             );
             // A Tick may leave gameplay (GameOver, and the endings once
-            // ported); between menus only keys move.
+            // ported). Between menus, a menu that polls its keys at a tick
+            // (Options5A7840) moves along the key graph on a held key.
             props::always!(
-                before.screen == after.screen || run_started || before.screen == Screen::Playing,
-                "game: a Tick moves between menu screens only by starting a run",
-                json!({ "before": before.screen, "after": after.screen })
+                before.screen == after.screen
+                    || run_started
+                    || before.screen == Screen::Playing
+                    || (menu_edge(before.screen, after.screen) && !before.pressed.is_empty()),
+                "game: a Tick moves between menu screens only by starting a run or along the key graph on a held key",
+                json!({ "before": before.screen, "after": after.screen, "pressed": before.pressed })
             );
+            options(before, after);
             if before.screen == Screen::Playing
                 && !before.paused
                 && before.player_death.game_over.is_none()
@@ -391,12 +399,12 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             }
             // Only the held-key set and per-command outputs may change.
             let ignored = || {
-                let mut ignored = after.clone();
+                let (mut ignored, mut earlier) = (after.clone(), before.clone());
+                ignored.begin_command();
+                earlier.begin_command();
                 ignored.pressed = before.pressed.clone();
-                ignored.audio.events = before.audio.events.clone();
-                ignored.music.events = before.music.events.clone();
                 ignored.stage_effects = before.stage_effects.clone();
-                ignored == *before
+                ignored == earlier
             };
             let request = &before.run_start_request;
             if before.screen != Screen::Playing && (request.input_pending || request.fading) {
@@ -618,6 +626,45 @@ fn room_clear(before: &State, command: &Command, after: &State) {
     );
 }
 
+/// Options5A7840 on a Tick. Left and Right step only the setting on the
+/// selected row (SFX on row 1, music on row 2; Up and Down take priority, so
+/// the row holds while a setting steps). Its back action saves the settings
+/// it leaves with (Settings5B8DB0 writes %.4f) before returning to Main.
+fn options(before: &State, after: &State) {
+    if before.screen != Screen::Options {
+        return;
+    }
+    let row = before.options_menu.selection;
+    props::always!(
+        (after.audio.sfx_volume == before.audio.sfx_volume || row == 1)
+            && (after.music.volume == before.music.volume || row == 2),
+        "game: an Options tick changes only the volume on its selected row",
+        json!({
+            "row": row,
+            "sfx": [before.audio.sfx_volume, after.audio.sfx_volume],
+            "music": [before.music.volume, after.music.volume],
+        })
+    );
+    if after.screen == Screen::Main {
+        let saved = after.options_menu.save_requests.last();
+        props::always!(
+            saved.is_some_and(|saved| {
+                saved.sfx_volume == format!("{:.4}", after.audio.sfx_volume)
+                    && saved.music_volume == format!("{:.4}", after.music.volume)
+                    && saved.fullscreen == after.fullscreen.requested
+            }),
+            "game: leaving Options saves the settings it leaves with",
+            json!({
+                "saved": saved,
+                "sfx": after.audio.sfx_volume,
+                "music": after.music.volume,
+                "fullscreen": after.fullscreen.requested,
+            })
+        );
+        props::sometimes!(true, "game: Options saves and returns to the main menu");
+    }
+}
+
 /// Normal Isaac death (`engine/src/player_death.rs`): GameOver freezes
 /// gameplay (Game54f760 returns before the run tick), the menu key handler
 /// ignores input, and the released System popup's Restart or Exit request is
@@ -742,11 +789,12 @@ pub fn state(state: &State) {
     props::always!(
         (1..=3).contains(&state.profile)
             && state.main_selection < 5
+            && state.options_menu.selection < 8
             && usize::from(state.character_selection) < catalog
             && (state.difficulty == "normal" || state.difficulty == "hard")
             && state.profiles.len() == 3,
         "game: menu selections stay within their menus",
-        json!({ "profile": state.profile, "main": state.main_selection, "character": state.character_selection, "difficulty": state.difficulty })
+        json!({ "profile": state.profile, "main": state.main_selection, "options": state.options_menu.selection, "character": state.character_selection, "difficulty": state.difficulty })
     );
     if state.screen != Screen::Playing {
         props::always!(

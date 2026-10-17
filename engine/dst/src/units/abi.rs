@@ -1,8 +1,9 @@
 //! The exported C ABI transport (`engine/src/lib.rs`, consumed by
 //! `web/engine.ts`): request framing, malformed requests, failed resets, the
-//! per-thread engine slot and the authored-resource boot the e2e harness uses.
-//! A resource boot with the authored inputs must behave exactly like the plain
-//! boot, or a suite booted with resources would not speak for the browser.
+//! per-thread engine slot, the settings resets the browser boots with and the
+//! authored-resource boot the e2e harness uses. A resource boot with the
+//! authored inputs must behave exactly like the plain boot, or a suite booted
+//! with resources would not speak for the browser.
 use crate::entropy::Entropy;
 use crate::harness::Case;
 use crate::props;
@@ -31,15 +32,19 @@ fn send(bytes: &[u8]) -> Option<u32> {
     Some(abi::command())
 }
 
-/// Fills the boot resource buffer and resets from it.
-fn boot_with(resources: &[u8], seed: u32, epoch: u32) -> Option<u32> {
+/// Fills the boot resource buffer, then runs `reset` from it.
+fn load(resources: &[u8], reset: impl FnOnce() -> u32) -> Option<u32> {
     let pointer = abi::boot_resource_ptr(resources.len());
     if pointer.is_null() {
         return None;
     }
     // SAFETY: boot_resource_ptr returned a writable buffer of exactly resources.len().
     unsafe { std::ptr::copy_nonoverlapping(resources.as_ptr(), pointer, resources.len()) };
-    Some(abi::reset_with_boot_resources(seed, epoch))
+    Some(reset())
+}
+
+fn boot_with(resources: &[u8], seed: u32, epoch: u32) -> Option<u32> {
+    load(resources, || abi::reset_with_boot_resources(seed, epoch))
 }
 
 fn snapshot() -> Vec<u8> {
@@ -187,7 +192,91 @@ pub fn run(case: &mut Case) {
             current = published;
         }
     }
-    resources(e);
+    let authored = resources(e);
+    settings(e, &authored);
+}
+
+/// The settings resets `web/engine.ts` boots with from the stored Options
+/// settings: a fullscreen reset with an audio presence flag, or an audio
+/// reset. They admit only presence flags of zero or one and, when audio is
+/// present, finite volumes within the unit interval; a refused reset keeps
+/// the previous game. Booted from the authored resources, each publishes the
+/// state its plain reset does.
+fn settings(e: &mut Entropy, authored: &[u8]) {
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    let volume = |e: &mut Entropy| e.below(10_001) as f32 / 10_000.0;
+    let (sfx, music) = (volume(e), volume(e));
+    let (fullscreen, has_audio) = (e.below(2) as u32, e.below(2) as u32);
+    let display =
+        abi::reset_with_fullscreen_preferences(seed, epoch, fullscreen, has_audio, sfx, music);
+    let plain_display = snapshot();
+    let booted = serde_json::from_slice::<State>(&plain_display).ok();
+    props::always!(
+        display == 0
+            && abi::error_len() == 0
+            && booted.as_ref().is_some_and(|state| {
+                state.fullscreen.requested == (fullscreen == 1)
+                    && (has_audio == 0
+                        || (state.audio.sfx_volume == sfx && state.music.volume == music))
+            }),
+        "abi: a settings reset boots with the stored settings",
+        json!({ "fullscreen": fullscreen, "hasAudio": has_audio, "sfx": sfx, "music": music, "error": error() })
+    );
+    let resourced_display = load(authored, || {
+        abi::reset_with_boot_resources_and_fullscreen_preferences(
+            seed, epoch, fullscreen, has_audio, sfx, music,
+        )
+    });
+    let display_matches = resourced_display == Some(0) && snapshot() == plain_display;
+    let audio = abi::reset_with_audio_preferences(seed, epoch, sfx, music);
+    let plain_audio = snapshot();
+    let resourced_audio = load(authored, || {
+        abi::reset_with_boot_resources_and_audio_preferences(seed, epoch, sfx, music)
+    });
+    props::always!(
+        display_matches && audio == 0 && resourced_audio == Some(0) && snapshot() == plain_audio,
+        "abi: a settings boot from the authored resources publishes the plain settings boot's state",
+        json!({ "seed": seed, "epoch": epoch, "display": resourced_display, "audio": [audio, resourced_audio], "error": error() })
+    );
+
+    let previous = snapshot();
+    let out_of_range = *e.pick(&[
+        f32::NAN,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        -0.25,
+        1.0001,
+        -1.0e-7,
+    ]);
+    let (bad_sfx, bad_music) = if e.chance(1, 2) {
+        (out_of_range, music)
+    } else {
+        (sfx, out_of_range)
+    };
+    let flag = e.range(2, u32::MAX);
+    let (case, result) = match e.below(4) {
+        0 => (
+            "fullscreen flag",
+            abi::reset_with_fullscreen_preferences(seed, epoch, flag, has_audio, sfx, music),
+        ),
+        1 => (
+            "audio flag",
+            abi::reset_with_fullscreen_preferences(seed, epoch, fullscreen, flag, sfx, music),
+        ),
+        2 => (
+            "display volume",
+            abi::reset_with_fullscreen_preferences(seed, epoch, fullscreen, 1, bad_sfx, bad_music),
+        ),
+        _ => (
+            "audio volume",
+            abi::reset_with_audio_preferences(seed, epoch, bad_sfx, bad_music),
+        ),
+    };
+    props::always!(
+        result == 1 && !error().is_empty() && snapshot() == previous,
+        "abi: a settings reset refuses flags other than zero or one and stored volumes outside the unit interval, keeping the previous game",
+        json!({ "case": case, "flag": flag, "volumes": [bad_sfx, bad_music], "result": result })
+    );
 }
 
 /// The commands both boots replay: through the menus into a run, then play.
@@ -232,7 +321,8 @@ fn replay(commands: &[Command]) -> Vec<(Option<u32>, Vec<u8>)> {
         .collect()
 }
 
-fn resources(e: &mut Entropy) {
+/// Returns the authored resources it booted from.
+fn resources(e: &mut Entropy) -> Vec<u8> {
     props::always!(
         abi::boot_resource_ptr(MAX_BOOT_RESOURCE + 1 + e.index(1024)).is_null()
             && !abi::boot_resource_ptr(MAX_BOOT_RESOURCE).is_null(),
@@ -282,6 +372,7 @@ fn resources(e: &mut Entropy) {
         );
         props::sometimes!(failed_cleanly, "abi: corrupted boot resources are rejected");
     }
+    authored
 }
 
 /// Resource bytes the bridge could deliver: truncated or invalid JSON, an

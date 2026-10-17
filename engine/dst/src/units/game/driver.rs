@@ -260,14 +260,35 @@ impl Driver {
                     }
                 } else {
                     match e.below(20) {
-                        // Challenge opens a menu; the other actions are rejected.
-                        0..=1 => self.press("Enter", 0),
+                        // Challenge and Options open menus; the other actions
+                        // are rejected. Options polls the held Enter that
+                        // opened it (59B454).
+                        0..=1 => self.press("Enter", e.range(0, 2)),
                         2..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), 0),
                         14 => self.press("Escape", 0),
                         _ => self.ticks(e),
                     }
                 }
             }
+            // Options acts on keys held at a tick (the released System poll),
+            // so presses hold into ticks; long holds reach the hold repeat.
+            Screen::Options => match e.below(20) {
+                0..=6 => self.press(
+                    e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]),
+                    e.range(1, 3),
+                ),
+                7..=11 => {
+                    let hold = if e.chance(1, 6) {
+                        e.range(48, 90)
+                    } else {
+                        e.range(1, 3)
+                    };
+                    self.press(e.pick(&["ArrowLeft", "ArrowRight", "KeyA", "KeyD"]), hold)
+                }
+                12..=13 => self.press(e.pick(&["Enter", "Space"]), e.range(1, 3)),
+                14..=16 => self.press("Escape", e.range(1, 3)),
+                _ => self.ticks(e),
+            },
             Screen::Challenge => match e.below(20) {
                 0..=5 => self.press("Enter", 0),
                 6..=13 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),
