@@ -4,7 +4,10 @@
 //! the browser's `game.reset(seed, ...)` plus commands reproduces, so a DST
 //! finding replays outside the harness without translation.
 use rebirth_cleanroom::{
-    fullscreen::FullscreenPreferences, keyboard::InputConfigs, options_menu::AudioPreferences,
+    fullscreen::FullscreenPreferences,
+    keyboard::InputConfigs,
+    options_menu::AudioPreferences,
+    save_host::{SaveHost, SaveStore},
     Command, Game,
 };
 use serde::{Deserialize, Serialize};
@@ -23,6 +26,9 @@ pub struct Tape {
     /// The input configuration file (inputconfigs.dat) the browser stored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boot_input_configs: Option<InputConfigs>,
+    /// The browser's own-save storage (`save_host`); absent, no save IO.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub save_host: Option<SaveHost>,
     pub commands: Vec<Command>,
 }
 
@@ -34,6 +40,7 @@ impl Tape {
             boot_audio_preferences: None,
             boot_fullscreen_preferences: None,
             boot_input_configs: None,
+            save_host: None,
             commands: Vec::new(),
         }
     }
@@ -56,6 +63,18 @@ impl Tape {
             self.boot_fullscreen_preferences,
             self.boot_input_configs.clone(),
         )
+    }
+
+    /// The boot and, with a save host, its declared save IO and stored
+    /// document, as the browser performs them before the first command.
+    pub fn session(&self) -> Result<(Game, Option<SaveStore>), String> {
+        let mut game = self.boot()?;
+        let store = self
+            .save_host
+            .as_ref()
+            .map(|host| host.boot(&mut game))
+            .transpose()?;
+        Ok((game, store))
     }
 
     pub fn read(path: &Path) -> Result<Self, String> {

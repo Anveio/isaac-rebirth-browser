@@ -137,6 +137,7 @@ pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
 pub mod run_quit;
+pub mod save_host;
 pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
@@ -867,7 +868,9 @@ pub struct Game {
     pub saved_run: Option<saved_game::SavedRun>,
     #[serde(default)]
     pub menu_readmission: Option<save_profiles::MenuReadmission>,
-    #[serde(skip)]
+    /// The declared host capability decides whether a readmission waits for
+    /// the host's document, so a resumed Game keeps it.
+    #[serde(default)]
     save_io_enabled: bool,
     #[serde(skip)]
     save_write_request: Option<save_profiles::SaveWriteRequest>,

@@ -218,6 +218,10 @@ pub(crate) fn bomb_hit_with_copied_source(
 }
 
 /// The same circle/impulse/queue with the caller's actual incoming flags.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "each argument is a separate input of the 554490 blast circle: center, radius, damage, source, copied EntityRef, the caller's incoming damage flags and its line-clear test"
+)]
 pub(crate) fn blast_hit_with_kind(
     state: &mut State,
     center: WorldVector,
