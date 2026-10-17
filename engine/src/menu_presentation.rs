@@ -95,7 +95,8 @@ impl SaveSelect {
     /// non-Select clip hands over to the selected file's Select and drawing.
     fn update(&mut self) {
         // SelectN/DeselectN author five frames; Idle one; Animated loops ten.
-        self.menu.update(if self.menu.animation == "Idle" { 1 } else { 5 }, false);
+        self.menu
+            .update(if self.menu.animation == "Idle" { 1 } else { 5 }, false);
         for drawing in &mut self.drawings {
             let animated = drawing.animation == "Animated";
             drawing.update(if animated { 10 } else { 1 }, animated);
@@ -147,7 +148,11 @@ impl Carousel {
                 // The shorter way round turns toward the target.
                 let toward = difference < 180.0;
                 let turn = difference.min(limit);
-                self.angle = if toward == forward { angle + turn } else { angle - turn };
+                self.angle = if toward == forward {
+                    angle + turn
+                } else {
+                    angle - turn
+                };
                 if self.angle < 0.0 {
                     self.angle = 360.0;
                 } else if self.angle > 360.0 {
@@ -155,8 +160,12 @@ impl Carousel {
                 }
             }
             // The f64 portrait angle narrows to f32 before sincosf.
-            let around = -((f64::from(index as f32) * std::f64::consts::TAU / f64::from(total)) as f32);
-            let (x, y) = (crate::fmath::cos(around) * 70.0, crate::fmath::sin(around) * 70.0);
+            let around =
+                -((f64::from(index as f32) * std::f64::consts::TAU / f64::from(total)) as f32);
+            let (x, y) = (
+                crate::fmath::cos(around) * 70.0,
+                crate::fmath::sin(around) * 70.0,
+            );
             // Vector rotate612640 converts degrees with f32 0x3c8efa35.
             let radians = (90.0 - self.angle) * f32::from_bits(0x3c8e_fa35);
             let (sin, cos) = (crate::fmath::sin(radians), crate::fmath::cos(radians));
@@ -298,7 +307,11 @@ impl MenuPresentation {
     /// SetMenu59CAC0 and the page targets the page updates set.
     fn set_page(&mut self, page: Page, input: Input) {
         let seed_view = input.seed;
-        let challenge_scroll = if page == Page::Challenge { input.challenge } else { 0 };
+        let challenge_scroll = if page == Page::Challenge {
+            input.challenge
+        } else {
+            0
+        };
         if page != self.page {
             self.moving = true;
             // 5A0680 resets the Character carousel when Save opens Game.
