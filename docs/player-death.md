@@ -2,14 +2,15 @@
 
 The normal Player damage callback now carries the admitted caller's damage
 flags into Kill and Death. Both public death routes now execute in fresh
-original/browser pairs; the complete four-case gate remains red. Revival items, other characters, cooperative players,
-black hearts, and complete diary content remain unimplemented.
+original/browser pairs; the complete four-case gate remains red. Revival items,
+other characters, cooperative players, black hearts, and complete diary content
+remain unimplemented.
 
 | Contract | Original evidence | Port state | Live acceptance |
 | --- | --- | --- | --- |
 | Health-depleted damage and NO_KILL bit1 | Player52b080/52c675/52cbc9 | Explicit admitted damage branch; no global zero-HP death trigger | Pending |
 | Normal zero-gib Kill | Entity4464c0/445c60/44622e | SFX30 volume f32.8, delay2; own Shared raw seed, real Blood7 and immediate Update | Pending |
-| Death animation and motion | Player531850/531b24/531bb6; RoomFast5cd920 | Base carried motion precedes the dead branch and velocity reset on both Player callbacks; callbacks entered dead retain the source ground query; ANM advances only on full Base callbacks | Selected Death frame/playing/guard agree in both required routes; current full-cohort acceptance remains pending |
+| Death animation and motion | Player531850/531b24/531bb6; RoomFast5cd920 | Base carried motion precedes the dead branch and velocity reset on both Player callbacks; callbacks entered dead retain the source ground query; ANM advances only on full Base callbacks | Required-route position/velocity and Death frame/playing/guard agree; the complete gate remains red |
 | Finish and GameOver | Player52e770; Manager5bf8f0; Popup558900 | Hide body, immediate Music93 and queue8, popup state2 | Actual hidden/dead/popup2 and stopped Diary0 agree in both required routes |
 | Popup clock fence | Game550760 | Gameplay freezes; released System input and music continue | Pending |
 | Public actions14/15 | Keyboard62b520/620440/62bb90; Popup557650 | Per-key default Space/Return/Escape edges; deferred System requests | Pending |
@@ -58,6 +59,43 @@ query, so the full manager restores its query after contacts. Common Kill
 retains Isaac's class5 and collision samples, so zero velocity still permits
 bounded penetration correction. The existing player collider supplies that
 query.
+
+The current [kept public-input bank](../references/isaac/cases/player-death/recovery-dead-player-base-motion.json)
+has SHA256 `c2fec061861dba7f2ad432c1e7cbc2253edca2706dfc3c0a39740f52a39f2ebb`.
+All 2,962 checkpoints and 52,190 canonical state checks execute. Original
+backend/input provenance and fresh DOM Browser captures pass for all four
+cases; both required routes actually die and reach popup2, while both
+unfiltered OS rows remain alive. The same validated Original bank is reused
+for each immutable Browser artifact.
+
+Against main88b3 production
+`8beae6bbe77714fb59236a91510cf4fa6892be28326b645db77798f6c8a789ae`,
+guarded source2589dd2e production
+`d1a9b8d7703ecc755791570a5e1a06f2549e95e16e40f7e251bda578088ad185`
+removes 517 Y failures (Restart258, Exit259), with no regressed fields, changed
+passing values or changed remaining failures. All 52,190 selected fields agree
+with the earlier unguarded production
+`0331a7ea6c716cdbf5bdc994dd4def92346374a0fad18e84cf1b483fccf5fcff`.
+
+The gate remains **FAIL** with 3,014 strict failures: 2,774 Game-age, 80
+Exit-title-frame, 80 Exit-fade-color, 40 Exit-fade-active and 40 Exit-fade-alpha.
+The guarded A/B replay uses the unchanged canonical capture, Original
+validator, bank/death coverage guards and field comparer. Full actual Browser
+PNGs, manifests and input/backend traces are retained; RGBA differences are
+explicitly not computed for this replay. The complete RGBA diagnostics from
+production0331 remain preserved and red, without regrading or a pixel-parity
+claim.
+
+After the format-only main merge, source3028eb11 production
+`524351dbbd078b0fc62980668f633a36474b12e597c8a3a2a4c4affdf1a92781`
+also passes fresh DOM Browser capture and Original validation for the same
+26-checkpoint lethal prefix. All 329 selected fields agree with production0331;
+the seven baseline Y failures stay fixed and the 19 existing Game-age failures
+stay red. This final-artifact check supplements the complete cohort above.
+
+Replay the kept bank through `player-death --scenario-file
+references/isaac/cases/player-death/recovery-dead-player-base-motion.json`;
+an explicit `--case death-spikes-restart` selects its focused required route.
 
 The port's existing living-player grid query still runs before full-phase
 entity contacts. A Player killed later during contacts has already received
