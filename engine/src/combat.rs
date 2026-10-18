@@ -16,6 +16,18 @@ pub fn try_damage_player(
     immunity_presentations: u32,
     flags: u32,
 ) -> Result<bool, String> {
+    try_damage_player_from(state, health_units, immunity_presentations, flags, None)
+}
+
+/// `try_damage_player` with the source entity type, or for a projectile its
+/// spawner's (EntityRef +0 / +8): a Greed, Keeper or Hanger hit steals coins.
+pub fn try_damage_player_from(
+    state: &mut crate::State,
+    health_units: u8,
+    immunity_presentations: u32,
+    flags: u32,
+    source_type: Option<u32>,
+) -> Result<bool, String> {
     if health_units == 0 || state.player.dead || state.damage_cooldown != 0 {
         return Ok(false);
     }
@@ -26,6 +38,9 @@ pub fn try_damage_player(
         state,
         crate::ordinary_placement::Frontier::PlayerDamageEffects,
     );
+    if matches!(source_type, Some(50 | 86 | 90)) {
+        steal_coins(state)?;
+    }
     crate::health_damage::apply_admitted(state, health_units, flags)?;
     state.damage_cooldown = immunity_presentations;
     crate::player_death::after_damage(state, flags)?;
@@ -33,6 +48,44 @@ pub fn try_damage_player(
     crate::item_queries::after_damage_queries(state, normal_source_query_path);
     crate::health_damage::finish_admitted(state);
     Ok(true)
+}
+
+/// 52bfa0..52c0b1, ahead of the hurt sound: with coins, Isaac loses one, then
+/// drops `min(bounded(3) + 1, coins)` more as pennies 5.20.1 he can pick back
+/// up, each with a seed, a speed `float·5 + 2` and a direction.
+fn steal_coins(state: &mut crate::State) -> Result<(), String> {
+    if state.inventory.coins == 0 {
+        return Ok(());
+    }
+    state.inventory.coins -= 1;
+    let shared = &mut state.boot_lifecycle.shared;
+    let count = (shared.bounded(3) + 1).min(state.inventory.coins);
+    let position = crate::bombs::player_world(state);
+    for _ in 0..count {
+        let shared = &mut state.boot_lifecycle.shared;
+        let seed = shared.next_u32();
+        let speed = shared.uniform() * 5.0 + 2.0;
+        let angle = (f64::from(shared.uniform()) * std::f64::consts::TAU) as f32;
+        let direction = WorldVector {
+            x: crate::fmath::cos(angle),
+            y: crate::fmath::sin(angle),
+        };
+        let id = state.next_pickup;
+        state.next_pickup = id.checked_add(1).ok_or("stolen coin identity exhausted")?;
+        let mut pickup = crate::pickups::Pickup::spawn(id, 20, 1, position, true)?;
+        pickup.initialize_spawn_seed(seed)?;
+        pickup.velocity = direction * speed;
+        pickup.birth_game_update = state.game_update_count;
+        state.room.pickups.push(pickup);
+        let actor = crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id,
+        };
+        state.room.authored_actor_order.push(actor);
+        state.actor_scheduler.admit(actor)?;
+    }
+    state.inventory.coins -= count;
+    Ok(())
 }
 
 /// Player Update and its intermediate counterpart each advance admitted hurt
