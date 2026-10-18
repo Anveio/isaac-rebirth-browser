@@ -116,7 +116,7 @@ export function fightKeys(view, memory) {
   const flight = memory.lead ? distance / 10 : 0;
   const ax = dx + (target.vx ?? 0) * flight, ay = dy + (target.vy ?? 0) * flight;
   const aim = Math.abs(ax) >= Math.abs(ay) ? (ax > 0 ? 'ArrowRight' : 'ArrowLeft') : (ay > 0 ? 'ArrowDown' : 'ArrowUp');
-  const radius = memory.lead ? 90 : target.boss ? 170 : 110, pull = (radius - distance) / radius * 2;
+  const radius = memory.lead ? 90 : target.boss ? (memory.bossRadius ?? 170) : 110, pull = (radius - distance) / radius * 2;
   const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
   const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
   const solid = (x, y) => {

@@ -21,7 +21,9 @@
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
 // fightKeys) and parks the player in the bottom-left corner (`corner`);
 // --lead aims ahead of each foe's velocity and orbits closer; --dodge scores
-// moves against enemy shots' projected paths and lit fireplaces; --no-corner
+// moves against enemy shots' projected paths and lit fireplaces; --orbit -1
+// starts the orbit the other way round and --boss-radius R holds bosses at R
+// units (default 170); --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -261,7 +263,10 @@ try {
     }
   };
   if (FIGHT) {
-    const memory = { orbit: 1, lead: hasFlag('--lead'), dodge: hasFlag('--dodge') };
+    // --orbit -1 starts the boss orbit the other way round; --boss-radius R
+    // holds bosses at R units instead of 170.
+    const memory = { orbit: Number(flag('--orbit', '1')), lead: hasFlag('--lead'), dodge: hasFlag('--dodge'),
+      ...(flag('--boss-radius') ? { bossRadius: Number(flag('--boss-radius')) } : {}) };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
     // or beside it then takes the item in the port alone, which leaves an
     // empty pedestal (subtype 0) where the original's keeps its item. With
