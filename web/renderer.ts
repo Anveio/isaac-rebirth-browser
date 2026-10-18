@@ -422,6 +422,9 @@ export class Renderer {
       if (bomb.motion.lifetime === "alive")
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const explosion of state.explosions) {
+      // Owned rows only project the real Effect1 frame/light. Draw it once
+      // through spriteEffects; old serialized adapter rows remain explicit.
+      if (explosion.sourceEffect !== undefined) continue;
       this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     }
     for (const bomb of state.bombs)

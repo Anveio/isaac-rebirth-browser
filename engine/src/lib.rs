@@ -4275,11 +4275,16 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
+        if phase == phase::Phase::Update {
+            //5D1384 grid callbacks precede5D145A's manager454DF0 fence.
+            //A bomb rock's Effect1 therefore gets its first real Full here;
+            //a child born inside a Bomb actor callback remains fenced out.
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
+            rock_blast::advance_markers(&mut self.state);
+        }
         let existing = self.state.actor_scheduler.full_phase();
         let mut player_updated = false;
         if phase == phase::Phase::Update {
-            rock_blast::advance_bomb_rocks(&mut self.state)?;
-            rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
                 if *counter > 0 {

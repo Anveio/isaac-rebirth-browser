@@ -207,7 +207,7 @@ export interface Bomb {
     fullUpdates: number; animationFrame: number; lifetime: "alive" | "exploding" | "removed";
   };
 }
-export interface Explosion { id: number; x: number; y: number; animationFrame: number; }
+export interface Explosion { id: number; x: number; y: number; animationFrame: number; sourceEffect?: number; }
 export interface Pickup {
   sourceSpawner?: {entityType: number; variant: number} | null;
   pocketContactDelay?: number | null;

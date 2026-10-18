@@ -35,8 +35,8 @@ pub struct BombRockFuse {
 /// collision class3 and post-decrements Rock+348; when it reads zero, the
 /// fourth update, Destroy56c670 sets state2, collision0 and marker900, then
 /// explodes through Game554490 with damage40, radius60 and flags4 and no
-/// source entity. Its 1000/1 explosion and particle draws stay unadmitted
-/// effect families, as for ordinary rock debris.
+/// source entity. Its actual1000/18 record and1000/1 children use the shared
+/// explosion owners; ordinary rubble/worm particle families remain separate.
 pub fn advance_bomb_rocks(state: &mut State) -> Result<(), String> {
     // Grid updates run in ascending cell order; rocks that a secondary blast
     // moves to state3 start counting on the next update.
@@ -84,7 +84,12 @@ pub fn advance_bomb_rocks(state: &mut State) -> Result<(), String> {
         )?;
         // Rock.Destroy56c8ec/56ca46: the same crater and explosion spawns as
         // a bomb. The explosion's light owner is keyed apart from bomb ids.
-        crate::bombs::spawn_blast_effects(state, 0x8000_0000 | cell as u32, position);
+        crate::bombs::spawn_blast_effects(
+            state,
+            0x8000_0000 | cell as u32,
+            position,
+            crate::attack_color::AttackColor::WHITE,
+        )?;
     }
     Ok(())
 }
