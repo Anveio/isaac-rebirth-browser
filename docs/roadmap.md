@@ -610,7 +610,9 @@ candidate `46affff7`, artifact `2a6cbdf4` / WASM `f415dc46`, passes build/interf
 checks, affected selection of 52 suites and the registered fixed `PBW9YNC8` Browser test:
 28 checks, 18 labels and 217 commands. The actual packet retains all four live
 paused room 7 coins with matching write/store/menu-readmission bytes; the
-Bomb-only baseline remains 27 pass / 1 missing-list failure. This qualifies the
+Bomb-only baseline remains 27 pass / 1 missing-list failure. Both existing
+initial-room capacity contracts also pass on this artifact (35 and 4,062 checks),
+covering own-store Continue and oversized-write rejection. This qualifies the
 storage writer, not later-room Continue, NPC restoration, Original actor-save
 packet parity or later-main gameplay. See [Save scope and replay](save-continue.md).
 

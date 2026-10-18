@@ -823,7 +823,10 @@ the copied SavedRun. Fresh PR #711 base candidate `46affff7` / artifact `2a6cbdf
 52 and the registered fixed `PBW9YNC8` storage test: 28 checks, 18 labels and
 217 commands. All four paused room 7 coins now appear in the actual packet;
 write/store/menu readmission share its bytes. The retained Bomb-only baseline
-remains 27 pass / 1 missing-list failure. Later-room Continue, NPC restoration,
+remains 27 pass / 1 missing-list failure. The same artifact also passes both
+initial-room capacity contracts (35 and 4,062 checks), including own-store
+Continue and retaining the older store after an oversized-write rejection.
+Later-room Continue, NPC restoration,
 Original actor-save packet parity and later-main gameplay remain unqualified.
 
 The public initial-room Save/Continue increment now writes bounded origin-local

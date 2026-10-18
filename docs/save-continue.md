@@ -57,6 +57,11 @@ contains their exact ordered handles, positions, spawn/RNG seeds, charge,
 touched and saved-byte fields; the successful write, stored bytes and menu
 readmission identify the same packet.
 
+The two existing initial-room capacity contracts also pass on this artifact:
+35 checks for a complete packet, successful acknowledgement and Continue from
+its own store; 4,062 checks for rejecting the oversized write and Continuing
+from the unchanged older store. These remain Browser storage contracts.
+
 The retained Bomb-only baseline remains 27 pass / 1 fail: its packet omitted
 those same four live records. Earlier launch/observation failures and its
 separate retention hold remain preserved. This is a Browser storage contract
