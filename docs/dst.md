@@ -328,9 +328,13 @@ short coverage tape.
 
 `tools/dst/chase.py` chains those branches for scenarios that need several
 rare events in a row. Each `--stage` names census keys. Every stage branches
-64 cases from the prefix so far and keeps the case that reached its keys
-earliest, cut just past them. The next stage branches from that cut, and the
-final tape is written only if its replay reaches every stage.
+64 cases from the prefix so far and keeps the cases that reached its keys,
+earliest first, each cut just past them. The next stage branches from the
+earliest cut, and a round that reaches nothing moves the next round to the
+next-earliest: a boss entry no branch survives (Monstro's first entry on
+dc38bee, 0 kills in 256) is one dead end among the stage's hits, not the
+end of the chase. The final tape is written only if its replay reaches
+every stage.
 
 Every scenario tape built this way keeps its recipe in
 [engine/dst/chases.json](../engine/dst/chases.json): the tape and its stages.
