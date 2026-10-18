@@ -43,8 +43,9 @@ def declaration(context):
     if case.get('declarationMode') != 'map-opacity-fast31-source-v1' or contract.get('schema') != 1 \
             or contract.get('caseDeclarationMode') != case['declarationMode']:
         raise ValueError('Unadmitted Map public declaration/schema')
-    if contract.get('preferenceSchema') != 3 or contract.get('storageKey') != 'isaac-rebirth.options.v3':
-        raise ValueError('Map requires explicitly declared V3 preference ownership')
+    if type(contract.get('preferenceSchema')) is not int or contract['preferenceSchema'] not in (3, 4) \
+            or contract.get('storageKey') != 'isaac-rebirth.options.v' + str(contract['preferenceSchema']):
+        raise ValueError('Map requires explicitly declared V3 or V4 preference ownership')
     if case['tape'] != case['bootstrap']['sourceOnlyPrelude'] + case['pairedTape']:
         raise ValueError('Map full public tape must retain declared intro plus paired suffix')
     native_labels = [row['label'] for row in case['tape'] if row['type'] == 'capture']

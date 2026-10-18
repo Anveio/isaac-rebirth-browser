@@ -225,6 +225,12 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             inputs,
             state.weapon_admission.source_player_type,
             state.source_cache_run_flags,
+            crate::item_queries::AppearanceQueries::new(
+                state.player_items.as_ref().expect("checked cache owner"),
+                state.weapon_cache.primary,
+                state.player.entity_source,
+                None,
+            ),
         )? {
             state.player_stats.luck = Some(luck);
             completed |= 1024;

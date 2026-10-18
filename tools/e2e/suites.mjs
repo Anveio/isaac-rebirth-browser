@@ -102,6 +102,8 @@ export const SUITES = [
     'Source-authored normal SKU fixtures: four branches plus recorded OS idle-approach controls'),
   suite('item-composition', e2e('item-composition'), ['--count', '2'],
     'Public Challenge resources, ordered pedestal grants, cache and weapon bodies/history across fixed phases and recorded OS cases'),
+  suite('trinket-start', e2e('item-composition'), ['--trinket-start', '--count', '1'],
+    'Declared Challenge Kind2 Give41/Remove41 actual calls, held/cache/pool fields and unchanged default shots; fixed phases plus first OS input'),
   suite('pockets', e2e('item-composition'), ['--pockets', 'all', '--count', '1'],
     'Card/Pill procedural Init, held collection and spills, copied presentation and sound requests; fixed and recorded/fresh OS public inputs'),
   suite('card-pill-init', e2e('item-composition'), ['--pockets', 'init', '--count', '1'],
@@ -136,10 +138,13 @@ export const SUITES = [
   suite('run-admission', e2e('run-admission'), ['--count', '2'],
     'Initial run admission: menu confirmation clock anchor and Player control enable timing'),
   suite('audio', e2e('audio'), ['--count', '2'], 'SFX admission and Web Audio output'),
-  suite('options-map', e2e('options-map-suite'), ['--count', '1'],
+  suite('options-gamma', e2e('options-map-suite'), ['--count', '1', '--preferences-schema', '4', '--gamma'],
+    'Gamma f32 repeat/clamps, percentage, final composition and Back/reload: fixed plus unfiltered OS public inputs',
+    { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
+  suite('options-map', e2e('options-map-suite'), ['--count', '1', '--preferences-schema', '4'],
     'Map opacity repeats/clamps/Back and short-Tab map surfaces: fixed route plus unfiltered OS seed/boot, actual owners and required render regions',
     { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
-  suite('options-audio', e2e('options-audio'), ['--count', '1', '--preferences-schema', '3'],
+  suite('options-audio', e2e('options-audio'), ['--count', '1', '--preferences-schema', '4'],
     'Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed',
     { env: { ISAAC_CLOCK_GATE_RENDER_ALL: '1', ISAAC_CLOCK_GATE_WINDOW_QUERIES: '1' } }),
   // The original streams and starts music on worker threads that keep real
@@ -171,15 +176,15 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
-  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map'],
+  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
   stage: ['stage-exit', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
-  items: ['items', 'item-composition', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
+  items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars'],
   combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'tnt', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
   monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],
-  audio: ['audio', 'music', 'options-audio', 'options-map'],
+  audio: ['audio', 'music', 'options-audio', 'options-map', 'options-gamma'],
 };
 for (const [group, ids] of Object.entries(GROUPS)) for (const id of ids)
   if (!suiteById.get(id) || suiteById.get(id).alias) throw new Error(`Group ${group} names unknown or alias suite ${id}`);

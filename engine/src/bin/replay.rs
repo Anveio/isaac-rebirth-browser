@@ -19,6 +19,8 @@ struct Replay {
     #[serde(default)]
     boot_map_preferences: Option<rebirth_cleanroom::map_presentation::MapPreferences>,
     #[serde(default)]
+    boot_gamma_preferences: Option<rebirth_cleanroom::display_settings::GammaPreferences>,
+    #[serde(default)]
     boot_elapsed: Option<BootElapsed>,
     /// The browser's own-save storage; absent, the game has no save IO.
     #[serde(default)]
@@ -67,7 +69,7 @@ fn main() {
         eprintln!("replay exceeds 36,000 total simulation steps");
         std::process::exit(1);
     }
-    let mut game = match Game::new_with_input_configs_and_map_preferences(
+    let mut game = match Game::new_with_settings_preferences(
         replay.initial_seed,
         replay.boot_epoch_seed,
         None,
@@ -75,6 +77,7 @@ fn main() {
         replay.boot_fullscreen_preferences,
         replay.boot_input_configs,
         replay.boot_map_preferences,
+        replay.boot_gamma_preferences,
     ) {
         Ok(game) => game,
         Err(error) => {

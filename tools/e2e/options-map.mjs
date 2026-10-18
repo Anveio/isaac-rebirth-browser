@@ -16,6 +16,8 @@ import {browserLaunchOptions,inspectBrowserGraphics} from '../foundation/browser
 import {pixelDifference,crop} from '../foundation/compare.mjs';
 import {validateMapDeclaration,compareOptionsMap} from '../foundation/options-map-state-pair.mjs';
 import {mapObservedBrowser} from './options-map-browser.mjs';
+import {gammaObservedBrowser} from './options-gamma-browser.mjs';
+import {validateGammaDeclaration,compareOptionsGamma} from '../foundation/options-gamma-state-pair.mjs';
 
 const ROOT=path.resolve(fileURLToPath(new URL('../..',import.meta.url)));
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -25,14 +27,15 @@ for(const name of ['--binding','--binding-sha256','--output'])assert.ok(flag(nam
 const bindingPath=path.resolve(flag('--binding')),bindingHash=flag('--binding-sha256');
 assert.equal(digest(bindingPath),bindingHash,'Exact separately reviewed launch binding required');
 const binding=read(bindingPath);
-assert.equal(binding.schema,1);assert.equal(binding.mode,'reviewed-options-map-fast31-v1');
+assert.equal(binding.schema,1);assert.ok(['reviewed-options-map-fast31-v1','reviewed-options-gamma-v1'].includes(binding.mode));
+const gammaMode=binding.mode==='reviewed-options-gamma-v1';
 assert.equal(path.resolve(binding.sourceRoot),ROOT,'Execute only the independently frozen Source named by the binding');
 for(const name of ['ISAAC_CLOCK_GATE_RENDER_ALL','ISAAC_CLOCK_GATE_WINDOW_QUERIES'])
   assert.equal(process.env[name],binding.nativeEnvironment[name],`Declared Native host mode ${name} required`);
 assert.deepEqual(binding.nativeEnvironment,{ISAAC_CLOCK_GATE_RENDER_ALL:'1',ISAAC_CLOCK_GATE_WINDOW_QUERIES:'1'});
 const data=read(binding.caseFile),contract=read(binding.contractFile);
 assert.equal(digest(binding.caseFile),binding.caseSha256);assert.equal(digest(binding.contractFile),binding.contractSha256);
-validateMapDeclaration(data,contract);
+(gammaMode?validateGammaDeclaration:validateMapDeclaration)(data,contract);
 const output=path.resolve(flag('--output'));assert.ok(!fs.existsSync(output),'Use a fresh immutable output directory');
 const identity=()=>Object.fromEntries(Object.keys(binding.sourceFiles).sort().map(name=>{
   const p=path.resolve(ROOT,name);assert.ok(p.startsWith(ROOT+path.sep)&&fs.statSync(p).isFile(),'Source pin outside frozen Source');
@@ -75,14 +78,14 @@ for(let at=12;at+8<=sample.length;) {
   at=start+size+(size&1);
 }
 assert.ok(pcm);const pcm237Sha256=hash(pcm);
-const observer=path.join(ROOT,'tools/original/options-map-observe.py');
-const launchIdentity={schema:1,mode:'options-map-fast31-paired-v1',binarySha256:ORIGINAL_SHA,bindingSha256:bindingHash,
+const observer=path.join(ROOT,gammaMode?'tools/original/options-gamma-observe.py':'tools/original/options-map-observe.py');
+const launchIdentity={schema:1,mode:gammaMode?'options-gamma-paired-v1':'options-map-fast31-paired-v1',binarySha256:ORIGINAL_SHA,bindingSha256:bindingHash,
   caseSha256:binding.caseSha256,contractSha256:binding.contractSha256,captureProducerSha256:before['tools/foundation/paired-game.mjs'],
-  observerSha256:before['tools/original/options-map-observe.py'],audioLibrarySha256:libraryHash,
+  observerSha256:before[gammaMode?'tools/original/options-gamma-observe.py':'tools/original/options-map-observe.py'],audioLibrarySha256:libraryHash,
   publicClockSha256:hash(JSON.stringify(clock)),publicStartup:{audio:{sfxVolume:1,musicVolume:1},fullscreen:false,mapPreferences:null},nativeEnvironment:binding.nativeEnvironment};
 writeJson(path.join(output,'observer-identity.json'),launchIdentity);
 const report={schema:1,status:'running',identity:launchIdentity,sourceBefore:before,frames:[],diagnostics:[],
-  scope:'One new fixed31Native/30Browser Map pair, complete public clock and inputs. Native-only probes and old84/V2 results do not qualify this run. No reload/migration/banner/controller/fullmix/completeMT acceptance.'};
+  scope:gammaMode?'One declared21Native/20Browser Gamma pair, actual settings/config/number/final GPU and V4 Back plus separate real Browser reload. No old Native regrade, HQ4X, Popups, Native reload or complete MT acceptance.':'One new fixed31Native/30Browser Map pair, complete public clock and inputs. Native-only probes and old84/V2 results do not qualify this run. No reload/migration/banner/controller/fullmix/completeMT acceptance.'};
 let server,browser,native,candidate,comparison,error;
 const observed={checkpoints:[],errors:[],failures:[]};
 const retain=value=>fs.writeFileSync(path.join(output,'actual-browser-owners.json.gz'),gzipSync(JSON.stringify(value)));
@@ -97,7 +100,7 @@ try {
   catch(failure){native={status:'fail',error:String(failure.stack??failure)};}
   try {
     browser=await chromium.launch({...browserLaunchOptions(),headless:false});report.graphics=await inspectBrowserGraphics(browser);
-    candidate=await browserCapture(mapObservedBrowser(browser,data,contract,observed,retain),server,data,path.join(output,'browser'),true,true,false,clock,{sfxVolume:1,musicVolume:1},false);
+    candidate=await browserCapture((gammaMode?gammaObservedBrowser:mapObservedBrowser)(browser,data,contract,observed,retain),server,data,path.join(output,'browser'),true,true,false,clock,{sfxVolume:1,musicVolume:1},false);
   } catch(failure){candidate={status:'fail',failures:[String(failure.stack??failure)],frames:[]};}
   finally {try{await browser?.close();}catch(failure){observed.failures.push(String(failure.stack??failure));}browser=undefined;retain(observed);}
   try {if(native.deferredEvidence)native=await native.deferredEvidence();if(native.status==='pass')native.publicClockValidation=validateNativeClockPlan(data,clock,native);}
@@ -106,7 +109,7 @@ try {
   writeJson(path.join(output,'browser-status.json'),{status:candidate.status,failures:candidate.failures});
   const calls=fs.readFileSync(path.join(output,'original/audio-trace/calls.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
   assert.equal(calls[0].api,'trace-start');calls.slice(1).forEach((c,i)=>assert.equal(c.seq,i+1));
-  comparison=compareOptionsMap({data,contract,clock,native,browser:candidate,observed,calls,scopedState,pcm237Sha256});
+  comparison=(gammaMode?compareOptionsGamma:compareOptionsMap)({data,contract,clock,native,browser:candidate,observed,calls,scopedState,pcm237Sha256});
   writeJson(path.join(output,'functional-comparison.json'),comparison);
   const nativeFrames=new Map((native.manifest?.frames??[]).map(f=>[f.label,f]));const browserFrames=new Map(candidate.frames.map(f=>[f.label,f]));
   const nativePNGInputs=Object.fromEntries([...nativeFrames].map(([label,n])=>[label,{path:path.resolve(output,'original',n.path),sha256:digest(path.resolve(output,'original',n.path))}]));
@@ -145,7 +148,7 @@ finally {
     report.sourceAfterUnchanged=true;
   }catch(failure){error??={message:String(failure.message),stack:failure.stack};}
   retain(observed);report.error=error;report.functional=comparison;
-  report.status=!error&&native?.status==='pass'&&candidate?.status==='pass'&&comparison?.status==='pass'&&observed.errors.length===0&&observed.failures.length===0&&report.frames.length===30&&report.frames.every(r=>r.status==='pass')?'pass':'fail';
+  report.status=!error&&native?.status==='pass'&&candidate?.status==='pass'&&comparison?.status==='pass'&&observed.errors.length===0&&observed.failures.length===0&&report.frames.length===contract.pairedLabels.length&&report.frames.every(r=>r.status==='pass')?'pass':'fail';
   writeJson(path.join(output,'report.json'),report);
 }
 console.log(JSON.stringify({status:report.status,report:path.join(output,'report.json')}));process.exitCode=report.status==='pass'?0:1;

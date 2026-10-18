@@ -24,7 +24,7 @@ pub(crate) fn gimpy_half_heart(
     if count <= 0 {
         return Ok(false);
     }
-    if items.trinket_slots != [0, 0] || items.queued_id.is_some() {
+    if items.trinket_slots != [0, 0] || !items.queue_is_empty() {
         return Err("Gimpy callback requires the actual trinket22 owner".into());
     }
     if !max_hp.is_finite() || max_hp <= 0.0 {

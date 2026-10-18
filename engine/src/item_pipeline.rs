@@ -2,9 +2,7 @@
 //!
 //! Item predicates retain their distinct source meanings. Actor removal,
 //! admission, audio, and random draws belong to the caller/backend.
-use crate::{
-    items, player_items::PlayerItems, player_stats::PlayerStats, weapon_plan::PrimaryWeaponC08,
-};
+use crate::{player_items::PlayerItems, player_stats::PlayerStats, weapon_plan::PrimaryWeaponC08};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct CacheMask(pub(crate) u32);
@@ -199,6 +197,7 @@ impl<'a> ItemInputs<'a> {
         source_player_type: Option<u32>,
         primary: PrimaryWeaponC08,
         flags: crate::attack_flags::AttackFlags,
+        queries: crate::item_queries::AppearanceQueries<'_>,
     ) -> Option<u32> {
         if self.admits_soy_milk_regular_properties(source_player_type, primary, flags) {
             return Some(0);
@@ -213,7 +212,11 @@ impl<'a> ItemInputs<'a> {
         (source_player_type == Some(0)
             && primary == PrimaryWeaponC08::RegularTears
             && flags.0 == 0
-            && self.admits_scalar_context()
+            //50D176/1C7 query30 then31 before the kind1 tail. Only
+            //their actual negatives bypass both shared random branches.
+            && queries.has_trinket(30) == Some(false)
+            && queries.has_trinket(31) == Some(false)
+            && self.owner.temporary_collectibles.is_empty()
             && self
                 .owner
                 .owned_counts
@@ -316,10 +319,7 @@ impl<'a> ItemInputs<'a> {
 
     fn admits_scalar_context(self) -> bool {
         self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.queue_excludes_trinkets()
             && self.owner.temporary_collectibles.is_empty()
     }
 
@@ -369,28 +369,25 @@ impl<'a> ItemInputs<'a> {
     ///variant to BloodTear1. This grants no controller or cache capability.
     pub(crate) fn admits_monstro_kind1_context(self) -> bool {
         self.admits_monstro_readset(MONSTRO_KIND1_ITEMS)
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.owner.queued_collectible_is_none_or(|id| {
+                MONSTRO_KIND1_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
     ///Separate519FC0 C08=7 caller footprint. Has149/55/87/153/2/245
     ///are false; cache and kind1 admission do not grant this controller.
     pub(crate) fn admits_monstro_caller(self) -> bool {
         self.admits_monstro_readset(MONSTRO_CALLER_ITEMS)
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
+            && self.owner.queued_collectible_is_none_or(|id| {
+                MONSTRO_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+            })
     }
 
     fn admits_monstro_readset(self, supported: &[usize]) -> bool {
         self.admits_permanent_readset(229, supported)
             && self
                 .owner
-                .queued_id
-                .is_none_or(|id| supported.contains(&(id as usize)))
+                .queued_collectible_is_none_or(|id| supported.contains(&(id as usize)))
     }
 
     ///Each selected511F10 callback owns its own input roles.2 contributes
@@ -449,10 +446,9 @@ impl<'a> ItemInputs<'a> {
     ///retains actualFIRSTPlayer/source0 and currentC88/C98/CA0 ownership;
     ///physicalParent and the Target's birth inventory are not this getter.
     pub(crate) fn admits_epic_fetus_kind6_context(self) -> bool {
-        self.owner
-            .queued_id
-            .is_none_or(|id| EPIC_FETUS_KIND6_QUEUED_ITEMS.contains(&(id as usize)))
-            && self.admits_permanent_readset(168, EPIC_FETUS_KIND6_ITEMS)
+        self.owner.queued_collectible_is_none_or(|id| {
+            EPIC_FETUS_KIND6_QUEUED_ITEMS.contains(&(id as usize))
+        }) && self.admits_permanent_readset(168, EPIC_FETUS_KIND6_ITEMS)
     }
 
     ///Only actualAdd2/168 may consume this independent zero-amount grant proof,
@@ -467,27 +463,24 @@ impl<'a> ItemInputs<'a> {
     ///Has2 is current signed ownership;153/55/87 are absent. Source0, D80,
     ///charge, C18, RNG and canonicalTarget/Rocket remain caller obligations.
     pub(crate) fn admits_epic_fetus_caller(self) -> bool {
-        self.owner
-            .queued_id
-            .is_none_or(|id| EPIC_FETUS_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
-            && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
+        self.owner.queued_collectible_is_none_or(|id| {
+            EPIC_FETUS_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+        }) && self.admits_permanent_readset(168, EPIC_FETUS_CALLER_ITEMS)
     }
 
     ///51A420..51F3D7: normal C08=1, actual Have2 and no other emitter modifiers.
     pub(crate) fn admits_inner_eye_caller(self) -> bool {
-        self.owner
-            .queued_id
-            .is_none_or(|id| INNER_EYE_CALLER_QUEUED_ITEMS.contains(&(id as usize)))
-            && self.admits_permanent_readset(2, INNER_EYE_CALLER_ITEMS)
+        self.owner.queued_collectible_is_none_or(|id| {
+            INNER_EYE_CALLER_QUEUED_ITEMS.contains(&(id as usize))
+        }) && self.admits_permanent_readset(2, INNER_EYE_CALLER_ITEMS)
     }
 
     ///Independent selected50D090(kind1) trace; passive queued2/4 do not enter
     ///508FE0's queued-config-kind2 branch. Actual current cache stays separate.
     pub(crate) fn admits_inner_eye_kind1_context(self) -> bool {
-        self.owner
-            .queued_id
-            .is_none_or(|id| INNER_EYE_KIND1_QUEUED_ITEMS.contains(&(id as usize)))
-            && self.admits_permanent_readset(2, INNER_EYE_KIND1_ITEMS)
+        self.owner.queued_collectible_is_none_or(|id| {
+            INNER_EYE_KIND1_QUEUED_ITEMS.contains(&(id as usize))
+        }) && self.admits_permanent_readset(2, INNER_EYE_KIND1_ITEMS)
     }
 
     ///Mechanical signed-count/context check, with no item capability implied
@@ -501,10 +494,7 @@ impl<'a> ItemInputs<'a> {
     fn admits_permanent_readset(self, required: usize, supported: &[usize]) -> bool {
         self.positive_owned_count(required)
             && self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.queue_excludes_trinkets()
             && self.owner.temporary_collectibles.is_empty()
             && self
                 .owner
@@ -524,7 +514,8 @@ impl<'a> ItemInputs<'a> {
         ) {
             return true;
         }
-        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+        self.owner
+            .queued_collectible_is_none_or(|id| matches!(id, 4 | 52))
             && self.admits_fetus_readset(FETUS_CACHE_ITEMS, Some(1))
     }
 
@@ -538,7 +529,7 @@ impl<'a> ItemInputs<'a> {
         ) {
             return true;
         }
-        self.owner.queued_id.is_none() && self.admits_fetus_readset(FETUS_KIND5_ITEMS, Some(1))
+        self.owner.queue_is_empty() && self.admits_fetus_readset(FETUS_KIND5_ITEMS, Some(1))
     }
 
     ///Only the actual Add52 wrapper consumes this independent grant proof.
@@ -550,7 +541,8 @@ impl<'a> ItemInputs<'a> {
         ) {
             return true;
         }
-        self.owner.queued_id.is_none_or(|id| matches!(id, 4 | 52))
+        self.owner
+            .queued_collectible_is_none_or(|id| matches!(id, 4 | 52))
             && self.admits_fetus_readset(FETUS_GRANT_ITEMS, Some(1))
     }
 
@@ -567,8 +559,7 @@ impl<'a> ItemInputs<'a> {
             && self.admits_fetus_readset(supported, None)
             && self
                 .owner
-                .queued_id
-                .is_none_or(|id| queued.contains(&(id as usize)))
+                .queued_collectible_is_none_or(|id| queued.contains(&(id as usize)))
     }
 
     ///Mechanical signed-count/context validation, independent of the caller's
@@ -706,10 +697,7 @@ impl<'a> ItemInputs<'a> {
     ///cache32/64 support never expands this contact/controller domain.
     pub(crate) fn admits_neutral_kind2(self) -> bool {
         self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.queue_excludes_trinkets()
             && self.owner.temporary_collectibles.is_empty()
             && self
                 .owner
@@ -727,10 +715,7 @@ impl<'a> ItemInputs<'a> {
 
     pub(crate) fn admits_neutral_kind4(self) -> bool {
         self.owner.trinket_slots == [0, 0]
-            && self
-                .owner
-                .queued_id
-                .is_none_or(|id| items::definition(id).is_some_and(|config| config.kind != 2))
+            && self.owner.queue_excludes_trinkets()
             && self.owner.temporary_collectibles.is_empty()
             && self
                 .owner
@@ -2002,12 +1987,18 @@ pub(crate) fn resolve_neutral_flight(
 struct LuckStage;
 
 impl LuckStage {
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        //Empty actual slots and a non-trinket queue close helper42/21 for
-        //either Have139 capacity. BFC0 excludes the separate BFC8 operator.
+    fn admits(
+        inputs: ItemInputs<'_>,
+        source_player_type: Option<u32>,
+        queries: crate::item_queries::AppearanceQueries<'_>,
+    ) -> bool {
+        //513CCB queries actual42, including Paper21, Have139 capacity,
+        //held slots and typed queue. Positive/unknown42 retains its owner.
+        //BFC0 separately excludes the513CDD/515208 character operator.
         source_player_type == Some(0)
-            && inputs.admits_scalar_context()
+            && inputs.owner.temporary_collectibles.is_empty()
             && inputs.owner.owned_counts.iter().all(|&count| count >= 0)
+            && queries.has_trinket(42) == Some(false)
     }
 }
 
@@ -2060,6 +2051,7 @@ pub(crate) fn resolve_luck(
     inputs: ItemInputs<'_>,
     source_player_type: Option<u32>,
     source_run_flags: Option<u64>,
+    queries: crate::item_queries::AppearanceQueries<'_>,
 ) -> Result<Option<f32>, String> {
     if inputs
         .owner
@@ -2071,7 +2063,7 @@ pub(crate) fn resolve_luck(
     let (Some(auxiliary), Some(run_flags)) = (inputs.owner.luck_inputs, source_run_flags) else {
         return Ok(None);
     };
-    if !LuckStage::admits(inputs, source_player_type) {
+    if !LuckStage::admits(inputs, source_player_type, queries) {
         return Ok(None);
     }
     let (Some(pill_down), Some(pill_up)) = (

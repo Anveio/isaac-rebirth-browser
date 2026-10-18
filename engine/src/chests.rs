@@ -290,9 +290,7 @@ fn empty_trinket_inputs(state: &State) -> bool {
         && state.player_items.as_ref().is_some_and(|items| {
             items.owned_counts.len() == 347
                 && items.trinket_slots == [0, 0]
-                && items.queued_id.is_none_or(|id| {
-                    crate::items::definition(id).is_some_and(|config| config.kind != 2)
-                })
+                && items.queue_excludes_trinkets()
         })
 }
 
@@ -678,7 +676,13 @@ fn admit_child(
     regular_inputs: crate::pickups::RegularSubtypeInputs,
     pocket_inputs: crate::pickups::PocketSubtypeInputs,
 ) -> Result<(), String> {
-    //Rare scaled50/60 and trinket350 retain their independent Init owners.
+    //A350 child must execute its actual Init/Get before the parent can
+    //continue. This slice has no live350 adapter. Public command Err rolls
+    //back the proposed world; it does not commit a Native callback prefix.
+    if birth.variant == 350 {
+        return Err("Chest350 Init/Get is outside the admitted grant-only slice".into());
+    }
+    //Rare scaled50/60 retain their independent Init owners.
     //Pocket70/300 now shares the room/reentry/drop resolver; every caller
     //retains its actual seed, scatter velocity and scheduler admission order.
     if birth.sprite_scale_multiplier.is_some()

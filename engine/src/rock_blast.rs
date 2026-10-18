@@ -215,6 +215,15 @@ fn tinted_reward(
     index: usize,
     local: &mut crate::items::Rng,
 ) -> Result<(), String> {
+    //The existing reward operator owns the empty-trinket context only.
+    //A positive held/Kind2 query must not borrow that negative readset.
+    if state
+        .player_items
+        .as_ref()
+        .is_none_or(|owner| owner.trinket_slots != [0, 0] || !owner.queue_excludes_trinkets())
+    {
+        return Err("tinted reward with held/queued trinkets is not admitted".into());
+    }
     let grid = Grid::new(
         state
             .room

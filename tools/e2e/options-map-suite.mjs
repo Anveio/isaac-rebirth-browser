@@ -18,9 +18,19 @@ for(const name of ['--output','--production-directory','--scenarios','--count'])
 assert.equal(flag('--reuse-original'),undefined,'Registered Map requires fresh Native for every declared case');
 const output=path.resolve(flag('--output',`.cache/e2e/options-map/${Date.now()}-${process.pid}`));
 assert.ok(!fs.existsSync(output),'Use a fresh Map evidence directory');fs.mkdirSync(output,{recursive:true});
-const generator='tools/original/options-map-scenarios.py',pair='tools/e2e/options-map.mjs';
-const contractName='references/isaac/cases/options-map/fast31-render-persistence-contract-v2.json';
+const gammaMode=process.argv.includes('--gamma');
+const generator=gammaMode?'tools/original/options-gamma-scenarios.py':'tools/original/options-map-scenarios.py',pair='tools/e2e/options-map.mjs';
+const preferencesSchema=flag('--preferences-schema','4');
+assert.ok(preferencesSchema==='3'||preferencesSchema==='4','Map preferences schema must be explicitly3 or4');
+assert.ok(!gammaMode||preferencesSchema==='4','Gamma requires explicit PreferencesV4');
+const contractName=gammaMode?'references/isaac/cases/options-gamma/gamma-clamps-back-surface-contract-v1.json':preferencesSchema==='3'
+  ?'references/isaac/cases/options-map/fast31-render-persistence-contract-v2.json'
+  :'references/isaac/cases/options-map/fast31-render-persistence-contract-v4.json';
 const sourcePaths=new Set([
+  'tools/foundation/options-gamma-state-pair.mjs','tools/e2e/options-gamma-browser.mjs',
+  'tools/original/options-map-scenarios.py',
+  ...(gammaMode?['tools/original/options-gamma-scenarios.py','tools/original/options-gamma-observe.py',
+    'references/isaac/cases/options-gamma/gamma-clamps-back-surface-v1.json']:[]),
   'tools/e2e/options-map-suite.mjs',pair,'tools/e2e/options-map-browser.mjs',generator,
   'tools/foundation/options-map-state-pair.mjs','tools/original/options-map-observe.py',
   'references/isaac/cases/options-map/map-adjust-back-surface-fast31-v2.json',contractName,
@@ -97,7 +107,7 @@ try {
   for(const [index,data] of bank.cases.entries()) {
     const prefix=String(index).padStart(2,'0')+'-'+data.scenario.id;
     const caseFile=path.join(output,prefix+'-case.json');save(caseFile,data);
-    const binding={schema:1,mode:'reviewed-options-map-fast31-v1',sourceRoot:ROOT,
+    const binding={schema:1,mode:gammaMode?'reviewed-options-gamma-v1':'reviewed-options-map-fast31-v1',sourceRoot:ROOT,
       sourceFiles:before,caseFile,caseSha256:digest(caseFile),contractFile,contractSha256:digest(contractFile),
       artifact:{directory:artifactDirectory,...artifactBefore},
       nativeEnvironment:{ISAAC_CLOCK_GATE_RENDER_ALL:'1',ISAAC_CLOCK_GATE_WINDOW_QUERIES:'1'}};
@@ -125,6 +135,6 @@ finally {
 }
 const report={schema:1,status:!failure&&bank?.cases?.length===cases.length&&cases.length>0&&cases.every(row=>row.status==='pass')?'pass':'fail',
   failure,cases,sourceBefore:before,artifact:artifactBefore,
-  scope:'Fixed31/30 regression plus default one fresh unfiltered OS seed/boot Map route; complete recorded-bank replay makes no entropy draws. Each pair requires public clock/input/provenance, actual Map owners, Back IO, configured237 and strict required renderer regions. Old84/V2 evidence is unchanged. Full-frame RGBA remains diagnostic; reload/migration/banner/controller/fullmix/completeMT remain separate.'};
+  scope:gammaMode?'Gamma21/20 regression plus default one fresh unfiltered OS seed/boot route; complete recorded-bank replay makes no entropy draws. Each pair requires public clock/input/provenance, actual Gamma/config/number/final GPU owners, V4 Back IO, separate actual Browser reload and strict required number regions. Historical V2/V3 evidence is unchanged; full-frame RGBA, Native reload, HQ4X, Popups and completeMT remain separate.':'Fixed31/30 regression plus default one fresh unfiltered OS seed/boot Map route; complete recorded-bank replay makes no entropy draws. Each pair requires public clock/input/provenance, actual Map owners, Back IO, configured237 and strict required renderer regions. Old84/V2 evidence is unchanged. Full-frame RGBA remains diagnostic; reload/migration/banner/controller/fullmix/completeMT remain separate.'};
 save(path.join(output,'report.json'),report);
 console.log(JSON.stringify({status:report.status,report:path.join(output,'report.json')}));process.exitCode=report.status==='pass'?0:1;
