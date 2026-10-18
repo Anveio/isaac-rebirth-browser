@@ -4550,26 +4550,13 @@ impl Game {
         self.update_player(phase, false, false)?;
         self.state.player.visible = true;
         let stage = self.state.stage;
-        let stage_seed = self
-            .state
-            .run_seeds
-            .as_ref()
-            .ok_or("next level requires the run's Seeds")?
-            .initialized_fields[stage as usize];
+        let request = stage_transition::floor_request(&self.state, stage)?;
         // Level::Init58be30 clears the per-level owners and reinitializes the
         // descriptor grid seeds from the shared stream (587ec0).
         self.state.level_progress.begin_level();
         self.boot_level_grid = self.state.boot_lifecycle.initialize_level_grid();
-        self.state.floor = floor::generate_normal_basement(floor::NormalBasementRequest {
-            stage,
-            stage_seed,
-            game_flags: self.state.floor.game_flags,
-            red_hp: self.state.player.hp,
-            max_red_hp: self.state.player.max_hp,
-            soul_hp: self.state.player.soul_hp,
-            coins: self.state.inventory.coins,
-        })?;
-        self.state.stage_seed = stage_seed;
+        self.state.floor = floor::generate_normal_basement(request)?;
+        self.state.stage_seed = request.stage_seed;
         //Neither fresh Level nor a reused manager owns empty query buckets.
         self.state.knife_query_partition = None;
         self.state.current_room = self.state.floor.starting_descriptor;
