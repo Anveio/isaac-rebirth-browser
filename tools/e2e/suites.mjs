@@ -78,6 +78,14 @@ export const SUITES = [
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
     '--native-frame-timeout', '120', '--gl-trace'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II and Caves I arrivals'),
+  // The three-floor descent (Basement I, II and Caves I's Mega Fatty, each with
+  // each game's own keys) runs about three times stage-exit's per-case frames,
+  // so it is its own suite; it grades the shared exit into Caves II.
+  suite('stage-descent', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
+    '--helper-arg', '--contrived', '--helper-arg', 'EV9BP18Q-caves2', '--helper-arg', '--count', '--helper-arg', '1',
+    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
+    '--native-frame-timeout', '120', '--gl-trace'],
+    'Three-floor descent through Basement I, Basement II and Caves I bosses, then the Caves II arrival'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
   // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
   suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
@@ -180,7 +188,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
-  stage: ['stage-exit', 'monstro'],
+  stage: ['stage-exit', 'stage-descent', 'monstro'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
   items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars'],
