@@ -34,8 +34,8 @@ codec = entity.codec
 
 def specs():
     script = ("import { entitySpecs } from './tools/e2e/entities.mjs';"
-              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, gridType, count, contrived, boss, shop }) =>"
-              " ({ name, type, variant, shape, roomType, gridType, count, contrived, boss: Boolean(boss), shop: Boolean(shop) }))));")
+              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss, shop }) =>"
+              " ({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss: Boolean(boss), shop: Boolean(shop) }))));")
     return json.loads(subprocess.run(['node', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
 
 
@@ -45,6 +45,10 @@ def identity(spec):
 
 def shape(spec):
     return tuple(spec.get('shape') or (13, 7))
+
+
+def fight(specs):
+    return max(spec.get('fight') or 0 for spec in specs)
 
 
 def tagged(case, names, identifier):
@@ -70,7 +74,8 @@ def room_cases(room_specs, attempts):
         admitted = [spec for spec in named if slot in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType'), spec.get('gridType')))]
         if admitted:
             names = [spec['name'] for spec in admitted]
-            cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), {'entropy': 'contrived spec seed'}, False, room_shape),
+            cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), {'entropy': 'contrived spec seed'}, False, room_shape,
+                                            fight(admitted)),
                                 names, f"{'+'.join(names)}-contrived-{len(cases)}"))
     # OS-random rooms from one seed stream.
     needed = {spec['name']: spec['count'] for spec in room_specs if spec['count']}
@@ -105,7 +110,7 @@ def room_cases(room_specs, attempts):
                 needed[name] -= 1
             provenance = {'entropy': 'OS random', 'discoveryAttempts': attempt,
                           'room': descriptor['template']['name'], 'catalogIndex': descriptor['catalogIndex']}
-            cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), provenance, True, room_shape),
+            cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), provenance, True, room_shape, fight(admitted)),
                                 names, f"{'+'.join(names)}-random-{len(cases)}"))
     for name, remaining in needed.items():
         if remaining:
