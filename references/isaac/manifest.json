@@ -11405,11 +11405,6 @@
       "sha256": "c033dbb846fe7b31ef22ca7f621a4d421d0cdfd406fba76225916da99cbe61f3"
     },
     {
-      "path": "references/isaac/rebirth/resources/rooms/03.caves.stb",
-      "bytes": 424532,
-      "sha256": "09919f36bdc1f2766419af628610eeec16f186be740fdbb42825545dc4056ddc"
-    },
-    {
       "path": "references/isaac/rebirth/resources/rules.txt",
       "bytes": 381,
       "sha256": "bebddbea6f8aaa575c4c98ce89b3147f1d5eb755f37194985456d8680d6ef4b0"

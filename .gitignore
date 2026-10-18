@@ -22,3 +22,6 @@ web/generated/
 
 __pycache__/
 *.pyc
+
+# Derive this owner-private room input in the ignored build cache.
+/references/isaac/rebirth/resources/rooms/03.caves.stb

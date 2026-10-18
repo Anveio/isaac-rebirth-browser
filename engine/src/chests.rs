@@ -260,6 +260,9 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
             Ok(())
         },
     )?;
+    if births.iter().any(|birth| birth.variant == 350) {
+        crate::item_queries::note_unrepresented_trinket_spawn(state);
+    }
     let chest = state.room.pickups[index]
         .chest
         .as_mut()
@@ -578,6 +581,9 @@ fn open_bounded_chest(
             Ok(())
         },
     )?;
+    if births.iter().any(|birth| birth.variant == 350) {
+        crate::item_queries::note_unrepresented_trinket_spawn(state);
+    }
     let chest = state.room.pickups[index]
         .chest
         .as_mut()
@@ -676,11 +682,12 @@ fn admit_child(
     regular_inputs: crate::pickups::RegularSubtypeInputs,
     pocket_inputs: crate::pickups::PocketSubtypeInputs,
 ) -> Result<(), String> {
-    //A350 child must execute its actual Init/Get before the parent can
-    //continue. This slice has no live350 adapter. Public command Err rolls
-    //back the proposed world; it does not commit a Native callback prefix.
+    //A350 child's actual Init/Get is outside the admitted grant-only slice.
+    //Port gap: the child is not admitted, its birth stays in the chest's
+    //loot record and the caller notes the unrepresented trinket, so the
+    //opening continues instead of failing every retry of the command.
     if birth.variant == 350 {
-        return Err("Chest350 Init/Get is outside the admitted grant-only slice".into());
+        return Ok(());
     }
     //Rare scaled50/60 retain their independent Init owners.
     //Pocket70/300 now shares the room/reentry/drop resolver; every caller

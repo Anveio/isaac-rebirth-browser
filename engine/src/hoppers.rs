@@ -137,7 +137,9 @@ fn ai(
             hop(npc, &mut hopper, random, world, *friction);
             Ok(())
         }
-        state => Err(format!("Hopper state {state} is not admitted")),
+        // 4cfcf0 dispatches 3 and 4 for these types (6..8 belong to Leaper,
+        // Keeper and Ragling); any other state runs only the tail.
+        _ => Ok(()),
     };
     if npc.state == 3 {
         npc.grid_collision_class = 5;

@@ -10,12 +10,23 @@ struct Request {
     stage_seed: u32,
     #[serde(default)]
     spawns: bool,
-    /// A later normal floor (2..4) with the retained game flags and a fresh
-    /// character's health and coins; omitted, Basement I.
+    /// A later normal floor (2..4) with the retained game flags, health and
+    /// coins (a fresh character's when omitted); omitted, Basement I.
     #[serde(default)]
     stage: Option<u32>,
     #[serde(default)]
     game_flags: u64,
+    #[serde(default = "full_red")]
+    red_hp: u8,
+    #[serde(default = "full_red")]
+    max_red_hp: u8,
+    #[serde(default)]
+    soul_hp: i32,
+    #[serde(default)]
+    coins: u32,
+}
+fn full_red() -> u8 {
+    6
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -42,10 +53,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 stage,
                 stage_seed: request.stage_seed,
                 game_flags: request.game_flags,
-                red_hp: 6,
-                max_red_hp: 6,
-                soul_hp: 0,
-                coins: 0,
+                red_hp: request.red_hp,
+                max_red_hp: request.max_red_hp,
+                soul_hp: request.soul_hp,
+                coins: request.coins,
             },
         )?,
     };

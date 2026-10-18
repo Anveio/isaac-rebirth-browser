@@ -125,3 +125,42 @@ and challenge predicates, special assignment/resizing, outer generation
 retries, curses and other stages, secret placement, descriptor save/load,
 doors/traversal, typed spawn instantiation and room-clear behavior. No
 per-seed map or fixed stage-to-room draw offset is used by either Rust kernel.
+
+## Caves II, the surprise-miniboss tail and non-1x1 boss rooms
+
+Decoded from the Linux x64 original; the port's inputs stay the stage seed,
+the retained game flags, health and coins.
+
+- **Post-room tail (589feb..58a9d1).** Every successful placement attempt, on
+  every stage, draws two RandomFloats (5c2db0, `next() * 2.3283064e-10`)
+  before the 58c337 word. The chance is `base * 0.33333334`: `base` is 1.0
+  (1.05 above 19 coins), plus 0.1 / 0.02 for flags 0x40000000 / 0x80000000,
+  which are then cleared. Game+0x10eafc subtracts 0.05 per count (at most
+  0.25); only payouts the port does not admit raise it (552650). The roll needs
+  that no miniboss room was placed this attempt and that flags 0x18000 are not
+  both set. The first float flags the secret room from stage 5 (with a local
+  SetSeed shift-0xc R1000), the second the shop from stage 4. Descriptor+40 is
+  the flag. The five off-grid descriptors after it (58a137..58a433) are not
+  generated.
+- **Entering a flagged room (586c90..586cc3).** The original loads a type-6
+  template from the special set instead: Greed 2040..2049 while flag 0x8000 is
+  clear (then sets it), otherwise Super Greed 2140..2149 (sets 0x10000); a
+  flagged devil room takes Krampus 2300..2309. The pick seeds SetSeed(desc+0x4c,
+  1), one next(), then 5d5600's SetSeed(s, 7) and one RandomFloat, and decays
+  the picked weight by 0.1. Greed (50.0 / 50.1) spawns from the template at
+  grid 67. The port does not perform this swap yet, so stage 4 stays
+  unreachable (`next_stage`).
+- **Boss-room fit (591b80 -> 58fad0 -> 58f480).** The boss room takes the
+  first dead end farther than one step from the start for which one of six
+  candidates around its connector `C` (incoming direction `d`, `o = (d+2)%4`)
+  fits: c0 `(C, 1x1, o)`, c1 `(C+off, long, o)`, c2 `(C, cross, o+4)`, c3
+  `(C+s, cross, o)`, c4 `(C+off, 2x2, o+4)`, c5 `(C+off+s, 2x2, unset)`.
+  `off` is (-1,0) for d=0, (0,-1) for d=1, else (0,0); horizontal entries use
+  long 2x1, cross 1x2 and `s = (0,-1)`, vertical ones the swapped axes and
+  `s = (-1,0)`. A candidate needs the template's cell dims (8ed500: shapes
+  0..3 -> 1x1, 1x2, 2x1, 2x2), its door in the template mask, only free or own
+  cells, and at most one other room touching it, each touching slot's door in
+  the mask. The dead end takes the candidate's rectangle; a failure changes
+  nothing and retries the floor. These are the growth candidates of
+  `layout.rs`. c5 reads a stale stack slot and is refused (2x2 only); Double
+  Trouble (3700..3708) is 26x7 or 13x14.

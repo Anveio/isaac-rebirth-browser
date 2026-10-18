@@ -56,7 +56,7 @@ original/port footage, then filing what it saw here by these rules.
 
 | Milestone | What a player can do | Gate |
 | --- | --- | --- |
-| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Current focus: verify the complete route. Later descent remains unadmitted (#413); its repeated-tick freeze is guarded. |
+| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Verify the complete route. PR654 adds Caves I descent source; selected-wall catalogue and current-build qualification remain separate. |
 | **M1 Chapter 1** | Basement I/II and Cellar with every Chapter 1 enemy, boss, room type and common item | All Chapter 1 bosses; shops, devil/angel rooms, Cellar unlock |
 | **M2 Chapters 2-4** | Caves/Catacombs, Depths/Necropolis, Womb/Utero, Mom and Mom's Heart | Other stage generators, their enemies and bosses |
 | **M3 Endgame** | Sheol/Cathedral, Dark Room/Chest, Satan, Isaac, ???, The Lamb, endings | Final floors, final bosses, ending cutscenes |
@@ -72,15 +72,15 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
-| [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
+| [Floor generation](#floor-generation) | Partial | Normal Basement I/II and Caves I source | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I to II | 3 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I/II to Caves I source | 3 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
 | [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT Full countdown/nonrare blast, webs, trapdoor, decorations | 2 |
-| [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
+| [Enemies](#enemies) | Partial | Ordinary NPC families, now including Hopper/Trite and Flaming Hopper source | 3 |
 | [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
@@ -216,7 +216,13 @@ selection, special room placement, curses, XL floors, alternate stages.
 
 Port: fresh normal Basement generation with authored weights, retries,
 fitting and secret rooms, verified against 17 original floors. Basement II
-generates. Missing: Cellar and every later stage, curses (Labyrinth, Lost,
+and Caves I/II (stages 3 and 4) now have generation source, including
+Double Trouble's rectangular boss rooms (no native Double Trouble or Caves II
+layout graded yet). The separate Caves set 1 wall catalogue labels patches 0..2
+instead of 3..5; its reviewed metadata correction
+is unbuilt and live-unrun. This does not change wall quads or RNG order.
+Missing: Cellar, Depths and later stages, Caves II's flagged-shop Greed swap,
+curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
 Next: Cellar generation and unlock; curses.
@@ -250,17 +256,18 @@ Rebirth scope: boss clear award, trapdoor, stage transition animation and
 name streak, chapter order, Womb/Utero to Sheol/Cathedral, final floors,
 endings.
 
-Port: boss clear award (with poop occupants), trapdoor, stage transition and
-the Basement I to Basement II step. The [carried-active follow-up](stage-exit-evidence.md)
+Port: boss clear award (with poop occupants), trapdoor, stage transition,
+Basement I to Basement II and PR654 Caves I descent source. The [carried-active follow-up](stage-exit-evidence.md)
 passes 48 mandatory identity/charge/reserve/ownership/descent checks across
-two active routes on frozen f837, with an ordinary control. Missing: every step after Basement II,
-alternate stages, endings.
+two active routes on frozen f837, with an ordinary control. Double Trouble
+seeds now generate Caves I; current arrival/catalogue qualification is separate. Missing: Caves II and
+later steps, alternate stages, endings.
 
 Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P1 | Basement II's open trapdoor refuses descent because the next generator is unadmitted; 2efbef1 guards the old repeated-tick freeze | issue; docs/dst.md |
+| #413 | P1 | Caves I descent source landed (#654), Double Trouble boss rooms place, Caves II generates behind a refused trapdoor; the selected-wall catalogue also needs correction | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
 
@@ -374,12 +381,17 @@ current-main qualification is inferred.
 Rebirth scope: about 140 ordinary enemy types and their champions across
 all chapters.
 
-Port (18 ordinary types): Frowning Gaper 10.0, Gaper 10.1, Gusher 11.0,
+Port: Frowning Gaper 10.0, Gaper 10.1, Gusher 11.0,
 Pacer 11.1, Horf 12, Fly 13, Pooter 14, Attack Fly 18, Maggot 21, Charger 23,
 Spitty 31, Fire Place 33, Level 2 Fly 214, Dip 217, Wall Hugger 218, Gurgling
-237, Round Worm 244, and Shopkeeper 17. Missing: every other enemy,
-champions, Chapter 2+ enemies. Bulk enemy imports are owned by
-the user's import workflow (see AGENTS.md).
+237, Round Worm 244, and Shopkeeper 17. PR680 also implements Hopper 29.0,
+Trite 29.1 and Flaming Hopper 54.0 through the shared Hopper family. The
+existing `entities/hopper` and `entities/trite` drivers declare admission
+coverage. Independent live qualification of these imports on pinned main
+`ca408124` is **UNRUN**; this records source availability, not Original/Browser,
+fire-conversion, shared-MT or pixel acceptance. Remaining enemy families and
+champion behavior are incomplete. Bulk enemy imports retain their existing
+owner (see AGENTS.md).
 
 Horf's final dead Full update now runs its AI before retirement. Scoped
 [regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
@@ -412,6 +424,7 @@ Next: the rest of the Basement/Cellar spawn table.
 | #241 | P1 | Red (attacking) Fire Place 33.1 is not admitted | e2e |
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
 | #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
+| #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 
 ## Bosses
 
