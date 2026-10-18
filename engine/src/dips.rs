@@ -182,14 +182,21 @@ fn advance_sprite(npc: &mut Npc) {
 }
 
 /// First dead31f transition4464c0 calls445c60 before the next FIFO record.
-fn die(npc: &mut Npc, random: &mut Mt19937, world: &mut NpcWorld<'_>) -> Result<(), String> {
-    // Infestation2 requires copied FIFO source variants and a real BlueSpider
-    // producer. Its unresolved path does not admit a substitute effect.
+fn die(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    //47FD22 Have234 (Infestation2): unless the NPC's +360 records already
+    //hold a 3.73, 50C980 spawns a BlueSpider at its position before 4464C0.
+    //Port gap (#295): no BlueSpider familiar exists, so none is spawned and
+    //no substitute is admitted; the birth records the unported factory.
     if world
         .player_items
         .is_some_and(|items| items.owned_counts[234] != 0)
     {
-        return Err("Dip death requires the owned234 BlueSpider source callback".into());
+        births.push(Birth::UnportedBlueSpider);
     }
     if npc.dip.as_ref().unwrap().status_countdown > 0 {
         return Err(
@@ -305,7 +312,7 @@ pub(crate) fn advance(
     phase: Phase,
     random: &mut Mt19937,
     world: &mut NpcWorld<'_>,
-    _: &mut Vec<Birth>,
+    births: &mut Vec<Birth>,
 ) -> Result<(), String> {
     world
         .player_items
@@ -390,7 +397,7 @@ pub(crate) fn advance(
         if !npc.dead && npc.max_hp > 0.0 {
             npc.hp -= amount;
             if npc.hp < 0.0 {
-                die(npc, random, world)?;
+                die(npc, random, world, births)?;
             }
         }
     }
