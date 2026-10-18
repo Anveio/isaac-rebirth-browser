@@ -398,6 +398,12 @@ retain their separate scope (4,364 fields, 38 gains). The input-only replay
 bank and default fixed fixture use the qualified public route. Longer-tail MT,
 other champion hooks and whole-game acceptance remain open.
 
+After integrating Gamma and the starting-trinket runtime, frozen `62300f05`
+replays the same four Native cases with all 456,532 inherited entity/paired
+fields and 196,875 fixed MT fields unchanged. All 134,916 Gaper-spawner rows
+pass. The four older missing-Acid failures and all 1,390 pixel verdicts remain
+unchanged (28 pass, 1,362 fail); this adds no fresh Native or longer-tail MT claim.
+
 Next: the rest of the Basement/Cellar spawn table.
 
 | Bug | Sev | Symptom | Source |

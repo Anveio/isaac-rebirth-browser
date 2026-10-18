@@ -594,6 +594,14 @@ on each side. The recorded positive route on frozen `35edb299` passes all
 whole shared MT on this longer tail is unmeasured. Earlier negative routes
 and their mandatory missing-Acid failures remain preserved.
 
+The combined Gamma/starting-trinket build `62300f05` replays all four retained
+Native cases without a new Native process or entropy. All 456,532 inherited
+entity/paired fields and 196,875 fixed MT fields remain exact; all 134,916
+Gaper-spawner rows pass. The four older missing-Acid failures remain required.
+All 1,390 pixel verdicts and metrics remain unchanged (28 pass, 1,362 fail).
+The positive Acid route retains all seven witnesses per side; longer-tail MT
+remains unmeasured.
+
 ```sh
 npm run test:e2e -- entity-gaper --scenarios references/isaac/cases/entities/gaper-recorded-fixed-and-dt3mfa-acid-v1.json --case gaper-contrived-2-green-contact-ring-early-v3 --public-clock-schedule
 ```
