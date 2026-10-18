@@ -301,6 +301,22 @@ pub(crate) fn advance_transition(
         crate::combat::advance_player_immunity(state);
         return Ok(true);
     }
+    // 5ddf20 tests the Player's bf4 (50a5b0) before an ordinary style0
+    // departure. A guarded extra animation is released (5de3a3) and the
+    // Player receives one Update (5ddf87), so ordinary walking presentation
+    // owns the main sprite again before ChangeRoom.
+    let pickup_guard = state
+        .player_items
+        .as_ref()
+        .is_some_and(|items| items.pickup_animation_guard);
+    if state.player_animation.guard || pickup_guard {
+        state.player_animation = crate::player_animation::PlayerAnimation::default();
+        if let Some(items) = state.player_items.as_mut() {
+            items.pickup_animation_playing = false;
+            items.pickup_animation_guard = false;
+        }
+        crate::combat::advance_player_immunity(state);
+    }
     // ChangeRoom5dd1b0 enables Player+7d4 before550970, whose admitted
     // Room.Update observes it. Game restores the incoming freeze afterward.
     state.player.controls_enabled = true;
