@@ -54,6 +54,35 @@ function mapInputLaw(data) {
   return{labels,requests};
 }
 
+//5B1070..10E3 adds exactly one f32 .1 per mode0 Full. Count the
+//literal released interval using each runtime's own post-System counter;
+//neither side's clock or alpha supplies the other's expected value.
+function smallMapReturn(data, counter) {
+  assert.ok(Number.isInteger(counter) && counter >= 0 && counter <= 0xffffffff);
+  let active = false, ended = false, presentations = 0;
+  for (const action of data.pairedTape) {
+    if (action.type === 'capture' && action.label === 'map-second-tab-release-1') {
+      assert.equal(active, false);
+      active = true;
+    } else if (action.type === 'capture' && action.label === 'map-second-tab-release-14') {
+      assert.equal(active, true);
+      ended = true;
+      break;
+    } else if (active) {
+      assert.equal(action.type, 'step', 'The second released interval must retain only public steps');
+      presentations += action.frames;
+    }
+  }
+  assert.equal(ended, true);
+  let fullUpdates = 0, alpha = 0;
+  for (let step = 0; step < presentations; step++) {
+    if (((counter + step) & 1) !== 0) continue;
+    fullUpdates++;
+    alpha = alpha < Math.fround(.9) ? Math.fround(alpha + Math.fround(.1)) : 1;
+  }
+  return {presentations, fullUpdates, alpha};
+}
+
 export function compareOptionsMap({data,contract,clock,native,browser,observed,calls,scopedState,pcm237Sha256}) {
   const checks=[],diagnostics=[];
   const check=(field,expected,actual)=>checks.push({field,expected,actual,status:equal(expected,actual)?'pass':'fail'});
@@ -115,6 +144,13 @@ export function compareOptionsMap({data,contract,clock,native,browser,observed,c
         const menu=map.options;assert.equal(menu.status,'pass');
         check(label+'.screen',({1:'title',2:'profile',3:'main',4:'character',8:'options'})[menu.menu.screen],actual.screen);
         for(const field of ['selection','leftHeld','rightHeld','verticalHeld'])check(label+'.options.'+field,menu.options[field],actual.optionsMenu[field]);
+        check(label+'.menuMoving',menu.menu.moving,actual.menuPresentation?.moving);
+        for(let axis=0;axis<2;axis++)check(label+'.menuView.'+axis+'.word',menu.menu.rawView?.[axis]?.bits,Number.isFinite(actual.menuPresentation?.view?.[axis])?word(actual.menuPresentation.view[axis]):undefined);
+        if(actual.screen==='options') {
+          const row=menu.options.selection, target=row<=2?-1080:row<=6?-1080-(row*18-36):-1170;
+          check(label+'.sourceNativeOptionsTarget.word',[word(-480),word(target)],Array.isArray(menu.menu.rawRequestedPageTarget)?menu.menu.rawRequestedPageTarget.map(owner=>owner?.bits):undefined);
+          f32(label+'.sourceBrowserOptionsTarget',target,actual.menuPresentation?.optionsScroll);
+        }
         check(label+'.SFX.word',menu.settings.sfxVolume.bits,word(actual.audio.sfxVolume));
         check(label+'.music.word',menu.settings.rawMusicVolume.bits,word(actual.music.volume));
         check(label+'.musicEnabled',menu.settings.musicEnabled,actual.music.musicEnabled);
@@ -175,11 +211,33 @@ export function compareOptionsMap({data,contract,clock,native,browser,observed,c
       ['map-small-steady',{mode:0,expandedLatched:false,heldFrames:0,smallAlpha:1,expandedAlpha:0}],
       ['map-first-tab-release-18',{mode:2,expandedLatched:true,heldFrames:0,smallAlpha:0}],
       ['map-second-tab-held-2',{mode:1,heldFrames:0}],
-      ['map-second-tab-release-14',{mode:0,expandedLatched:false,heldFrames:0,smallAlpha:1,expandedAlpha:0}],
+      ['map-second-tab-release-1',{mode:0,expandedLatched:false,heldFrames:0,smallAlpha:0}],
+      ['map-second-tab-release-14',{mode:0,expandedLatched:false,heldFrames:0,expandedAlpha:0}],
     ])for(const [field,value] of Object.entries(values)) {
       const n=ns.get(label).map.presentation[field],b=bf.get(label).state.minimapPresentation[field];
       if(field.endsWith('Alpha')) {check(label+'.requiredNative.'+field+'.word',word(value),n.bits);f32(label+'.requiredBrowser.'+field,value,b);}
       else {check(label+'.requiredNative.'+field,value,n);check(label+'.requiredBrowser.'+field,value,b);}
+    }
+    const returnStart='map-second-tab-release-1',returnEnd='map-second-tab-release-14';
+    for(const side of ['Native','Browser']) {
+      const start=side==='Native'?ns.get(returnStart).map:bf.get(returnStart).state;
+      const end=side==='Native'?ns.get(returnEnd).map:bf.get(returnEnd).state;
+      const counter=owner=>side==='Native'?owner.systemCounter:owner.systemClock.systemCounter;
+      const full=owner=>side==='Native'?owner.gameFullCounter:owner.gameUpdateCount;
+      let expectedAlpha;
+      try {
+        const counters=[counter(start),counter(end),full(start),full(end)];
+        assert.ok(counters.every(value=>Number.isInteger(value)&&value>=0&&value<=0xffffffff), 'Missing actual u32 System/Full return owners');
+        const expected=smallMapReturn(data,counter(start));
+        expectedAlpha=word(expected.alpha);
+        check(returnEnd+'.'+side+'.releasedPublicPresentationCount',expected.presentations,counter(end)-counter(start));
+        check(returnEnd+'.'+side+'.sourceFullCallbacks',expected.fullUpdates,full(end)-full(start));
+      } catch(failure) {
+        check(returnEnd+'.'+side+'.sourceReturnLaw',null,String(failure));
+      }
+      const alpha=side==='Native'?end.presentation?.smallAlpha?.bits:end.minimapPresentation?.smallAlpha;
+      const actual=side==='Native'?alpha:Number.isFinite(alpha)?word(alpha):undefined;
+      check(returnEnd+'.required'+side+'.smallAlpha.word',expectedAlpha,actual);
     }
     check('map-first-tab-release-18.actualNativeTarget.word',ns.get('map-first-tab-release-18').map.opacity.bits,ns.get('map-first-tab-release-18').map.presentation.expandedAlpha.bits);
     const final=law.labels.get('map-final-value-tap-4');assert.ok(final&&law.requests.length>0);

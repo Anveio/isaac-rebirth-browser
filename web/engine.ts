@@ -329,7 +329,7 @@ export type MenuPage = "title" | "save" | "game" | "options" | "controls" | "key
 export interface MenuClip { animation: string; frame: number; playing: boolean }
 /** MenuManager view, Back/Select widgets, File select and Character carousel. */
 export interface MenuPresentation {
-  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number; keyboardScroll: number;
+  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number; keyboardScroll: number; optionsScroll: number;
   widgetsShown: boolean; widgets: [number, number];
   save: { file: number; menu: MenuClip; drawings: [MenuClip, MenuClip, MenuClip] };
   carousel: { angle: number; portraits: [number, number][] };

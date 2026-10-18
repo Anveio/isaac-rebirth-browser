@@ -3640,6 +3640,7 @@ impl Game {
             .menu_presentation
             .advance(self.state.screen, menu_input);
         if options_callback {
+            let previous_selection = self.state.options_menu.selection;
             let action = self.state.options_menu.advance(
                 &self.state.public_actions,
                 &self.state.pressed,
@@ -3649,6 +3650,11 @@ impl Game {
                 &mut self.state.boot_lifecycle.shared,
                 audio_counter,
             )?;
+            if self.state.options_menu.selection != previous_selection {
+                self.state
+                    .menu_presentation
+                    .set_options_scroll(self.state.options_menu.selection);
+            }
             match action {
                 options_menu::Action::None => {}
                 options_menu::Action::Controls => {

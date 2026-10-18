@@ -120,7 +120,7 @@ test("the public Keyboard Map binding controls the expanded map after Back", asy
   expect(opened.publicActions.held[13]).toBe(false);
   expect(opened.minimapPresentation.mode).toBe(2);
   expect(opened.minimapPresentation.expandedLatched).toBe(true);
-  expect(opened.minimapPresentation.expandedAlpha).toBe(Math.fround(.3));
+  expect(Math.fround(opened.minimapPresentation.expandedAlpha)).toBe(Math.fround(.3));
   expect(opened.keyboard.bindings[13]).toEqual([73, -1]);
   await press("KeyI", 18, 2);
   const closed = await state();

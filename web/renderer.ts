@@ -731,6 +731,9 @@ export class Renderer {
   private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
+    // Backdrop Render427420/427990 copies the composed floor/walls with ONE/ZERO.
+    // Alpha blending again would multiply cached tutorial/stain alpha twice.
+    gl.blendFactors("one", "zero");
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
       x + border, y + border, width - border * 2, height - border - size);
     gl.drawSurface(this.walls, 0, 0, border, height, x, y, border, height);
@@ -738,6 +741,7 @@ export class Renderer {
     gl.drawSurface(this.walls, border, 0, width - border * 2, border, x + border, y, width - border * 2, border);
     gl.drawSurface(this.walls, border, height - border, width - border * 2, border,
       x + border, y + height - border, width - border * 2, border);
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
     const rotation = { up: 0, left: -Math.PI / 2, right: Math.PI / 2, down: Math.PI };
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
@@ -858,6 +862,15 @@ export class Renderer {
         this.drawnMaps.push({surface: "expanded", alpha: Math.fround(gl.globalAlpha * expandedAlpha),
           position: [480 - bounds.maxX - 24, 14 - bounds.minY], sourceSize: [230, 204], destinationSize: [230, 204]});
       }
+      //5B213A joins5B1811 after the expanded surface: the same alpha
+      //also owns the signed Game counter's30Hz Time text. Font5B0E16
+      //is TeamMeatFont10;5B18F5 uses logical y30 and exact half-width.
+      const counter = state.gameUpdateCount | 0;
+      const time = [Math.trunc(counter / 108000), Math.trunc((counter % 108000) / 1800), Math.trunc((counter % 1800) / 30)]
+        .map(value => String(value).padStart(2, "0")).join(":");
+      ctx.save(); ctx.globalAlpha *= expandedAlpha;
+      this.assets.font(ctx, "teammeatfont10", `Time: ${time}`, 240, 30, { align: "center" });
+      ctx.restore();
     }
   }
 

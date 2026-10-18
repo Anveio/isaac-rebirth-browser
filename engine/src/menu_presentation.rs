@@ -199,6 +199,10 @@ pub struct MenuPresentation {
     pub challenge_scroll: u32,
     #[serde(default = "keyboard_origin")]
     pub keyboard_scroll: f32,
+    ///59CC10 owns the Main-family Options page target, independently of
+    ///the paused Options instance's local scroll.
+    #[serde(default = "options_origin")]
+    pub options_scroll: f32,
     /// MenuManager+21: widgets are shown until a key is pressed on a settled page.
     pub widgets_shown: bool,
     /// MenuManager+2C/+30 Back and Select widget drop below their rest.
@@ -226,6 +230,7 @@ impl MenuPresentation {
             seed_view: false,
             challenge_scroll: 0,
             keyboard_scroll: keyboard_origin(),
+            options_scroll: options_origin(),
             widgets_shown: true,
             widgets: [90.0, 90.0],
             save: SaveSelect::reset(file),
@@ -244,7 +249,7 @@ impl MenuPresentation {
             Page::Title => [0.0, 0.0],
             Page::Save => [0.0, -270.0],
             Page::Game => [0.0, -810.0],
-            Page::Options => [-480.0, -1080.0],
+            Page::Options => [-480.0, self.options_scroll],
             Page::Controls => [-480.0, -1620.0],
             Page::Keyboard => [-480.0, self.keyboard_scroll],
             Page::Character => [if self.seed_view { -960.0 } else { -480.0 }, -810.0],
@@ -314,6 +319,19 @@ impl MenuPresentation {
         } else if self.blood > 0.0 && !hard {
             self.blood -= 0.05;
         }
+    }
+
+    ///59CC10 follows a Main-family Options row change. Its target write
+    ///precedes the next MenuManager view step; it never moves the view twice.
+    pub fn set_options_scroll(&mut self, selection: u8) {
+        self.options_scroll = if selection <= 2 {
+            options_origin()
+        } else if selection <= 6 {
+            options_origin() - f32::from(selection * 18 - 36)
+        } else {
+            -1170.0
+        };
+        self.moving = true;
     }
 
     ///59CC60 changes page10's destination and marks the view moving.
@@ -406,4 +424,9 @@ pub struct Input {
 ///MenuInit59A748 and59CC60 use the same page10 baseline.
 fn keyboard_origin() -> f32 {
     -1890.0
+}
+
+///MenuInit59A6B2 and59CC50 use the same page8 baseline.
+fn options_origin() -> f32 {
+    -1080.0
 }
