@@ -26,6 +26,7 @@ pub struct SavedRun {
     /// A missing legacy owner remains missing, never an inventory-derived set.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acquisition_history: Option<crate::acquisition_history::AcquisitionHistory>,
+    /// Native Saved+EF80: the source nine-byte seed text, including byte4 space.
     pub run_seed: String,
     pub seeded_run: bool,
     pub stage: u32,
@@ -46,10 +47,10 @@ impl SavedRun {
         item_pools: items::ItemPools,
         grid_records: Vec<Option<crate::grid_records::GridRecord>>,
         player_items: crate::player_save::SavedPlayerItems,
-    ) -> Self {
-        Self {
+    ) -> Result<Self, String> {
+        Ok(Self {
             acquisition_history: state.acquisition_history.clone(),
-            run_seed: state.run_seed.clone(),
+            run_seed: crate::seed::formatted(state.run_seed_value)?,
             seeded_run: state.seeded_run,
             stage: state.stage,
             game_update_count: state.game_update_count,
@@ -61,7 +62,7 @@ impl SavedRun {
             inventory: state.inventory.clone(),
             item_pools,
             grid_records,
-        }
+        })
     }
 
     pub fn summary(

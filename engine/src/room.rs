@@ -897,6 +897,18 @@ impl Room {
         index: usize,
         special: Option<&[crate::room_assets::RoomAsset]>,
     ) -> Result<Self, String> {
+        Self::from_floor_descriptor_with_layout(floor, index, special, None)
+    }
+
+    /// `layout` replaces the descriptor's authored template, as load_room
+    /// 586c90 does for a surprise-miniboss room; the descriptor keeps its
+    /// own type, seeds and backdrop.
+    pub(crate) fn from_floor_descriptor_with_layout(
+        floor: &crate::floor::Floor,
+        index: usize,
+        special: Option<&[crate::room_assets::RoomAsset]>,
+        layout: Option<crate::room_assets::RoomAsset>,
+    ) -> Result<Self, String> {
         let descriptor = floor
             .descriptors
             .get(index)
@@ -929,7 +941,10 @@ impl Room {
         // Start Room's authored boundary door grid positions, padded by one,
         // use RoomGetGridPosition (40+40*x,120+40*y), .65 projection and
         // common sprite Y−1. Normal door setup adds the source 15px inset.
-        let authored = crate::room_assets::for_descriptor_with_special(descriptor, special)?;
+        let authored = match layout {
+            Some(layout) => layout,
+            None => crate::room_assets::for_descriptor_with_special(descriptor, special)?,
+        };
         room.spawns = Some(crate::room_spawns::select(
             &authored,
             descriptor.spawn_seed,

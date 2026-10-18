@@ -425,6 +425,7 @@ Next: the rest of the Basement/Cellar spawn table.
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
 | #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
+| #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 
 ## Bosses
 
@@ -621,11 +622,32 @@ same-Native Save controls preserve 3,748 rows per role (3,650 pass / 98 fail),
 zero lost passes and pixel metrics; the 98 failures include 28 ambient velocity
 words, 14 canonical scope, 28 seed separator and 28 penalty-stage rows.
 Historical Source C capacity and failed wrappers retain their separate scopes.
-Unmerged H (`65178aba`), on frozen main715 plus Save6, passes build/runtime 4/4
-and its two Save comparisons gain 56 rows with zero losses: 3,706 pass / 42
-fail, 66 own-save guards and unchanged pixels. The remaining failures are 28
-ambient velocity words and 14 canonical scope rows. H's ordinary-run driver
-has not run; H natural reload and current-main gameplay remain unqualified.
+Fresh public-main134 H/tooling artifact `7ddc18cc` separately passes build/ABI
+and runtime 4/4. Its one fixed same-Native Save capture keeps all 2,384 ordered
+rows exactly equal to dbfab H: 2,349 pass / 35 fail, zero lost/missing/new or
+changed Native expectations, 33 own-save guards and unchanged pixels. Actual
+natural reload/Continue passes, with stored seed9/live seed8 and penalty0; the
+observed movement follows the valid room5-to-room6 door transition. The suite
+still fails its 28 ambient velocity and seven canonical scope rows. No new134
+baseline, OS or ordinary replay is claimed; its actual canonical affected
+preview selects 52 suites. Publication on later main3b08711d preserves Mega Fatty and unrelated
+quality tools without inheriting a later-main gameplay grade.
+
+H's separate snapshotdbfab qualification uses fresh baseline `9e3c05e5` and
+shared H/tooling artifact `70cb3285`: fresh build/ABI and runtime 4/4 each pass. The
+candidate's actual affected preview selects 52 suites. The same retained fixed Native case improves 2,321 pass /
+63 fail to 2,349 pass / 35 fail: 14 seed-text and 14 penalty-stage gains, zero
+lost/missing/new rows or changed Native expectations, unchanged pixels and
+33 own-save guards per role. The remaining 35 are 28 ambient velocity words
+and seven canonical scope rows; both comparison exits remain failed. Both
+ordinary-run replays pass on the same retained Native case, including the
+candidate's exact nine-character saved-seed guard. Both fixed natural reloads
+pass; their fresh boot RNG/epochs differ, and unchanged placement permits the
+observed different valid doors. This is no identical-boot counterfactual or
+Original-process reload parity. Historical main715 H retains its separately
+qualified fixed/OS 56 gains and 42 failures. Raw archive audit corrects its
+earlier ordinary/reload-unqualified notes; the old notes remain preserved.
+No main134 integration, Factory/Get or whole-game qualification is inherited.
 See [Save scope and replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |

@@ -25,6 +25,8 @@ wait and a waypoint for the approach; every recorded case replays exactly.
 import argparse
 import importlib.util
 import json
+import os
+import sys
 from pathlib import Path
 import random
 import subprocess
@@ -35,6 +37,7 @@ spec = importlib.util.spec_from_file_location('stage_exit_boss_routes', Path(__f
 routes = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(routes)
 FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
+RECORDINGS = ROOT / '.cache/stage-exit-recordings'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
 # Frames a descent adds per earlier floor for its trapdoor, the stage
@@ -53,16 +56,52 @@ ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
 
 
+def retain(path, content):
+    """Exclusive attempt files remain private even when the caller aborts."""
+    with path.open('xb') as handle:
+        handle.write(content); handle.flush(); os.fsync(handle.fileno())
+
+
 def record(base, *args, rooms='0', arrival='', production_directory=None):
-    with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
-        json.dump(base, handle); handle.flush()
-        production = ['--production-directory', str(production_directory)] if production_directory else []
-        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *production, *map(str, args)],
-                                cwd=ROOT, capture_output=True, text=True, timeout=3600)
-    lines = result.stdout.strip().splitlines()
-    if not lines:
-        raise RuntimeError(f'Stage-exit recorder failed: {result.stderr.strip()[-2000:]}')
-    return json.loads(lines[-1])
+    RECORDINGS.mkdir(parents=True, exist_ok=True)
+    attempt = Path(tempfile.mkdtemp(prefix='attempt-', dir=RECORDINGS))
+    parent = os.open(RECORDINGS, os.O_RDONLY | os.O_DIRECTORY)
+    try: os.fsync(parent)
+    finally: os.close(parent)
+    print(f'Stage-exit recorder attempt retained at {attempt}', file=sys.stderr, flush=True)
+    input_path = attempt / 'case.json'
+    retain(input_path, json.dumps(base).encode())
+    production = ['--production-directory', str(production_directory)] if production_directory else []
+    argv = ['node', str(routes.RECORDER), '--case', str(input_path), '--rooms', rooms, '--arrival', arrival,
+            '--attempt-output', str(attempt), *production, *map(str, args)]
+    retain(attempt / 'request.json', (json.dumps({'argv': argv, 'cwd': str(ROOT)}) + '\n').encode())
+    completed, failure, returned = None, None, False
+    try:
+        with (attempt / 'stdout.raw').open('xb') as stdout, (attempt / 'stderr.raw').open('xb') as stderr:
+            try:
+                completed = subprocess.run(argv, cwd=ROOT, stdout=stdout, stderr=stderr, timeout=3600)
+            finally:
+                for stream in (stdout, stderr):
+                    stream.flush(); os.fsync(stream.fileno())
+        lines = (attempt / 'stdout.raw').read_bytes().strip().splitlines()
+        if not lines:
+            raise RuntimeError(f'Stage-exit recorder produced no result; retained at {attempt}')
+        retain(attempt / 'returned-result.raw.json', lines[-1])
+        result = json.loads(lines[-1])
+        returned = True
+        return result
+    except BaseException as error:
+        failure = {'type': type(error).__name__, 'message': str(error)}
+        raise
+    finally:
+        retain(attempt / 'execution.json', (json.dumps({
+            'returnCode': completed.returncode if completed is not None else None,
+            'error': failure, 'returnedJsonParsed': returned,
+            'artifactObserved': (attempt / 'artifact.json').is_file(),
+        }) + '\n').encode())
+        directory = os.open(attempt, os.O_RDONLY | os.O_DIRECTORY)
+        try: os.fsync(directory)
+        finally: os.close(directory)
 
 
 def port_fight(base, *args, **options):
@@ -254,11 +293,14 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
 
 
 def main():
+    global RECORDINGS
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contrived', action='append', default=[], metavar='FIXTURE', help='fixture name under references/.../stage-exit')
     parser.add_argument('--count', type=int, default=1, help='OS-random approach cases per fixture')
     parser.add_argument('--production-directory', help='Existing immutable production artifact for both public-input recordings')
+    parser.add_argument('--recordings-output', type=Path, default=RECORDINGS, help='Private recorder attempt archive, retained on every failure')
     args = parser.parse_args()
+    RECORDINGS = args.recordings_output.resolve()
     entropy = random.SystemRandom()
     cases, failures = [], []
     for name in args.contrived:
