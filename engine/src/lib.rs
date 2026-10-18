@@ -63,6 +63,7 @@ pub mod envy;
 pub mod familiars;
 pub mod fatty;
 pub mod fireplaces;
+pub mod fistula;
 pub mod floor;
 pub mod fly_effects;
 mod fmath;
@@ -5234,7 +5235,7 @@ impl Game {
                 if spawned.scale != 1.0 {
                     npc.sprite_scale = Some(spawned.scale);
                 }
-                npc.max_hp *= spawned.health_scale;
+                npc.max_hp *= spawned.max_health_scale;
                 npc.hp *= spawned.health_scale;
                 Ok(())
             }
