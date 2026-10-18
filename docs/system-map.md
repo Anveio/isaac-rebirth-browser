@@ -24,14 +24,15 @@ admission coverage. Independent live qualification on pinned main `ca408124`
 is **UNRUN**; merged source and inputs establish no Original/Browser,
 fire-conversion, shared-MT or pixel acceptance. Bulk imports keep their owner.
 
-Caves I (stage 3) generation is still seed-dependent: selecting Double Trouble
-(boss range 3700..3749) stops generation because rectangular boss placement
-is unimplemented. Separately, its wall catalogue is built before selection
+Caves I/II generation places Double Trouble's 26x7 and 13x14 boss rooms
+through 58f480's candidates (source-decoded; no native Double Trouble layout
+is graded yet). Separately, the Caves I wall catalogue is built before selection
 and labels set 1 as patches 0..2 instead of 3..5. The reviewed catalogue
 correction is unbuilt and live-unrun; it changes metadata, not wall quads or
-RNG order, and does not fix Double Trouble. A real set 1 arrival and unchanged
-Basement controls remain required. Caves II (stage 4) and later stages remain
-outside this scope.
+RNG order. A real set 1 arrival and unchanged Basement controls remain
+required. Caves II (stage 4) generates, including the shop's surprise-miniboss
+flag, but its trapdoor stays refused until flagged-room entry (586c90's Greed
+template) is ported; see room-layout-evidence.md.
 
 | Area | Implemented source | Independent live scope and remaining work |
 | --- | --- | --- |

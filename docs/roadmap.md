@@ -216,12 +216,13 @@ selection, special room placement, curses, XL floors, alternate stages.
 
 Port: fresh normal Basement generation with authored weights, retries,
 fitting and secret rooms, verified against 17 original floors. Basement II
-and Caves I (stage 3) now have generation source, but Caves seeds selecting
-Double Trouble (boss range 3700..3749) still stop on unimplemented rectangular
-boss placement. The separate Caves set 1 wall catalogue labels patches 0..2
+and Caves I/II (stages 3 and 4) now have generation source, including
+Double Trouble's rectangular boss rooms (no native Double Trouble or Caves II
+layout graded yet). The separate Caves set 1 wall catalogue labels patches 0..2
 instead of 3..5; its reviewed metadata correction
 is unbuilt and live-unrun. This does not change wall quads or RNG order.
-Missing: Cellar, Caves II (stage 4) and later stages, curses (Labyrinth, Lost,
+Missing: Cellar, Depths and later stages, Caves II's flagged-shop Greed swap,
+curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
 Next: Cellar generation and unlock; curses.
@@ -258,15 +259,15 @@ endings.
 Port: boss clear award (with poop occupants), trapdoor, stage transition,
 Basement I to Basement II and PR654 Caves I descent source. The [carried-active follow-up](stage-exit-evidence.md)
 passes 48 mandatory identity/charge/reserve/ownership/descent checks across
-two active routes on frozen f837, with an ordinary control. Caves I still refuses Double Trouble seeds;
-current arrival/catalogue qualification is separate. Missing: Caves II and
+two active routes on frozen f837, with an ordinary control. Double Trouble
+seeds now generate Caves I; current arrival/catalogue qualification is separate. Missing: Caves II and
 later steps, alternate stages, endings.
 
 Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P1 | Caves I descent source landed (#654), but Double Trouble rectangular boss placement can still stop generation; the selected-wall catalogue also needs correction | issue; stage-exit-evidence.md |
+| #413 | P1 | Caves I descent source landed (#654), Double Trouble boss rooms place, Caves II generates behind a refused trapdoor; the selected-wall catalogue also needs correction | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
 
