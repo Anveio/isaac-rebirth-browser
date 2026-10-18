@@ -50,7 +50,7 @@ ANCHOR_IDLE = 120
 # live foes it fights clear before the doors open.
 ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
-ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
+ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -124,9 +124,11 @@ def frames(actions):
 
 
 def window(fixture):
-    """Frames from boss-room-arrival to exit-start for this fixture's fights."""
+    """Frames from boss-room-arrival to exit-start for this fixture's fights. A
+    fixture whose later floors take longer than WINDOW each (Caves I's eight-room
+    route and Mega Fatty) names its own window."""
     floors = len(fixture.get('descent', [None]))
-    return WINDOW * floors + EXIT_LEG * (floors - 1)
+    return fixture.get('window', WINDOW * floors + EXIT_LEG * (floors - 1))
 
 
 def final_rooms(fixture):
