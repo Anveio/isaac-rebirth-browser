@@ -93,6 +93,7 @@ pub struct Npc {
     pub dingle: Option<crate::dingle::DingleState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_creep: Option<crate::wall_creep::WallCreepState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub squirt: Option<crate::squirt::SquirtState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
