@@ -38,6 +38,10 @@ all preceding row values and statuses. Each recorded Native capture observes
 Give/Remove entry and return and restores its debug registers. The suite remains
 failed; this does not qualify the complete Tear backend. The deferred chest/TNT/
 rock bonuses and loose350 bodies stay outside this grant-only runtime slice.
+After integrating Gamma, all four browser runtime checks pass and the three-case
+replay retains every preceding comparison row. The fixed Save reuse also retains
+all 2,384 state rows (2,321 pass, 63 fail), pixel metrics and verdicts against the
+preceding candidate and main; its own-file reload passes.
 
 ## Running
 
