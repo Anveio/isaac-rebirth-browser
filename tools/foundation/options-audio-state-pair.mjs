@@ -18,7 +18,7 @@ export function compareOptionsAudio({data,clock,native,browser,observed,calls,na
  let error,preferenceContract;
  try{
   preferenceContract=optionsPreferenceContract(preferencesSchema);
-  if(preferencesSchema===3)check('declaredBrowserPreferenceContract',preferenceContract,observed.preferenceContract);
+  if(preferencesSchema===3||preferencesSchema===4)check('declaredBrowserPreferenceContract',preferenceContract,observed.preferenceContract);
   assert.equal(native.status,'pass');assert.equal(native.provenance.status,'pass');assert.equal(native.publicClockValidation.status,'pass');
   assert.equal(browser.status,'pass');assert.ok(observed?.trace);assert.deepEqual(observed.failures,[]);
   check('actualBrowserErrors',[],observed.errors);check('actualAPIComplete',false,observed.api.truncated);
@@ -56,10 +56,11 @@ export function compareOptionsAudio({data,clock,native,browser,observed,calls,na
    check(label+'.effectiveMusic.word',settings.effectiveMusicVolume.bits,word(actual.music.musicEnabled?actual.music.volume:0));
    check(label+'.fullscreenRequested',settings.fullscreenRequested,actual.fullscreen.requested);
    const marker=observed.checkpoints.find(c=>c.label===label);assert.ok(marker,label+' actual checkpoint owner');
-   if(preferencesSchema===3){
+   if(preferencesSchema===3||preferencesSchema===4){
     check(label+'.preferences.activeKey',preferenceContract.storageKey,marker.preferences.key);
     check(label+'.storage.declaredReadKey',preferenceContract.storageKey,marker.storageKey);
     f32(label+'.mapOpacity.untouchedSetting',Math.fround(.3),actual.mapSettings?.opacity);
+    if(preferencesSchema===4)check(label+'.gamma.untouchedSetting.word',word(1),Number.isFinite(actual.gammaSettings?.gamma)?word(actual.gammaSettings.gamma):undefined);
    }
    check(label+'.IOComplete',false,marker.preferences.truncated);check(label+'.feedbackComplete',false,marker.feedback.truncated);
    check(label+'.IOFailures',[],marker.preferences.events.filter(e=>e.status==='fail'));
@@ -181,13 +182,15 @@ export function compareOptionsAudio({data,clock,native,browser,observed,calls,na
    check('Back.actualNativeSerializedMapOpacity','0.3000',ini('MapOpacity'));
    check('Back.actualBrowserStorage',preferenceContract.saved,JSON.parse(saved.storage));
    const loads=saved.preferences.events.filter(e=>e.operation==='load'&&e.status==='pass');
-   check('V3.actualInitialStorageLoadObserved',true,loads.length>0);
-   check('V3.actualInitialStorageLoadKeyAndValues',true,loads.length>0&&loads.every(e=>e.key===preferenceContract.storageKey&&eq(e.value,preferenceContract.initial)));
+   check((preferencesSchema===4?'V4':'V3')+'.actualInitialStorageLoadObserved',true,loads.length>0);
+   check((preferencesSchema===4?'V4':'V3')+'.actualInitialStorageLoadKeyAndValues',true,loads.length>0&&loads.every(e=>e.key===preferenceContract.storageKey&&eq(e.value,preferenceContract.initial)));
    const saves=saved.preferences.events.filter(e=>e.operation==='save'&&e.status==='pass');
-   check('V3.actualBackSaveKeyAndValues',true,saves.length===1&&saves.every(e=>e.key===preferenceContract.storageKey&&eq(e.value,preferenceContract.saved)));
+   check((preferencesSchema===4?'V4':'V3')+'.actualBackSaveKeyAndValues',true,saves.length===1&&saves.every(e=>e.key===preferenceContract.storageKey&&eq(e.value,preferenceContract.saved)));
   }
+  if(preferencesSchema===4){const gamma=[...back.file.text.matchAll(/^Gamma=([^\r\n]+)$/gm)];
+   check('V4.Back.actualNativeGammaCount',1,gamma.length);check('V4.Back.actualNativeSerializedGamma','1.0000',gamma[0]?.[1]);}
   check('Back.actualBrowserSaveSuccesses',1,saved.preferences.events.filter(e=>e.operation==='save'&&e.status==='pass').length);
  }catch(e){error={message:String(e.message),stack:e.stack??null};}
- return{schema:preferencesSchema===3?2:1,...(preferencesSchema===3?{preferenceContract}:{}),status:!error&&checks.length>0&&checks.every(c=>c.status==='pass')?'pass':'fail',checks,diagnostics,error,
+ return{schema:preferencesSchema===4?3:preferencesSchema===3?2:1,...((preferencesSchema===3||preferencesSchema===4)?{preferenceContract}:{}),status:!error&&checks.length>0&&checks.every(c=>c.status==='pass')?'pass':'fail',checks,diagnostics,error,
   scope:'One declared actual Native/Browser audio-arrow/changed-value Back case with complete public seed transport. Actual direct configured gain, stored-gain materialization, playing query/live gain, class restart and pool reset remain separate blocking rows. Native physical resets and Browser voice stops have independently declared mandatory stages; their raw counts remain explicit. No audible/fullmix PCM, RGBA, complete MT, process-reload or whole Options parity.'};
 }

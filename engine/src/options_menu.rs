@@ -49,6 +49,8 @@ pub struct SaveRequest {
     pub fullscreen: bool,
     #[serde(default = "crate::map_presentation::default_serialized_opacity")]
     pub map_opacity: String,
+    #[serde(default = "crate::display_settings::default_serialized_gamma")]
+    pub gamma: String,
 }
 
 /// An explicit port capability failure, not a native setting or callback.
@@ -81,6 +83,7 @@ impl OptionsMenu {
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
         map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -109,9 +112,27 @@ impl OptionsMenu {
             }
             Action::None
         } else if left {
-            self.adjust(-1, self.left_held, audio, music, map, shared, audio_counter)?
+            self.adjust(
+                -1,
+                self.left_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if right {
-            self.adjust(1, self.right_held, audio, music, map, shared, audio_counter)?
+            self.adjust(
+                1,
+                self.right_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if actions.menu_back {
             Action::SaveAndBack
         } else {
@@ -173,6 +194,7 @@ impl OptionsMenu {
         music: &music::MusicState,
         fullscreen: &crate::fullscreen::FullscreenState,
         map: &crate::map_presentation::MapPreferences,
+        gamma: &crate::display_settings::GammaPreferences,
     ) -> Result<(), String> {
         let sequence = self.next_save_sequence;
         self.next_save_sequence = sequence
@@ -184,6 +206,7 @@ impl OptionsMenu {
             music_volume: format!("{:.4}", music.volume),
             fullscreen: fullscreen.requested,
             map_opacity: format!("{:.4}", map.opacity),
+            gamma: format!("{:.4}", gamma.gamma),
         });
         Ok(())
     }
@@ -203,6 +226,7 @@ impl OptionsMenu {
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
         map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -253,6 +277,7 @@ impl OptionsMenu {
                 );
             }
             4 => return Ok(Action::Fullscreen),
+            6 => gamma.adjust(direction),
             other => return Ok(Action::UnsupportedSetting(other)),
         }
         Ok(Action::None)

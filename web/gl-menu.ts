@@ -26,6 +26,10 @@ export class GLMenuContext {
   private readonly projection: WebGLUniformLocation;
   private readonly white: Texture;
   private readonly screen: GLSurface;
+  private readonly positionAttribute: number;
+  private readonly uvAttribute: number;
+  private gammaProgram: {program: WebGLProgram; buffer: WebGLBuffer; position: number; uv: number;
+    gamma: WebGLUniformLocation; image: WebGLUniformLocation} | null = null;
   private screenActive = false;
   private currentTarget: GLSurface | null = null;
   private readonly drawLayers = new Map<GLSurface | null, number>();
@@ -55,6 +59,7 @@ export class GLMenuContext {
     this.alphaTest("greater", 0);
     this.vertices = gl.createBuffer()!; gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices); gl.bufferData(gl.ARRAY_BUFFER, 30 * 4, gl.DYNAMIC_DRAW);
     const position = gl.getAttribLocation(this.program, "position"), uv = gl.getAttribLocation(this.program, "textureUV");
+    this.positionAttribute = position; this.uvAttribute = uv;
     gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 20, 0);
     gl.enableVertexAttribArray(uv); gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, 20, 12);
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.CULL_FACE);
@@ -71,7 +76,7 @@ export class GLMenuContext {
     const context = new GLMenuContext(width, height), paths = new Set<string>([
       "gfx/ui/main menu/menuoverlay.png", "gfx/ui/main menu/menushadow.png", "gfx/ui/main menu/emptyscreen.png", "gfx/ui/backselectwidget.png",
     ]);
-    const menuActors = new Set(["titlemenu", "saveselectmenu", "saveselectmenu_drawing", "gamemenu", "charactermenu", "characterportraits", "completion_widget", "difficultywidget", "seedwidget", "seedentry", "winstreakwidget", "menushadow", "challengemenu", "optionsmenu", "controllerselectmenu", "keyconfigmenu"]);
+    const menuActors = new Set(["titlemenu", "saveselectmenu", "saveselectmenu_drawing", "gamemenu", "charactermenu", "characterportraits", "completion_widget", "difficultywidget", "seedwidget", "seedentry", "winstreakwidget", "menushadow", "challengemenu", "optionsmenu", "gammamenu", "controllerselectmenu", "keyconfigmenu"]);
     for (const [path, actor] of Object.entries(sceneData)) if (menuActors.has(path.replace("gfx/ui/main menu/", "").replace(".anm2", ""))) {
       for (const sheet of actor.Spritesheets) paths.add(normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`));
     }
@@ -172,13 +177,58 @@ export class GLMenuContext {
     this.screenActive = true;
     this.beginTarget(null);
   }
-  presentScreen(): void {
+  presentScreen(gamma = 1): void {
+    if (!Number.isFinite(gamma) || gamma < 0.5 || gamma > 1.5)
+      throw new Error("Final display Gamma must be finite and within .5..1.5");
     this.screenActive = false;
     this.beginTarget(null); this.resetTransform(); this.globalAlpha = 1; this.imageSmoothingEnabled = false;
     this.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.blendFactors("one", "zero");
-    this.drawSurface(this.screen, 0, 0, this.screen.width, this.screen.height,
+    // Identity keeps the existing program and draw sequence exactly.
+    if (gamma === 1) this.drawSurface(this.screen, 0, 0, this.screen.width, this.screen.height,
       0, 0, this.canvas.width, this.canvas.height);
+    else this.presentGamma(gamma);
+  }
+  private presentGamma(gamma: number): void {
+    const gl = this.gl;
+    if (!this.gammaProgram) {
+      // Authored equivalent of the bounded final color operation. It consumes
+      // the completed screen target; sprite sampling/programs stay unchanged.
+      const vertex = this.shader(gl.VERTEX_SHADER, `attribute vec2 position; attribute vec2 textureUV;
+        varying vec2 uv; void main() { uv = textureUV; gl_Position = vec4(position, 0.0, 1.0); }`);
+      const fragment = this.shader(gl.FRAGMENT_SHADER, `precision highp float;
+        uniform highp sampler2D image; uniform float gamma; varying vec2 uv;
+        void main() { vec4 pixel = texture2D(image, uv);
+          gl_FragColor = vec4(pow(clamp(pixel.rgb, 0.0, 1.0), vec3(1.0 / gamma)), pixel.a); }`);
+      const program = gl.createProgram(), buffer = gl.createBuffer();
+      if (!program || !buffer) throw new Error("Final color program allocation failed");
+      gl.attachShader(program, vertex); gl.attachShader(program, fragment); gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        throw new Error(gl.getProgramInfoLog(program) ?? "Final color program link failed");
+      const position = gl.getAttribLocation(program, "position"), uv = gl.getAttribLocation(program, "textureUV");
+      const gammaLocation = gl.getUniformLocation(program, "gamma"), image = gl.getUniformLocation(program, "image");
+      if (position < 0 || uv < 0 || !gammaLocation || !image) throw new Error("Final color program owners missing");
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, 1, 0, 0, -1, -1, 0, 1, 1, 1, 1, 0,
+        1, 1, 1, 0, -1, -1, 0, 1, 1, -1, 1, 1,
+      ]), gl.STATIC_DRAW);
+      this.gammaProgram = {program, buffer, position, uv, gamma: gammaLocation, image};
+    }
+    const pass = this.gammaProgram;
+    try {
+      gl.useProgram(pass.program); gl.bindBuffer(gl.ARRAY_BUFFER, pass.buffer);
+      gl.enableVertexAttribArray(pass.position); gl.vertexAttribPointer(pass.position, 2, gl.FLOAT, false, 16, 0);
+      gl.enableVertexAttribArray(pass.uv); gl.vertexAttribPointer(pass.uv, 2, gl.FLOAT, false, 16, 8);
+      gl.bindTexture(gl.TEXTURE_2D, this.screen.texture);
+      gl.uniform1i(pass.image, 0); gl.uniform1f(pass.gamma, gamma); gl.drawArrays(gl.TRIANGLES, 0, 6);
+    } finally {
+      for (const index of [pass.position, pass.uv])
+        if (index !== this.positionAttribute && index !== this.uvAttribute) gl.disableVertexAttribArray(index);
+      gl.useProgram(this.program); gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
+      gl.enableVertexAttribArray(this.positionAttribute); gl.vertexAttribPointer(this.positionAttribute, 3, gl.FLOAT, false, 20, 0);
+      gl.enableVertexAttribArray(this.uvAttribute); gl.vertexAttribPointer(this.uvAttribute, 2, gl.FLOAT, false, 20, 12);
+    }
   }
   blendFactors(source: BlendName, destination: BlendName): void {
     const gl = this.gl, factors: Record<BlendName, number> = {

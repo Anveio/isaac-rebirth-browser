@@ -52,7 +52,7 @@ function installOptionsReturns() {
 // its separately declared current-or-historical contract explicitly.
 export function optionsObservedBrowser(real, data, observed, retain, preferencesSchema = 2) {
   const contract = optionsPreferenceContract(preferencesSchema);
-  if (preferencesSchema === 3) observed.preferenceContract = contract;
+  if (preferencesSchema === 3 || preferencesSchema === 4) observed.preferenceContract = contract;
   const labels = data.pairedTape.filter(action => action.type === 'capture').map(action => action.label);
   return new Proxy(real, {get(target, key) {
     if (key !== 'newContext') {
@@ -66,7 +66,8 @@ export function optionsObservedBrowser(real, data, observed, retain, preferences
       const initial = contract.initial;
       await context.addInitScript({content:
         `localStorage.removeItem('isaac-rebirth.options.audio.v1');\n` +
-        (preferencesSchema === 3 ? `localStorage.removeItem('isaac-rebirth.options.v2');\n` : '') +
+        ((preferencesSchema === 3 || preferencesSchema === 4) ? `localStorage.removeItem('isaac-rebirth.options.v2');\n` : '') +
+        (preferencesSchema === 4 ? `localStorage.removeItem('isaac-rebirth.options.v3');\n` : '') +
         `localStorage.setItem(${JSON.stringify(contract.storageKey)},${JSON.stringify(JSON.stringify(initial))});\n` +
         `(${installBrowserAudioObserver.toString()})();\n` +
         `(${installOptionsGainObserver.toString()})();\n` +
@@ -84,7 +85,7 @@ export function optionsObservedBrowser(real, data, observed, retain, preferences
           const result = await evaluate(fn, arg);
           if (typeof fn === 'function' && /window\.game\.capture\(\)/.test(fn.toString())) {
             const actual = await evaluate(({storageKey, preferencesSchema}) => ({preferences: window.game.preferences(), feedback: window.game.feedback(),
-              storage: localStorage.getItem(storageKey), ...(preferencesSchema === 3 ? {storageKey} : {}), apiEvents: window.__audioApi.events.length,
+              storage: localStorage.getItem(storageKey), ...((preferencesSchema === 3 || preferencesSchema === 4) ? {storageKey} : {}), apiEvents: window.__audioApi.events.length,
               gainEvents: window.__optionsGainObservation.snapshot().events.length}), contract);
             observed.checkpoints.push({label: labels[next++], ...actual});
           }
