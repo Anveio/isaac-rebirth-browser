@@ -291,9 +291,28 @@ Movement/coasting is mandatory on W→I, both-column and Defaults routes; Escape
 binding owns only its declared menu and final normal seeded-run suffix. The
 duplicate refusal requires actual SFX187 slot/cooldown and measured Menu clock
 origins; it does not rewrite the original three failed clock rows. Every pixel
-mismatch and history-cap failure remains visible. Reload, alternate physical
-confirm/raw-priority interactions, controller/hotplug, disabled-interpolation/
-Skipped behavior and complete pixels/PCM remain separate coverage.
+mismatch and history-cap failure remains visible. Native reload, alternate
+physical confirm/raw-priority interactions, controller/hotplug,
+disabled-interpolation/Skipped behavior and complete pixels/PCM remain separate
+coverage.
+
+`--keyboard-own-reload` is an explicit opt-in. It validates the complete replay
+bank before selecting the supported W→I routes, retains the original paired
+captures, then checks the actual Back save, natural same-origin constructor
+load, separate reset-load and trusted I movement/old W refusal. Options V4 and
+InputConfigs use separate storage owners. Command-state history must contain the
+constructor state plus one state per public command, with actual reset/final-step
+endpoints and no truncation. Music callback states are a separate optional owner. Same-Native default/reload comparisons
+on current-main `568e86ec` preserve 1,568 fields and 44 original-document PNG bytes; the two
+reload routes pass 298 checks over 26 checkpoints. RGBA remains 18 pass/26 fail
+and prior history-cap failures remain. These two recorded cases add no new draw
+or Native process; they do not qualify Native reload or the whole five-case bank.
+Replay their existing public inputs through the registered gate:
+
+```sh
+npm run test:e2e -- controls --keyboard-own-reload --scenarios references/isaac/cases/controls/recorded-four-fixed-and-9xzmzpr0-v1.json --case controls-movement-up-w-to-i-v1
+npm run test:e2e -- controls --keyboard-own-reload --scenarios references/isaac/cases/controls/recorded-os-m3mjey2z-v1.json --case controls-os-movement-up-w-to-i-v1
+```
 
 The first registered run on main0ad-based artifact `2a706930` passes all five
 cases: 3,688/3,688 fields and 109 checkpoints. The recorded OS input is
