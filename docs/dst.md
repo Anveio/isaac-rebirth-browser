@@ -99,7 +99,7 @@ indexes each one's declared properties from source.
 | `pathfinder` | FindGridPath's flood (`pathfinder::flood_costs`, 5b498f) over room-shaped and arbitrary cost grids | an independent node-weighted Dijkstra: every label is the cell's shortest distance whatever order heap ties take; only open cells of the grid change; the owner is visited exactly when it lies within half the room's cells; without it the flood visits exactly the cells nearer than that cutoff, with it every cell nearer than the expansion that visits the owner and none farther, and that expansion runs to its end; purity; grids outside admission are rejected |
 | `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
 | `game` | the whole engine through public commands, booted with or without the settings and input configuration the browser stored | per-step state invariants, per-command transition contracts (menus including Options, Controls and Keyboard bindings, the own-save protocol and Continue, run-start hold, pause, boss scenes, stage descents, death and GameOver), boot with stored settings, rejection of malformed inputs, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
-| `rooms` | every room `traversal::admits` on a seeded run's Basement I, II or Caves I floor, reached through an open trapdoor's own entry check and a door transition, and played by the game driver (after stage/rooms' room-entry scan) | no Tick fails and nothing panics, signed by the engine's error; a stage transition a trapdoor starts arrives within 1,500 full updates. A refused trapdoor or door is skipped and a player who walks back out has played the room, so no port gap is pinned |
+| `rooms` | every room `traversal::admits` on a floor a seeded run's trapdoors reach, through each trapdoor's own entry check and a door transition, and played by the game driver (after stage/rooms' room-entry scan) | no Tick fails and nothing panics, signed by the engine's error; a stage transition a trapdoor starts arrives within 1,500 full updates. A refused trapdoor or door is skipped and a player who walks back out has played the room, so no port gap is pinned |
 | `abi` | the exported C ABI the browser bridge drives | save documents bounded at 4 MiB, save IO declared only with protocol 1 at a fresh Title and documents loaded only there, corrupt documents refused keeping the game; framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game; the settings resets boot with their stored settings, publish the same state from the authored resources, and refuse presence flags other than zero or one and stored volumes or Map opacity outside the unit interval, keeping the previous game; the input-configuration reset boots with the stored configuration and the same state from the authored resources, and refuses more than 32 retained devices, duplicate or unprintable names, Keyboard bindings outside GLFW's keys and unknown request fields, keeping the previous game; the Gamma settings reset boots with every stored setting and the same state from the authored resources, boots what the input-configuration reset does at Gamma 1, and refuses a missing, null or out-of-range Gamma and unknown fields, keeping the previous game |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
@@ -277,15 +277,17 @@ Ordinary play reaches only the rooms one route crosses, and a later stage
 only after its boss, so the `rooms` unit enters every room a floor admits,
 after stage/rooms' native room-entry scan. A case starts a seeded run
 through the public menus (the seed scout's walk) and plays past the start
-hold. For Basement II or Caves I it then stands the player on an open
-trapdoor (state 1, its open clip finished) on the stage before, so the
-trapdoor's own entry check (`advance_trapdoor`) decides the descent. When it
-takes the player, the stage transition runs NextStage, the nightmare scene
-and the next level's admission as in play. On the floor it arrives on, the
-unit enters each room `traversal::admits` through the transition a door
-starts (`roomTransition` out, from the starting room to the target's first
-door), and the game driver plays it for 300 to 900 full updates. Admission
-reads only the target and its door, so the rooms need not be adjacent.
+hold. It then descends: on each floor it stands the player on an open
+trapdoor (state 1, its open clip finished), so the trapdoor's own entry
+check (`advance_trapdoor`) decides the descent, and the stage transition
+runs NextStage, the nightmare scene and the next level's admission as in
+play. The chain ends at the first trapdoor that refuses, so every stage the
+port admits joins without a change to the unit. The case plays one of the
+floors it reached, chosen uniformly: it enters each room
+`traversal::admits` through the transition a door starts (`roomTransition`
+out, from the starting room to the target's first door), and the game
+driver plays it for 300 to 900 full updates. Admission reads only the
+target and its door, so the rooms need not be adjacent.
 
 A trapdoor that does not take the player within 120 full updates refused
 the descent, which is not a violation; a transition it starts must arrive

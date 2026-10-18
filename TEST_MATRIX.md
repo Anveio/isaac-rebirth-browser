@@ -335,7 +335,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 80 | 62 | 2 |
-| `rooms` | every room a run's floor admits, on Basement I, II and Caves I, entered and played | 2 | 7 | 1 |
+| `rooms` | every room a floor its trapdoors reach admits, entered and played | 2 | 7 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
