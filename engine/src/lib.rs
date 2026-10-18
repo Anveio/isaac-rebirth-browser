@@ -1035,6 +1035,10 @@ impl Game {
             map,
         )
     }
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is a separate boot input: seeds, challenge catalog, special-room assets and the saved audio, fullscreen, input and map preferences"
+    )]
     fn new_with_challenges(
         initial_seed: u32,
         boot_epoch_seed: u32,
@@ -5967,6 +5971,10 @@ pub extern "C" fn reset_with_boot_resources_and_map_preferences(
         }
     }
 }
+#[expect(
+    clippy::too_many_arguments,
+    reason = "forwards the scalar wasm ABI arguments of the exported reset_with_*map_preferences entry points, which cannot take a struct"
+)]
 fn reset_with_map_inputs(
     initial_seed: u32,
     boot_epoch_seed: u32,
@@ -6047,6 +6055,10 @@ pub extern "C" fn reset_with_boot_resources_and_map_preferences_v2(
         }
     }
 }
+#[expect(
+    clippy::too_many_arguments,
+    reason = "forwards the scalar wasm ABI arguments of the exported reset_with_*map_preferences_v2 entry points, which cannot take a struct"
+)]
 fn reset_with_map_input_presence(
     initial_seed: u32,
     boot_epoch_seed: u32,

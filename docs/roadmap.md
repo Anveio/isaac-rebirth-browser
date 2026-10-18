@@ -140,7 +140,8 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Filter, Gamma and Pop-ups values remain incomplete; Map opacity has separate bounded evidence | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
+| #647 | P2 | Options page draws no Filter, Gamma or Pop-ups values (Map Opacity fixed by #661) | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
+| #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
 
