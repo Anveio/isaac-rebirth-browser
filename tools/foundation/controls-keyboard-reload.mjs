@@ -94,12 +94,18 @@ export async function reloadOwnKeyboard(page,directory,data,original,transport) 
     check('naturalBoot.traceInitiallyDisabled',false,boot.trace.enabled);
     //This public reset separately reads the actual same-origin owner again.
     //inputConfigs is deliberately absent; never pass the observed table back.
-    await page.evaluate(({initialSeed,bootEpochSeed,startup})=>window.game.reset(initialSeed,{trace:true,bootEpochSeed,
+    const initialCommandState=await evaluateJson(page,({initialSeed,bootEpochSeed,startup})=>window.game.reset(initialSeed,{trace:true,bootEpochSeed,
       audioPreferences:startup.audioPreferences,fullscreenPreferences:startup.fullscreenPreferences}),data);
-    let expectedSeedDialog=false;const pressed=new Set();
-    for(const action of tape){
+    let expectedSeedDialog=false,lastCommandState;const pressed=new Set();
+    const lastCommandIndex=tape.findLastIndex(action=>action.type!=='capture');
+    assert.equal(tape[lastCommandIndex]?.type,'step','The declared suffix ends with a public Step before its final checkpoint');
+    for(const [actionIndex,action]of tape.entries()){
       if(action.type==='capture'){await checkpoint(action.label);continue;}
-      if(action.type==='step'){await page.evaluate(count=>{window.game.step(count);},action.frames);commands.push({type:'tick',count:action.frames});continue;}
+      if(action.type==='step'){
+        if(actionIndex===lastCommandIndex)lastCommandState=await evaluateJson(page,count=>window.game.step(count),action.frames);
+        else await page.evaluate(count=>{window.game.step(count);},action.frames);
+        commands.push({type:'tick',count:action.frames});continue;
+      }
       assert.equal(action.type,'key');const code=transport.browserKeyCode(action.key);
       assert.ok(/^(Enter|Tab|ArrowUp|Key[A-Z]|Digit[0-9])$/.test(code),'Only the declared modifier-free suffix is admitted');
       const text=expectedSeedDialog?transport.seedInputText(code,new Set()):null;
@@ -111,7 +117,15 @@ export async function reloadOwnKeyboard(page,directory,data,original,transport) 
     const trace=await readTrace(page),after=await passive();await writeJsonEvidence(join(out,'public-reset-trace.json.gz'),trace);save(join(out,'after-public-suffix.json'),after);
     check('publicReset.completeTrace',true,trace.enabled);check('publicReset.inputTraceTruncated',false,trace.inputTraceTruncated);
     check('publicReset.backendTruncated',false,trace.backendStateTruncated);check('publicReset.backendReason',null,trace.backendStateTruncationReason);
-    check('publicReset.backendStatesPresent',true,Array.isArray(trace.backendEvents)&&trace.backendEvents.every(event=>event.state&&typeof event.state==='object'&&!Array.isArray(event.state)));
+    check('publicReset.stateHistoryTruncated',false,trace.stateHistoryTruncated);
+    check('publicReset.stateHistoryReason',null,trace.stateHistoryTruncationReason);
+    check('publicReset.commandStateCount',commands.length+1,Array.isArray(trace.states)?trace.states.length:undefined);
+    check('publicReset.commandStatesPresent',true,Array.isArray(trace.states)&&trace.states.length>0&&trace.states.every(state=>state&&typeof state==='object'&&!Array.isArray(state)));
+    check('publicReset.initialCommandState',initialCommandState,trace.states[0]);
+    check('publicReset.finalCommandState',lastCommandState,trace.states.at(-1));
+    //Music callbacks have a separate optional journal; zero real callbacks is
+    //not command-history presence. Every actual callback must retain its state.
+    check('publicReset.musicBackendStatesComplete',true,Array.isArray(trace.backendEvents)&&trace.backendEvents.every(event=>event.state&&typeof event.state==='object'&&!Array.isArray(event.state)));
     check('publicReset.actualCommands',commands,trace.commands);check('publicReset.actualSeed',data.initialSeed,trace.initialSeed);check('publicReset.actualEpoch',data.bootEpochSeed,trace.bootEpochSeed);
     check('publicReset.bootInputConfigs',ownConfigs,trace.bootInputConfigs);check('publicReset.audio',data.startup.audioPreferences,trace.bootAudioPreferences);
     check('publicReset.fullscreen',data.startup.fullscreenPreferences,trace.bootFullscreenPreferences);

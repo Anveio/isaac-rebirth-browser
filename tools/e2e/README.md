@@ -270,9 +270,11 @@ coverage.
 bank before selecting the supported W→I routes, retains the original paired
 captures, then checks the actual Back save, natural same-origin constructor
 load, separate reset-load and trusted I movement/old W refusal. Options V4 and
-InputConfigs use separate storage owners. Same-Native default/reload comparisons
+InputConfigs use separate storage owners. Command-state history must contain the
+constructor state plus one state per public command, with actual reset/final-step
+endpoints and no truncation. Music callback states are a separate optional owner. Same-Native default/reload comparisons
 on `4c385253` preserve 1,568 fields and 44 original-document PNG bytes; the two
-reload routes pass 286 checks over 26 checkpoints. RGBA remains 18 pass/26 fail
+reload routes pass 298 checks over 26 checkpoints. RGBA remains 18 pass/26 fail
 and prior history-cap failures remain. These two recorded cases add no new draw
 or Native process; they do not qualify Native reload or the whole five-case bank.
 Replay their existing public inputs through the registered gate:

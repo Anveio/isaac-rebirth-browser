@@ -134,7 +134,7 @@ and two real reloads passing. Filter and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Keyboard document reload now passes 286 own-save/load and gameplay checks on
+Keyboard document reload now passes 298 own-save/load and gameplay checks on
 the retained fixed and recorded OS W→I routes. All 1,568 paired fields and 44
 original-document Browser PNG bytes stay unchanged; RGBA remains 18 pass/26 fail.
 This opt-in scope does not qualify Native process reload or the whole Controls bank.
