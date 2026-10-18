@@ -132,3 +132,48 @@ test("the public Keyboard Map binding controls the expanded map after Back", asy
   expect(feedback.truncated).toBe(false);
   expect(feedback.events.filter((event: any) => event.kind === "unavailableControl" && event.action === 13)).toEqual([]);
 });
+
+
+test("Gamma arrows reach the final display owner and Back survives a real document reload", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto("/"); await waitForReady(page);
+  await page.evaluate(() => {
+    const game = (window as any).game;
+    game.pause(); game.reset(2184569263, { trace: true });
+  });
+  const state = async () => page.evaluate(() => (window as any).game.snapshot());
+  const step = async (count: number) => page.evaluate(count => (window as any).game.step(count), count);
+  const tap = async (key: string, held = 2, released = 2) => {
+    await page.keyboard.down(key); await step(held);
+    await page.keyboard.up(key); if (released) await step(released);
+  };
+  await step(63);
+  for (const screen of ["profile", "main"]) {
+    await tap("Enter", 12, 72); expect((await state()).screen).toBe(screen);
+  }
+  for (let row = 0; row < 3; row++) await tap("ArrowDown");
+  await tap("Enter", 2, 60); expect((await state()).screen).toBe("options");
+  for (let row = 0; row < 6; row++) await tap("ArrowDown");
+  await step(60); expect((await state()).optionsMenu.selection).toBe(6);
+  expect((await state()).gammaSettings.gamma).toBe(1);
+  await tap("Enter"); expect((await state()).gammaSettings.gamma).toBe(1);
+  await page.keyboard.down("ArrowLeft"); await step(53);
+  let expected = Math.fround(1);
+  for (let prior = 0; prior < 53; prior++)
+    if (prior === 0 || prior > 49 && prior % 2 === 0)
+      expected = Math.max(0.5, Math.fround(expected - Math.fround(0.01)));
+  expect(Math.fround((await state()).gammaSettings.gamma)).toBe(expected);
+  await step(98); expect((await state()).gammaSettings.gamma).toBe(0.5);
+  await page.keyboard.up("ArrowLeft"); await step(2);
+  await tap("ArrowRight", 255); expect((await state()).gammaSettings.gamma).toBe(1.5);
+  await tap("Escape", 2, 60); expect((await state()).screen).toBe("main");
+  const saved = await page.evaluate(() => localStorage.getItem('isaac-rebirth.options.v4'));
+  expect(JSON.parse(saved!).gamma).toBe('1.5000');
+  await page.reload(); await waitForReady(page);
+  const loaded = await page.evaluate(() => ({state: (window as any).game.snapshot(),
+    trace: (window as any).game.trace(), preferences: (window as any).game.preferences()}));
+  expect(loaded.state.gammaSettings.gamma).toBe(1.5);
+  expect(loaded.trace.bootGammaPreferences).toEqual({gamma: 1.5});
+  expect(loaded.preferences.events.some((event: any) => event.operation === 'load' &&
+    event.status === 'pass' && event.key === 'isaac-rebirth.options.v4' && event.value.gamma === '1.5000')).toBe(true);
+});

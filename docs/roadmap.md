@@ -130,7 +130,7 @@ Music case (261/261) pass on the same frozen artifact. Options Audio V3 fixed
 plus recorded JWMM passes 948/948; history caps and pixel diagnostics remain
 failed. Same-Native Save replays preserve all 3,748 field values and statuses
 (3,650 pass, 98 fail), with zero lost passes, 66 own-save checks, 48 MT snapshots
-and two real reloads passing. Filter, Gamma and Popups callbacks,
+and two real reloads passing. Filter and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
@@ -140,7 +140,7 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Options page draws no Filter, Gamma or Pop-ups values (Map Opacity fixed by #661) | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
+| #647 | P2 | Options Filter and Pop-ups values remain open; Map Opacity is bounded by #661 and Gamma has a separate functional slice | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 | #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
@@ -616,3 +616,5 @@ Bugs in a test route or tool rather than in the game.
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
 - #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).
+
+The bounded [Gamma slice](options-gamma.md) implements the f32 callback, percentage, final RGB pass and V4 Back/reload. Fixed plus first-unfiltered OS inputs pass 1,376 functional checks and 26 required percentage regions; full-frame diagnostics remain 10/40 exact. Historical preference versions and shared regression evidence keep their own contracts.

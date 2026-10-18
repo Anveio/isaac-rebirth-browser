@@ -197,7 +197,7 @@ export class Renderer {
         this.menu.drawLoadingImage(ctx, state, alpha);
       }
     }
-    gl.presentScreen(); gl.finish();
+    gl.presentScreen(state.gammaSettings.gamma); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
     this.context.drawImage(gl.canvas, 0, 0);
   }

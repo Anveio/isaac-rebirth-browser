@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 const equal = (a,b) => a !== undefined && b !== undefined && JSON.stringify(a) === JSON.stringify(b);
 const word = value => {assert.ok(Number.isFinite(value)); const b=Buffer.alloc(4); b.writeFloatLE(value); return b.readUInt32LE();};
 export function validateMapDeclaration(data, contract) {
-  assert.equal(contract.schema,1); assert.equal(contract.preferenceSchema,3);
-  assert.equal(contract.storageKey,'isaac-rebirth.options.v3');
+  assert.equal(contract.schema,1); assert.ok(contract.preferenceSchema===3||contract.preferenceSchema===4);
+  assert.equal(contract.storageKey,'isaac-rebirth.options.v'+contract.preferenceSchema);
   assert.equal(data.declarationMode,'map-opacity-fast31-source-v1');
   assert.equal(contract.caseDeclarationMode,data.declarationMode);
   assert.deepEqual(data.tape,[...data.bootstrap.sourceOnlyPrelude,...data.pairedTape]);
@@ -244,15 +244,19 @@ export function compareOptionsMap({data,contract,clock,native,browser,observed,c
     const saved=observed.checkpoints.find(r=>r.label==='options-map-back-saved');
     const back=ns.get('options-map-back-saved').map.options.file;
     const ini=key=>{const matches=[...back.text.matchAll(new RegExp('^'+key+'=([^\\r\\n]+)$','gm'))];assert.equal(matches.length,1);return matches[0][1];};
-    const serialized=final.opacity.toFixed(4),expectedStore={schema:3,sfxVolume:'1.0000',musicVolume:'1.0000',fullscreen:false,mapOpacity:serialized};
+    const serialized=final.opacity.toFixed(4),expectedStore={schema:contract.preferenceSchema,sfxVolume:'1.0000',musicVolume:'1.0000',fullscreen:false,mapOpacity:serialized};
+    if(contract.preferenceSchema===4)expectedStore.gamma='1.0000';
     check('Back.NativeMapOpacity',serialized,ini('MapOpacity'));check('Back.NativeSFX','1.0000',ini('SFXVolume'));check('Back.NativeMusic','1.0000',ini('MusicVolume'));check('Back.NativeFullscreen','0',ini('Fullscreen'));
     assert.ok(Number.isInteger(back.mode)&&Number.isInteger(back.uid)&&Number.isInteger(back.gid),'Missing actual Native file metadata');
     check('Back.NativeFileActuallyChanged',true,back.sha256!==beforeFile.sha256);
+    if(contract.preferenceSchema===4){const gamma=[...back.text.matchAll(/^Gamma=([^\r\n]+)$/gm)];
+      check('V4.Back.NativeGammaCount',1,gamma.length);check('V4.Back.NativeGamma','1.0000',gamma[0]?.[1]);}
     check('Back.actualBrowserStorage',expectedStore,JSON.parse(saved.storage.text));
     const saves=saved.preferences.events.filter(e=>e.operation==='save'&&e.status==='pass');check('Back.actualSaveCount',1,saves.length);
     check('Back.actualSaveValue',expectedStore,saves[0]?.value);check('Back.actualSaveKey',contract.storageKey,saves[0]?.key);
     const saveRows=observed.returns.rows.flatMap(r=>r.options.saveRequests.map(request=>({presentation:r.presentation,request})));
     check('Back.actualSourceRequestCount',1,saveRows.length);check('Back.actualRequestMap',serialized,saveRows[0]?.request.mapOpacity);
+    if(contract.preferenceSchema===4)check('V4.Back.actualRequestGamma','1.0000',saveRows[0]?.request.gamma);
     check('Back.actualSequenceJoin',saveRows[0]?.request.sequence,saves[0]?.sequence);
     check('initialActualAbsentLoad',true,saved.preferences.events.some(e=>e.operation==='load'&&e.status==='absent'&&e.key===contract.storageKey));
     const lo=nf.get('options-map-row-3').virtualElapsedNs,hi=nf.get('options-map-back-saved').virtualElapsedNs;
