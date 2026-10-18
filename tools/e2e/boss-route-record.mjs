@@ -182,6 +182,7 @@ try {
     return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
       dir: path.length > 1 ? next % 5 : incoming };
   };
+  const routeFight = { orbit: 1, lead: false };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
@@ -209,6 +210,9 @@ try {
       const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
+        // A route room whose live foes keep its doors shut is fought clear
+        // (a descent's later floor: Caves I's Dips and Chargers).
+        : !usable && !state.clear && state.foes.length ? fightKeys(state, routeFight)
         // A cleared boss room's shared keys step from cell centre to cell
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.

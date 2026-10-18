@@ -43,6 +43,9 @@ EXIT_LEG = 3000
 PADDING_STEP = 600
 # Frames both games stand still after re-entering the boss room.
 ANCHOR_IDLE = 120
+# Frames the port's walk may spend in each route room of a later floor, whose
+# live foes it fights clear before the doors open.
+ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
 ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
@@ -122,6 +125,7 @@ def descended(result, fixture, production_directory):
         last = index + 1 == len(floors)
         leg = port_fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
+                         *(['--room-frames', ROUTE_ROOM_FRAMES] if index else []),
                          *(['--route-avoid', avoid] if avoid else []),
                          *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
                          rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
