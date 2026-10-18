@@ -10,14 +10,8 @@ npm run check                                 # build + every live suite
 npm run test:e2e -- --list                    # registered live suites
 npm run test:e2e:paired -- --replay-cases PATH
 npm run matrix:update                         # sync TEST_MATRIX.md
+python3 tools/foundation/decode-rooms.py --prepare-private-caves  # before raw cargo
 ```
-
-Caves room bytes are derived privately from the owner's pinned Linux
-rooms.a into the ignored .cache/private-base-assets/rooms/ directory.
-The npm build/build:wasm and cloud entrypoints prepare this input automatically.
-Before direct native Cargo commands, run
-python3 tools/foundation/decode-rooms.py --prepare-private-caves.
-Keep Original resource payloads private.
 
 | Subsystem | Root |
 | --- | --- |
