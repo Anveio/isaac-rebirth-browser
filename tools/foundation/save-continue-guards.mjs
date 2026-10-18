@@ -27,7 +27,9 @@ export async function validateSaveCapture(frames,directory,caseData) {
     assert.ok(main.state.saveRevision>prior.state.saveRevision,'A stored admission packet alone is insufficient');
     assert.ok(record.run.gameUpdateCount>initialRecord.run.gameUpdateCount);
     assert.equal(record.run.gameUpdateCount,prior.state.gameUpdateCount,'Quit must copy its actual paused Game update owner');
-    assert.equal(record.run.runSeed,caseData.seed.replaceAll(' ',''));assert.equal(record.run.seededRun,true);
+    const code=caseData.seed.replaceAll(' ','').toUpperCase();
+    assert.match(code,/^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);
+    assert.equal(record.run.runSeed,code.slice(0,4)+' '+code.slice(4),'Actual Saved+EF80 text');assert.equal(record.run.seededRun,true);
     assert.equal(record.run.stage,1);assert.equal(record.context.character,'Isaac');assert.equal(record.context.challengeId,0);assert.equal(record.context.sourceEffectMode,0);
     assert.equal(record.run.currentRoom,record.run.floor.startingDescriptor);assert.equal(record.context.visitedRooms.length,1);
     const footprintWitness = caseData.saveContinueContract?.stationaryBeforeSave === false;
@@ -44,7 +46,7 @@ export async function validateSaveCapture(frames,directory,caseData) {
   });
   await required('same-process-real-Continue-world',async()=>{
     const main=frame('save-main-settled'),resumed=frame('save-continued-playing'),moved=frame('save-continued-coast');const record=await ownPacket(main);
-    assert.equal(resumed.state.screen,'playing');assert.equal(resumed.state.runSeedValue,caseData.seedValue);assert.equal(resumed.state.runSeed,record.run.runSeed);
+    assert.equal(resumed.state.screen,'playing');assert.equal(resumed.state.runSeedValue,caseData.seedValue);assert.equal(resumed.state.runSeed,caseData.seed.replaceAll(' ','').toUpperCase(),'Actual internal compact run code');
     assert.equal(resumed.state.stage,record.run.stage);assert.equal(resumed.state.currentRoom,record.run.currentRoom);assert.deepEqual(resumed.state.floor,record.run.floor);
     assert.deepEqual(resumed.state.inventory,record.run.inventory);assert.equal(resumed.state.player.hp,record.run.player.hp);assert.equal(resumed.state.player.maxHp,record.run.player.maxHp);
     assert.ok(resumed.state.room.loaded&&resumed.state.room.grid?.cells.length>0);

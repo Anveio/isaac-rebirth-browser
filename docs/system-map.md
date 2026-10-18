@@ -853,12 +853,32 @@ WASM differential and Browser over-bound results retain their separate scopes;
 complete direct WASM owner bytes remain unobserved and the under-bound Browser
 wrapper failure remains retained. The merged current-main native port library
 check passes separately; its wrapper's failed label remains preserved.
-Unmerged H (`65178aba`), on frozen main715 plus Save6, passes build/runtime 4/4
-and two actual Save comparisons gain 56 rows with zero lost passes: 3,706 pass /
-42 fail. All 66 own-save guards pass through same-process Continue and pixels
-are unchanged. The 42 failures are 28 ambient velocity words and 14 canonical
-scope rows. H's ordinary-run driver and natural reload remain unqualified;
-these results add no Factory/Get or whole-game parity claim.
+Fresh public-main134 H/tooling artifact `7ddc18cc` separately passes build/ABI
+and runtime 4/4. Its one fixed same-Native Save capture keeps all 2,384 ordered
+rows exactly equal to dbfab H: 2,349 pass / 35 fail, zero lost/missing/new or
+changed Native expectations, 33 own-save guards and unchanged pixels. Actual
+natural reload/Continue passes, with stored seed9/live seed8 and penalty0; the
+observed movement follows the valid room5-to-room6 door transition. The suite
+still fails its 28 ambient velocity and seven canonical scope rows. No new134
+baseline, OS or ordinary replay is claimed; its actual canonical affected
+preview selects 52 suites. Publication on later main3b08711d preserves Mega Fatty and unrelated
+quality tools without inheriting a later-main gameplay grade.
+
+H's separate snapshotdbfab qualification uses fresh baseline `9e3c05e5` and
+shared H/tooling artifact `70cb3285`: fresh build/ABI and runtime 4/4 each pass. The
+candidate's actual affected preview selects 52 suites. The same retained fixed Native case improves 2,321 pass /
+63 fail to 2,349 pass / 35 fail: 14 seed-text and 14 penalty-stage gains, zero
+lost/missing/new rows or changed Native expectations, unchanged pixels and
+33 own-save guards per role. The remaining 35 are 28 ambient velocity words
+and seven canonical scope rows; both comparison exits remain failed. Both
+ordinary-run replays pass on the same retained Native case, including the
+candidate's exact nine-character saved-seed guard. Both fixed natural reloads
+pass; their fresh boot RNG/epochs differ, and unchanged placement permits the
+observed different valid doors. This is no identical-boot counterfactual or
+Original-process reload parity. Historical main715 H retains its separately
+qualified fixed/OS 56 gains and 42 failures. Raw archive audit corrects its
+earlier ordinary/reload-unqualified notes; the old notes remain preserved.
+No main134 integration, Factory/Get or whole-game qualification is inherited.
 [Save/Continue scope](save-continue.md) preserves exact current and historical
 producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.

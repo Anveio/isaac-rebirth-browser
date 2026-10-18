@@ -2,7 +2,7 @@
 //! Level+81b0 is separate from the retained Game+10eae0 boss-family word.
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct LevelProgress {
     /// Native Level+81b0 qword. This leaf owns supported damage bits2/5;
@@ -10,8 +10,19 @@ pub struct LevelProgress {
     pub flags: u64,
     /// Native Level+c, set only by an accepted heart-family collection.
     pub heart_collected: bool,
-    ///52c4e5 writes Game+10ecdc. Its initial/restore value is not admitted.
+    /// Game.Init54E769 owns zero; damage52C4E5 records the current stage.
+    /// Save54F32F/Load54EE22 copy this owner; legacy unknown stays None.
     pub last_penalty_stage: Option<u32>,
+}
+
+impl Default for LevelProgress {
+    fn default() -> Self {
+        Self {
+            flags: 0,
+            heart_collected: false,
+            last_penalty_stage: Some(0),
+        }
+    }
 }
 
 impl LevelProgress {
