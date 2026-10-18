@@ -240,5 +240,19 @@
         "cleared:6"
       ]
     ]
+  },
+  {
+    "out": "coverage-save-reload.json",
+    "from": null,
+    "steps": 2000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "property:game: a session boots with a run a previous session saved"
+      ],
+      [
+        "property:game: Continue resumes a run a previous session saved"
+      ]
+    ]
   }
 ]
