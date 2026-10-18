@@ -128,7 +128,8 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>, af
         props::always!(
             expected.is_some() || result.is_ok(),
             "game: valid Tick commands always succeed",
-            details()
+            details(),
+            signature: result.as_ref().err().map_or("", String::as_str)
         );
     }
     props::sometimes!(
@@ -996,25 +997,32 @@ pub fn state(state: &State) {
             .map(rebirth_cleanroom::grid::Grid::new);
         if let Some(Ok(grid)) = grid {
             let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
+            // Each body names its family (NPC type, pickup variant), which
+            // signs a failure: one family's known escape cannot hide another.
             let npcs = npcs
                 .filter(|npc| npc.grid_collision_class != 0)
-                .map(|npc| ("npc", npc.id, npc.position));
+                .map(|npc| ("npc", npc.kind, npc.id, npc.position));
             let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
-            let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
+            let pickups =
+                pickups.map(|pickup| ("pickup", pickup.variant, pickup.id, pickup.position));
             let bombs = state.bombs.iter();
-            let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
+            let bombs = bombs.map(|bomb| ("bomb", 4, bomb.id, bomb.motion.position));
             let doorway = |position: WorldVector| {
                 grid.index(position)
                     .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
                     .is_some_and(|entity| entity.kind == 16)
             };
-            let escaped = npcs.chain(pickups).chain(bombs).find(|(_, _, position)| {
-                grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
-            });
+            let escaped = npcs
+                .chain(pickups)
+                .chain(bombs)
+                .find(|(_, _, _, position)| {
+                    grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
+                });
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
-                json!({ "body": escaped })
+                json!({ "body": escaped }),
+                signature: escaped.map_or(String::new(), |(body, family, _, _)| format!("{body} {family}"))
             );
         }
     }
