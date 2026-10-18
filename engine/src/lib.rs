@@ -2575,8 +2575,8 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
-        // A room holding more stains (or actors) than the record format
-        // admits refuses this save: the profile keeps its previous record
+        // A room holding more actors than the record format admits refuses
+        // this save: the profile keeps its previous record
         // and no write is requested, so the Tick and the run continue.
         if !record.rooms_within_supported_counts() {
             return Ok(());
@@ -2657,12 +2657,12 @@ impl Game {
 
     pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
         if let Some(request) = &self.save_write_request {
-            return Ok(request.packet.as_ref().clone());
+            return request.packet.export();
         }
-        self.serialize_profile_data()
+        self.serialize_profile_data()?.export()
     }
 
-    fn serialize_profile_data(&self) -> Result<Vec<u8>, String> {
+    fn serialize_profile_data(&self) -> Result<save_profiles::SaveWritePacket, String> {
         let fresh;
         let profiles = match self.saved_profiles.as_deref() {
             Some(profiles) => profiles,
@@ -2671,12 +2671,7 @@ impl Game {
                 &fresh
             }
         };
-        profiles.validate()?;
-        let bytes = serde_json::to_vec(&profiles).map_err(|error| error.to_string())?;
-        if bytes.len() > save_profiles::MAX_BYTES {
-            return Err("saved profiles exceed the supported 4 MiB format".into());
-        }
-        Ok(bytes)
+        profiles.write_packet()
     }
 
     ///A real application storage owner declares this capability before any
@@ -2709,7 +2704,7 @@ impl Game {
         self.save_write_request = Some(save_profiles::SaveWriteRequest {
             protocol: 1,
             revision: self.state.save_revision,
-            packet: std::sync::Arc::new(packet),
+            packet,
             remaining_ticks: None,
         });
         self.state.save_write_pending = true;

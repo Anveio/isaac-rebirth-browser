@@ -2,6 +2,8 @@
  * by the canonical WASM save owner; native files/captures never enter here. */
 export const SAVE_KEY = 'isaac-rebirth.savegames.v1';
 export const SAVE_BYTE_LIMIT = 4 * 1024 * 1024;
+//Exact expected refusal from the current string-only save export ABI.
+const SAVE_CAPACITY_ERROR = "saved profiles exceed the supported 4 MiB format";
 
 interface SaveEngine {
   enableSaveIO(): void;
@@ -58,11 +60,17 @@ export class SaveGameIO {
       throw new Error('Save IO requires the exact next actual callback revision');
     //The runtime exports this immutable request, not the later mutable profile.
     //No retry/coalescing can replace an older request with a newer packet.
-    //Canonical request/ABI errors cannot masquerade as storage failure.
-    const text = engine.exportSaveData();
-    bounded(text);
+    //Only the canonical byte-capacity refusal is a normal failed write.
+    //Other request/ABI errors cannot masquerade as storage failure.
+    let text: string | undefined;
+    try { text = engine.exportSaveData(); }
+    catch (error) {
+      if (!(error instanceof Error) || error.message !== SAVE_CAPACITY_ERROR) throw error;
+    }
+    if (text !== undefined) bounded(text);
     let succeeded = false;
     try {
+      if (text === undefined) throw new Error(SAVE_CAPACITY_ERROR);
       if (!this.storage) throw new Error('Saved profile storage is unavailable');
       this.storage.setItem(SAVE_KEY, text);
       if (this.storage.getItem(SAVE_KEY) !== text)

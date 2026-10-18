@@ -7,6 +7,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub const VERSION: u32 = 1;
 pub const MAX_BYTES: usize = 4 * 1024 * 1024;
+///The existing string-only save ABI reports this expected capacity refusal.
+///Hosts acknowledge it as a failed write; other export errors stay errors.
+pub const CAPACITY_ERROR: &str = "saved profiles exceed the supported 4 MiB format";
 
 ///Commands clone Game for atomic validation. Retained profile records are
 ///immutable between actual Save/Clear requests, so that hot path shares them.
@@ -148,11 +151,23 @@ impl Profiles {
 
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
         if bytes.len() > MAX_BYTES {
-            return Err("saved profiles exceed the supported 4 MiB format".into());
+            return Err(CAPACITY_ERROR.into());
         }
         let value: Self = serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
         value.validate()?;
         Ok(value)
+    }
+
+    ///Serialize every retained owner under the same byte budget as import.
+    ///Capacity is an expected failed write, not an invalid simulation state.
+    pub fn write_packet(&self) -> Result<SaveWritePacket, String> {
+        self.validate()?;
+        let mut output = SavePacketWriter::default();
+        match serde_json::to_writer(&mut output, self) {
+            Ok(()) => Ok(SaveWritePacket::Ready(std::sync::Arc::new(output.bytes))),
+            Err(_) if output.capacity_exceeded => Ok(SaveWritePacket::CapacityExceeded),
+            Err(error) => Err(error.to_string()),
+        }
     }
 
     ///Validate the complete retained document before changing the live Game.
@@ -191,16 +206,11 @@ impl Profiles {
 }
 
 impl RunRecord {
-    /// The record format's per-room actor and paint bounds. Live play does
-    /// not cap a room's background stains, so a run can exceed them.
+    /// The record format's supported per-room actor counts.
     pub(crate) fn rooms_within_supported_counts(&self) -> bool {
         std::iter::once(&self.run.room)
             .chain(self.context.persisted_rooms.values())
-            .all(|room| {
-                room.npcs.len() <= 512
-                    && room.pickups.len() <= 512
-                    && room.background_stains.len() <= 4096
-            })
+            .all(|room| room.npcs.len() <= 512 && room.pickups.len() <= 512)
     }
 
     pub fn validate(&self) -> Result<(), String> {
@@ -266,6 +276,8 @@ impl RunRecord {
                 return Err("saved Level contains an invalid descriptor".into());
             }
         }
+        //Room paint is append-only. The complete document byte limit, not
+        //an unrelated stain count, bounds this retained transport owner.
         for room in std::iter::once(&run.room).chain(context.persisted_rooms.values()) {
             let grid = room
                 .grid
@@ -336,7 +348,8 @@ impl RunRecord {
                 .dynamic_crater_records
                 .as_ref()
                 .is_none_or(|records| !records.is_empty())
-            //Blood7 footprints paint into a transient backdrop target. Room.Init
+            //Flags8 Blood7 paint, including generic splats and footprints, shares
+            //a transient backdrop target. Room.Init
             //5C5B30→42A170→428020 clears that same target before rebuilding it;
             //5C57C0 also excludesBlood7 from persisted entity records. The
             //diagnostic savedRoom still retains its real preSave paint, while
@@ -345,7 +358,7 @@ impl RunRecord {
                 .room
                 .background_stains
                 .iter()
-                .any(|stain| stain.variant != 7 || !stain.footprint)
+                .any(|stain| stain.variant != 7)
         {
             return Err("Continue has no owned load caller for this saved run yet".into());
         }
@@ -430,12 +443,56 @@ pub struct MenuReadmission {
     pub timestamp_millis: Option<u64>,
 }
 
+///The packet captured by one Save/Clear. An oversized document remains in
+///the retained owners, while its attempted write exports no truncated bytes.
+#[derive(Clone, Debug, PartialEq)]
+pub enum SaveWritePacket {
+    Ready(std::sync::Arc<Vec<u8>>),
+    CapacityExceeded,
+}
+
+impl SaveWritePacket {
+    pub fn export(&self) -> Result<Vec<u8>, String> {
+        match self {
+            Self::Ready(bytes) => Ok(bytes.as_ref().clone()),
+            Self::CapacityExceeded => Err(CAPACITY_ERROR.into()),
+        }
+    }
+}
+
+///Never allocate an oversized export before discovering its byte length.
+#[derive(Default)]
+struct SavePacketWriter {
+    bytes: Vec<u8>,
+    capacity_exceeded: bool,
+}
+
+impl std::io::Write for SavePacketWriter {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if bytes.len() > MAX_BYTES - self.bytes.len() {
+            self.capacity_exceeded = true;
+            return Err(std::io::Error::other(CAPACITY_ERROR));
+        }
+        let required = self.bytes.len() + bytes.len();
+        if required > self.bytes.capacity() {
+            let capacity = required.next_power_of_two().min(MAX_BYTES);
+            self.bytes.reserve_exact(capacity - self.bytes.len());
+        }
+        self.bytes.extend_from_slice(bytes);
+        Ok(bytes.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
 ///An actual host-enabled Save/Clear owns one immutable request packet.
 ///The public Tick may resume only after its real write attempt is acknowledged.
 #[derive(Clone, Debug, PartialEq)]
 pub struct SaveWriteRequest {
     pub protocol: u32,
     pub revision: u64,
-    pub packet: std::sync::Arc<Vec<u8>>,
+    pub packet: SaveWritePacket,
     pub remaining_ticks: Option<u32>,
 }
