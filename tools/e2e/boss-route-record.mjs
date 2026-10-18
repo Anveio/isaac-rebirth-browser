@@ -274,6 +274,11 @@ try {
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
+      if (process.env.BOSS_ROUTE_DEBUG && (FIGHT - left) % 600 === 0) {
+        const raw = JSON.parse(await page.evaluate(() => window.game.snapshotJson()));
+        writeFileSync(`${process.env.BOSS_ROUTE_DEBUG}.fight`, `${JSON.stringify({ fight: FIGHT - left, player: state.player, clear: state.clear, foes: state.foes,
+          npcs: raw.room.npcs.map(n => [n.kind, n.variant, n.hp, n.dead, n.removed, n.canShutDoors, Math.round(n.position.x), Math.round(n.position.y)]) })}\n`, { flag: 'a' });
+      }
     }
     checkpoint('clear');
     if (hasFlag('--no-corner')) { await hold([]); await step(1); }
