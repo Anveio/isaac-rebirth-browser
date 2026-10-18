@@ -676,7 +676,7 @@ Original capture or authored media.
 
 ```sh
 npm run test:e2e -- options-map --no-build --production-directory FROZEN
-npm run test:e2e -- options-map --scenarios SAVED_BANK --no-build --production-directory FROZEN
+npm run test:e2e -- options-map --scenarios references/isaac/cases/options-map/recorded-fixed-and-rhreyt48-v1.json --no-build --production-directory FROZEN
 ```
 
 The executing Source is archived before the first fresh draw. All draws and the
@@ -691,6 +691,20 @@ required. Missing owners fail. The fixed declared menu-gauge and Playing-map
 rectangles compare exact RGBA without adaptive alignment or masks; a mismatch
 fails this render gate. Full-frame RGBA stays an explicit diagnostic. Old84 Map
 and V2 Options results remain historical; this suite never regrades them.
+On frozen `48e1477f`/1,408, the unchanged recorded fixed plus first-unfiltered-OS
+bank passes 3,122/3,122 functional checks with no lost old pass. All 26 required
+menu-gauge regions are exact, while Playing-map regions pass 7/22; the whole
+render gate remains failed at 33/48. All 50 full-frame diagnostic failures are
+retained. The same build passes runtime 3/3 and the one recorded
+`audible-title-floor-pause` Music case (261/261), without claiming current OS
+Music coverage. Options Audio V3 completes the unchanged fixed plus recorded
+JWMM bank at 948/948; the earlier unlaunched OS reserve failure, both history
+caps and 16/32 pixel diagnostic failures remain retained. Two same-Native
+Save replays preserve all 3,748 ordered field values and statuses (3,650 pass,
+98 fail), with 66 own-save checks, 48 MT snapshots and two natural reloads
+passing. Save RGBA remains 34/62 exact; no lost exact image or pixel waiver.
+See [the scoped results and remaining issues](../../docs/map-opacity.md).
+
 Natural reload/migration, banner/controller, fullmix and complete sharedMT
 parity need separate evidence. Source registration alone is not a passing live
 qualification.

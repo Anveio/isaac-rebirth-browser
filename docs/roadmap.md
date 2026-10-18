@@ -123,17 +123,24 @@ the 24-action/two-column editor and its persistence; its [artifact-bound fixed,
 unfiltered OS and Full/Fast bomb results](controls-keyboard.md) remain separate
 from other systems. Fresh main173 artifact 4ca passes runtime 2/2 and exact fixed
 W→I plus recorded OS replay (1,568 fields unchanged and 44 identical Browser PNGs).
-Map Opacity, Filter, Gamma and Popups callbacks,
+The [partial Map opacity slice](map-opacity.md) now passes all 3,122 functional
+checks on fixed plus first-unfiltered-OS inputs and all 26 menu-gauge regions;
+15 of 48 required render regions remain failed. Runtime 3/3 and one recorded
+Music case (261/261) pass on the same frozen artifact. Options Audio V3 fixed
+plus recorded JWMM passes 948/948; history caps and pixel diagnostics remain
+failed. Same-Native Save replays preserve all 3,748 field values and statuses
+(3,650 pass, 98 fail), with zero lost passes, 66 own-save checks, 48 MT snapshots
+and two real reloads passing. Filter, Gamma and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Next: complete Controls reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
+Next: complete Controls reload and remaining callbacks; close Map rendering gaps; death screen parity; intro cutscene.
 See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Options page draws no Map Opacity, Filter, Gamma or Pop-ups values | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
+| #647 | P2 | Filter, Gamma and Pop-ups values remain incomplete; Map opacity has separate bounded evidence | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
 
 ## Input
 
