@@ -50,6 +50,16 @@ def record(base, *args, rooms='0', arrival='', production_directory=None):
     return json.loads(lines[-1])
 
 
+def fight(base, *args, **options):
+    """A port fight leg. A fight whose player takes the boss item (the port
+    alone; the original's pedestal keeps it) is recorded again keeping off
+    the pedestal cells."""
+    leg = record(base, *args, **options)
+    if leg['status'] != 'pass' and leg.get('reason') == 'The port took the boss item':
+        leg = record(base, *args, '--keep-off-pedestal', **options)
+    return leg
+
+
 def keys_only(actions):
     """A per-game segment carries no captures: only the shared tail is paired."""
     return [action for action in actions if action['type'] != 'capture']
@@ -81,8 +91,8 @@ def fought(fixture, production_directory=None):
     # originalHealth [red, maxRed, soul]: the original's fight ends below full
     # health, so a port fight at full health takes one bomb blast (--hurt).
     red, maximum, soul = fixture.get('originalHealth', [0, 0, 0])
-    port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
-                  *(['--hurt'] if red + soul < maximum else []), production_directory=production_directory)
+    port = fight(result, '--from', 'boss-room-arrival', '--fight', WINDOW,
+                 *(['--hurt'] if red + soul < maximum else []), production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     build = port.get('build')

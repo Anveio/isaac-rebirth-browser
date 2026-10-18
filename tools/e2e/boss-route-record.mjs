@@ -22,6 +22,8 @@
 // fightKeys) and parks the player in the bottom-left corner (`corner`);
 // --lead aims ahead of each foe's velocity and orbits closer; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
+// A parked fight fails if the port's player took the boss item (an empty
+// pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
@@ -50,6 +52,7 @@ const VIA = flag('--via') && flag('--via').split(',').map(Number);
 const VIA_CANDIDATES = (flag('--via-candidates', '') || '').split(';').filter(Boolean).map(item => item.split(',').map(Number));
 let chosenVia = VIA ? { x: VIA[0], y: VIA[1] } : null;
 const IDLE = Number(flag('--idle', '0'));
+const TOOK_ITEM = 'The port took the boss item';
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
 const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
@@ -190,10 +193,12 @@ try {
     const memory = { orbit: 1, lead: hasFlag('--lead') };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
     // or beside it then takes the item in the port alone, which leaves an
-    // empty pedestal (subtype 0) where the original's keeps its item. A fight
-    // that goes on to the stage exit (no --no-corner) steers around those
-    // cells as if they were solid.
-    const PEDESTAL_CELLS = hasFlag('--no-corner') ? [] : [82, 96, 97, 98, 112];
+    // empty pedestal (subtype 0) where the original's keeps its item. With
+    // --keep-off-pedestal the fight steers around those cells as if they
+    // were solid. Only a fight that took the item is recorded so: the cells
+    // narrow every fight's orbit, and EV9BP18Q's Monstro then outlasts the
+    // window.
+    const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
@@ -251,6 +256,7 @@ try {
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
     state = await view();
+    if (state.pickups.some(p => p.variant === 100 && p.subtype === 0)) throw new Error(TOOK_ITEM);
     checkpoint('corner');
   }
   if (EXIT) {
