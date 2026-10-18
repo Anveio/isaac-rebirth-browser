@@ -164,7 +164,8 @@ def descended(result, fixture, production_directory):
         # routing grid's own solid cells.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         last = index + 1 == len(floors)
-        leg = port_fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
+        # A floor's `fight` budget covers a longer boss (Mega Fatty's 600 HP).
+        leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
                          *(['--room-frames', ROUTE_ROOM_FRAMES] if index else []),
                          *(['--route-avoid', avoid] if avoid else []),
