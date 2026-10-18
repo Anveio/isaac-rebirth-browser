@@ -325,8 +325,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 78 | 60 | 2 |
-| `abi` | the exported C ABI transport the browser bridge drives | 26 | 3 | 0 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 79 | 60 | 2 |
+| `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -667,6 +667,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a boss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: a miniboss room is cleared | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: an Options tick changes only the setting on its selected row | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
+| Always | game: Gamma stays within .5..1.5 | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: leaving Options saves the settings it leaves with | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Sometimes | game: Options saves and returns to the main menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
 | Always | game: bindings and the stored input configuration change only in the keyboard menu | [invariants.rs](engine/dst/src/units/game/invariants.rs) |
@@ -773,6 +774,10 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: an input-configuration reset boots with the stored configuration | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration reset refuses a configuration inputconfigs.dat cannot hold, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a Gamma settings reset boots with the stored settings | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a Gamma settings boot from the authored resources publishes the plain boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a settings reset with Gamma 1 boots what the input-configuration reset does | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a settings reset refuses a missing Gamma or one outside .5..1.5, keeping the previous game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a settings reset boots with the stored settings | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a settings boot from the authored resources publishes the plain settings boot's state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a map settings reset boots with the stored settings, from the authored resources too | [abi.rs](engine/dst/src/units/abi.rs) |
