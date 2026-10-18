@@ -144,6 +144,10 @@ pub(crate) enum Birth {
         position: WorldVector,
         color: crate::sprite_color::Color,
     },
+    /// Kill47FC80 Have234 (Infestation 2): Player50c980 would spawn a
+    /// BlueSpider familiar 3.73 at the dying NPC. Port gap: that familiar is
+    /// unported, so nothing is spawned and the caller records the frontier.
+    UnportedBlueSpider,
 }
 
 pub(crate) type Advance =

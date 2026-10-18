@@ -5081,6 +5081,17 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::UnportedBlueSpider => {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: 3,
+                        variant: 73,
+                        subtype: 0,
+                    },
+                );
+                Ok(())
+            }
             entities::Birth::FlyExplosion {
                 seed,
                 position,
