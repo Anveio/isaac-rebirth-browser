@@ -39,7 +39,10 @@ pub struct HopperState {
 }
 
 fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Option<Npc>, String> {
-    let admitted = matches!((selector.entity_type, selector.variant), (29, 0 | 1) | (54, 0));
+    let admitted = matches!(
+        (selector.entity_type, selector.variant),
+        (29, 0 | 1) | (54, 0)
+    );
     if selector.category != SpawnCategory::Entity || !admitted || selector.subtype != 0 {
         return Ok(None);
     }
@@ -115,9 +118,21 @@ fn ai(
     }
     let target = world.player;
     let delta = sub(target, npc.position);
-    let mut hopper = npc.hopper.take().ok_or("Hopper requires its +f58/+440 state")?;
+    let mut hopper = npc
+        .hopper
+        .take()
+        .ok_or("Hopper requires its +f58/+440 state")?;
     let result = match npc.state {
-        3 => idle(npc, &mut hopper, random, world, target, delta, reach, minimum_idle),
+        3 => idle(
+            npc,
+            &mut hopper,
+            random,
+            world,
+            target,
+            delta,
+            reach,
+            minimum_idle,
+        ),
         4 => {
             hop(npc, &mut hopper, random, world, *friction);
             Ok(())
@@ -152,7 +167,10 @@ fn burn(npc: &mut Npc, random: &mut Mt19937) -> Result<(), String> {
     Ok(())
 }
 
-#[expect(clippy::too_many_arguments, reason = "IDLE 4cffe0 reads the reach, target and minimum idle the entry computed")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "IDLE 4cffe0 reads the reach, target and minimum idle the entry computed"
+)]
 fn idle(
     npc: &mut Npc,
     hopper: &mut HopperState,
@@ -190,7 +208,10 @@ fn idle(
         return Ok(());
     };
     // Entity+440 (`npc.target`): the landing cell centre.
-    npc.target = world.grid.position(index).ok_or("Hopper landing cell has no centre")?;
+    npc.target = world
+        .grid
+        .position(index)
+        .ok_or("Hopper landing cell has no centre")?;
     npc.state = 4;
     plain_npc::play(npc, "Hop", true);
     hopper.counter = 0;
@@ -199,7 +220,13 @@ fn idle(
 
 /// HOP 4d02f8. Steering uses the update's base friction (+470 before the
 /// tail's ×0.7).
-fn hop(npc: &mut Npc, hopper: &mut HopperState, random: &mut Mt19937, world: &mut NpcWorld, friction: f32) {
+fn hop(
+    npc: &mut Npc,
+    hopper: &mut HopperState,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    friction: f32,
+) {
     if hopper.counter == 19 {
         world.audio.admit(
             random,
