@@ -7,6 +7,10 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
+room_spec = importlib.util.spec_from_file_location('private_base_rooms', root / 'tools/foundation/decode-rooms.py')
+rooms = importlib.util.module_from_spec(room_spec)
+room_spec.loader.exec_module(rooms)
+rooms.prepare_private_caves(root)
 manifest = json.loads((root / 'references/isaac/manifest.json').read_text())
 errors = []
 for entry in manifest['files']:
