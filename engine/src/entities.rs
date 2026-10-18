@@ -250,7 +250,17 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         points,
     })?;
     let sample_position = npc.position;
-    collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    if npc.kind == 220 {
+        // 44364a: Squirt shares the Dip's 1.2 reflection scale.
+        collider.resolve_nonplayer_ground_bouncy(
+            grid,
+            &mut npc.position,
+            &mut npc.velocity,
+            false,
+        )?;
+    } else {
+        collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    }
     // 442df8 records a solid sample independently of the summed normal.
     npc.grid_collided = collider
         .samples()
@@ -318,6 +328,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::dingle::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
+    &crate::squirt::FAMILY,
     &crate::wall_hugger::FAMILY,
     &crate::wall_creep::FAMILY,
     &crate::larry::FAMILY,

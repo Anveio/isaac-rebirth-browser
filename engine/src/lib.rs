@@ -50,6 +50,7 @@ mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
+pub mod squirt;
 mod surprise;
 pub mod tear_deaths;
 mod tear_factory;

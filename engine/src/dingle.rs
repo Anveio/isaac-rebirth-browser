@@ -324,14 +324,26 @@ fn splat(
     random: &mut Mt19937,
     world: &mut NpcWorld,
 ) -> Result<(), String> {
+    brown_splat(npc.position, state.tint, state.offsets, random, world)
+}
+
+/// The caller's `MT.float·0.5 + 0.2` scale, 480fe0's Blood7 at `position`,
+/// then SetColor (shared with Squirt 494f0f).
+pub(crate) fn brown_splat(
+    position: WorldVector,
+    tint: [f32; 4],
+    offsets: [f32; 3],
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+) -> Result<(), String> {
     let scale = random.uniform() * 0.5 + 0.2;
     let seed = random.next_u32();
     let id = world
         .effects
-        .admit_blood(seed, npc.position, [1.0; 4], [0.0; 3])?;
+        .admit_blood(seed, position, [1.0; 4], [0.0; 3])?;
     world.effects.set_blood_scale(id, scale)?;
     world.effects.advance_blood_initial(id, random)?;
-    world.effects.set_blood_color(id, state.tint, state.offsets)
+    world.effects.set_blood_color(id, tint, offsets)
 }
 
 /// 4ae428: default ProjectileParams draw their angle, then FireProjectiles
