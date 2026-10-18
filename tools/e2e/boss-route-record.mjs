@@ -30,12 +30,22 @@
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
 // bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
 import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
+
+// Optional private caller-owned archive; default stdout/result behavior is unchanged.
+const attemptOutput = flag('--attempt-output');
+const preserveAttempt = (name, value) => {
+  if (!attemptOutput) return;
+  const fd = openSync(join(attemptOutput, name), 'wx', 0o600);
+  try { writeFileSync(fd, JSON.stringify(value) + '\n'); fsyncSync(fd); }
+  finally { closeSync(fd); }
+};
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const rooms = flag('--rooms').split(',').map(Number);
@@ -100,10 +110,18 @@ function collectKeys(state, key) {
 }
 
 const server = await startProductionServer({ directory: flag('--production-directory') });
-const browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
+try {
+  preserveAttempt('artifact.json', server.build);
+} catch (error) {
+  try { await server.close(); }
+  catch (cleanupError) { throw new AggregateError([error, cleanupError], 'Recorder artifact retention and server cleanup failed'); }
+  throw error;
+}
+let browser;
 const actions = [], checkpoints = {};
 let frames = 0, status = 'fail', reason;
 try {
+  browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
@@ -425,8 +443,26 @@ try {
 } catch (error) {
   reason = String(error.message || error);
 } finally {
-  await browser.close();
-  await server.close();
+  const failures = [];
+  try {
+    preserveAttempt('before-cleanup.json', { phase: 'before-cleanup', result: {
+      status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
+      via: chosenVia && [chosenVia.x, chosenVia.y],
+    } });
+  } catch (error) { failures.push(error); }
+  const cleanup = await Promise.allSettled([
+    Promise.resolve().then(() => browser?.close()),
+    Promise.resolve().then(() => server.close()),
+  ]);
+  const resources = cleanup.map((result, index) => ({
+    resource: index === 0 ? 'browser' : 'server',
+    status: index === 0 && !browser ? 'not-started' : result.status,
+    reason: result.status === 'rejected' ? String(result.reason) : null,
+  }));
+  try { preserveAttempt('cleanup.json', { phase: 'cleanup-complete', resources }); }
+  catch (error) { failures.push(error); }
+  for (const result of cleanup) if (result.status === 'rejected') failures.push(result.reason);
+  if (failures.length) throw new AggregateError(failures, 'Recorder retention or cleanup failed');
 }
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
   via: chosenVia && [chosenVia.x, chosenVia.y] }) + '\n');
