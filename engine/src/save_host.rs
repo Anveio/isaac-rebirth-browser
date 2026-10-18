@@ -127,13 +127,22 @@ impl SaveStore {
                 if Some(revision) != self.consumed_revision.checked_add(1) {
                     return Err("Save IO requires the exact next actual callback revision".into());
                 }
-                let text = String::from_utf8(io.export()?).map_err(|error| error.to_string())?;
-                if !bounded(&text) {
-                    return Err("Saved profiles exceed the supported 4 MiB format".into());
-                }
-                let stored = !host.failed_writes.contains(&revision);
+                let text = match io.export() {
+                    Ok(bytes) => {
+                        let text = String::from_utf8(bytes).map_err(|error| error.to_string())?;
+                        if !bounded(&text) {
+                            return Err("Saved profiles exceed the supported 4 MiB format".into());
+                        }
+                        Some(text)
+                    }
+                    //The engine exports no partial packet for this expected
+                    //capacity failure. Keep older bytes and acknowledge once.
+                    Err(error) if error == save_profiles::CAPACITY_ERROR => None,
+                    Err(error) => return Err(error),
+                };
+                let stored = text.is_some() && !host.failed_writes.contains(&revision);
                 if stored {
-                    self.stored = Some(text);
+                    self.stored = text;
                 }
                 self.consumed_revision = revision;
                 io.complete_write(revision, stored)?;

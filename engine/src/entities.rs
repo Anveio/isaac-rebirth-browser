@@ -121,6 +121,15 @@ pub(crate) enum Birth {
         position: WorldVector,
         damage: i32,
     },
+    /// Spawn550a40 of a pickup-less bomb (Troll Bomb variant 3), spawner NULL.
+    Bomb {
+        variant: u32,
+        seed: u32,
+        position: WorldVector,
+    },
+    /// Mulligan EXPLODE 4e8200: its blast, effect seeds, cardinal burst, Kill
+    /// and dead branch, in the spawner's update order.
+    MulliganExplode,
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the
@@ -154,6 +163,10 @@ pub(crate) enum Birth {
         position: WorldVector,
         color: crate::sprite_color::Color,
     },
+    /// Kill47FC80 Have234 (Infestation 2): Player50c980 would spawn a
+    /// BlueSpider familiar 3.73 at the dying NPC. Port gap: that familiar is
+    /// unported, so nothing is spawned and the caller records the frontier.
+    UnportedBlueSpider,
 }
 
 pub(crate) type Advance =
@@ -271,6 +284,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
     &crate::mega_fatty::FAMILY,
+    &crate::mulligans::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

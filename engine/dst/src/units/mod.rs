@@ -19,6 +19,7 @@ mod phase;
 mod pickups;
 mod room_spawns;
 mod room_templates;
+mod rooms;
 mod seed_codec;
 mod tears;
 
@@ -107,6 +108,12 @@ pub const UNITS: &[Unit] = &[
         name: "game",
         summary: "the whole engine through public commands: invariants, contracts, replay, ABI",
         run: game::run,
+    },
+    Unit {
+        name: "rooms",
+        summary:
+            "every room a run's floor admits, on Basement I, II and Caves I, entered and played",
+        run: rooms::run,
     },
     Unit {
         name: "abi",

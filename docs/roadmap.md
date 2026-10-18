@@ -613,8 +613,20 @@ The70 inherited failures remain14 canonical menu/gameplay-scope errors,
 28 seed separator rows and28 last-penalty-stage rows. Other saved rooms/items/
 actors, complete progression/unlocks, broader RNG/PCM and challenges beyond
 Challenge1 ingress remain open. Historical1b30/0af122 failures and listed-Bomb/
-legacy-refusal evidence retain their exact scope. See [Save scope and
-replay](save-continue.md).
+legacy-refusal evidence retain their exact scope. PR696 is merged at
+`9f952efd`: complete saves retain the 4 MiB limit without a 4,096 walking-paint
+cutoff; capacity refusal acknowledges once, keeps older bytes and resumes the
+Tick. Exact main715 baseline/candidate build and runtime 4/4 each pass. Four
+same-Native Save controls preserve 3,748 rows per role (3,650 pass / 98 fail),
+zero lost passes and pixel metrics; the 98 failures include 28 ambient velocity
+words, 14 canonical scope, 28 seed separator and 28 penalty-stage rows.
+Historical Source C capacity and failed wrappers retain their separate scopes.
+Unmerged H (`65178aba`), on frozen main715 plus Save6, passes build/runtime 4/4
+and its two Save comparisons gain 56 rows with zero losses: 3,706 pass / 42
+fail, 66 own-save guards and unchanged pixels. The remaining failures are 28
+ambient velocity words and 14 canonical scope rows. H's ordinary-run driver
+has not run; H natural reload and current-main gameplay remain unqualified.
+See [Save scope and replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

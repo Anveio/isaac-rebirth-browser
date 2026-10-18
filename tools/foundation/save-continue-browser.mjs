@@ -25,7 +25,11 @@ export async function captureSaveOwn(page,directory,label,state) {
   };
   if(actual.storeText!==null)actual.store=await archive(actual.storeText);
   delete actual.storeText;
-  for(const event of actual.io.events)if(Object.hasOwn(event,'text')){event.packet=await archive(event.text);delete event.text;}
+  for(const event of actual.io.events)if(Object.hasOwn(event,'text')){
+    if(event.text===undefined&&event.status==='fail'&&typeof event.error==='string'&&event.error.length>0){
+      event.packetUnavailable={reason:'event-text-undefined',ownTextProperty:true};delete event.text;
+    }else{event.packet=await archive(event.text);delete event.text;}
+  }
   await save(join(directory,label+'.save-own.json'),actual);
   return actual;
 }

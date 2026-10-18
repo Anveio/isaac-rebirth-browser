@@ -105,6 +105,7 @@ pub mod monstro;
 mod monstros_lung;
 pub mod motion;
 pub mod mt;
+pub mod mulligans;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
@@ -2576,8 +2577,8 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
-        // A room holding more stains (or actors) than the record format
-        // admits refuses this save: the profile keeps its previous record
+        // A room holding more actors than the record format admits refuses
+        // this save: the profile keeps its previous record
         // and no write is requested, so the Tick and the run continue.
         if !record.rooms_within_supported_counts() {
             return Ok(());
@@ -2658,12 +2659,12 @@ impl Game {
 
     pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
         if let Some(request) = &self.save_write_request {
-            return Ok(request.packet.as_ref().clone());
+            return request.packet.export();
         }
-        self.serialize_profile_data()
+        self.serialize_profile_data()?.export()
     }
 
-    fn serialize_profile_data(&self) -> Result<Vec<u8>, String> {
+    fn serialize_profile_data(&self) -> Result<save_profiles::SaveWritePacket, String> {
         let fresh;
         let profiles = match self.saved_profiles.as_deref() {
             Some(profiles) => profiles,
@@ -2672,12 +2673,7 @@ impl Game {
                 &fresh
             }
         };
-        profiles.validate()?;
-        let bytes = serde_json::to_vec(&profiles).map_err(|error| error.to_string())?;
-        if bytes.len() > save_profiles::MAX_BYTES {
-            return Err("saved profiles exceed the supported 4 MiB format".into());
-        }
-        Ok(bytes)
+        profiles.write_packet()
     }
 
     ///A real application storage owner declares this capability before any
@@ -2710,7 +2706,7 @@ impl Game {
         self.save_write_request = Some(save_profiles::SaveWriteRequest {
             protocol: 1,
             revision: self.state.save_revision,
-            packet: std::sync::Arc::new(packet),
+            packet,
             remaining_ticks: None,
         });
         self.state.save_write_pending = true;
@@ -5040,6 +5036,50 @@ impl Game {
         };
         self.advance_npc(id, phase::Phase::Update)
     }
+    /// Mulligan EXPLODE 4e8200: the blast (damage 40, radius 60, source the
+    /// Mulligan), the effect and burst draws, Kill's non-boss burst, then
+    /// the dead branch. The post-AI dead handling removes it this update.
+    fn mulligan_explode(&mut self, index: usize) -> Result<(), String> {
+        let (id, kind, position) = {
+            let npc = &self.state.room.npcs[index];
+            (npc.id, npc.kind, npc.position)
+        };
+        bombs::explode(
+            &mut self.state,
+            position,
+            60.0,
+            40.0,
+            combat::DamageSource {
+                id,
+                entity_type: kind,
+            },
+        )?;
+        let mut births = Vec::new();
+        mulligans::explode_shots(position, &mut self.state.boot_lifecycle.shared, &mut births);
+        // Kill 4464c0: the non-boss burst 445c60 at once.
+        self.state.audio.admit(
+            &mut self.state.boot_lifecycle.shared,
+            self.state.system_clock.system_counter.wrapping_sub(1),
+            audio::SoundRequest {
+                id: 30,
+                volume: 0.8,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+        let seed = self.state.boot_lifecycle.shared.next_u32();
+        let npc = &mut self.state.room.npcs[index];
+        npc.dead = true;
+        npc.death_effect_seed = Some(seed);
+        births.push(entities::Birth::Blood(seed));
+        mulligans::death(npc, &mut self.state.boot_lifecycle.shared, &mut births);
+        for birth in births {
+            self.admit_npc_birth(index, birth)?;
+        }
+        self.state.room.npcs[index].removed = true;
+        Ok(())
+    }
     /// Admits one NPC callback product at the callback's own return point.
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
@@ -5102,6 +5142,17 @@ impl Game {
                 mega_fatty::suck(&mut self.state, center);
                 Ok(())
             }
+            entities::Birth::UnportedBlueSpider => {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: 3,
+                        variant: 73,
+                        subtype: 0,
+                    },
+                );
+                Ok(())
+            }
             entities::Birth::FlyExplosion {
                 seed,
                 position,
@@ -5130,6 +5181,12 @@ impl Game {
                 outcome.record_frontier(&mut self.state, "npcGridHurt");
                 Ok(())
             }
+            entities::Birth::Bomb {
+                variant,
+                seed,
+                position,
+            } => bombs::admit_conversion(&mut self.state, variant, seed, position),
+            entities::Birth::MulliganExplode => self.mulligan_explode(index),
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
