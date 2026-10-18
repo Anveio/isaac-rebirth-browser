@@ -2602,6 +2602,12 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
+        // A room holding more stains (or actors) than the record format
+        // admits refuses this save: the profile keeps its previous record
+        // and no write is requested, so the Tick and the run continue.
+        if !record.rooms_within_supported_counts() {
+            return Ok(());
+        }
         record.validate()?;
         let retained = self.saved_profiles.get_or_insert_with(|| {
             std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
@@ -3079,11 +3085,12 @@ impl Game {
                 && matches!(selector.entity_type, 4..=6 | 17 | 33)
             {
                 if order.len() == before_entities {
+                    // An authored 5.350 trinket's Init/Get is outside the
+                    // admitted grant-only slice. Its room stays traversable
+                    // like any unsupported factory; item queries record the
+                    // unrepresented spawn instead of halting the run.
                     if selector.entity_type == 5 && selector.variant == 350 {
                         crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
-                        return Err(
-                            "authored350 Init/Get is outside the admitted grant-only slice".into(),
-                        );
                     }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
