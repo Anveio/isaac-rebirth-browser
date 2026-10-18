@@ -10,6 +10,7 @@ npm run check                                 # build + every live suite
 npm run test:e2e -- --list                    # registered live suites
 npm run test:e2e:paired -- --replay-cases PATH
 npm run matrix:update                         # sync TEST_MATRIX.md
+python3 tools/foundation/decode-rooms.py --prepare-private-caves  # before raw cargo
 ```
 
 | Subsystem | Root |
@@ -27,7 +28,7 @@ npm run matrix:update                         # sync TEST_MATRIX.md
 | Lint and format upkeep | [docs/lint-upkeep.md](docs/lint-upkeep.md) |
 | Toolchain and dev server | [cloud](cloud) |
 | Progress site publishing | [tools/sites](tools/sites) |
-| Private reference assets and captures | [references/isaac](references/isaac) |
+| Reference cases and original evidence | [references/isaac](references/isaac) |
 | Roadmap: subsystem status and triaged bugs | [docs/roadmap.md](docs/roadmap.md) |
 | System map and per-system evidence | [docs/system-map.md](docs/system-map.md), [docs](docs) |
 | Scenario coverage and open parity | [TEST_MATRIX.md](TEST_MATRIX.md), [tools/foundation/systems.mjs](tools/foundation/systems.mjs) |

@@ -217,10 +217,6 @@ pub(crate) fn advance_trapdoor(state: &mut State, phase: Phase) -> Result<(), St
         return Ok(());
     };
     let position = trapdoor.world_position(width);
-    // The trapdoor opens on every trapdoor stage, but a stage whose next
-    // SetNextStage585620 target has no admitted generator never takes the
-    // player: like an unadmitted doorway, the frontier refuses the entry.
-    let admitted = next_stage(state.stage).is_ok();
     let player = player_world(state);
     let (dx, dy) = (player.x - position.x, player.y - position.y);
     let distance = (dx * dx + dy * dy).sqrt();
@@ -234,8 +230,8 @@ pub(crate) fn advance_trapdoor(state: &mut State, phase: Phase) -> Result<(), St
             trapdoor.state = 1;
         }
     }
-    let enter = 21.0 > distance && trapdoor.state == 1 && admitted;
-    if enter && !state.player_animation.guard {
+    let near = 21.0 > distance && trapdoor.state == 1;
+    if near && !state.player_animation.guard && next_floor_generates(state) {
         // Game+a1d8 is 16 only in the same-stage branch; normal runs pass false.
         start(state, false, 0);
         crate::player_animation::force_play(state, crate::player_animation::Clip::Trapdoor);
@@ -342,6 +338,40 @@ pub fn fade(transition: &StageTransition) -> f32 {
         3 => 1.0 - transition.counter as f32 / 50.0,
         _ => 0.0,
     }
+}
+
+/// The trapdoor opens on every trapdoor stage, but takes the player only to a
+/// floor the port generates. A SetNextStage585620 target with no admitted
+/// generator, or a floor whose generation the port refuses (Double Trouble's
+/// 2x1 boss room), would halt Level::Init58be30 at the end of the transition:
+/// like an unadmitted doorway, the frontier refuses the entry instead.
+fn next_floor_generates(state: &State) -> bool {
+    next_stage(state.stage)
+        .and_then(|stage| floor_request(state, stage))
+        .and_then(crate::floor::generate_normal_basement)
+        .is_ok()
+}
+
+/// Level::Init58be30's request for `stage`: its Seeds stage seed, the
+/// retained game flags and the Player's health and coins as they stand.
+pub(crate) fn floor_request(
+    state: &State,
+    stage: u32,
+) -> Result<crate::floor::NormalBasementRequest, String> {
+    let stage_seed = state
+        .run_seeds
+        .as_ref()
+        .ok_or("next level requires the run's Seeds")?
+        .initialized_fields[stage as usize];
+    Ok(crate::floor::NormalBasementRequest {
+        stage,
+        stage_seed,
+        game_flags: state.floor.game_flags,
+        red_hp: state.player.hp,
+        max_red_hp: state.player.max_hp,
+        soul_hp: state.player.soul_hp,
+        coins: state.inventory.coins,
+    })
 }
 
 /// Level::SetNextStage585620 for the admitted ordinary stages. Alternate
