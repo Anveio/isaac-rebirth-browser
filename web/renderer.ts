@@ -6,7 +6,7 @@ import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
 import {drawPlayerLaser} from "./lasers";
-import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engine";
+import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
@@ -28,7 +28,7 @@ const MINIMAP_ICONS: Record<number, string> = {
 // Minimap pickup icon 5af6df: saved type5 records set one bit per kind and
 // the first set bit in draw order wins. Hearts prefer eternal, then black
 // over soul/red, then soul; chests prefer locked (gold), then red.
-function minimapPickupIcon(records: readonly { variant: number; subtype: number }[]): string | undefined {
+function minimapPickupIcons(records: readonly { variant: number; subtype: number }[]): string[] {
   let heart = 0, chest = 0;
   const kinds = new Set<string>();
   for (const { variant, subtype } of records) {
@@ -49,12 +49,14 @@ function minimapPickupIcon(records: readonly { variant: number; subtype: number 
     else if (variant === 20) kinds.add("coin");
     else if (variant === 90) kinds.add("battery");
   }
-  if (kinds.has("heart")) return { 4: "IconWhiteHeart", 6: "IconBlackHeart", 3: "IconBlueHeart" }[heart] ?? "IconHeart";
-  if (kinds.has("item")) return "IconItem";
-  if (kinds.has("chest")) return chest === 60 ? "IconGoldChest" : chest === 360 ? "IconRedChest" : "IconChest";
+  const icons: string[] = [];
+  if (kinds.has("heart")) icons.push({ 4: "IconWhiteHeart", 6: "IconBlackHeart", 3: "IconBlueHeart" }[heart] ?? "IconHeart");
+  if (kinds.has("item")) icons.push("IconItem");
+  if (kinds.has("chest")) icons.push(chest === 60 ? "IconGoldChest" : chest === 360 ? "IconRedChest" : "IconChest");
   const order: [string, string][] = [["card", "IconCard"], ["pill", "IconPill"], ["key", "IconKey"],
     ["bomb", "IconBomb"], ["coin", "IconCoin"], ["battery", "IconBattery"]];
-  return order.find(([kind]) => kinds.has(kind))?.[1];
+  for (const [kind, icon] of order) if (kinds.has(kind)) icons.push(icon);
+  return icons;
 }
 // Base Rebirth's four shapes: bit 1 tall, bit 2 wide (1x1, 1x2, 2x1, 2x2).
 function minimapShape(template: { width: number; height: number }): number {
@@ -107,6 +109,8 @@ export class Renderer {
   private readonly pickups: PickupRenderer;
   private readonly floor: GLSurface;
   private readonly walls: GLSurface;
+  private readonly smallMap: GLSurface;
+  private readonly expandedMap: GLSurface;
   private roomKey = "";
   private paintedStains = { count: 0, last: "" };
   // Room-transition snapshots of the old and new world layers.
@@ -120,6 +124,9 @@ export class Renderer {
   private drawnGrid: { index: number; kind: number; animation: string; frame: number }[] = [];
   // [entity type, spawn seed] of the player (seed null) and NPCs, in draw order.
   private drawnOrder: [number, number | null][] = [];
+  // Actual submitted map composites, for the existing public capture owner.
+  private drawnMaps: {surface: "small-frame" | "small" | "expanded"; alpha: number;
+    position: [number, number]; sourceSize?: [number, number]; destinationSize?: [number, number]}[] = [];
   private constructor(private readonly canvas: HTMLCanvasElement, private readonly assets: Assets,
     private readonly graphics: GLMenuContext) {
     this.context = canvas.getContext("2d", { alpha: false })!;
@@ -129,6 +136,8 @@ export class Renderer {
     this.pickups = new PickupRenderer(assets);
     this.floor = graphics.createTarget(1024, 512);
     const screen = graphics.screenSurface();
+    this.smallMap = graphics.createTarget(screen.width, screen.height);
+    this.expandedMap = graphics.createTarget(230, 204);
     this.slideOld = graphics.createTarget(screen.width, screen.height);
     this.slideNew = graphics.createTarget(screen.width, screen.height);
     this.walls = graphics.createTarget(1024, 512);
@@ -139,7 +148,7 @@ export class Renderer {
     return new Renderer(canvas, assets, graphics);
   }
   draw(state: State): void {
-    this.drawnNpcs = []; this.drawnGrid = []; this.drawnOrder = [];
+    this.drawnNpcs = []; this.drawnGrid = []; this.drawnOrder = []; this.drawnMaps = [];
     const gl = this.graphics;
     if (state.screen === "playing") {
       this.prepareRoom(state.room);
@@ -192,7 +201,7 @@ export class Renderer {
         this.menu.drawLoadingImage(ctx, state, alpha);
       }
     }
-    gl.presentScreen(); gl.finish();
+    gl.presentScreen(state.gammaSettings.gamma); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
     this.context.drawImage(gl.canvas, 0, 0);
   }
@@ -265,7 +274,8 @@ export class Renderer {
       ctx.save();
       ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
       ctx.scale(sprite.scale.x, sprite.scale.y);
-      this.assets.draw(ctx, "gfx/1000.022_creep (red).anm2", sprite.animation, 0, 0, sprite.frame,
+      const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2" : "gfx/1000.022_creep (red).anm2";
+      this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
         { color: { tint: sprite.tint, offsets: sprite.offsets } });
       ctx.restore();
     }
@@ -287,6 +297,12 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame,
           rockSheet ? { spritesheets: { 0: rockSheet } } : {});
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
+      } else if (entity.kind === 12 && entity.sourceOwner?.tnt) {
+        const sprite = entity.sourceOwner.tnt.sprite;
+        // TNT owns four frame0 grid clips; its callback never advances ANM.
+        const crop = { Idle: [0, 0], IdleMedium: [32, 0], ReadyToExplode: [0, 32], Blown: [32, 32] }[sprite.animation]!;
+        ctx.drawImage(this.assets.image("gfx/grid/grid_tnt.png"), crop[0]!, crop[1]!, 32, 32, x - 16, y - 16, 32, 32);
+        this.drawnGrid.push({ index, kind: 12, animation: sprite.animation, frame: sprite.frame });
       } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
         // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
         // (State5 once broken); a spawn into a loaded room plays Appear first.
@@ -315,6 +331,11 @@ export class Renderer {
     const playerSlot = hidePlayer ? -1 : order.findIndex(actor => actor.kind === "player");
     const npcs = [...state.room.npcs].sort((a, b) => slot(a) - slot(b));
     const overPlayer = playerSlot < 0 ? [] : npcs.filter(npc => slot(npc) > playerSlot);
+    // Machines and beggars share the actor render array (441bd0 y key).
+    const machineSlot = (machine: Slot) => order.findIndex(actor => actor.kind === "slot" && actor.id === machine.id);
+    const machines = [...state.room.slots].sort((a, b) => machineSlot(a) - machineSlot(b));
+    const machinesOverPlayer = playerSlot < 0 ? [] : machines.filter(machine => machineSlot(machine) > playerSlot);
+    for (const machine of machines) if (!machinesOverPlayer.includes(machine)) this.drawSlot(ctx, machine);
     for (const npc of npcs) if (!overPlayer.includes(npc)) this.drawNpc(ctx, npc);
     for (const knife of state.knives) {
       if (!knife.visible) continue;
@@ -381,6 +402,7 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
     if (!hidePlayer) this.drawPlayer(ctx, state);
+    for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
     for (const npc of overPlayer) this.drawNpc(ctx, npc);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
@@ -456,6 +478,13 @@ export class Renderer {
     ctx.restore();
     this.stage.foreground(state.stageEffects);
     this.drawFxRays(state);
+  }
+
+  /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
+  private drawSlot(ctx: CanvasRenderingContext2D, machine: Slot): void {
+    this.assets.draw(ctx, machine.actor, machine.animation,
+      (machine.presentedPosition.x + machine.positionOffset.x) * 0.65 + 32,
+      (machine.presentedPosition.y + machine.positionOffset.y) * 0.65 - 46, machine.animationFrame);
   }
 
   private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {
@@ -602,7 +631,7 @@ export class Renderer {
     gl.scale(this.canvas.width / 480, this.canvas.height / 270);
   }
   debugTargets(): StageTargets { return this.stage.debugTargets(); }
-  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid), order: structuredClone(this.drawnOrder) }; }
+  drawRecord() { return { npcs: structuredClone(this.drawnNpcs), grid: structuredClone(this.drawnGrid), order: structuredClone(this.drawnOrder), maps: structuredClone(this.drawnMaps) }; }
   private drawQuads(appearance: RoomAppearance, quads: RoomQuad[]): void {
     const gl = this.graphics, image = this.assets.image(appearance.backdrop);
     for (const quad of quads) {
@@ -616,9 +645,11 @@ export class Renderer {
     }
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
-    const actors: Record<number, string> = { 2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+    const actors: Record<number, string> = { 1: "gfx/1000.001_bomb explosion.anm2",
+      2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
       12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
-      17: "gfx/1000.017_poof04.anm2", 21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
+      17: "gfx/1000.017_poof04.anm2", 18: "gfx/1000.018_bomb crater.anm2",
+      21: "gfx/1000.021_tiny bug.anm2", 33: "gfx/1000.033_tiny fly.anm2",
       42: "gfx/1000.042_blood gush.anm2", 68: "gfx/1000.021_tiny bug.anm2",
       79: "gfx/1000.012_tear poof_small.anm2", 80: "gfx/1000.012_tear poof_verysmall.anm2" };
     const actor = actors[variant];
@@ -627,12 +658,15 @@ export class Renderer {
     ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
     const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
       [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
-    this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-      { layerScales, overrides: { 0: {
+    const colorOptions = variant === 1
+      ? { color: { tint: sprite.tint, offsets: sprite.offsets } }
+      : { overrides: { 0: {
         RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
         BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
         RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255,
-        BlueOffset: sprite.offsets[2] * 255 } } });
+        BlueOffset: sprite.offsets[2] * 255 } } };
+    this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
+      { layerScales, ...colorOptions });
     ctx.restore();
   }
   private prepareRoom(room: Room): void {
@@ -717,6 +751,9 @@ export class Renderer {
   private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
+    // Backdrop Render427420/427990 copies the composed floor/walls with ONE/ZERO.
+    // Alpha blending again would multiply cached tutorial/stain alpha twice.
+    gl.blendFactors("one", "zero");
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
       x + border, y + border, width - border * 2, height - border - size);
     gl.drawSurface(this.walls, 0, 0, border, height, x, y, border, height);
@@ -724,6 +761,7 @@ export class Renderer {
     gl.drawSurface(this.walls, border, 0, width - border * 2, border, x + border, y, width - border * 2, border);
     gl.drawSurface(this.walls, border, height - border, width - border * 2, border,
       x + border, y + height - border, width - border * 2, border);
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
     const rotation = { up: 0, left: -Math.PI / 2, right: Math.PI / 2, down: Math.PI };
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
@@ -806,8 +844,103 @@ export class Renderer {
       this.assets.font(ctx, "pftempestasevencondensed", String(counts[pickup]).padStart(2, "0"), 36, 45 + pickup * 12);
     }
     if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);
-    this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "Frame", 400, 16);
-    this.drawMinimap(ctx, state);
+    this.drawMaps(ctx, state);
+  }
+
+  private drawMaps(ctx: CanvasRenderingContext2D, state: State): void {
+    const gl = this.graphics, {smallAlpha, expandedAlpha} = state.minimapPresentation;
+    //5DE820 is1 for the port's admitted ordinary doorway kind0/nonnegative
+    //target. Special transition kinds/target-1 need their own source fields;
+    //do not guess a fade from the unrelated fullUpdates projection.
+    if (smallAlpha > 0) {
+      ctx.save(); ctx.globalAlpha *= smallAlpha;
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "Frame", 400, 16);
+      ctx.restore();
+      this.drawnMaps.push({surface: "small-frame", alpha: Math.fround(gl.globalAlpha * smallAlpha), position: [400, 16]});
+      //The source applies final alpha once to the completed map texture.
+      //Keep the existing small-map geometry and icon scope independent.
+      gl.save(); gl.beginTarget(this.smallMap); gl.resetTransform(); gl.globalAlpha = 1;
+      gl.clearRect(0, 0, this.smallMap.width, this.smallMap.height);
+      gl.scale(this.canvas.width / 480, this.canvas.height / 270);
+      this.drawMinimap(gl.asCanvasContext(), state);
+      gl.beginScreen(); gl.restore();
+      gl.drawSurface(this.smallMap, 0, 0, this.smallMap.width, this.smallMap.height,
+        0, 0, 480, 270, [1, 1, 1, smallAlpha]);
+      this.drawnMaps.push({surface: "small", alpha: Math.fround(gl.globalAlpha * smallAlpha), position: [0, 0],
+        sourceSize: [this.smallMap.width, this.smallMap.height], destinationSize: [480, 270]});
+    }
+    if (expandedAlpha > 0) {
+      gl.save(); gl.beginTarget(this.expandedMap); gl.resetTransform(); gl.globalAlpha = 1;
+      gl.clearRect(0, 0, 230, 204);
+      const bounds = this.drawExpandedMap(gl.asCanvasContext(), state);
+      gl.beginScreen(); gl.restore();
+      if (bounds) {
+        //5B1ED0: default manager offset/shake0 and scale1; occupied-content
+        //bounds align the surface to the top/right. The expanded map has no Frame.
+        gl.drawSurface(this.expandedMap, 0, 0, 230, 204,
+          480 - bounds.maxX - 24, 14 - bounds.minY, 230, 204, [1, 1, 1, expandedAlpha]);
+        this.drawnMaps.push({surface: "expanded", alpha: Math.fround(gl.globalAlpha * expandedAlpha),
+          position: [480 - bounds.maxX - 24, 14 - bounds.minY], sourceSize: [230, 204], destinationSize: [230, 204]});
+      }
+      //5B213A joins5B1811 after the expanded surface: the same alpha
+      //also owns the signed Game counter's30Hz Time text. Font5B0E16
+      //is TeamMeatFont10;5B18F5 uses logical y30 and exact half-width.
+      const counter = state.gameUpdateCount | 0;
+      const time = [Math.trunc(counter / 108000), Math.trunc((counter % 108000) / 1800), Math.trunc((counter % 1800) / 30)]
+        .map(value => String(value).padStart(2, "0")).join(":");
+      ctx.save(); ctx.globalAlpha *= expandedAlpha;
+      this.assets.font(ctx, "teammeatfont10", `Time: ${time}`, 240, 30, { align: "center" });
+      ctx.restore();
+    }
+  }
+
+  private drawExpandedMap(ctx: CanvasRenderingContext2D, state: State): {minY: number; maxX: number} | null {
+    const path = "gfx/ui/minimap2.anm2", descriptors = state.floor.descriptors;
+    const cells: {index: number; flags: number; origin: boolean; frame: number; x: number; y: number}[] = [];
+    let minY = Infinity, maxX = -Infinity;
+    for (let row = 0; row < 13; row++) for (let column = 0; column < 13; column++) {
+      const grid = row * 13 + column, index = state.floor.grid[grid] ?? -1;
+      const flags = index < 0 ? 0 : state.roomDisplayFlags[index] ?? 0;
+      if (!flags) continue;
+      const room = descriptors[index]!;
+      const offset = grid - room.gridIndex, down = Math.floor(offset / 13), across = offset - 13 * down;
+      const shape = minimapShape(room.template);
+      const frame = shape === 1 ? down + 1 : shape === 2 ? across + 3 : shape === 3 ? across + 2 * down + 5 : 0;
+      const x = column * 17, y = row * 15;
+      cells.push({index, flags, origin: offset === 0, frame, x, y});
+      minY = Math.min(minY, y); maxX = Math.max(maxX, x + 26);
+    }
+    for (const cell of cells) this.assets.draw(ctx, path, "RoomOutline", cell.x, cell.y);
+    for (const cell of cells) {
+      const type = descriptors[cell.index]!.template.type;
+      const animation = cell.index === state.currentRoom ? "RoomCurrent"
+        : state.visitedRooms.includes(cell.index) ? "RoomVisited"
+        : cell.flags & 1 && type !== 7 && type !== 8 ? "RoomUnvisited" : null;
+      if (animation) this.assets.draw(ctx, path, animation, cell.x, cell.y, cell.frame);
+    }
+    for (const cell of cells) {
+      if (!cell.origin) continue;
+      const room = descriptors[cell.index]!, type = room.template.type;
+      const icon = cell.flags & 4 ? MINIMAP_ICONS[type] : undefined;
+      const locked = !icon && cell.flags & 2 && !state.visitedRooms.includes(cell.index) && LOCKED_MINIMAP_TYPES.has(type);
+      const icons = icon ? [icon] : locked ? ["IconLockedRoom"] : [];
+      //Unlike the small cap1, special/locked rooms may also carry pickups.
+      //Only Shop excludes pickup scanning. This preserves the existing admitted
+      //regular-pickup record family; generic/nonzero native varData stays open.
+      const saved = cell.index === state.currentRoom ? state.room.savedRegularPickups
+        : state.persistedRooms[cell.index]?.savedRegularPickups ?? [];
+      if (type !== 2) icons.push(...minimapPickupIcons(saved));
+      const selected = icons.slice(0, 4);
+      const shape = minimapShape(room.template);
+      const qx = cell.x + 5 + (shape & 2 ? 8 : 0), qy = cell.y + 5 + (shape & 1 ? 7 : 0);
+      const slots = selected.length === 1 ? [[8, 7]] : selected.length === 2 ? [[4, 7], [12, 7]]
+        : [[4, 3.5], [12, 3.5], [4, 10.5], [12, 10.5]];
+      for (const [index, name] of selected.entries()) {
+        const [sx, sy] = slots[index]!;
+        this.assets.draw(ctx, path, name, Math.floor(qx + sx! - 6), Math.floor(qy + sy! - 6));
+      }
+    }
+    return cells.length ? {minY, maxX} : null;
   }
 
   // Minimap render 5aeb10: a 7x7 grid-cell window around the current room's
@@ -852,7 +985,7 @@ export class Renderer {
       // (Descriptor+70..78 records; one icon by the constructor's limit).
       const saved = cell.index === state.currentRoom ? state.room.savedRegularPickups
         : state.persistedRooms[cell.index]?.savedRegularPickups ?? [];
-      const pickup = icon || locked || type === 2 ? undefined : minimapPickupIcon(saved);
+      const pickup = icon || locked || type === 2 ? undefined : minimapPickupIcons(saved)[0];
       if (!icon && !locked && !pickup) continue;
       // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
       const shape = minimapShape(room.template);

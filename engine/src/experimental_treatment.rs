@@ -160,7 +160,7 @@ pub(crate) fn preflight(state: &State) -> Result<Admission, String> {
     let luck_history_preserved = normal_inputs_preserved
         && owner.trinket_slots == [0, 0]
         && owner.temporary_collectibles.is_empty()
-        && owner.queued_id.is_none_or(|queued| queued == 240)
+        && owner.queued_collectible_is_none_or(|queued| queued == 240)
         && owner.owned_counts[240] >= 0
         && owner
             .owned_counts
@@ -172,14 +172,14 @@ pub(crate) fn preflight(state: &State) -> Result<Admission, String> {
     let move_speed_history_preserved = normal_inputs_preserved
         && owner.trinket_slots == [0, 0]
         && owner.temporary_collectibles.is_empty()
-        && owner.queued_id.is_none_or(|queued| queued == 240);
+        && owner.queued_collectible_is_none_or(|queued| queued == 240);
     //Independent sourceC70 footprint:240 touches no timer and cannot enter
     //constructor/restore/pocket/Full. Keep the initial no-foreign-item scope.
     //This separate proof preserves Some(value), never infers zero from counts.
     let c70_history_preserved = normal_inputs_preserved
         && owner.trinket_slots == [0, 0]
         && owner.temporary_collectibles.is_empty()
-        && owner.queued_id.is_none_or(|queued| queued == 240)
+        && owner.queued_collectible_is_none_or(|queued| queued == 240)
         && owner.owned_counts[240] >= 0
         && owner
             .owned_counts

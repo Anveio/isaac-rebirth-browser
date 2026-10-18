@@ -55,7 +55,21 @@ fn advance(
     world: &mut NpcWorld,
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
-    plain_npc::advance_dead_ai(npc, phase, random, world, births, ai)
+    plain_npc::advance_dead_ai(npc, phase, random, world, births, ai)?;
+    if phase == Phase::Interpolate && !npc.removed && npc.grid_collision_class == 5 {
+        // Base Fast444746 calls442b90(true): correct only the preview,
+        // preserving the full position, velocity and prior grid feedback.
+        let collider = crate::grid::Collider::new(crate::grid::CollisionGeometry {
+            radius: npc.collision_radius,
+            scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
+            points: npc.config().grid_points,
+        })?;
+        let mut position = world.grid.clamp_room(npc.presented_position, 0.0);
+        let mut velocity = npc.velocity;
+        collider.resolve_nonplayer_ground(world.grid, &mut position, &mut velocity, true)?;
+        npc.presented_position = position;
+    }
+    Ok(())
 }
 
 /// GetOverlayFrame 410430: the overlay's frame, or -1 without one.

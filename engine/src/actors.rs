@@ -16,6 +16,8 @@ pub enum ActorKind {
     Knife,
     /// Entity_Laser (type 7).
     Laser,
+    /// Entity_Slot (type 6): machines and beggars, see `slots`.
+    Slot,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]

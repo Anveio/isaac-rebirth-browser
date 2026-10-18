@@ -7,11 +7,11 @@
 //! loot or placeholder random draws run.
 use crate::{grid::Grid, motion::WorldVector, State};
 
-/// Room.Update ages destruction markers before actor dispatch every third full
-/// game update. Paused gameplay and doorway freezes do not advance this clock.
-/// The gate reads native Game+ce9f4, which is one more than game_update_count.
+/// Room.Update ages destruction markers after grid callbacks every third Full.
+/// Game54fa82 has already incremented the actual Game+ce9f4 owner before this
+/// callback; paused gameplay and doorway freezes do not advance that counter.
 pub fn advance_markers(state: &mut State) {
-    if !(state.game_update_count + 1).is_multiple_of(3) {
+    if !state.game_update_count.is_multiple_of(3) {
         return;
     }
     if let Some(costs) = &mut state.room.path_costs {
@@ -107,8 +107,8 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
             .as_ref()
             .and_then(|grid| grid.cells[index].entity.as_ref())
             .map(|entity| entity.kind);
-        if kind == Some(14) {
-            // DestroyGrid5cbb70 -> Poop's base Destroy561c00 is Hurt(4).
+        if matches!(kind, Some(12 | 14)) {
+            // TNT and Poop both use Base Destroy -> their actual Hurt(4).
             let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
             outcome.record_frontier(state, "bombGridHurt");
             continue;
@@ -231,6 +231,15 @@ fn tinted_reward(
     index: usize,
     local: &mut crate::items::Rng,
 ) -> Result<(), String> {
+    //The existing reward operator owns the empty-trinket context only.
+    //A positive held/Kind2 query must not borrow that negative readset.
+    if state
+        .player_items
+        .as_ref()
+        .is_none_or(|owner| owner.trinket_slots != [0, 0] || !owner.queue_excludes_trinkets())
+    {
+        return Err("tinted reward with held/queued trinkets is not admitted".into());
+    }
     let grid = Grid::new(
         state
             .room

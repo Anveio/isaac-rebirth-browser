@@ -343,8 +343,8 @@ fn admits_player(state: &State) -> bool {
     let items = state.player_items.as_ref();
     let extra_animation =
         state.player_animation.guard || items.is_some_and(|items| items.pickup_animation_guard);
-    let queued = items.is_some_and(|items| items.queued_id.is_some());
-    (!extra_animation || !queued) && items.is_none_or(|items| items.active_state_d80 != 5)
+    let no_queue = items.is_none_or(|items| items.queued_presence() == Some(false));
+    (!extra_animation || no_queue) && items.is_none_or(|items| items.active_state_d80 != 5)
 }
 
 /// Opened doors take `collision_class`; doors blown open take `blown_class`.

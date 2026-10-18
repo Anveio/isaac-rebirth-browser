@@ -1,5 +1,6 @@
 import {installBrowserAudioObserver} from './audio-api-observer.mjs';
 import {installOptionsGainObserver} from './options-gain-observer.mjs';
+import {optionsPreferenceContract} from '../foundation/options-preference-contract.mjs';
 
 // Observe actual public returns already produced by the canonical capture.
 // This retains tiny request/Back witnesses beyond the full-history cap without
@@ -47,7 +48,11 @@ function installOptionsReturns() {
   window.__optionsTypedInput = {snapshot: () => ({events: structuredClone(events), truncated: inputTruncated})};
 }
 
-export function optionsObservedBrowser(real, data, observed, retain) {
+// The legacy callable default remains V2; the current driver always passes
+// its separately declared current-or-historical contract explicitly.
+export function optionsObservedBrowser(real, data, observed, retain, preferencesSchema = 2) {
+  const contract = optionsPreferenceContract(preferencesSchema);
+  if (preferencesSchema === 3 || preferencesSchema === 4) observed.preferenceContract = contract;
   const labels = data.pairedTape.filter(action => action.type === 'capture').map(action => action.label);
   return new Proxy(real, {get(target, key) {
     if (key !== 'newContext') {
@@ -58,10 +63,12 @@ export function optionsObservedBrowser(real, data, observed, retain) {
       const context = await target.newContext(...args);
       // Preferences are independent public startup inputs through the real IO.
       // One init script defines API-before-gain forwarding order explicitly.
-      const initial = {schema: 2, sfxVolume: '1.0000', musicVolume: '1.0000', fullscreen: false};
+      const initial = contract.initial;
       await context.addInitScript({content:
         `localStorage.removeItem('isaac-rebirth.options.audio.v1');\n` +
-        `localStorage.setItem('isaac-rebirth.options.v2',${JSON.stringify(JSON.stringify(initial))});\n` +
+        ((preferencesSchema === 3 || preferencesSchema === 4) ? `localStorage.removeItem('isaac-rebirth.options.v2');\n` : '') +
+        (preferencesSchema === 4 ? `localStorage.removeItem('isaac-rebirth.options.v3');\n` : '') +
+        `localStorage.setItem(${JSON.stringify(contract.storageKey)},${JSON.stringify(JSON.stringify(initial))});\n` +
         `(${installBrowserAudioObserver.toString()})();\n` +
         `(${installOptionsGainObserver.toString()})();\n` +
         `(${installOptionsReturns.toString()})();\n`});
@@ -77,9 +84,9 @@ export function optionsObservedBrowser(real, data, observed, retain) {
         page.evaluate = async (fn, arg) => {
           const result = await evaluate(fn, arg);
           if (typeof fn === 'function' && /window\.game\.capture\(\)/.test(fn.toString())) {
-            const actual = await evaluate(() => ({preferences: window.game.preferences(), feedback: window.game.feedback(),
-              storage: localStorage.getItem('isaac-rebirth.options.v2'), apiEvents: window.__audioApi.events.length,
-              gainEvents: window.__optionsGainObservation.snapshot().events.length}));
+            const actual = await evaluate(({storageKey, preferencesSchema}) => ({preferences: window.game.preferences(), feedback: window.game.feedback(),
+              storage: localStorage.getItem(storageKey), ...((preferencesSchema === 3 || preferencesSchema === 4) ? {storageKey} : {}), apiEvents: window.__audioApi.events.length,
+              gainEvents: window.__optionsGainObservation.snapshot().events.length}), contract);
             observed.checkpoints.push({label: labels[next++], ...actual});
           }
           return result;

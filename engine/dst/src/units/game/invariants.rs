@@ -128,7 +128,8 @@ pub fn outcome(state: &State, command: &Command, result: &Result<(), String>, af
         props::always!(
             expected.is_some() || result.is_ok(),
             "game: valid Tick commands always succeed",
-            details()
+            details(),
+            signature: result.as_ref().err().map_or("", String::as_str)
         );
     }
     props::sometimes!(
@@ -633,8 +634,8 @@ fn room_clear(before: &State, command: &Command, after: &State) {
 }
 
 /// Options5A7840 on a Tick. Left and Right step only the setting on the
-/// selected row (SFX on row 1, music on row 2; Up and Down take priority, so
-/// the row holds while a setting steps). Its back action saves the settings
+/// selected row (SFX on row 1, music on row 2, Map opacity on row 3; Up and
+/// Down take priority, so the row holds while a setting steps). Its back action saves the settings
 /// it leaves with (Settings5B8DB0 writes %.4f) before returning to Main.
 fn options(before: &State, after: &State) {
     if before.screen != Screen::Options {
@@ -643,13 +644,22 @@ fn options(before: &State, after: &State) {
     let row = before.options_menu.selection;
     props::always!(
         (after.audio.sfx_volume == before.audio.sfx_volume || row == 1)
-            && (after.music.volume == before.music.volume || row == 2),
-        "game: an Options tick changes only the volume on its selected row",
+            && (after.music.volume == before.music.volume || row == 2)
+            && (after.map_settings == before.map_settings || row == 3)
+            && (after.gamma_settings == before.gamma_settings || row == 6),
+        "game: an Options tick changes only the setting on its selected row",
         json!({
             "row": row,
             "sfx": [before.audio.sfx_volume, after.audio.sfx_volume],
             "music": [before.music.volume, after.music.volume],
+            "map": [before.map_settings, after.map_settings],
+            "gamma": [before.gamma_settings, after.gamma_settings],
         })
+    );
+    props::always!(
+        (0.5..=1.5).contains(&after.gamma_settings.gamma),
+        "game: Gamma stays within .5..1.5",
+        json!({ "row": row, "gamma": [before.gamma_settings, after.gamma_settings] })
     );
     if after.screen == Screen::Main {
         let saved = after.options_menu.save_requests.last();
@@ -658,6 +668,8 @@ fn options(before: &State, after: &State) {
                 saved.sfx_volume == format!("{:.4}", after.audio.sfx_volume)
                     && saved.music_volume == format!("{:.4}", after.music.volume)
                     && saved.fullscreen == after.fullscreen.requested
+                    && saved.map_opacity == format!("{:.4}", after.map_settings.opacity)
+                    && saved.gamma == format!("{:.4}", after.gamma_settings.gamma)
             }),
             "game: leaving Options saves the settings it leaves with",
             json!({
@@ -665,6 +677,8 @@ fn options(before: &State, after: &State) {
                 "sfx": after.audio.sfx_volume,
                 "music": after.music.volume,
                 "fullscreen": after.fullscreen.requested,
+                "map": after.map_settings,
+                "gamma": after.gamma_settings,
             })
         );
         props::sometimes!(true, "game: Options saves and returns to the main menu");
@@ -983,25 +997,32 @@ pub fn state(state: &State) {
             .map(rebirth_cleanroom::grid::Grid::new);
         if let Some(Ok(grid)) = grid {
             let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
+            // Each body names its family (NPC type, pickup variant), which
+            // signs a failure: one family's known escape cannot hide another.
             let npcs = npcs
                 .filter(|npc| npc.grid_collision_class != 0)
-                .map(|npc| ("npc", npc.id, npc.position));
+                .map(|npc| ("npc", npc.kind, npc.id, npc.position));
             let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
-            let pickups = pickups.map(|pickup| ("pickup", pickup.id, pickup.position));
+            let pickups =
+                pickups.map(|pickup| ("pickup", pickup.variant, pickup.id, pickup.position));
             let bombs = state.bombs.iter();
-            let bombs = bombs.map(|bomb| ("bomb", bomb.id, bomb.motion.position));
+            let bombs = bombs.map(|bomb| ("bomb", 4, bomb.id, bomb.motion.position));
             let doorway = |position: WorldVector| {
                 grid.index(position)
                     .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
                     .is_some_and(|entity| entity.kind == 16)
             };
-            let escaped = npcs.chain(pickups).chain(bombs).find(|(_, _, position)| {
-                grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
-            });
+            let escaped = npcs
+                .chain(pickups)
+                .chain(bombs)
+                .find(|(_, _, _, position)| {
+                    grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
+                });
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
-                json!({ "body": escaped })
+                json!({ "body": escaped }),
+                signature: escaped.map_or(String::new(), |(body, family, _, _)| format!("{body} {family}"))
             );
         }
     }
@@ -1140,6 +1161,7 @@ pub fn state(state: &State) {
             .iter()
             .any(|pickup| pickup.id == actor.id),
         ActorKind::Npc => state.room.npcs.iter().any(|npc| npc.id == actor.id),
+        ActorKind::Slot => state.room.slots.iter().any(|slot| slot.id == actor.id),
         ActorKind::Projectile => state
             .enemy_projectiles
             .iter()

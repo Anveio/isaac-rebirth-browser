@@ -69,7 +69,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -79,7 +79,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
-| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 2 |
+| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT Full countdown/nonrare blast, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
@@ -123,17 +123,30 @@ the 24-action/two-column editor and its persistence; its [artifact-bound fixed,
 unfiltered OS and Full/Fast bomb results](controls-keyboard.md) remain separate
 from other systems. Fresh main173 artifact 4ca passes runtime 2/2 and exact fixed
 W→I plus recorded OS replay (1,568 fields unchanged and 44 identical Browser PNGs).
-Map Opacity, Filter, Gamma and Popups callbacks,
+The [partial Map opacity slice](map-opacity.md) now passes all 3,122 functional
+checks on fixed plus first-unfiltered-OS inputs and all 26 menu-gauge regions;
+15 of 48 required render regions remain failed. Runtime 3/3 and one recorded
+Music case (261/261) pass on the same frozen artifact. Options Audio V3 fixed
+plus recorded JWMM passes 948/948; history caps and pixel diagnostics remain
+failed. Same-Native Save replays preserve all 3,748 field values and statuses
+(3,650 pass, 98 fail), with zero lost passes, 66 own-save checks, 48 MT snapshots
+and two real reloads passing. Filter and Popups callbacks,
 shaders, further OS interactions and reload stay separate. Missing: intro cutscene (the paired tapes
 skip it), stats and win screen. General challenge rules remain separate.
 
-Next: complete Controls reload and remaining callbacks; qualify Map Opacity; death screen parity; intro cutscene.
+Keyboard document reload now passes 298 own-save/load and gameplay checks on
+the retained fixed and recorded OS W→I routes. All 1,568 paired fields and 44
+original-document Browser PNG bytes stay unchanged; RGBA remains 18 pass/26 fail.
+This opt-in scope does not qualify Native process reload or the whole Controls bank.
+
+Next: complete Native Controls reload and remaining callbacks; close Map rendering gaps; death screen parity; intro cutscene.
 See [source and live scopes](system-map.md#source-implementation-and-live-scope).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Options page draws no Map Opacity, Filter, Gamma or Pop-ups values | playtest 2026-10-17 `playtest/4c47d7b/options-tour-side-by-side.mp4` |
+| #647 | P2 | Options page draws no Filter or Pop-ups values (Map Opacity and Gamma fixed by #661/#666) | playtest 2026-10-18 `playtest/6606044/options-tour-side-by-side.mp4` |
+| #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
 
@@ -161,11 +174,12 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 50 raw pointer/sequence differences. The outer raw-index guard fails; its
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
-Missing: controllers, mouse, reload acceptance and remaining remapped action
-callbacks, including drop/map/restart. Strict pixels and history caps remain red;
+Missing: controllers, mouse, Native process reload, Browser OS-process
+restart and remaining remapped action callbacks, including drop and restart. The configurable Map action has the
+separate bounded scope above. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: drop (Ctrl), map (Tab) and restart (R) actions; gamepad.
+Next: Native own-saved Keyboard process reload; drop (Ctrl) and restart (R); gamepad.
 
 No open bugs.
 
@@ -247,7 +261,6 @@ Next: coordinate later-stage admission with the level workstream (#413).
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #413 | P1 | Basement II's open trapdoor refuses descent because the next generator is unadmitted; 2efbef1 guards the old repeated-tick freeze | issue; docs/dst.md |
-| #449 | P3 | Basement II start room keeps the controls drawing (the "BASEMENT I" streak is fixed by #567) | playtest 2026-10-17 `playtest/ff24cc6/` |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 
 ## Player
@@ -327,11 +340,28 @@ Rebirth scope: rocks (normal, tinted, bomb, marked), pots, poop variants,
 spikes, TNT, pits, blocks, keys blocks, trapdoors, crawlspaces, buttons.
 
 Port: ordinary/tinted rocks and supported tinted rewards, authored bomb rocks,
-spikes, poop (authored too), TNT (intact collision only), spider webs, trapdoor,
-ordinary backdrop-1 Block initialization, decorations, grid records and costs.
-The [Block constructor comparison](block-grid-evidence.md) preserves its existing
-gameplay and pixel failures. Missing: TNT fuse/countdown and blast,
-broader pit/block behavior, buttons, crawlspace ladders and poop variants.
+spikes, poop (authored too), TNT signed fuse/countdown and nonrare Full blast,
+spider webs, trapdoor, ordinary backdrop-1 Block initialization, decorations,
+grid records and costs. The [Block constructor comparison](block-grid-evidence.md)
+preserves its existing gameplay and pixel failures. Missing: broader pit/block
+behavior, buttons, crawlspace ladders and poop variants.
+The [bounded TNT comparison](tnt-grid-evidence.md) on frozen `e3fa5336`/1,408
+files (WASM `e505236c`) passes 41,659 required checks on the unchanged recorded
+fixed-plus-first-OS bank:21,038 fixed and 20,621 boot 4011211959/idle 8. All 22,535
+prior passes remain identical, with zero lost rows or changed expectations;
+19,113 added rows pass and 11 invalid live-four guards now use actual Penny
+conservation. Earlier raw failures remain unchanged. Separate corrected-clock
+ordinary-room Node and fresh-Native/DOM controls each pass 278 checkpoints,
+99,406 inherited fields and 279 added clock rows, recovering 162 old marker
+failures with no lost parent passes. Broader recorded11-rock/six-bomb/four-key
+controls preserve all1,687,079 inherited field keys and all passing values;
+8,811 added absolute-clock fields pass. The252 known Rock failures remain,
+including64 already-failing tinted-position values changed against actual137b.
+Transient18 seed/callback remains
+UNOBSERVED; history caps, fullRGBA, rare50/41 pool/pickup350, mixed-grid order,
+Player/NPC damage, reentry and whole shared MT remain open. No whole-game or
+current-main qualification is inferred.
+
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
@@ -354,6 +384,25 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 [regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
+
+[PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
+champion creep. Its current-main666-based frozen `35edb299` passes a fresh
+Original/Browser fixed route: 173,135 entity fields, 419 paired checkpoints and
+all seven lifecycle/Acid milestones on each side. Actual Native damage sources
+identify live Green actors. Three retained-Native regressions preserve all
+269,637 entity and 9,605 paired field keys with zero lost passes; both Fast
+presentation mismatches improve. Fixed MT remains 196,875/196,875 exact and
+the recorded OS case passes. Older routes retain their missing Acid witnesses;
+full RGBA on the new route remains 7 pass/412 fail. Earlier Bomb/NPC controls
+retain their separate scope (4,364 fields, 38 gains). The input-only replay
+bank and default fixed fixture use the qualified public route. Longer-tail MT,
+other champion hooks and whole-game acceptance remain open.
+
+After integrating Gamma and the starting-trinket runtime, frozen `62300f05`
+replays the same four Native cases with all 456,532 inherited entity/paired
+fields and 196,875 fixed MT fields unchanged. All 134,916 Gaper-spawner rows
+pass. The four older missing-Acid failures and all 1,390 pixel verdicts remain
+unchanged (28 pass, 1,362 fail); this adds no fresh Native or longer-tail MT claim.
 
 Next: the rest of the Basement/Cellar spawn table.
 
@@ -516,6 +565,7 @@ parity is a diagnostic only.
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
+| #670 | P3 | Enemy spawn smoke puffs draw light tan and opaque; the original's are dark grey and see-through | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 
@@ -576,6 +626,8 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
+- #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
 - #438 resolves the source-derived admission/death clock mismatch; [scoped clock evidence](player-death.md) retains the fresh OS cohort's required Original audio-observation failure, pixel reds and incomplete audio acceptance.
 - [PR615](https://github.com/Anveio/isaac-rebirth-browser/pull/615) restores the fresh Title/frame0 and black fade on GameOver Exit; clock and audio qualification remain separate.
 
@@ -590,3 +642,5 @@ Bugs in a test route or tool rather than in the game.
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
 - #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).
+
+The bounded [Gamma slice](options-gamma.md) implements the f32 callback, percentage, final RGB pass and V4 Back/reload. Fixed plus first-unfiltered OS inputs pass 1,376 functional checks and 26 required percentage regions; full-frame diagnostics remain 10/40 exact. Historical preference versions and shared regression evidence keep their own contracts.

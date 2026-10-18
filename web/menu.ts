@@ -121,6 +121,11 @@ export class MenuRenderer {
     const gauge = (value: number) => Math.floor(Math.fround(Math.fround(value * 10) + 0.5));
     this.assets.draw(ctx, path, "Idle", x, y, gauge(state.audio.sfxVolume), {layers: [3]});
     this.assets.draw(ctx, path, "Idle", x, y, gauge(state.music.musicEnabled ? state.music.volume : 0), {layers: [4]});
+    this.assets.draw(ctx, path, "Idle", x, y, gauge(state.mapSettings.opacity), {layers: [5]});
+    // The native numeric display uses its GammaMenu Counter actor, not a slider.
+    const percent = Math.floor(Math.fround(Math.fround(Math.fround(state.gammaSettings.gamma) * 100) + 0.5));
+    for (const [index, digit] of [...String(percent)].reverse().entries())
+      this.assets.draw(ctx, `${MENU}gammamenu.anm2`, "Counter", x + 300 - index * 11, y + 210, Number(digit));
     //5A79D9/5A7F70: source Settings fullscreen uses inverted layer frames.
     this.assets.draw(ctx, path, "Idle", x, y, state.fullscreen.requested ? 0 : 1, {layers: [6]});
     this.assets.draw(ctx, path, "Idle", x, y, state.optionsMenu.selection, {layers: [8]});
@@ -137,7 +142,7 @@ export class MenuRenderer {
     const path = `${MENU}keyconfigmenu.anm2`;
     this.assets.draw(ctx,path,'Idle',x,y,0,{layers:[0,9,8,7,2,1,3,4]});
     const names = ['Move up','Move down','Move left','Move right','Shoot up','Shoot down','Shoot left','Shoot right',
-      'Bomb','Item','Pill / card','Drop (unavailable)','Map (unavailable)','Fullscreen (unavailable)','Restart (unavailable)','Mute (unavailable)','Pause (unavailable)'];
+      'Bomb','Item','Pill / card','Drop (unavailable)','Map','Fullscreen (unavailable)','Restart (unavailable)','Mute (unavailable)','Pause (unavailable)'];
     const actions = [2,3,0,1,6,7,4,5,8,9,10,11,13,17,16,18,12];
     const labels: Record<number,string> = {'-1':'---',32:'Space',256:'Esc',257:'Enter',258:'Tab',259:'Backspace',
       260:'Insert',261:'Delete',262:'Right',263:'Left',264:'Down',265:'Up',266:'Page up',267:'Page down',

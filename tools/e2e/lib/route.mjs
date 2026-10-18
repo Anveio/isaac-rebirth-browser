@@ -86,7 +86,7 @@ export function routingView(s) {
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
     // Living door-shutting enemies and enemy shots, for fight().
     foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
-      .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y })),
+      .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
     shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
   };
@@ -95,14 +95,19 @@ export function routingView(s) {
 // One closed-loop fight decision: aim along the dominant axis at the nearest
 // foe and orbit it (bosses at 170 units, others at 110), steering away from
 // walls, solid cells, foes and enemy shots; `memory.orbit` flips when boxed in.
-// Room bounds are the 1x1 playable box.
+// With `memory.lead` (fast wall-bouncing foes such as Envy's heads) the aim
+// leads the foe by its velocity over a tear's flight time, and the orbit
+// closes to 90 units. Room bounds are the 1x1 playable box.
 export function fightKeys(view, memory) {
   const { player, grid, foes, shots } = view;
   if (!foes.length) return [];
   const target = foes.reduce((a, b) => Math.hypot(a.x - player.x, a.y - player.y) <= Math.hypot(b.x - player.x, b.y - player.y) ? a : b);
   const dx = target.x - player.x, dy = target.y - player.y, distance = Math.hypot(dx, dy) || 1;
-  const aim = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'ArrowRight' : 'ArrowLeft') : (dy > 0 ? 'ArrowDown' : 'ArrowUp');
-  const radius = target.boss ? 170 : 110, pull = (radius - distance) / radius * 2;
+  // Isaac's tears cover about 10 world units per update.
+  const flight = memory.lead ? distance / 10 : 0;
+  const ax = dx + (target.vx ?? 0) * flight, ay = dy + (target.vy ?? 0) * flight;
+  const aim = Math.abs(ax) >= Math.abs(ay) ? (ax > 0 ? 'ArrowRight' : 'ArrowLeft') : (ay > 0 ? 'ArrowDown' : 'ArrowUp');
+  const radius = memory.lead ? 90 : target.boss ? 170 : 110, pull = (radius - distance) / radius * 2;
   const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
   const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
   const solid = (x, y) => {

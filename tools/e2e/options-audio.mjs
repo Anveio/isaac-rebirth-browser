@@ -16,6 +16,7 @@ import {browserLaunchOptions, inspectBrowserGraphics} from '../foundation/browse
 import {pixelDifference} from '../foundation/compare.mjs';
 import {compareOptionsAudio} from '../foundation/options-audio-state-pair.mjs';
 import {optionsObservedBrowser} from './options-audio-observer.mjs';
+import {optionsPreferenceContract} from '../foundation/options-preference-contract.mjs';
 
 const ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const read = name => JSON.parse(fs.readFileSync(name, 'utf8'));
@@ -24,7 +25,14 @@ const fileDigest = name => digest(fs.readFileSync(name));
 const recorded = flag('--scenarios'), reuse = flag('--reuse-original'), count = flag('--count', '1');
 for (const name of ['--scenarios', '--reuse-original', '--production-directory', '--output'])
   assert.ok(flag(name) === undefined || flag(name).length > 0, `${name} requires a nonempty value`);
+// The current runtime writes V4. Historical V2 replay is an explicit input;
+// it is never guessed from a bank, artifact, or observed Browser storage.
+const preferencesVersion = flag('--preferences-schema', '4');
+assert.ok(preferencesVersion === '2' || preferencesVersion === '3' || preferencesVersion === '4', '--preferences-schema must be 2, 3 or 4');
+const preferencesSchema = Number(preferencesVersion);
+const preferenceContract = optionsPreferenceContract(preferencesSchema);
 const output = outputDirectory('options-audio');
+writeJson(path.join(output, 'preference-contract.json'), preferenceContract);
 const helper = 'tools/original/options-scenarios.py';
 const observer = path.join(ROOT, 'tools/original/options-observe.py');
 const sourcePaths = [
@@ -33,6 +41,7 @@ const sourcePaths = [
   'tools/e2e/options-audio.mjs', 'tools/e2e/options-audio-observer.mjs', 'tools/e2e/options-gain-observer.mjs',
   'tools/e2e/audio-api-observer.mjs', 'tools/e2e/lib/cli.mjs', 'tools/e2e/lib/original.mjs',
   'tools/foundation/paired-game.mjs', 'tools/foundation/options-audio-state-pair.mjs',
+  'tools/foundation/options-preference-contract.mjs',
   'tools/foundation/browser.mjs', 'tools/foundation/production-server.mjs',
   'tools/foundation/native-evidence.mjs', 'tools/foundation/browser-evidence.mjs',
   'tools/foundation/compare.mjs', 'tools/foundation/mt-draws.mjs', 'tools/e2e/lib/audio-owners.mjs',
@@ -73,7 +82,7 @@ const library = path.join(output, 'options-audio-trace.so');
 execFileSync('cc', ['-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
   'tools/original/audio-trace.c', '-o', library, '-ldl', '-pthread'], {cwd: ROOT});
 const nativeSources = Object.fromEntries(sourcePaths.filter(name => name.startsWith('tools/original/')).map(name => [name, before[name]]));
-const observerIdentity = {schema: 1, mode: 'options-audio-v1', binarySha256: ORIGINAL_SHA,
+const observerIdentity = {schema: 1, mode: preferencesSchema === 4 ? 'options-audio-v4' : preferencesSchema === 3 ? 'options-audio-v3' : 'options-audio-v1', binarySha256: ORIGINAL_SHA,
   captureProducerSha256: before['tools/foundation/paired-game.mjs'],
   librarySha256: fileDigest(library), sources: nativeSources, publicPreferences: {sfxVolume: 1, musicVolume: 1, fullscreen: false}};
 const catalogue = read(path.join(ROOT, 'web/audio-data.json'));
@@ -94,10 +103,12 @@ const inputsBefore = inputIdentity();
 for (const name of resourcePaths) assert.equal(inputsBefore[name], catalogue.assets[name].sha256, 'Actual authored input differs from its catalogue');
 writeJson(path.join(output, 'input-before.json'), inputsBefore);
 observerIdentity.authoredInputs = inputsBefore;
+if (preferencesSchema === 3 || preferencesSchema === 4) observerIdentity.preferenceContract = preferenceContract;
 const metadata = {waveFormat, pcm237Sha256: digest(pcm), pcm237Bytes: pcm.length,
   music61InputSha256s: ['music/title screen intro.ogg', 'music/title screen.ogg'].map(name => catalogue.assets[name].sha256)};
-const report = {schema: 1, status: 'running', caseFilter: bank.caseFilter, originalBinarySha256: ORIGINAL_SHA,
+const report = {schema: preferencesSchema === 4 ? 3 : preferencesSchema === 3 ? 2 : 1, status: 'running', caseFilter: bank.caseFilter, originalBinarySha256: ORIGINAL_SHA,
   observerIdentity, source: before, cases: [], scope: 'Main-family Options SFX/Music arrows and changed-value Back with actual request/backend owners, public clock and final public run seed. Pixels and complete state history remain explicit diagnostics; no full mix, complete MT or other callbacks.'};
+if (preferencesSchema === 3 || preferencesSchema === 4) report.preferenceContract = preferenceContract;
 let server, fatal;
 try {
   server = await startProductionServer({directory: flag('--production-directory')}); report.production = server.build;
@@ -132,7 +143,7 @@ try {
       try {
         browser = await chromium.launch({...browserLaunchOptions(), headless: false});
         report.graphics = await inspectBrowserGraphics(browser);
-        browserResult = await browserCapture(optionsObservedBrowser(browser, data, observed, retain), server, data,
+        browserResult = await browserCapture(optionsObservedBrowser(browser, data, observed, retain, preferencesSchema), server, data,
           path.join(directory, 'browser'), true, true, false, clock, {sfxVolume: 1, musicVolume: 1});
       } catch (failure) { browserResult = {status: 'fail', failures: [String(failure.stack ?? failure)], frames: []}; }
       finally {
@@ -152,7 +163,7 @@ try {
       const calls = fs.readFileSync(callsPath, 'utf8').trim().split('\n').map(JSON.parse);
       assert.equal(calls[0].api, 'trace-start'); calls.slice(1).forEach((call, at) => assert.equal(call.seq, at + 1));
       typed = compareOptionsAudio({data, clock, native, browser: browserResult, observed, calls,
-        nativeAudioDirectory: path.dirname(callsPath), metadata, scopedState});
+        nativeAudioDirectory: path.dirname(callsPath), metadata, scopedState, preferencesSchema});
       writeJson(path.join(directory, 'comparison.json'), typed);
       const pixels = [];
       for (const frame of browserResult.frames) {

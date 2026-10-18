@@ -1,4 +1,5 @@
 import baseSceneData from "./scene-data.json";
+import minimapData from "./generated/minimap-data.json";
 import informationData from "./information-data.json";
 import doorData from "./door-data.json";
 import gridData from "./grid-data.json";
@@ -11,7 +12,7 @@ import bloodTearData from "./blood-tear-data.json";
 import costume229Data from "./costume229-data.json";
 import bossSplashData from "./boss-splash-data.json";
 import pocketData from "./pocket-data.json";
-const sceneData = { ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
+const sceneData = { ...minimapData, ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
@@ -126,6 +127,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/effects/effect_021_tiny bug.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_033_tiny fly.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_029_explosion.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_017_bombradius.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_002_bloodpoof*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_033_tiny fly.png",
   "../references/isaac/rebirth/resources/gfx/items/pick ups/pickup_016_bomb.png",

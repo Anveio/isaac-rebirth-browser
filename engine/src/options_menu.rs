@@ -47,6 +47,10 @@ pub struct SaveRequest {
     pub music_volume: String,
     #[serde(default)]
     pub fullscreen: bool,
+    #[serde(default = "crate::map_presentation::default_serialized_opacity")]
+    pub map_opacity: String,
+    #[serde(default = "crate::display_settings::default_serialized_gamma")]
+    pub gamma: String,
 }
 
 /// An explicit port capability failure, not a native setting or callback.
@@ -68,12 +72,18 @@ pub enum Action {
 
 impl OptionsMenu {
     /// Inputs precede5A7560's counter update. Both System parities poll.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is separate Options state 5A7560 reads or writes: actions, held keys, audio, music, map opacity, the shared MT stream and the audio counter"
+    )]
     pub fn advance(
         &mut self,
         actions: &PublicActions,
         pressed: &BTreeSet<String>,
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
+        map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -102,9 +112,27 @@ impl OptionsMenu {
             }
             Action::None
         } else if left {
-            self.adjust(-1, self.left_held, audio, music, shared, audio_counter)?
+            self.adjust(
+                -1,
+                self.left_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if right {
-            self.adjust(1, self.right_held, audio, music, shared, audio_counter)?
+            self.adjust(
+                1,
+                self.right_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if actions.menu_back {
             Action::SaveAndBack
         } else {
@@ -165,6 +193,8 @@ impl OptionsMenu {
         audio: &audio::AudioState,
         music: &music::MusicState,
         fullscreen: &crate::fullscreen::FullscreenState,
+        map: &crate::map_presentation::MapPreferences,
+        gamma: &crate::display_settings::GammaPreferences,
     ) -> Result<(), String> {
         let sequence = self.next_save_sequence;
         self.next_save_sequence = sequence
@@ -175,6 +205,8 @@ impl OptionsMenu {
             sfx_volume: format!("{:.4}", audio.sfx_volume),
             music_volume: format!("{:.4}", music.volume),
             fullscreen: fullscreen.requested,
+            map_opacity: format!("{:.4}", map.opacity),
+            gamma: format!("{:.4}", gamma.gamma),
         });
         Ok(())
     }
@@ -183,12 +215,18 @@ impl OptionsMenu {
         counter == 0 || (counter > 49 && counter.is_multiple_of(10))
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the per-row adjustment of advance, which takes the same separate audio, music, map, MT and counter state"
+    )]
     fn adjust(
         &self,
         direction: i32,
         held: u32,
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
+        map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -222,7 +260,24 @@ impl OptionsMenu {
                 };
                 music.set_volume((volume + delta).clamp(0.0, 1.0));
             }
+            3 => {
+                //5A8129/5A8265 store actual Settings+10 then request237,
+                //including a held repeat whose value is already clamped.
+                map.opacity = (map.opacity + delta).clamp(0.0, 1.0);
+                audio.admit(
+                    shared,
+                    audio_counter,
+                    audio::SoundRequest {
+                        id: 237,
+                        volume: 1.0,
+                        delay: 0,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+            }
             4 => return Ok(Action::Fullscreen),
+            6 => gamma.adjust(direction),
             other => return Ok(Action::UnsupportedSetting(other)),
         }
         Ok(Action::None)

@@ -8,6 +8,7 @@
 //! drives the C ABI used by the browser, and (with `--wasm`) the shipped WASM.
 mod driver;
 mod invariants;
+pub(crate) mod saves;
 mod scout;
 
 use crate::coverage;
@@ -18,13 +19,16 @@ use crate::props;
 use crate::tape::{Reset, Tape};
 use rebirth_cleanroom::audio::{SoundEvent, VolumeCallback};
 use rebirth_cleanroom::controls_menu;
+use rebirth_cleanroom::display_settings::GammaPreferences;
 use rebirth_cleanroom::fullscreen::{self, FullscreenPreferences};
 use rebirth_cleanroom::input;
 use rebirth_cleanroom::keyboard::{
     DeviceConfig, InputConfigs, Keyboard, CONFIGURABLE, DEFAULT_PAIRS,
 };
+use rebirth_cleanroom::map_presentation::MapPreferences;
 use rebirth_cleanroom::music::MusicEvent;
 use rebirth_cleanroom::options_menu::{AudioPreferences, SaveRequest, UnavailableRequest};
+use rebirth_cleanroom::save_host::SaveStore;
 use rebirth_cleanroom::{Command, Game, Screen, State};
 use serde::Serialize;
 use serde_json::json;
@@ -63,6 +67,20 @@ pub fn run(case: &mut Case) {
             }
             if e.chance(1, 3) {
                 tape.boot_input_configs = Some(stored_input_configs(e));
+            }
+            if e.chance(1, 3) {
+                tape.boot_map_preferences = Some(MapPreferences {
+                    opacity: stored_volume(e),
+                });
+            }
+            if e.chance(1, 3) {
+                tape.boot_gamma_preferences = Some(GammaPreferences {
+                    gamma: stored_gamma(e),
+                });
+            }
+            // The browser's own-save storage, which a menu readmission reads.
+            if e.chance(1, 2) {
+                tape.save_host = Some(saves::generated_host(e));
             }
             tape
         }
@@ -114,6 +132,8 @@ const BATCH_SAMPLE_TICKS: u32 = 32;
 
 struct Simulation {
     game: Game,
+    /// The save host's storage, with the tape's save host.
+    store: Option<SaveStore>,
     tape: Tape,
     /// Ok/Err outcome and state digest after each command.
     trace: Vec<(bool, u64)>,
@@ -276,6 +296,16 @@ fn stored_volume(e: &mut Entropy) -> f32 {
     }
 }
 
+/// A Gamma an Options save stored (`%.4f` within .5..1.5): a bound, a
+/// whole number of Options steps from 1, or any four-decimal value.
+fn stored_gamma(e: &mut Entropy) -> f32 {
+    match e.below(4) {
+        0 => *e.pick(&[0.5, 1.0, 1.5]),
+        1 => (50 + e.below(101)) as f32 / 100.0,
+        _ => (5_000 + e.below(10_001)) as f32 / 10_000.0,
+    }
+}
+
 fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String>, String> {
     panic::catch_unwind(AssertUnwindSafe(|| game.command(command)))
         .map_err(|_| harness::take_panic())
@@ -287,10 +317,10 @@ impl Simulation {
         // boot meets.
         coverage::begin_case();
         let (initial_seed, boot_epoch_seed) = (tape.initial_seed, tape.boot_epoch_seed);
-        let booted = panic::catch_unwind(|| tape.boot());
+        let booted = panic::catch_unwind(|| tape.session());
         let details = json!({ "initialSeed": initial_seed, "bootEpochSeed": boot_epoch_seed });
         match booted {
-            Ok(Ok(game)) => {
+            Ok(Ok((game, store))) => {
                 props::always!(true, "game: every nonzero seed and epoch boots to Title");
                 props::always!(
                     game.state.screen == rebirth_cleanroom::Screen::Title
@@ -313,12 +343,16 @@ impl Simulation {
                         .boot_fullscreen_preferences
                         .is_none_or(|display| state.fullscreen.requested == display.fullscreen)
                         && state.keyboard == configs.keyboard()
-                        && state.input_configs == configs,
+                        && state.input_configs == configs
+                        && state.map_settings == tape.boot_map_preferences.unwrap_or_default()
+                        && state.gamma_settings == tape.boot_gamma_preferences.unwrap_or_default(),
                     "game: boot starts with the stored settings",
                     json!({
                         "audio": tape.boot_audio_preferences,
                         "fullscreen": tape.boot_fullscreen_preferences,
                         "inputConfigs": tape.boot_input_configs,
+                        "map": [tape.boot_map_preferences, state.map_settings],
+                        "gamma": [tape.boot_gamma_preferences, state.gamma_settings],
                         "sfx": state.audio.sfx_volume,
                         "music": state.music.volume,
                         "requested": state.fullscreen.requested,
@@ -331,15 +365,16 @@ impl Simulation {
                         && tape.boot_input_configs.is_some(),
                     "game: a game boots with stored audio, fullscreen and input settings"
                 );
-                let again = tape.boot();
+                let again = tape.session();
                 props::always!(
-                    again.as_ref().ok() == Some(&game),
+                    again.as_ref().ok() == Some(&(game.clone(), store.clone())),
                     "game: boot is a pure function of its seeds and stored settings"
                 );
                 invariants::state(&game.state);
                 coverage::observe(&game.state);
                 Some(Self {
                     game,
+                    store,
                     tape: tape.start(),
                     trace: Vec::new(),
                     uncontrolled_since: None,
@@ -389,6 +424,7 @@ impl Simulation {
     /// Applies one command with every per-step check; false ends the case.
     fn step(&mut self, command: Command, e: &mut Entropy) -> bool {
         let before = self.game.clone();
+        let before_store = self.store.clone();
         self.tape.commands.push(command.clone());
         let result = match command_engine(&mut self.game, command.clone()) {
             Ok(result) => result,
@@ -400,6 +436,22 @@ impl Simulation {
                 return false;
             }
         };
+        // The browser answers the save IO a command leaves before any later
+        // input sees the state, so the contracts below see both.
+        let host = self.tape.save_host.as_ref();
+        let pending =
+            self.game.state.save_write_pending || self.game.state.save_readmission_pending;
+        if host.is_some() && (pending || e.chance(1, 8)) {
+            saves::stale_acknowledgement(&self.game, e);
+        }
+        let served = match &result {
+            Ok(()) => saves::serve(&mut self.store, host, &mut self.game, &command),
+            Err(_) => Ok(Vec::new()),
+        };
+        saves::check(&before, &command, &served, &self.game);
+        if host.is_some() && e.chance(1, 40) {
+            saves::round_trip(&self.tape, &self.game);
+        }
         invariants::outcome(&before.state, &command, &result, &self.game.state);
         match &result {
             Ok(()) => invariants::transition(&before.state, &command, &self.game.state),
@@ -423,7 +475,7 @@ impl Simulation {
             ) = (&result, &command)
             {
                 if (2..=BATCH_SAMPLE_TICKS).contains(count) {
-                    self.batch_matches_single_ticks(&before, *count);
+                    self.batch_matches_single_ticks(&before, before_store, *count);
                 }
             }
         }
@@ -436,8 +488,9 @@ impl Simulation {
     /// every iteration's outputs (`State::begin_command`) in order, and a
     /// screen change resets the menu animation counter at the command
     /// boundary.
-    fn batch_matches_single_ticks(&self, before: &Game, count: u32) {
+    fn batch_matches_single_ticks(&self, before: &Game, mut store: Option<SaveStore>, count: u32) {
         let mut singles = before.clone();
+        let host = self.tape.save_host.as_ref();
         let mut published = Published::default();
         let mut screen_changed = false;
         let mut failed_at = None;
@@ -447,7 +500,9 @@ impl Simulation {
                 count: 1,
                 timestamp_millis: None,
             };
-            if !matches!(command_engine(&mut singles, single), Ok(Ok(()))) {
+            if !matches!(command_engine(&mut singles, single.clone()), Ok(Ok(())))
+                || saves::serve(&mut store, host, &mut singles, &single).is_err()
+            {
                 failed_at = Some(index);
                 break;
             }
@@ -548,12 +603,16 @@ impl Simulation {
 
     /// The same tape on a fresh boot reproduces every outcome and state.
     fn replay_matches(&self) {
-        let Ok(mut game) = self.tape.boot() else {
+        let Ok((mut game, mut store)) = self.tape.session() else {
             return;
         };
+        let host = self.tape.save_host.as_ref();
         let mut divergence = None;
         for (index, command) in self.tape.commands.iter().enumerate() {
             let outcome = matches!(command_engine(&mut game, command.clone()), Ok(Ok(())));
+            if outcome {
+                let _ = saves::serve(&mut store, host, &mut game, command);
+            }
             if (outcome, digest(&game.state)) != self.trace[index] {
                 divergence = Some(index);
                 break;
@@ -571,16 +630,19 @@ impl Simulation {
     /// no simulation state lives outside the serialized game.
     fn continuation_matches(&self, e: &mut Entropy) {
         let commands = &self.tape.commands;
-        let Ok(mut game) = self.tape.boot() else {
+        let Ok((mut game, mut store)) = self.tape.session() else {
             return;
         };
+        let host = self.tape.save_host.as_ref();
         let midpoint = if commands.is_empty() {
             0
         } else {
             e.index(commands.len() + 1)
         };
         for command in &commands[..midpoint] {
-            let _ = command_engine(&mut game, command.clone());
+            if let Ok(Ok(())) = command_engine(&mut game, command.clone()) {
+                let _ = saves::serve(&mut store, host, &mut game, command);
+            }
         }
         let saved = serde_json::to_string(&game).expect("game serializes");
         let Ok(mut resumed) = serde_json::from_str::<Game>(&saved) else {
@@ -592,7 +654,9 @@ impl Simulation {
             return;
         };
         for command in &commands[midpoint..] {
-            let _ = command_engine(&mut resumed, command.clone());
+            if let Ok(Ok(())) = command_engine(&mut resumed, command.clone()) {
+                let _ = saves::serve(&mut store, host, &mut resumed, command);
+            }
         }
         let equal = resumed == self.game;
         props::always!(
@@ -626,21 +690,54 @@ impl Simulation {
                 sfx_volume,
                 music_volume,
             ),
+            Reset::Map {
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
+            } => abi::reset_with_map_preferences_v2(
+                seed,
+                epoch,
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
+            ),
             Reset::InputConfigs { request } => {
-                let pointer = abi::request_ptr(request.len());
-                if pointer.is_null() {
+                if !abi_request(&request) {
                     props::always!(false, "game: the C ABI agrees with direct dispatch");
                     return;
                 }
-                // SAFETY: request_ptr returned a buffer of exactly request.len().
-                unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
                 abi::reset_with_input_configs(seed, epoch)
+            }
+            Reset::Settings { request } => {
+                if !abi_request(&request) {
+                    props::always!(false, "game: the C ABI agrees with direct dispatch");
+                    return;
+                }
+                abi::reset_with_settings_preferences(seed, epoch)
             }
         };
         if reset != 0 {
             props::always!(false, "game: the C ABI agrees with direct dispatch");
             return;
         }
+        let host = self.tape.save_host.as_ref();
+        let mut store = match host.map(|host| host.boot(&mut saves::AbiSaves)).transpose() {
+            Ok(store) => store,
+            Err(error) => {
+                props::always!(
+                    false,
+                    "game: the C ABI agrees with direct dispatch",
+                    json!({ "saveHost": error })
+                );
+                return;
+            }
+        };
         let mut divergence = None;
         for (index, command) in self.tape.commands.iter().enumerate() {
             let bytes = serde_json::to_vec(command).expect("command serializes");
@@ -657,6 +754,10 @@ impl Simulation {
                 divergence = Some((index, "outcome"));
                 break;
             }
+            if !failed && saves::serve(&mut store, host, &mut saves::AbiSaves, command).is_err() {
+                divergence = Some((index, "save host"));
+                break;
+            }
         }
         let pointer = abi::snapshot_ptr();
         // SAFETY: snapshot_ptr/snapshot_len describe the thread-local buffer.
@@ -668,4 +769,15 @@ impl Simulation {
             json!({ "divergence": divergence })
         );
     }
+}
+
+/// Copies a reset request into the C ABI's request buffer.
+fn abi_request(request: &[u8]) -> bool {
+    let pointer = rebirth_cleanroom::request_ptr(request.len());
+    if pointer.is_null() {
+        return false;
+    }
+    // SAFETY: request_ptr returned a buffer of exactly request.len().
+    unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
+    true
 }

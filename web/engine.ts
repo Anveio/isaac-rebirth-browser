@@ -68,7 +68,15 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
-export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "slot" | "npc" | "projectile" | "effect"; id: number; }
+/** Entity_Slot (type 6): an idle machine or beggar (engine/src/slots.rs). */
+export interface Slot {
+  id: number; variant: number; subtype: number; spawnSeed: number;
+  position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
+  targetPosition: {x: number; y: number}; positionOffset: {x: number; y: number}; sizeMulti: {x: number; y: number};
+  collisionRadius: number; collisionMass: number; configuredFriction: number; currentFriction: number;
+  state: number; actor: string; animation: string; animationFrame: number;
+}
 export type OrdinaryPlacementFrontier =
   {kind: "playerUpdate"; field: string} |
   {kind: "factory"; entityType: number; variant: number; subtype: number} |
@@ -145,7 +153,7 @@ export interface SavedRunSummary {
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
     record: GridRecord | null}[];
   doorCellRecords: {gridIndex: number; record: GridRecord | null}[];
-  itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
+  itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed?: number | null;
     specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
     pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};
 }
@@ -299,12 +307,13 @@ export interface Room {
       actorRngState: number; renderOrderOffset: number; flameScale: number; flameRenderMode: number;
       particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
-  authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
+  slots: Slot[];
+  authoredActorOrder: {kind: "npc" | "pickup" | "slot"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
-  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number}} | null}[] } | null;
+  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number; tnt?: {countdown: number; sprite: {animation: "Idle" | "IdleMedium" | "ReadyToExplode" | "Blown"; frame: number; playing: boolean}; rewardFrontier?: {nextTrinketPoolQuery: number}}}} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
@@ -329,7 +338,7 @@ export type MenuPage = "title" | "save" | "game" | "options" | "controls" | "key
 export interface MenuClip { animation: string; frame: number; playing: boolean }
 /** MenuManager view, Back/Select widgets, File select and Character carousel. */
 export interface MenuPresentation {
-  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number; keyboardScroll: number;
+  view: [number, number]; moving: boolean; page: MenuPage; seedView: boolean; challengeScroll: number; keyboardScroll: number; optionsScroll: number;
   widgetsShown: boolean; widgets: [number, number];
   save: { file: number; menu: MenuClip; drawings: [MenuClip, MenuClip, MenuClip] };
   carousel: { angle: number; portraits: [number, number][] };
@@ -361,12 +370,13 @@ export interface State {
     completionCallbacksPending: boolean };
   audio: AudioState;
   music: MusicState;
-  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
+  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean; mapOpacity: string; gamma: string}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
-  itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
-    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
+  itemPools: {seed: number; rootRng: ItemRng; secondaryRng?: ItemRng | null; pools: ItemPool[];
+    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[];
+    trinkets?: {available: boolean[]; count: number; eligible?: boolean[] | null} | null} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     heldPockets?: {slots: {id: number; card: boolean}[];
@@ -377,7 +387,7 @@ export interface State {
     activeChargeHistory?: ActiveChargeHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
-    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedConfigKind?: 1 | 2 | 3 | 4 | null; queuedCharge: number; queuedTouched: boolean;
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;
@@ -434,6 +444,9 @@ export interface State {
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;
     histories: {capacity: number; head: number; samples: {x: number; y: number}[]}[]} | null;
   nextPickup: number;
+  mapSettings: MapPreferences;
+  gammaSettings: GammaPreferences;
+  minimapPresentation: {mode: number; expandedLatched: boolean; heldFrames: number; smallAlpha: number; expandedAlpha: number};
   minimap: { cells: { x: number; y: number; visibility: "unvisited" | "visited" | "current" }[] };
   tears: Tear[]; fireCooldown: number; nextTear: number;
   fireParticles: {id: number; parentNpc: number; parentType: number; parentVariant: number; spawnSeed: number; birthGameUpdate: number;
@@ -452,15 +465,22 @@ export interface State {
 export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }
 export interface AudioPreferences { sfxVolume: number; musicVolume: number; }
 export interface FullscreenPreferences { fullscreen: boolean; }
+export interface MapPreferences { opacity: number; }
+export interface GammaPreferences { gamma: number; }
 export interface ResourceInputs { challengesXml: string; specialRooms?: number[]; }
 export type Command = { type: "key"; code: string; down: boolean } | { type: "text"; text: string } | { type: "tick"; count: number; timestampMillis?: number } | { type: "audioVolume"; sfx_volume: number } | { type: 'musicVolume'; volume: number } | MusicBackendCommand;
 interface Exports extends WebAssembly.Exports {
   reset_with_input_configs: (initialSeed: number, bootEpochSeed: number) => number;
   memory: WebAssembly.Memory; abi_version: () => number; reset: (initialSeed: number, bootEpochSeed: number) => number; request_ptr: (length: number) => number;
+  reset_with_settings_preferences: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_boot_resources_and_fullscreen_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number) => number;
   reset_with_boot_resources_and_audio_preferences: (initialSeed: number, bootEpochSeed: number, sfxVolume: number, musicVolume: number) => number;
+  reset_with_map_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_boot_resources_and_map_preferences: (initialSeed: number, bootEpochSeed: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_map_preferences_v2: (initialSeed: number, bootEpochSeed: number, hasFullscreen: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
+  reset_with_boot_resources_and_map_preferences_v2: (initialSeed: number, bootEpochSeed: number, hasFullscreen: number, fullscreen: number, hasAudio: number, sfxVolume: number, musicVolume: number, opacity: number) => number;
   reset_with_resources: (initialSeed: number, bootEpochSeed: number) => number;
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
@@ -491,7 +511,7 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs) {
+  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences, gammaPreferences?: GammaPreferences) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     const response = await fetch(wasmUrl);
@@ -501,7 +521,7 @@ export class Engine {
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
       || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
-    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs); return engine;
+    const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs, mapPreferences, gammaPreferences); return engine;
   }
   private static validateSeed(initialSeed: number) {
     if (!Number.isInteger(initialSeed) || initialSeed < 1 || initialSeed > 0xffffffff)
@@ -511,7 +531,7 @@ export class Engine {
     if (!Number.isInteger(bootEpochSeed) || bootEpochSeed < 0 || bootEpochSeed > 0xffffffff)
       throw new Error("Boot epoch seed must be an unsigned 32-bit value");
   }
-  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs): State {
+  reset(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences, gammaPreferences?: GammaPreferences): State {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
     if (audioPreferences !== undefined && (!audioPreferences ||
@@ -527,13 +547,31 @@ export class Engine {
     if (typeof this.wasm.reset_with_fullscreen_preferences !== 'function' ||
       typeof this.wasm.reset_with_boot_resources_and_fullscreen_preferences !== 'function')
       throw new Error('WASM fullscreen preference owner is stale; rebuild with npm run build:wasm');
+    if (mapPreferences !== undefined && (!mapPreferences || typeof mapPreferences !== 'object' || Array.isArray(mapPreferences) ||
+      Object.keys(mapPreferences).join(',') !== 'opacity' || !Number.isFinite(mapPreferences.opacity) || mapPreferences.opacity<0 || mapPreferences.opacity>1))
+      throw new Error('Initial map preference requires exactly one finite opacity within 0..1');
+    if (mapPreferences !== undefined && (typeof this.wasm.reset_with_map_preferences_v2 !== 'function' ||
+      typeof this.wasm.reset_with_boot_resources_and_map_preferences_v2 !== 'function'))
+      throw new Error('WASM map preference owner is stale; rebuild with npm run build:wasm');
+    if (gammaPreferences !== undefined && (!gammaPreferences || typeof gammaPreferences !== 'object' || Array.isArray(gammaPreferences) ||
+      Object.keys(gammaPreferences).join(',') !== 'gamma' || !Number.isFinite(gammaPreferences.gamma) ||
+      gammaPreferences.gamma < 0.5 || gammaPreferences.gamma > 1.5))
+      throw new Error('Initial Gamma requires exactly one finite value within .5..1.5');
+    if (gammaPreferences !== undefined && typeof this.wasm.reset_with_settings_preferences !== 'function')
+      throw new Error('WASM Gamma preference ingress is stale; rebuild');
+    const mapReset = (withResources: boolean) => {
+      const reset = withResources ? this.wasm.reset_with_boot_resources_and_map_preferences_v2 : this.wasm.reset_with_map_preferences_v2;
+      return reset(initialSeed, bootEpochSeed, Number(fullscreenPreferences !== undefined),
+        Number(fullscreenPreferences?.fullscreen ?? false), Number(audioPreferences !== undefined),
+        audioPreferences?.sfxVolume ?? 0, audioPreferences?.musicVolume ?? 0, mapPreferences!.opacity);
+    };
     const displayReset = (withResources: boolean) => {
       const reset = withResources ? this.wasm.reset_with_boot_resources_and_fullscreen_preferences : this.wasm.reset_with_fullscreen_preferences;
       return reset(initialSeed, bootEpochSeed, Number(fullscreenPreferences!.fullscreen), Number(audioPreferences !== undefined),
         audioPreferences?.sfxVolume ?? 0, audioPreferences?.musicVolume ?? 0);
     };
     let result: number;
-    if (inputConfigs !== undefined) {
+    if (inputConfigs !== undefined || gammaPreferences !== undefined) {
       if (typeof this.wasm.reset_with_input_configs !== 'function') throw new Error('WASM keyboard boot ingress is stale; rebuild');
       if (resources !== undefined) {
         const resourceBytes = new TextEncoder().encode(JSON.stringify(resources));
@@ -542,13 +580,16 @@ export class Engine {
         if (resourcePointer === 0) throw new Error('WASM resource allocation failed');
         new Uint8Array(this.wasm.memory.buffer,resourcePointer,resourceBytes.length).set(resourceBytes);
       }
-      const bytes = new TextEncoder().encode(JSON.stringify({withResources:resources !== undefined, audioPreferences, fullscreenPreferences, inputConfigs}));
+      const bytes = new TextEncoder().encode(JSON.stringify({withResources:resources !== undefined, audioPreferences, fullscreenPreferences, inputConfigs, mapPreferences, gammaPreferences}));
       if (bytes.length > 65536) throw new Error('Keyboard startup inputs exceed64KiB');
       const pointer = this.wasm.request_ptr(bytes.length);
       if (pointer === 0) throw new Error('Keyboard startup input allocation failed');
       new Uint8Array(this.wasm.memory.buffer,pointer,bytes.length).set(bytes);
-      result = this.wasm.reset_with_input_configs(initialSeed,bootEpochSeed);
-    } else if (resources === undefined) result = fullscreenPreferences !== undefined ? displayReset(false)
+      result = gammaPreferences === undefined
+        ? this.wasm.reset_with_input_configs(initialSeed,bootEpochSeed)
+        : this.wasm.reset_with_settings_preferences(initialSeed,bootEpochSeed);
+    } else if (resources === undefined) result = mapPreferences !== undefined ? mapReset(false)
+      : fullscreenPreferences !== undefined ? displayReset(false)
       : audioPreferences === undefined ? this.wasm.reset(initialSeed, bootEpochSeed)
       : this.wasm.reset_with_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     else {
@@ -559,7 +600,8 @@ export class Engine {
       const ptr = this.wasm.boot_resource_ptr(bytes.length);
       if (ptr === 0) throw new Error("WASM resource allocation failed");
       new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-      result = fullscreenPreferences !== undefined ? displayReset(true)
+      result = mapPreferences !== undefined ? mapReset(true)
+        : fullscreenPreferences !== undefined ? displayReset(true)
         : audioPreferences === undefined ? this.wasm.reset_with_boot_resources(initialSeed, bootEpochSeed)
         : this.wasm.reset_with_boot_resources_and_audio_preferences(initialSeed, bootEpochSeed, audioPreferences.sfxVolume, audioPreferences.musicVolume);
     }

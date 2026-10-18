@@ -1,6 +1,6 @@
 use rebirth_cleanroom::{
-    fullscreen::FullscreenPreferences, options_menu::AudioPreferences, Command, Game,
-    MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS,
+    fullscreen::FullscreenPreferences, options_menu::AudioPreferences, save_host::SaveHost,
+    Command, Game, MAX_COMMAND_TICKS, MAX_REPLAY_COMMANDS,
 };
 use serde::Deserialize;
 use std::io::{self, Read};
@@ -16,6 +16,13 @@ struct Replay {
     boot_fullscreen_preferences: Option<FullscreenPreferences>,
     #[serde(default)]
     boot_input_configs: Option<rebirth_cleanroom::keyboard::InputConfigs>,
+    #[serde(default)]
+    boot_map_preferences: Option<rebirth_cleanroom::map_presentation::MapPreferences>,
+    #[serde(default)]
+    boot_gamma_preferences: Option<rebirth_cleanroom::display_settings::GammaPreferences>,
+    /// The browser's own-save storage; absent, the game has no save IO.
+    #[serde(default)]
+    save_host: Option<SaveHost>,
     commands: Vec<Command>,
 }
 fn main() {
@@ -54,13 +61,15 @@ fn main() {
         eprintln!("replay exceeds 36,000 total simulation steps");
         std::process::exit(1);
     }
-    let mut game = match Game::new_with_input_configs(
+    let mut game = match Game::new_with_settings_preferences(
         replay.initial_seed,
         replay.boot_epoch_seed,
         None,
         replay.boot_audio_preferences,
         replay.boot_fullscreen_preferences,
         replay.boot_input_configs,
+        replay.boot_map_preferences,
+        replay.boot_gamma_preferences,
     ) {
         Ok(game) => game,
         Err(error) => {
@@ -68,11 +77,29 @@ fn main() {
             std::process::exit(1);
         }
     };
-    println!("{}", game.json());
-    for command in replay.commands {
-        if let Err(error) = game.command(command) {
+    let mut store = match replay
+        .save_host
+        .as_ref()
+        .map(|host| host.boot(&mut game))
+        .transpose()
+    {
+        Ok(store) => store,
+        Err(error) => {
             eprintln!("{error}");
             std::process::exit(1);
+        }
+    };
+    println!("{}", game.json());
+    for command in replay.commands {
+        if let Err(error) = game.command(command.clone()) {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        if let (Some(host), Some(store)) = (&replay.save_host, &mut store) {
+            if let Err(error) = store.service(host, &mut game, &command) {
+                eprintln!("{error}");
+                std::process::exit(1);
+            }
         }
         println!("{}", game.json());
     }

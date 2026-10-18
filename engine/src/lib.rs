@@ -37,6 +37,7 @@ mod creep_effects;
 pub mod critters;
 pub mod dingle;
 pub mod dips;
+pub mod display_settings;
 mod doors;
 mod dr_fetus;
 pub mod duke;
@@ -95,6 +96,7 @@ pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
 pub mod maggots;
+pub mod map_presentation;
 pub mod menu_lifecycle;
 pub mod menu_presentation;
 pub mod monstro;
@@ -136,14 +138,17 @@ pub mod room_templates;
 pub mod roundworm;
 pub mod run_admission;
 pub mod run_quit;
+pub mod save_host;
 pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
+pub mod slots;
 mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
 mod target_eligibility;
+pub mod tnt;
 pub mod traversal;
 pub mod wall_hugger;
 mod weapon_plan;
@@ -334,8 +339,9 @@ pub struct Tear {
     pub animation_tier: u8,
     pub collision_radius: f32,
     pub grid_contact: bool,
-    /// 542f70: the tear died on a grid contact above height -60, so its
-    /// death probes the grid for Hurt (5430a5).
+    /// 542f70: this tear attempted its known grid-death Hurt branch before
+    /// that callback's ground integration. The later poof/removal callback
+    /// does not repeat it; unknown source_variant remains unknown.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub grid_death: bool,
     pub motion: projectiles::TearMotion,
@@ -674,6 +680,11 @@ pub struct State {
     #[serde(default)]
     pub input_configs: keyboard::InputConfigs,
     #[serde(default)]
+    pub map_settings: map_presentation::MapPreferences,
+    pub gamma_settings: display_settings::GammaPreferences,
+    #[serde(default)]
+    pub minimap_presentation: map_presentation::MapPresentation,
+    #[serde(default)]
     pub fullscreen: fullscreen::FullscreenState,
     pub challenge_selection: Option<u32>,
     ///Real Config achievement requirements queried for the fresh menu rows.
@@ -860,7 +871,9 @@ pub struct Game {
     pub saved_run: Option<saved_game::SavedRun>,
     #[serde(default)]
     pub menu_readmission: Option<save_profiles::MenuReadmission>,
-    #[serde(skip)]
+    /// The declared host capability decides whether a readmission waits for
+    /// the host's document, so a resumed Game keeps it.
+    #[serde(default)]
     save_io_enabled: bool,
     #[serde(skip)]
     save_write_request: Option<save_profiles::SaveWriteRequest>,
@@ -906,6 +919,8 @@ impl Game {
             None,
             None,
             keyboard::InputConfigs::default(),
+            None,
+            None,
         )
     }
     pub fn new_with_resources(
@@ -952,6 +967,77 @@ impl Game {
         fullscreen: Option<fullscreen::FullscreenPreferences>,
         input_configs: Option<keyboard::InputConfigs>,
     ) -> Result<Self, String> {
+        Self::new_with_input_configs_and_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            input_configs,
+            None,
+        )
+    }
+    /// Additive MapOpacity ingress; all legacy callers retain source .3.
+    pub fn new_with_map_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        map: Option<map_presentation::MapPreferences>,
+    ) -> Result<Self, String> {
+        Self::new_with_input_configs_and_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            None,
+            map,
+        )
+    }
+    /// Independent immutable Keyboard and Map owners share one constructor.
+    pub fn new_with_input_configs_and_map_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: Option<keyboard::InputConfigs>,
+        map: Option<map_presentation::MapPreferences>,
+    ) -> Result<Self, String> {
+        Self::new_with_settings_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            input_configs,
+            map,
+            None,
+        )
+    }
+    /// Additive global display input; legacy constructors retain Gamma1.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is a separate declared boot input: seeds, resources, audio, fullscreen, input, map and Gamma preferences"
+    )]
+    pub fn new_with_settings_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: Option<keyboard::InputConfigs>,
+        map: Option<map_presentation::MapPreferences>,
+        gamma: Option<display_settings::GammaPreferences>,
+    ) -> Result<Self, String> {
+        let gamma = gamma
+            .map(display_settings::GammaPreferences::validate)
+            .transpose()?;
+        let map = map
+            .map(map_presentation::MapPreferences::validate)
+            .transpose()?;
         let input_configs = input_configs
             .map(keyboard::InputConfigs::validate)
             .transpose()?
@@ -979,8 +1065,14 @@ impl Game {
             preferences,
             fullscreen,
             input_configs,
+            map,
+            gamma,
         )
     }
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is a separate boot input: seeds, challenge catalog, special-room assets and the saved audio, fullscreen, input and map preferences"
+    )]
     fn new_with_challenges(
         initial_seed: u32,
         boot_epoch_seed: u32,
@@ -989,6 +1081,8 @@ impl Game {
         preferences: Option<options_menu::AudioPreferences>,
         fullscreen: Option<fullscreen::FullscreenPreferences>,
         input_configs: keyboard::InputConfigs,
+        map: Option<map_presentation::MapPreferences>,
+        gamma: Option<display_settings::GammaPreferences>,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
@@ -1049,6 +1143,9 @@ impl Game {
                 controls_menu: controls_menu::ControlsMenu::default(),
                 keyboard: input_configs.keyboard(),
                 input_configs,
+                map_settings: map.unwrap_or_default(),
+                gamma_settings: gamma.unwrap_or_default(),
+                minimap_presentation: map_presentation::MapPresentation::default(),
                 fullscreen: fullscreen::FullscreenState::from_preferences(fullscreen)?,
                 challenge_selection: None,
                 challenge_unlocked: Vec::new(),
@@ -1704,6 +1801,15 @@ impl Game {
         self.state.profiles[usize::from(self.state.profile - 1)].selected_character =
             self.state.character.clone();
     }
+    fn advance_minimap_full(&mut self) {
+        if self.state.minimap_presentation.advance_full(
+            self.state.public_actions.held[13],
+            self.state.map_settings.opacity,
+        ) {
+            //5B1240 requests585500 on exactly the tenth held Game Full.
+            self.state.run_introduction = RunIntroduction::stage(true);
+        }
+    }
     fn refresh_minimap(&mut self) {
         // Level.UpdateVisibility586940 retains descriptor flags. Fresh Isaac
         // reveals adjacent rooms, but a secret endpoint requires an actually
@@ -1846,6 +1952,7 @@ impl Game {
         self.state.paused = false;
         self.state.run_tick = 0;
         self.state.game_update_count = 0;
+        self.state.minimap_presentation = map_presentation::MapPresentation::default();
         mt::note_update(0);
         //54F471/54F635 clear duration, without writing the independent output.
         self.state
@@ -1865,7 +1972,8 @@ impl Game {
         self.state.next_laser = 1;
         self.state.familiars.clear();
         self.state.next_familiar = 1;
-        self.state.fire_cooldown = -1;
+        //Fresh Player51980B initializes C74 before any firing callback.
+        self.state.fire_cooldown = 0;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
@@ -1894,7 +2002,8 @@ impl Game {
         );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
-        self.state.head_timer = -1;
+        //Fresh Player5198D0 initializes BB0 independently of later decrements.
+        self.state.head_timer = 0;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
             kind: actors::ActorKind::Player,
@@ -2081,7 +2190,7 @@ impl Game {
         run_seeds.admit_menu_seed_effect(&run.run_seed)?;
         //54EE90 initializes ItemPool from SavedED94, then581CF0 restores
         //its actual saved tables. It does not request NewRun's14th seed draw.
-        let _constructed_pools = items::ItemPools::new(
+        let constructed_pools = items::ItemPools::new(
             run.item_pools.seed,
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
         )?;
@@ -2106,7 +2215,7 @@ impl Game {
         self.state.source_damage_maximum = Some(false);
         self.state.source_fire_delay_minimum = Some(false);
         self.state.acquisition_history = run.acquisition_history.clone();
-        self.state.item_pools = Some(run.item_pools.clone());
+        self.state.item_pools = Some(run.item_pools.restore_after_init(&constructed_pools)?);
         self.state.player_items = Some(player_items);
         self.player_manager_secondary_rng.seed = self.saved_game.player_rng_seed;
         self.state.player = Player::starting();
@@ -2395,12 +2504,14 @@ impl Game {
         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
         self.state.saved_load_valid = Some(false);
         // Game.Save 54f33b copies the actual modeled ItemPool before Room.Save.
-        // Retain its owned vectors/RNGs; copying neither reseeds nor samples.
+        // Retain its owned vectors/RNGs and trinket availability/count;
+        //581ED0 does not copy current-profile trinket eligibility or sample.
         let item_pools = self
             .state
             .item_pools
-            .clone()
-            .ok_or("run save requires initialized item pools")?;
+            .as_ref()
+            .ok_or("run save requires initialized item pools")?
+            .copy_for_save()?;
         let grid_save = saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
@@ -2463,6 +2574,12 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
+        // A room holding more stains (or actors) than the record format
+        // admits refuses this save: the profile keeps its previous record
+        // and no write is requested, so the Tick and the run continue.
+        if !record.rooms_within_supported_counts() {
+            return Ok(());
+        }
         record.validate()?;
         let retained = self.saved_profiles.get_or_insert_with(|| {
             std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
@@ -2655,12 +2772,25 @@ impl Game {
         if self.state.room.pickups[index].variant == 90 {
             return pickups::collect_battery(&mut self.state, index);
         }
+        if self.state.room.pickups[index].variant == 350 {
+            return Err("loose350 contact is outside the admitted grant-only slice".into());
+        }
         if matches!(self.state.room.pickups[index].variant, 70 | 300) {
             pockets::player_contact(&mut self.state, index)?;
             return Ok(());
         }
         if !pickups::player_can_collect(&self.state) {
             return Ok(());
+        }
+        //The existing free Coin operator has not qualified held/Kind2
+        //effects. Refuse that reached context before granting inventory.
+        if self.state.room.pickups[index].variant == 20
+            && self.state.room.pickups[index].touches(&self.state.player)
+            && self.state.player_items.as_ref().is_none_or(|owner| {
+                owner.trinket_slots != [0, 0] || !owner.queue_excludes_trinkets()
+            })
+        {
+            return Err("free Coin with held/queued trinkets is not admitted".into());
         }
         let red_multiplier = if self
             .state
@@ -2730,6 +2860,7 @@ impl Game {
         ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
+        let mut room_slots = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
         // The source descriptor map survives Room.Init. Only a source-owned
@@ -2833,6 +2964,14 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
+            } else if selector.entity_type == 6 {
+                // Slot Init and its spawnConfig rewrite draw no shared MT and
+                // roll no champion; the idle actor spawns nothing.
+                let id = u32::try_from(room_slots.len()).map_err(|_| "Slot identity exhausted")?;
+                if let Some(slot) = slots::Slot::from_selector(id, selector, room_type)? {
+                    order.push(slots::actor(id));
+                    room_slots.push(slot);
+                }
             } else if room_type == 2 && selector.entity_type == 5 && selector.variant == 150 {
                 if let Some(mut pickup) = shop::from_selector(&mut self.state, next, selector)? {
                     pickup.birth_game_update = self.state.game_update_count;
@@ -2920,6 +3059,9 @@ impl Game {
                 if order.len() == before_entities {
                     if selector.entity_type == 5 && selector.variant == 350 {
                         crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
+                        return Err(
+                            "authored350 Init/Get is outside the admitted grant-only slice".into(),
+                        );
                     }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
@@ -2984,6 +3126,7 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
+        self.state.room.slots = room_slots;
         // Game551a10: the authored bossportraits.xml presentation of the
         // room's boss (Monstro20/0 is presentation1).
         self.state.room.boss_presentation_index = if room_type == 5 {
@@ -3089,6 +3232,13 @@ impl Game {
                         .iter()
                         .find(|pickup| pickup.id == id)
                         .map(|pickup| key(pickup.position.y, 0)),
+                    // Entity_Slot keeps the base 441bd0 key at +448 y.
+                    actors::ActorKind::Slot => state
+                        .room
+                        .slots
+                        .iter()
+                        .find(|slot| slot.id == id)
+                        .map(|slot| key(slot.position.y, 0)),
                     actors::ActorKind::Projectile => state
                         .enemy_projectiles
                         .iter()
@@ -3167,6 +3317,9 @@ impl Game {
                     .pickups
                     .iter()
                     .any(|pickup| pickup.id == actor.id && !pickup.removed),
+                actors::ActorKind::Slot => {
+                    self.state.room.slots.iter().any(|slot| slot.id == actor.id)
+                }
                 _ => return Err("invalid authored room actor handle".into()),
             };
             if admitted {
@@ -3408,6 +3561,7 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.run_introduction.active = false;
         self.state.game_update_count = 0;
+        self.state.minimap_presentation = map_presentation::MapPresentation::default();
         if let Some(shake) = &mut self.state.game_shake {
             shake.reset_duration();
         }
@@ -3572,14 +3726,22 @@ impl Game {
             .menu_presentation
             .advance(self.state.screen, menu_input);
         if options_callback {
+            let previous_selection = self.state.options_menu.selection;
             let action = self.state.options_menu.advance(
                 &self.state.public_actions,
                 &self.state.pressed,
                 &mut self.state.audio,
                 &mut self.state.music,
+                &mut self.state.map_settings,
+                &mut self.state.gamma_settings,
                 &mut self.state.boot_lifecycle.shared,
                 audio_counter,
             )?;
+            if self.state.options_menu.selection != previous_selection {
+                self.state
+                    .menu_presentation
+                    .set_options_scroll(self.state.options_menu.selection);
+            }
             match action {
                 options_menu::Action::None => {}
                 options_menu::Action::Controls => {
@@ -3607,6 +3769,8 @@ impl Game {
                         &self.state.audio,
                         &self.state.music,
                         &self.state.fullscreen,
+                        &self.state.map_settings,
+                        &self.state.gamma_settings,
                     )?;
                     self.state.screen = Screen::Main;
                     //59CAC0 stores the new page now; next iteration's view
@@ -3693,7 +3857,7 @@ impl Game {
             //No source callback has been admitted for these global actions.
             //Their real held/triggered owners remain observable; each actual
             //attempt emits an explicit capability failure, never a fake effect.
-            for action in [11, 12, 13, 16, 17, 18] {
+            for action in [11, 12, 16, 17, 18] {
                 if self.state.public_actions.triggered[action] {
                     self.state.controls_menu.unavailable_actions.push(action);
                 }
@@ -3853,6 +4017,9 @@ impl Game {
             phase,
             self.special_room_assets.as_deref().map(Vec::as_slice),
         )? {
+            if phase == phase::Phase::Update {
+                self.advance_minimap_full();
+            }
             if boss_cleanup {
                 // State3 calls Player.Update at5dde9e before enabling controls
                 // and leaving the transition. The outer actor pass stays frozen.
@@ -3886,6 +4053,7 @@ impl Game {
                         ordinary_placement::Frontier::Restore,
                     );
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    let restored_slots = slots::readmit_saved(&mut self.state);
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
@@ -3897,6 +4065,9 @@ impl Game {
                     // families keep their existing reconstruction owners.
                     for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
+                    }
+                    for id in restored_slots {
+                        slots::advance_actor(&mut self.state, phase, id)?;
                     }
                     //The restored Room.Update has the same late manager paint
                     //and actual inactive Uninit fence before entity contacts.
@@ -3918,6 +4089,8 @@ impl Game {
                             self.collect_regular_pickup_at(index)?;
                         }
                     }
+                    slots::unadmitted_contacts(&self.state)?;
+                    slots::player_contacts(&mut self.state)?;
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                 } else {
@@ -3929,7 +4102,9 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count.wrapping_add(1);
+                    // Room.Init reads the current Game+CE9F4 for its immediate
+                    // critter Update, as does the admitted Room.Update below.
+                    let counter = self.state.game_update_count;
                     let viewer = self
                         .state
                         .departure_position
@@ -3948,6 +4123,9 @@ impl Game {
                             }
                             actors::ActorKind::Pickup => {
                                 self.advance_pickup(actor.id, phase)?;
+                            }
+                            actors::ActorKind::Slot => {
+                                slots::advance_actor(&mut self.state, phase, actor.id)?;
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
@@ -4055,6 +4233,7 @@ impl Game {
         }
 
         if phase == phase::Phase::Update {
+            self.advance_minimap_full();
             // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
                 .state
@@ -4081,7 +4260,7 @@ impl Game {
         doors::advance(&mut self.state, phase)?;
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
-        grid_records::advance_tnt(&mut self.state, phase);
+        tnt::advance(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
@@ -4145,11 +4324,14 @@ impl Game {
             controlled_knife_homing::rebuild_partition(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
-            bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
+            //4549D1 completes the NPC/Bomb partition's self-pairs before
+            //454A0A queries that partition against the actual Players.
             npcs::nonplayer_contacts(&mut self.state)?;
             bombs::bomb_contacts(&mut self.state)?;
+            bombs::player_contacts(&mut self.state)?;
+            npcs::player_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
+            slots::unadmitted_contacts(&self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             self.state.tear_partition = self
                 .state
@@ -4219,6 +4401,7 @@ impl Game {
                 }
                 self.collect_regular_pickup_at(index)?;
             }
+            slots::player_contacts(&mut self.state)?;
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             if player_updated {
                 // Final manager454b1d..454b2f visits the retained Player
@@ -4524,6 +4707,35 @@ impl Game {
                 {
                     return controlled_tear::advance(&mut self.state, phase, actor.id);
                 }
+                // 542F70..5430A5 consumes the prior Full grid contact and
+                // calls Hurt before Base447190 integrates this tear. Poof
+                // and removal remain at the next Full dead-entry callback.
+                let mut grid_death = false;
+                if phase == phase::Phase::Update && !newborn {
+                    let hit = self
+                        .state
+                        .tears
+                        .iter()
+                        .find(|tear| tear.id == actor.id)
+                        .filter(|tear| {
+                            tear.motion.lifetime == projectiles::Lifetime::Alive
+                                && tear.grid_contact
+                                && tear.source_variant.is_some_and(|variant| variant != 9)
+                                && tear.attack_flags.0 & (0x8_0000 | 0x2_0000_0000) == 0
+                                && tear.motion.height > -60.0
+                                && tear.motion.height <= -5.0
+                        })
+                        .map(|tear| {
+                            (
+                                tear.motion.position,
+                                1 + i32::from(tear.collision_damage > 10.0),
+                            )
+                        });
+                    if let Some((position, damage)) = hit {
+                        tear_grid_hurt(&mut self.state, position, damage)?;
+                        grid_death = true;
+                    }
+                }
                 let grid = if phase == phase::Phase::Update && !newborn {
                     Some(
                         self.state
@@ -4538,13 +4750,11 @@ impl Game {
                     None
                 };
                 let mut death = None;
-                let mut grid_hurt = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
                         let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
-                        let height = tear.motion.height;
                         let lifetime = tear.motion.advance(phase, tear.grid_contact)?;
                         if lifetime == projectiles::Lifetime::Removed && dying {
                             death = Some(tear_deaths::Death {
@@ -4552,14 +4762,8 @@ impl Game {
                                 height: tear.motion.height,
                                 scale: tear.scale,
                             });
-                            if tear.grid_death {
-                                grid_hurt = Some((
-                                    tear.motion.position,
-                                    1 + i32::from(tear.collision_damage > 10.0),
-                                ));
-                            }
                         } else if !dying && lifetime == projectiles::Lifetime::Dying {
-                            tear.grid_death = tear.grid_contact && height > -60.0;
+                            tear.grid_death = grid_death;
                         }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
@@ -4574,14 +4778,12 @@ impl Game {
                 if let Some(death) = death {
                     tear_deaths::emit(&mut self.state, death)?;
                 }
-                if let Some((position, damage)) = grid_hurt {
-                    tear_grid_hurt(&mut self.state, position, damage)?;
-                }
             }
             actors::ActorKind::Bomb => bombs::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Pickup => {
                 self.advance_pickup(actor.id, phase)?;
             }
+            actors::ActorKind::Slot => slots::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Npc => {
                 controlled_tear::before_npc_update(&mut self.state, phase, actor.id);
                 self.advance_npc(actor.id, phase)?;
@@ -4794,9 +4996,9 @@ impl Game {
             phase,
             &mut self.state.boot_lifecycle.shared,
             &mut entities::NpcWorld {
-                // Native Game+ce9f4 is one more than game_update_count (the
-                // run-loader origin); AI frame gates read the native value.
-                game_counter: self.state.game_update_count.wrapping_add(1),
+                // Game increments before ordinary Room callbacks. Admission
+                // and synchronous child callbacks retain the current owner.
+                game_counter: self.state.game_update_count,
                 player,
                 player_velocity,
                 grid: &grid,
@@ -5217,6 +5419,16 @@ impl Game {
                             }
                         }
                         shooting_aim_db4 = aim_step.db4_write;
+                        //52F5B8 updates DA0 before519FC0 for regular shots too.
+                        //The existing ordinary group already owns this write.
+                        if plan.controller == weapon_plan::ControllerChannel::RegularShots
+                            && !ordinary
+                        {
+                            attack_runtime::ordinary_head_direction(
+                                &mut self.state,
+                                aim_step.callback_aim,
+                            );
+                        }
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
                         if !technology2_selected
                             && (ordinary || controlled || controlled_tear || controlled_target)
@@ -5520,6 +5732,12 @@ impl Game {
                                 self.state.weapon_admission.source_player_type,
                                 self.state.weapon_cache.primary,
                                 plan.flags,
+                                item_queries::AppearanceQueries::new(
+                                    self.state.player_items.as_ref()?,
+                                    self.state.weapon_cache.primary,
+                                    self.state.player.entity_source,
+                                    None,
+                                ),
                             )
                         })
                 } else {
@@ -5529,6 +5747,15 @@ impl Game {
                 self.state.fire_cooldown = plan.fire_delay;
                 self.state.head_timer = plan.head_timer;
             }
+        }
+        //52F700/5306E0 follows the real kind1 callback and timer continuation.
+        //With no held shooting input, BB0<0 selects the actual D9C idle head.
+        if regular_dispatch {
+            attack_runtime::controlled_idle_head_for(
+                &mut self.state,
+                aim.is_some(),
+                "regularTearMovementHistory",
+            );
         }
         //52F738/744 gates the postcallback DB4 store by nonzero processed input.
         //Release and canceled held input retain the actual prior DB4.
@@ -5775,6 +6002,8 @@ struct InputConfigBoot {
     audio_preferences: Option<options_menu::AudioPreferences>,
     #[serde(default)]
     fullscreen_preferences: Option<fullscreen::FullscreenPreferences>,
+    #[serde(default)]
+    map_preferences: Option<map_presentation::MapPreferences>,
     input_configs: keyboard::InputConfigs,
 }
 #[no_mangle]
@@ -5790,15 +6019,251 @@ pub extern "C" fn reset_with_input_configs(initial_seed: u32, boot_epoch_seed: u
         } else {
             None
         };
-        Game::new_with_input_configs(
+        Game::new_with_input_configs_and_map_preferences(
             initial_seed,
             boot_epoch_seed,
             resources,
             boot.audio_preferences,
             boot.fullscreen_preferences,
             Some(boot.input_configs),
+            boot.map_preferences,
         )
     });
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// Explicit global preference inputs; no mutable runtime state is accepted.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct SettingsBoot {
+    #[serde(default)]
+    with_resources: bool,
+    #[serde(default)]
+    audio_preferences: Option<options_menu::AudioPreferences>,
+    #[serde(default)]
+    fullscreen_preferences: Option<fullscreen::FullscreenPreferences>,
+    #[serde(default)]
+    input_configs: Option<keyboard::InputConfigs>,
+    #[serde(default)]
+    map_preferences: Option<map_presentation::MapPreferences>,
+    gamma_preferences: display_settings::GammaPreferences,
+}
+#[no_mangle]
+pub extern "C" fn reset_with_settings_preferences(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    let result = REQUEST.with(|request| {
+        let boot: SettingsBoot =
+            serde_json::from_slice(&request.borrow()).map_err(|error| error.to_string())?;
+        let resources = if boot.with_resources {
+            Some(BOOT_RESOURCE.with(|buffer| {
+                serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+                    .map_err(|error| error.to_string())
+            })?)
+        } else {
+            None
+        };
+        Game::new_with_settings_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            boot.audio_preferences,
+            boot.fullscreen_preferences,
+            boot.input_configs,
+            boot.map_preferences,
+            Some(boot.gamma_preferences),
+        )
+    });
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// All preference values are declared inputs; no platform acknowledgements.
+#[no_mangle]
+pub extern "C" fn reset_with_map_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    reset_with_map_inputs(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_map_preferences(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_map_inputs(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            fullscreen,
+            has_audio,
+            sfx_volume,
+            music_volume,
+            map_opacity,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+#[expect(
+    clippy::too_many_arguments,
+    reason = "forwards the scalar wasm ABI arguments of the exported reset_with_*map_preferences entry points, which cannot take a struct"
+)]
+fn reset_with_map_inputs(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    // The original additive map ABI declares its fullscreen value explicitly.
+    reset_with_map_input_presence(
+        initial_seed,
+        boot_epoch_seed,
+        resources,
+        1,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+/// A map preference does not declare another owner's startup request.
+#[no_mangle]
+pub extern "C" fn reset_with_map_preferences_v2(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    reset_with_map_input_presence(
+        initial_seed,
+        boot_epoch_seed,
+        None,
+        has_fullscreen,
+        fullscreen,
+        has_audio,
+        sfx_volume,
+        music_volume,
+        map_opacity,
+    )
+}
+#[no_mangle]
+pub extern "C" fn reset_with_boot_resources_and_map_preferences_v2(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let resources = BOOT_RESOURCE.with(|buffer| {
+        serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+            .map_err(|error| error.to_string())
+    });
+    match resources {
+        Ok(resources) => reset_with_map_input_presence(
+            initial_seed,
+            boot_epoch_seed,
+            Some(resources),
+            has_fullscreen,
+            fullscreen,
+            has_audio,
+            sfx_volume,
+            music_volume,
+            map_opacity,
+        ),
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+#[expect(
+    clippy::too_many_arguments,
+    reason = "forwards the scalar wasm ABI arguments of the exported reset_with_*map_preferences_v2 entry points, which cannot take a struct"
+)]
+fn reset_with_map_input_presence(
+    initial_seed: u32,
+    boot_epoch_seed: u32,
+    resources: Option<challenges::ResourceInputs>,
+    has_fullscreen: u32,
+    fullscreen: u32,
+    has_audio: u32,
+    sfx_volume: f32,
+    music_volume: f32,
+    map_opacity: f32,
+) -> u32 {
+    let result = if has_fullscreen > 1 || fullscreen > 1 || has_audio > 1 {
+        Err("Initial fullscreen/audio presence flags must be exactly zero or one".into())
+    } else {
+        Game::new_with_map_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            (has_audio == 1).then_some(options_menu::AudioPreferences {
+                sfx_volume,
+                music_volume,
+            }),
+            (has_fullscreen == 1).then_some(fullscreen::FullscreenPreferences {
+                fullscreen: fullscreen == 1,
+            }),
+            Some(map_presentation::MapPreferences {
+                opacity: map_opacity,
+            }),
+        )
+    };
     match result {
         Ok(game) => {
             GAME.with(|state| *state.borrow_mut() = Some(game));
@@ -6112,9 +6577,9 @@ pub extern "C" fn public_keys_len() -> usize {
     PUBLIC_KEYS_JSON.with(Vec::len)
 }
 
-/// 5430a5: after its splash, a tear that died on the grid hurts the cell
-/// under it or, failing that, the cells 10 to either side, stopping at the
-/// first that takes the damage.
+/// 5430a5: the alive callback marks a grid death and immediately hurts the
+/// cell under its pre-integration position or the four adjacent probes.
+/// Poof and removal belong to the next Full callback's dead-entry branch.
 fn tear_grid_hurt(
     state: &mut State,
     position: motion::WorldVector,

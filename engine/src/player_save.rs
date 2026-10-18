@@ -203,7 +203,7 @@ impl SavedPlayerItems {
             || owner.item_rngs.len() != 347
             || owner.trinket_rngs.len() != 62
             || owner.pocket_rngs.len() != 41
-            || owner.queued_id.is_some()
+            || !owner.queue_is_empty()
             || !owner.temporary_collectibles.is_empty()
             || owner.active_state_d80 != 0
             || owner.active_state_d84 != 0

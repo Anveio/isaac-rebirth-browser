@@ -9,7 +9,10 @@ use crate::harness::Case;
 use crate::props;
 use crate::units::game::stored_input_configs;
 use rebirth_cleanroom as abi;
-use rebirth_cleanroom::keyboard::ACTIONS;
+use rebirth_cleanroom::fullscreen::FullscreenPreferences;
+use rebirth_cleanroom::keyboard::{InputConfigs, ACTIONS};
+use rebirth_cleanroom::map_presentation::MapPreferences;
+use rebirth_cleanroom::options_menu::AudioPreferences;
 use rebirth_cleanroom::{Command, State, ABI_VERSION};
 use serde_json::{json, Value};
 
@@ -197,6 +200,81 @@ pub fn run(case: &mut Case) {
     let authored = resources(e);
     settings(e, &authored);
     input_configs(e, &authored);
+    gamma(e, &authored);
+    saves(e);
+}
+
+/// The own-save transport `web/engine.ts` calls (`save_input_ptr`,
+/// `load_save_data`, `enable_saved_game_io`, `save_data_ptr`): documents are
+/// bounded at 4 MiB, save IO is declared only with protocol 1 at a fresh
+/// Title, and a document loads only into a fresh Title. A refused call
+/// reports an error and leaves the game unchanged.
+fn saves(e: &mut Entropy) {
+    use rebirth_cleanroom::save_profiles::MAX_BYTES;
+    props::always!(
+        abi::save_input_ptr(MAX_BYTES + 1 + e.index(1024)).is_null()
+            && !abi::save_input_ptr(MAX_BYTES).is_null(),
+        "abi: save documents are bounded at 4 MiB"
+    );
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    abi::reset(seed, epoch);
+    let title = snapshot();
+    // The document this fresh Title would store.
+    let pointer = abi::save_data_ptr();
+    let document = if pointer.is_null() {
+        Vec::new()
+    } else {
+        // SAFETY: save_data_ptr fills the snapshot buffer snapshot_len describes.
+        unsafe { std::slice::from_raw_parts(pointer, abi::snapshot_len()) }.to_vec()
+    };
+    let load = |bytes: &[u8]| {
+        let pointer = abi::save_input_ptr(bytes.len());
+        if pointer.is_null() {
+            return None;
+        }
+        // SAFETY: save_input_ptr returned a writable buffer of exactly bytes.len().
+        unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), pointer, bytes.len()) };
+        Some(abi::load_save_data())
+    };
+    let protocol = e.range(2, u32::MAX);
+    let refused_protocol = abi::enable_saved_game_io(protocol) == 1 && !error().is_empty();
+    let corrupt = *e.pick(&[
+        &b""[..],
+        b"{}",
+        b"null",
+        b"not json",
+        br#"{"version":2,"profiles":[]}"#,
+    ]);
+    let refused_document = load(corrupt) == Some(1) && !error().is_empty();
+    props::always!(
+        refused_protocol && refused_document && snapshot() == title,
+        "abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game",
+        json!({ "protocol": protocol, "document": String::from_utf8_lossy(corrupt) })
+    );
+    props::always!(
+        !document.is_empty()
+            && abi::enable_saved_game_io(1) == 0
+            && load(&document) == Some(0)
+            && abi::error_len() == 0,
+        "abi: a fresh Title declares save IO and loads a save document",
+        json!({ "error": error() })
+    );
+    // Leaving the Title for the profile menu ends both boundaries.
+    let leave = serde_json::to_vec(&Command::Key {
+        code: "Enter".into(),
+        down: true,
+    })
+    .expect("command");
+    let left = send(&leave) == Some(0);
+    let moved = snapshot();
+    props::always!(
+        !left
+            || (abi::enable_saved_game_io(1) == 1
+                && load(&document) == Some(1)
+                && !error().is_empty()
+                && snapshot() == moved),
+        "abi: save IO and save documents are refused outside a fresh Title, keeping the game"
+    );
 }
 
 /// The input-configuration reset `web/engine.ts` boots with when the browser
@@ -211,8 +289,7 @@ fn input_configs(e: &mut Entropy, authored: &[u8]) {
     let configs = stored_input_configs(e);
     let reset = |with_resources: bool, configs: &Value| {
         let request = json!({ "withResources": with_resources, "inputConfigs": configs });
-        let bytes = serde_json::to_vec(&request).expect("boot request serializes");
-        reset_from_request(&bytes, seed, epoch)
+        from_request(&request, || abi::reset_with_input_configs(seed, epoch))
     };
     let stored = json!(configs);
     let plain = reset(false, &stored);
@@ -272,8 +349,10 @@ fn input_configs(e: &mut Entropy, authored: &[u8]) {
         }
         _ => {
             let request = json!({ "withResources": false, "inputConfigs": configs, "extra": true });
-            let bytes = serde_json::to_vec(&request).expect("boot request serializes");
-            ("unknown field", reset_from_request(&bytes, seed, epoch))
+            (
+                "unknown field",
+                from_request(&request, || abi::reset_with_input_configs(seed, epoch)),
+            )
         }
     };
     props::always!(
@@ -283,16 +362,146 @@ fn input_configs(e: &mut Entropy, authored: &[u8]) {
     );
 }
 
-/// Fills the request buffer with an input-configuration boot request, then
-/// resets from it.
-fn reset_from_request(request: &[u8], seed: u32, epoch: u32) -> Option<u32> {
+/// The settings reset `web/engine.ts` boots with when the browser stored a
+/// Gamma: `reset_with_settings_preferences` reads every stored setting, any
+/// stored input configuration and whether to boot from the authored
+/// resources from the request buffer, which must name one finite Gamma
+/// within .5..1.5. A legacy reset keeps Gamma 1, so a request whose Gamma is
+/// 1 boots what the input-configuration reset does; anything else is
+/// refused, keeping the previous game.
+fn gamma(e: &mut Entropy, authored: &[u8]) {
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    let volume = |e: &mut Entropy| e.below(10_001) as f32 / 10_000.0;
+    let audio = if e.chance(1, 2) {
+        Some(AudioPreferences {
+            sfx_volume: volume(e),
+            music_volume: volume(e),
+        })
+    } else {
+        None
+    };
+    let fullscreen = e.chance(1, 2).then(|| FullscreenPreferences {
+        fullscreen: e.chance(1, 2),
+    });
+    let map = if e.chance(1, 2) {
+        Some(MapPreferences { opacity: volume(e) })
+    } else {
+        None
+    };
+    let configs = stored_input_configs(e);
+    let stored_configs = e.chance(1, 2).then_some(configs.clone());
+    let gamma = (5_000 + e.below(10_001)) as f32 / 10_000.0;
+    let request = |with_resources: bool, configs: &Option<InputConfigs>, gamma: Value| {
+        let mut request = json!({
+            "withResources": with_resources,
+            "audioPreferences": audio,
+            "fullscreenPreferences": fullscreen,
+            "mapPreferences": map,
+            "inputConfigs": configs,
+        });
+        if !gamma.is_null() {
+            request["gammaPreferences"] = gamma;
+        }
+        request
+    };
+    let reset = |request: &Value| {
+        from_request(request, || {
+            abi::reset_with_settings_preferences(seed, epoch)
+        })
+    };
+    let stored = json!({ "gamma": gamma });
+    let plain = reset(&request(false, &stored_configs, stored.clone()));
+    let booted = snapshot();
+    let defaults = stored_configs.clone().unwrap_or_default();
+    props::always!(
+        plain == Some(0)
+            && abi::error_len() == 0
+            && serde_json::from_slice::<State>(&booted).is_ok_and(|state| {
+                state.gamma_settings.gamma == gamma
+                    && state.map_settings == map.unwrap_or_default()
+                    && state.fullscreen.requested == fullscreen.is_some_and(|f| f.fullscreen)
+                    && audio.is_none_or(|audio| {
+                        state.audio.sfx_volume == audio.sfx_volume
+                            && state.music.volume == audio.music_volume
+                    })
+                    && state.input_configs == defaults
+                    && state.keyboard == defaults.keyboard()
+            }),
+        "abi: a Gamma settings reset boots with the stored settings",
+        json!({ "gamma": gamma, "inputConfigs": stored_configs.is_some(), "result": plain, "error": error() })
+    );
+    let resourced = load(authored, || {
+        reset(&request(true, &stored_configs, stored.clone())).unwrap_or(2)
+    });
+    props::always!(
+        resourced == Some(0) && snapshot() == booted,
+        "abi: a Gamma settings boot from the authored resources publishes the plain boot's state",
+        json!({ "result": resourced, "error": error() })
+    );
+    let configured = Some(configs);
+    let legacy = from_request(&request(false, &configured, Value::Null), || {
+        abi::reset_with_input_configs(seed, epoch)
+    });
+    let legacy_state = snapshot();
+    let unit = reset(&request(false, &configured, json!({ "gamma": 1.0 })));
+    props::always!(
+        legacy == Some(0) && unit == Some(0) && snapshot() == legacy_state,
+        "abi: a settings reset with Gamma 1 boots what the input-configuration reset does",
+        json!({ "result": [legacy, unit], "error": error() })
+    );
+
+    let previous = snapshot();
+    let (case, result) = match e.below(5) {
+        0 => {
+            let outside = *e.pick(&[0.4999, 1.5001, -1.0, 0.0, 2.0, 1.0e30]);
+            (
+                "Gamma outside .5..1.5",
+                reset(&request(
+                    false,
+                    &stored_configs,
+                    json!({ "gamma": outside }),
+                )),
+            )
+        }
+        1 => (
+            "no Gamma",
+            reset(&request(false, &stored_configs, Value::Null)),
+        ),
+        2 => (
+            "null Gamma",
+            reset(&request(false, &stored_configs, json!({ "gamma": null }))),
+        ),
+        3 => (
+            "unknown Gamma field",
+            reset(&request(
+                false,
+                &stored_configs,
+                json!({ "gamma": gamma, "contrast": 1.0 }),
+            )),
+        ),
+        _ => {
+            let mut extra = request(false, &stored_configs, stored);
+            extra["extra"] = json!(true);
+            ("unknown field", reset(&extra))
+        }
+    };
+    props::always!(
+        result == Some(1) && !error().is_empty() && snapshot() == previous,
+        "abi: a settings reset refuses a missing Gamma or one outside .5..1.5, keeping the previous game",
+        json!({ "case": case, "result": result })
+    );
+}
+
+/// Fills the request buffer with a boot request, then runs `reset` from it.
+fn from_request(request: &Value, reset: impl FnOnce() -> u32) -> Option<u32> {
+    let request = serde_json::to_vec(request).expect("boot request serializes");
     let pointer = abi::request_ptr(request.len());
     if pointer.is_null() {
         return None;
     }
     // SAFETY: request_ptr returned a writable buffer of exactly request.len().
     unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
-    Some(abi::reset_with_input_configs(seed, epoch))
+    Some(reset())
 }
 
 /// The settings resets `web/engine.ts` boots with from the stored Options
@@ -337,6 +546,47 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
         "abi: a settings boot from the authored resources publishes the plain settings boot's state",
         json!({ "seed": seed, "epoch": epoch, "display": resourced_display, "audio": [audio, resourced_audio], "error": error() })
     );
+    // The map reset carries presence flags for the display and audio
+    // settings beside the stored Map opacity.
+    let has_display = e.below(2) as u32;
+    let opacity = volume(e);
+    let map = abi::reset_with_map_preferences_v2(
+        seed,
+        epoch,
+        has_display,
+        fullscreen,
+        has_audio,
+        sfx,
+        music,
+        opacity,
+    );
+    let plain_map = snapshot();
+    let mapped = serde_json::from_slice::<State>(&plain_map).ok();
+    let resourced_map = load(authored, || {
+        abi::reset_with_boot_resources_and_map_preferences_v2(
+            seed,
+            epoch,
+            has_display,
+            fullscreen,
+            has_audio,
+            sfx,
+            music,
+            opacity,
+        )
+    });
+    props::always!(
+        map == 0
+            && mapped.as_ref().is_some_and(|state| {
+                state.map_settings.opacity == opacity
+                    && state.fullscreen.requested == (has_display == 1 && fullscreen == 1)
+                    && (has_audio == 0
+                        || (state.audio.sfx_volume == sfx && state.music.volume == music))
+            })
+            && resourced_map == Some(0)
+            && snapshot() == plain_map,
+        "abi: a map settings reset boots with the stored settings, from the authored resources too",
+        json!({ "opacity": opacity, "hasFullscreen": has_display, "hasAudio": has_audio, "result": [map, resourced_map], "error": error() })
+    );
 
     let previous = snapshot();
     let out_of_range = *e.pick(&[
@@ -353,7 +603,7 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
         (sfx, out_of_range)
     };
     let flag = e.range(2, u32::MAX);
-    let (case, result) = match e.below(4) {
+    let (case, result) = match e.below(6) {
         0 => (
             "fullscreen flag",
             abi::reset_with_fullscreen_preferences(seed, epoch, flag, has_audio, sfx, music),
@@ -366,6 +616,25 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
             "display volume",
             abi::reset_with_fullscreen_preferences(seed, epoch, fullscreen, 1, bad_sfx, bad_music),
         ),
+        3 => (
+            "map opacity",
+            abi::reset_with_map_preferences_v2(
+                seed,
+                epoch,
+                has_display,
+                fullscreen,
+                has_audio,
+                sfx,
+                music,
+                out_of_range,
+            ),
+        ),
+        4 => (
+            "map flag",
+            abi::reset_with_map_preferences_v2(
+                seed, epoch, flag, fullscreen, has_audio, sfx, music, opacity,
+            ),
+        ),
         _ => (
             "audio volume",
             abi::reset_with_audio_preferences(seed, epoch, bad_sfx, bad_music),
@@ -373,7 +642,7 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
     };
     props::always!(
         result == 1 && !error().is_empty() && snapshot() == previous,
-        "abi: a settings reset refuses flags other than zero or one and stored volumes outside the unit interval, keeping the previous game",
+        "abi: a settings reset refuses flags other than zero or one and stored volumes or Map opacity outside the unit interval, keeping the previous game",
         json!({ "case": case, "flag": flag, "volumes": [bad_sfx, bad_music], "result": result })
     );
 }

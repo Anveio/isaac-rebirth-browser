@@ -13,6 +13,7 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -28,6 +29,7 @@ paired = load('entity_paired', 'foundation-paired-scenarios.py')
 runner = load('entity_clock', 'foundation-clock-run.py')
 codec = runner.codec
 GENERATOR = ROOT / 'engine/target/debug/floor'
+RECORDER = ROOT / 'tools/e2e/boss-route-record.mjs'
 # Door slots 0..3 are left, up, right, down. Hold frames match the traversal
 # route that crosses each ordinary 1x1 starting-room doorway.
 DEPART = (('a', 72), ('w', 74), ('d', 72), ('s', 18))
@@ -69,12 +71,70 @@ def route(slot, sweep=False):
     return tape
 
 
-def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7)):
+def fought(result, code, slot, frames):
+    """Replace the shooting tail after `entry-40` with the port's own
+    closed-loop fight (boss-route-record.mjs --fight, lib/route.mjs
+    fightKeys, leading each foe) until the room clears. Both games
+    replay those keys open-loop, so an original that diverges keeps its own
+    fight outcome; the recorder's port must clear the room within FRAMES."""
+    for name in ('tape', 'pairedTape'):
+        end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'entry-40')
+        result[name] = result[name][:end + 1]
+    generated = floor(codec.decode_seed(code))
+    room = generated['descriptors'][generated['startingDescriptor']]['neighbors'][slot]
+    with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
+        json.dump(result, handle); handle.flush()
+        recorded = subprocess.run(['node', str(RECORDER), '--case', handle.name, '--rooms', str(room), '--from', 'entry-40',
+                                   '--fight', str(frames), '--lead', '--no-corner', '--arrival', ''], cwd=ROOT, capture_output=True, text=True, timeout=3600)
+    lines = recorded.stdout.strip().splitlines()
+    port = json.loads(lines[-1]) if lines else {'status': 'fail', 'reason': recorded.stderr.strip()[-2000:]}
+    # A fight still raging when the budget runs out is kept as recorded, with
+    # its held keys released; any other recorder failure is an error.
+    if port['status'] != 'pass' and not str(port.get('reason')).startswith('Room not cleared'):
+        raise RuntimeError(f"Port fight for {code} slot {slot} failed: {port.get('reason')}")
+    held = {}
+    for action in port['actions']:
+        if action['type'] == 'key':
+            held[action['key']] = action['down']
+    releases = [key(name, False) for name, down in held.items() if down]
+    for name in ('tape', 'pairedTape'):
+        result[name] += port['actions'] + releases
+        dense(result[name], 90, 'idle', 2)
+    result['portRecordedBuild'] = port.get('build')
+
+
+def green_creep_contact_tail():
+    # Fixed Green champion route: open the Poop, circle the centre rock, then
+    # wait beside the trail. Actual captures must still prove the Acid witness.
+    tape = [key('d', True)]
+    dense(tape, 27, 'contact-align')
+    tape.append(key('d', False))
+    dense(tape, 30, 'contact-align-settle', 2)
+    tape.append(key('Down', True))
+    dense(tape, 80, 'contact-open-poop', 2)
+    tape.append(key('Down', False))
+    for leg, (move, frames) in enumerate((('d', 23), ('s', 12), ('d', 20),
+                                        ('w', 22), ('a', 21), ('s', 14), ('a', 20)), 1):
+        tape.append(key(move, True))
+        dense(tape, frames, f'contact-kite-leg{leg}')
+        tape.append(key(move, False))
+    dense(tape, 30, 'contact-kite-coast', 2)
+    dense(tape, 140, 'contact-kite-observe', 2)
+    return tape
+
+
+def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7), fight=0):
     result = paired.build('paired-bomb-moving-even', code)
     tail = route(slot, sweep=shape != (13, 7))
+    if (not randomized and entity == (10, 1) and code.replace(' ', '') == '0F8NB23G'
+            and slot == 2 and shape == (13, 7)):
+        entry = next(index for index, action in enumerate(tail) if action.get('label') == 'entry-40')
+        tail = tail[:entry + 1] + green_creep_contact_tail()
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1] + tail
+    if fight:
+        fought(result, code, slot, fight)
     runner.validate_tape(result['tape'])
     subject = f'entity {entity[0]}.{entity[1]}' if entity[0] is not None else f'a {shape[0]}x{shape[1]} room'
     result['scenario'] = {'id': identifier, 'description': f'Walk into a room admitting {subject}',

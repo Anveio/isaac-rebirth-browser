@@ -191,6 +191,18 @@ impl Profiles {
 }
 
 impl RunRecord {
+    /// The record format's per-room actor and paint bounds. Live play does
+    /// not cap a room's background stains, so a run can exceed them.
+    pub(crate) fn rooms_within_supported_counts(&self) -> bool {
+        std::iter::once(&self.run.room)
+            .chain(self.context.persisted_rooms.values())
+            .all(|room| {
+                room.npcs.len() <= 512
+                    && room.pickups.len() <= 512
+                    && room.background_stains.len() <= 4096
+            })
+    }
+
     pub fn validate(&self) -> Result<(), String> {
         let run = &self.run;
         let descriptors = &run.floor.descriptors;
@@ -237,6 +249,7 @@ impl RunRecord {
         {
             return Err("saved run has incomplete or inconsistent Level/Game owners".into());
         }
+        run.item_pools.validate_saved_trinkets()?;
         if let Some(records) = &context.ambient_records {
             crate::critters::validate_saved_records(records)?;
         }
@@ -260,12 +273,12 @@ impl RunRecord {
                 .ok_or("saved room is missing its actual grid")?;
             if grid.cells.len() > crate::grid::MAX_GRID_CELLS
                 || usize::from(grid.width) * usize::from(grid.height) != grid.cells.len()
-                || room.npcs.len() > 512
-                || room.pickups.len() > 512
-                || room.background_stains.len() > 4096
             {
                 return Err("saved room is outside supported bounds".into());
             }
+        }
+        if !self.rooms_within_supported_counts() {
+            return Err("saved room is outside supported bounds".into());
         }
         if run.player.max_hp > 24
             || !(0..=24).contains(&run.player.soul_hp)
