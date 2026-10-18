@@ -20,6 +20,10 @@ pub struct Module {
     pub path: String,
 }
 
+/// `reset_with_map_preferences_v2`'s seeds, presence flags, stored
+/// settings and Map opacity.
+type MapReset = (u32, u32, u32, u32, u32, f32, f32, f32);
+
 struct Exports {
     store: Store<()>,
     memory: Memory,
@@ -27,7 +31,7 @@ struct Exports {
     reset_with_audio_preferences: TypedFunc<(u32, u32, f32, f32), u32>,
     reset_with_fullscreen_preferences: TypedFunc<(u32, u32, u32, u32, f32, f32), u32>,
     reset_with_input_configs: TypedFunc<(u32, u32), u32>,
-    reset_with_map_preferences_v2: TypedFunc<(u32, u32, u32, u32, u32, f32, f32, f32), u32>,
+    reset_with_map_preferences_v2: TypedFunc<MapReset, u32>,
     request_ptr: TypedFunc<u32, u32>,
     command: TypedFunc<(), u32>,
     snapshot_ptr: TypedFunc<(), u32>,
