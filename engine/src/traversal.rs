@@ -302,9 +302,10 @@ pub(crate) fn advance_transition(
         return Ok(true);
     }
     // 5ddf20 tests the Player's bf4 (50a5b0) before an ordinary style0
-    // departure. A guarded extra animation is released (5de3a3) and the
-    // Player receives one Update (5ddf87), so ordinary walking presentation
-    // owns the main sprite again before ChangeRoom.
+    // departure. A guarded extra animation is released (5de3a3) before the
+    // Player's Update (5ddf87), so ordinary walking presentation owns the
+    // main sprite again before ChangeRoom. That Update leaves the observed
+    // damage countdown unchanged (health-damage RYLW MR89 entry-10..70).
     let pickup_guard = state
         .player_items
         .as_ref()
@@ -315,7 +316,6 @@ pub(crate) fn advance_transition(
             items.pickup_animation_playing = false;
             items.pickup_animation_guard = false;
         }
-        crate::combat::advance_player_immunity(state);
     }
     // ChangeRoom5dd1b0 enables Player+7d4 before550970, whose admitted
     // Room.Update observes it. Game restores the incoming freeze afterward.
