@@ -4118,7 +4118,6 @@ impl Game {
                             self.collect_regular_pickup_at(index)?;
                         }
                     }
-                    slots::unadmitted_contacts(&self.state)?;
                     slots::player_contacts(&mut self.state)?;
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
@@ -4360,7 +4359,6 @@ impl Game {
             bombs::player_contacts(&mut self.state)?;
             npcs::player_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
-            slots::unadmitted_contacts(&self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             self.state.tear_partition = self
                 .state
