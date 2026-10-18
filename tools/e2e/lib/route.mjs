@@ -148,6 +148,15 @@ export function fightKeys(view, memory) {
         const near = Math.hypot(fire.x - (player.x + ux * look), fire.y - (player.y + uy * look));
         if (near < 36) score -= (36 - near) / 8;
       }
+      // A foe's own motion (a boss's lunge) projected over the same frames.
+      for (const foe of foes) for (const t of [3, 6, 10, 15]) {
+        const near = Math.hypot(player.x + ux * 3.5 * t - (foe.x + (foe.vx ?? 0) * t), player.y + uy * 3.5 * t - (foe.y + (foe.vy ?? 0) * t));
+        const reach = foe.boss ? 70 : 34;
+        if (near < reach) score -= (reach - near) / 12 * (t <= 6 ? 1.5 : 1);
+      }
+      // Keep room to dodge: walls within 50 units cost in proportion.
+      const nx = player.x + ux * 20, ny = player.y + uy * 20;
+      for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
     } else for (const shot of shots) {
       const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
       if (near < 45) score -= (45 - near) / 15;
