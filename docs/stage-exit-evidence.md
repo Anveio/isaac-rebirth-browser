@@ -76,5 +76,5 @@ Both games end the segment hurt: the original at 4/6, the port at 2/6 in the rec
 **Diagnostics only:** health (each game's own fights), MT trapdoor seeds, and full-frame RGBA (mean channel error 3.8 at `caves-i-120`).
 
 **Port gaps found while building the fixture:**
-- Basement II room 8's slot machine (6.1) is never spawned (#645). The fixture's `routeAvoid` keeps both walks off its cells.
+- Basement II room 8 authors a slot machine (6.1) at cell 67. The port spawns it as an idle body since #662, but the routing grid (`tools/e2e/lib/route.mjs`) does not count slot bodies as solid. The fixture's `routeAvoid` keeps both walks off cells 52/67/82. Without it, the port's own walk stalls against the machine: on main 0c6170d5, its Basement II leg fails "No way from room 8 to room 0 in 600 frames".
 - The award's rock destruction on cells 37 and 97 is ported (fix_award_pos Destroy(1)). Rock particles and the worm roll's effects stay unadmitted, as for blasts.
