@@ -290,6 +290,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
     &crate::fatty::FAMILY,
+    &crate::skinny::FAMILY,
     &crate::greed::FAMILY,
     &crate::mega_fatty::FAMILY,
     &crate::mulligans::FAMILY,

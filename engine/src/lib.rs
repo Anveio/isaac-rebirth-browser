@@ -149,6 +149,7 @@ pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
+pub mod skinny;
 pub mod slots;
 mod source_angles;
 pub mod stage_shooting_guard;
