@@ -15,6 +15,7 @@
 //     about: 'one line for the suite list',
 //     contrived: ['CODE:SLOT'],             // fixed seed + starting-room door slot (optional)
 //     count: 2,                             // OS-random rooms discovered per run
+//     fight: 3000,                          // after entry, the port's recorded fight to the clear (frames budget)
 //     required: ['admission', ...],         // lifecycle markers both games must reach
 //     fields: (native, actor, phase) => [], // extra [field, native, port] rows (optional)
 //     roomFields: (source, actual, phase) => [], // extra room-level rows (optional)
