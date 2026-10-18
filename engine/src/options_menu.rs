@@ -70,6 +70,10 @@ pub enum Action {
 
 impl OptionsMenu {
     /// Inputs precede5A7560's counter update. Both System parities poll.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is separate Options state 5A7560 reads or writes: actions, held keys, audio, music, map opacity, the shared MT stream and the audio counter"
+    )]
     pub fn advance(
         &mut self,
         actions: &PublicActions,
@@ -188,6 +192,10 @@ impl OptionsMenu {
         counter == 0 || (counter > 49 && counter.is_multiple_of(10))
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the per-row adjustment of advance, which takes the same separate audio, music, map, MT and counter state"
+    )]
     fn adjust(
         &self,
         direction: i32,
