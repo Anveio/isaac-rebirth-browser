@@ -425,6 +425,7 @@ Next: the rest of the Basement/Cellar spawn table.
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
 | #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
+| #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 
 ## Bosses
 
