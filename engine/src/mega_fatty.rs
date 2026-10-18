@@ -336,8 +336,10 @@ fn fart(
     births: &mut Vec<Birth>,
 ) -> Result<(), String> {
     // PORT GAP: Effect 1000.34 Fart (cosmetic) takes this seed but is not
-    // admitted.
+    // admitted; its Init's FlipX roll and fart sound (458ebd) still run.
     random.next_u32();
+    random.bounded(2);
+    sound(world, random, 37, 1.0);
     if world.countable_total <= 3 && random.bounded(2) == 0 {
         for index in 0..2 {
             if index == 1 && random.bounded(2) != 0 {
