@@ -58,7 +58,8 @@ const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
 // --via-candidates X,Y;X,Y;... (an OS-shuffled order) takes the first one the
-// exit can use as its waypoint; the result reports it as `via`.
+// exit can use as its waypoint and route to; the result reports it as `via`.
+// With none, the exit takes the trapdoor directly and reports no `via`.
 const VIA_CANDIDATES = (flag('--via-candidates', '') || '').split(';').filter(Boolean).map(item => item.split(',').map(Number));
 let chosenVia = VIA ? { x: VIA[0], y: VIA[1] } : null;
 const IDLE = Number(flag('--idle', '0'));
@@ -71,8 +72,8 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
 // --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
-// around in those rooms: an authored slot machine (6.x) blocks the player in
-// both games, but the routing grid does not count slot bodies as solid.
+// around in those rooms, beyond the routing grid's own solid cells (which
+// include NPC and slot bodies).
 const ROUTE_AVOID = new Map((flag('--route-avoid', '') || '').split(';').filter(Boolean)
   .map(item => item.split(':')).map(([room, cells]) => [Number(room), cells.split(',').map(Number)]));
 // --hurt: the original's fixture fight ends below full health. Basement II's
@@ -193,12 +194,14 @@ try {
         }
       }
     }
-    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming };
+    // No route: head straight for the goal (`routed` false), which crosses
+    // whatever lies between.
+    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming, routed: false };
     const path = [];
     for (let k = found; k !== undefined; k = previous.get(k)) path.unshift(k);
     const next = path[1] ?? path[0], cell = Math.floor(next / 5);
     return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
-      dir: path.length > 1 ? next % 5 : incoming };
+      dir: path.length > 1 ? next % 5 : incoming, routed: true };
   };
   const routeFight = { orbit: 1, lead: false };
   for (let leg = 1; leg < rooms.length; leg++) {
@@ -402,14 +405,22 @@ try {
       return state.grid.solid[cell] !== '1'
         && ![cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1');
     };
+    // The award cells, --avoid and the port's own poops can wall the player
+    // off from a waypoint. A walk without a route heads straight across cells
+    // solid in one game alone, so only that game's player is stopped
+    // (Y9QL8QZM: the original's tail poop at cell 39 held its player while
+    // the port's walked on, and it took the trapdoor 16 frames later).
+    const routed = point => planStep([...AWARD_CELLS, ...AVOID, ...pickupCells(state)], point, 4).routed;
     if (!chosenVia && VIA_CANDIDATES.length) {
-      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }));
-      if (!found) throw new Error('exit via: no candidate waypoint clear of solid cells');
-      chosenVia = { x: found[0], y: found[1] };
+      // With no routed candidate the walk takes the trapdoor directly, as
+      // the contrived exit does.
+      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }) && routed({ x, y }));
+      chosenVia = found && { x: found[0], y: found[1] };
     }
     if (chosenVia) {
       const via = chosenVia;
       if (!usable(via)) throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
+      if (!routed(via)) throw new Error(`exit via: no route to (${via.x}, ${via.y})`);
       await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
         `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
     }

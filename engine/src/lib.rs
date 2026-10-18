@@ -61,6 +61,7 @@ mod controlled_knife_homing;
 pub mod controls_menu;
 pub mod envy;
 pub mod familiars;
+pub mod fatty;
 pub mod fireplaces;
 pub mod floor;
 pub mod fly_effects;
@@ -148,6 +149,7 @@ pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
+pub mod skinny;
 pub mod slots;
 mod source_angles;
 pub mod stage_shooting_guard;
@@ -2531,6 +2533,7 @@ impl Game {
         )?;
         //Room.Save5CE418 captures actor records before PlayerManager.Save
         //can flush later grant callbacks. This is not a later live-state clone.
+        let regular_records = pickups::capture_regular_records(&self.state)?;
         let ambient_records = critters::capture_saved_records(&self.state);
         // Constructor 587ec0 initializes unused grid indices to -1; 58ced0
         // excludes only -3 special records. Fresh normal Level copies all135.
@@ -2542,12 +2545,13 @@ impl Game {
         //owned grant queue and applies the supported Player save boundary.
         let player_items = player_save::capture_at_manager_save(&mut self.state)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(
+        let mut saved = saved_game::SavedRun::copy_from(
             &self.state,
             item_pools,
             grid_save.records,
             player_items,
         )?;
+        saved.room.saved_regular_pickups = regular_records;
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,
@@ -4275,11 +4279,16 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
+        if phase == phase::Phase::Update {
+            //5D1384 grid callbacks precede5D145A's manager454DF0 fence.
+            //A bomb rock's Effect1 therefore gets its first real Full here;
+            //a child born inside a Bomb actor callback remains fenced out.
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
+            rock_blast::advance_markers(&mut self.state);
+        }
         let existing = self.state.actor_scheduler.full_phase();
         let mut player_updated = false;
         if phase == phase::Phase::Update {
-            rock_blast::advance_bomb_rocks(&mut self.state)?;
-            rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
                 if *counter > 0 {
@@ -5138,6 +5147,14 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Fart {
+                position,
+                radius,
+                source,
+            } => {
+                fatty::fart(&mut self.state, position, radius, source);
+                Ok(())
+            }
             entities::Birth::VariantProjectile(birth, variant) => {
                 let spawner_type = self.state.room.npcs[index].kind;
                 self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {

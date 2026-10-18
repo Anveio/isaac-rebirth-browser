@@ -105,6 +105,12 @@ pub(crate) enum Birth {
     Npc(SpawnSelector),
     /// Creep 5516d0 hurt of the player from a spawner-run first update.
     CreepHit,
+    /// Game::Fart 5522d0's knockback around `position` (see `fatty::fart`).
+    Fart {
+        position: WorldVector,
+        radius: f32,
+        source: u32,
+    },
     /// A projectile 9.v other than the blood shot, e.g. Mega Fatty's puke 9.3.
     VariantProjectile(ProjectileBirth, u32),
     /// Player TakeDamage(1.0, flags 0, countdown 30) from an NPC's AI (Mega
@@ -283,6 +289,8 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
+    &crate::fatty::FAMILY,
+    &crate::skinny::FAMILY,
     &crate::greed::FAMILY,
     &crate::mega_fatty::FAMILY,
     &crate::mulligans::FAMILY,

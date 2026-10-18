@@ -3,12 +3,14 @@
 //! readmissions the command left pending, as `web/main.ts` does before any
 //! later input sees the state. Without the host a game never stores a
 //! document, so a menu readmission finds none and Continue stays unavailable.
+use super::driver::Driver;
 use crate::entropy::Entropy;
 use crate::harness;
 use crate::props;
 use crate::tape::Tape;
 use rebirth_cleanroom::save_host::{Response, SaveHost, SaveIo, SaveStore};
-use rebirth_cleanroom::{Command, Game, Screen};
+use rebirth_cleanroom::save_profiles::Profiles;
+use rebirth_cleanroom::{seed, Command, Game, Screen};
 use serde_json::json;
 use std::panic::{self, AssertUnwindSafe};
 
@@ -36,6 +38,63 @@ pub fn generated_host(e: &mut Entropy) -> SaveHost {
     }
 }
 
+/// What a returning player's browser holds: a fresh game with a sound save
+/// host plays `steps` driver commands, the host answering each one's save
+/// IO, and the document it stored is what the next session boots with. A
+/// previous session that panics or stores nothing leaves none; the same
+/// driver plays every generated case, which reports those with a tape.
+pub fn previous_session(e: &mut Entropy, steps: u32) -> Option<String> {
+    let mut tape = Tape::new(e.nonzero_u32(), e.u32());
+    let host = SaveHost::default();
+    tape.save_host = Some(host.clone());
+    let (mut game, mut store) = tape.session().ok()?;
+    let mut driver = Driver::new(e);
+    for _ in 0..steps {
+        let command = driver.next(&game.state, e);
+        let Ok(applied) = panic::catch_unwind(AssertUnwindSafe(|| game.command(command.clone())))
+        else {
+            harness::take_panic();
+            return None;
+        };
+        if applied.is_ok() {
+            serve(&mut store, Some(&host), &mut game, &command).ok()?;
+        }
+    }
+    store?.stored
+}
+
+/// The document a previous session stored loads at the next session's fresh
+/// Title, whatever that boot's seeds and settings, and exports back byte for
+/// byte. `fresh` marks a document this engine just stored, which must load;
+/// a replayed tape's document may predate a save format the engine now
+/// refuses, so a replay checks only a document that loads.
+pub fn reload(tape: &Tape, document: &str, fresh: bool) {
+    let Ok(mut next) = tape.boot() else {
+        return;
+    };
+    let enabled = next.enable_save_io(1);
+    let imported = next.import_save_data(document.as_bytes());
+    if !fresh && imported.is_err() {
+        return;
+    }
+    let again = next.export_save_data();
+    props::always!(
+        enabled.is_ok() && imported.is_ok() && again.as_deref().ok() == Some(document.as_bytes()),
+        "game: a document a previous session stored loads at the next session's Title unchanged",
+        json!({ "enabled": enabled, "imported": imported, "bytes": document.len() })
+    );
+    let saved_run = next.saved_profiles.as_ref().is_some_and(|profiles| {
+        profiles
+            .profiles
+            .iter()
+            .any(|profile| profile.saved.is_some())
+    });
+    props::sometimes!(
+        saved_run,
+        "game: a session boots with a run a previous session saved"
+    );
+}
+
 /// Answers the save IO a command left pending; a panic is an error.
 pub fn serve(
     store: &mut Option<SaveStore>,
@@ -57,6 +116,7 @@ pub fn check(
     command: &Command,
     served: &Result<Vec<Response>, String>,
     after: &Game,
+    imported: Option<&Profiles>,
 ) {
     props::always!(
         served.is_ok(),
@@ -77,12 +137,16 @@ pub fn check(
             }
         }
     }
-    continued(before, after);
+    continued(before, after, imported);
 }
 
 /// 54ECE0 loads the saved persistent stores into freshly constructed owners:
-/// the run Continue starts is the one its profile's record saved.
-fn continued(before: &Game, after: &Game) {
+/// the run Continue starts is the one its profile's record saved, whether
+/// this session saved it or `imported` did, the document the session booted
+/// with. The record keeps the seed as Saved+EF80's text, the formatter's nine
+/// bytes with a space (or a legacy compact code), while the run keeps the
+/// compact code, so the two compare by the seed they spell.
+fn continued(before: &Game, after: &Game, imported: Option<&Profiles>) {
     let continuing = before.state.run_start_request.resume_saved
         && before.state.screen != Screen::Playing
         && after.state.screen == Screen::Playing;
@@ -102,7 +166,8 @@ fn continued(before: &Game, after: &Game) {
                 && state.difficulty == context.difficulty
                 && state.challenge_id == context.challenge_id
                 && state.run_seed_value == context.run_seed_value
-                && state.run_seed == run.run_seed
+                && seed::decode(&run.run_seed)
+                    .is_ok_and(|saved| seed::decode(&state.run_seed) == Ok(saved))
                 && state.seeded_run == run.seeded_run
                 && state.stage == run.stage
                 && state.stage_seed == context.stage_seed
@@ -115,10 +180,21 @@ fn continued(before: &Game, after: &Game) {
             "profile": before.state.profile,
             "saved": record.is_some(),
             "character": state.character,
+            "seed": [&state.run_seed, record.map(|record| &record.run.run_seed)],
             "stage": [state.stage, state.stage_seed],
         })
     );
     props::sometimes!(true, "game: a saved run is continued");
+    let slot = usize::from(before.state.profile) - 1;
+    props::sometimes!(
+        record.is_some_and(|record| {
+            imported
+                .and_then(|profiles| profiles.profiles.get(slot))
+                .and_then(|profile| profile.saved.as_ref())
+                == Some(record)
+        }),
+        "game: Continue resumes a run a previous session saved"
+    );
 }
 
 /// The engine refuses an acknowledgement for a write or readmission it did

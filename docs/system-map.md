@@ -816,6 +816,19 @@ match all 2,688 cost words, six complete occupancy sets and 360 semantic record
 fields; 228 seed/record failures remain blocking. Its strict W0 case passes
 18/18 on the same leaf artifact. Other backdrop/shape decorations and grid callbacks,
 post-acquisition Player state and complete saved-world restoration remain open.
+The current-room regular Save writer captures the supported manager-ordered
+pickup list before PlayerManager Save flushes queued grants and installs it in
+the copied SavedRun. Fresh PR #711 base candidate `46affff7` / artifact `2a6cbdf4`
+(1,417 files; WASM `f415dc46`) passes build/interface checks, affected selection
+52 and the registered fixed `PBW9YNC8` storage test: 28 checks, 18 labels and
+217 commands. All four paused room 7 coins now appear in the actual packet;
+write/store/menu readmission share its bytes. The retained Bomb-only baseline
+remains 27 pass / 1 missing-list failure. The same artifact also passes both
+initial-room capacity contracts (35 and 4,062 checks), including own-store
+Continue and retaining the older store after an oversized-write rejection.
+Later-room Continue, NPC restoration,
+Original actor-save packet parity and later-main gameplay remain unqualified.
+
 The public initial-room Save/Continue increment now writes bounded origin-local
 slots and reconstructs the world through Main and natural same-origin reload.
 On current404a/immutable1b30, fixed moving plus first unfiltered OS DL17GHC7
@@ -1126,7 +1139,7 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Regular tears own source ground/height/full/fast prediction, ordered birth RNG/audio admission and next-full removal; RoundWorm has a typed type9 projectile | Complete RNG-dependent numerical parity, other weapons, tear Poof/death effects, broader projectile contacts and downstream callbacks |
 | `Entity_NPC` | Authored Fly/AttackFly/RoundWorm/Keeper/Fire and ordinary Monstro have typed source admission/update/contact/damage paths. Scoped paired failures remain required; implemented AI is not a whole-NPC parity claim. | Unsupported subclasses/champions, exact shared seeds/trajectories, final-boss rewards/death effects and exceptional spawn contexts |
 | `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Reviewed NPC Poof source now separates cached spawner words from its null linked parent; this correction has no new production/live acceptance. Four earlier fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
-| `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, source full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega conversion paths | Exact converted shared birth seeds, broader variant/grid/radial holdouts, craters and complete hurt/explosion rendering |
+| `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega Troll conversion. Real1000/18+1 child/record order and grid-before-actor fence are implemented; two fixed ordinary-Bomb routes retain290 canonical/80 Bomb passes and add243 child passes (256/292), zero lost passes | All36 child seed/RNG/counter/flip failures remain; counter offset already exists at gameplay-start. StrictRGBA stays14/36 with22 failures. Crater18 paint/records and Dr/Troll/rock/TNT callers are unpaired here; converted seeds, Room11/unknown history, modifiers, complete shared MT, rendering/audio and live-effect Continue remain open. [Evidence](bomb-evidence.md#bomb-and-bomb-rock-effect-children-source-follow-up) |
 | `Entity_Pickup`, grid entities | Natural coin/key/bomb actors, collection and scoped persistence; deferred collectible grant and empty-altar motion; Chest constructor/opening source path; actual grid occupancy, rock/spike/door response and fresh signed448-word Room costs | Regular saved readmission and anchor corrections remain separately reviewed; hearts/other families, paid/modifier contexts, Chest loot/live completion, weighted path costs and other grid callbacks |
 | `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; the default local paired tool captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |
 | Graphics, `ANM2`, backdrop/shadow/FX | Authored sprite playback, actual source f32 transforms and scoped GPU light/shadow masks; supported actor/room renderers consume runtime state | Complete room/backdrop/sprite pixels, broader effects and native projection/composition edges |

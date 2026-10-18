@@ -2,19 +2,21 @@
 //!
 //! Ordinary play reaches only the rooms one route crosses, and a later stage
 //! only after its boss. After stage/rooms' room-entry scan (`cavesentry`),
-//! each case starts a seeded run through the public menus and, for Basement II
-//! or Caves I, stands the player on an open trapdoor on the stage before, so
-//! the trapdoor's own entry check decides the descent. On the floor it arrives
-//! on, it enters each room `traversal::admits` lets the player enter, through
-//! the transition a door starts, and the game driver plays the room. The
-//! transition names the starting room as the room left and the target's first
-//! door as the one entered; admission reads only the target and its door.
+//! each case starts a seeded run through the public menus and descends: on
+//! each floor it stands the player on an open trapdoor, so the trapdoor's own
+//! entry check decides the next descent, until a trapdoor refuses. Every
+//! stage the port admits joins without a change here. The case plays one of
+//! the floors it reached, chosen uniformly: it enters each room
+//! `traversal::admits` lets the player enter, through the transition a door
+//! starts, and the game driver plays the room. The transition names the
+//! starting room as the room left and the target's first door as the one
+//! entered; admission reads only the target and its door.
 //!
 //! Only a failed or panicking Tick is a violation, signed by its error. A room
 //! the engine refuses is skipped, a player who walks back out has played the
 //! room, and a trapdoor that does not take the player refused the descent. A
-//! transition the trapdoor starts must arrive, and a Tick that fails on the
-//! way is a violation too.
+//! transition a trapdoor starts must arrive, and a Tick that fails on the way
+//! is a violation too.
 use super::game::{expected_rejection, seeded_run, Driver};
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
@@ -32,6 +34,9 @@ const ARRIVAL_FRAMES: u32 = 1_500;
 const START_FRAMES: u32 = 600;
 /// Full updates an open trapdoor under the player gets to take them.
 const TRAPDOOR_FRAMES: u32 = 120;
+/// Descents a case may chain, more than a run has stages, so only a
+/// refusing trapdoor ends the chain.
+const DESCENTS: usize = 16;
 
 pub fn run(case: &mut Case) {
     let e = &mut *case.entropy;
@@ -57,11 +62,18 @@ pub fn run(case: &mut Case) {
             return;
         }
     }
-    // 0 stays on Basement I; 1, 2 and 3 arrive on the next stage.
-    let from_stage = e.below(4) as u32;
-    if from_stage > 0 && !arrive(&mut game, from_stage, e, &code) {
-        return;
+    // Every floor the run's trapdoors reach, Basement I first; the case
+    // plays one of them.
+    let mut floors = vec![game];
+    while floors.len() <= DESCENTS {
+        let Some(floor) = floors.last() else { break };
+        let mut next = floor.clone();
+        if !descend(&mut next, e, &code) {
+            break;
+        }
+        floors.push(next);
     }
+    let game = floors.swap_remove(e.below(floors.len() as u64) as usize);
     let stage = game.state.stage;
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");
@@ -115,17 +127,18 @@ pub fn run(case: &mut Case) {
     }
 }
 
-/// The stage after `from_stage`, through the trapdoor's own entry check: an
-/// open trapdoor (state1, its open clip finished) under the player, who stands
-/// on its cell's centre. A trapdoor that does not take the player within
+/// The next floor, through the trapdoor's own entry check: an open trapdoor
+/// (state 1, its open clip finished) under the player, who stands on its
+/// cell's centre. A trapdoor that does not take the player within
 /// `TRAPDOOR_FRAMES` refused, as it refuses a stage it cannot generate; one
-/// that does must arrive within `ARRIVAL_FRAMES`.
-fn arrive(game: &mut Game, from_stage: u32, e: &mut Entropy, code: &str) -> bool {
+/// that does must arrive within `ARRIVAL_FRAMES`, on a deeper stage (an XL
+/// floor skips one).
+fn descend(game: &mut Game, e: &mut Entropy, code: &str) -> bool {
     let state = &mut game.state;
     let Some(width) = state.room.grid.as_ref().map(|grid| usize::from(grid.width)) else {
         return false;
     };
-    state.stage = from_stage;
+    let from = state.stage;
     // The player's world position (the published position is 0.65 world
     // scale, offset 32, -46) and the grid cell it stands in.
     let x = (state.player.x - 32.0) / 0.65;
@@ -144,7 +157,7 @@ fn arrive(game: &mut Game, from_stage: u32, e: &mut Entropy, code: &str) -> bool
         frame: 10.0,
         playing: false,
     });
-    let label = || json!({ "code": code, "at": "stage arrival", "from": from_stage });
+    let label = || json!({ "code": code, "at": "stage arrival", "from": from });
     let mut started = false;
     for frame in 0..ARRIVAL_FRAMES {
         if !tick(game, 1, label) {
@@ -158,7 +171,7 @@ fn arrive(game: &mut Game, from_stage: u32, e: &mut Entropy, code: &str) -> bool
             return false;
         }
         if started
-            && state.stage == from_stage + 1
+            && state.stage > from
             && !state.stage_transition.active()
             && state.player.controls_enabled
         {
@@ -166,11 +179,11 @@ fn arrive(game: &mut Game, from_stage: u32, e: &mut Entropy, code: &str) -> bool
             break;
         }
     }
-    let arrived = game.state.stage == from_stage + 1 && !game.state.stage_transition.active();
+    let arrived = game.state.stage > from && !game.state.stage_transition.active();
     props::always!(
         arrived,
         "rooms: a stage transition a trapdoor starts arrives within 1,500 full updates",
-        json!({ "code": code, "from": from_stage, "stage": game.state.stage })
+        json!({ "code": code, "from": from, "stage": game.state.stage })
     );
     arrived
 }

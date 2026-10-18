@@ -446,6 +446,10 @@ pub struct Explosion {
     pub x: f64,
     pub y: f64,
     pub animation_frame: u8,
+    /// Actual1000/1 owner. This row only projects its frame/light; it never
+    /// owns another actor, callback, SFX or RNG draw. Legacy rows stay explicit.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_effect: Option<u32>,
 }
 
 pub fn player_world(state: &State) -> WorldVector {
@@ -572,28 +576,45 @@ fn advance_animation(bomb: &mut Bomb, detonated: bool) {
     }
 }
 
-/// Existing explosions advance only on full phases. Snapshot their count before
-/// actor dispatch so the effect created by this phase starts at authored frame0.
+/// Keep the existing public explosion/light view linked to its actual Effect1.
+/// Its scheduler callback owns animation and SFX; this projection owns neither.
+/// Old serialized rows without an owner retain their historical adapter only.
 pub fn advance_explosions(state: &mut State, phase: Phase, fence: usize) {
-    if phase != Phase::Update {
-        return;
-    }
-    for explosion in state.explosions.iter_mut().take(fence) {
-        // Effect case1 45abd7: the first Update of subtype0 plays SFX182.
-        if explosion.animation_frame == 0 {
-            state.audio.admit(
-                &mut state.boot_lifecycle.shared,
-                state.system_clock.system_counter.wrapping_sub(1),
-                crate::audio::SoundRequest {
-                    id: 182,
-                    volume: 1.0,
-                    delay: 2,
-                    looping: false,
-                    pitch: 1.0,
-                },
-            );
+    for explosion in &mut state.explosions {
+        if let Some(id) = explosion.source_effect {
+            if let Some(effect) = state.sprite_effects.iter().find(|effect| {
+                effect.id == id && effect.variant == 1 && effect.explosion_effect.is_some()
+            }) {
+                explosion.x = f64::from(effect.presented_position.x) * WORLD_SCALE + 32.0;
+                explosion.y = f64::from(effect.presented_position.y) * WORLD_SCALE - 46.0;
+                explosion.animation_frame = effect.sprite.frame as u8;
+            } else {
+                // This view never keeps an absent body alive. The actual
+                // effect roster and lifecycle remain the authority.
+                explosion.animation_frame = 19;
+            }
         }
-        explosion.animation_frame += 1;
+    }
+    if phase == Phase::Update {
+        for explosion in state.explosions.iter_mut().take(fence) {
+            if explosion.source_effect.is_some() {
+                continue;
+            }
+            if explosion.animation_frame == 0 {
+                state.audio.admit(
+                    &mut state.boot_lifecycle.shared,
+                    state.system_clock.system_counter.wrapping_sub(1),
+                    crate::audio::SoundRequest {
+                        id: 182,
+                        volume: 1.0,
+                        delay: 2,
+                        looping: false,
+                        pitch: 1.0,
+                    },
+                );
+            }
+            explosion.animation_frame += 1;
+        }
     }
     state
         .explosions
@@ -725,11 +746,17 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
             damage,
             crate::combat::DamageSource { id, entity_type: 4 },
         )?;
+        //457752 passes the actual Sprite Color2D0, not permanent3A0.
+        let color = state.bombs[index]
+            .shot
+            .as_ref()
+            .map_or(AttackColor::WHITE, |shot| shot.current_color);
+        spawn_blast_effects(state, id, position, color)?;
+        //457784 follows the entire555300 call, including both actual children.
         if shot_detonation {
             state.bombs[index].motion = next_motion;
             advance_animation(&mut state.bombs[index], true);
         }
-        spawn_blast_effects(state, id, position);
     }
     if let Some(shot) = &mut state.bombs[index].shot {
         //Explicit Remove may precede natural clocks; never revive that31F.
@@ -958,23 +985,28 @@ pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
-/// Bomb555385/5554bb and Rock.Destroy56c8ec/56ca46 follow Game554490 with
-/// the same two seeded spawns: the Bomb Crater 1000.18, whose Init459121
-/// draws its alpha U * 0.2 + 0.8 (its frame uses its own RNG35), then the
-/// Bomb Explosion 1000.1, whose Init458e9d draws Random(2) for its 0x2fc
-/// flip. Crater rendering remains deferred.
-pub(crate) fn spawn_blast_effects(state: &mut State, id: u32, position: WorldVector) {
-    let shared = &mut state.boot_lifecycle.shared;
-    let _crater_seed = shared.next_u32();
-    let _crater_alpha = shared.uniform() * 0.2 + 0.8;
-    let _explosion_seed = shared.next_u32();
-    let _explosion_flip = shared.bounded(2) == 0;
+/// Bomb555385/5554BB and Rock56C8EC/56CA46 enter the same real
+/// crater->record->explosion sequence after damage/nested callbacks.
+/// The public row is only a compatibility projection for existing lights.
+pub(crate) fn spawn_blast_effects(
+    state: &mut State,
+    id: u32,
+    position: WorldVector,
+    color: AttackColor,
+) -> Result<(), String> {
+    let Some(source_effect) =
+        crate::explosion_effects::admit_blast_children(state, position, color)?
+    else {
+        return Ok(());
+    };
     state.explosions.push(Explosion {
         id,
         x: f64::from(position.x) * WORLD_SCALE + 32.0,
         y: f64::from(position.y) * WORLD_SCALE - 46.0,
         animation_frame: 0,
+        source_effect: Some(source_effect),
     });
+    Ok(())
 }
 
 /// Game554490 with the line check on and incoming DamageFlags4. Each circle
