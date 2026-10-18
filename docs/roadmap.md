@@ -424,6 +424,7 @@ Next: the rest of the Basement/Cellar spawn table.
 | #241 | P1 | Red (attacking) Fire Place 33.1 is not admitted | e2e |
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
 | #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
+| #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 
 ## Bosses
 
