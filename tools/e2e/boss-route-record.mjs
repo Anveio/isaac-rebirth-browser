@@ -137,33 +137,45 @@ try {
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
   assert.equal(state.room, rooms[0], `Route must start in room ${rooms[0]}, not ${state.room}`);
-  // Cells beside an obstacle only one game holds: the original's own (--avoid)
-  // or a solid poop the port's own fight left. A turn there carries the player
-  // about ten units on toward it, so only that game's player meets it (#649 at
-  // a waypoint; mid-walk below an original tail poop and beside a port poop
-  // alike). The shared boss-room walks keep one cell clear of them wherever
-  // the room still leaves a way to the goal.
-  const margin = sources => [...new Set(sources.flatMap(cell => [cell - 15, cell + 15, cell - 1, cell + 1]))]
-    .filter(cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120 && !sources.includes(cell));
+  // The shared boss-room walks step from cell centre to cell centre. A turn
+  // carries the player about ten units on in the direction it was moving, so
+  // a turn in a cell whose next cell that way holds an obstacle only one game
+  // has (the original's own, --avoid, or a poop the port's own fight left)
+  // brings only that game's player against it (#649 at a waypoint; mid-walk
+  // below an original tail poop and beside a port poop alike). The planner
+  // prices such turns out wherever the room leaves another way: a search over
+  // (cell, incoming direction), with `incoming` 4 when standing still.
   const pointCell = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
-  const reaches = (grid, from, to) => {
-    const seen = new Set([from]), queue = [from];
-    while (queue.length) {
-      const cell = queue.shift();
-      if (cell === to) return true;
-      for (const next of [cell - grid.w, cell + grid.w, cell - 1, cell + 1]) {
-        if (next < 0 || next >= grid.solid.length || seen.has(next) || (grid.solid[next] === '1' && next !== to)) continue;
-        seen.add(next); queue.push(next);
+  const planStep = (cells, goal, incoming) => {
+    const w = state.grid.w, h = state.grid.h, steps = [-w, w, -1, 1];
+    const blocked = new Set(cells), lonely = new Set([...AVOID, ...state.poops]);
+    const start = pointCell(state.player), target = pointCell(goal), key = (cell, dir) => cell * 5 + dir;
+    const best = new Map([[key(start, incoming), 0]]), previous = new Map(), open = [[0, start, incoming]];
+    let found;
+    while (open.length) {
+      open.sort((x, y) => x[0] - y[0]);
+      const [cost, cell, dir] = open.shift();
+      if (cost > best.get(key(cell, dir))) continue;
+      if (cell === target) { found = key(cell, dir); break; }
+      for (let d = 0; d < 4; d++) {
+        const next = cell + steps[d];
+        if (d >= 2 && Math.floor(next / w) !== Math.floor(cell / w)) continue;
+        const c = next % w, r = Math.floor(next / w);
+        const inside = c >= 1 && c <= w - 2 && r >= 1 && r <= h - 2;
+        if (next !== target && (!inside || state.grid.solid[next] === '1' || blocked.has(next))) continue;
+        const turn = dir < 4 && d !== dir && lonely.has(cell + steps[dir]);
+        const total = cost + 1 + (turn ? 40 : 0);
+        if (total < (best.get(key(next, d)) ?? Infinity)) {
+          best.set(key(next, d), total); previous.set(key(next, d), key(cell, dir)); open.push([total, next, d]);
+        }
       }
     }
-    return false;
-  };
-  const clearOf = (cells, goal) => {
-    for (const sources of [[...AVOID, ...state.poops], AVOID]) {
-      const wide = [...cells, ...margin(sources)];
-      if (reaches(avoiding(state.grid, wide), pointCell(state.player), pointCell(goal))) return wide;
-    }
-    return cells;
+    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming };
+    const path = [];
+    for (let k = found; k !== undefined; k = previous.get(k)) path.unshift(k);
+    const next = path[1] ?? path[0], cell = Math.floor(next / 5);
+    return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
+      dir: path.length > 1 ? next % 5 : incoming };
   };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
@@ -172,10 +184,10 @@ try {
     // grazes a corner solid in one game alone would slow only that game's
     // player: walks in a cleared boss room target the next route cell's
     // centre once the player stands at the current one.
-    let centre = centreOf(state.player);
-    const centreKeys = (grid, door) => {
-      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) centre = waypoint(grid, state.player, door, 1);
-      return centre.x === door.x && centre.y === door.y ? doorKeys(grid, state.player, door) : toward(state.player, centre, 2);
+    let centre = centreOf(state.player), incoming = 4;
+    const centreKeys = (cells, door) => {
+      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) ({ point: centre, dir: incoming } = planStep(cells, door, incoming));
+      return centre.x === door.x && centre.y === door.y ? doorKeys(avoiding(state.grid, cells), state.player, door) : toward(state.player, centre, 2);
     };
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
@@ -196,7 +208,7 @@ try {
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
-          ? centreKeys(avoiding(state.grid, clearOf([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)), door)
+          ? centreKeys([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)
           : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
@@ -333,10 +345,10 @@ try {
     // The shared exit keys step from cell centre to cell centre, as the
     // cleared boss room's door walk does above.
     const centreWalk = async (goal, cells, arrived, failure) => {
-      let target = centreOf(state.player);
+      let target = centreOf(state.player), incoming = 4;
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, clearOf([...cells, ...pickupCells(state)], goal)), state.player, goal, 1);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) ({ point: target, dir: incoming } = planStep([...cells, ...pickupCells(state)], goal, incoming));
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }
