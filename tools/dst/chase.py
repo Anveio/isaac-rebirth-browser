@@ -205,6 +205,9 @@ def main():
         print(f"== {recipe['out']}")
         work = (args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")) / recipe["out"].removesuffix(".json")
         work.mkdir(parents=True, exist_ok=True)
+        if one.source and not one.source.exists():
+            print(f"{source} does not exist yet; chasing from a fresh boot")
+            one.source = None
         if one.source:
             one.at = precondition_cut(args.binary, one.source, one.stage[0], work / "precondition.json")
             if one.at is None:

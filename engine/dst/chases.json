@@ -227,5 +227,18 @@
         "property:game: a saved run is continued"
       ]
     ]
+  },
+  {
+    "out": "coverage-miniboss-clear.json",
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "property:game: the player is in a miniboss room"
+      ],
+      [
+        "cleared:6"
+      ]
+    ]
   }
 ]
