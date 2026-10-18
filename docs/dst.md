@@ -136,7 +136,11 @@ loop in `web/main.ts`). After every command it answers the writes and menu
 readmissions the command left pending, before any later input sees the
 state. It stores the document a write exports unless that revision's storage
 fails, and answers a readmission with the stored document. Without the host
-a readmission finds no document, so Continue stays unavailable. The
+a readmission finds no document, so Continue stays unavailable. A third of
+the host's cases boot as a returning player's browser: a previous session,
+a fresh game the same driver plays for 150 to 1,500 commands with a sound
+host, leaves the document it stored, and the case boots with it. The driver
+resumes a saved run from Continue about half the times it selects it. The
 contracts see each command together with the host's answers:
 * the host's answers always succeed, and a Tick a write or readmission
   suspended advances its full count once answered;
@@ -144,8 +148,13 @@ contracts see each command together with the host's answers:
   refused without change (probed whenever IO is pending);
 * the document a game would store imports into a fresh Title and exports
   again byte for byte;
+* a document a previous session stored loads at the next session's Title,
+  whatever its seeds and settings, and exports again byte for byte (a
+  replayed tape's document is checked only when it loads, since it may
+  predate a save format the engine now refuses);
 * Continue (54ECE0) resumes the saved record's character, difficulty,
-  challenge, seeds, stage and floor.
+  challenge, seeds, stage and floor, whether this session saved the run or
+  a previous one.
 
 In a room it plays before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a
