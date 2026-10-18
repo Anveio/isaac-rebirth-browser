@@ -37,6 +37,38 @@ nonzero item callbacks, unsupported grid factories and progression remain explic
 validator and this narrower load admission are separate; a durable packet does
 not by itself establish an implemented Continue caller for every saved state.
 
+## Current-room regular records at Save
+
+Game.Save now captures the supported regular pickups in actual manager order at
+the Room.Save boundary, before PlayerManager Save flushes queued grants. The
+RoomOut writer uses the same pure capture loop. The captured list is installed
+in the copied SavedRun room; it does not replace live bodies or widen Continue
+admission. This follows the mapped Original Game.Save `54F347` to Room.Save
+`5CE2D0` call chain.
+
+The fresh candidate on PR #711 base `248f2d09` has tree `46affff7` and frozen
+artifact `2a6cbdf4` (1,417 files; WASM `f415dc46`). Build, interface checks and
+the canonical affected preview pass; the preview selects 52 suites without
+running them. Its registered **Pause Quit saves live regular pickups in the
+current room** Browser regression passes all 28 checks, 18 capture labels and
+217 commands on the fixed public `PBW9YNC8` route. At paused room 7 / GameUpdate 91,
+four uncollected coins remain frozen through Quit. The actual revision 2 packet
+contains their exact ordered handles, positions, spawn/RNG seeds, charge,
+touched and saved-byte fields; the successful write, stored bytes and menu
+readmission identify the same packet.
+
+The two existing initial-room capacity contracts also pass on this artifact:
+35 checks for a complete packet, successful acknowledgement and Continue from
+its own store; 4,062 checks for rejecting the oversized write and Continuing
+from the unchanged older store. These remain Browser storage contracts.
+
+The retained Bomb-only baseline remains 27 pass / 1 fail: its packet omitted
+those same four live records. Earlier launch/observation failures and its
+separate retention hold remain preserved. This is a Browser storage contract
+witness, not Original actor-save packet parity. The visited-room packet does
+not establish later-room Continue, NPC restoration or reload support, and this
+PR #711 base qualification does not grade later public-main imports.
+
 ## Saved ambient restoration
 
 The successor `137b5e4c` restores Tiny Bug1000/21, Tiny Fly1000/33 and

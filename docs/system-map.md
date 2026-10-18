@@ -816,6 +816,19 @@ match all 2,688 cost words, six complete occupancy sets and 360 semantic record
 fields; 228 seed/record failures remain blocking. Its strict W0 case passes
 18/18 on the same leaf artifact. Other backdrop/shape decorations and grid callbacks,
 post-acquisition Player state and complete saved-world restoration remain open.
+The current-room regular Save writer captures the supported manager-ordered
+pickup list before PlayerManager Save flushes queued grants and installs it in
+the copied SavedRun. Fresh PR #711 base candidate `46affff7` / artifact `2a6cbdf4`
+(1,417 files; WASM `f415dc46`) passes build/interface checks, affected selection
+52 and the registered fixed `PBW9YNC8` storage test: 28 checks, 18 labels and
+217 commands. All four paused room 7 coins now appear in the actual packet;
+write/store/menu readmission share its bytes. The retained Bomb-only baseline
+remains 27 pass / 1 missing-list failure. The same artifact also passes both
+initial-room capacity contracts (35 and 4,062 checks), including own-store
+Continue and retaining the older store after an oversized-write rejection.
+Later-room Continue, NPC restoration,
+Original actor-save packet parity and later-main gameplay remain unqualified.
+
 The public initial-room Save/Continue increment now writes bounded origin-local
 slots and reconstructs the world through Main and natural same-origin reload.
 On current404a/immutable1b30, fixed moving plus first unfiltered OS DL17GHC7

@@ -604,6 +604,18 @@ No open bugs.
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
+Current-room Game.Save now copies the supported manager-ordered regular
+pickup list before PlayerManager Save flushes queued grants. Fresh PR #711 base
+candidate `46affff7`, artifact `2a6cbdf4` / WASM `f415dc46`, passes build/interface
+checks, affected selection of 52 suites and the registered fixed `PBW9YNC8` Browser test:
+28 checks, 18 labels and 217 commands. The actual packet retains all four live
+paused room 7 coins with matching write/store/menu-readmission bytes; the
+Bomb-only baseline remains 27 pass / 1 missing-list failure. Both existing
+initial-room capacity contracts also pass on this artifact (35 and 4,062 checks),
+covering own-store Continue and oversized-write rejection. This qualifies the
+storage writer, not later-room Continue, NPC restoration, Original actor-save
+packet parity or later-main gameplay. See [Save scope and replay](save-continue.md).
+
 Port: in-run SavedGame records, origin-local initial-room Save/Continue,
 natural reload and owned Tiny Bug/Fly/Wall Bug saved records through fresh Init.
 The successor137b also restores the physical/fast boundary and Stop Room's
