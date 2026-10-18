@@ -341,19 +341,21 @@ every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, active-item descent, restart, Random-exit, Number One cooldown and
-Envy split-death regressions, the Monstro, Larry Jr. and Gemini kills, the
-Dingle and Gurglings entries and the Options menu (`"from": null` chases
-from a fresh boot), and the Charger entry. Few generated cases reach
+Envy split-death regressions, the Monstro, Larry Jr., Grub and Gemini
+kills, the Dingle and Gurglings entries and the Options menu (`"from": null`
+chases from a fresh boot), and the Charger entry. Few generated cases reach
 Options at the fifth Main row, so `coverage-options-menu` holds a setting
 past the hold repeat, binds a key in the Keyboard menu, is refused leaving
 it with an action unbound, leaves it with its bindings saved and leaves
 Options through its save on every run. `coverage-stored-settings` boots
 with stored audio, fullscreen and input settings and plays into a run, so
-that boot runs on every run too. Chargers live in a room chain
-generated floors seldom place, so no fresh-boot branch met one in 192; the
-Charger recipe branches from the Larry Jr. tape's run start
-(`screen:Playing`), whose floor holds that chain, and 12 of 64 branches met
-one.
+that boot runs on every run too. Larry Jr. and the Grub (239) each have
+their own recipe: a shared one needed the run to meet both, which only an
+older tape's floor did, and a rebuild from a fresh boot met no Grub. Chargers
+live in a room chain generated floors seldom place, so no fresh-boot branch
+met one in 192; the Charger recipe branches from the Grub tape's entry into
+the Grub's room (`npc:239`), whose floor holds that chain, and 5 of 64
+branches met one on 540197a, where the Grub died in 11 of 64.
 Boss fights and descents are the first coverage a shared-MT change moves, so
 one command rebuilds all of them:
 

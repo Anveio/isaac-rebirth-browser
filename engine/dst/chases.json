@@ -41,7 +41,20 @@
         "npc:19"
       ],
       [
-        "removed:19",
+        "removed:19"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-grub-kill.json",
+    "from": null,
+    "steps": 8000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "npc:239"
+      ],
+      [
         "removed:239"
       ]
     ]
@@ -105,12 +118,12 @@
   },
   {
     "out": "coverage-charger-entry.json",
-    "from": "coverage-larry-segments.json",
-    "steps": 4000,
+    "from": "coverage-grub-kill.json",
+    "steps": 2000,
     "final_extend": 300,
     "stages": [
       [
-        "screen:Playing"
+        "npc:239"
       ],
       [
         "npc:23"
