@@ -38,6 +38,10 @@ pub struct Pathfinder {
     /// +734: last target whose cell was open (cost <= 999).
     #[serde(default = "zero")]
     pub last_target: WorldVector,
+    /// Port frontier, not a source field: a probe off the lattice of a room
+    /// larger than 200 cells read Room+e94 as -1 (see `cost`).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub unmodelled_crawlspace_read: bool,
 }
 
 fn no_cell() -> i32 {
@@ -63,6 +67,7 @@ impl Pathfinder {
             direct: false,
             found: false,
             last_target: ZERO,
+            unmodelled_crawlspace_read: false,
         }
     }
 
@@ -71,6 +76,7 @@ impl Pathfinder {
         *self = Self {
             last_update: u32::MAX,
             flood: std::mem::replace(&mut self.flood, RoomCosts::zeroed()),
+            unmodelled_crawlspace_read: self.unmodelled_crawlspace_read,
             ..Self::new()
         };
     }
@@ -106,20 +112,25 @@ fn length(vector: WorldVector) -> f32 {
     (vector.x * vector.x + vector.y * vector.y).sqrt()
 }
 
-fn cost(world: &NpcWorld, point: WorldVector) -> Result<i32, String> {
+fn cost(world: &NpcWorld, path: &mut Pathfinder, point: WorldVector) -> Result<i32, String> {
     // Outside the lattice GetGridIndex5c6fa0 returns -1 and the source reads
     // the word before Room+e98: Room+e94, which Room.Init (5cf3a0/5cfe40)
     // leaves at -1 or a grid index below width*height. Every caller tests
     // the cost against 199, 300 or 700, so in a room of at most 200 cells
-    // any such value reads as an open cell. Larger rooms need the field.
-    // (MoveRandomly's dirs[-1] side probe reaches speed*40 below the end
-    // point, which leaves the lattice for Larry Jr.'s speed 2.)
+    // any such value reads as an open cell. (MoveRandomly's dirs[-1] side
+    // probe reaches speed*40 below the end point, which leaves the lattice
+    // for Larry Jr.'s speed 2.) Room+e94 is the floor's hidden crawlspace
+    // rock: Room.Init seeds an RNG from Game+81a8 (Level::Init's draw after
+    // generation, 58c33c), picks one non-boss room, and only there picks a
+    // grid index (5cfe34; Rock.Destroy 56cfbf compares it). Every other room
+    // keeps -1. Larger rooms read -1 too, exact outside the crawlspace room,
+    // and record that the field is not modelled.
     let Some(index) = world.grid.index(point) else {
         let descriptor = world.grid.descriptor();
-        if u32::from(descriptor.width) * u32::from(descriptor.height) <= 200 {
-            return Ok(-1);
+        if u32::from(descriptor.width) * u32::from(descriptor.height) > 200 {
+            path.unmodelled_crawlspace_read = true;
         }
-        return Err("pathfinder probe left the room grid; Room+e94 is not modelled".into());
+        return Ok(-1);
     };
     world
         .path_costs
@@ -220,7 +231,7 @@ fn move_with(
                 };
         }
         let probe = npc.position + normalized(npc.velocity) * 40.0;
-        if cost(world, probe)? > 700 && length(npc.velocity) > 3.0 {
+        if cost(world, path, probe)? > 700 && length(npc.velocity) > 3.0 {
             path.stuck += 1;
             if path.stuck > 2 {
                 path.target = ZERO;
@@ -258,7 +269,7 @@ fn choose(
         if count > 1 {
             let mut offset = 40;
             for probe in 1..count {
-                let cell = cost(world, npc.position + heading * offset as f32)?;
+                let cell = cost(world, path, npc.position + heading * offset as f32)?;
                 if cell > 300 && !(cell <= 999 && tries <= 0) {
                     reached = probe - 1;
                     distance = reached * 40;
@@ -271,8 +282,8 @@ fn choose(
         let turn = index as i32 + 1;
         let left = end + direction((turn - 2) % 4) * 40.0;
         let right = end + DIRECTIONS[(turn & 3) as usize] * 40.0;
-        let left_cost = cost(world, left)?;
-        let right_cost = cost(world, right)?;
+        let left_cost = cost(world, path, left)?;
+        let right_cost = cost(world, path, right)?;
         if right_cost > 199 && left_cost > 199 && random.bounded(10) != 0 {
             continue;
         }
