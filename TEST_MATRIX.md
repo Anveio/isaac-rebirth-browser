@@ -333,7 +333,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 79 | 60 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 80 | 62 | 2 |
 | `rooms` | every room a run's floor admits, on Basement I, II and Caves I, entered and played | 2 | 7 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
 
@@ -752,12 +752,15 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: replaying a tape reproduces every outcome and state | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a document a previous session stored loads at the next session's Title unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a session boots with a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: the save host answers every save write and menu readmission a command leaves | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write is stored | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write's storage fails | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a menu readmission loads the stored document | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: Continue resumes the saved run's character, seeds and floor | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a saved run is continued | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: Continue resumes a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: a stale or unrequested save acknowledgement is refused without change | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a stale acknowledgement arrives while save IO is pending | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: a save document exports and imports back unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |

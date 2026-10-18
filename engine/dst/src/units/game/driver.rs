@@ -334,6 +334,15 @@ impl Driver {
                         15 => self.press("Escape", 0),
                         _ => self.ticks(e),
                     }
+                } else if state.main_selection == 1 {
+                    // Continue, selectable only while the profile holds a
+                    // saved run, often resumes it.
+                    match e.below(20) {
+                        0..=9 => self.press("Enter", 0),
+                        10..=15 => self.press(e.pick(&["ArrowUp", "ArrowDown"]), 0),
+                        16 => self.press("Escape", 0),
+                        _ => self.ticks(e),
+                    }
                 } else {
                     match e.below(20) {
                         // Challenge and Options open menus; the other actions
