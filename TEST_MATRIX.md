@@ -822,6 +822,7 @@ Generated from [systems.mjs](tools/foundation/systems.mjs). Each failed image re
 | `entity-collision` | Actor overlap, contact and mass separation; `actorContacts, player.x, player.y, player.vx, player.vy` | Integrate source actor admission/order, strict overlap and mass/grid response on independently moving actors without supplying captured positions to gameplay. |
 | `npc-ai` | Enemy state, attacks and obstacle navigation; `enemies, enemyProjectiles, roomClear` | Extend source-supported NPC state machines and projectiles while retaining direct admission/damage/death/clear contracts and exact trajectory diagnostics. |
 | `damage-pipeline` | Deferred actor damage, immunity and death admission; `actorHealth, damageQueue, damageCooldown, removedActors` | Integrate typed damage-source identity, queued full-phase HP drain, callbacks/removal and player countdown with independently scheduled actors. |
+| `champion-creep` | Green champion creep lifecycle and Acid contact; `room.npcs, spriteEffects, player.hp, damageCooldown` | Preserve the strict fixed Green lifecycle/contact route and recorded OS controls; extend longer-tail shared MT and other champion hooks independently. |
 
 Production behavior is seed-independent: seeds enter a general codec and generators. Seed-specific expected outputs belong only in reference fixtures. Invariants use new OS-random seeds, record those values for replay, and verify the same tape in native Rust and WASM. Randomness does not excuse missing original comparisons or permit seed-specific implementation branches.
 

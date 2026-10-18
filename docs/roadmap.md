@@ -380,14 +380,18 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
 
-[PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) proposes green
-champion creep and remains unmerged. Frozen `60ab853b` passes 196,875 fixed-case
-MT cursor/word checks and the recorded OS Gaper case. Its extended contact
-replay retains four failures: two NPC Fast presentation positions and two
-missing Acid-contact witnesses. All prior passing fields remain passing;
-38 Bomb/NPC fields improve on two retained controls. The Source preview fix
-and current-main integration still need a fresh build and qualification.
-Earlier failed captures remain preserved; this is not current-main coverage.
+[PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
+champion creep. Its current-main666-based frozen `35edb299` passes a fresh
+Original/Browser fixed route: 173,135 entity fields, 419 paired checkpoints and
+all seven lifecycle/Acid milestones on each side. Actual Native damage sources
+identify live Green actors. Three retained-Native regressions preserve all
+269,637 entity and 9,605 paired field keys with zero lost passes; both Fast
+presentation mismatches improve. Fixed MT remains 196,875/196,875 exact and
+the recorded OS case passes. Older routes retain their missing Acid witnesses;
+full RGBA on the new route remains 7 pass/412 fail. Earlier Bomb/NPC controls
+retain their separate scope (4,364 fields, 38 gains). The input-only replay
+bank and default fixed fixture use the qualified public route. Longer-tail MT,
+other champion hooks and whole-game acceptance remain open.
 
 Next: the rest of the Basement/Cellar spawn table.
 

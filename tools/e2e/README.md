@@ -536,6 +536,27 @@ whose rooms cannot be found fails the suite without hiding the others. The
 whole workflow is
 in [docs/content-pipeline.md](../../docs/content-pipeline.md).
 
+The fixed Green champion Gaper route opens the Poop and follows a declared
+ring before waiting beside Green creep. It requires birth, first update,
+timeout, fade, last fade, retirement and actual Acid contact independently
+on each side. The recorded positive route on frozen `35edb299` passes all
+173,135 entity checks and 419 paired checkpoints, including typed Native
+1000.23 damage causes at Full327/357. Full RGBA remains 7 pass/412 fail;
+whole shared MT on this longer tail is unmeasured. Earlier negative routes
+and their mandatory missing-Acid failures remain preserved.
+
+```sh
+npm run test:e2e -- entity-gaper --scenarios references/isaac/cases/entities/gaper-recorded-fixed-and-dt3mfa-acid-v1.json --case gaper-contrived-2-green-contact-ring-early-v3 --public-clock-schedule
+```
+
+This input-only whole bank retains the other three original public case
+objects, including first recorded OS seed DT3MFAFE. It does not claim a fresh
+Native rerun of all four cases. Current same-Native controls preserve all
+269,637 entity and 9,605 paired fields with no lost passes, gain the two Fast
+preview comparisons, and retain all 196,875 fixed MT checks. The default
+fixed Green fixture emits the qualified physical tail. The existing standalone
+floor-helper path/freshness boundary remains separate from this route change.
+
 ## Large native captures
 
 `npm run test:e2e:paired -- --archive-native-evidence` retains the complete
