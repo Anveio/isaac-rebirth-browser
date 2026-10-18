@@ -137,6 +137,7 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hopper: Option<crate::hoppers::HopperState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fatty: Option<crate::fatty::FattyState>,
     pub mega_fatty: Option<crate::mega_fatty::MegaFattyState>,
 }
 
@@ -934,6 +935,7 @@ impl Npc {
             overlay: None,
             gemini: None,
             hopper: None,
+            fatty: None,
             mega_fatty: None,
         }
     }

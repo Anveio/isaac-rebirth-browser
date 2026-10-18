@@ -52,3 +52,5 @@ gfx/009.003_puke projectile.anm2
 gfx/264.000_mega fatty.anm2
 gfx/016.000_mulligan.anm2
 gfx/016.001_mulligoon.anm2
+gfx/207.000_fatty.anm2
+gfx/207.001_pale fatty.anm2

@@ -60,6 +60,7 @@ mod controlled_knife_homing;
 pub mod controls_menu;
 pub mod envy;
 pub mod familiars;
+pub mod fatty;
 pub mod fireplaces;
 pub mod floor;
 pub mod fly_effects;
@@ -5132,6 +5133,14 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Fart {
+                position,
+                radius,
+                source,
+            } => {
+                fatty::fart(&mut self.state, position, radius, source);
+                Ok(())
+            }
             entities::Birth::VariantProjectile(birth, variant) => {
                 self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
                     variant,
