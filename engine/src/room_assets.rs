@@ -176,6 +176,14 @@ pub fn basement() -> Vec<RoomAsset> {
     .expect("checked-in authored Basement STB")
 }
 
+/// stages.xml room set 3, the Caves I/II catalogue (Level stages 3 and 4).
+pub fn caves() -> Vec<RoomAsset> {
+    decode(include_bytes!(
+        "../../references/isaac/rebirth/resources/rooms/03.caves.stb"
+    ))
+    .expect("checked-in authored Caves STB")
+}
+
 /// Resolve complete authored groups through the descriptor's original catalogue
 /// index, with an identity check. Selected weights live separately in Floor.
 pub fn for_descriptor(descriptor: &crate::floor::Descriptor) -> Result<RoomAsset, String> {
@@ -191,6 +199,7 @@ pub(crate) fn for_descriptor_with_special(
     let mut catalog = match descriptor.asset_stage {
         0 => source.map_or_else(special, <[RoomAsset]>::to_vec),
         1 => basement(),
+        3 => caves(),
         _ => return Err("unimplemented authored stage catalogue".into()),
     };
     if descriptor.catalog_index >= catalog.len() {

@@ -22,6 +22,8 @@
 // fightKeys) and parks the player in the bottom-left corner (`corner`);
 // --lead aims ahead of each foe's velocity and orbits closer; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
+// A parked fight fails if the port's player took the boss item (an empty
+// pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
@@ -45,7 +47,12 @@ const ARRIVAL = flag('--arrival', 'boss-room-arrival');
 const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
+// --via-candidates X,Y;X,Y;... (an OS-shuffled order) takes the first one the
+// exit can use as its waypoint; the result reports it as `via`.
+const VIA_CANDIDATES = (flag('--via-candidates', '') || '').split(';').filter(Boolean).map(item => item.split(',').map(Number));
+let chosenVia = VIA ? { x: VIA[0], y: VIA[1] } : null;
 const IDLE = Number(flag('--idle', '0'));
+const TOOK_ITEM = 'The port took the boss item';
 // Cells around the boss-award trapdoor (grid 37) and pedestal (grid 97) that
 // the corner walk and the exit approach keep clear of.
 const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
@@ -53,6 +60,11 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
+// around in those rooms: an authored slot machine (6.x) the port does not
+// spawn yet still blocks the original's player (#645).
+const ROUTE_AVOID = new Map((flag('--route-avoid', '') || '').split(';').filter(Boolean)
+  .map(item => item.split(':')).map(([room, cells]) => [Number(room), cells.split(',').map(Number)]));
 // --hurt: the original's fixture fight ends below full health. Basement II's
 // generation reads it (a Challenge room needs full health), so a port fight
 // that ends at full health takes one blast of its own bomb before parking.
@@ -130,6 +142,46 @@ try {
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
   assert.equal(state.room, rooms[0], `Route must start in room ${rooms[0]}, not ${state.room}`);
+  // The shared boss-room walks step from cell centre to cell centre. A turn
+  // carries the player about ten units on in the direction it was moving, so
+  // a turn in a cell whose next cell that way holds an obstacle only one game
+  // has (the original's own, --avoid, or a poop the port's own fight left)
+  // brings only that game's player against it (#649 at a waypoint; mid-walk
+  // below an original tail poop and beside a port poop alike). The planner
+  // prices such turns out wherever the room leaves another way: a search over
+  // (cell, incoming direction), with `incoming` 4 when standing still.
+  const pointCell = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
+  const planStep = (cells, goal, incoming) => {
+    const w = state.grid.w, h = state.grid.h, steps = [-w, w, -1, 1];
+    const blocked = new Set(cells), lonely = new Set([...AVOID, ...state.poops]);
+    const start = pointCell(state.player), target = pointCell(goal), key = (cell, dir) => cell * 5 + dir;
+    const best = new Map([[key(start, incoming), 0]]), previous = new Map(), open = [[0, start, incoming]];
+    let found;
+    while (open.length) {
+      open.sort((x, y) => x[0] - y[0]);
+      const [cost, cell, dir] = open.shift();
+      if (cost > best.get(key(cell, dir))) continue;
+      if (cell === target) { found = key(cell, dir); break; }
+      for (let d = 0; d < 4; d++) {
+        const next = cell + steps[d];
+        if (d >= 2 && Math.floor(next / w) !== Math.floor(cell / w)) continue;
+        const c = next % w, r = Math.floor(next / w);
+        const inside = c >= 1 && c <= w - 2 && r >= 1 && r <= h - 2;
+        if (next !== target && (!inside || state.grid.solid[next] === '1' || blocked.has(next))) continue;
+        const turn = dir < 4 && d !== dir && lonely.has(cell + steps[dir]);
+        const total = cost + 1 + (turn ? 40 : 0);
+        if (total < (best.get(key(next, d)) ?? Infinity)) {
+          best.set(key(next, d), total); previous.set(key(next, d), key(cell, dir)); open.push([total, next, d]);
+        }
+      }
+    }
+    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming };
+    const path = [];
+    for (let k = found; k !== undefined; k = previous.get(k)) path.unshift(k);
+    const next = path[1] ?? path[0], cell = Math.floor(next / 5);
+    return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
+      dir: path.length > 1 ? next % 5 : incoming };
+  };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
@@ -137,10 +189,10 @@ try {
     // grazes a corner solid in one game alone would slow only that game's
     // player: walks in a cleared boss room target the next route cell's
     // centre once the player stands at the current one.
-    let centre = centreOf(state.player);
-    const centreKeys = (grid, door) => {
-      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) centre = waypoint(grid, state.player, door, 1);
-      return centre.x === door.x && centre.y === door.y ? doorKeys(grid, state.player, door) : toward(state.player, centre, 2);
+    let centre = centreOf(state.player), incoming = 4;
+    const centreKeys = (cells, door) => {
+      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) ({ point: centre, dir: incoming } = planStep(cells, door, incoming));
+      return centre.x === door.x && centre.y === door.y ? doorKeys(avoiding(state.grid, cells), state.player, door) : toward(state.player, centre, 2);
     };
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
@@ -161,8 +213,8 @@ try {
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
-          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)]), door)
-          : doorKeys(avoiding(state.grid, pedestals), state.player, door));
+          ? centreKeys([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)
+          : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
@@ -184,9 +236,17 @@ try {
   };
   if (FIGHT) {
     const memory = { orbit: 1, lead: hasFlag('--lead') };
+    // The boss pedestal spawns at the clear in cell 97: a player standing on
+    // or beside it then takes the item in the port alone, which leaves an
+    // empty pedestal (subtype 0) where the original's keeps its item. With
+    // --keep-off-pedestal the fight steers around those cells as if they
+    // were solid. Only a fight that took the item is recorded so: the cells
+    // narrow every fight's orbit, and EV9BP18Q's Monstro then outlasts the
+    // window.
+    const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
-      await hold(state.player.controls ? fightKeys(state, memory) : []);
+      await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
     }
@@ -237,33 +297,97 @@ try {
       }
       await step(30); state = await view();
     }
-    await walk({ x: 80, y: 400 }, [...AWARD_CELLS, ...pickupCells(state)], 600, 'corner walk');
+    // An authored corner object (a Monstro room's poop in cell 106) parks the
+    // player in the nearest open bottom-left cell, pressed against it.
+    const blocked = [...AWARD_CELLS, ...pickupCells(state)];
+    const park = [106, 107, 91, 108, 92, 76].find(cell => state.grid.solid[cell] !== '1' && !blocked.includes(cell));
+    if (park === undefined) throw new Error('No open bottom-left cell to park in');
+    // Port-only poops can also cut the parking corner off from a doorway the
+    // shared re-anchor walk leaves through: EV9BP18Q's Basement II room keeps
+    // a fresh poop beside the doorway's inner cell while the original's own
+    // poop and a heart cell (--avoid) close its other side. Shoot out the
+    // first poop on the cheapest corner-to-doorway route until it is open.
+    const w = state.grid.w, cellAt = (x, y) => Math.round((y - 120) / 40) * w + Math.round((x - 40) / 40);
+    const keepOff = () => new Set([state.trapdoor?.gridIndex, ...AVOID, ...pickupCells(state),
+      ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))]);
+    // 0-1 BFS over the room's interior: open cells cost 0, solid poops 1.
+    const corridor = (from, to) => {
+      const off = keepOff(), cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
+      while (deque.length) {
+        const cell = deque.shift();
+        if (cell === to) break;
+        for (const next of [cell - w, cell + w, cell - 1, cell + 1]) {
+          const c = next % w, r = Math.floor(next / w);
+          if (c < 1 || c > w - 2 || r < 1 || r > state.grid.h - 2 || (off.has(next) && next !== to)) continue;
+          const poop = state.poops.includes(next);
+          if (!poop && state.grid.solid[next] === '1') continue;
+          const total = cost.get(cell) + (poop ? 1 : 0);
+          if (cost.has(next) && cost.get(next) <= total) continue;
+          cost.set(next, total); previous.set(next, cell);
+          if (poop) deque.push(next); else deque.unshift(next);
+        }
+      }
+      if (!previous.has(to)) return null;
+      const path = [];
+      for (let cell = to; cell !== -1; cell = previous.get(cell)) path.unshift(cell);
+      return path;
+    };
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
+      const inner = cellAt(door.x + inward[0], door.y + inward[1]);
+      for (let tries = 0; ; tries++) {
+        const path = corridor(park, inner);
+        if (!path) throw new Error(`No corner route to the ${door.side} doorway`);
+        const at = path.findIndex(cell => state.poops.includes(cell));
+        if (at < 0) break;
+        if (tries === 6) throw new Error(`Corner route to the ${door.side} doorway still crosses poops`);
+        const poop = path[at], stand = path[at - 1];
+        await walk({ x: 40 + stand % w * 40, y: 120 + Math.floor(stand / w) * 40 }, blocked, 600, 'route poop');
+        const aim = { [1]: 'ArrowRight', [-1]: 'ArrowLeft', [w]: 'ArrowDown', [-w]: 'ArrowUp' }[poop - stand];
+        for (let left = 600; state.grid.solid[poop] === '1'; left -= STRIDE) {
+          if (left <= 0) throw new Error(`Route poop at cell ${poop} still stands`);
+          await hold([aim]); await step(STRIDE); state = await view();
+        }
+        await hold([]);
+      }
+    }
+    await walk({ x: 40 + park % 15 * 40, y: 120 + Math.floor(park / 15) * 40 }, blocked, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
     await hold(['KeyS', 'KeyA']); await step(60); await hold([]); await step(1);
     state = await view();
+    if (state.pickups.some(p => p.variant === 100 && p.subtype === 0)) throw new Error(TOOK_ITEM);
     checkpoint('corner');
   }
   if (EXIT) {
     // The shared exit keys step from cell centre to cell centre, as the
     // cleared boss room's door walk does above.
     const centreWalk = async (goal, cells, arrived, failure) => {
-      let target = centreOf(state.player);
+      let target = centreOf(state.player), incoming = 4;
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, [...cells, ...pickupCells(state)]), state.player, goal, 1);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) ({ point: target, dir: incoming } = planStep([...cells, ...pickupCells(state)], goal, incoming));
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }
     };
-    if (VIA) {
-      const via = { x: VIA[0], y: VIA[1] };
-      // The turn there overshoots about ten units: a waypoint beside an
-      // interior cell the port's own fight left solid would touch it in the
-      // port alone (#649), so the helper draws another. Walls are in both.
-      const cell = Math.round((via.y - 120) / 40) * 15 + Math.round((via.x - 40) / 40);
-      const interior = next => next % 15 > 0 && next % 15 < 14 && next > 14 && next < 120;
-      if ([cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1'))
-        throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
+    // The turn at a waypoint overshoots about ten units: one on or beside an
+    // interior cell the port's own fight left solid would touch it in the
+    // port alone (#649). Walls are in both games.
+    const cellOfPoint = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
+    const interior = next => next % 15 > 0 && next % 15 < 14 && next > 14 && next < 120;
+    const usable = point => {
+      const cell = cellOfPoint(point);
+      return state.grid.solid[cell] !== '1'
+        && ![cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1');
+    };
+    if (!chosenVia && VIA_CANDIDATES.length) {
+      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }));
+      if (!found) throw new Error('exit via: no candidate waypoint clear of solid cells');
+      chosenVia = { x: found[0], y: found[1] };
+    }
+    if (chosenVia) {
+      const via = chosenVia;
+      if (!usable(via)) throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
       await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
         `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
     }
@@ -304,5 +428,6 @@ try {
   await browser.close();
   await server.close();
 }
-process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256 }) + '\n');
+process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
+  via: chosenVia && [chosenVia.x, chosenVia.y] }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;

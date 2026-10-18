@@ -367,62 +367,85 @@ fn select(
         picker.catalog()[selected.catalog_index].clone(),
     ))
 }
-fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> u32 {
+/// 58c100..58c130 normal-mode difficulty: odd floors 1..5, even floors 5..10.
+fn difficulty_band(stage: u32) -> (u8, u8) {
+    if stage % 2 == 1 {
+        (1, 5)
+    } else {
+        (5, 10)
+    }
+}
+
+/// Boss variant base 584240 for a fresh profile (every achievement byte zero,
+/// no devil room visited). Odd floors choose and save a family; even floors
+/// use its retained flag to select the other member without consuming that
+/// extra draw. Stages 3/4 (Caves) share the draw chain and add Double
+/// Trouble's R10 at 5846d8; their families reuse flags 0x100000 and 0x10.
+fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, String> {
+    let caves = matches!(stage, 3 | 4);
+    if !(caves || matches!(stage, 1 | 2)) {
+        return Err("boss selection admits only Basement and Caves floors".into());
+    }
+    let odd = stage % 2 == 1;
+    // Odd floors draw R2 and save the family flag; even floors read it.
+    let family = |flags: &mut u64, flag: u64, primary: &mut Primary| {
+        if odd {
+            let set = primary.random(2) == 1;
+            if set {
+                *flags |= flag;
+            } else {
+                *flags &= !flag;
+            }
+            set
+        } else {
+            *flags & flag != 0
+        }
+    };
     primary.next(); // Local RNG1 creation; fresh unavailable families never use it.
     if primary.random(4) == 0 {
-        // Odd floors choose and save a family; even floors use its retained
-        // flag to select the other member without consuming that extra draw.
-        let horseman = if stage == 1 {
-            primary.random(2) == 1
-        } else {
-            *flags & 0x100000 == 0
-        };
-        if horseman {
-            if stage == 1 {
-                *flags |= 0x100000;
-            }
-            5020
-        } else {
-            if stage == 1 {
-                *flags &= !0x100000;
-            }
-            5140
-        }
-    } else {
-        primary.random(2);
-        primary.random(5);
-        primary.random(2);
-        primary.random(3);
-        primary.random(10);
-        primary.random(3);
-        primary.random(4);
-        if primary.random(5) == 0 && stage == 1 {
-            return 2010;
-        }
-        primary.random(2);
-        if primary.random(4) == 0 && stage == 1 {
-            return 2050;
-        }
-        primary.random(2);
-        primary.random(2);
-        primary.random(2);
-        let monstro = if stage == 1 {
-            primary.random(2) == 1
-        } else {
-            *flags & 16 == 0
-        };
-        if monstro {
-            if stage == 1 {
-                *flags |= 16;
-            }
-            1010
-        } else {
-            if stage == 1 {
-                *flags &= !16;
-            }
-            1020
-        }
+        // Basement: Dingle 5020 / Gurglings 5140; Caves (0x675ec8): Mega
+        // Fatty 5050 / Mega Maw 5030, the even floor taking the other one.
+        let set = family(flags, 0x100000, primary);
+        return Ok(match (caves, odd == set) {
+            (false, true) => 5020,
+            (false, false) => 5140,
+            (true, true) => 5050,
+            (true, false) => 5030,
+        });
     }
+    primary.random(2);
+    primary.random(5);
+    if caves && primary.random(10) == 0 {
+        // 5846d8 Double Trouble: a 2x1/1x2 room in 3700..3749.
+        return Ok(3700);
+    }
+    primary.random(2);
+    primary.random(3);
+    // 584488 R10: The Fallen needs a visited devil room (flag 0x40).
+    primary.random(10);
+    primary.random(3);
+    primary.random(4);
+    if primary.random(5) == 0 && odd {
+        // Duke of Flies 2010; Peep 2020 on Caves I.
+        return Ok(if caves { 2020 } else { 2010 });
+    }
+    primary.random(2);
+    if primary.random(4) == 0 && odd {
+        // 2050 on Basement I; Gurdy Jr. 3280 on Caves I.
+        return Ok(if caves { 3280 } else { 2050 });
+    }
+    primary.random(2);
+    primary.random(2);
+    primary.random(2);
+    // Basement: Monstro 1010 / Larry Jr. 1020; Caves: Gurdy 1040 / Chub
+    // 1030, the even floor taking the other one.
+    let set = family(flags, 16, primary);
+    Ok(match (caves, odd == set) {
+        (false, true) => 1010,
+        (false, false) => 1020,
+        (true, true) => 1040,
+        (true, false) => 1030,
+    })
 }
 fn record(
     descriptors: &mut Vec<Descriptor>,
@@ -512,9 +535,20 @@ fn attempt(
     }
     let mut fitting = Fitting::new(growth);
     let mut descriptors = Vec::new();
-    let minimum = boss(primary, flags, request.stage);
+    let minimum = boss(primary, flags, request.stage)?;
+    if minimum == 3700 {
+        // 591b80 fits the chosen room by its shape; only 1x1 boss rooms fit here.
+        return Err("Double Trouble's 2x1 boss room requires unimplemented boss placement".into());
+    }
     let boss_seed = primary.next();
-    let selected = select(special, boss_seed, 5, (minimum, minimum + 9), 4, 0, 10)?;
+    // 589854: bases 3500..3999 span 50 variants, 4000..4999 one, others ten.
+    let maximum = minimum
+        + match minimum {
+            3500..=3999 => 49,
+            4000..=4999 => 0,
+            _ => 9,
+        };
+    let selected = select(special, boss_seed, 5, (minimum, maximum), 4, 0, 10)?;
     let Some(index) = fitting.fit_small(selected.1.door_mask, true) else {
         return Ok(None);
     };
@@ -611,25 +645,34 @@ fn attempt(
         accepted,
         primary.state,
     );
-    let rare = primary.random(80) == 0;
-    let available: Vec<u32> = [
-        (2000, 0x200),
-        (2010, 0x400),
-        (2020, 0x800),
-        (2030, 0x1000),
-        (2050, 0x2000),
-        (2060, 0x4000),
-    ]
-    .into_iter()
-    .filter_map(|(variant, flag)| (*flags & flag == 0).then_some(variant))
-    .collect();
-    if available.is_empty() {
-        return Err("normal Basement retry exhausted the source miniboss candidate set".into());
-    }
-    let minimum =
-        available[primary.random(available.len() as u32) as usize] + if rare { 100 } else { 0 };
+    // 58a8b3: from stage 3, 58ae1a's R10 may offer Ultra Pride 2260 once
+    // per run (flag 0x1_0000_0000), discarding one word before its seed.
+    let ultra_pride = request.stage > 2 && primary.random(10) == 0 && *flags & 0x1_0000_0000 == 0;
+    let (minimum, maximum, rare) = if ultra_pride {
+        primary.next();
+        (2260, 2269, false)
+    } else {
+        let rare = primary.random(80) == 0;
+        let available: Vec<u32> = [
+            (2000, 0x200),
+            (2010, 0x400),
+            (2020, 0x800),
+            (2030, 0x1000),
+            (2050, 0x2000),
+            (2060, 0x4000),
+        ]
+        .into_iter()
+        .filter_map(|(variant, flag)| (*flags & flag == 0).then_some(variant))
+        .collect();
+        if available.is_empty() {
+            return Err("normal Basement retry exhausted the source miniboss candidate set".into());
+        }
+        let minimum =
+            available[primary.random(available.len() as u32) as usize] + if rare { 100 } else { 0 };
+        (minimum, minimum + 9, rare)
+    };
     let seed = primary.next();
-    let selected = select(special, seed, 6, (minimum, minimum + 9), 4, 0, 10)?;
+    let selected = select(special, seed, 6, (minimum, maximum), 4, 0, 10)?;
     let mut accepted = primary.random(4) == 0;
     if !accepted {
         accepted = primary.random(3) == 0 && request.stage == 1;
@@ -650,12 +693,15 @@ fn attempt(
             2030 => 0x1000,
             2050 => 0x2000,
             2060 => 0x4000,
+            2260 => 0x1_0000_0000,
             _ => unreachable!(),
         };
     }
     let seed = primary.next();
     let selected = select(special, seed, 11, (0, u32::MAX), 4, 0, 10)?;
-    let accepted = primary.random(2) == 0
+    // 58b28e..58b818: R2 is always drawn; from stage 3 only full health counts.
+    let roll = primary.random(2);
+    let accepted = (roll == 0 || request.stage > 2)
         && request.stage > 1
         && i32::from(request.max_red_hp) <= i32::from(request.red_hp) + request.soul_hp;
     optional(
@@ -684,7 +730,8 @@ fn attempt(
         &mut fitting,
         &mut descriptors,
         selected,
-        request.stage == 2 && request.coins > 4,
+        // 58b3ac: even floors of the first four chapters with five coins.
+        matches!(request.stage, 2 | 4 | 6 | 8) && request.coins > 4,
         primary.state,
     );
     let kind = if primary.random(2) != 0 { 19 } else { 18 };
@@ -753,8 +800,8 @@ fn attempt(
                 required_doors: fitting.mask(index),
                 min_variant: 0,
                 max_variant: u32::MAX,
-                min_difficulty: if request.stage == 1 { 1 } else { 5 },
-                max_difficulty: if request.stage == 1 { 5 } else { 10 },
+                min_difficulty: difficulty_band(request.stage).0,
+                max_difficulty: difficulty_band(request.stage).1,
             }) {
                 Ok(selected) => (
                     selected.catalog_index,
@@ -766,7 +813,7 @@ fn attempt(
                 &mut descriptors,
                 &fitting,
                 index,
-                1,
+                if request.stage <= 2 { 1 } else { 3 },
                 selected.0,
                 selected.1,
                 primary.state,
@@ -878,15 +925,23 @@ fn generate_normal_basement_inner(
     special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
     let stage_seed = request.stage_seed;
-    if !(1..=2).contains(&request.stage) {
-        return Err("normal Basement generation admits only stages 1 and 2".into());
+    if !(1..=3).contains(&request.stage) {
+        // Caves II's shop may take the surprise-miniboss flag from the two
+        // RandomFloat draws after the normal rooms (589feb..58a9d1), which
+        // this generator does not model.
+        return Err("normal generation admits only Basement I/II and Caves I".into());
     }
     if stage_seed == 0 {
         return Err("nonzero stage seed required".into());
     }
     let special_assets =
         special.map_or_else(room_assets::special, <[room_assets::RoomAsset]>::to_vec);
-    let basement_assets = room_assets::basement();
+    // 5d49b0: room set stage - even + (type != 0); stage type 0 only.
+    let basement_assets = if request.stage <= 2 {
+        room_assets::basement()
+    } else {
+        room_assets::caves()
+    };
     let mut special = TemplatePicker::new(
         special_assets
             .into_iter()
@@ -902,8 +957,7 @@ fn generate_normal_basement_inner(
     // 58c18d queries actual normal templates in the floor's difficulty band;
     // 58c20f admits a rectangular shape only when its count exceeds four.
     let mut shape_counts = [0u32; 4];
-    let (minimum_difficulty, maximum_difficulty) =
-        if request.stage == 1 { (1, 5) } else { (5, 10) };
+    let (minimum_difficulty, maximum_difficulty) = difficulty_band(request.stage);
     for template in basement.catalog() {
         if template.room_type == 1
             && (minimum_difficulty..=maximum_difficulty).contains(&template.difficulty)
@@ -974,8 +1028,10 @@ fn generate_normal_basement_inner(
                     "source-authored-challenge1-neutral-filter-fresh-isaac-basement".into()
                 } else if request.stage == 1 {
                     CONTRACT.into()
-                } else {
+                } else if request.stage == 2 {
                     "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
+                } else {
+                    "continuing-profile-normal-isaac-caves-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
                 },
                 stage: request.stage,
                 stage_seed,

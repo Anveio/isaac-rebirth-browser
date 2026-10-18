@@ -187,66 +187,108 @@ fn starting_wall_catalog() -> Vec<WallVariant> {
 }
 
 /// A backdrops.xml row a room's backdrop setup selects. Every admitted id
-/// is a 468x468 sheet with Basement's patch layout (walls1, floors1,
-/// floorvariants6); only the sheet and its wall-variant count differ.
+/// is a 468x468 sheet of six 234x156 patches; pre_render_floor/walls pick a
+/// floor set (Random(floors)) of `floor_variants` patches and a wall set
+/// (Random(walls)) of `wall_variants` patches.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct Backdrop {
     pub id: u32,
     pub gfx: &'static str,
+    pub walls: u32,
     pub wall_variants: u32,
+    pub floors: u32,
+    pub floor_variants: u32,
 }
 
 const BASEMENT: Backdrop = Backdrop {
     id: 1,
     gfx: "gfx/backdrop/01_basement.png",
+    walls: 1,
     wall_variants: 3,
+    floors: 1,
+    floor_variants: 6,
 };
-const BACKDROPS: [Backdrop; 10] = [
+const BACKDROPS: [Backdrop; 11] = [
     BASEMENT,
+    Backdrop {
+        id: 3,
+        gfx: "gfx/backdrop/03_caves.png",
+        walls: 2,
+        wall_variants: 3,
+        floors: 2,
+        floor_variants: 3,
+    },
     Backdrop {
         id: 5,
         gfx: "gfx/backdrop/05_depths.png",
+        walls: 1,
         wall_variants: 3,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 9,
         gfx: "gfx/backdrop/09_sheol.png",
+        walls: 1,
         wall_variants: 3,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 14,
         gfx: "gfx/backdrop/0a_library.png",
+        walls: 1,
         wall_variants: 3,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 15,
         gfx: "gfx/backdrop/0b_shop.png",
+        walls: 1,
         wall_variants: 2,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 16,
         gfx: "gfx/backdrop/0c_isaacsroom.png",
+        walls: 1,
         wall_variants: 2,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 17,
         gfx: "gfx/backdrop/0d_barrenroom.png",
+        walls: 1,
         wall_variants: 2,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 18,
         gfx: "gfx/backdrop/0f_secretroom.png",
+        walls: 1,
         wall_variants: 3,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 19,
         gfx: "gfx/backdrop/0e_diceroom.png",
+        walls: 1,
         wall_variants: 4,
+        floors: 1,
+        floor_variants: 6,
     },
     Backdrop {
         id: 20,
         gfx: "gfx/backdrop/0e_arcade.png",
+        walls: 1,
         wall_variants: 4,
+        floors: 1,
+        floor_variants: 6,
     },
 ];
 
@@ -259,12 +301,13 @@ const BACKDROPS: [Backdrop; 10] = [
 pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option<Backdrop>) {
     let id = match room_type {
         5 if variant == 5000 => 13,
-        0 | 1 | 4 | 5 | 6 => {
-            if !matches!(stage, 1 | 2) {
-                return (0, None);
-            }
-            1
-        }
+        // 5d49b0: an odd stage keeps its number, an even one drops by one,
+        // and the alternate type (locked on a fresh profile) adds one.
+        0 | 1 | 4 | 5 | 6 => match stage {
+            1 | 2 => 1,
+            3 | 4 => 3,
+            _ => return (0, None),
+        },
         2 => 15,
         3 => 21,
         7 => 18,
@@ -293,6 +336,8 @@ pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option
 struct WallParameters {
     chance: u32,
     variants: u32,
+    /// The selected wall set's first patch, set*wallvariants.
+    first: u32,
 }
 
 impl WallParameters {
@@ -301,11 +346,20 @@ impl WallParameters {
             return Self {
                 chance: 3,
                 variants: 1,
+                first: 0,
             };
         }
         Self {
             chance: 3,
             variants: backdrop.wall_variants,
+            first: 0,
+        }
+    }
+
+    fn in_set(self, set: u32) -> Self {
+        Self {
+            first: set * self.variants,
+            ..self
         }
     }
 
@@ -333,17 +387,22 @@ impl WallParameters {
 fn choose_wall(rng: &mut DecorationRng, parameters: WallParameters) -> u8 {
     // A variant draw is conditional. Flattening the resulting distribution
     // to one weighted draw changes all subsequent stream state.
-    if rng.next().is_multiple_of(parameters.chance) {
-        (rng.next() % parameters.variants) as u8
+    let variant = if rng.next().is_multiple_of(parameters.chance) {
+        rng.next() % parameters.variants
     } else {
         0
-    }
+    };
+    (parameters.first + variant) as u8
 }
 
-fn floor_patches(rng: &mut DecorationRng) -> Vec<u8> {
-    // Random(floors) advances the original stream even with floors=1.
-    rng.next();
-    let mut catalogue: Vec<u8> = (0..6).collect();
+/// pre_render_floor 428930..428a4a: Random(floors) picks a floor set; its
+/// `floor_variants` patches (jump table 0x665e00) double until more than 31,
+/// then shuffle. Basement's single set draws Random(1) all the same.
+fn floor_patches(rng: &mut DecorationRng, backdrop: Backdrop) -> Vec<u8> {
+    let first = rng.next() % backdrop.floors * backdrop.floor_variants;
+    let mut catalogue: Vec<u8> = (first..first + backdrop.floor_variants)
+        .map(|patch| patch as u8)
+        .collect();
     while catalogue.len() < 32 {
         catalogue.extend_from_within(..);
     }
@@ -368,8 +427,8 @@ fn validate_backdrop_dimensions(width: u8, height: u8) -> Result<(), String> {
 /// Backdrop::pre_render_floor428020 uses the actual padded grid dimensions.
 /// Its centre patches precede the right strip, bottom strip and final corner.
 /// The final corner reuses the last bottom-strip patch without another draw.
-fn tile_floor(rng: &mut DecorationRng, width: u8, height: u8) -> Vec<RoomQuad> {
-    let catalogue = floor_patches(rng);
+fn tile_floor(rng: &mut DecorationRng, backdrop: Backdrop, width: u8, height: u8) -> Vec<RoomQuad> {
+    let catalogue = floor_patches(rng, backdrop);
     // Room+14/+18 include one boundary cell on each side. The render cache
     // has one additional tile of wall depth on each side (42A1DE..42A201).
     let right = i32::from(width) - 7;
@@ -647,7 +706,7 @@ pub(crate) fn basement_boss_blood(
             .ok_or("boss-room blood scatter requires the room grid")?,
     )?;
     let mut rng = DecorationRng::new(descriptor.decoration_seed);
-    floor_patches(&mut rng);
+    floor_patches(&mut rng, BASEMENT);
     rng.next();
     boss_blood_scatter(&mut rng, &grid)
 }
@@ -696,7 +755,7 @@ impl Room {
                 .ok_or("boss-room backdrop requires the room grid")?,
         )?;
         let mut rng = DecorationRng::new(descriptor.decoration_seed);
-        floor_patches(&mut rng);
+        floor_patches(&mut rng, BASEMENT);
         rng.next();
         boss_blood_scatter(&mut rng, &grid)?;
         // The boss branch sets wallvariants to 1, so each tile draws Int(3)
@@ -706,6 +765,7 @@ impl Room {
             WallParameters {
                 chance: 3,
                 variants: 1,
+                first: 0,
             },
             Some(3),
             template.width,
@@ -849,6 +909,7 @@ impl Room {
             template.room_type,
             template.width,
             template.height,
+            floor.stage,
         )?;
         room.appearance.backdrop_id = backdrop_id;
         room.descriptor = Some(descriptor.clone());
@@ -1010,7 +1071,7 @@ impl Room {
     /// decoration seed. This is also the original-observation verification entry.
     /// The seed is not a run seed; this method does not generate floor topology.
     pub fn from_decoration_seed(decoration_seed: u32) -> Self {
-        Self::from_backdrop(decoration_seed, BASEMENT, 1, 13, 7)
+        Self::from_backdrop(decoration_seed, BASEMENT, 1, 13, 7, 1)
             .expect("starting-room dimensions fit the source backdrop")
     }
 
@@ -1022,24 +1083,35 @@ impl Room {
         room_type: u32,
         width: u8,
         height: u8,
+        stage: u32,
     ) -> Result<Self, String> {
         validate_backdrop_dimensions(width, height)?;
         let walls = WallParameters::for_room(backdrop, room_type);
         let mut rng = DecorationRng::new(decoration_seed);
-        let floor_quads = tile_floor(&mut rng, width, height);
+        let floor_quads = tile_floor(&mut rng, backdrop, width, height);
         let wall_variant_catalog = walls.catalog(backdrop);
-        // Random(walls) also advances the stream with Basement walls=1.
-        rng.next();
-        let wall_quads = tile_walls(&mut rng, walls, None, width, height);
+        // 424532 Random(walls) picks the wall set; a tile's patch is its
+        // drawn variant plus set*wallvariants (4247b9, 425487). Basement's
+        // single set draws Random(1) all the same.
+        let set = rng.next() % backdrop.walls;
+        let wall_quads = tile_walls(&mut rng, walls.in_set(set), None, width, height);
         // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
         // fx entry from the decoration seed, shift index 35 (5494df): it does
         // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
         // overlay in authored order [2, 3, 4, 5, 1] (54972d); two
-        // RandomFloat*100 draws (5498f8, 549926; RandomFloat 5c2db0 is
-        // next * 2.3283064e-10 in f32) give the layer's x and y offsets.
+        // RandomFloat draws (5498f8, 549926; RandomFloat 5c2db0 is next *
+        // 2.3283064e-10 in f32) give the layer's x and y offsets as
+        // min + RandomFloat * (max - min). The overlay group follows the
+        // Level's chapter (fxlayers `stage`): Basement fx2 spans 0..100,
+        // Caves fx5 -10..10; both author their 1x1 overlays as [2, 3, 4, 5, 1].
+        let (overlay_folder, low, high) = if matches!(stage, 3 | 4) {
+            ("caves", -10.0_f32, 10.0_f32)
+        } else {
+            ("basement", 0.0_f32, 100.0_f32)
+        };
         let mut fx = DecorationRng::new(decoration_seed);
         let overlay_variant = [2, 3, 4, 5, 1][(fx.next() % 5) as usize];
-        let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * 100.0_f32);
+        let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * (high - low) + low);
         let overlay_origin = RoomOrigin {
             // Natural overlay size is 663×429; viewport-centered sampling starts here.
             x: (663.0 - 480.0) * 0.5 + offset(),
@@ -1137,7 +1209,7 @@ impl Room {
                     (26, 14) => "gfx/backdrop/shading_2x2.png",
                     _ => "gfx/backdrop/shading.png",
                 }.into(),
-                overlay: format!("gfx/overlays/basement/1x1_overlay_{overlay_variant}.png"),
+                overlay: format!("gfx/overlays/{overlay_folder}/1x1_overlay_{overlay_variant}.png"),
                 overlay_origin,
                 // Absolute sprite render anchor, not initial-spawn displacement
                 // or the physical ground position used by the radial light.

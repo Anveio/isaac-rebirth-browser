@@ -1,6 +1,7 @@
-// Boss-room exit and Basement II arrival from a fresh original/public-input
-// production pair (tools/original/stage-exit-scenarios.py). Each game fights
-// with its own keys before `exit-start`; only the shared tail is graded:
+// Boss-room exit and next-floor arrival (Basement II, or Caves I after a
+// descent fixture) from a fresh original/public-input production pair
+// (tools/original/stage-exit-scenarios.py). Each game fights with its own
+// keys before `exit-start`; only the shared tail is graded:
 // the award trapdoor (TrapDoor 5711a0) and boss pedestal, the
 // StageTransition 5e38b0 states and counter, the player's Trapdoor/Appear
 // clips, visibility and controls, and the stage/room the transition admits.
@@ -63,7 +64,7 @@ for (const label of labels) {
   // entry frame (and so the StageTransition counter) follows from it.
   diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
     [state.player.x, state.player.y]);
-  // Each fight also leaves its own health, which Basement II's generation
+  // Each fight also leaves its own health, which the next floor's generation
   // reads (a Challenge room needs full health).
   diagnostic(label, 'player.health', [player.redHp, player.maxRedHp, player.soulHp],
     [state.player.hp, state.player.maxHp, state.player.soulHp]);
@@ -92,7 +93,8 @@ for (const label of labels) {
     .map(pickup => [pickup.subtype, [pickup.position.x, pickup.position.y]]);
   check(label, 'pedestals', pedestals, actualPedestals);
 }
-check('next-stage', 'arrivedStage', 2, finalStage);
+// A case predating `arrivedStage` is a Basement I exit.
+check('next-stage', 'arrivedStage', replay.stageExit?.arrivedStage ?? 2, finalStage);
 // The authored active fixture must retain a positive carried-item contract
 // even on replay; an old bank lacking it cannot silently pass the new gate.
 const expectedActiveId = replay.stageExit?.carriedActiveItemId;
@@ -143,8 +145,8 @@ if (expectedActiveId !== undefined) {
 }
 
 // With `--gl-trace`, each room the port entered (the shared route, the boss
-// room, the re-anchor's previous room and the boss room again, then Basement
-// II) must equal an original wall cache draw, in entry order
+// room, the re-anchor's previous room and the boss room again, then the next
+// floor) must equal an original wall cache draw, in entry order
 // (wall-quads.mjs). A room entry is a change of room index or of its walls:
 // the stage number turns over a few captures before the next level's start
 // room loads, so it does not mark an entry.
@@ -158,7 +160,7 @@ if (native.graphicsTrace) {
   }
   checks.push(...compareWallAssemblies(originalWallAssemblies(native.graphicsTrace.path), rooms));
 }
-// The original logs each Level::Init seed; the last one is Basement II's.
+// The original logs each Level::Init seed; the last one is the next floor's.
 check('next-stage', 'stageSeed', native.observedState.stageSeed, frames.get('next-stage').state.stageSeed);
 const report = { schema: 1, status: checks.every(item => item.status === 'pass') ? 'pass' : 'fail',
   scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room. Declared carried active identity, charge and reserve require bounded Native reads and settled stage1→2 descent. Per-game fights are not graded; MT trapdoor seeds are diagnostics',

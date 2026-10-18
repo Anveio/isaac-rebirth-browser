@@ -346,10 +346,12 @@ pub fn fade(transition: &StageTransition) -> f32 {
 
 /// Level::SetNextStage585620 for the admitted ordinary stages. Alternate
 /// stages need Seeds stage bit0 clear and a Manager unlock byte that a fresh
-/// profile does not own; Curse of the Labyrinth is not admitted.
+/// profile does not own; Curse of the Labyrinth is not admitted. Caves II
+/// (stage 4) has no admitted generator, so Caves I's trapdoor stays shut.
 pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
     match stage {
         1 => Ok(2),
+        2 => Ok(3),
         _ => Err(format!(
             "stage {stage} has no admitted next-stage generator"
         )),
@@ -361,16 +363,21 @@ pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
 fn stage_name(stage: u32) -> &'static str {
     match stage {
         2 => "BASEMENT II",
+        3 => "CAVES I",
+        4 => "CAVES II",
         _ => "BASEMENT I",
     }
 }
 
 /// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30
-/// destroy. Poop has no Destroy override (561c00 is Hurt(4)), so a tail poop
-/// runs Poop Hurt56a390 with its draws, particles, explosion and drop roll.
-/// Other occupants' destroys, unported Hurt branches and the 5c7f30
-/// relocation when collision remains are not admitted: those cells keep their
-/// object and the award still spawns there.
+/// destroy with immediate=1. Poop has no Destroy override (561c00 is
+/// Hurt(4)), so a tail poop runs Poop Hurt56a390 with its draws, particles,
+/// explosion and drop roll. An ordinary or tinted rock (an authored rock on a
+/// Larry Jr. room's award cell) breaks through Rock.Destroy56c670, whose
+/// immediate flag only changes bomb rocks. Other occupants' destroys,
+/// unported Hurt branches and the 5c7f30 relocation when collision remains
+/// are not admitted: those cells keep their object and the award still
+/// spawns there.
 fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String> {
     let occupant = state
         .room
@@ -381,9 +388,15 @@ fn clear_award_cell(state: &mut crate::State, index: usize) -> Result<(), String
         .entity
         .as_ref()
         .map(|entity| entity.kind);
-    if occupant == Some(14) {
-        let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
-        outcome.record_frontier(state, "bossAward");
+    match occupant {
+        Some(14) => {
+            let outcome = crate::attack_grid::callback_at_index(state, index, 4)?;
+            outcome.record_frontier(state, "bossAward");
+        }
+        Some(2 | 4) => {
+            crate::rock_blast::destroy_rock(state, index)?;
+        }
+        _ => {}
     }
     Ok(())
 }
