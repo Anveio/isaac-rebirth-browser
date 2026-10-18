@@ -261,6 +261,8 @@ Actual browser cases below are discovered from the executable browser scenario s
 | releasing a held bomb key in seed entry preserves text-only typing and the first gameplay press | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | the public Keyboard Map binding controls the expanded map after Back | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | Gamma arrows reach the final display owner and Back survives a real document reload | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
+| Save capacity under writes the complete packet and Continues its own store | [save-capacity.spec.ts](tools/tests/save-capacity.spec.ts) |
+| Save capacity over fails ACK once and Continues the unchanged older store | [save-capacity.spec.ts](tools/tests/save-capacity.spec.ts) |
 | fresh source title fade, f32 animation, loop and retained reentry clock match seven complete original frames | [title.spec.ts](tools/tests/title.spec.ts) |
 
 Selected GPU-mask checkpoints below come directly from the native fixture manifest consumed by the browser gate. Each selected case compares every straight RGBA byte in both complete targets with zero tolerance. Controlled cases require actual X11 delivery, complete paired GL phases, binary/log/target hashes and independently repeated original evidence; this remains a graphics-target contract, not full original state or frame parity.
