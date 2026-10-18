@@ -116,8 +116,8 @@ def descended(result, fixture, production_directory):
         marker = f'descent-{index}'
         case = {**result, 'pairedTape': result['pairedTape'] + keys_only(actions) + [{'type': 'capture', 'label': marker}]}
         rooms = floor['rooms'][-1:] if index == 0 else floor['rooms']
-        # routeAvoid {room: [cells]}: authored bodies that block the walk but
-        # that the routing grid does not count as solid (a slot machine).
+        # routeAvoid {room: [cells]}: cells the walk keeps off beyond the
+        # routing grid's own solid cells.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         last = index + 1 == len(floors)
         leg = port_fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
