@@ -57,8 +57,8 @@ pub fn run(case: &mut Case) {
             return;
         }
     }
-    // 0 stays on Basement I; 1 and 2 arrive on the next stage.
-    let from_stage = e.below(3) as u32;
+    // 0 stays on Basement I; 1, 2 and 3 arrive on the next stage.
+    let from_stage = e.below(4) as u32;
     if from_stage > 0 && !arrive(&mut game, from_stage, e, &code) {
         return;
     }
@@ -66,6 +66,7 @@ pub fn run(case: &mut Case) {
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");
     props::sometimes!(stage == 3, "rooms: Caves I's rooms are played");
+    props::sometimes!(stage == 4, "rooms: Caves II's rooms are played");
     let start = game.state.current_room;
     let descriptors = game.state.floor.descriptors.clone();
     let Some(from_slot) = first_door(&descriptors[start].neighbors) else {
