@@ -129,9 +129,8 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
             frontier(state, "ControllerHistory");
             continue;
         };
-        if owner.reward_frontier.is_some() {
-            return Err("TNT rare trinket callback remains outside the admitted slice".into());
-        }
+        // A recorded reward frontier marks the rare trinket this port skips
+        // (below); the blown barrel's ordinary update continues.
         if !owner.update(entity.state) {
             continue;
         }
@@ -165,10 +164,9 @@ pub(crate) fn advance(state: &mut State, phase: Phase) -> Result<(), String> {
             });
             // RemoveTrinket needs two real pool bytes; held slots cannot
             // prove either. No fallback/placement draws or fake empty spawn.
+            // Port gap: the rare trinket's Remove/scatter/Init is skipped, and
+            // the frontier above records it, so the run keeps going.
             frontier(state, "RareTrinketPool");
-            //No Remove/scatter/Init callback is admitted here. Game::command
-            //rolls back this proposed world on Err, including this frontier.
-            return Err("TNT rare trinket Remove/Init is outside the admitted slice".into());
         }
         state
             .room

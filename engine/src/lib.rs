@@ -3057,11 +3057,12 @@ impl Game {
                 && matches!(selector.entity_type, 4..=6 | 17 | 33)
             {
                 if order.len() == before_entities {
+                    // An authored 5.350 trinket's Init/Get is outside the
+                    // admitted grant-only slice. Its room stays traversable
+                    // like any unsupported factory; item queries record the
+                    // unrepresented spawn instead of halting the run.
                     if selector.entity_type == 5 && selector.variant == 350 {
                         crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
-                        return Err(
-                            "authored350 Init/Get is outside the admitted grant-only slice".into(),
-                        );
                     }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
