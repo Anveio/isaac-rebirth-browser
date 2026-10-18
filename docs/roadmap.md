@@ -145,7 +145,7 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Options Filter and Pop-ups values remain open; Map Opacity is bounded by #661 and Gamma has a separate functional slice | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
+| #647 | P2 | Options page draws no Filter or Pop-ups values (Map Opacity and Gamma fixed by #661/#666) | playtest 2026-10-18 `playtest/6606044/options-tour-side-by-side.mp4` |
 | #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
@@ -565,6 +565,7 @@ parity is a diagnostic only.
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
+| #670 | P3 | Enemy spawn smoke puffs draw light tan and opaque; the original's are dark grey and see-through | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 
