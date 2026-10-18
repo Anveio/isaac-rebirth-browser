@@ -58,6 +58,79 @@ const browserActor = (actor, identities) => ({ raw: actor,
   scale: actor.sprite?.scale && [actor.sprite.scale.x, actor.sprite.scale.y], tint: actor.sprite?.tint,
   dead: actor.removed, active: actor.active });
 
+// The Green emitter is a 10.0 champion while the historical Gaper spec
+// selects 10.1. Grade both existing family variants additively, without
+// changing discovery, scalar spec selection, or any historical row key.
+function gaperSpawners(rows, source, actual) {
+  const native = own(() => array(source.entities)
+    .filter(actor => actor.type === 10 && (actor.variant === 0 || actor.variant === 1)), value => value);
+  const browser = own(() => {
+    const identities = array(actual.actorScheduler?.identities);
+    return array(actual.room?.npcs)
+      .filter(actor => actor.kind === 10 && (actor.variant === 0 || actor.variant === 1) && !boolean(actor.removed))
+      .map(actor => {
+        const id = integer(actor.id);
+        const matches = identities.filter(row => row.actor?.kind === 'npc' && integer(row.actor.id) === id);
+        return { raw: actor, sequence: matches.length === 1 ? matches[0].sequenceId : undefined };
+      });
+  }, value => value);
+  law(rows, 'green.spawner.nativeObservation', ['pass', false],
+    () => [text(source.status), boolean(source.memoryWritten)]);
+  law(rows, 'green.spawner.nativeOwner', true, () => native.observed, boolean);
+  law(rows, 'green.spawner.browserOwner', true, () => browser.observed, boolean);
+  emit(rows, 'green.spawner.phase', () => integer(source.nativePhase?.systemIterations) % 2,
+    () => integer(actual.systemClock?.systemCounter) % 2, integer);
+  emit(rows, 'green.spawner.fullCounter', () => source.nativePhase?.fullGameUpdates,
+    () => actual.gameUpdateCount, integer);
+  const nativeIdentity = actor => [actor.sequenceId, actor.type, actor.variant, actor.subtype, actor.spawnSeed];
+  const browserIdentity = actor => [actor.sequence, actor.raw.kind, actor.raw.variant, actor.raw.subtype, actor.raw.spawnSeed];
+  emit(rows, 'green.spawner.identities', () => array(native.value).map(nativeIdentity),
+    () => array(browser.value).map(browserIdentity), value => array(value).map(identity));
+  for (const [side, owner, getIdentity] of [['native', native, nativeIdentity], ['browser', browser, browserIdentity]])
+    law(rows, `green.spawner.${side}.uniqueManagerSequence`, true, () => {
+      const sequences = array(owner.value).map(actor => integer(getIdentity(actor)[0]));
+      return new Set(sequences).size === sequences.length;
+    }, boolean);
+  for (const n of native.value ?? []) {
+    const ownedIdentity = own(() => nativeIdentity(n), identity);
+    if (!ownedIdentity.observed) {
+      law(rows, 'green.spawner.nativeIdentityOwner', true, () => ownedIdentity.observed, boolean);
+      continue;
+    }
+    const id = ownedIdentity.value;
+    const p = browser.value?.find(actor => {
+      const candidate = own(() => browserIdentity(actor), identity);
+      return candidate.observed && JSON.stringify(candidate.value) === JSON.stringify(id);
+    })?.raw;
+    const prefix = `green.spawner.${id.join('.')}`;
+    for (const [field, expected, observed, normalize] of [
+      ['position', () => n.position, () => source.nativePhase.systemIterations % 2 === 0 ? p?.presentedPosition : p?.position, vector],
+      ['velocity', () => n.velocity, () => p?.velocity, vector],
+      ['target', () => n.npcTarget, () => p?.target, vector],
+      ['state', () => n.npcState, () => p?.state, signed],
+      ['frameAge', () => n.npcFrameAge, () => p?.frameAge, integer],
+      ['hp', () => n.hp, () => p?.hp, word], ['maxHp', () => n.maxHp, () => p?.maxHp, word],
+      ['pendingDamage', () => n.pendingDamage, () => p?.damage?.pendingDamage, word],
+      ['pendingFlags', () => n.pendingFlags, () => p?.damage?.pendingFlags, integer],
+      ['animation', () => n.animation, () => p?.animation, text],
+      ['animationFrame', () => n.animationFrame, () => p?.animationClock, word],
+      ['animationPlaying', () => n.animationPlaying, () => p?.animationPlaying, boolean],
+      ['championColor', () => n.npcChampionColor, () => p === undefined ? undefined : p.champion?.color ?? -1, signed],
+      ['active', () => n.active, () => p === undefined ? undefined : !boolean(p.removed), boolean],
+      ['dead', () => n.removed, () => p?.dead, boolean],
+      ['radius', () => n.collisionRadius, () => p?.collisionRadius, word],
+      ['mass', () => n.collisionMass, () => p?.collisionMass, word],
+      ['contactDamage', () => n.collisionDamage, () => p?.collisionDamage, word],
+    ]) {
+      emit(rows, `${prefix}.${field}`, expected, observed, normalize);
+      if (field === 'position') rows.at(-1).browserPositionOwners = {
+        physical: p?.position ?? null, presented: p?.presentedPosition ?? null };
+    }
+    // Native +470 and the port's retained AI multiplier have different
+    // update ownership; no shared friction projection is admitted here.
+  }
+}
+
 export function createGreenCreepContract(caseData, configuration) {
   const configured = typeof configuration?.requiredRoute?.seed === 'string'
     && Number.isInteger(configuration?.requiredRoute?.slot);
@@ -227,6 +300,7 @@ export function createGreenCreepContract(caseData, configuration) {
         rows.push({ field: 'green.contactOutcome.owner', expected: 'typed actual player/cause owners', actual: null,
           status: 'fail', error: String(error) });
       }
+      gaperSpawners(rows, source, actual);
     },
     finish(rows) {
       law(rows, 'green.required.configuration', true, () => configured, boolean);
