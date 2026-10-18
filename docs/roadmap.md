@@ -69,7 +69,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -79,7 +79,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
-| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 2 |
+| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT Full countdown/nonrare blast, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
@@ -170,10 +170,11 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, reload acceptance and remaining remapped action
-callbacks, including drop/map/restart. Strict pixels and history caps remain red;
+callbacks, including drop and restart. The configurable Map action has the
+separate bounded scope above. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: drop (Ctrl), map (Tab) and restart (R) actions; gamepad.
+Next: qualify own-saved Keyboard reload; drop (Ctrl) and restart (R); gamepad.
 
 No open bugs.
 
@@ -378,6 +379,15 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 [regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
+
+[PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) proposes green
+champion creep and remains unmerged. Frozen `60ab853b` passes 196,875 fixed-case
+MT cursor/word checks and the recorded OS Gaper case. Its extended contact
+replay retains four failures: two NPC Fast presentation positions and two
+missing Acid-contact witnesses. All prior passing fields remain passing;
+38 Bomb/NPC fields improve on two retained controls. The Source preview fix
+and current-main integration still need a fresh build and qualification.
+Earlier failed captures remain preserved; this is not current-main coverage.
 
 Next: the rest of the Basement/Cellar spawn table.
 
