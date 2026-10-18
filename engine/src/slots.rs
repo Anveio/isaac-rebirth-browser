@@ -200,17 +200,11 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
         if !combat::slot_overlap(&player, &body, size_multi, UNROTATED)? {
             continue;
         }
-        // 539690 with partner type1, state1 and timer+7e4 <= 0.
-        let gate = match slot.variant {
-            2 => Some("Blood Donation Player contact (TakeDamage, no resource gate)"),
-            5 => Some("Devil Beggar Player contact (no resource gate)"),
-            7 if state.inventory.keys > 0 => Some("Key Master contact with keys"),
-            1 | 3 | 4 | 6 if state.inventory.coins > 0 => Some("Slot contact with coins"),
-            _ => None,
-        };
-        if let Some(gate) = gate {
-            return Err(format!("{gate} is unadmitted"));
-        }
+        // 539690 with partner type1, state1 and timer+7e4 <= 0 pays out or
+        // hurts on Blood Donation 6.2 and Devil Beggar 6.5, on 6.1/3/4/6
+        // with coins and on the Key Master 6.7 with keys. PORT GAP: those
+        // payouts are not admitted; the idle body's mass response below
+        // still runs, so play continues without them.
         let resolution = if size_multi.x != 1.0 || size_multi.y != 1.0 {
             combat::resolve_capsule_contact(
                 &mut player,
@@ -221,8 +215,15 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
             )?
         } else {
             //445710 retains its Player grid-shift veto and half share here.
+            //PORT GAP: a flying or nonground Player has no admitted grid
+            //collider, so the push takes no grid-shift veto.
             if state.player.flying != Some(false) || state.player.grid_collision_class != Some(5) {
-                return Err("beggar contact requires the ground Player collider owner".into());
+                let resolution =
+                    combat::resolve_player_beggar_contact(&mut player, &mut body, |_| false)?;
+                if resolution.colliding {
+                    write_back(state, index, &player, &body);
+                }
+                continue;
             }
             let grid = crate::grid::Grid::new(
                 state
@@ -246,94 +247,30 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
                 collider.blocks_player_shift(&grid, original, shift)
             })?
         };
-        if !resolution.colliding {
-            continue;
-        }
-        state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
-        state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
-        state.player.vx = f64::from(player.velocity.x) * 0.65;
-        state.player.vy = f64::from(player.velocity.y) * 0.65;
-        let slot = &mut state.room.slots[index];
-        slot.position = body.position;
-        slot.presented_position = body.position;
-        slot.velocity = body.velocity;
-    }
-    Ok(())
-}
-
-/// Entity class4 slots also pair with NPCs, pickups and bombs, each with the
-/// mass response. None of those pairs is admitted yet: reaching one stops the
-/// frame. Ordinary tears pass through: in the original a Tear spawned
-/// overlapping a Beggar neither dies nor moves it (PDTGS0Y1 door1 shared-MT
-/// trace: no tear-death draws at the overlap), so tears do not pair here.
-pub(crate) fn unadmitted_contacts(state: &State) -> Result<(), String> {
-    if state.room.slots.is_empty() {
-        return Ok(());
-    }
-    let mut partners = Vec::new();
-    for bomb in &state.bombs {
-        if bomb.motion.lifetime == crate::bombs::BombLifetime::Alive {
-            // bombs::contact_body: the planted Bomb4 body has radius16.
-            partners.push(("Bomb", 4, bomb.motion.position, 16.0));
-        }
-    }
-    for pickup in &state.room.pickups {
-        if pickup.removed
-            || pickup.collected
-            || pickup
-                .regular_collision
-                .as_ref()
-                .is_some_and(|collision| collision.entity_collision_class == 0)
-        {
-            continue;
-        }
-        partners.push(("Pickup", 5, pickup.position, pickup.collision_radius));
-    }
-    for npc in &state.room.npcs {
-        if !(npc.dead || npc.removed || npc.entity_collision_class == 0) {
-            partners.push(("NPC", npc.kind, npc.position, npc.collision_radius));
-        }
-    }
-    for slot in &state.room.slots {
-        let body = slot.body();
-        for &(name, entity_type, position, radius) in &partners {
-            let partner = ContactBody {
-                id: 0,
-                entity_type,
-                position,
-                velocity: ZERO,
-                radius,
-                mass: 1.0,
-            };
-            if combat::slot_overlap(&partner, &body, slot.size_multi, UNROTATED)? {
-                return Err(format!("{name}/Slot contact is unadmitted"));
-            }
+        if resolution.colliding {
+            write_back(state, index, &player, &body);
         }
     }
     Ok(())
 }
 
-/// Game554490 reaches Slot TakeDamage53bd80 with flags4: machines break or
-/// pay out and beggars die, all unadmitted (same radius rule as pickups).
-pub(crate) fn bomb_hit(
-    state: &State,
-    center: WorldVector,
-    blast_radius: f32,
-    line_clear: &dyn Fn(WorldVector) -> bool,
-) -> Result<(), String> {
-    for slot in &state.room.slots {
-        let delta = WorldVector {
-            x: slot.position.x - center.x,
-            y: slot.position.y - center.y,
-        };
-        let squared = delta.x * delta.x + delta.y * delta.y;
-        let radius = blast_radius + slot.collision_radius;
-        if squared < radius * radius && line_clear(slot.position) {
-            return Err("explosion damage to a Slot is unadmitted".into());
-        }
-    }
-    Ok(())
+fn write_back(state: &mut State, index: usize, player: &ContactBody, body: &ContactBody) {
+    state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
+    state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
+    state.player.vx = f64::from(player.velocity.x) * 0.65;
+    state.player.vy = f64::from(player.velocity.y) * 0.65;
+    let slot = &mut state.room.slots[index];
+    slot.position = body.position;
+    slot.presented_position = body.position;
+    slot.velocity = body.velocity;
 }
+
+// PORT GAP: Entity class4 slots also pair with NPCs, pickups and bombs, each
+// with the mass response, and Game554490 reaches TakeDamage53bd80 with
+// explosion flag4 (machines break or pay out, beggars die). None of those is
+// admitted: such bodies pass through slots and explosions leave them idle.
+// Ordinary tears pass through as the original does: a Tear spawned
+// overlapping the PDTGS0Y1 door-1 Beggar neither dies nor moves it.
 
 pub(crate) fn actor(id: u32) -> ActorRef {
     ActorRef {
