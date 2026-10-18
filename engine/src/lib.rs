@@ -2532,6 +2532,7 @@ impl Game {
         )?;
         //Room.Save5CE418 captures actor records before PlayerManager.Save
         //can flush later grant callbacks. This is not a later live-state clone.
+        let regular_records = pickups::capture_regular_records(&self.state)?;
         let ambient_records = critters::capture_saved_records(&self.state);
         // Constructor 587ec0 initializes unused grid indices to -1; 58ced0
         // excludes only -3 special records. Fresh normal Level copies all135.
@@ -2543,12 +2544,13 @@ impl Game {
         //owned grant queue and applies the supported Player save boundary.
         let player_items = player_save::capture_at_manager_save(&mut self.state)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(
+        let mut saved = saved_game::SavedRun::copy_from(
             &self.state,
             item_pools,
             grid_save.records,
             player_items,
         )?;
+        saved.room.saved_regular_pickups = regular_records;
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,
