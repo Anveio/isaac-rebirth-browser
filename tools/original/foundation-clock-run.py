@@ -112,6 +112,7 @@ def main():
     parser.add_argument('--state-observer', type=Path, help='Optional parent-only reference debug module exposing observe(pid, context); never production game input')
     parser.add_argument('--observe-every-step', action='store_true', help='Observe at each tape step gate without screenshots; use one-frame steps for dense trajectories')
     parser.add_argument('--composition-lifecycle-events', action='store_true', help='Optional source-bound leader-thread Knife8/0/1 hardware event observation; requires canonical ISAAC_ORIGINAL_SHA, no game inputs changed')
+    parser.add_argument('--trinket-start-events', action='store_true', help='Owned leader-thread Give41/Remove41 hardware entry/return observation; no actor/instruction writes')
     parser.add_argument('--archive-evidence', action='store_true', help='Lossless gzip manifest plus committed native progress journal; public observations and clock unchanged')
     parser.add_argument('--journal-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in journal transport only; zstd requires Python zstandard/system libzstd and Node24 readers; default gzip unchanged')
     parser.add_argument('--manifest-codec', choices=('gzip', 'zstd'), default='gzip', help='Opt-in complete manifest transport; requires archived evidence and qualified Zstd readers; default gzip unchanged')
@@ -133,6 +134,9 @@ def main():
     parser.add_argument('--frame-timeout', type=float, default=60,
                         help='Host-wall socket/gate wait limit in seconds, per 600 frames of a step; does not alter released presentation counts')
     args = parser.parse_args()
+    if args.trinket_start_events and args.composition_lifecycle_events:
+        parser.error('One exclusive hardware event owner may trace the Native leader')
+    event_report_field = 'trinketStartEvents' if args.trinket_start_events else 'compositionLifecycle'
     if args.journal_codec != 'gzip' and not args.archive_evidence:
         raise SystemExit('--journal-codec requires --archive-evidence')
     if args.manifest_codec != 'gzip':
@@ -415,8 +419,10 @@ def main():
                     lifecycle.gate(status)
                 return status
             current = acknowledgement()
-            if args.composition_lifecycle_events:
-                lifecycle = module('composition_lifecycle', 'composition-lifecycle.py').Tap(proc.pid, out / 'lifecycle', timeout=args.frame_timeout)
+            if args.composition_lifecycle_events or args.trinket_start_events:
+                event_module = 'trinket-start-events.py' if args.trinket_start_events else 'composition-lifecycle.py'
+                event_directory = 'trinket-start-events' if args.trinket_start_events else 'lifecycle'
+                lifecycle = module('owned_source_events', event_module).Tap(proc.pid, out / event_directory, timeout=args.frame_timeout)
                 lifecycle.gate(current)
             connection.sendall(b'step 30\n')
             current = acknowledgement()
@@ -528,7 +534,7 @@ def main():
                 'nativeCpuMs': sum(p['advancePerformance']['cpuUserMs']+p['advancePerformance']['cpuSystemMs'] for p in measured),
                 'scope': 'released presentation intervals only; simulation ticks unknown; observer cost included'}
             if lifecycle is not None:
-                report['compositionLifecycle'] = lifecycle.close()
+                report[event_report_field] = lifecycle.close()
             report['status'] = 'pass'
             connection.sendall(b'quit\n')
             proc.wait(timeout=5)
@@ -540,7 +546,7 @@ def main():
     finally:
         if lifecycle is not None:
             try:
-                report['compositionLifecycle'] = lifecycle.close()
+                report[event_report_field] = lifecycle.close()
             except Exception as error:
                 report['status'] = 'fail'
                 report['failures'].append(str(error))
