@@ -31,7 +31,7 @@ def observe(pid,context):
     return read(pointer,length).decode('ascii') if length else ''
    manager=u64(0x8ed560);menus=u64(0x8ed570);game=u64(0x8ecd30);saved=manager+0x4a8;system_state=u32(manager)
    samples=[];level_samples=[];saved_rows=[];level_rows=[]
-   for room in [0,1,134]:
+   for room in [0,1,127,134]:
     # GameState room record0 begins+f8, stridef0; gridvector starts+58.
     pointer=u64(saved+0xf8+room*0xf0+0x58)
     for slot in [0,1,447]:
@@ -39,7 +39,7 @@ def observe(pid,context):
      samples.append({'roomRecord':room,'gridIndex':slot,'seed10':words[4],'seed18':words[6]})
     saved_rows.append({'roomRecord':room,'gridIndex':struct.unpack('<i',read(saved+0xf8+room*0xf0,4))[0]})
    if game:
-    for room in [0,1,134]:
+    for room in [0,1,127,134]:
      # 5881b6: record base+10, stridef0; +14 is its room index field.
      pointer=u64(game+0x10+room*0xf0+0x58)
      for slot in [0,1,447]:
