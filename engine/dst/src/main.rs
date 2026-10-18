@@ -287,6 +287,9 @@ fn simulate() -> ExitCode {
                 result.fails,
                 result.location
             );
+            for signed in &result.signatures {
+                eprintln!("  {} failures: {}", signed.fails, signed.signature);
+            }
         }
     }
     eprintln!(

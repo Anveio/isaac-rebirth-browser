@@ -19,11 +19,13 @@ use crate::props;
 use crate::tape::{Reset, Tape};
 use rebirth_cleanroom::audio::{SoundEvent, VolumeCallback};
 use rebirth_cleanroom::controls_menu;
+use rebirth_cleanroom::display_settings::GammaPreferences;
 use rebirth_cleanroom::fullscreen::{self, FullscreenPreferences};
 use rebirth_cleanroom::input;
 use rebirth_cleanroom::keyboard::{
     DeviceConfig, InputConfigs, Keyboard, CONFIGURABLE, DEFAULT_PAIRS,
 };
+use rebirth_cleanroom::map_presentation::MapPreferences;
 use rebirth_cleanroom::music::MusicEvent;
 use rebirth_cleanroom::options_menu::{AudioPreferences, SaveRequest, UnavailableRequest};
 use rebirth_cleanroom::save_host::SaveStore;
@@ -65,6 +67,16 @@ pub fn run(case: &mut Case) {
             }
             if e.chance(1, 3) {
                 tape.boot_input_configs = Some(stored_input_configs(e));
+            }
+            if e.chance(1, 3) {
+                tape.boot_map_preferences = Some(MapPreferences {
+                    opacity: stored_volume(e),
+                });
+            }
+            if e.chance(1, 3) {
+                tape.boot_gamma_preferences = Some(GammaPreferences {
+                    gamma: stored_gamma(e),
+                });
             }
             // The browser's own-save storage, which a menu readmission reads.
             if e.chance(1, 2) {
@@ -284,6 +296,16 @@ fn stored_volume(e: &mut Entropy) -> f32 {
     }
 }
 
+/// A Gamma an Options save stored (`%.4f` within .5..1.5): a bound, a
+/// whole number of Options steps from 1, or any four-decimal value.
+fn stored_gamma(e: &mut Entropy) -> f32 {
+    match e.below(4) {
+        0 => *e.pick(&[0.5, 1.0, 1.5]),
+        1 => (50 + e.below(101)) as f32 / 100.0,
+        _ => (5_000 + e.below(10_001)) as f32 / 10_000.0,
+    }
+}
+
 fn command_engine(game: &mut Game, command: Command) -> Result<Result<(), String>, String> {
     panic::catch_unwind(AssertUnwindSafe(|| game.command(command)))
         .map_err(|_| harness::take_panic())
@@ -321,12 +343,16 @@ impl Simulation {
                         .boot_fullscreen_preferences
                         .is_none_or(|display| state.fullscreen.requested == display.fullscreen)
                         && state.keyboard == configs.keyboard()
-                        && state.input_configs == configs,
+                        && state.input_configs == configs
+                        && state.map_settings == tape.boot_map_preferences.unwrap_or_default()
+                        && state.gamma_settings == tape.boot_gamma_preferences.unwrap_or_default(),
                     "game: boot starts with the stored settings",
                     json!({
                         "audio": tape.boot_audio_preferences,
                         "fullscreen": tape.boot_fullscreen_preferences,
                         "inputConfigs": tape.boot_input_configs,
+                        "map": [tape.boot_map_preferences, state.map_settings],
+                        "gamma": [tape.boot_gamma_preferences, state.gamma_settings],
                         "sfx": state.audio.sfx_volume,
                         "music": state.music.volume,
                         "requested": state.fullscreen.requested,
@@ -664,15 +690,36 @@ impl Simulation {
                 sfx_volume,
                 music_volume,
             ),
+            Reset::Map {
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
+            } => abi::reset_with_map_preferences_v2(
+                seed,
+                epoch,
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
+            ),
             Reset::InputConfigs { request } => {
-                let pointer = abi::request_ptr(request.len());
-                if pointer.is_null() {
+                if !abi_request(&request) {
                     props::always!(false, "game: the C ABI agrees with direct dispatch");
                     return;
                 }
-                // SAFETY: request_ptr returned a buffer of exactly request.len().
-                unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
                 abi::reset_with_input_configs(seed, epoch)
+            }
+            Reset::Settings { request } => {
+                if !abi_request(&request) {
+                    props::always!(false, "game: the C ABI agrees with direct dispatch");
+                    return;
+                }
+                abi::reset_with_settings_preferences(seed, epoch)
             }
         };
         if reset != 0 {
@@ -722,4 +769,15 @@ impl Simulation {
             json!({ "divergence": divergence })
         );
     }
+}
+
+/// Copies a reset request into the C ABI's request buffer.
+fn abi_request(request: &[u8]) -> bool {
+    let pointer = rebirth_cleanroom::request_ptr(request.len());
+    if pointer.is_null() {
+        return false;
+    }
+    // SAFETY: request_ptr returned a buffer of exactly request.len().
+    unsafe { std::ptr::copy_nonoverlapping(request.as_ptr(), pointer, request.len()) };
+    true
 }
