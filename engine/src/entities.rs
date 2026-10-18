@@ -27,7 +27,8 @@ pub(crate) struct SpawnContext {
 
 /// The union of the owners any supported NPC callback reads or writes.
 pub(crate) struct NpcWorld<'a> {
-    /// Native Game+ce9f4 full-update counter (`State::native_game_frame`).
+    /// Actual current Game full-update counter (`State::native_game_frame`),
+    /// including admission callbacks.
     pub game_counter: u32,
     pub player: WorldVector,
     pub player_velocity: WorldVector,

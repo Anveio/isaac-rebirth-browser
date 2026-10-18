@@ -14,6 +14,8 @@ for (const name of ['--output','--production-directory','--scenarios'])
   assert.ok(flag(name)===undefined || flag(name).length>0,`${name} requires a nonempty value`);
 assert.equal(flag('--reuse-original'),undefined,'Registered Controls requires fresh Native; cached Native reuse is not admitted by this producer');
 const recorded=flag('--scenarios');
+const controlsOwnReload=process.argv.includes('--keyboard-own-reload');
+const reloadIds=['controls-movement-up-w-to-i-v1','controls-os-movement-up-w-to-i-v1'];
 const output=resolve(flag('--output',`.cache/e2e/controls/${Date.now()}-${process.pid}`));
 assert.ok(!existsSync(output),'Controls needs a fresh evidence directory');
 mkdirSync(output,{recursive:true});
@@ -27,6 +29,8 @@ const sourcePaths=[
   'tools/e2e/controls.mjs','tools/e2e/lib/cli.mjs','tools/e2e/lib/original.mjs',
   producer,'tools/foundation/controls-state-pair.mjs','tools/foundation/controls-bank-state-pair.mjs',
   'tools/foundation/controls-browser-observe.mjs','tools/foundation/browser.mjs',
+  ...(controlsOwnReload ? ['tools/foundation/controls-keyboard-reload.mjs',
+    'references/isaac/foundation/combat/tapes.json'] : []),
   'tools/foundation/production-server.mjs','tools/foundation/compare.mjs',
   'tools/foundation/native-evidence.mjs','tools/foundation/browser-evidence.mjs',
   'tools/foundation/native-journal-zstd.mjs','tools/foundation/mt-draws.mjs',
@@ -58,7 +62,7 @@ try {
     assert.equal(fileDigest(target),before[name],'Archived executing Source must match its identity');
   }
   save(resolve(output,'source-before.json'),before);
-  producerIdentity={schema:1,mode:'controls-v1',binarySha256:ORIGINAL_SHA,
+  producerIdentity={schema:1,mode:controlsOwnReload?'controls-own-keyboard-reload-v1':'controls-v1',binarySha256:ORIGINAL_SHA,
     captureProducerSha256:before[producer],observerSha256:before[observer],
     sources:before,publicPreferences:{sfxVolume:1,musicVolume:1,fullscreen:false,inputConfigs:{devices:[]}}};
   save(resolve(output,'producer-identity.json'),producerIdentity);
@@ -69,8 +73,14 @@ try {
   const generated=resolve(output,'generated-scenarios.json');
   save(generated,bank);
   execFileSync('python3',['tools/original/controls-scenarios.py','--validate-bank',generated],{cwd:ROOT,encoding:'utf8'});
-  bank.cases=selectCases(bank.cases,data=>data.scenario.id);
-  if (flag('--case')) bank.caseFilter=flag('--case');
+  //Validate/retain the complete generated bank first. This explicit Source
+  //mode selects declared route IDs only, before either capture, never outcomes.
+  const selectionArgv=controlsOwnReload && flag('--case')===undefined
+    ? [...process.argv,'--case',reloadIds.join(',')] : process.argv;
+  bank.cases=selectCases(bank.cases,data=>data.scenario.id,selectionArgv);
+  if (flag('--case',undefined,selectionArgv)) bank.caseFilter=flag('--case',undefined,selectionArgv);
+  if (controlsOwnReload) assert.ok(bank.cases.every(data=>reloadIds.includes(data.scenario.id)),
+    'Own Keyboard reload admits only its fixed/OS W-to-I route; no other remapping tape');
   const scenarios=resolve(output,'scenarios.json');
   save(scenarios,bank);
   execFileSync('python3',['tools/original/controls-scenarios.py','--validate-bank',scenarios],{cwd:ROOT,encoding:'utf8'});
@@ -95,10 +105,15 @@ try {
       report=await runPairedGate({output:directory,selected:[],randomCount:0,replayCases:[paths[index]],
         productionDirectory:flag('--production-directory'),originalObserver:observer,
         originalSfxVolume:1,originalMusicVolume:1,publicClockSchedule:true,
-        captureControlsOwners:true,stateComparator:comparers.compareControls,movementComparator:comparers.compareMovement,
+        captureControlsOwners:true,controlsOwnReload,stateComparator:comparers.compareControls,movementComparator:comparers.compareMovement,
         archiveNativeEvidence:true,archiveBrowserEvidence:true,
         exactPixels:process.argv.includes('--require-exact-pixels'),nativeFrameTimeout:Number(flag('--native-frame-timeout','60'))});
       assert.equal(report.cases.length,1,'Every declared input case must execute');
+      if (controlsOwnReload) {
+        const own=report.cases[0].browser.keyboardOwnReload;
+        assert.equal(own?.status,'pass','Actual own Keyboard reload is mandatory in the explicit mode');
+        assert.ok(Number.isInteger(own.checks)&&own.checks>0&&Number.isInteger(own.checkpoints)&&own.checkpoints>0);
+      }
       const aggregates=report.cases[0].checks?.filter(check=>check.label==='required-movement-and-old-key-refusal')??[];
       assert.equal(aggregates.length,Number(requiredMovement),'Required movement aggregate cannot disappear or be invented');
       if (requiredMovement)
@@ -117,9 +132,12 @@ finally {
     assert.deepEqual(after,before,'Executing Controls Source changed during the suite');
   } catch (error) { failure=[failure,String(error.stack??error)].filter(Boolean).join('\n'); }
 }
-const result={schema:1,status:!failure && results.length===bank?.cases?.length && results.every(row=>row.status==='pass')?'pass':'fail',
+const result={schema:1,...(controlsOwnReload && {controlsOwnReload:true,fullBank:false,
+  additionalScope:'Complete paired W-to-I input route plus actual Browser own-storage natural document load, reset-load and remapped gameplay. Native process reload, corrupt/hotplug/controller and Browser OS-process restart remain unqualified.'}),status:!failure && results.length===bank?.cases?.length && results.every(row=>row.status==='pass')?'pass':'fail',
   failure,producerIdentity,cases:results,
-  scope:'Four fixed routes plus recorded unfiltered OS Keyboard W-to-I: independent actual Menu9/10/24x2/physical-action/file/storage owners and required movement/coasting where declared; corrected duplicate SFX187 Menu-clock protocol. Canonical Native provenance/finalseed/clock and complete actual Browser input/error gates remain required. Executing producer Source is archived before draws/games and unchanged at completion. Every failure/partial is retained and later declared cases still execute. Full RGBA/history-cap diagnostics retained; no reload, alternatephysical overlap/controller/Skipped/PCM or wholeControls claim.'};
+  scope:controlsOwnReload
+    ? 'Filtered fixed/first-OS W-to-I paired routes plus mandatory real Browser own Keyboard save, natural document constructor load, separate reset-load and public remapped gameplay. All inherited Native/Browser clock/state/physical/movement guards remain required. No Native process reload, corrupt/hotplug/controller, Browser OS-process restart, fullRGBA or PCM claim.'
+    : 'Four fixed routes plus recorded unfiltered OS Keyboard W-to-I: independent actual Menu9/10/24x2/physical-action/file/storage owners and required movement/coasting where declared; corrected duplicate SFX187 Menu-clock protocol. Canonical Native provenance/finalseed/clock and complete actual Browser input/error gates remain required. Executing producer Source is archived before draws/games and unchanged at completion. Every failure/partial is retained and later declared cases still execute. Full RGBA/history-cap diagnostics retained; no reload, alternatephysical overlap/controller/Skipped/PCM or wholeControls claim.'};
 save(resolve(output,'report.json'),result);
 console.log(JSON.stringify(result));
 process.exitCode=result.status==='pass'?0:1;

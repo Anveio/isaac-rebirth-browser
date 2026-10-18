@@ -69,6 +69,8 @@ fn partition_members(state: &State) -> Option<Vec<(ActorRef, Bounds)>> {
             //454B53 inserts actual type4 into this same mask8 partition.
             //Its source AABB owner is separate; omitting it changes cap40/order.
             ActorKind::Bomb => return None,
+            //Slot6 membership in this partition is not decoded.
+            ActorKind::Slot => return None,
             _ => {}
         }
     }

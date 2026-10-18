@@ -37,3 +37,11 @@ gfx/010.000_frowning gaper.anm2
 gfx/010.001_gaper.anm2
 gfx/011.000_gusher.anm2
 gfx/011.001_pacer.anm2
+gfx/006.001_slot machine.anm2
+gfx/006.002_blood donation machine.anm2
+gfx/006.003_fortune telling machine.anm2
+gfx/006.004_beggar.anm2
+gfx/006.005_devil beggar.anm2
+gfx/006.006_shell game.anm2
+gfx/006.007_key master.anm2
+gfx/006.008_donationmachine.anm2

@@ -9,6 +9,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadSpec } from '../e2e/entities.mjs';
 import { entityRows, loadManifest, markers } from './entity-compare.mjs';
+import { createGreenCreepContract } from './green-creep-contract.mjs';
 
 const option = (name, required = true) => {
   const at = process.argv.indexOf(name);
@@ -16,7 +17,8 @@ const option = (name, required = true) => {
   return at >= 0 ? process.argv[at + 1] : undefined;
 };
 const directory = resolve(option('--case'));
-const caseEntity = JSON.parse(readFileSync(resolve(directory, 'case.json'), 'utf8')).entity ?? {};
+const caseData = JSON.parse(readFileSync(resolve(directory, 'case.json'), 'utf8'));
+const caseEntity = caseData.entity ?? {};
 const named = caseEntity.specs ?? [option('--entity')];
 const specs = await Promise.all(named.map(loadSpec));
 const native = loadManifest(directory, 'original'), browser = loadManifest(directory, 'browser');
@@ -28,6 +30,7 @@ const renders = new Map(browser.frames.map(frame => [frame.label, frame.render])
 const checks = [], graded = {};
 for (const spec of specs) {
   const rows = [];
+  const green = spec.greenCreepContract ? createGreenCreepContract(caseData, spec.greenCreepContract) : undefined;
   let started = false;
   for (const [label, observation] of observations) {
     const actual = states.get(label);
@@ -37,6 +40,7 @@ for (const spec of specs) {
     assert.equal(observation.gameplay.memoryWritten, false);
     const captured = [];
     entityRows(captured, observation.gameplay, actual, spec, renders.get(label));
+    green?.capture(captured, observation.gameplay, actual, label);
     for (const row of captured) rows.push({ label, ...row });
   }
   assert.ok(rows.length, `${spec.name}: a case must compare at least one gameplay capture`);
@@ -47,6 +51,7 @@ for (const spec of specs) {
   for (const [side, reached] of Object.entries(execution))
     for (const name of required) rows.push({ label: 'execution', field: `${side}.${name}`, expected: true, actual: reached[name],
       status: reached[name] ? 'pass' : 'fail' });
+  green?.finish(rows);
   for (const row of rows) checks.push({ entity: spec.name, ...row });
   graded[spec.name] = { status: rows.every(row => row.status === 'pass') ? 'pass' : 'fail', checks: rows.length,
     failures: rows.filter(row => row.status === 'fail').length, required, execution };

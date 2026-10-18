@@ -68,7 +68,15 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
-export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "npc" | "projectile" | "effect"; id: number; }
+export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "slot" | "npc" | "projectile" | "effect"; id: number; }
+/** Entity_Slot (type 6): an idle machine or beggar (engine/src/slots.rs). */
+export interface Slot {
+  id: number; variant: number; subtype: number; spawnSeed: number;
+  position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
+  targetPosition: {x: number; y: number}; positionOffset: {x: number; y: number}; sizeMulti: {x: number; y: number};
+  collisionRadius: number; collisionMass: number; configuredFriction: number; currentFriction: number;
+  state: number; actor: string; animation: string; animationFrame: number;
+}
 export type OrdinaryPlacementFrontier =
   {kind: "playerUpdate"; field: string} |
   {kind: "factory"; entityType: number; variant: number; subtype: number} |
@@ -299,7 +307,8 @@ export interface Room {
       actorRngState: number; renderOrderOffset: number; flameScale: number; flameRenderMode: number;
       particleBirthCount: number; lastParticleBirth: {parentId: number; spawnSeed: number; position: {x: number; y: number}; velocity: {x: number; y: number}} | null;
       lootBirth: {parentId: number; variant: number; spawnSeed: number; position: {x: number; y: number}} | null} | null }[];
-  authoredActorOrder: {kind: "npc" | "pickup"; id: number}[];
+  slots: Slot[];
+  authoredActorOrder: {kind: "npc" | "pickup" | "slot"; id: number}[];
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;

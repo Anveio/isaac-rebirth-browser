@@ -163,6 +163,15 @@ pub fn positions(state: &State) -> Result<Vec<WorldVector>, Frontier> {
                     .map(|body| body.position)
                     .ok_or(Frontier::MissingBody { actor })?,
             ),
+            ActorKind::Slot => Some(
+                state
+                    .room
+                    .slots
+                    .iter()
+                    .find(|body| body.id == actor.id)
+                    .map(|body| body.position)
+                    .ok_or(Frontier::MissingBody { actor })?,
+            ),
             _ => None,
         };
         if let Some(position) = position {

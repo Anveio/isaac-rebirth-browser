@@ -97,6 +97,9 @@ fn ordered_targets(state: &State) -> Result<TargetQuery, String> {
                     return Err("Laser query Familiar handle is unresolved".into());
                 }
             }
+            ActorKind::Slot => {
+                return Err("Laser query Slot6 target membership is unadmitted".into());
+            }
             //Known source types1/2/4/5/7/8/9 do not enter the neutral target
             //set. Extra213 projectile/other-parent-family paths stay pending.
             ActorKind::Player

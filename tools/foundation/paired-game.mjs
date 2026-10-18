@@ -222,7 +222,9 @@ async function readCapturedNative(directory, archiveNativeEvidence, error) {
 }
 
 export async function browserCapture(browser, server, caseData, directory, archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan,
-  audioPreferences = {sfxVolume: 0, musicVolume: 0}, captureControlsOwners = false, saveContinue = false) {
+  audioPreferences = {sfxVolume: 0, musicVolume: 0}, captureControlsOwners = false, saveContinue = false, controlsOwnReload = false) {
+  assert.equal(typeof controlsOwnReload, 'boolean');
+  assert.ok(!controlsOwnReload || (captureControlsOwners && !saveContinue), 'Own Keyboard reload requires Controls readers and its separate declared route');
   assert.equal(typeof saveContinue, 'boolean', 'Save/Continue owner capture is an explicit opt-in');
   mkdirSync(directory, { recursive: true });
   assert.equal(typeof captureControlsOwners, 'boolean');
@@ -244,6 +246,7 @@ export async function browserCapture(browser, server, caseData, directory, archi
   const browserPressed = new Set(), browserModifiers = new Set();
   let expectedSeedDialog = false;
   const failures = [];
+  let initialPhysical, keyboardOwnReload;
   try {
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
@@ -377,6 +380,12 @@ export async function browserCapture(browser, server, caseData, directory, archi
       await reloadOwnSavedWorld(page, directory, caseData);
       assert.ok(ownChecks.every(row => row.status === 'pass'), 'Actual mandatory own-save guards');
     }
+    if (controlsOwnReload) {
+      const {reloadOwnKeyboard} = await import('./controls-keyboard-reload.mjs');
+      initialPhysical = await page.evaluate(() => window.__controlsPhysicalInputs());
+      keyboardOwnReload = await reloadOwnKeyboard(page, directory, caseData,
+        {frames, inputs, trace, physical: initialPhysical}, {browserKeyCode, seedInputText});
+    }
   } catch (error) {
     failures.push(String(error.message));
     if (saveContinue) {
@@ -391,7 +400,9 @@ export async function browserCapture(browser, server, caseData, directory, archi
   finally {
     if (captureControlsOwners) {
       try {
-        const physical=await page.evaluate(()=>window.__controlsPhysicalInputs());
+        //The old document's actual physical evidence was archived before the
+        //explicit reload. New-document physical edges have their own report.
+        const physical=initialPhysical ?? await page.evaluate(()=>window.__controlsPhysicalInputs());
         save(join(directory,'physical-inputs.json'),physical);
         assert.equal(physical.truncated,false);
         const expected=caseData.pairedTape.filter(action=>action.type==='key').map(action=>({type:action.down?'keydown':'keyup',code:browserKeyCode(action.key)}));
@@ -403,7 +414,7 @@ export async function browserCapture(browser, server, caseData, directory, archi
     }
     await context.close();
   }
-  const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs };
+  const result = { status: failures.length ? 'fail' : 'pass', failures, frames, inputs, ...(controlsOwnReload && {keyboardOwnReload}) };
   if (archiveBrowserEvidence) {
     const evidence = await writeJsonEvidence(join(directory, 'manifest.json.gz'), result);
     save(join(directory, 'manifest-archive.json'), evidence);
@@ -559,7 +570,9 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, captureControlsOwners = false, movementComparator, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
   originalSfxVolume, originalMusicVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
-  glTrace = process.argv.includes('--gl-trace'), saveContinue = false }) {
+  glTrace = process.argv.includes('--gl-trace'), saveContinue = false, controlsOwnReload = false }) {
+  assert.equal(typeof controlsOwnReload, 'boolean');
+  assert.ok(!controlsOwnReload || (captureControlsOwners && !saveContinue), 'Own Keyboard reload is a separate Controls opt-in');
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
     'Native frame timeout must be more than 0 and at most 300 host-wall seconds');
   assert.equal(typeof publicClockSchedule, 'boolean', 'Public clock scheduling is an explicit gate opt-in');
@@ -577,7 +590,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
     nativeFrameTimeout, originalSfxVolume, publicClockSchedule, declaredAudioPreferences: audioPreferences,
     originalObserver, archiveBrowserEvidence, archiveNativeEvidence, captureBrowserAudio, mtDraws, glTrace,
     ...(captureAudioOwners && {captureAudioOwners}), ...(captureControlsOwners && {captureControlsOwners}),
-    ...(saveContinue && {saveContinue}),
+    ...(saveContinue && {saveContinue}), ...(controlsOwnReload && {controlsOwnReload}),
     comparisons: { functional: 'Real input/phase/readback and source title, fade, player motion, pause/controller, HP, immunity, active tear/bomb counts',
       pixels: 'Strict full RGBA diagnostic; every difference remains a failure in its own pixel result',
       exactPixelsRequired: exactPixels, completeOriginalStateParity: false },
@@ -666,7 +679,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           report.browserGraphics = await inspectBrowserGraphics(browser);
           [browserResult] = await Promise.allSettled([
             browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
-              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners, saveContinue),
+              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners, saveContinue, controlsOwnReload),
           ]);
         } catch (error) {
           browserResult = { status: 'rejected', reason: error };
@@ -703,7 +716,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           directory, original: { status: native.status, error: native.error, provenance: native.provenance,
             manifestPath: native.manifestPath, evidence: native.evidence,
             ...(publicClockPlan && {publicClockValidation}) },
-          browser: { status: candidate.status, failures: candidate.failures }, checks,
+          browser: { status: candidate.status, failures: candidate.failures, ...(controlsOwnReload && {keyboardOwnReload: candidate.keyboardOwnReload}) }, checks,
           ...(publicClockPlan && {publicClockPlan: {path: join(directory, 'public-clock-plan.json'), nativeEntryPresentation: publicClockPlan.nativeEntryPresentation}}),
           status: native.status === 'pass' && candidate.status === 'pass'
             && (!publicClockPlan || publicClockValidation?.status === 'pass')
