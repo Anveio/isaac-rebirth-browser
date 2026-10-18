@@ -328,6 +328,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 79 | 60 | 2 |
+| `rooms` | every room a run's floor admits, on Basement I, II and Caves I, entered and played | 2 | 7 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -757,6 +758,16 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: the seed scout starts a seeded run | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Sometimes | game: a scouted seed offers a weapon collectible | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Always | wasm: the shipped engine agrees with native dispatch | [wasm.rs](engine/dst/src/wasm.rs) |
+| Sometimes | rooms: Basement I's rooms are played | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: Basement II's rooms are played | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: Caves I's rooms are played | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: a large room is played | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: a boss room is played | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: the player is still in the entered room after playing it | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: a run arrives on the next stage | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Always | rooms: a stage transition a trapdoor starts arrives within 1,500 full updates | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Unreachable | rooms: entering and playing rooms never panics the engine | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Always | rooms: no Tick fails while a run enters and plays its floor's rooms | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Always | abi: the exported ABI version is current | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: commands before reset fail and snapshots publish null | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: the public_keys export publishes exactly the engine's key surface | [abi.rs](engine/dst/src/units/abi.rs) |

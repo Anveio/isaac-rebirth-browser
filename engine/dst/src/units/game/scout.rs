@@ -49,6 +49,11 @@ pub fn codes(booted: &Game, e: &mut Entropy, wanted: usize) -> Vec<String> {
     found
 }
 
+/// A seeded run of `code`, started from `booted` through the public menus.
+pub(crate) fn seeded_run(booted: Game, code: &str) -> Option<Game> {
+    walk(walk(booted, None)?, Some(code))
+}
+
 fn tap(queue: &mut VecDeque<Command>, code: &str) {
     for down in [true, false] {
         queue.push_back(Command::Key {

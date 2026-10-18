@@ -11,6 +11,10 @@ mod invariants;
 pub(crate) mod saves;
 mod scout;
 
+pub(crate) use driver::Driver;
+pub(crate) use invariants::expected_rejection;
+pub(crate) use scout::seeded_run;
+
 use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
