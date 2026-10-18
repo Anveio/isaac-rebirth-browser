@@ -170,6 +170,19 @@ def main():
     for name in ('authoredResourcePath', 'specialRoomsPath'):
         if case['fixture'].get(name):
             case['fixture'][name] = str((args.scenarios.resolve().parent / case['fixture'][name]).resolve())
+    trinket_start = case.get('requires', {}).get('trinketKind2Startup')
+    tap_requested = '--trinket-start-events' in extra
+    if trinket_start is not None:
+        if (args.pockets or trinket_start.get('schema') != 'source-public-challenge-start41-v1'
+                or case['fixture'].get('startingItems') != []
+                or case['fixture'].get('startingTrinkets') != [41]
+                or case['fixture'].get('challengeId') != 1
+                or case['fixture'].get('specialRoomsPath')):
+            raise ValueError('Trinket startup admits only the declared direct Challenge41 fixture')
+        if not args.prepare_only and not tap_requested:
+            raise ValueError('Trinket startup execution needs actual Give/Remove entry/return witnesses')
+    elif tap_requested:
+        raise ValueError('Trinket startup tap requires its explicit case contract')
     epoch = case.get('bootEpochSeed')
     if type(epoch) is not int or not 0 <= epoch <= 0xffffffff:
         raise ValueError('Case must declare a public unsigned32 boot epoch')
@@ -279,6 +292,10 @@ def main():
     ids = [int(value) for value in target.get('startingitems', '').split(',') if value]
     if ids != case['fixture']['startingItems']:
         raise ValueError('Actual declared XML must preserve the case ordered starting items')
+    if trinket_start is not None:
+        held = [int(value) for value in target.get('startingtrinkets', '').split(',') if value]
+        if held != [41]:
+            raise ValueError('Actual declared XML must contain only starting Kind2 config41')
     for change in case['fixture'].get('attributeChanges', []):
         if target.get(change['attribute']) != change['authoredValue']:
             raise ValueError('Actual declared XML must preserve every authored attribute change')

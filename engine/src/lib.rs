@@ -1971,7 +1971,8 @@ impl Game {
         self.state.next_laser = 1;
         self.state.familiars.clear();
         self.state.next_familiar = 1;
-        self.state.fire_cooldown = -1;
+        //Fresh Player51980B initializes C74 before any firing callback.
+        self.state.fire_cooldown = 0;
         self.state.max_fire_delay = 10;
         self.state.player_stats = player_stats::PlayerStats::default();
         // Fresh reset 54E6A3 initializes the actual Game run-flag word.
@@ -2000,7 +2001,8 @@ impl Game {
         );
         self.state.weapon_cache = weapon_plan::WeaponCache::fresh_player();
         self.state.weapon_admission = weapon_plan::WeaponAdmission::fresh_isaac();
-        self.state.head_timer = -1;
+        //Fresh Player5198D0 initializes BB0 independently of later decrements.
+        self.state.head_timer = 0;
         self.state.actor_scheduler = actors::Scheduler::default();
         self.state.actor_scheduler.admit(actors::ActorRef {
             kind: actors::ActorKind::Player,
@@ -2187,7 +2189,7 @@ impl Game {
         run_seeds.admit_menu_seed_effect(&run.run_seed)?;
         //54EE90 initializes ItemPool from SavedED94, then581CF0 restores
         //its actual saved tables. It does not request NewRun's14th seed draw.
-        let _constructed_pools = items::ItemPools::new(
+        let constructed_pools = items::ItemPools::new(
             run.item_pools.seed,
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
         )?;
@@ -2212,7 +2214,7 @@ impl Game {
         self.state.source_damage_maximum = Some(false);
         self.state.source_fire_delay_minimum = Some(false);
         self.state.acquisition_history = run.acquisition_history.clone();
-        self.state.item_pools = Some(run.item_pools.clone());
+        self.state.item_pools = Some(run.item_pools.restore_after_init(&constructed_pools)?);
         self.state.player_items = Some(player_items);
         self.player_manager_secondary_rng.seed = self.saved_game.player_rng_seed;
         self.state.player = Player::starting();
@@ -2501,12 +2503,14 @@ impl Game {
         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
         self.state.saved_load_valid = Some(false);
         // Game.Save 54f33b copies the actual modeled ItemPool before Room.Save.
-        // Retain its owned vectors/RNGs; copying neither reseeds nor samples.
+        // Retain its owned vectors/RNGs and trinket availability/count;
+        //581ED0 does not copy current-profile trinket eligibility or sample.
         let item_pools = self
             .state
             .item_pools
-            .clone()
-            .ok_or("run save requires initialized item pools")?;
+            .as_ref()
+            .ok_or("run save requires initialized item pools")?
+            .copy_for_save()?;
         let grid_save = saved_game::save_grid_cells(
             &mut self.boot_level_grid,
             &mut self.state.boot_lifecycle.shared,
@@ -2761,12 +2765,25 @@ impl Game {
         if self.state.room.pickups[index].variant == 90 {
             return pickups::collect_battery(&mut self.state, index);
         }
+        if self.state.room.pickups[index].variant == 350 {
+            return Err("loose350 contact is outside the admitted grant-only slice".into());
+        }
         if matches!(self.state.room.pickups[index].variant, 70 | 300) {
             pockets::player_contact(&mut self.state, index)?;
             return Ok(());
         }
         if !pickups::player_can_collect(&self.state) {
             return Ok(());
+        }
+        //The existing free Coin operator has not qualified held/Kind2
+        //effects. Refuse that reached context before granting inventory.
+        if self.state.room.pickups[index].variant == 20
+            && self.state.room.pickups[index].touches(&self.state.player)
+            && self.state.player_items.as_ref().is_none_or(|owner| {
+                owner.trinket_slots != [0, 0] || !owner.queue_excludes_trinkets()
+            })
+        {
+            return Err("free Coin with held/queued trinkets is not admitted".into());
         }
         let red_multiplier = if self
             .state
@@ -3026,6 +3043,9 @@ impl Game {
                 if order.len() == before_entities {
                     if selector.entity_type == 5 && selector.variant == 350 {
                         crate::item_queries::note_unrepresented_trinket_spawn(&mut self.state);
+                        return Err(
+                            "authored350 Init/Get is outside the admitted grant-only slice".into(),
+                        );
                     }
                     // Preserve unrelated traversal when its existing factory
                     // is unsupported. Only a later lookup of this cell needs
@@ -5360,6 +5380,16 @@ impl Game {
                             }
                         }
                         shooting_aim_db4 = aim_step.db4_write;
+                        //52F5B8 updates DA0 before519FC0 for regular shots too.
+                        //The existing ordinary group already owns this write.
+                        if plan.controller == weapon_plan::ControllerChannel::RegularShots
+                            && !ordinary
+                        {
+                            attack_runtime::ordinary_head_direction(
+                                &mut self.state,
+                                aim_step.callback_aim,
+                            );
+                        }
                         let head_frame_request = if self.state.head_timer > 8 { 2 } else { 0 };
                         if !technology2_selected
                             && (ordinary || controlled || controlled_tear || controlled_target)
@@ -5663,6 +5693,12 @@ impl Game {
                                 self.state.weapon_admission.source_player_type,
                                 self.state.weapon_cache.primary,
                                 plan.flags,
+                                item_queries::AppearanceQueries::new(
+                                    self.state.player_items.as_ref()?,
+                                    self.state.weapon_cache.primary,
+                                    self.state.player.entity_source,
+                                    None,
+                                ),
                             )
                         })
                 } else {
@@ -5672,6 +5708,15 @@ impl Game {
                 self.state.fire_cooldown = plan.fire_delay;
                 self.state.head_timer = plan.head_timer;
             }
+        }
+        //52F700/5306E0 follows the real kind1 callback and timer continuation.
+        //With no held shooting input, BB0<0 selects the actual D9C idle head.
+        if regular_dispatch {
+            attack_runtime::controlled_idle_head_for(
+                &mut self.state,
+                aim.is_some(),
+                "regularTearMovementHistory",
+            );
         }
         //52F738/744 gates the postcallback DB4 store by nonzero processed input.
         //Release and canceled held input retain the actual prior DB4.

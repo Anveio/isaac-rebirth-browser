@@ -145,7 +145,7 @@ export interface SavedRunSummary {
     levelSeeds: [number, number]; savedSeeds: [number, number]; occupancy: "empty" | "occupied" | "padding";
     record: GridRecord | null}[];
   doorCellRecords: {gridIndex: number; record: GridRecord | null}[];
-  itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed: number;
+  itemPools: {poolSeed: number; rootRngSeed: number; secondaryRngSeed?: number | null;
     specialFactor: number; specialCounters: number[]; removedSamples: {itemId: number; removed: boolean}[];
     pillEffects: number[]; weightSamples: {poolId: number; itemId: number; weight: number}[]};
 }
@@ -365,8 +365,9 @@ export interface State {
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
-  itemPools: {seed: number; rootRng: ItemRng; secondaryRng: ItemRng; pools: ItemPool[];
-    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]} | null;
+  itemPools: {seed: number; rootRng: ItemRng; secondaryRng?: ItemRng | null; pools: ItemPool[];
+    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[];
+    trinkets?: {available: boolean[]; count: number; eligible?: boolean[] | null} | null} | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     heldPockets?: {slots: {id: number; card: boolean}[];
@@ -377,7 +378,7 @@ export interface State {
     activeChargeHistory?: ActiveChargeHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
-    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedCharge: number; queuedTouched: boolean;
+    ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedConfigKind?: 1 | 2 | 3 | 4 | null; queuedCharge: number; queuedTouched: boolean;
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
     pickupPresentation: {itemId: number; animationFrame: number; animationPlaying: boolean;

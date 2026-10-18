@@ -239,9 +239,15 @@ impl RegularSubtypeInputs {
                     && [173usize, 238, 239]
                         .into_iter()
                         .all(|id| items.owned_counts.get(id).is_some_and(|count| *count <= 0))
-                    && items.trinket_slots == [0, 0]
-                    && items.queued_id.is_none_or(|id| {
-                        crate::items::definition(id).is_some_and(|config| config.kind != 2)
+                    && [22, 38, 18, 17].into_iter().all(|id| {
+                        crate::item_queries::AppearanceQueries::new(
+                            items,
+                            state.weapon_cache.primary,
+                            state.player.entity_source,
+                            None,
+                        )
+                        .has_trinket(id)
+                            == Some(false)
                     })
             })
             .and(humbling_bundle);
@@ -1096,6 +1102,12 @@ pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), Strin
         {
             continue;
         }
+        //Native Init does not initialize opaqueAB8 for350. Live contact
+        //passes literal queuecharge0, but Save copiesAB8. Until its pooled
+        //allocation history is owned, refuse rather than save spawn's0.
+        if pickup.variant == 350 {
+            return Err("saving a loose350 requires its raw pooled AB8 charge owner".into());
+        }
         let rng = pickup
             .regular_rng
             .ok_or("saved regular pickup has no persistent RNG30")?;
@@ -1251,6 +1263,9 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     //Contact-time Remove can leave the body listed until the next Full sweep.
     if state.room.pickups[index].removed {
         return Ok(());
+    }
+    if state.room.pickups[index].variant == 350 {
+        return Err("loose350 callbacks are outside the admitted grant-only slice".into());
     }
     state.room.pickups[index].advance(phase, state.game_update_count);
     if phase == Phase::Update {

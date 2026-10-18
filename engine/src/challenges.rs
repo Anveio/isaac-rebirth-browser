@@ -281,10 +281,12 @@ impl Definition {
     /// Current narrow runtime scope: the declared item-focused Challenge1
     ///view, normal Isaac, neutral filters. Other definitions remain parsed.
     pub(crate) fn validate_initial_scope(&self) -> Result<(), String> {
+        let starting_trinkets_owned = self.starting_trinkets.is_empty()
+            || (self.starting_trinkets.as_slice() == [41] && self.starting_items.is_empty());
         if self.id != 1
             || self.player_type != 0
             || !self.achievements.is_empty()
-            || !self.starting_trinkets.is_empty()
+            || !starting_trinkets_owned
             || self.starting_pill != -1
             || self.starting_card != 0
             || self.soul_hp != 0
@@ -354,6 +356,16 @@ pub(crate) fn initialize_player(state: &mut State, definition: &Definition) -> R
             .as_mut()
             .ok_or("Challenge ItemPool owner absent")?
             .removed[id as usize] = true;
+    }
+    //52E2D5 grants each actual Kind2 directly, then52E2EA removes that ID
+    //from availability. This startup callback does not enqueue a pickup.
+    for &id in &definition.starting_trinkets {
+        player_items::give_trinket(state, id)?;
+        state
+            .item_pools
+            .as_mut()
+            .ok_or("Challenge ItemPool owner absent")?
+            .remove_trinket(id)?;
     }
     //52e340 invokes511f10 unconditionally, even when the requested mask is0.
     crate::player_stats::evaluate_cache(state)?;

@@ -181,6 +181,62 @@ impl RangeInputs {
     }
 }
 
+/// Actual ItemConfig header word. ID+4 belongs to this same typed config;
+/// collectible41 and Trinket41 are independent records, never one namespace.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(try_from = "u32", into = "u32")]
+#[repr(u32)]
+pub enum QueuedConfigKind {
+    Passive = 1,
+    Trinket = 2,
+    Active = 3,
+    Familiar = 4,
+}
+
+impl TryFrom<u32> for QueuedConfigKind {
+    type Error = String;
+    fn try_from(word: u32) -> Result<Self, Self::Error> {
+        match word {
+            1 => Ok(Self::Passive),
+            2 => Ok(Self::Trinket),
+            3 => Ok(Self::Active),
+            4 => Ok(Self::Familiar),
+            _ => Err("queued ItemConfig kind is outside Base1/2/3/4".into()),
+        }
+    }
+}
+
+impl From<QueuedConfigKind> for u32 {
+    fn from(kind: QueuedConfigKind) -> Self {
+        kind as Self
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct QueuedConfig {
+    pub kind: QueuedConfigKind,
+    pub id: u32,
+}
+
+impl QueuedConfig {
+    fn collectible(id: u32) -> Result<Self, String> {
+        let config = items::definition(id).ok_or("queued collectible config unavailable")?;
+        let kind = QueuedConfigKind::try_from(u32::from(config.kind))?;
+        if kind == QueuedConfigKind::Trinket {
+            return Err("collectible queue requires an actual kind1/3/4 config".into());
+        }
+        Ok(Self { kind, id })
+    }
+
+    fn configuration_known(self) -> bool {
+        match self.kind {
+            QueuedConfigKind::Trinket => items::trinket_definition(self.id).is_some(),
+            kind => items::definition(self.id)
+                .is_some_and(|config| u32::from(config.kind) == u32::from(kind)),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PlayerItems {
@@ -244,7 +300,13 @@ pub struct PlayerItems {
     pub shot_speed_inputs: Option<ShotSpeedInputs>,
     ///Actual held trinket slots E14/E18; normal fresh constructor initializes0.
     pub trinket_slots: [u32; 2],
+    /// Raw config+4 ID, retained for the existing wire consumers. Native
+    /// interpretation additionally requires the independently owned kind.
     pub queued_id: Option<u32>,
+    /// Actual3058->kind word. A missing legacy kind on a positive raw ID is
+    /// unknown; it is never reconstructed from the collectible ID table.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub queued_config_kind: Option<QueuedConfigKind>,
     pub queued_charge: i32,
     pub queued_touched: bool,
     pub pickup_animation_frame: f32,
@@ -278,6 +340,50 @@ pub struct PlayerItems {
 }
 
 impl PlayerItems {
+    /// Literal pointer presence is independent of config-kind interpretation.
+    /// Orphan kind metadata contradicts an absent pointer and stays unknown.
+    pub(crate) fn queued_presence(&self) -> Option<bool> {
+        match (self.queued_id, self.queued_config_kind) {
+            (None, None) => Some(false),
+            (None, Some(_)) => None,
+            (Some(_), _) => Some(true),
+        }
+    }
+
+    pub(crate) fn queue_is_empty(&self) -> bool {
+        self.queued_presence() == Some(false)
+    }
+
+    /// OuterNone is an unavailable/contradictory config owner. Some(None)
+    /// is the actual null pointer. Positive records retain their kind+ID
+    /// namespace; known Kind2 never enters the collectible catalogue.
+    pub(crate) fn queued_config(&self) -> Option<Option<QueuedConfig>> {
+        match (self.queued_id, self.queued_config_kind) {
+            (None, None) => Some(None),
+            (Some(id), Some(kind)) => {
+                let config = QueuedConfig { kind, id };
+                config.configuration_known().then_some(Some(config))
+            }
+            _ => None,
+        }
+    }
+
+    /// Existing per-consumer collectible queue readsets keep their own ID
+    /// predicates; typed Kind2 and unknown legacy records cannot pass them.
+    pub(crate) fn queued_collectible_is_none_or(&self, allowed: impl FnOnce(u32) -> bool) -> bool {
+        match self.queued_config() {
+            Some(None) => true,
+            Some(Some(config)) if config.kind != QueuedConfigKind::Trinket => allowed(config.id),
+            _ => false,
+        }
+    }
+
+    ///A known null or actual kind1/3/4 pointer cannot satisfy HasTrinket's
+    ///queued-kind2 arm. This proves no held-slot or other query capability.
+    pub(crate) fn queue_excludes_trinkets(&self) -> bool {
+        self.queued_collectible_is_none_or(|_| true)
+    }
+
     /// PlayerManager5bf4a0 passes saved Seeds output13 unchanged to519350.
     /// Each child is initialized by its actual local RNG5 consumer; none of
     /// these 347+62+41 initializers consumes the shared MT stream.
@@ -333,6 +439,7 @@ impl PlayerItems {
             fire_delay_inputs: Some(FireDelayInputs { source_d2c: 0 }),
             trinket_slots: [0; 2],
             queued_id: None,
+            queued_config_kind: None,
             queued_charge: 0,
             queued_touched: false,
             pickup_animation_frame: 0.0,
@@ -520,12 +627,27 @@ pub(crate) fn finish_player_update(state: &mut State, phase: Phase) -> Result<()
 
 /// Source52f310 always flushes a prior config before replacing queue fields.
 fn enqueue(state: &mut State, id: u32, charge: i32, touched: bool) -> Result<(), String> {
+    enqueue_config(state, QueuedConfig::collectible(id)?, charge, touched)
+}
+
+///52F310 receives a typed actual config pointer. Future350 contact may queue
+///Kind2 here after its own lookup/eligibility, without granting it early.
+pub(crate) fn enqueue_config(
+    state: &mut State,
+    config: QueuedConfig,
+    charge: i32,
+    touched: bool,
+) -> Result<(), String> {
+    if !config.configuration_known() {
+        return Err("queued typed ItemConfig unavailable".into());
+    }
     flush_queued(state)?;
     let items = state
         .player_items
         .as_mut()
         .ok_or("Player item owner absent")?;
-    items.queued_id = Some(id);
+    items.queued_id = Some(config.id);
+    items.queued_config_kind = Some(config.kind);
     items.queued_charge = charge;
     items.queued_touched = touched;
     Ok(())
@@ -848,17 +970,107 @@ pub(crate) fn flush_queued(state: &mut State) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
-    let Some(id) = owner.queued_id else {
+    let Some(config) = owner
+        .queued_config()
+        .ok_or("queued config kind/history unavailable")?
+    else {
         return Ok(());
     };
-    let (charge, touched) = (owner.queued_charge, owner.queued_touched);
-    add_collectible(state, id, charge, touched)?;
+    if config.kind == QueuedConfigKind::Trinket {
+        //52EEAF reaches518890 rather than AddCollectible52CC90. This call
+        //must complete before52EE86 clears either pointer or charge.
+        give_trinket(state, config.id)?;
+    } else {
+        let (charge, touched) = (owner.queued_charge, owner.queued_touched);
+        add_collectible(state, config.id, charge, touched)?;
+    }
     let owner = state
         .player_items
         .as_mut()
         .expect("checked Player item owner");
     owner.queued_id = None;
+    owner.queued_config_kind = None;
     owner.queued_charge = 0;
+    Ok(())
+}
+
+///Actual518890 for normal single-Player explicit41 and an empty active slot.
+///Other config effects, full replacement and multiplayer retain their owners.
+///Contact queues the config; only this deferred callback writes held slots.
+pub(crate) fn give_trinket(state: &mut State, id: u32) -> Result<(), String> {
+    let config = items::trinket_definition(id).ok_or("granted Trinket config absent")?;
+    if id != 41 {
+        return Err("Trinket518890 grant requires its explicit positive effect owner".into());
+    }
+    if state.weapon_admission.source_player_type != Some(0)
+        || !state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        || !state
+            .actor_scheduler
+            .full_phase()
+            .into_iter()
+            .filter(|actor| actor.kind == crate::actors::ActorKind::Player)
+            .eq([crate::actors::ActorRef {
+                kind: crate::actors::ActorKind::Player,
+                id: 0,
+            }])
+    {
+        return Err("Trinket518890 requires the normal single Player owner".into());
+    }
+    //511060 is FIRST. For this real config its empty+60 string returns at
+    //51108B, before costume/vector/body callbacks. Metadata alone grants no
+    //other config that registration capability.
+    if !config.costume_anm2.is_empty() || config.cache_flags != 0 {
+        return Err("explicit41 registration/cache metadata no longer matches its Source".into());
+    }
+    let owner = state
+        .player_items
+        .as_ref()
+        .ok_or("Player item owner absent")?;
+    if !owner
+        .query_history
+        .as_ref()
+        .is_some_and(|history| history.trinket_slots)
+    {
+        return Err("Trinket grant requires owned current held slots".into());
+    }
+    //508FC0 calls actualHave139, then5188C6 scans only that capacity. A
+    //missing query is not inferred false from apparently empty held words.
+    let capacity = if crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    )
+    .have(139)
+    .ok_or("Trinket capacity139 query unavailable")?
+    {
+        2
+    } else {
+        1
+    };
+    let slot = owner.trinket_slots[..capacity]
+        .iter()
+        .position(|held| *held == 0)
+        .ok_or("Trinket full-slot/replacement owner is not admitted")?;
+    let owner = state
+        .player_items
+        .as_mut()
+        .expect("checked Player item owner");
+    //5189D0..E4 writes the first empty E14/E18 and ORs actual config+24.
+    //Keep every prior unknown history unknown; this writes no RNG/count or
+    //CF8 record, and does not create a fresh inventory/cache capability.
+    owner.trinket_slots[slot] = id;
+    owner.unevaluated_cache_flags |= config.cache_flags;
+    if owner.unevaluated_cache_flags != 0 {
+        //Cache0 does not bypass an already pending D6C. The existing cache
+        //owner preserves its per-callback unknowns and request frontiers.
+        crate::player_stats::evaluate_cache(state)?;
+    }
+    //Normal variant0, non7, one Player takes518907..941 -> return. The
+    //unimplemented7 pool removals and multiplayer propagation are not used.
     Ok(())
 }
 
