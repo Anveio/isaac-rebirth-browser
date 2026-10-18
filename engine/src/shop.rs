@@ -414,6 +414,22 @@ pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<bool, St
     if original_price <= 0 || !normal_inputs(state) {
         return Err("paid pickup reached an unadmitted price modifier".into());
     }
+    //The current paid Coin callback has not closed its held/Kind2 effect
+    //readset. This is a port frontier, not a new native Has predicate or an
+    //inference that41 is inert in every paid callback.
+    if pickup.variant == 20
+        && state
+            .player_items
+            .as_ref()
+            .is_some_and(|owner| owner.trinket_slots != [0, 0] || !owner.queue_excludes_trinkets())
+    {
+        state.room.pickups[index]
+            .shop_price
+            .as_mut()
+            .expect("checked paid Coin owner")
+            .purchase_frontier = Some("paidCoinTrinketReadset".into());
+        return Ok(true);
+    }
     //All reached unowned debit branches stop before grant. Manual-seed
     //eligibility=false proves5BD5F5's achievement callback is a no-op.
     let debit_frontier = if queries(state).and_then(|query| query.have(109)).is_none() {

@@ -13,6 +13,32 @@ Every suite mixes two kinds of cases:
   developed against. A fuzz failure is a real bug until shown otherwise. The
   run records the case, so it can be replayed exactly.
 
+The `trinket-start` suite declares two fixed boot phases plus the first unfiltered
+OS boot/phase input before either game. Both games receive the same locally
+authored Challenge1 XML (no starting collectibles, starting Kind2 trinket41).
+It retains the ordinary composition/default-shot grade and adds actual Native
+Give41/Remove41 entry/return witnesses, held slots, namespace counts, cache3074
+and pool availability/count checks. Missing witnesses fail. Queue/contact350,
+random Get, other positive effects and held Continue remain unqualified.
+Original-derived XML and captures stay private; only the transformation recipe
+belongs in source.
+
+```sh
+npm run test:e2e -- trinket-start --no-build --keep-evidence --production FROZEN
+npm run test:e2e -- trinket-start --scenarios SAVED_BANK --no-build --keep-evidence --production FROZEN
+npm run test:e2e -- trinket-start --scenarios SAVED_BANK --case challenge-start41-fixed-phase0 --reuse-original CLOSED_NATIVE_CASE --no-build --keep-evidence --production FROZEN
+```
+
+Native reuse admits exactly one unchanged recorded case and retains its actual
+invocation journal. Replay draws no entropy. The current three-case replay
+passes 62,213 base checks and retains 24 required regular-Tear coverage failures.
+The additive grade passes 19,591 checks and fails its three inherited base-status
+requirements. Replaying the trimmed candidate on the same recordings preserves
+all preceding row values and statuses. Each recorded Native capture observes
+Give/Remove entry and return and restores its debug registers. The suite remains
+failed; this does not qualify the complete Tear backend. The deferred chest/TNT/
+rock bonuses and loose350 bodies stay outside this grant-only runtime slice.
+
 ## Running
 
 ```sh

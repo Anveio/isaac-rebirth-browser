@@ -192,7 +192,8 @@ pub struct SavedRemovedSample {
 pub struct SavedItemPoolsSummary {
     pub pool_seed: u32,
     pub root_rng_seed: u32,
-    pub secondary_rng_seed: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub secondary_rng_seed: Option<u32>,
     pub special_factor: f32,
     pub special_counters: Vec<i32>,
     pub removed_samples: Vec<SavedRemovedSample>,
@@ -224,7 +225,7 @@ impl SavedItemPoolsSummary {
         Self {
             pool_seed: pools.seed,
             root_rng_seed: pools.root_rng.words()[0],
-            secondary_rng_seed: pools.secondary_rng.words()[0],
+            secondary_rng_seed: pools.secondary_rng.map(|rng| rng.state),
             special_factor: pools.special_factor,
             special_counters: pools
                 .pools

@@ -34,8 +34,34 @@ def catalogue():
             raise ValueError(f'Unexpected base resource: {name}')
         trees[name] = ET.fromstring(data)
     definitions = []
+    trinket_achievements = [None] * 62
+    trinkets = []
     for item in trees['items.xml']:
         if item.tag == 'trinket':
+            item_id = int(item.attrib['id'])
+            achievement = int(item.get('achievement', '-1'))
+            if not 0 < item_id < 62 or item_id == 47 or trinket_achievements[item_id] is not None:
+                raise ValueError('Unexpected sparse base trinket identity')
+            if not -1 <= achievement < 179:
+                raise ValueError('Trinket references an undefined achievement byte')
+            trinket_achievements[item_id] = achievement
+            # Base ItemConfig Kind2 is a separate ID namespace. Metadata is
+            # not an admission of registration, held effects or pickup350.
+            if set(item.attrib) - {'id', 'name', 'description', 'gfx', 'achievement', 'cache'}:
+                raise ValueError('Unexpected authored base trinket field')
+            flags = 0
+            for token in item.get('cache', '').split():
+                flags |= 0xffffffff if token == 'all' else CACHE[token]
+            graphic = 'gfx/items/trinkets/' + item.attrib['gfx'].lower() if item.get('gfx') else None
+            if graphic and not (RESOURCES / graphic).is_file():
+                raise ValueError(f'Missing authored trinket graphic: {graphic}')
+            trinkets.append({'id': item_id, 'name': item.attrib['name'],
+                'description': item.attrib['description'], 'graphic': graphic,
+                'achievement': achievement, 'cacheFlags': flags,
+                # Parser57E021 initializes config+60 empty; the pinned base
+                # Kind2 nodes have no ANM field. Registration remains owned
+                # by its caller rather than inferred from these definitions.
+                'costumeAnm2': ''})
             continue
         kind = {'passive': 1, 'active': 3, 'familiar': 4}[item.tag]
         flags = 512 if kind == 4 else 0
@@ -53,6 +79,11 @@ def catalogue():
             'inventory': [int(item.get(key, '0')) for key in INVENTORY],
             'maxCharges': int(item.get('maxcharges', '0')), 'cooldown': int(item.get('cooldown', '0')),
             'special': special in ('true', '1')})
+    # Missing configs0/47 differ from a present config with no prerequisite.
+    # Reset5820A0 treats both as eligible, then disables their availability.
+    if [i for i, value in enumerate(trinket_achievements) if value is None] != [0, 47]:
+        raise ValueError('Unexpected sparse base trinket catalogue')
+    trinkets.sort(key=lambda item: item['id'])
     definitions.sort(key=lambda item: item['id'])
     ids = {item['id'] for item in definitions}
     if len(ids) != 343 or len(definitions) != 343 or min(ids) != 1 or max(ids) != 346:
@@ -78,7 +109,8 @@ def catalogue():
     if not set(costume_ids) <= ids:
         raise ValueError('Costume references an undefined base collectible')
     return {'schema': 1, 'sourceHashes': PINS, 'collectibles': definitions,
-            'pools': pools, 'costumeCollectibleIds': costume_ids}
+            'pools': pools, 'costumeCollectibleIds': costume_ids,
+            'trinketAchievements': trinket_achievements, 'trinkets': trinkets}
 
 
 def rust(data):
@@ -95,6 +127,15 @@ def rust(data):
         lines.append(f"PoolDefinition {{ id: {pool['id']}, name: {json.dumps(pool['name'])}, entries: &[")
         lines.extend(f"PoolEntryDefinition {{ id: {entry['id']}, weight: {scalar(entry['weight'])}, decrease_by: {scalar(entry['decreaseBy'])}, remove_on: {scalar(entry['removeOn'])} }}," for entry in pool['entries'])
         lines.append('] },')
+    lines.append('];')
+    prerequisites = ', '.join('None' if value is None else f'Some({value})'
+                              for value in data['trinketAchievements'])
+    lines.append(f'pub const TRINKET_ACHIEVEMENTS: [Option<i32>; 62] = [{prerequisites}];')
+    lines.append('pub const TRINKETS: &[TrinketDefinition] = &[')
+    for item in data['trinkets']:
+        strings = ', '.join(f'{key}: {json.dumps(item[key], ensure_ascii=False)}' for key in ['name', 'description'])
+        graphic = f'Some({json.dumps(item["graphic"], ensure_ascii=False)})' if item['graphic'] else 'None'
+        lines.append(f"TrinketDefinition {{ id: {item['id']}, {strings}, graphic: {graphic}, achievement: {item['achievement']}, cache_flags: {item['cacheFlags']}, costume_anm2: {json.dumps(item['costumeAnm2'])} }},")
     lines.append('];')
     return '\n'.join(lines) + '\n'
 
