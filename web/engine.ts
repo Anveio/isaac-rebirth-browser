@@ -358,7 +358,7 @@ export interface State {
     parentOffset:{x:number;y:number}; angle:number; renderSortOffset:number; remainingUpdates:number;
     beamLength:number; lineEnabled:boolean; line:{points:{x:number;y:number}[]}; fast:boolean; sourceColor:AttackColor; currentColor:AttackColor; sprite:ActorSprite;
     impact: {sourceSubtype:number|null; spriteFlipX:boolean|null; raw814:number|null; id:number; parent:ActorRef|null; parentKnown:boolean; sourceColor:AttackColor|null; currentColor:AttackColor|null; position:{x:number;y:number}; positionOffset:{x:number;y:number}; scale:{x:number;y:number}; rotation:number; actor:string; animation:string; animationClock:number; removed:boolean}|null; actor:string}[];
-  enemyProjectiles: {id:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
+  enemyProjectiles: {id:number; variant?:number; spawnSeed:number; position:{x:number;y:number}; presentedPosition:{x:number;y:number}; velocity:{x:number;y:number}; height:number; scale:number; animation:string|null; animationFrame:number; dead:boolean; removed:boolean}[];
   schema: 1; tickRate: 60; tick: number; menuAnimationTick: number; runTick: number; gameUpdateCount: number; screen: Screen;
   titleAnimationFrame: number; menuFade: { active: boolean; alpha: number; color: [number, number, number, number] };
   menuPresentation: MenuPresentation;
