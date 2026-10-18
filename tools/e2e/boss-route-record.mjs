@@ -19,7 +19,9 @@
 // --from names the scripted prefix label (default gameplay-start) after which
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
-// fightKeys) and parks the player in the bottom-left corner (`corner`).
+// fightKeys) and parks the player in the bottom-left corner (`corner`);
+// --lead aims ahead of each foe's velocity and orbits closer; --no-corner
+// ends at the clear without the doorway-poop shots and the corner park.
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
@@ -181,7 +183,7 @@ try {
     }
   };
   if (FIGHT) {
-    const memory = { orbit: 1 };
+    const memory = { orbit: 1, lead: hasFlag('--lead') };
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
       await hold(state.player.controls ? fightKeys(state, memory) : []);
@@ -189,6 +191,9 @@ try {
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
     }
     checkpoint('clear');
+    if (hasFlag('--no-corner')) { await hold([]); await step(1); }
+  }
+  if (FIGHT && !hasFlag('--no-corner')) {
     // A poop the port's own fight drops in the cell inside an open doorway
     // would wall off the shared re-anchor walk. The port shoots it out from
     // a free side cell before parking; the original's fixture fight is fixed.

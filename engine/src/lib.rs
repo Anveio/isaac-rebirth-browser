@@ -2574,6 +2574,12 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
+        // A room holding more stains (or actors) than the record format
+        // admits refuses this save: the profile keeps its previous record
+        // and no write is requested, so the Tick and the run continue.
+        if !record.rooms_within_supported_counts() {
+            return Ok(());
+        }
         record.validate()?;
         let retained = self.saved_profiles.get_or_insert_with(|| {
             std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
