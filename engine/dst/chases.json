@@ -254,5 +254,25 @@
         "property:game: Continue resumes a run a previous session saved"
       ]
     ]
+  },
+  {
+    "out": "coverage-super-secret-entry.json",
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "room:8"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-greed-entry.json",
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "npc:50"
+      ]
+    ]
   }
 ]
