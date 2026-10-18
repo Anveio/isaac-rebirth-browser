@@ -58,8 +58,8 @@ pub struct Descriptor {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub persistent_spawn_cells: Option<PersistentSpawnCells>,
     /// Descriptor+40 selects generated surprise-miniboss substitution. Source
-    /// constructors clear it; secret/shop producers require stage>4/>3, so
-    /// fresh Basement's ordinary generated descriptors retain false.
+    /// constructors clear it; the generator's tail (589feb..58a9d1) sets it on
+    /// the secret room from stage 5 and on the shop from stage 4.
     pub surprise_miniboss: bool,
 }
 
@@ -200,49 +200,143 @@ impl Fitting {
         }
     }
     fn fit_small(&mut self, mask: u64, boss: bool) -> Option<usize> {
+        self.fit(mask, (1, 1), boss)
+            .expect("a 1x1 fit never reaches candidate5")
+    }
+    /// 58fad0/58f480: the first dead end (boss: farther than one step) that
+    /// one of the candidates around its connector fits. A candidate must have
+    /// the template's cell dims (8ed500) and its required door, cover only
+    /// free cells or the dead end's own, and touch at most one other room
+    /// (per slot, each slot's door in the template mask). The dead end takes
+    /// the candidate's rectangle; a failed fit changes nothing.
+    fn fit(&mut self, mask: u64, dims: (i32, i32), boss: bool) -> Result<Option<usize>, String> {
         for position in 0..self.ends.len() {
             let index = self.ends[position];
-            let room = &self.rooms[index];
+            let room = self.rooms[index].clone();
             if boss && room.distance <= 1 {
                 continue;
             }
-            let opposite = (room.direction? + 2) % 4;
-            if mask & (1 << opposite) == 0 {
+            let Some(direction) = room.direction else {
                 continue;
-            }
+            };
+            let opposite = (direction + 2) % 4;
             let Cell { x, y } = room.connector;
-            let mut neighbors = 0;
-            let mut valid = true;
-            for (slot, (dx, dy)) in [(-1, 0), (0, -1), (1, 0), (0, 1)].into_iter().enumerate() {
-                if let Some(cell) = cell_index(Cell {
-                    x: x + dx,
-                    y: y + dy,
-                }) {
-                    let neighbor = self.grid[cell];
-                    if neighbor >= 0 && neighbor != index as i32 {
-                        neighbors += 1;
-                        valid &= mask & (1 << slot) != 0;
+            // Horizontal entries grow left (0) or right (2); vertical ones
+            // up (1) or down (3), with the axes swapped.
+            let (dx, dy) = match direction {
+                0 => (-1, 0),
+                1 => (0, -1),
+                _ => (0, 0),
+            };
+            let (long, cross, step) = if matches!(direction, 0 | 2) {
+                ((2, 1), (1, 2), (0, -1))
+            } else {
+                ((1, 2), (2, 1), (-1, 0))
+            };
+            let candidates = [
+                (Cell { x, y }, (1, 1), Some(opposite)),
+                (
+                    Cell {
+                        x: x + dx,
+                        y: y + dy,
+                    },
+                    long,
+                    Some(opposite),
+                ),
+                (Cell { x, y }, cross, Some(opposite + 4)),
+                (
+                    Cell {
+                        x: x + step.0,
+                        y: y + step.1,
+                    },
+                    cross,
+                    Some(opposite),
+                ),
+                (
+                    Cell {
+                        x: x + dx,
+                        y: y + dy,
+                    },
+                    (2, 2),
+                    Some(opposite + 4),
+                ),
+                // 58f480 never sets candidate5's door slot (stale stack).
+                (
+                    Cell {
+                        x: x + dx + step.0,
+                        y: y + dy + step.1,
+                    },
+                    (2, 2),
+                    None,
+                ),
+            ];
+            for (origin, (width, height), slot) in candidates {
+                if (width, height) != dims {
+                    continue;
+                }
+                let Some(slot) = slot else {
+                    return Err("2x2 boss fit candidate5 reads an unset door slot".into());
+                };
+                if mask & (1 << slot) == 0 {
+                    continue;
+                }
+                let candidate = GeneratedRoom {
+                    origin,
+                    width,
+                    height,
+                    ..room.clone()
+                };
+                let free = (0..height).all(|row| {
+                    (0..width).all(|column| {
+                        cell_index(Cell {
+                            x: origin.x + column,
+                            y: origin.y + row,
+                        })
+                        .is_some_and(|cell| self.grid[cell] < 0 || self.grid[cell] == index as i32)
+                    })
+                });
+                if !free {
+                    continue;
+                }
+                let mut neighbors = 0;
+                let mut valid = true;
+                for (slot, cell) in slots(&candidate) {
+                    if !valid_slot(&candidate, slot) {
+                        continue;
+                    }
+                    if let Some(cell) = cell_index(cell) {
+                        let neighbor = self.grid[cell];
+                        if neighbor >= 0 && neighbor != index as i32 {
+                            neighbors += 1;
+                            valid &= mask & (1 << slot) != 0;
+                        }
                     }
                 }
-            }
-            if neighbors > 1 || !valid {
-                continue;
-            }
-            // 58f480 candidate0 shrinks at the incoming connector. Rejection
-            // later re-adds this index without undoing the shape mutation.
-            for value in &mut self.grid {
-                if *value == index as i32 {
-                    *value = -1;
+                if neighbors > 1 || !valid {
+                    continue;
                 }
+                // Rejection later re-adds this index without undoing the shape.
+                for value in &mut self.grid {
+                    if *value == index as i32 {
+                        *value = -1;
+                    }
+                }
+                for row in 0..height {
+                    for column in 0..width {
+                        let cell = cell_index(Cell {
+                            x: origin.x + column,
+                            y: origin.y + row,
+                        })
+                        .expect("checked in bounds");
+                        self.grid[cell] = index as i32;
+                    }
+                }
+                self.rooms[index] = candidate;
+                self.ends.remove(position);
+                return Ok(Some(index));
             }
-            self.grid[cell_index(room.connector)?] = index as i32;
-            self.rooms[index].origin = room.connector;
-            self.rooms[index].width = 1;
-            self.rooms[index].height = 1;
-            self.ends.remove(position);
-            return Some(index);
         }
-        None
+        Ok(None)
     }
     fn restore_rejected(&mut self, index: Option<usize>) {
         if let Some(index) = index {
@@ -536,10 +630,6 @@ fn attempt(
     let mut fitting = Fitting::new(growth);
     let mut descriptors = Vec::new();
     let minimum = boss(primary, flags, request.stage)?;
-    if minimum == 3700 {
-        // 591b80 fits the chosen room by its shape; only 1x1 boss rooms fit here.
-        return Err("Double Trouble's 2x1 boss room requires unimplemented boss placement".into());
-    }
     let boss_seed = primary.next();
     // 589854: bases 3500..3999 span 50 variants, 4000..4999 one, others ten.
     let maximum = minimum
@@ -549,7 +639,16 @@ fn attempt(
             _ => 9,
         };
     let selected = select(special, boss_seed, 5, (minimum, maximum), 4, 0, 10)?;
-    let Some(index) = fitting.fit_small(selected.1.door_mask, true) else {
+    // 591b80 fits the boss room by its shape's cell dims (8ed500); Double
+    // Trouble's rooms are 26x7 or 13x14.
+    let dims = match selected.1.shape_index() {
+        0 => (1, 1),
+        1 => (1, 2),
+        2 => (2, 1),
+        3 => (2, 2),
+        _ => return Err("boss template has no 8ed500 cell dims".into()),
+    };
+    let Some(index) = fitting.fit(selected.1.door_mask, dims, true)? else {
         return Ok(None);
     };
     record(
@@ -578,12 +677,16 @@ fn attempt(
     // Seed is reserved before mandatory shop/treasure, allocation comes after
     // every optional placement and admission draw (589a00 vs 589a2a).
     let secret_seed = primary.next();
+    let mut shop = None;
     for (kind, range) in [(2, (0, 1)), (4, (0, u32::MAX))] {
         let seed = primary.next();
         let selected = select(special, seed, kind, range, 4, 0, 10)?;
         let Some(index) = fitting.fit_small(selected.1.door_mask, false) else {
             return Ok(None);
         };
+        if kind == 2 {
+            shop = Some(descriptors.len());
+        }
         record(
             &mut descriptors,
             &fitting,
@@ -677,15 +780,15 @@ fn attempt(
     if !accepted {
         accepted = primary.random(3) == 0 && request.stage == 1;
     }
-    if optional(
+    let miniboss_placed = optional(
         &mut fitting,
         &mut descriptors,
         selected,
         accepted,
         primary.state,
     )
-    .is_some()
-    {
+    .is_some();
+    if miniboss_placed {
         *flags |= match minimum - if rare { 100 } else { 0 } {
             2000 => 0x200,
             2010 => 0x400,
@@ -820,6 +923,14 @@ fn attempt(
             );
         }
     }
+    surprise_miniboss(
+        primary,
+        flags,
+        &request,
+        miniboss_placed,
+        shop,
+        &mut descriptors,
+    );
     let mut generated_to_descriptor = vec![None; fitting.rooms.len()];
     for descriptor in &descriptors {
         generated_to_descriptor[descriptor.generated_index] = Some(descriptor.index);
@@ -853,6 +964,44 @@ fn attempt(
         })
         .collect();
     Ok(Some(Placed { descriptors, grid }))
+}
+
+/// 589feb..58a9d1: after the normal rooms every attempt draws two
+/// RandomFloats (5c2db0) against the surprise-miniboss chance. The first may
+/// flag the secret room from stage 5 and the second the shop from stage 4;
+/// both need that no miniboss room was placed this attempt (589ff7 also
+/// clears it when flags 0x18000 are both set). Game+0x10eafc only counts
+/// payouts the port does not admit (552650), so its penalty stays 0. The
+/// flag's local R1000 (SetSeed shift 0xc) does not advance the primary.
+/// PORT GAP: the five off-grid descriptors after it (58a137..58a433) and
+/// their primary words are not generated.
+fn surprise_miniboss(
+    primary: &mut Primary,
+    flags: &mut u64,
+    request: &NormalBasementRequest,
+    miniboss_placed: bool,
+    shop: Option<usize>,
+    descriptors: &mut [Descriptor],
+) {
+    let open = !miniboss_placed && *flags & 0x18000 != 0x18000;
+    let mut base = if request.coins > 19 { 1.05_f32 } else { 1.0 };
+    if *flags & 0x4000_0000 != 0 {
+        base += 0.1;
+        *flags &= !0x4000_0000;
+    }
+    if *flags & 0x8000_0000 != 0 {
+        base += 0.02;
+        *flags &= !0x8000_0000;
+    }
+    let chance = base * 0.333_333_34_f32;
+    let mut random_float = || primary.next() as f32 * 2.328_306_4e-10_f32;
+    // The secret room's flag needs stage > 4; this generator admits stage <= 4.
+    random_float();
+    if chance > random_float() && open && request.stage > 3 {
+        if let Some(shop) = shop {
+            descriptors[shop].surprise_miniboss = true;
+        }
+    }
 }
 
 pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
@@ -925,11 +1074,8 @@ fn generate_normal_basement_inner(
     special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
     let stage_seed = request.stage_seed;
-    if !(1..=3).contains(&request.stage) {
-        // Caves II's shop may take the surprise-miniboss flag from the two
-        // RandomFloat draws after the normal rooms (589feb..58a9d1), which
-        // this generator does not model.
-        return Err("normal generation admits only Basement I/II and Caves I".into());
+    if !(1..=4).contains(&request.stage) {
+        return Err("normal generation admits only Basement I/II and Caves I/II".into());
     }
     if stage_seed == 0 {
         return Err("nonzero stage seed required".into());
@@ -1030,8 +1176,10 @@ fn generate_normal_basement_inner(
                     CONTRACT.into()
                 } else if request.stage == 2 {
                     "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
-                } else {
+                } else if request.stage == 3 {
                     "continuing-profile-normal-isaac-caves-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
+                } else {
+                    "continuing-profile-normal-isaac-caves-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
                 },
                 stage: request.stage,
                 stage_seed,
