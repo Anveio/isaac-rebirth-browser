@@ -346,8 +346,13 @@ precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, active-item descent, restart, Random-exit, Number One cooldown and
 Envy split-death regressions, the Monstro, Larry Jr., Grub and Gemini
-kills, the Dingle and Gurglings entries and the Options menu (`"from": null`
-chases from a fresh boot), and the Charger entry. Few generated cases reach
+kills, the miniboss clear, the Dingle and Gurglings entries and the Options
+menu (`"from": null` chases from a fresh boot), and the Charger entry. A
+recipe whose tape does not exist yet chases from a fresh boot, so a new
+scenario needs only its recipe. The miniboss clear had been a harvested tape
+with no recipe, which a menu change sent into Options before any run; its
+recipe met Gluttony's room in 2 of 64 fresh boots on da2d591 and cleared it
+in 11 of 64 branches from there. Few generated cases reach
 Options at the fifth Main row, so `coverage-options-menu` holds a setting
 past the hold repeat, binds a key in the Keyboard menu, is refused leaving
 it with an action unbound, leaves it with its bindings saved and leaves
