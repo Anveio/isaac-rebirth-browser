@@ -137,13 +137,14 @@ try {
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
   assert.equal(state.room, rooms[0], `Route must start in room ${rooms[0]}, not ${state.room}`);
-  // Cells beside the original's own obstacles (--avoid): a turn there carries
-  // the player about ten units on toward the obstacle, which only the
-  // original's player then meets (#649 at a waypoint, and alike below a tail
-  // poop mid-walk). The shared boss-room walks keep one cell clear of them
-  // wherever the room still leaves a way to the goal.
-  const margin = [...new Set(AVOID.flatMap(cell => [cell - 15, cell + 15, cell - 1, cell + 1]))]
-    .filter(cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120 && !AVOID.includes(cell));
+  // Cells beside an obstacle only one game holds: the original's own (--avoid)
+  // or a solid poop the port's own fight left. A turn there carries the player
+  // about ten units on toward it, so only that game's player meets it (#649 at
+  // a waypoint; mid-walk below an original tail poop and beside a port poop
+  // alike). The shared boss-room walks keep one cell clear of them wherever
+  // the room still leaves a way to the goal.
+  const margin = sources => [...new Set(sources.flatMap(cell => [cell - 15, cell + 15, cell - 1, cell + 1]))]
+    .filter(cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120 && !sources.includes(cell));
   const pointCell = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
   const reaches = (grid, from, to) => {
     const seen = new Set([from]), queue = [from];
@@ -158,8 +159,11 @@ try {
     return false;
   };
   const clearOf = (cells, goal) => {
-    const wide = [...cells, ...margin];
-    return margin.length && reaches(avoiding(state.grid, wide), pointCell(state.player), pointCell(goal)) ? wide : cells;
+    for (const sources of [[...AVOID, ...state.poops], AVOID]) {
+      const wide = [...cells, ...margin(sources)];
+      if (reaches(avoiding(state.grid, wide), pointCell(state.player), pointCell(goal))) return wide;
+    }
+    return cells;
   };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
