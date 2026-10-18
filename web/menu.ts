@@ -122,6 +122,10 @@ export class MenuRenderer {
     this.assets.draw(ctx, path, "Idle", x, y, gauge(state.audio.sfxVolume), {layers: [3]});
     this.assets.draw(ctx, path, "Idle", x, y, gauge(state.music.musicEnabled ? state.music.volume : 0), {layers: [4]});
     this.assets.draw(ctx, path, "Idle", x, y, gauge(state.mapSettings.opacity), {layers: [5]});
+    // The native numeric display uses its GammaMenu Counter actor, not a slider.
+    const percent = Math.floor(Math.fround(Math.fround(Math.fround(state.gammaSettings.gamma) * 100) + 0.5));
+    for (const [index, digit] of [...String(percent)].reverse().entries())
+      this.assets.draw(ctx, `${MENU}gammamenu.anm2`, "Counter", x + 300 - index * 11, y + 210, Number(digit));
     //5A79D9/5A7F70: source Settings fullscreen uses inverted layer frames.
     this.assets.draw(ctx, path, "Idle", x, y, state.fullscreen.requested ? 0 : 1, {layers: [6]});
     this.assets.draw(ctx, path, "Idle", x, y, state.optionsMenu.selection, {layers: [8]});

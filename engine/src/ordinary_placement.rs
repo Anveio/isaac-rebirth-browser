@@ -163,6 +163,15 @@ pub fn positions(state: &State) -> Result<Vec<WorldVector>, Frontier> {
                     .map(|body| body.position)
                     .ok_or(Frontier::MissingBody { actor })?,
             ),
+            ActorKind::Slot => Some(
+                state
+                    .room
+                    .slots
+                    .iter()
+                    .find(|body| body.id == actor.id)
+                    .map(|body| body.position)
+                    .ok_or(Frontier::MissingBody { actor })?,
+            ),
             _ => None,
         };
         if let Some(position) = position {
@@ -267,13 +276,16 @@ pub(crate) fn player_update_frontier(
             return unknown("reached permanent status producer subtree");
         }
     }
-    //Empty canonical E14/E18 plus an actually nontrinket/empty queue makes
-    //Have25/Have16 false without reaching Paper21's independent age owner.
-    if owner.trinket_slots != [0, 0]
-        || owner
-            .queued_id
-            .is_some_and(|id| crate::items::definition(id).is_none_or(|config| config.kind == 2))
-    {
+    //The actual reached status callbacks ask25/16. An unrelated held or
+    //typed queued trinket is not an empty inventory and grants no role;
+    //canonical508FE0 must independently prove each actual query false.
+    let queries = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
+    if queries.has_trinket(25) != Some(false) || queries.has_trinket(16) != Some(false) {
         return unknown("actual HaveTrinket25/16 source context");
     }
     //531ED5 calls an effect helper only on an actual C70 expiry1→0.

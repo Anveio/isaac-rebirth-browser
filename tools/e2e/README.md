@@ -13,6 +13,36 @@ Every suite mixes two kinds of cases:
   developed against. A fuzz failure is a real bug until shown otherwise. The
   run records the case, so it can be replayed exactly.
 
+The `trinket-start` suite declares two fixed boot phases plus the first unfiltered
+OS boot/phase input before either game. Both games receive the same locally
+authored Challenge1 XML (no starting collectibles, starting Kind2 trinket41).
+It retains the ordinary composition/default-shot grade and adds actual Native
+Give41/Remove41 entry/return witnesses, held slots, namespace counts, cache3074
+and pool availability/count checks. Missing witnesses fail. Queue/contact350,
+random Get, other positive effects and held Continue remain unqualified.
+Original-derived XML and captures stay private; only the transformation recipe
+belongs in source.
+
+```sh
+npm run test:e2e -- trinket-start --no-build --keep-evidence --production FROZEN
+npm run test:e2e -- trinket-start --scenarios SAVED_BANK --no-build --keep-evidence --production FROZEN
+npm run test:e2e -- trinket-start --scenarios SAVED_BANK --case challenge-start41-fixed-phase0 --reuse-original CLOSED_NATIVE_CASE --no-build --keep-evidence --production FROZEN
+```
+
+Native reuse admits exactly one unchanged recorded case and retains its actual
+invocation journal. Replay draws no entropy. The current three-case replay
+passes 62,213 base checks and retains 24 required regular-Tear coverage failures.
+The additive grade passes 19,591 checks and fails its three inherited base-status
+requirements. Replaying the trimmed candidate on the same recordings preserves
+all preceding row values and statuses. Each recorded Native capture observes
+Give/Remove entry and return and restores its debug registers. The suite remains
+failed; this does not qualify the complete Tear backend. The deferred chest/TNT/
+rock bonuses and loose350 bodies stay outside this grant-only runtime slice.
+After integrating Gamma, all four browser runtime checks pass and the three-case
+replay retains every preceding comparison row. The fixed Save reuse also retains
+all 2,384 state rows (2,321 pass, 63 fail), pixel metrics and verdicts against the
+preceding candidate and main; its own-file reload passes.
+
 ## Running
 
 ```sh
@@ -261,9 +291,28 @@ Movement/coasting is mandatory on W→I, both-column and Defaults routes; Escape
 binding owns only its declared menu and final normal seeded-run suffix. The
 duplicate refusal requires actual SFX187 slot/cooldown and measured Menu clock
 origins; it does not rewrite the original three failed clock rows. Every pixel
-mismatch and history-cap failure remains visible. Reload, alternate physical
-confirm/raw-priority interactions, controller/hotplug, disabled-interpolation/
-Skipped behavior and complete pixels/PCM remain separate coverage.
+mismatch and history-cap failure remains visible. Native reload, alternate
+physical confirm/raw-priority interactions, controller/hotplug,
+disabled-interpolation/Skipped behavior and complete pixels/PCM remain separate
+coverage.
+
+`--keyboard-own-reload` is an explicit opt-in. It validates the complete replay
+bank before selecting the supported W→I routes, retains the original paired
+captures, then checks the actual Back save, natural same-origin constructor
+load, separate reset-load and trusted I movement/old W refusal. Options V4 and
+InputConfigs use separate storage owners. Command-state history must contain the
+constructor state plus one state per public command, with actual reset/final-step
+endpoints and no truncation. Music callback states are a separate optional owner. Same-Native default/reload comparisons
+on current-main `568e86ec` preserve 1,568 fields and 44 original-document PNG bytes; the two
+reload routes pass 298 checks over 26 checkpoints. RGBA remains 18 pass/26 fail
+and prior history-cap failures remain. These two recorded cases add no new draw
+or Native process; they do not qualify Native reload or the whole five-case bank.
+Replay their existing public inputs through the registered gate:
+
+```sh
+npm run test:e2e -- controls --keyboard-own-reload --scenarios references/isaac/cases/controls/recorded-four-fixed-and-9xzmzpr0-v1.json --case controls-movement-up-w-to-i-v1
+npm run test:e2e -- controls --keyboard-own-reload --scenarios references/isaac/cases/controls/recorded-os-m3mjey2z-v1.json --case controls-os-movement-up-w-to-i-v1
+```
 
 The first registered run on main0ad-based artifact `2a706930` passes all five
 cases: 3,688/3,688 fields and 109 checkpoints. The recorded OS input is
@@ -536,6 +585,35 @@ whose rooms cannot be found fails the suite without hiding the others. The
 whole workflow is
 in [docs/content-pipeline.md](../../docs/content-pipeline.md).
 
+The fixed Green champion Gaper route opens the Poop and follows a declared
+ring before waiting beside Green creep. It requires birth, first update,
+timeout, fade, last fade, retirement and actual Acid contact independently
+on each side. The recorded positive route on frozen `35edb299` passes all
+173,135 entity checks and 419 paired checkpoints, including typed Native
+1000.23 damage causes at Full327/357. Full RGBA remains 7 pass/412 fail;
+whole shared MT on this longer tail is unmeasured. Earlier negative routes
+and their mandatory missing-Acid failures remain preserved.
+
+The combined Gamma/starting-trinket build `62300f05` replays all four retained
+Native cases without a new Native process or entropy. All 456,532 inherited
+entity/paired fields and 196,875 fixed MT fields remain exact; all 134,916
+Gaper-spawner rows pass. The four older missing-Acid failures remain required.
+All 1,390 pixel verdicts and metrics remain unchanged (28 pass, 1,362 fail).
+The positive Acid route retains all seven witnesses per side; longer-tail MT
+remains unmeasured.
+
+```sh
+npm run test:e2e -- entity-gaper --scenarios references/isaac/cases/entities/gaper-recorded-fixed-and-dt3mfa-acid-v1.json --case gaper-contrived-2-green-contact-ring-early-v3 --public-clock-schedule
+```
+
+This input-only whole bank retains the other three original public case
+objects, including first recorded OS seed DT3MFAFE. It does not claim a fresh
+Native rerun of all four cases. Current same-Native controls preserve all
+269,637 entity and 9,605 paired fields with no lost passes, gain the two Fast
+preview comparisons, and retain all 196,875 fixed MT checks. The default
+fixed Green fixture emits the qualified physical tail. The existing standalone
+floor-helper path/freshness boundary remains separate from this route change.
+
 ## Large native captures
 
 `npm run test:e2e:paired -- --archive-native-evidence` retains the complete
@@ -708,3 +786,16 @@ See [the scoped results and remaining issues](../../docs/map-opacity.md).
 Natural reload/migration, banner/controller, fullmix and complete sharedMT
 parity need separate evidence. Source registration alone is not a passing live
 qualification.
+
+`options-gamma` extends the existing Options public-clock capture with fixed
+clamp/repeat/Back inputs and one unfiltered OS seed/boot case. It requires actual
+f32 settings, authored percentage, final GPU parameters and separate Browser
+reload owners under Preferences V4. The recorded bank passes 1,376 functional
+fields and 26/26 required percentage regions after the sampler precision fix;
+full-frame diagnostics remain 10/40 exact. Historical V2/V3 IO is a separate
+contract, not a regrade of old captures.
+
+```sh
+npm run test:e2e -- options-gamma --no-build --production-directory FROZEN
+npm run test:e2e -- options-gamma --scenarios references/isaac/cases/options-gamma/recorded-fixed-and-1k6qhddf-v1.json --no-build --production-directory FROZEN
+```

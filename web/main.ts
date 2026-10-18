@@ -1,5 +1,5 @@
 import './style.css';
-import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs, type MapPreferences } from './engine';
+import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs, type MapPreferences, type GammaPreferences } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
@@ -34,9 +34,10 @@ async function boot() {
   let bootAudioPreferences = savedPreferences?.audio ?? null;
   let bootFullscreenPreferences = savedPreferences?.fullscreen ?? null;
   let bootMapPreferences = savedPreferences?.map ?? null;
+  let bootGammaPreferences = savedPreferences?.gamma ?? null;
   //Real saved settings precede the first Title Music admission, as5B9930
   //precedes MenuInit. No post-constructor command may discard its Start.
-  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined, bootMapPreferences ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
+  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined, bootMapPreferences ?? undefined, bootGammaPreferences ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
   const saveGames = new SaveGameIO();
   let saveFailureVisible = false;
   const reportSaveFailure = () => {
@@ -233,7 +234,7 @@ async function boot() {
       if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
       automaticPaused = false; accumulator = 0; previous = performance.now();
     },
-    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences; inputConfigs?: InputConfigs; mapPreferences?: MapPreferences } = {}) => {
+    reset: (seed = randomSeed(), options: { trace?: boolean; bootEpochSeed?: number; resources?: ResourceInputs; audioPreferences?: AudioPreferences; fullscreenPreferences?: FullscreenPreferences; inputConfigs?: InputConfigs; mapPreferences?: MapPreferences; gammaPreferences?: GammaPreferences } = {}) => {
       fullscreen.assertIdleForReset();
       preferences.resetDispatch();
       inputConfigIO.resetDispatch();
@@ -244,8 +245,9 @@ async function boot() {
       // saved or independently declared Fullscreen input exists.
       const loadedFullscreenPreferences = options.fullscreenPreferences ?? stored?.fullscreen ?? {fullscreen: false};
       const loadedMapPreferences = options.mapPreferences ?? stored?.map ?? null;
+      const loadedGammaPreferences = options.gammaPreferences ?? stored?.gamma ?? null;
       currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
-        loadedFullscreenPreferences, loadedInputConfigs ?? undefined, loadedMapPreferences ?? undefined);
+        loadedFullscreenPreferences, loadedInputConfigs ?? undefined, loadedMapPreferences ?? undefined, loadedGammaPreferences ?? undefined);
       if (!saveGames.load(engine)) reportSaveFailure();
       currentState = engine.snapshot();
       feedback.resetDispatch();
@@ -256,6 +258,7 @@ async function boot() {
       bootAudioPreferences = loadedAudioPreferences === null ? null : {...loadedAudioPreferences};
       bootFullscreenPreferences = {...loadedFullscreenPreferences};
       bootMapPreferences = loadedMapPreferences === null ? null : {...loadedMapPreferences};
+      bootGammaPreferences = loadedGammaPreferences === null ? null : {...loadedGammaPreferences};
       audio.reset(options.trace === true);
       initialSeed = seed;
       trace = new ReplayTrace(initialSeed, options.trace === true, currentState);
@@ -266,7 +269,8 @@ async function boot() {
     },
     trace: () => ({...trace.snapshot(), bootInputConfigs: bootInputConfigs === null ? null : structuredClone(bootInputConfigs), bootAudioPreferences: bootAudioPreferences === null ? null : {...bootAudioPreferences},
       bootFullscreenPreferences: bootFullscreenPreferences === null ? null : {...bootFullscreenPreferences},
-      bootMapPreferences: bootMapPreferences === null ? null : {...bootMapPreferences}}),
+      bootMapPreferences: bootMapPreferences === null ? null : {...bootMapPreferences},
+      bootGammaPreferences: bootGammaPreferences === null ? null : {...bootGammaPreferences}}),
     // Diagnostic shared-MT draw log for the e2e --mt-draws comparator.
     mtDraws: { enable: (enabled = true) => engine.setMtDrawLog(enabled), take: () => engine.takeMtDraws() },
     capture: () => {

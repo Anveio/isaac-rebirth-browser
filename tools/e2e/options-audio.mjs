@@ -25,10 +25,10 @@ const fileDigest = name => digest(fs.readFileSync(name));
 const recorded = flag('--scenarios'), reuse = flag('--reuse-original'), count = flag('--count', '1');
 for (const name of ['--scenarios', '--reuse-original', '--production-directory', '--output'])
   assert.ok(flag(name) === undefined || flag(name).length > 0, `${name} requires a nonempty value`);
-// The current runtime writes V3. Historical V2 replay is an explicit input;
+// The current runtime writes V4. Historical V2 replay is an explicit input;
 // it is never guessed from a bank, artifact, or observed Browser storage.
-const preferencesVersion = flag('--preferences-schema', '3');
-assert.ok(preferencesVersion === '2' || preferencesVersion === '3', '--preferences-schema must be 2 or 3');
+const preferencesVersion = flag('--preferences-schema', '4');
+assert.ok(preferencesVersion === '2' || preferencesVersion === '3' || preferencesVersion === '4', '--preferences-schema must be 2, 3 or 4');
 const preferencesSchema = Number(preferencesVersion);
 const preferenceContract = optionsPreferenceContract(preferencesSchema);
 const output = outputDirectory('options-audio');
@@ -82,7 +82,7 @@ const library = path.join(output, 'options-audio-trace.so');
 execFileSync('cc', ['-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', '-fPIC', '-shared',
   'tools/original/audio-trace.c', '-o', library, '-ldl', '-pthread'], {cwd: ROOT});
 const nativeSources = Object.fromEntries(sourcePaths.filter(name => name.startsWith('tools/original/')).map(name => [name, before[name]]));
-const observerIdentity = {schema: 1, mode: preferencesSchema === 3 ? 'options-audio-v3' : 'options-audio-v1', binarySha256: ORIGINAL_SHA,
+const observerIdentity = {schema: 1, mode: preferencesSchema === 4 ? 'options-audio-v4' : preferencesSchema === 3 ? 'options-audio-v3' : 'options-audio-v1', binarySha256: ORIGINAL_SHA,
   captureProducerSha256: before['tools/foundation/paired-game.mjs'],
   librarySha256: fileDigest(library), sources: nativeSources, publicPreferences: {sfxVolume: 1, musicVolume: 1, fullscreen: false}};
 const catalogue = read(path.join(ROOT, 'web/audio-data.json'));
@@ -103,12 +103,12 @@ const inputsBefore = inputIdentity();
 for (const name of resourcePaths) assert.equal(inputsBefore[name], catalogue.assets[name].sha256, 'Actual authored input differs from its catalogue');
 writeJson(path.join(output, 'input-before.json'), inputsBefore);
 observerIdentity.authoredInputs = inputsBefore;
-if (preferencesSchema === 3) observerIdentity.preferenceContract = preferenceContract;
+if (preferencesSchema === 3 || preferencesSchema === 4) observerIdentity.preferenceContract = preferenceContract;
 const metadata = {waveFormat, pcm237Sha256: digest(pcm), pcm237Bytes: pcm.length,
   music61InputSha256s: ['music/title screen intro.ogg', 'music/title screen.ogg'].map(name => catalogue.assets[name].sha256)};
-const report = {schema: preferencesSchema === 3 ? 2 : 1, status: 'running', caseFilter: bank.caseFilter, originalBinarySha256: ORIGINAL_SHA,
+const report = {schema: preferencesSchema === 4 ? 3 : preferencesSchema === 3 ? 2 : 1, status: 'running', caseFilter: bank.caseFilter, originalBinarySha256: ORIGINAL_SHA,
   observerIdentity, source: before, cases: [], scope: 'Main-family Options SFX/Music arrows and changed-value Back with actual request/backend owners, public clock and final public run seed. Pixels and complete state history remain explicit diagnostics; no full mix, complete MT or other callbacks.'};
-if (preferencesSchema === 3) report.preferenceContract = preferenceContract;
+if (preferencesSchema === 3 || preferencesSchema === 4) report.preferenceContract = preferenceContract;
 let server, fatal;
 try {
   server = await startProductionServer({directory: flag('--production-directory')}); report.production = server.build;

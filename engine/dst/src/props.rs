@@ -11,6 +11,11 @@
 //! Details are built only when the SDK would emit them (the first pass and the
 //! first failure of each call site), keeping per-step checks cheap.
 //!
+//! An `always` may also name a failure's signature (the error a Tick
+//! returned, the kind of body that escaped): the property fails exactly as
+//! before, and the report additionally counts every distinct signature with
+//! its own earliest failure, so one known failure cannot hide a new one.
+//!
 //! Cases may run on several threads. A site's reported failure is the one
 //! from the earliest (unit, case, step), and each thread counts its own
 //! violations, so a report depends on the seed, never on scheduling.
@@ -38,6 +43,14 @@ pub struct Site {
     fails: AtomicU64,
     registered: AtomicBool,
     first_failure: Mutex<Option<(FailureKey, Value)>>,
+    signatures: Mutex<BTreeMap<String, Signed>>,
+}
+
+/// One signature's failures at a call site: how many, and the earliest.
+#[derive(Clone)]
+struct Signed {
+    fails: u64,
+    first: (FailureKey, Value),
 }
 
 /// Where a failure happened: unit, case and step, ordered for determinism.
@@ -71,6 +84,7 @@ impl Site {
             fails: AtomicU64::new(0),
             registered: AtomicBool::new(false),
             first_failure: Mutex::new(None),
+            signatures: Mutex::new(BTreeMap::new()),
         }
     }
 
@@ -84,6 +98,19 @@ impl Site {
         }
     }
 
+    /// As [`Site::would_emit`], and also for a signature's earliest failure.
+    pub fn would_emit_signed(&self, condition: bool, signature: Option<&str>) -> bool {
+        self.would_emit(condition)
+            || signature.is_some_and(|signature| {
+                let key = failure_key();
+                self.signatures
+                    .lock()
+                    .expect("property signatures")
+                    .get(signature)
+                    .is_none_or(|signed| key < signed.first.0)
+            })
+    }
+
     fn earliest(&self, key: FailureKey) -> bool {
         self.first_failure
             .lock()
@@ -93,6 +120,11 @@ impl Site {
     }
 
     pub fn record(&'static self, condition: bool, details: &Value) {
+        self.record_signed(condition, details, None);
+    }
+
+    /// Records a hit; a failure with a signature also counts toward it.
+    pub fn record_signed(&'static self, condition: bool, details: &Value, signature: Option<&str>) {
         if !self.registered.swap(true, Ordering::Relaxed) {
             SITES.lock().expect("property ledger").push(self);
         }
@@ -111,6 +143,31 @@ impl Site {
         }
         VIOLATIONS.with(|count| count.set(count.get() + 1));
         let key = failure_key();
+        let new_signature = signature.is_some_and(|signature| {
+            let mut signatures = self.signatures.lock().expect("property signatures");
+            match signatures.get_mut(signature) {
+                Some(signed) => {
+                    signed.fails += 1;
+                    if key < signed.first.0 {
+                        signed.first = (key, details.clone());
+                    }
+                    false
+                }
+                None => {
+                    let first = (key, details.clone());
+                    signatures.insert(signature.to_owned(), Signed { fails: 1, first });
+                    true
+                }
+            }
+        });
+        if new_signature && previous > 0 {
+            eprintln!(
+                "PROPERTY VIOLATION [{:?}] {} (new signature)\n{}",
+                self.kind,
+                self.message,
+                serde_json::to_string_pretty(details).unwrap_or_default()
+            );
+        }
         let mut first = self.first_failure.lock().expect("property failure");
         if first.as_ref().is_some_and(|(recorded, _)| *recorded <= key) {
             return;
@@ -178,19 +235,25 @@ pub fn with_context(details: Value) -> Value {
 }
 
 macro_rules! property {
-    ($sdk:ident, $kind:ident, $condition:expr, $message:literal, $details:expr) => {{
+    ($sdk:ident, $kind:ident, $condition:expr, $message:literal, $details:expr) => {
+        $crate::props::property!($sdk, $kind, $condition, $message, $details, None::<String>)
+    };
+    ($sdk:ident, $kind:ident, $condition:expr, $message:literal, $details:expr, $signature:expr) => {{
         static SITE: $crate::props::Site =
             $crate::props::Site::new($message, $crate::props::Kind::$kind);
         let condition: bool = $condition;
+        // A signature names a failure, so it is computed only for one.
+        let signature: Option<String> = if condition { None } else { $signature };
         let owned;
-        let details: &::serde_json::Value = if SITE.would_emit(condition) {
-            owned = $crate::props::with_context($details);
-            &owned
-        } else {
-            &$crate::props::NO_DETAILS
-        };
+        let details: &::serde_json::Value =
+            if SITE.would_emit_signed(condition, signature.as_deref()) {
+                owned = $crate::props::with_context($details);
+                &owned
+            } else {
+                &$crate::props::NO_DETAILS
+            };
         ::antithesis_sdk::$sdk!(condition, $message, details);
-        SITE.record(condition, details);
+        SITE.record_signed(condition, details, signature.as_deref());
     }};
 }
 
@@ -201,6 +264,17 @@ macro_rules! always {
     };
     ($condition:expr, $message:literal, $details:expr $(,)?) => {
         $crate::props::property!(assert_always, Always, $condition, $message, $details)
+    };
+    // `signature` names what failed; it is evaluated only on a failure.
+    ($condition:expr, $message:literal, $details:expr, signature: $signature:expr $(,)?) => {
+        $crate::props::property!(
+            assert_always,
+            Always,
+            $condition,
+            $message,
+            $details,
+            Some(::std::string::ToString::to_string(&$signature))
+        )
     };
 }
 
@@ -274,6 +348,17 @@ pub struct PropertyResult {
     pub status: Status,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub first_failure: Option<Value>,
+    /// Every distinct signature a signed `always` failed with.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub signatures: Vec<SignatureResult>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignatureResult {
+    pub signature: String,
+    pub fails: u64,
+    pub first_failure: Value,
 }
 
 /// Applies Antithesis property semantics to every SDK catalog entry declared
@@ -282,12 +367,30 @@ pub struct PropertyResult {
 pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
     // Antithesis identifies a property by its message, so call sites sharing
     // a message (e.g. the pass and fail arms of one check) aggregate.
-    type Ledger = (u64, u64, Option<(FailureKey, Value)>);
+    type Ledger = (
+        u64,
+        u64,
+        Option<(FailureKey, Value)>,
+        BTreeMap<String, Signed>,
+    );
     let mut sites: BTreeMap<&'static str, Ledger> = BTreeMap::new();
     for site in SITES.lock().expect("property ledger").iter() {
         let entry = sites.entry(site.message).or_default();
         entry.0 += site.passes.load(Ordering::Relaxed);
         entry.1 += site.fails.load(Ordering::Relaxed);
+        for (signature, signed) in site.signatures.lock().expect("property signatures").iter() {
+            match entry.3.get_mut(signature) {
+                Some(merged) => {
+                    merged.fails += signed.fails;
+                    if signed.first.0 < merged.first.0 {
+                        merged.first = signed.first.clone();
+                    }
+                }
+                None => {
+                    entry.3.insert(signature.clone(), signed.clone());
+                }
+            }
+        }
         if site.kind != Kind::Sometimes {
             let failure = site.first_failure.lock().expect("property failure").clone();
             if let Some(failure) = failure {
@@ -310,8 +413,17 @@ pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
         if !selected(info.class) || results.contains_key(info.message) {
             continue;
         }
-        let (passes, fails, first_failure) = sites.get(info.message).cloned().unwrap_or_default();
+        let (passes, fails, first_failure, signatures) =
+            sites.get(info.message).cloned().unwrap_or_default();
         let first_failure = first_failure.map(|(_, details)| details);
+        let signatures = signatures
+            .into_iter()
+            .map(|(signature, signed)| SignatureResult {
+                signature,
+                fails: signed.fails,
+                first_failure: signed.first.1,
+            })
+            .collect();
         let status = match info.display_type {
             "Always" if fails > 0 => Status::Failed,
             "Always" if passes == 0 => Status::Unmet,
@@ -330,6 +442,7 @@ pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
                 fails,
                 status,
                 first_failure,
+                signatures,
             },
         );
     }

@@ -242,6 +242,23 @@ export function entityRows(rows, source, actual, spec, render) {
       ['endpoint', vector(beam.laserEndpoint), vector(laser.endpoint)], ['scaleX', f32(beam.spriteScale?.[0]), f32(laser.sprite?.scale?.x)],
     ]) check(rows, `${name}.${field}`, expected, observed);
   }
+  // Entity_Slot machines and beggars (type 6) by spawn seed: the idle body
+  // the player collides with, anchored to its spawn position.
+  const machines = source.entities.filter(actor => actor.type === 6 && !actor.removed);
+  const slots = actual.room.slots ?? [];
+  check(rows, 'slot.identities', machines.map(actor => [actor.type, actor.variant, actor.spawnSeed]),
+    slots.map(slot => [6, slot.variant, slot.spawnSeed]));
+  for (const machine of machines) {
+    const slot = slots.find(candidate => candidate.spawnSeed === machine.spawnSeed);
+    if (!slot) continue;
+    const name = `slot${machine.spawnSeed}`;
+    for (const [field, expected, observed] of [
+      ['position', vector(machine.position), vector(phase === 0 ? slot.presentedPosition : slot.position)],
+      ['velocity', vector(machine.velocity), vector(slot.velocity)],
+      ['radius', f32(machine.collisionRadius), f32(slot.collisionRadius)], ['mass', f32(machine.collisionMass), f32(slot.collisionMass)],
+      ['animation', machine.animation, slot.animation],
+    ]) check(rows, `${name}.${field}`, expected, observed);
+  }
   const shots = source.entities.filter(actor => actor.type === 9 && !actor.removed);
   check(rows, 'projectile.seeds', shots.map(actor => actor.spawnSeed),
     actual.enemyProjectiles.filter(actor => !actor.dead && !actor.removed).map(actor => actor.spawnSeed));
@@ -286,7 +303,8 @@ export function markers(directory, spec) {
       }
       const actors = side === 'original'
         ? row.entities.filter(actor => spec.matches(actor.type, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.pendingDamage, dead: actor.removed }))
-        : row.room.npcs.filter(actor => !actor.removed && spec.matches(actor.kind, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.damage.pendingDamage, dead: actor.dead }));
+        : [...row.room.npcs.filter(actor => !actor.removed && spec.matches(actor.kind, actor.variant)).map(actor => ({ seed: actor.spawnSeed, hp: actor.hp, maxHp: actor.maxHp, pending: actor.damage.pendingDamage, dead: actor.dead })),
+          ...(row.room.slots ?? []).filter(slot => spec.matches(6, slot.variant)).map(slot => ({ seed: slot.spawnSeed, hp: 0, maxHp: 0, pending: 0, dead: false }))];
       const clear = side === 'original' ? row.room.combatClear : row.room.combatClear;
       // The spec's authored shape plus the one-cell wall border.
       const grid = side === 'original' ? [row.room.gridWidth, row.room.gridHeight] : row.room.grid && [row.room.grid.width, row.room.grid.height];

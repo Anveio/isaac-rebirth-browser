@@ -49,6 +49,8 @@ pub struct SaveRequest {
     pub fullscreen: bool,
     #[serde(default = "crate::map_presentation::default_serialized_opacity")]
     pub map_opacity: String,
+    #[serde(default = "crate::display_settings::default_serialized_gamma")]
+    pub gamma: String,
 }
 
 /// An explicit port capability failure, not a native setting or callback.
@@ -70,6 +72,10 @@ pub enum Action {
 
 impl OptionsMenu {
     /// Inputs precede5A7560's counter update. Both System parities poll.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is separate Options state 5A7560 reads or writes: actions, held keys, audio, music, map opacity, the shared MT stream and the audio counter"
+    )]
     pub fn advance(
         &mut self,
         actions: &PublicActions,
@@ -77,6 +83,7 @@ impl OptionsMenu {
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
         map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -105,9 +112,27 @@ impl OptionsMenu {
             }
             Action::None
         } else if left {
-            self.adjust(-1, self.left_held, audio, music, map, shared, audio_counter)?
+            self.adjust(
+                -1,
+                self.left_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if right {
-            self.adjust(1, self.right_held, audio, music, map, shared, audio_counter)?
+            self.adjust(
+                1,
+                self.right_held,
+                audio,
+                music,
+                map,
+                gamma,
+                shared,
+                audio_counter,
+            )?
         } else if actions.menu_back {
             Action::SaveAndBack
         } else {
@@ -169,6 +194,7 @@ impl OptionsMenu {
         music: &music::MusicState,
         fullscreen: &crate::fullscreen::FullscreenState,
         map: &crate::map_presentation::MapPreferences,
+        gamma: &crate::display_settings::GammaPreferences,
     ) -> Result<(), String> {
         let sequence = self.next_save_sequence;
         self.next_save_sequence = sequence
@@ -180,6 +206,7 @@ impl OptionsMenu {
             music_volume: format!("{:.4}", music.volume),
             fullscreen: fullscreen.requested,
             map_opacity: format!("{:.4}", map.opacity),
+            gamma: format!("{:.4}", gamma.gamma),
         });
         Ok(())
     }
@@ -188,6 +215,10 @@ impl OptionsMenu {
         counter == 0 || (counter > 49 && counter.is_multiple_of(10))
     }
 
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the per-row adjustment of advance, which takes the same separate audio, music, map, MT and counter state"
+    )]
     fn adjust(
         &self,
         direction: i32,
@@ -195,6 +226,7 @@ impl OptionsMenu {
         audio: &mut audio::AudioState,
         music: &mut music::MusicState,
         map: &mut crate::map_presentation::MapPreferences,
+        gamma: &mut crate::display_settings::GammaPreferences,
         shared: &mut crate::mt::Mt19937,
         audio_counter: u32,
     ) -> Result<Action, String> {
@@ -245,6 +277,7 @@ impl OptionsMenu {
                 );
             }
             4 => return Ok(Action::Fullscreen),
+            6 => gamma.adjust(direction),
             other => return Ok(Action::UnsupportedSetting(other)),
         }
         Ok(Action::None)

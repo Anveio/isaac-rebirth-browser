@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "caseDeclarationMode": "gamma-main-options-source-v1",
+  "nativeLabels": [
+    "intro",
+    "title-ready",
+    "options-initial-row-0",
+    "options-gamma-row-6",
+    "gamma-confirm-no-adjust",
+    "gamma-left-held-1",
+    "gamma-left-held-49",
+    "gamma-left-held-50",
+    "gamma-left-held-51",
+    "gamma-left-held-52",
+    "gamma-left-held-53",
+    "gamma-left-held-151",
+    "gamma-right-held-1",
+    "gamma-right-held-49",
+    "gamma-right-held-51",
+    "gamma-right-held-255",
+    "options-gamma-back-saved",
+    "provenance-character",
+    "provenance-seed-entry",
+    "character-seeded",
+    "gameplay-start"
+  ],
+  "pairedLabels": [
+    "title-ready",
+    "options-initial-row-0",
+    "options-gamma-row-6",
+    "gamma-confirm-no-adjust",
+    "gamma-left-held-1",
+    "gamma-left-held-49",
+    "gamma-left-held-50",
+    "gamma-left-held-51",
+    "gamma-left-held-52",
+    "gamma-left-held-53",
+    "gamma-left-held-151",
+    "gamma-right-held-1",
+    "gamma-right-held-49",
+    "gamma-right-held-51",
+    "gamma-right-held-255",
+    "options-gamma-back-saved",
+    "provenance-character",
+    "provenance-seed-entry",
+    "character-seeded",
+    "gameplay-start"
+  ],
+  "menuLabels": [
+    "title-ready",
+    "options-initial-row-0",
+    "options-gamma-row-6",
+    "gamma-confirm-no-adjust",
+    "gamma-left-held-1",
+    "gamma-left-held-49",
+    "gamma-left-held-50",
+    "gamma-left-held-51",
+    "gamma-left-held-52",
+    "gamma-left-held-53",
+    "gamma-left-held-151",
+    "gamma-right-held-1",
+    "gamma-right-held-49",
+    "gamma-right-held-51",
+    "gamma-right-held-255",
+    "options-gamma-back-saved"
+  ],
+  "playingLabels": [
+    "gameplay-start"
+  ],
+  "provenanceOnlyLabels": [
+    "intro",
+    "provenance-character",
+    "provenance-seed-entry",
+    "character-seeded"
+  ],
+  "sourceOnlyLabels": [
+    "intro"
+  ],
+  "preferenceSchema": 4,
+  "storageKey": "isaac-rebirth.options.v4",
+  "gamma": true,
+  "naturalReload": true,
+  "rectangles": {
+    "gammaPercentage": {
+      "labels": [
+        "options-gamma-row-6",
+        "gamma-confirm-no-adjust",
+        "gamma-left-held-1",
+        "gamma-left-held-49",
+        "gamma-left-held-50",
+        "gamma-left-held-51",
+        "gamma-left-held-52",
+        "gamma-left-held-53",
+        "gamma-left-held-151",
+        "gamma-right-held-1",
+        "gamma-right-held-49",
+        "gamma-right-held-51",
+        "gamma-right-held-255"
+      ],
+      "region": {
+        "x": 544,
+        "y": 268,
+        "width": 112,
+        "height": 48
+      },
+      "required": true,
+      "scope": "Source-declared settled Options percentage Counter and final Gamma; fixed rectangle, no masks/tolerance"
+    }
+  },
+  "scope": "Bounded fresh/default color-config Gamma. Actual f32/menu/Back/final GPU, required fixed numeral region, separate Browser reload and public seed/clock. No arbitrary native settings, fullRGBA, Native reload, HQ4X or Popups claim."
+}

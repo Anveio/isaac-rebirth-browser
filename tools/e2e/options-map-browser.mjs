@@ -24,7 +24,7 @@ function installMapReturns() {
           if (rows.length === limit) truncated = true;
           else rows.push({presentation, timestampMillis: args[1], tick: state.tick, screen: state.screen,
             systemCounter: state.systemClock.systemCounter, gameUpdateCount: state.gameUpdateCount,
-            opacity: state.mapSettings.opacity, options: structuredClone(state.optionsMenu),
+            opacity: state.mapSettings.opacity, gamma: state.gammaSettings?.gamma, options: structuredClone(state.optionsMenu),
             map: structuredClone(state.minimapPresentation), audioEvents: structuredClone(state.audio.events),
             slot237: structuredClone(state.audio.slots['237'])});
         } catch (failure) { error ??= String(failure.stack ?? failure); }
@@ -41,7 +41,7 @@ export function mapObservedBrowser(real, data, contract, observed, retain) {
     // Fresh-origin actual absence is a public startup declaration. No Map value
     // is injected, including on reset; the runtime must use its real default.
     await context.addInitScript({content:
-      `for (const key of ['isaac-rebirth.options.audio.v1','isaac-rebirth.options.v2','isaac-rebirth.options.v3']) localStorage.removeItem(key);\n` +
+      (contract.gamma ? '' : `for (const key of ['isaac-rebirth.options.audio.v1','isaac-rebirth.options.v2','isaac-rebirth.options.v3','isaac-rebirth.options.v4']) localStorage.removeItem(key);\n`) +
       `(${installPhysicalObserver.toString()})();\n(${installMapReturns.toString()})();`});
     const newPage = context.newPage.bind(context), close = context.close.bind(context);
     let page, next = 0;
@@ -61,7 +61,7 @@ export function mapObservedBrowser(real, data, contract, observed, retain) {
           if (typeof fn === 'function' && /window\.game\.capture\(\)/.test(fn.toString())) {
             const actual = await evaluateJson(page, storageKey => ({preferences: window.game.preferences(),
               feedback: window.game.feedback(), storage: {key: storageKey, text: localStorage.getItem(storageKey)},
-              audio: window.game.audio()}), contract.storageKey);
+              audio: window.game.audio(), graphics: window.__gammaGraphics?.()}), contract.storageKey);
             observed.checkpoints.push({label: contract.pairedLabels[next++], ...actual});
           }
           return result;
@@ -75,7 +75,14 @@ export function mapObservedBrowser(real, data, contract, observed, retain) {
         observed.trace = await readTrace(page);
         Object.assign(observed, await evaluateJson(page, () => ({returns: window.__mapActualReturns(),
           physical: window.__controlsPhysicalInputs(), preferences: window.game.preferences(),
-          feedback: window.game.feedback()})));
+          feedback: window.game.feedback(), graphics: window.__gammaGraphics?.()})));
+        if (contract.naturalReload === true) {
+          await page.reload({waitUntil: 'networkidle'});
+          await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+          observed.reload = await evaluateJson(page, key => ({ready: document.body.dataset.ready,
+            state: window.game.snapshot(), trace: window.game.trace(), preferences: window.game.preferences(),
+            storage: localStorage.getItem(key), graphics: window.__gammaGraphics?.()}), contract.storageKey);
+        }
       } catch (error) {observed.failures.push(String(error.stack ?? error));}
       finally {
         try {await close();} catch (error) {observed.failures.push(String(error.stack ?? error));}

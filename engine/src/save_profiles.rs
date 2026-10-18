@@ -237,6 +237,7 @@ impl RunRecord {
         {
             return Err("saved run has incomplete or inconsistent Level/Game owners".into());
         }
+        run.item_pools.validate_saved_trinkets()?;
         if let Some(records) = &context.ambient_records {
             crate::critters::validate_saved_records(records)?;
         }

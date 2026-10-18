@@ -719,6 +719,8 @@ pub(crate) struct AppearanceQueries<'a> {
     primary: PrimaryWeaponC08,
     entity: Option<PlayerEntitySource>,
     source_30e8: Option<i32>,
+    ///Actual Game+CE9F4 at this query's native caller phase, not runTick.
+    paper_game_counter: Option<u32>,
 }
 
 impl<'a> AppearanceQueries<'a> {
@@ -733,6 +735,7 @@ impl<'a> AppearanceQueries<'a> {
             primary,
             entity,
             source_30e8,
+            paper_game_counter: None,
         }
     }
 
@@ -819,22 +822,31 @@ impl<'a> AppearanceQueries<'a> {
             .map(|record| Some(record.cooldown))
     }
 
-    ///Both actual E14/E18 empty and a known empty/nontrinket3058 close
-    ///Have21, capacity and the ordinary scan independently. Positive held,
-    ///queued-kind2 and Paper emulation remain the canonical350 owner's work.
+    ///508FE0: recursive Paper21, its signed Game-counter emulation, actual
+    ///Have139 capacity, active held slots, then the typed queued config.
+    ///An earlier positive match does not inspect a later unknown owner.
     pub(crate) fn has_trinket(self, id: u32) -> Option<bool> {
-        if id == 0 || !self.history()?.trinket_slots || self.owner.trinket_slots != [0, 0] {
+        if id == 0 || !self.history()?.trinket_slots {
             return None;
         }
-        //508FC0 reaches ordinaryHave139 even though both empty slots prove
-        //the same result for either capacity. Retain that query provenance.
-        let _capacity = if self.have(139)? { 2 } else { 1 };
-        if let Some(id) = self.owner.queued_id {
-            if items::definition(id)?.kind == 2 {
-                return None;
+        if id != 21 && self.has_trinket(21)? && matches!(id, 23 | 48) {
+            //The native arithmetic is signed remainder, including negative
+            //counter words. No RNG or Mom's Box multiplier belongs here.
+            let remainder = (self.paper_game_counter? as i32) % 4;
+            if (id == 48 && remainder == 2) || (id == 23 && remainder == 3) {
+                return Some(true);
             }
         }
-        Some(false)
+        let capacity = if self.have(139)? { 2 } else { 1 };
+        if self.owner.trinket_slots[..capacity].contains(&id) {
+            return Some(true);
+        }
+        match self.owner.queued_config()? {
+            Some(config) => Some(
+                config.kind == crate::player_items::QueuedConfigKind::Trinket && config.id == id,
+            ),
+            None => Some(false),
+        }
     }
 
     ///Direct ownership of retained C08; request completion is a separate

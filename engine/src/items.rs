@@ -19,6 +19,19 @@ pub struct CollectibleDefinition {
     pub cooldown: i32,
     pub special: bool,
 }
+///Actual base ItemConfig Kind2 namespace, separate from collectibles.
+///Metadata alone grants no held-effect, costume or pickup350 capability.
+#[derive(Debug)]
+pub struct TrinketDefinition {
+    pub id: u32,
+    pub name: &'static str,
+    pub description: &'static str,
+    pub graphic: Option<&'static str>,
+    pub achievement: i32,
+    pub cache_flags: u32,
+    ///Parser57E021's config+60 string; empty on all pinned base trinkets.
+    pub costume_anm2: &'static str,
+}
 #[derive(Debug)]
 pub struct PoolEntryDefinition {
     pub id: u32,
@@ -39,6 +52,14 @@ pub fn definition(id: u32) -> Option<&'static CollectibleDefinition> {
         .binary_search_by_key(&id, |entry| entry.id)
         .ok()
         .map(|index| &COLLECTIBLES[index])
+}
+
+///Look up an already typed Kind2 ID. This never infers kind from the ID.
+pub fn trinket_definition(id: u32) -> Option<&'static TrinketDefinition> {
+    TRINKETS
+        .binary_search_by_key(&id, |entry| entry.id)
+        .ok()
+        .map(|index| &TRINKETS[index])
 }
 
 ///Conservative Add registration readset. False closes an empty ANM/skip
@@ -117,18 +138,79 @@ pub struct Pool {
     pub special_counter: i32,
     pub entries: Vec<PoolEntry>,
 }
+///ItemPool+7C8/+7C9 per-ID bytes and the independent signed+9B4 count.
+///Save581ED0 copies availability/count only; eligibility belongs to the
+///current profile's Reset5820A0 and is absent from the saved representation.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct TrinketPool {
+    pub available: Vec<bool>,
+    pub count: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub eligible: Option<Vec<bool>>,
+}
+impl TrinketPool {
+    fn reset(achievements: &[bool]) -> Self {
+        let eligible: Vec<bool> = TRINKET_ACHIEVEMENTS
+            .iter()
+            .map(|achievement| achievement.is_none_or(|id| id < 0 || achievements[id as usize]))
+            .collect();
+        let mut available = vec![true; 62];
+        available[0] = false;
+        available[47] = false;
+        let count = available
+            .iter()
+            .zip(&eligible)
+            .filter(|(available, eligible)| **available && **eligible)
+            .count() as i32;
+        Self {
+            available,
+            count,
+            eligible: Some(eligible),
+        }
+    }
+
+    fn validate(&self) -> Result<(), String> {
+        if self.available.len() != 62
+            || self.available[0]
+            || self.available[47]
+            || self
+                .eligible
+                .as_ref()
+                .is_some_and(|bytes| bytes.len() != 62)
+        {
+            return Err(
+                "trinket pool requires its actual 62 availability/eligibility bytes".into(),
+            );
+        }
+        //Load581CF0 preserves the saved count while current-profile
+        //eligibility may differ. Remove581770 decrements without clamping.
+        //Each removal lowers both availability-count and this signed count.
+        let available = self.available.iter().filter(|value| **value).count() as i32;
+        if self.count < available - 60 || self.count > available {
+            return Err("trinket pool has an inconsistent saved signed count".into());
+        }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ItemPools {
     pub seed: u32,
     pub root_rng: Rng,
-    pub secondary_rng: Rng,
+    ///Actual ItemPool+49C words; omitted legacy/unrepresented state is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub secondary_rng: Option<Rng>,
     pub pools: Vec<Pool>,
     pub special_factor: f32,
     pub removed: Vec<bool>,
     pub selected: Vec<bool>,
     pub room_routes: [i32; 23],
     pub pill_effects: [i32; 10],
+    ///Missing legacy data or an unrepresented GetTrinket callback is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trinkets: Option<TrinketPool>,
 }
 
 impl ItemPools {
@@ -178,6 +260,9 @@ impl ItemPools {
                 }
             })
             .collect();
+        //583159 resets trinket bytes after loading collectible pools and
+        //before pill shuffles. Reset has no RNG consumer.
+        let trinkets = Some(TrinketPool::reset(achievements));
         // 583040 shuffles the nine pill colors and 28 effects, then samples
         // each color without replacement. Keep these actual consumers so the
         // manager's complete RNG state remains its source state.
@@ -197,7 +282,7 @@ impl ItemPools {
         Ok(Self {
             seed,
             root_rng,
-            secondary_rng,
+            secondary_rng: Some(secondary_rng),
             pools,
             special_factor: 1.0,
             removed: vec![false; 347],
@@ -206,7 +291,74 @@ impl ItemPools {
                 -1, -1, 1, -1, 0, 2, -1, 5, -1, -1, 12, 0, 6, -1, 3, 4, 0, 0, 0, 0, 8, 0, 1,
             ],
             pill_effects,
+            trinkets,
         })
+    }
+
+    ///581770 tests availability and current eligibility, then clears only
+    ///availability and decrements count. It neither refills nor draws RNG.
+    pub(crate) fn remove_trinket(&mut self, id: u32) -> Result<bool, String> {
+        let pool = self
+            .trinkets
+            .as_mut()
+            .ok_or("trinket pool availability is unknown")?;
+        pool.validate()?;
+        let index = usize::try_from(id).map_err(|_| "trinket ID outside base pool")?;
+        if index >= 62 {
+            return Err("trinket ID outside base pool".into());
+        }
+        let eligible = pool
+            .eligible
+            .as_ref()
+            .ok_or("current-profile trinket eligibility is unknown")?;
+        if !pool.available[index] || !eligible[index] {
+            return Ok(false);
+        }
+        pool.available[index] = false;
+        pool.count -= 1;
+        Ok(true)
+    }
+
+    pub(crate) fn copy_for_save(&self) -> Result<Self, String> {
+        let mut saved = self.clone();
+        if let Some(pool) = &mut saved.trinkets {
+            pool.validate()?;
+            if pool.eligible.is_none() {
+                return Err("run save requires current-profile trinket eligibility".into());
+            }
+            pool.eligible = None;
+        }
+        Ok(saved)
+    }
+
+    pub(crate) fn validate_saved_trinkets(&self) -> Result<(), String> {
+        if let Some(pool) = &self.trinkets {
+            pool.validate()?;
+            if pool.eligible.is_some() {
+                return Err(
+                    "saved trinket pool must not replace current-profile eligibility".into(),
+                );
+            }
+        }
+        Ok(())
+    }
+
+    ///54EE90 Init precedes54EEA2 Load. Restore the saved availability/count
+    ///without serializing or overwriting the just-initialized profile bytes.
+    pub(crate) fn restore_after_init(&self, initialized: &Self) -> Result<Self, String> {
+        self.validate_saved_trinkets()?;
+        let mut restored = self.clone();
+        if let Some(pool) = &mut restored.trinkets {
+            pool.eligible = Some(
+                initialized
+                    .trinkets
+                    .as_ref()
+                    .and_then(|fresh| fresh.eligible.clone())
+                    .ok_or("Continue requires current-profile trinket eligibility")?,
+            );
+        }
+        //A missing legacy pool remains unknown despite the fresh initializer.
+        Ok(restored)
     }
 
     pub fn room_pool(&self, room_type: u32, shared: &mut crate::mt::Mt19937) -> i32 {

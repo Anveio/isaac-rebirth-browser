@@ -428,7 +428,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
             npc.collision_damage
         };
         if contact_damage > 0.0 {
-            combat::try_damage_player(state, contact_damage as u8, 60, 0)?;
+            //49C060 supplies collision damage to52B080. Its normal branch
+            //stores BF8 as rounded incoming damage *60 (52BED6). Owned NPC
+            //config/champion amounts are integers0/1/2, so the existing
+            //health-unit conversion is also that rounded incoming amount.
+            let health_units = contact_damage as u8;
+            let immunity_presentations = u32::from(health_units) * 60;
+            combat::try_damage_player(state, health_units, immunity_presentations, 0)?;
         }
         let original_position = player_body.position;
         combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {

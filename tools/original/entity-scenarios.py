@@ -103,9 +103,33 @@ def fought(result, code, slot, frames):
     result['portRecordedBuild'] = port.get('build')
 
 
+def green_creep_contact_tail():
+    # Fixed Green champion route: open the Poop, circle the centre rock, then
+    # wait beside the trail. Actual captures must still prove the Acid witness.
+    tape = [key('d', True)]
+    dense(tape, 27, 'contact-align')
+    tape.append(key('d', False))
+    dense(tape, 30, 'contact-align-settle', 2)
+    tape.append(key('Down', True))
+    dense(tape, 80, 'contact-open-poop', 2)
+    tape.append(key('Down', False))
+    for leg, (move, frames) in enumerate((('d', 23), ('s', 12), ('d', 20),
+                                        ('w', 22), ('a', 21), ('s', 14), ('a', 20)), 1):
+        tape.append(key(move, True))
+        dense(tape, frames, f'contact-kite-leg{leg}')
+        tape.append(key(move, False))
+    dense(tape, 30, 'contact-kite-coast', 2)
+    dense(tape, 140, 'contact-kite-observe', 2)
+    return tape
+
+
 def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7), fight=0):
     result = paired.build('paired-bomb-moving-even', code)
     tail = route(slot, sweep=shape != (13, 7))
+    if (not randomized and entity == (10, 1) and code.replace(' ', '') == '0F8NB23G'
+            and slot == 2 and shape == (13, 7)):
+        entry = next(index for index, action in enumerate(tail) if action.get('label') == 'entry-40')
+        tail = tail[:entry + 1] + green_creep_contact_tail()
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1] + tail

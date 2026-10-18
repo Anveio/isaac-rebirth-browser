@@ -1,0 +1,2743 @@
+{
+  "schema": 1,
+  "suite": "options-gamma",
+  "declarationMode": "fixed-plus-unfiltered-gamma-seed-boot-v1",
+  "randomCount": 1,
+  "entropy": "OS secrets.randbelow; all logical draws retained; no outcome selection",
+  "cases": [
+    {
+      "schema": 1,
+      "seed": "1E0W JX06",
+      "seedValue": 3066190771,
+      "bootEpochSeed": 1700000000,
+      "initialSeed": 2184569263,
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ]
+      },
+      "declaredAudioOptions": {
+        "sfxVolume": 1,
+        "musicVolume": 1
+      },
+      "declaredFullscreen": false,
+      "publicClockDeclaration": {
+        "schema": 1,
+        "nativeBootstrapPresentations": 30,
+        "presentationIntervalNanoseconds": 16667000,
+        "nativeEntryPresentation": 231,
+        "scope": "Independent public presentation timestamps; paired tape and source-only prelude define the complete schedule before either game."
+      },
+      "scenario": {
+        "id": "options-gamma-clamps-back-surface-v1",
+        "description": "Fixed public Main Options Gamma exact f32/even-repeat/clamps, real percent/final composition, Back file+V4 IO and normal seed provenance. Separate natural Browser reload; no Native reload/full-color-config/HQ4X/Popups claim.",
+        "randomized": false,
+        "systems": [
+          "menu-presentation",
+          "gamma",
+          "preferences"
+        ]
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-initial-row-0"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-row-6"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-confirm-no-adjust"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-50"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-52"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-53"
+        },
+        {
+          "type": "step",
+          "frames": 98
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-151"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 204
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-255"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "provenance-character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "provenance-seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-initial-row-0"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-row-6"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-confirm-no-adjust"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-50"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-52"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-53"
+        },
+        {
+          "type": "step",
+          "frames": 98
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-151"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 204
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-255"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "provenance-character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "w",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "j",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "x",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "0",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "provenance-seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "declarationMode": "gamma-main-options-source-v1",
+      "captureDeclaration": {
+        "nativeLabels": [
+          "intro",
+          "title-ready",
+          "options-initial-row-0",
+          "options-gamma-row-6",
+          "gamma-confirm-no-adjust",
+          "gamma-left-held-1",
+          "gamma-left-held-49",
+          "gamma-left-held-50",
+          "gamma-left-held-51",
+          "gamma-left-held-52",
+          "gamma-left-held-53",
+          "gamma-left-held-151",
+          "gamma-right-held-1",
+          "gamma-right-held-49",
+          "gamma-right-held-51",
+          "gamma-right-held-255",
+          "options-gamma-back-saved",
+          "provenance-character",
+          "provenance-seed-entry",
+          "character-seeded",
+          "gameplay-start"
+        ],
+        "pairedLabels": [
+          "title-ready",
+          "options-initial-row-0",
+          "options-gamma-row-6",
+          "gamma-confirm-no-adjust",
+          "gamma-left-held-1",
+          "gamma-left-held-49",
+          "gamma-left-held-50",
+          "gamma-left-held-51",
+          "gamma-left-held-52",
+          "gamma-left-held-53",
+          "gamma-left-held-151",
+          "gamma-right-held-1",
+          "gamma-right-held-49",
+          "gamma-right-held-51",
+          "gamma-right-held-255",
+          "options-gamma-back-saved",
+          "provenance-character",
+          "provenance-seed-entry",
+          "character-seeded",
+          "gameplay-start"
+        ],
+        "sourceOnlyLabels": [
+          "intro"
+        ]
+      }
+    },
+    {
+      "schema": 1,
+      "seed": "1K6Q HDDF",
+      "seedValue": 3046612081,
+      "bootEpochSeed": 1907663617,
+      "initialSeed": 2184569263,
+      "bootstrap": {
+        "boundaryLabel": "title-ready",
+        "sourceOnlyPrelude": [
+          {
+            "type": "step",
+            "frames": 180
+          },
+          {
+            "type": "capture",
+            "label": "intro"
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": true
+          },
+          {
+            "type": "step",
+            "frames": 12
+          },
+          {
+            "type": "key",
+            "key": "Return",
+            "down": false
+          },
+          {
+            "type": "step",
+            "frames": 9
+          }
+        ]
+      },
+      "declaredAudioOptions": {
+        "sfxVolume": 1,
+        "musicVolume": 1
+      },
+      "declaredFullscreen": false,
+      "publicClockDeclaration": {
+        "schema": 1,
+        "nativeBootstrapPresentations": 30,
+        "presentationIntervalNanoseconds": 16667000,
+        "nativeEntryPresentation": 231,
+        "scope": "Independent public presentation timestamps; paired tape and source-only prelude define the complete schedule before either game."
+      },
+      "scenario": {
+        "id": "options-gamma-unfiltered-seed-boot-0",
+        "description": "Fixed public Main Options Gamma exact f32/even-repeat/clamps, real percent/final composition, Back file+V4 IO and normal seed provenance. Separate natural Browser reload; no Native reload/full-color-config/HQ4X/Popups claim.",
+        "randomized": true,
+        "systems": [
+          "menu-presentation",
+          "gamma",
+          "preferences"
+        ]
+      },
+      "pairedTape": [
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-initial-row-0"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-row-6"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-confirm-no-adjust"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-50"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-52"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-53"
+        },
+        {
+          "type": "step",
+          "frames": 98
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-151"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 204
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-255"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "provenance-character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "h",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "h",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "provenance-seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "tape": [
+        {
+          "type": "step",
+          "frames": 180
+        },
+        {
+          "type": "capture",
+          "label": "intro"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 9
+        },
+        {
+          "type": "capture",
+          "label": "title-ready"
+        },
+        {
+          "type": "step",
+          "frames": 40
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 8
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Up",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-initial-row-0"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-row-6"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-confirm-no-adjust"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-50"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-52"
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-53"
+        },
+        {
+          "type": "step",
+          "frames": 98
+        },
+        {
+          "type": "capture",
+          "label": "gamma-left-held-151"
+        },
+        {
+          "type": "key",
+          "key": "Left",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 1
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-1"
+        },
+        {
+          "type": "step",
+          "frames": 48
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-49"
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-51"
+        },
+        {
+          "type": "step",
+          "frames": 204
+        },
+        {
+          "type": "capture",
+          "label": "gamma-right-held-255"
+        },
+        {
+          "type": "key",
+          "key": "Right",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Escape",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 60
+        },
+        {
+          "type": "capture",
+          "label": "options-gamma-back-saved"
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Down",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 2
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "provenance-character"
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Tab",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 108
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "1",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "k",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "6",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "h",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "h",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "d",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "f",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 6
+        },
+        {
+          "type": "capture",
+          "label": "provenance-seed-entry"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 72
+        },
+        {
+          "type": "capture",
+          "label": "character-seeded"
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": true
+        },
+        {
+          "type": "step",
+          "frames": 12
+        },
+        {
+          "type": "key",
+          "key": "Return",
+          "down": false
+        },
+        {
+          "type": "step",
+          "frames": 300
+        },
+        {
+          "type": "capture",
+          "label": "gameplay-start"
+        }
+      ],
+      "declarationMode": "gamma-main-options-source-v1",
+      "captureDeclaration": {
+        "nativeLabels": [
+          "intro",
+          "title-ready",
+          "options-initial-row-0",
+          "options-gamma-row-6",
+          "gamma-confirm-no-adjust",
+          "gamma-left-held-1",
+          "gamma-left-held-49",
+          "gamma-left-held-50",
+          "gamma-left-held-51",
+          "gamma-left-held-52",
+          "gamma-left-held-53",
+          "gamma-left-held-151",
+          "gamma-right-held-1",
+          "gamma-right-held-49",
+          "gamma-right-held-51",
+          "gamma-right-held-255",
+          "options-gamma-back-saved",
+          "provenance-character",
+          "provenance-seed-entry",
+          "character-seeded",
+          "gameplay-start"
+        ],
+        "pairedLabels": [
+          "title-ready",
+          "options-initial-row-0",
+          "options-gamma-row-6",
+          "gamma-confirm-no-adjust",
+          "gamma-left-held-1",
+          "gamma-left-held-49",
+          "gamma-left-held-50",
+          "gamma-left-held-51",
+          "gamma-left-held-52",
+          "gamma-left-held-53",
+          "gamma-left-held-151",
+          "gamma-right-held-1",
+          "gamma-right-held-49",
+          "gamma-right-held-51",
+          "gamma-right-held-255",
+          "options-gamma-back-saved",
+          "provenance-character",
+          "provenance-seed-entry",
+          "character-seeded",
+          "gameplay-start"
+        ],
+        "sourceOnlyLabels": [
+          "intro"
+        ]
+      },
+      "entropyDraws": [
+        {
+          "parameter": "runSeed",
+          "exclusiveUpperBound": 4294967295,
+          "sample": 3046612080
+        },
+        {
+          "parameter": "bootEpochSeed",
+          "exclusiveUpperBound": 4294967296,
+          "sample": 1907663617
+        }
+      ]
+    }
+  ]
+}

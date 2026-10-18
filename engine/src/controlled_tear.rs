@@ -139,11 +139,20 @@ fn neutral_kind8_context(state: &State) -> bool {
     state.weapon_admission.source_player_type == Some(0)
         && state.weapon_cache.primary.numeric() == 8
         && state.player_items.as_ref().is_some_and(|items| {
+            let queries = crate::item_queries::AppearanceQueries::new(
+                items,
+                state.weapon_cache.primary,
+                state.player.entity_source,
+                None,
+            );
             items.owned_counts.len() == 347
                 && items.owned_counts[329] > 0
                 && items.temporary_collectibles.is_empty()
-                && items.trinket_slots == [0, 0]
-                && items.queued_id.is_none()
+                //50D176/1C7 precede kind dispatch, including actual kind8.
+                //Only their canonical negatives skip the shared RNG arms.
+                && queries.has_trinket(30) == Some(false)
+                && queries.has_trinket(31) == Some(false)
+                && items.queue_is_empty()
                 && items
                     .owned_counts
                     .iter()
