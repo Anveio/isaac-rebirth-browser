@@ -121,18 +121,86 @@ over-bound capacity passes separately. The under-bound Browser wrapper stops
 with `KeyError('fatal')`; its failed status and raw output remain preserved.
 These C results do not become main715 capacity gameplay evidence.
 
-The unmerged persistent seed/last-penalty-stage candidate H (`65178aba`) is
-qualified on frozen main715 plus Save6, separately from merged current main.
-Its fresh build and all four Browser runtime controls pass. Two actual Save
-comparisons preserve all 3,748 rows and improve **3,650 pass / 98 fail** to
-**3,706 pass / 42 fail**: 28 seed-text and 28 penalty-stage gains, with zero
-lost passes, missing/new rows or changed Native expectations. All 66 own-save
-guards pass through same-process Continue. Pixel metrics remain unchanged at
+The later H composition has its own fresh public-main134 artifact `7ddc18cc`
+(WASM `a3f2c0bb`). It passes `check:build`, ABI/constructor checks and all four
+Browser runtime controls. One unchanged fixed case reuses the full retained
+Original input bank: all 2,384 ordered expected/actual/status rows equal the
+older dbfab H candidate, **2,349 pass / 35 fail**, with zero lost passes,
+missing/new rows or changed Native expectations. All 33 own-save guards pass;
+all pixel metrics and source PNG hashes remain identical (17 pass / 14 fail).
+The 35 required failures remain 28 ambient velocity words and seven canonical
+scope rows, so the actual canonical invocation still exits failed. The earlier
+archive-parent wrapper preflight failure remains preserved separately.
+
+That main134 capture also passes real natural same-origin reload and
+own-storage Continue: the stored seed is exactly `T1PK 6Y0W`, the restored live
+seed stays `T1PK6Y0W`, and the owned penalty stage is zero. After public Continue, the player
+resumes at the valid x396 door inset; the public movement then takes the
+reciprocal room5-to-room6 transition. This is the captured valid door branch,
+not a same-room movement or Original-process reload claim. No current134
+baseline artifact, OS Save replay or ordinary-run replay is claimed; the
+ordinary consumer's actual dbfab and historical715 results remain below.
+The actual canonical main134 affected preview selects 52 suites. The H publication
+composes onto later main `3b08711d`, preserving Mega Fatty and the two unrelated
+quality-tool changes; these main134 tests do not become a gameplay grade for
+that later source tree.
+
+Persistent seed and penalty owners (H) have a separate fresh qualification on
+snapshot `dbfab9b0`: baseline `9e3c05e5` and shared H/tooling artifact `70cb3285`
+pass `check:build`, ABI/constructor checks and all four Browser runtime controls
+each. The candidate's actual affected preview selects 52 suites. The shared artifact's portable test files
+are separate from the seven H implementation/consumer paths. These results do
+not qualify the later main134 integration.
+
+On the same retained fixed Original case, the 2,384 ordered comparisons improve
+from **2,321 pass / 63 fail** to **2,349 pass / 35 fail**. Exactly 14 saved-seed
+separator rows and 14 last-penalty-stage rows turn green, with zero lost passes,
+missing/new rows or changed Native expectations. All 33 own-save guards pass
+per role. Every pixel metric and source PNG hash is unchanged. The 35 required
+failures remain 28 pre-Quit ambient velocity words and seven canonical scope
+rows; both suite exits remain failed. The recorded OS case was validated in the
+whole input bank but was not selected for this dbfab pair.
+
+The edited ordinary-run driver also runs on both fresh artifacts against the
+same retained `zero-epoch` Native case. Both pass all 801 saved-Player checks,
+the observed shared-MT cursor/624 words and required grid/owner comparisons.
+The candidate exercises the literal nine-character saved-seed guard; the
+baseline retains its older eight-character normalization. No new Native
+process or used input was drawn; the unchanged ordinary driver still makes
+four unused OS draws before loading the recorded scenario.
+
+Both fixed-case natural same-origin reloads and own-storage Continues pass.
+The stored documents differ in exactly three values: the run and summary seed
+strings gain the canonical space, and `lastPenaltyStage` changes from null to
+zero. Both resume with compact eight-character live seeds. The saved entry is
+identical, but fresh constructor seeds, epochs and complete shared-MT states
+differ. Observed positions match different valid door placements allowed by
+unchanged placement code: baseline starts at x396 and subsequently crosses to
+room6; H starts at x84 and moves within room5. The local selected slot and draw
+are not directly observed. This is not an identical-boot counterfactual or
+Original-process reload parity.
+
+H formats the persistent seed from validated numeric ownership while keeping
+the live codec compact. Continue accepts only the canonical legacy eight-character
+form or its exact nine-character form with one ASCII space after character4,
+both matching the saved numeric context. Fresh admitted penalty state starts
+at zero; missing or explicitly unknown legacy state stays unknown. Damage,
+cross-stage and Restart lifetime coverage beyond these initial-room controls
+remains separate.
+
+Historical H artifact `65178aba`, on frozen main715 plus Save6, passes build
+and runtime 4/4. Its unchanged fixed and recorded OS comparisons retain all
+3,748 rows and improve **3,650 pass / 98 fail** to **3,706 pass / 42 fail**:
+28 seed-text and 28 penalty-stage gains, with zero lost passes, missing/new rows
+or changed Native expectations. All 66 own-save guards pass; pixels remain
 17 pass / 14 fail per case. The 42 required failures remain 28 fixed-case
 ambient velocity words and 14 canonical scope rows; both suite exits remain
-failed. Natural reload is unqualified on H. Its edited ordinary-run driver
-has not run because no compatible retained Native bank was found. These
-results do not establish current-main, Factory/Get or whole-game parity.
+failed. Its ordinary-run driver subsequently passed the retained `zero-epoch`
+case. A later audit of both complete raw reload reports, checkpoints and durable
+archives also proves both historical natural reloads passed. This explicitly
+corrects the earlier H readout and PR697 notes that labeled ordinary-run and
+natural reload unqualified; those earlier records remain preserved. Neither
+historical artifact establishes later-main, Factory/Get or whole-game parity.
 
 ## Earlier live scope
 

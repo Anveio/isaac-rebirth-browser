@@ -2189,8 +2189,14 @@ impl Game {
         record.admit_initial_room()?;
         let run = &record.run;
         let context = &record.context;
+        // Saved+EF80 owns the formatted string; the internal codec stays compact.
+        // Validation already joins either legacy8 or formatted9 to this number.
+        let run_seed = seed::encode(context.run_seed_value)?;
+        if run.run_seed != run_seed && run.run_seed != seed::formatted(context.run_seed_value)? {
+            return Err("saved seed text requires canonical legacy or formatted code".into());
+        }
         let mut run_seeds = seed::RunSeeds::new(context.run_seed_value)?;
-        run_seeds.admit_menu_seed_effect(&run.run_seed)?;
+        run_seeds.admit_menu_seed_effect(&run_seed)?;
         //54EE90 initializes ItemPool from SavedED94, then581CF0 restores
         //its actual saved tables. It does not request NewRun's14th seed draw.
         let constructed_pools = items::ItemPools::new(
@@ -2207,7 +2213,7 @@ impl Game {
             .ok_or("saved manager RNG is unknown")?;
         self.state.run_seeds = Some(run_seeds);
         self.state.run_seed_value = context.run_seed_value;
-        self.state.run_seed = run.run_seed.clone();
+        self.state.run_seed = run_seed;
         self.state.seeded_run = run.seeded_run;
         self.state.achievement_eligibility = !run.seeded_run;
         self.state.character = context.character.clone();
@@ -2539,7 +2545,7 @@ impl Game {
             item_pools,
             grid_save.records,
             player_items,
-        );
+        )?;
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,
@@ -3565,6 +3571,8 @@ impl Game {
             shake.reset_duration();
         }
         self.state.source_cache_run_flags = Some(0);
+        // Stop54F54B follows Save; its copied penalty stage stays intact.
+        self.state.level_progress.last_penalty_stage = Some(0);
         // Stop54F571 ->576B70 follows the actual Save copy above.
         self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
         self.reconstruct_stopped_room_backdrop();
@@ -3588,6 +3596,8 @@ impl Game {
             // NewRun54eb20 itself has no clear; delay remains unchanged.
             // The same Stop54F571 clears history for both deferred requests.
             // NewRun itself never reconstructs unknown history from counts.
+            // Both deferred destinations pass Stop54F54B before dispatch.
+            self.state.level_progress.last_penalty_stage = Some(0);
             self.state.acquisition_history =
                 Some(acquisition_history::AcquisitionHistory::default());
             self.state.information_animation.clear();
