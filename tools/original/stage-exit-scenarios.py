@@ -69,6 +69,11 @@ def port_fight(base, *args, **options):
     leg = record(base, *args, **options)
     if leg['status'] != 'pass' and leg.get('reason') == 'The port took the boss item':
         leg = record(base, *args, '--keep-off-pedestal', **options)
+    if leg['status'] != 'pass' and str(leg.get('reason', '')).startswith('Room not cleared'):
+        # The port's own fight is ungraded closed-loop input. When the default
+        # orbit loses, the leading aim and tighter orbit (fightKeys --lead)
+        # records a different fight that may clear the room.
+        leg = record(base, *args, '--lead', **options)
     return leg
 
 
