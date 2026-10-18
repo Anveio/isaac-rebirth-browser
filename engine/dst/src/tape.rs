@@ -4,6 +4,7 @@
 //! the browser's `game.reset(seed, ...)` plus commands reproduces, so a DST
 //! finding replays outside the harness without translation.
 use rebirth_cleanroom::{
+    display_settings::GammaPreferences,
     fullscreen::FullscreenPreferences,
     keyboard::InputConfigs,
     map_presentation::MapPreferences,
@@ -29,6 +30,8 @@ pub struct Tape {
     pub boot_input_configs: Option<InputConfigs>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boot_map_preferences: Option<MapPreferences>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boot_gamma_preferences: Option<GammaPreferences>,
     /// The browser's own-save storage (`save_host`); absent, no save IO.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub save_host: Option<SaveHost>,
@@ -44,6 +47,7 @@ impl Tape {
             boot_fullscreen_preferences: None,
             boot_input_configs: None,
             boot_map_preferences: None,
+            boot_gamma_preferences: None,
             save_host: None,
             commands: Vec::new(),
         }
@@ -59,7 +63,7 @@ impl Tape {
 
     /// The boot `replay.rs` and the browser's reset perform for this tape.
     pub fn boot(&self) -> Result<Game, String> {
-        Game::new_with_input_configs_and_map_preferences(
+        Game::new_with_settings_preferences(
             self.initial_seed,
             self.boot_epoch_seed,
             None,
@@ -67,6 +71,7 @@ impl Tape {
             self.boot_fullscreen_preferences,
             self.boot_input_configs.clone(),
             self.boot_map_preferences,
+            self.boot_gamma_preferences,
         )
     }
 
@@ -90,16 +95,22 @@ impl Tape {
     /// The browser's reset export for this boot (`web/engine.ts`).
     pub fn reset(&self) -> Reset {
         let audio = self.boot_audio_preferences;
-        if let Some(configs) = &self.boot_input_configs {
-            let request = serde_json::json!({
+        let gamma = self.boot_gamma_preferences;
+        if self.boot_input_configs.is_some() || gamma.is_some() {
+            let mut request = serde_json::json!({
                 "withResources": false,
                 "audioPreferences": audio,
                 "fullscreenPreferences": self.boot_fullscreen_preferences,
                 "mapPreferences": self.boot_map_preferences,
-                "inputConfigs": configs,
+                "inputConfigs": self.boot_input_configs,
             });
-            return Reset::InputConfigs {
-                request: serde_json::to_vec(&request).expect("boot request serializes"),
+            if let Some(gamma) = gamma {
+                request["gammaPreferences"] = serde_json::json!(gamma);
+            }
+            let request = serde_json::to_vec(&request).expect("boot request serializes");
+            return match gamma {
+                Some(_) => Reset::Settings { request },
+                None => Reset::InputConfigs { request },
             };
         }
         if let Some(map) = self.boot_map_preferences {
@@ -139,8 +150,8 @@ impl Tape {
 }
 
 /// A reset export's arguments after the two seeds. A stored input
-/// configuration takes the request-buffer reset, which carries every stored
-/// setting; otherwise a stored Map opacity takes the map reset, and a stored
+/// configuration or Gamma takes a request-buffer reset, which carries every
+/// stored setting; otherwise a stored Map opacity takes the map reset, and a stored
 /// fullscreen setting the display reset, each carrying the settings before
 /// it.
 pub enum Reset {
@@ -166,6 +177,11 @@ pub enum Reset {
     },
     /// `reset_with_input_configs`, after `request_ptr` receives `request`.
     InputConfigs {
+        request: Vec<u8>,
+    },
+    /// `reset_with_settings_preferences`, after `request_ptr` receives
+    /// `request`, which then names a Gamma.
+    Settings {
         request: Vec<u8>,
     },
 }

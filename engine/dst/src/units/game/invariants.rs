@@ -644,14 +644,21 @@ fn options(before: &State, after: &State) {
     props::always!(
         (after.audio.sfx_volume == before.audio.sfx_volume || row == 1)
             && (after.music.volume == before.music.volume || row == 2)
-            && (after.map_settings == before.map_settings || row == 3),
+            && (after.map_settings == before.map_settings || row == 3)
+            && (after.gamma_settings == before.gamma_settings || row == 6),
         "game: an Options tick changes only the setting on its selected row",
         json!({
             "row": row,
             "sfx": [before.audio.sfx_volume, after.audio.sfx_volume],
             "music": [before.music.volume, after.music.volume],
             "map": [before.map_settings, after.map_settings],
+            "gamma": [before.gamma_settings, after.gamma_settings],
         })
+    );
+    props::always!(
+        (0.5..=1.5).contains(&after.gamma_settings.gamma),
+        "game: Gamma stays within .5..1.5",
+        json!({ "row": row, "gamma": [before.gamma_settings, after.gamma_settings] })
     );
     if after.screen == Screen::Main {
         let saved = after.options_menu.save_requests.last();
@@ -661,6 +668,7 @@ fn options(before: &State, after: &State) {
                     && saved.music_volume == format!("{:.4}", after.music.volume)
                     && saved.fullscreen == after.fullscreen.requested
                     && saved.map_opacity == format!("{:.4}", after.map_settings.opacity)
+                    && saved.gamma == format!("{:.4}", after.gamma_settings.gamma)
             }),
             "game: leaving Options saves the settings it leaves with",
             json!({
@@ -669,6 +677,7 @@ fn options(before: &State, after: &State) {
                 "music": after.music.volume,
                 "fullscreen": after.fullscreen.requested,
                 "map": after.map_settings,
+                "gamma": after.gamma_settings,
             })
         );
         props::sometimes!(true, "game: Options saves and returns to the main menu");

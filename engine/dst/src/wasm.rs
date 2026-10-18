@@ -31,6 +31,7 @@ struct Exports {
     reset_with_audio_preferences: TypedFunc<(u32, u32, f32, f32), u32>,
     reset_with_fullscreen_preferences: TypedFunc<(u32, u32, u32, u32, f32, f32), u32>,
     reset_with_input_configs: TypedFunc<(u32, u32), u32>,
+    reset_with_settings_preferences: TypedFunc<(u32, u32), u32>,
     reset_with_map_preferences_v2: TypedFunc<MapReset, u32>,
     request_ptr: TypedFunc<u32, u32>,
     command: TypedFunc<(), u32>,
@@ -98,6 +99,7 @@ impl Module {
             reset_with_audio_preferences: export!("reset_with_audio_preferences"),
             reset_with_fullscreen_preferences: export!("reset_with_fullscreen_preferences"),
             reset_with_input_configs: export!("reset_with_input_configs"),
+            reset_with_settings_preferences: export!("reset_with_settings_preferences"),
             reset_with_map_preferences_v2: export!("reset_with_map_preferences_v2"),
             request_ptr: export!("request_ptr"),
             command: export!("command"),
@@ -204,19 +206,21 @@ impl Module {
                 ),
             ),
             Reset::InputConfigs { request } => {
-                let pointer = wasm
-                    .request_ptr
-                    .call(&mut wasm.store, request.len() as u32)
-                    .map_err(trap)?;
-                if pointer == 0 {
+                if !wasm.request(&request)? {
                     return Ok(Some(
                         json!({ "step": "reset", "reason": "request allocation" }),
                     ));
                 }
-                wasm.memory
-                    .write(&mut wasm.store, pointer as usize, &request)
-                    .map_err(|error| error.to_string())?;
                 wasm.reset_with_input_configs.call(&mut wasm.store, seeds)
+            }
+            Reset::Settings { request } => {
+                if !wasm.request(&request)? {
+                    return Ok(Some(
+                        json!({ "step": "reset", "reason": "request allocation" }),
+                    ));
+                }
+                wasm.reset_with_settings_preferences
+                    .call(&mut wasm.store, seeds)
             }
         };
         if reset.map_err(trap)? != 0 {
@@ -233,18 +237,11 @@ impl Module {
         let stride = (count / SAMPLED_SNAPSHOTS).max(1);
         for (index, command) in tape.commands.iter().enumerate() {
             let bytes = serde_json::to_vec(command).map_err(|error| error.to_string())?;
-            let pointer = wasm
-                .request_ptr
-                .call(&mut wasm.store, bytes.len() as u32)
-                .map_err(trap)?;
-            if pointer == 0 {
+            if !wasm.request(&bytes)? {
                 return Ok(Some(
                     json!({ "step": index, "reason": "request allocation" }),
                 ));
             }
-            wasm.memory
-                .write(&mut wasm.store, pointer as usize, &bytes)
-                .map_err(|error| error.to_string())?;
             let failed = wasm.command.call(&mut wasm.store, ()).map_err(trap)? != 0;
             let error_published = wasm.error_len.call(&mut wasm.store, ()).map_err(trap)? != 0;
             let (native_ok, native_digest) = trace[index];
@@ -303,6 +300,19 @@ impl Exports {
         function
             .call(&mut self.store, parameters)
             .map_err(|error| format!("engine.wasm trapped: {error}"))
+    }
+
+    /// Copies `bytes` into the buffer `request_ptr` allocates, or reports
+    /// that the module could not allocate it.
+    fn request(&mut self, bytes: &[u8]) -> Result<bool, String> {
+        let pointer = self.call(self.request_ptr, bytes.len() as u32)?;
+        if pointer == 0 {
+            return Ok(false);
+        }
+        self.memory
+            .write(&mut self.store, pointer as usize, bytes)
+            .map_err(|error| error.to_string())?;
+        Ok(true)
     }
 
     /// Copies `bytes` into the buffer `save_input_ptr` allocates.
