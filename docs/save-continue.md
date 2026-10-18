@@ -9,9 +9,14 @@ The versioned, bounded Save packet contains explicit Player, ItemPool,
 Level/Room/GridRecord and profile owners. It does not replace the running
 Game/State. Quit reports the actual own-storage write result; fresh menu
 construction reads the actual stored bytes before selecting Main Continue.
-A failed latest write may leave an older valid own save. Each IO request
-suspends the current public Tick until its own response, including the
-remaining iterations of a batched Tick. Keyboard/InputConfigs, audio/display
+The complete encoded profile document is bounded at 4 MiB. Walking paint has
+no separate 4,096-record cutoff and is never truncated to fit. An actual
+capacity export failure produces no partial packet, receives exactly one
+failed-write acknowledgement, preserves every older stored byte and resumes
+the remaining public Tick iterations. Other export errors remain errors.
+An older valid own save may still be admitted after that failed latest write.
+Each IO request suspends the current public Tick until its own response,
+including the remaining iterations of a batched Tick. Keyboard/InputConfigs, audio/display
 preferences and the global clock retain their current owners. Constructor,
 cache and Room callbacks reconstruct the saved world; host data never supplies
 Native observations to WASM.
@@ -24,11 +29,11 @@ is unadmitted because this load caller cannot reconstruct it; the count is a
 conservative port list owner, not an inferred Native live/dead count. A legacy
 packet without this owner remains unknown and its Continue request is refused,
 while its own stored bytes remain intact. Ordinary
-walking footprints are admitted: they paint a transient backdrop and are not
-saved Blood7 bodies. Continue constructs the normal backdrop again, and both
-stationary restored endpoints require actual empty paint arrays. Other stains,
-room travel, special characters/modes, nonzero item callbacks, unsupported grid
-factories and progression remain explicit unsupported load domains. The packet
+walking footprints and other Blood7 paint are admitted: they use a transient
+backdrop and are not saved Blood7 bodies. Continue constructs the normal
+backdrop again; the earlier stationary restored endpoints require actual empty
+paint arrays. Other stain families, room travel, special characters/modes,
+nonzero item callbacks, unsupported grid factories and progression remain explicit unsupported load domains. The packet
 validator and this narrower load admission are separate; a durable packet does
 not by itself establish an implemented Continue caller for every saved state.
 
@@ -82,6 +87,52 @@ checks remain required. The retained seven-capture Exit/audio case passes all
 Actual death/Exit, public clocks and three earlier SFX8 positive owners pass;
 pixels remain 4 pass / 3 fail. The earlier rejected capture and its ungraded
 audio remain preserved. This covers Exit, without a Restart or full PCM claim.
+
+## Save capacity and current integration scope
+
+PR696's six-file Save foundation is merged at `9f952efd`. Its fresh Browser
+qualification remains bound to exact main715.
+Fresh baseline `7ad918af` and Save candidate `92dc82b9` pass `check:build`,
+ABI/constructor checks, the canonical affected preview and all four public
+Browser runtime tests each. Four actual same-Native Save controls replay the
+unchanged fixed moving case and recorded `DL17GHC7` on both artifacts. Each
+role preserves all 3,748 ordered expected/actual/status rows: **3,650 pass /
+98 fail**, with zero lost passes, changed rows or pixel-metric changes.
+All 33 own-save guards pass on each control. The 98 failures comprise 28
+fixed-case ambient velocity-word rows, 14 canonical menu/gameplay-scope rows,
+28 seed-text separator rows and 28 last-penalty-stage rows. The original closed
+baseline leg was reused after its wrapper mirror failed; that failed wrapper
+remains failed. No new Original process or random draw was used.
+
+The merged current-main composition separately passes an isolated native port library check:
+`cargo check --locked --lib`. Its outer wrapper's failed label is preserved:
+the wrapper expected a literal `Checking` line, while Cargo compiled the fresh
+engine and exited zero. This compiler result adds no current-main Browser or
+gameplay qualification.
+
+Earlier frozen Source C capacity evidence retains its own artifact scope.
+The native port Rust/C ABI replay observes a complete 2,970,551-byte packet
+with 6,368 paint records, literal complete-owner/wire/store agreement and successful write
+continuation. The over-bound replay observes 13,334 footprint records, one
+failed capacity acknowledgement, unchanged older stored bytes and continued
+Tick progress. Existing shipped-WASM differential replay passes; it does not
+observe complete direct WASM SavedRun/Profiles owner bytes. Production Browser
+over-bound capacity passes separately. The under-bound Browser wrapper stops
+with `KeyError('fatal')`; its failed status and raw output remain preserved.
+These C results do not become main715 capacity gameplay evidence.
+
+The unmerged persistent seed/last-penalty-stage candidate H (`65178aba`) is
+qualified on frozen main715 plus Save6, separately from merged current main.
+Its fresh build and all four Browser runtime controls pass. Two actual Save
+comparisons preserve all 3,748 rows and improve **3,650 pass / 98 fail** to
+**3,706 pass / 42 fail**: 28 seed-text and 28 penalty-stage gains, with zero
+lost passes, missing/new rows or changed Native expectations. All 66 own-save
+guards pass through same-process Continue. Pixel metrics remain unchanged at
+17 pass / 14 fail per case. The 42 required failures remain 28 fixed-case
+ambient velocity words and 14 canonical scope rows; both suite exits remain
+failed. Natural reload is unqualified on H. Its edited ordinary-run driver
+has not run because no compatible retained Native bank was found. These
+results do not establish current-main, Factory/Get or whole-game parity.
 
 ## Earlier live scope
 
