@@ -244,8 +244,7 @@ being copied by hand.
 
   `floor.rs` takes a `StageDef` instead of `stage == 1` predicates.
   `room_assets.rs` loads the STB named by the stage. The missing Caves and
-  Depths STBs are extracted from `rooms.a` and committed next to the existing
-  ones.
+  Depths STBs are derived privately from the owner's `rooms.a`, never committed.
 
   Stage progression needs one trapdoor/next-stage controller. That is
   separate behavior work and builds on `references/isaac/foundation/basement-ii`.
