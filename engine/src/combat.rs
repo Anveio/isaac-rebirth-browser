@@ -254,6 +254,310 @@ pub(crate) fn resolve_bomb_pair(
     )
 }
 
+/// Beggars and Key Master (SizeMulti (1,1)) take 445710 like a free
+/// pickup body: Slot539690 and Player509160 both return false here.
+pub(crate) fn resolve_player_beggar_contact(
+    player: &mut ContactBody,
+    slot: &mut ContactBody,
+    blocks_player_shift: impl FnOnce(WorldVector) -> bool,
+) -> Result<ContactResolution, String> {
+    if player.entity_type != 1 || slot.entity_type != 6 {
+        return Err("beggar contact requires Player1/Slot6 bodies".into());
+    }
+    resolve_contact(player, slot, blocks_player_shift, |_, _| {})
+}
+
+/// 445be0's shape test for a pair with a Slot: either SizeMulti other than
+/// (1,1) (612c20 operator!=) selects the capsule test, else the circle.
+pub(crate) fn slot_overlap(
+    other: &ContactBody,
+    slot: &ContactBody,
+    slot_size_multi: WorldVector,
+    rotation_degrees: f32,
+) -> Result<bool, String> {
+    if slot_size_multi.x != 1.0 || slot_size_multi.y != 1.0 {
+        other.validate()?;
+        slot.validate()?;
+        let (a, a_size, b, b_size) =
+            lower_type_first(other, WorldVector { x: 1.0, y: 1.0 }, slot, slot_size_multi);
+        let first = capsule(a, a_size, rotation_degrees)?;
+        let second = capsule(b, b_size, rotation_degrees)?;
+        Ok(capsule_penetration(&first, &second).is_some())
+    } else {
+        contact_overlap(other, slot)
+    }
+}
+
+fn lower_type_first<'a>(
+    first: &'a ContactBody,
+    first_size: WorldVector,
+    second: &'a ContactBody,
+    second_size: WorldVector,
+) -> (&'a ContactBody, WorldVector, &'a ContactBody, WorldVector) {
+    if first.entity_type > second.entity_type {
+        (second, second_size, first, first_size)
+    } else {
+        (first, first_size, second, second_size)
+    }
+}
+
+/// 42d9d0 capsule: a segment p1..p2 with a radius. Only +448 position,
+/// +474 radius, +478 SizeMulti and sprite rotation +2cc are read.
+#[derive(Clone, Copy)]
+struct Capsule {
+    p1: WorldVector,
+    p2: WorldVector,
+    radius: f32,
+}
+
+fn capsule(
+    body: &ContactBody,
+    size_multi: WorldVector,
+    rotation_degrees: f32,
+) -> Result<Capsule, String> {
+    // 6124a0 feeds glibc sinf/cosf/sincosf; only angle0 is exactly (0,1)
+    // without them, and no admitted body writes another rotation.
+    if rotation_degrees != 0.0 {
+        return Err("capsule contact with sprite rotation +2cc is unadmitted".into());
+    }
+    let sx = size_multi.x * body.radius;
+    let sy = body.radius * size_multi.y;
+    // ucomiss/ja: NaN takes the vertical branch. Direction is (cos,sin)
+    // horizontally and sincosf's (sin,cos) otherwise.
+    let (radius, half_length, direction) = if sx > sy {
+        (sy, sx - sy, WorldVector { x: 1.0, y: 0.0 })
+    } else {
+        (sx, sy - sx, WorldVector { x: 0.0, y: 1.0 })
+    };
+    let reach = WorldVector {
+        x: direction.x * half_length,
+        y: direction.y * half_length,
+    };
+    Ok(Capsule {
+        p1: WorldVector {
+            x: body.position.x - reach.x,
+            y: body.position.y - reach.y,
+        },
+        p2: WorldVector {
+            x: body.position.x + reach.x,
+            y: body.position.y + reach.y,
+        },
+        radius,
+    })
+}
+
+fn difference(a: WorldVector, b: WorldVector) -> WorldVector {
+    WorldVector {
+        x: a.x - b.x,
+        y: a.y - b.y,
+    }
+}
+
+fn length_squared(v: WorldVector) -> f32 {
+    v.x * v.x + v.y * v.y
+}
+
+/// 42dbc0: `point` minus its closest point on segment s1..s2.
+fn from_segment(point: WorldVector, s1: WorldVector, s2: WorldVector) -> WorldVector {
+    let span = difference(s2, s1);
+    let span_squared = length_squared(span);
+    // 666160: a segment shorter than 1e-4 squared is its first endpoint.
+    if 1e-4_f32 > span_squared.abs() {
+        return difference(point, s1);
+    }
+    let along = difference(point, s1);
+    let t = (along.x * span.x + along.y * span.y) / span_squared;
+    if 0.0 > t {
+        return difference(point, s1);
+    }
+    if t >= 1.0 {
+        return difference(point, s2);
+    }
+    let closest = WorldVector {
+        x: s1.x + span.x * t,
+        y: s1.y + span.y * t,
+    };
+    difference(point, closest)
+}
+
+/// 42dd10. Parallel or degenerate segments (denominator ±0) never cross;
+/// the crossing point applies B's parameter to A's segment, as the source does.
+fn segments_cross(
+    a1: WorldVector,
+    a2: WorldVector,
+    b1: WorldVector,
+    b2: WorldVector,
+) -> Option<WorldVector> {
+    let d1 = difference(a2, a1);
+    let d2 = difference(b2, b1);
+    let denominator = d1.y * d2.x - d1.x * d2.y;
+    if denominator == 0.0 {
+        return None;
+    }
+    let u = ((b1.y - a1.y) * d1.x + (a1.x - b1.x) * d1.y) / denominator;
+    // jb also rejects an unordered NaN parameter.
+    if !(0.0..=1.0).contains(&u) {
+        return None;
+    }
+    let s = ((a1.y - b1.y) * d2.x + (b1.x - a1.x) * d2.y) / -denominator;
+    if !(0.0..=1.0).contains(&s) {
+        return None;
+    }
+    Some(WorldVector {
+        x: a1.x + d1.x * u,
+        y: a1.y + d1.y * u,
+    })
+}
+
+/// 42dec0 capsule penetration, pointing from A toward B, or None when the
+/// strict `(rA+rB)^2 > dist2` test fails.
+fn capsule_penetration(a: &Capsule, b: &Capsule) -> Option<WorldVector> {
+    let mut offset = WorldVector { x: 0.0, y: 0.0 };
+    if let Some(crossing) = segments_cross(a.p1, a.p2, b.p1, b.p2) {
+        let mut best_vector = difference(crossing, a.p1);
+        let mut best = length_squared(best_vector);
+        let mut radius = a.radius;
+        for (end, end_radius) in [(a.p2, a.radius), (b.p1, b.radius), (b.p2, b.radius)] {
+            let vector = difference(crossing, end);
+            let squared = length_squared(vector);
+            if best > squared {
+                best_vector = vector;
+                best = squared;
+                radius = end_radius;
+            }
+        }
+        let depth = best.sqrt() + radius;
+        // 612860 Normalize multiplies by a rounded reciprocal.
+        let length = length_squared(best_vector).sqrt();
+        if length > 0.0 {
+            let inverse = 1.0 / length;
+            best_vector = WorldVector {
+                x: best_vector.x * inverse,
+                y: best_vector.y * inverse,
+            };
+        }
+        offset = WorldVector {
+            x: best_vector.x * depth,
+            y: best_vector.y * depth,
+        };
+    }
+    // 42e1d0 shifts all four endpoints: no relative change, but it rounds.
+    let shift = |point: WorldVector| {
+        if offset.x != 0.0 || offset.y != 0.0 {
+            WorldVector {
+                x: point.x + offset.x,
+                y: point.y + offset.y,
+            }
+        } else {
+            point
+        }
+    };
+    let (a1, a2, b1, b2) = (shift(a.p1), shift(a.p2), shift(b.p1), shift(b.p2));
+    let negate = |v: WorldVector| WorldVector { x: -v.x, y: -v.y };
+    let candidates = [
+        negate(from_segment(a1, b1, b2)),
+        negate(from_segment(a2, b1, b2)),
+        from_segment(b1, a1, a2),
+        from_segment(b2, a1, a2),
+    ];
+    let squared = candidates.map(length_squared);
+    // Ties keep the second candidate of each side, then the B side.
+    let (min_a, vector_a) = if squared[1] > squared[0] {
+        (squared[0], candidates[0])
+    } else {
+        (squared[1], candidates[1])
+    };
+    let (min_b, vector_b) = if squared[3] > squared[2] {
+        (squared[2], candidates[2])
+    } else {
+        (squared[3], candidates[3])
+    };
+    let (distance_squared, selected) = if min_b > min_a {
+        (min_a, vector_a)
+    } else {
+        (min_b, vector_b)
+    };
+    let radius = a.radius + b.radius;
+    let overlapping = radius * radius > distance_squared;
+    if !overlapping {
+        return None;
+    }
+    // 666164: coincident closest points yield the (usually zero) offset.
+    if distance_squared == 0.0 {
+        return Some(offset);
+    }
+    let distance = distance_squared.sqrt();
+    let depth = radius - distance;
+    let normal = WorldVector {
+        x: selected.x / distance,
+        y: selected.y / distance,
+    };
+    Some(WorldVector {
+        x: normal.x * depth + offset.x,
+        y: normal.y * depth + offset.y,
+    })
+}
+
+/// 4454a0, the pair for a SizeMulti other than (1,1). A is the lower entity
+/// type. Unlike 445710 there is no high-speed reflection, Player half share,
+/// grid-shift veto or 1e-4 distance exit: mass shares move both bodies and
+/// an impulse of |B.vel - A.vel| pushes them apart along the penetration.
+/// The caller has already run both collision callbacks (each false here).
+pub(crate) fn resolve_capsule_contact(
+    first: &mut ContactBody,
+    first_size_multi: WorldVector,
+    second: &mut ContactBody,
+    second_size_multi: WorldVector,
+    rotation_degrees: f32,
+) -> Result<ContactResolution, String> {
+    first.validate()?;
+    second.validate()?;
+    let swap = first.entity_type > second.entity_type;
+    let (a, a_size, b, b_size) = if swap {
+        (second, second_size_multi, first, first_size_multi)
+    } else {
+        (first, first_size_multi, second, second_size_multi)
+    };
+    let Some(penetration) = capsule_penetration(
+        &capsule(a, a_size, rotation_degrees)?,
+        &capsule(b, b_size, rotation_degrees)?,
+    ) else {
+        return Ok(ContactResolution {
+            colliding: false,
+            player_displacement_blocked: false,
+        });
+    };
+    let mut next_a = *a;
+    let mut next_b = *b;
+    let a_share = a.mass / (b.mass + a.mass);
+    let b_share = 1.0 - a_share;
+    next_a.position.x -= penetration.x * b_share;
+    next_a.position.y -= penetration.y * b_share;
+    next_b.position.x += penetration.x * a_share;
+    next_b.position.y += penetration.y * a_share;
+    if penetration.x != 0.0 || penetration.y != 0.0 {
+        let relative = difference(b.velocity, a.velocity);
+        let speed = length_squared(relative).sqrt();
+        let length = length_squared(penetration).sqrt();
+        let impulse = WorldVector {
+            x: penetration.x / length * speed,
+            y: penetration.y / length * speed,
+        };
+        next_a.velocity.x -= impulse.x * b_share;
+        next_a.velocity.y -= impulse.y * b_share;
+        next_b.velocity.x += impulse.x * a_share;
+        next_b.velocity.y += impulse.y * a_share;
+    }
+    next_a.validate()?;
+    next_b.validate()?;
+    *a = next_a;
+    *b = next_b;
+    Ok(ContactResolution {
+        colliding: true,
+        player_displacement_blocked: false,
+    })
+}
+
 fn bomb_pair_callback(first: &mut ContactBody, second: &mut ContactBody) {
     if first.entity_type == 4 {
         second.velocity = second.velocity * 0.2;
@@ -457,6 +761,7 @@ impl CopiedDamageSource {
                 ActorKind::Tear => self.entity_type == 2,
                 ActorKind::Bomb => self.entity_type == 4,
                 ActorKind::Pickup => self.entity_type == 5,
+                ActorKind::Slot => self.entity_type == 6,
                 ActorKind::Laser => self.entity_type == 7,
                 ActorKind::Knife => self.entity_type == 8,
                 ActorKind::Projectile => self.entity_type == 9,

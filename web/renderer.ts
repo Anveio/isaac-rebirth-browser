@@ -6,7 +6,7 @@ import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
 import {drawPlayerLaser} from "./lasers";
-import type { ActorSprite, Room, RoomAppearance, RoomQuad, State } from "./engine";
+import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
@@ -325,6 +325,11 @@ export class Renderer {
     const playerSlot = hidePlayer ? -1 : order.findIndex(actor => actor.kind === "player");
     const npcs = [...state.room.npcs].sort((a, b) => slot(a) - slot(b));
     const overPlayer = playerSlot < 0 ? [] : npcs.filter(npc => slot(npc) > playerSlot);
+    // Machines and beggars share the actor render array (441bd0 y key).
+    const machineSlot = (machine: Slot) => order.findIndex(actor => actor.kind === "slot" && actor.id === machine.id);
+    const machines = [...state.room.slots].sort((a, b) => machineSlot(a) - machineSlot(b));
+    const machinesOverPlayer = playerSlot < 0 ? [] : machines.filter(machine => machineSlot(machine) > playerSlot);
+    for (const machine of machines) if (!machinesOverPlayer.includes(machine)) this.drawSlot(ctx, machine);
     for (const npc of npcs) if (!overPlayer.includes(npc)) this.drawNpc(ctx, npc);
     for (const knife of state.knives) {
       if (!knife.visible) continue;
@@ -391,6 +396,7 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
     if (!hidePlayer) this.drawPlayer(ctx, state);
+    for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
     for (const npc of overPlayer) this.drawNpc(ctx, npc);
     for (const tear of state.tears) {
       const color = tear.sourceColor;
@@ -466,6 +472,13 @@ export class Renderer {
     ctx.restore();
     this.stage.foreground(state.stageEffects);
     this.drawFxRays(state);
+  }
+
+  /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
+  private drawSlot(ctx: CanvasRenderingContext2D, machine: Slot): void {
+    this.assets.draw(ctx, machine.actor, machine.animation,
+      (machine.presentedPosition.x + machine.positionOffset.x) * 0.65 + 32,
+      (machine.presentedPosition.y + machine.positionOffset.y) * 0.65 - 46, machine.animationFrame);
   }
 
   private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {

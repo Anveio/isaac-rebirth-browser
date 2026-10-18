@@ -143,6 +143,7 @@ pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
+pub mod slots;
 mod source_angles;
 pub mod stage_shooting_guard;
 pub mod stage_transition;
@@ -2853,6 +2854,7 @@ impl Game {
         ordinary_placement::begin_fresh_room(&mut self.state);
         let mut pickups = Vec::new();
         let mut npcs = Vec::new();
+        let mut room_slots = Vec::new();
         let mut order = Vec::new();
         let mut next = self.state.next_pickup;
         // The source descriptor map survives Room.Init. Only a source-owned
@@ -2956,6 +2958,14 @@ impl Game {
                     id,
                 });
                 npcs.push(npc);
+            } else if selector.entity_type == 6 {
+                // Slot Init and its spawnConfig rewrite draw no shared MT and
+                // roll no champion; the idle actor spawns nothing.
+                let id = u32::try_from(room_slots.len()).map_err(|_| "Slot identity exhausted")?;
+                if let Some(slot) = slots::Slot::from_selector(id, selector, room_type)? {
+                    order.push(slots::actor(id));
+                    room_slots.push(slot);
+                }
             } else if room_type == 2 && selector.entity_type == 5 && selector.variant == 150 {
                 if let Some(mut pickup) = shop::from_selector(&mut self.state, next, selector)? {
                     pickup.birth_game_update = self.state.game_update_count;
@@ -3110,6 +3120,7 @@ impl Game {
         }
         self.state.room.pickups = pickups;
         self.state.room.npcs = npcs;
+        self.state.room.slots = room_slots;
         // Game551a10: the authored bossportraits.xml presentation of the
         // room's boss (Monstro20/0 is presentation1).
         self.state.room.boss_presentation_index = if room_type == 5 {
@@ -3215,6 +3226,13 @@ impl Game {
                         .iter()
                         .find(|pickup| pickup.id == id)
                         .map(|pickup| key(pickup.position.y, 0)),
+                    // Entity_Slot keeps the base 441bd0 key at +448 y.
+                    actors::ActorKind::Slot => state
+                        .room
+                        .slots
+                        .iter()
+                        .find(|slot| slot.id == id)
+                        .map(|slot| key(slot.position.y, 0)),
                     actors::ActorKind::Projectile => state
                         .enemy_projectiles
                         .iter()
@@ -3293,6 +3311,9 @@ impl Game {
                     .pickups
                     .iter()
                     .any(|pickup| pickup.id == actor.id && !pickup.removed),
+                actors::ActorKind::Slot => {
+                    self.state.room.slots.iter().any(|slot| slot.id == actor.id)
+                }
                 _ => return Err("invalid authored room actor handle".into()),
             };
             if admitted {
@@ -4026,6 +4047,7 @@ impl Game {
                         ordinary_placement::Frontier::Restore,
                     );
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
+                    let restored_slots = slots::readmit_saved(&mut self.state);
                     item_queries::note_room_placement(&mut self.state);
                     self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
@@ -4037,6 +4059,9 @@ impl Game {
                     // families keep their existing reconstruction owners.
                     for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
+                    }
+                    for id in restored_slots {
+                        slots::advance_actor(&mut self.state, phase, id)?;
                     }
                     //The restored Room.Update has the same late manager paint
                     //and actual inactive Uninit fence before entity contacts.
@@ -4058,6 +4083,8 @@ impl Game {
                             self.collect_regular_pickup_at(index)?;
                         }
                     }
+                    slots::unadmitted_contacts(&self.state)?;
+                    slots::player_contacts(&mut self.state)?;
                     pickups::nonplayer_contacts(&mut self.state, candidates)?;
                     pickups::full_grid_contacts(&mut self.state)?;
                 } else {
@@ -4090,6 +4117,9 @@ impl Game {
                             }
                             actors::ActorKind::Pickup => {
                                 self.advance_pickup(actor.id, phase)?;
+                            }
+                            actors::ActorKind::Slot => {
+                                slots::advance_actor(&mut self.state, phase, actor.id)?;
                             }
                             _ => return Err("invalid authored room actor handle".into()),
                         }
@@ -4295,6 +4325,7 @@ impl Game {
             bombs::player_contacts(&mut self.state)?;
             npcs::player_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
+            slots::unadmitted_contacts(&self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             self.state.tear_partition = self
                 .state
@@ -4364,6 +4395,7 @@ impl Game {
                 }
                 self.collect_regular_pickup_at(index)?;
             }
+            slots::player_contacts(&mut self.state)?;
             pickups::nonplayer_contacts(&mut self.state, pickup_contacts)?;
             if player_updated {
                 // Final manager454b1d..454b2f visits the retained Player
@@ -4745,6 +4777,7 @@ impl Game {
             actors::ActorKind::Pickup => {
                 self.advance_pickup(actor.id, phase)?;
             }
+            actors::ActorKind::Slot => slots::advance_actor(&mut self.state, phase, actor.id)?,
             actors::ActorKind::Npc => {
                 controlled_tear::before_npc_update(&mut self.state, phase, actor.id);
                 self.advance_npc(actor.id, phase)?;
