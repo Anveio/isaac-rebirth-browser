@@ -309,7 +309,8 @@ def main():
         for index in range(args.count):
             # The waypoint comes from an OS-shuffled candidate order: the
             # recorder takes the first one clear of the port's own solid
-            # cells (authored rocks, its fight's poops). A retry reshuffles.
+            # cells (authored rocks, its fight's poops) that it can route to,
+            # or takes the trapdoor directly when none is. A retry reshuffles.
             for _ in range(2):
                 solid = set(fixture.get('originalSolid', []))
                 # Turning at the waypoint carries the player about ten units
