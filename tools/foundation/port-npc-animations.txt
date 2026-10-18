@@ -48,3 +48,5 @@ gfx/006.008_donationmachine.anm2
 gfx/029.000_hopper.anm2
 gfx/029.001_trite.anm2
 gfx/054.000_flaming hopper.anm2
+gfx/016.000_mulligan.anm2
+gfx/016.001_mulligoon.anm2
