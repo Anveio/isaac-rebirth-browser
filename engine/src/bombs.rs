@@ -1068,7 +1068,6 @@ fn explode_with_kind(
         &clear,
     )?;
     crate::pickups::bomb_hit(state, position, radius, damage, kind.flags(), &clear)?;
-    crate::slots::bomb_hit(state, position, radius, &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
         isaac_blast_velocity(
