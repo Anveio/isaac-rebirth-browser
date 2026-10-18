@@ -138,6 +138,9 @@ pub struct Npc {
     pub hopper: Option<crate::hoppers::HopperState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fatty: Option<crate::fatty::FattyState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub greed: Option<crate::greed::GreedState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mega_fatty: Option<crate::mega_fatty::MegaFattyState>,
 }
 
@@ -443,7 +446,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
             //health-unit conversion is also that rounded incoming amount.
             let health_units = contact_damage as u8;
             let immunity_presentations = u32::from(health_units) * 60;
-            combat::try_damage_player(state, health_units, immunity_presentations, 0)?;
+            combat::try_damage_player_from(
+                state,
+                health_units,
+                immunity_presentations,
+                0,
+                Some(npc.kind),
+            )?;
         }
         let original_position = player_body.position;
         combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {
@@ -936,6 +945,7 @@ impl Npc {
             gemini: None,
             hopper: None,
             fatty: None,
+            greed: None,
             mega_fatty: None,
         }
     }

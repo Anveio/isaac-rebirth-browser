@@ -110,6 +110,16 @@ impl TemplatePicker {
         &self.weights
     }
 
+    /// Continue from weights an earlier pick of the same catalogue decayed.
+    pub fn restore_weights(&mut self, weights: &[f32]) -> Result<(), String> {
+        if weights.len() != self.weights.len() || weights.iter().any(|w| !w.is_finite() || *w < 0.0)
+        {
+            return Err("restored template weights must match the catalogue".into());
+        }
+        self.weights.copy_from_slice(weights);
+        Ok(())
+    }
+
     pub fn choose(&mut self, request: SelectionRequest) -> Result<Selection, String> {
         if request.seed == 0
             || request.shape > 4

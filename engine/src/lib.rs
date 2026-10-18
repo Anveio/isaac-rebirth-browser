@@ -50,6 +50,7 @@ mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
+mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
@@ -70,6 +71,7 @@ pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod greed;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -4274,11 +4276,16 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
+        if phase == phase::Phase::Update {
+            //5D1384 grid callbacks precede5D145A's manager454DF0 fence.
+            //A bomb rock's Effect1 therefore gets its first real Full here;
+            //a child born inside a Bomb actor callback remains fenced out.
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
+            rock_blast::advance_markers(&mut self.state);
+        }
         let existing = self.state.actor_scheduler.full_phase();
         let mut player_updated = false;
         if phase == phase::Phase::Update {
-            rock_blast::advance_bomb_rocks(&mut self.state)?;
-            rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
                 if *counter > 0 {
@@ -5126,9 +5133,13 @@ impl Game {
                 self.state.room.authored_actor_order.push(actor);
                 self.state.actor_scheduler.admit(actor)
             }
-            entities::Birth::Projectile(birth) => self.admit_enemy_projectile(|id| {
-                enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
-            }),
+            entities::Birth::Projectile(birth) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
+                    spawner_type,
+                    ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+                })
+            }
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
@@ -5142,8 +5153,10 @@ impl Game {
                 Ok(())
             }
             entities::Birth::VariantProjectile(birth, variant) => {
+                let spawner_type = self.state.room.npcs[index].kind;
                 self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
                     variant,
+                    spawner_type,
                     ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
                 })
             }

@@ -323,7 +323,11 @@ Port: placement, fuse, motion, blast damage to player, NPCs and grid, Troll
 and Mega Troll conversion. Ordinary class5 Full ground response now follows
 entity contacts and both phases clamp to actual Room bounds; [scoped #349
 evidence](system-map.md#ordinary-bomb-late-grid-response-349) retains unresolved
-center/near-wall NPC timing. Missing: bomb-modifying items, craters, Bomb Bum
+center/near-wall NPC timing. A [bounded ordinary-Bomb child comparison](bomb-evidence.md#bomb-and-bomb-rock-effect-children-source-follow-up)
+connects real child owners and retains both fixed phase routes:290 canonical
+and80 Bomb fields pass unchanged;243 child-field gains leave36 seed/RNG/counter/flip
+failures. Strict RGBA remains14/36; crater18 records/paint and Dr/Troll/rock/TNT
+caller qualification remain open. Missing: bomb-modifying items, complete crater qualification, Bomb Bum
 and other variants.
 
 No open bugs. Bomb contact bugs are under *Collision and physics*.

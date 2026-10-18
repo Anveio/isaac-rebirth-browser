@@ -54,16 +54,25 @@ export function doorKeys(grid, player, door) {
 }
 
 // Solid cells (walls, rocks, pits, poops, spikes; door cells stay walkable), plus the cells
-// under live NPCs such as fireplaces, which block the player off the grid.
-function solidGrid(grid, npcs) {
+// under live NPCs such as fireplaces and every cell a slot's body reaches into, all of which
+// block the player off the grid.
+function solidGrid(grid, npcs, slots) {
   // Poops carry an authored selector without a grid entity in the snapshot;
   // treat any such authored cell as blocking.
   // Spikes (8) do not collide but hurt, so routes go around them too.
   const blocks = entity => (entity.collisionClass !== 0 && entity.kind !== 16) || entity.kind === 8;
   const solid = grid.cells.map(c => ((c.entity ? blocks(c.entity) : c.selector !== 0) ? '1' : '0'));
-  for (const npc of npcs) {
-    const [c, r] = cellOf(npc.position.x, npc.position.y);
+  const mark = (c, r) => {
     if (c >= 0 && r >= 0 && c < grid.width && r < grid.height) solid[r * grid.width + c] = '1';
+  };
+  for (const npc of npcs) mark(...cellOf(npc.position.x, npc.position.y));
+  // A beggar is a radius-12 circle; a machine's SizeMulti stretches it into a capsule
+  // (1.5 x 0.75 for slot machines, 3 x 0.75 for the shell game, which reaches into the cells
+  // beside it).
+  for (const slot of slots) {
+    const rx = slot.collisionRadius * slot.sizeMulti.x, ry = slot.collisionRadius * slot.sizeMulti.y;
+    const [c0, r0] = cellOf(slot.position.x - rx, slot.position.y - ry), [c1, r1] = cellOf(slot.position.x + rx, slot.position.y + ry);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) mark(c, r);
   }
   return { w: grid.width, h: grid.height, solid: solid.join('') };
 }
@@ -75,14 +84,14 @@ export function routingView(s) {
     room: s.currentRoom, transition: !!s.roomTransition, clear: s.room.combatClear,
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled,
       full: s.player.maxHp <= s.player.hp + s.player.soulHp },
-    grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed)),
+    grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed), s.room.slots ?? []),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     keys: s.inventory.keys,
     // Live fireplaces, which a route may shoot out rather than walk around.
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
     // Solid poop cells, which a walk may shoot out rather than route around.
     poops: s.room.grid ? s.room.grid.cells.flatMap((c, i) => (c.entity?.kind === 14 && c.entity.collisionClass !== 0 ? [i] : [])) : [],
-    openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33)),
+    openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33), s.room.slots ?? []),
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
     // Living door-shutting enemies and enemy shots, for fight().
     foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)

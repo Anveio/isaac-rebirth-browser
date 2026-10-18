@@ -8,7 +8,7 @@ use crate::harness;
 use crate::props;
 use crate::tape::Tape;
 use rebirth_cleanroom::save_host::{Response, SaveHost, SaveIo, SaveStore};
-use rebirth_cleanroom::{Command, Game, Screen};
+use rebirth_cleanroom::{seed, Command, Game, Screen};
 use serde_json::json;
 use std::panic::{self, AssertUnwindSafe};
 
@@ -81,7 +81,10 @@ pub fn check(
 }
 
 /// 54ECE0 loads the saved persistent stores into freshly constructed owners:
-/// the run Continue starts is the one its profile's record saved.
+/// the run Continue starts is the one its profile's record saved. The record
+/// keeps the seed as Saved+EF80's text, the formatter's nine bytes with a
+/// space (or a legacy compact code), while the run keeps the compact code, so
+/// the two compare by the seed they spell.
 fn continued(before: &Game, after: &Game) {
     let continuing = before.state.run_start_request.resume_saved
         && before.state.screen != Screen::Playing
@@ -102,7 +105,8 @@ fn continued(before: &Game, after: &Game) {
                 && state.difficulty == context.difficulty
                 && state.challenge_id == context.challenge_id
                 && state.run_seed_value == context.run_seed_value
-                && state.run_seed == run.run_seed
+                && seed::decode(&run.run_seed)
+                    .is_ok_and(|saved| seed::decode(&state.run_seed) == Ok(saved))
                 && state.seeded_run == run.seeded_run
                 && state.stage == run.stage
                 && state.stage_seed == context.stage_seed
@@ -115,6 +119,7 @@ fn continued(before: &Game, after: &Game) {
             "profile": before.state.profile,
             "saved": record.is_some(),
             "character": state.character,
+            "seed": [&state.run_seed, record.map(|record| &record.run.run_seed)],
             "stage": [state.stage, state.stage_seed],
         })
     );

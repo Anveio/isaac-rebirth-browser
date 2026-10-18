@@ -60,6 +60,9 @@ pub struct EnemyProjectile {
     pub removed: bool,
     pub impact_seed: Option<u32>,
     pub impact_rotation: Option<u32>,
+    /// EntityRef +8: the spawner's entity type (0 unknown).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub spawner_type: u32,
     /// Projectile 9.v: 0 blood, 3 puke (ProjectileParams+74).
     #[serde(default, skip_serializing_if = "is_zero")]
     pub variant: u32,
@@ -120,6 +123,7 @@ impl EnemyProjectile {
             removed: false,
             impact_seed: None,
             impact_rotation: None,
+            spawner_type: 0,
             variant: 0,
         }
     }
@@ -262,7 +266,8 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !result.colliding {
             continue;
         }
-        let accepted = combat::try_damage_player(state, 1, 60, 0)?;
+        let source = Some(state.enemy_projectiles[index].spawner_type);
+        let accepted = combat::try_damage_player_from(state, 1, 60, 0, source)?;
         state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
         state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
         state.player.vx = f64::from(player.velocity.x) * 0.65;
