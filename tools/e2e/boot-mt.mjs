@@ -77,9 +77,9 @@ await assertOriginalBinary();
 await writeFile(join(output, 'scenarios.json'), JSON.stringify({ schema: 1, entropy: 'OS secrets run seeds and Node crypto randomInt boot epochs', caseFilter, cases }, null, 2) + '\n');
 
 const SCOPES = {
-  boot: 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.',
-  menu: 'Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, nine saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.',
-  'seed-dialog': 'Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, nine saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.',
+  boot: 'Causal startup and initialized menu fields at Title: full 624-word MT state, saved player seed, twelve saved grid pairs, menu run seed and 179 stat poses. Later menu navigation, run/room/ambient random routing and tear fall uniforms remain incomplete.',
+  menu: 'Causal startup and forward Title/Profile/Main/Character initialization: full 624-word MT state, saved player seed, twelve saved grid pairs, menu run seed and 179 stat poses at every menu checkpoint, with complete public command and seed-entry provenance. Character-confirm fade/run admission, run/room/ambient random routing and ordinary-run seed use remain separate.',
+  'seed-dialog': 'Causal startup, forward menus and public seed dialog admission/reopening and valid commitment: full 624-word shared MT, saved player/menu seeds, menu seed text, Character dialog/committed fields, twelve saved grid pairs and 179 stat poses. A second real DOM sequence queues Profile/Tab/commit before its first tick and must preserve the decoded setter after Clear/Reset. Character-confirm fade/run admission and later consumers remain separate.',
 };
 const production = await startProductionServer();
 const browser = await chromium.launch(browserLaunchOptions());
@@ -212,7 +212,7 @@ async function gradeMode(scenario, mode, native, directory, result) {
       assert.deepEqual(errors, []);
       await writeFile(join(directory, 'browser-title-state.json'), JSON.stringify(state, null, 2) + '\n');
       result.status = 'pass'; result.comparedMenuCheckpoints = menuStates.length;
-      result.comparedStateWords = 624 * menuStates.length; result.comparedGridPairs = 9 * menuStates.length; result.comparedStatPoses = 179 * menuStates.length;
+      result.comparedStateWords = 624 * menuStates.length; result.comparedGridPairs = 12 * menuStates.length; result.comparedStatPoses = 179 * menuStates.length;
       result.inputProvenance = { status: 'pass', commands: trace.commands.length, initialSeed, bootEpochSeed: scenario.bootEpochSeed, runSeedValue: final.runSeedValue };
     } catch (error) { result.status = 'fail'; result.error = String(error); }
     finally {
