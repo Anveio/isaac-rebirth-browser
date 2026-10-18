@@ -57,3 +57,5 @@ gfx/016.001_mulligoon.anm2
 gfx/207.000_fatty.anm2
 gfx/207.001_pale fatty.anm2
 gfx/226.000_skinny.anm2
+gfx/206.000_crazy long legs.anm2
+gfx/206.001_small crazy long legs.anm2

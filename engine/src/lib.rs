@@ -99,6 +99,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
 pub mod mega_fatty;
