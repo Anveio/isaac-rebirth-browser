@@ -83,7 +83,7 @@ export function routingView(s) {
   return {
     room: s.currentRoom, transition: !!s.roomTransition, clear: s.room.combatClear,
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled,
-      full: s.player.maxHp <= s.player.hp + s.player.soulHp },
+      full: s.player.maxHp <= s.player.hp + s.player.soulHp, hp: s.player.hp + s.player.soulHp },
     grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed), s.room.slots ?? []),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     keys: s.inventory.keys,
@@ -96,7 +96,7 @@ export function routingView(s) {
     // Living door-shutting enemies and enemy shots, for fight().
     foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
       .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
-    shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y })),
+    shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, vx: p.velocity?.x ?? 0, vy: p.velocity?.y ?? 0 })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
   };
 }
@@ -137,7 +137,18 @@ export function fightKeys(view, memory) {
       const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = foe.boss ? 90 : 40;
       if (near < reach) score -= (90 - near) / 30;
     }
-    for (const shot of shots) {
+    if (memory.dodge) {
+      // Opt-in (--dodge): score each move against every shot's path over the
+      // next frames and keep clear of lit fireplaces, which burn on contact.
+      for (const shot of shots) for (const t of [2, 4, 6, 8, 12]) {
+        const near = Math.hypot(player.x + ux * 3.5 * t - (shot.x + shot.vx * t), player.y + uy * 3.5 * t - (shot.y + shot.vy * t));
+        if (near < 32) score -= (32 - near) / 8 * (t <= 6 ? 1.5 : 1);
+      }
+      for (const fire of view.fires ?? []) for (const look of [10, 20, 30]) {
+        const near = Math.hypot(fire.x - (player.x + ux * look), fire.y - (player.y + uy * look));
+        if (near < 36) score -= (36 - near) / 8;
+      }
+    } else for (const shot of shots) {
       const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
       if (near < 45) score -= (45 - near) / 15;
     }

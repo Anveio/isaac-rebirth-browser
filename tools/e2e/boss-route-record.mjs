@@ -20,7 +20,8 @@
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
 // fightKeys) and parks the player in the bottom-left corner (`corner`);
-// --lead aims ahead of each foe's velocity and orbits closer; --no-corner
+// --lead aims ahead of each foe's velocity and orbits closer; --dodge scores
+// moves against enemy shots' projected paths and lit fireplaces; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -203,7 +204,7 @@ try {
     return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
       dir: path.length > 1 ? next % 5 : incoming, routed: true };
   };
-  const routeFight = { orbit: 1, lead: false };
+  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge') };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
@@ -260,7 +261,7 @@ try {
     }
   };
   if (FIGHT) {
-    const memory = { orbit: 1, lead: hasFlag('--lead') };
+    const memory = { orbit: 1, lead: hasFlag('--lead'), dodge: hasFlag('--dodge') };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
     // or beside it then takes the item in the port alone, which leaves an
     // empty pedestal (subtype 0) where the original's keeps its item. With
@@ -271,6 +272,7 @@ try {
     const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
+      if (state.player.hp <= 0) throw new Error(`The port's player died in the fight, ${FIGHT - left} frames in`);
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);

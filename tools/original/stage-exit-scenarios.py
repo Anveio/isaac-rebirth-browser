@@ -168,6 +168,9 @@ def descended(result, fixture, production_directory):
         leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
                          *(['--room-frames', ROUTE_ROOM_FRAMES] if index else []),
+                         # A floor marked `dodge` fights with projected shot dodging
+                         # (Mega Fatty's 30-shot bursts) and keeps off fireplaces.
+                         *(['--dodge'] if floor.get('dodge') else []),
                          *(['--route-avoid', avoid] if avoid else []),
                          *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
                          rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
