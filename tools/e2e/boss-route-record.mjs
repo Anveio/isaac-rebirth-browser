@@ -137,6 +137,30 @@ try {
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
   assert.equal(state.room, rooms[0], `Route must start in room ${rooms[0]}, not ${state.room}`);
+  // Cells beside the original's own obstacles (--avoid): a turn there carries
+  // the player about ten units on toward the obstacle, which only the
+  // original's player then meets (#649 at a waypoint, and alike below a tail
+  // poop mid-walk). The shared boss-room walks keep one cell clear of them
+  // wherever the room still leaves a way to the goal.
+  const margin = [...new Set(AVOID.flatMap(cell => [cell - 15, cell + 15, cell - 1, cell + 1]))]
+    .filter(cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120 && !AVOID.includes(cell));
+  const pointCell = point => Math.round((point.y - 120) / 40) * 15 + Math.round((point.x - 40) / 40);
+  const reaches = (grid, from, to) => {
+    const seen = new Set([from]), queue = [from];
+    while (queue.length) {
+      const cell = queue.shift();
+      if (cell === to) return true;
+      for (const next of [cell - grid.w, cell + grid.w, cell - 1, cell + 1]) {
+        if (next < 0 || next >= grid.solid.length || seen.has(next) || (grid.solid[next] === '1' && next !== to)) continue;
+        seen.add(next); queue.push(next);
+      }
+    }
+    return false;
+  };
+  const clearOf = (cells, goal) => {
+    const wide = [...cells, ...margin];
+    return margin.length && reaches(avoiding(state.grid, wide), pointCell(state.player), pointCell(goal)) ? wide : cells;
+  };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
@@ -168,7 +192,7 @@ try {
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
-          ? centreKeys(avoiding(state.grid, [state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)]), door)
+          ? centreKeys(avoiding(state.grid, clearOf([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)), door)
           : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
@@ -308,7 +332,7 @@ try {
       let target = centreOf(state.player);
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, [...cells, ...pickupCells(state)]), state.player, goal, 1);
+        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) target = waypoint(avoiding(state.grid, clearOf([...cells, ...pickupCells(state)], goal)), state.player, goal, 1);
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }
