@@ -147,6 +147,29 @@ def observe(pid, context):
                     result['projectileParameter2'] = struct.unpack_from('<f', more, 0x18)[0]
                     result['projectileFullUpdates'] = struct.unpack_from('<I', more, 0x1c)[0]
                     result['projectileFlags'] = struct.unpack_from('<I', more, 0x20)[0]
+                if result['type'] == 1000 and result['variant'] == 23:
+                    try:
+                        # Additive green controller owners; other family tails stay unchanged.
+                        more = read(address + 0x7d4, 0x48)
+                        size = struct.unpack_from('<f', more, 0x44)[0]
+                        if not math.isfinite(size): raise ValueError('Nonfinite green creep size')
+                        if not definition: raise ValueError('Green creep has no actual clip definition')
+                        frames = u32(definition + 0x34)
+                        if not 1 <= frames <= 4096: raise ValueError('Green creep clip frame bound')
+                        for offset in (0x31d, 0x31e, 0x31f, 0x14c):
+                            if raw[offset] not in (0, 1): raise ValueError('Green creep bool owner')
+                        result['greenCreep'] = {
+                            'status': 'pass', 'counter': struct.unpack_from('<i', more, 0)[0],
+                            'timeToLive': struct.unpack_from('<i', more, 0x1c)[0],
+                            'raw7f4': struct.unpack_from('<i', more, 0x20)[0],
+                            'size': size, 'clipFrames': frames,
+                            'actorRng': list(struct.unpack_from('<4I', raw, 0x7c0)),
+                            'spawnerType': struct.unpack_from('<I', raw, 0x1c)[0],
+                            'spawnerVariant': struct.unpack_from('<I', raw, 0x20)[0],
+                            'parentNull': struct.unpack_from('<Q', raw, 0x498)[0] == 0}
+                    except Exception as error:
+                        # A new tail failure must not suppress generic historical entity owners.
+                        result['greenCreep'] = {'status': 'fail', 'error': repr(error)}
                 if result['type'] == 1000 and result['variant'] in (7, 15, 43, 58, 66):
                     more = read(address + 0x7d4, 0x24)
                     result['effectLifetimeDivisor'] = struct.unpack_from('<i', more, 0)[0]

@@ -49,14 +49,37 @@ impl NpcEffectAdmission<'_> {
         spawner: (u32, u32),
         scale: f32,
     ) -> Result<u32, String> {
-        let config = definition(1000, 22).expect("authored Creep (Red) config");
+        self.admit_pool(22, seed, position, spawner, scale, (125, 1))
+    }
+
+    /// A green champion's Spawn550a40 of 1000.23 (4fb02a, default scale),
+    /// whose timeout +7f0 and +7f4 it sets to 30 before the first update.
+    pub(crate) fn admit_green_creep(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        spawner: (u32, u32),
+    ) -> Result<u32, String> {
+        self.admit_pool(23, seed, position, spawner, 1.0, (30, 30))
+    }
+
+    fn admit_pool(
+        &mut self,
+        variant: u32,
+        seed: u32,
+        position: WorldVector,
+        spawner: (u32, u32),
+        scale: f32,
+        (time_to_live, raw_7f4): (i32, i32),
+    ) -> Result<u32, String> {
+        let config = definition(1000, variant).ok_or("authored Creep config absent")?;
         let id = *self.next_effect;
         *self.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
         let mut sprite = Sprite::new(config);
         sprite.scale = WorldVector { x: scale, y: scale };
         self.effects.push(SpriteEffect {
             id,
-            variant: 22,
+            variant,
             subtype: 0,
             spawn_seed: seed,
             spawner_type: spawner.0,
@@ -83,8 +106,8 @@ impl NpcEffectAdmission<'_> {
             removed: false,
             render_order_offset: 2000,
             lifetime_divisor: 0,
-            time_to_live: 125,
-            raw_7f4: 1,
+            time_to_live,
+            raw_7f4,
             raw_7f8: 0.0,
             raw_7d8: true,
             sprite,
@@ -151,7 +174,7 @@ fn step(
     game_counter: u32,
     player: WorldVector,
 ) -> Result<bool, String> {
-    let config = definition(1000, 22).ok_or("effect config absent")?;
+    let config = definition(1000, effect.variant).ok_or("effect config absent")?;
     effect.full_updates = effect
         .full_updates
         .checked_add(1)

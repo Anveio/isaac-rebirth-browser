@@ -69,7 +69,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 
 | Subsystem | State | Port today | Open bugs |
 | --- | --- | --- | ---: |
-| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 1 |
+| [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II generator | 0 |
@@ -79,7 +79,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
-| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT collision, webs, trapdoor, decorations | 2 |
+| [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT Full countdown/nonrare blast, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | 18 ordinary NPC types, including the Gaper family | 3 |
 | [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
@@ -174,11 +174,12 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 50 raw pointer/sequence differences. The outer raw-index guard fails; its
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
-Missing: controllers, mouse, reload acceptance and remaining remapped action
-callbacks, including drop/map/restart. Strict pixels and history caps remain red;
+Missing: controllers, mouse, Native process reload, Browser OS-process
+restart and remaining remapped action callbacks, including drop and restart. The configurable Map action has the
+separate bounded scope above. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: drop (Ctrl), map (Tab) and restart (R) actions; gamepad.
+Next: Native own-saved Keyboard process reload; drop (Ctrl) and restart (R); gamepad.
 
 No open bugs.
 
@@ -383,6 +384,25 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 [regression evidence](npc-evidence.md#horfs-final-dead-update) preserves all
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
+
+[PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
+champion creep. Its current-main666-based frozen `35edb299` passes a fresh
+Original/Browser fixed route: 173,135 entity fields, 419 paired checkpoints and
+all seven lifecycle/Acid milestones on each side. Actual Native damage sources
+identify live Green actors. Three retained-Native regressions preserve all
+269,637 entity and 9,605 paired field keys with zero lost passes; both Fast
+presentation mismatches improve. Fixed MT remains 196,875/196,875 exact and
+the recorded OS case passes. Older routes retain their missing Acid witnesses;
+full RGBA on the new route remains 7 pass/412 fail. Earlier Bomb/NPC controls
+retain their separate scope (4,364 fields, 38 gains). The input-only replay
+bank and default fixed fixture use the qualified public route. Longer-tail MT,
+other champion hooks and whole-game acceptance remain open.
+
+After integrating Gamma and the starting-trinket runtime, frozen `62300f05`
+replays the same four Native cases with all 456,532 inherited entity/paired
+fields and 196,875 fixed MT fields unchanged. All 134,916 Gaper-spawner rows
+pass. The four older missing-Acid failures and all 1,390 pixel verdicts remain
+unchanged (28 pass, 1,362 fail); this adds no fresh Native or longer-tail MT claim.
 
 Next: the rest of the Basement/Cellar spawn table.
 

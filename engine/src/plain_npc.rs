@@ -280,6 +280,7 @@ fn advance_full(
         // the post-AI handling; an AI that clears dead (Gaper's Morph) lives
         // on, otherwise the base kill retires the actor.
         ai(npc, random, world, births, &mut friction)?;
+        champion_hooks(npc, random, world, births)?;
         if npc.dead {
             base_kill(npc, random, births);
             npc.removed = true;
@@ -324,9 +325,11 @@ fn advance_full(
             .ok_or("NPC appearance counter exhausted")?;
         if npc.state != 1 {
             ai(npc, random, world, births, &mut friction)?;
+            champion_hooks(npc, random, world, births)?;
         }
     } else if !revived {
         ai(npc, random, world, births, &mut friction)?;
+        champion_hooks(npc, random, world, births)?;
     }
     if npc.dead && npc.boss {
         // A boss that killed itself in its AI (Larry Jr.'s lone head) enters
@@ -369,6 +372,39 @@ fn advance_full(
     }
     if !npc.position.is_finite() || !npc.velocity.is_finite() {
         return Err("NPC source motion overflowed actual world vectors".into());
+    }
+    Ok(())
+}
+
+/// Champion hooks 4f998e after update_ai (4fa3f0), dead or alive, but not
+/// in the appearance's initializer or hidden updates. A green champion
+/// (+1040 == 2) on global is_frame(7) (444890 with no sequence offset)
+/// spawns Creep (Green) 1000.23 at its position and runs its first update
+/// (4fafdf..4fb064). The other colours' hooks (6, 8, 9, 10, 11, 12 and type
+/// 252) remain unadmitted.
+fn champion_hooks(
+    npc: &Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    // Effect admission retains the actual Game+ce9f4 callback counter.
+    let game_counter = world.effects.game_update_count;
+    if npc.champion.as_ref().map(|champion| champion.color) != Some(2)
+        || npc.entity_flags() & 0x4000 != 0
+        || !game_counter.is_multiple_of(7)
+    {
+        return Ok(());
+    }
+    let seed = random.next_u32();
+    let creep = world
+        .effects
+        .admit_green_creep(seed, npc.position, (npc.kind, npc.variant))?;
+    if world
+        .effects
+        .advance_creep_initial(creep, random, game_counter, world.player)?
+    {
+        births.push(Birth::CreepHit);
     }
     Ok(())
 }
