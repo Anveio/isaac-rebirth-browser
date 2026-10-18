@@ -62,6 +62,16 @@ def record(base, *args, rooms='0', arrival='', production_directory=None):
     return json.loads(lines[-1])
 
 
+def fight(base, *args, **options):
+    """A port fight leg. A fight whose player takes the boss item (the port
+    alone; the original's pedestal keeps it) is recorded again keeping off
+    the pedestal cells."""
+    leg = record(base, *args, **options)
+    if leg['status'] != 'pass' and leg.get('reason') == 'The port took the boss item':
+        leg = record(base, *args, '--keep-off-pedestal', **options)
+    return leg
+
+
 def keys_only(actions):
     """A per-game segment carries no captures: only the shared tail is paired."""
     return [action for action in actions if action['type'] != 'capture']
@@ -110,11 +120,11 @@ def descended(result, fixture, production_directory):
         # spawn yet (a slot machine, #645) that still block the original's walk.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         last = index + 1 == len(floors)
-        leg = record(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
-                     *([] if last else ['--exit', EXIT_LEG]),
-                     *(['--route-avoid', avoid] if avoid else []),
-                     *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
-                     rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
+        leg = fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
+                    *([] if last else ['--exit', EXIT_LEG]),
+                    *(['--route-avoid', avoid] if avoid else []),
+                    *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
+                    rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
         if leg['status'] != 'pass':
             raise RuntimeError(f"Port descent leg {index} for {fixture['name']} failed: {leg['reason']}")
         if build not in (None, leg.get('build')):
@@ -147,9 +157,9 @@ def fought(fixture, production_directory=None):
     if 'descent' in fixture:
         port = descended(result, fixture, production_directory)
     else:
-        port = record(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *hurt(fixture.get('originalHealth')),
-                      *(['--avoid', ','.join(map(str, avoided(fixture)))] if avoided(fixture) else []),
-                      production_directory=production_directory)
+        port = fight(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *hurt(fixture.get('originalHealth')),
+                     *(['--avoid', ','.join(map(str, avoided(fixture)))] if avoided(fixture) else []),
+                     production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     build = port.get('build')
