@@ -89,8 +89,10 @@ pub(crate) struct SpawnedNpc {
     pub boss_spawned: bool,
     /// Sprite scale (+2c4) multiplier.
     pub scale: f32,
-    /// HP and max HP multiplier.
+    /// HP (+484) multiplier.
     pub health_scale: f32,
+    /// Max HP (+488) multiplier.
+    pub max_health_scale: f32,
 }
 
 /// Actors an NPC callback creates. Game admits them in this order.
@@ -315,6 +317,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
     &crate::long_legs::FAMILY,
+    &crate::fistula::FAMILY,
     &crate::wall_hugger::FAMILY,
     &crate::wall_creep::FAMILY,
     &crate::larry::FAMILY,
