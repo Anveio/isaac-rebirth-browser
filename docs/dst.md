@@ -90,7 +90,7 @@ indexes each one's declared properties from source.
 | `pathfinder` | FindGridPath's flood (`pathfinder::flood_costs`, 5b498f) over room-shaped and arbitrary cost grids | an independent node-weighted Dijkstra: every label is the cell's shortest distance whatever order heap ties take; only open cells of the grid change; the owner is visited exactly when it lies within half the room's cells; without it the flood visits exactly the cells nearer than that cutoff, with it every cell nearer than the expansion that visits the owner and none farther, and that expansion runs to its end; purity; grids outside admission are rejected |
 | `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
 | `game` | the whole engine through public commands, booted with or without the settings and input configuration the browser stored | per-step state invariants, per-command transition contracts (menus including Options, Controls and Keyboard bindings, the own-save protocol and Continue, run-start hold, pause, boss scenes, stage descents, death and GameOver), boot with stored settings, rejection of malformed inputs, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
-| `abi` | the exported C ABI the browser bridge drives | save documents bounded at 4 MiB, save IO declared only with protocol 1 at a fresh Title and documents loaded only there, corrupt documents refused keeping the game; framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game; the settings resets boot with their stored settings, publish the same state from the authored resources, and refuse presence flags other than zero or one and stored volumes outside the unit interval, keeping the previous game; the input-configuration reset boots with the stored configuration and the same state from the authored resources, and refuses more than 32 retained devices, duplicate or unprintable names, Keyboard bindings outside GLFW's keys and unknown request fields, keeping the previous game |
+| `abi` | the exported C ABI the browser bridge drives | save documents bounded at 4 MiB, save IO declared only with protocol 1 at a fresh Title and documents loaded only there, corrupt documents refused keeping the game; framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game; the settings resets boot with their stored settings, publish the same state from the authored resources, and refuse presence flags other than zero or one and stored volumes or Map opacity outside the unit interval, keeping the previous game; the input-configuration reset boots with the stored configuration and the same state from the authored resources, and refuses more than 32 retained devices, duplicate or unprintable names, Keyboard bindings outside GLFW's keys and unknown request fields, keeping the previous game |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
 emits commands the browser bridge can send, plus adversarial variants of them
@@ -111,8 +111,8 @@ resets them. It names its play keys by their default binding and presses
 each through the key now bound to its action, so a case that leaves with
 custom bindings, or boots with them, plays on with them (rebound cases
 reach about as many census keys as default ones). The menus' contracts:
-* an Options tick steps only the volume on the selected row, and leaving
-  Options saves the settings it leaves with;
+* an Options tick steps only the setting on the selected row (SFX, music or
+  Map opacity), and leaving Options saves the settings it leaves with;
 * bindings and the stored input configuration change only in the Keyboard
   menu, which binds the awaited key to the selected action alone (clearing
   it from every other configurable action) or resets the defaults;
@@ -235,7 +235,8 @@ Beyond its invariants, every `game` tape is checked by:
   clear, so a new output cannot drift out of either check.
 * **C ABI differential.** The tape drives the exported reset the browser picks
   for its stored settings (`reset`, `reset_with_audio_preferences`,
-  `reset_with_fullscreen_preferences`, or `reset_with_input_configs` after
+  `reset_with_fullscreen_preferences`, `reset_with_map_preferences_v2`, or
+  `reset_with_input_configs` after
   `request_ptr` receives the stored input configuration and settings), then
   `request_ptr`/`command`/`snapshot_*`, exactly as `web/engine.ts` does,
   answering save IO through `enable_saved_game_io`, `save_data_ptr`,
@@ -252,9 +253,9 @@ Beyond its invariants, every `game` tape is checked by:
 ### Tapes and the corpus
 
 Game tapes use the engine's replay format (`initialSeed`, `bootEpochSeed`,
-the optional `bootAudioPreferences`, `bootFullscreenPreferences` and
-`bootInputConfigs` a generated case stores half, a third and a third of
-the time, the `saveHost` half of them run with (`stored`, the document
+the optional `bootAudioPreferences`, `bootFullscreenPreferences`,
+`bootInputConfigs` and `bootMapPreferences` a generated case stores half, a
+third, a third and a third of the time, the `saveHost` half of them run with (`stored`, the document
 the browser boots with, and `failedWrites`, the revisions whose storage
 fails), and `commands`). A stored input configuration retains other
 devices' arbitrary bindings and usually the Keyboard's: the defaults,

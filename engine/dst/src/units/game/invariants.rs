@@ -633,8 +633,8 @@ fn room_clear(before: &State, command: &Command, after: &State) {
 }
 
 /// Options5A7840 on a Tick. Left and Right step only the setting on the
-/// selected row (SFX on row 1, music on row 2; Up and Down take priority, so
-/// the row holds while a setting steps). Its back action saves the settings
+/// selected row (SFX on row 1, music on row 2, Map opacity on row 3; Up and
+/// Down take priority, so the row holds while a setting steps). Its back action saves the settings
 /// it leaves with (Settings5B8DB0 writes %.4f) before returning to Main.
 fn options(before: &State, after: &State) {
     if before.screen != Screen::Options {
@@ -643,12 +643,14 @@ fn options(before: &State, after: &State) {
     let row = before.options_menu.selection;
     props::always!(
         (after.audio.sfx_volume == before.audio.sfx_volume || row == 1)
-            && (after.music.volume == before.music.volume || row == 2),
-        "game: an Options tick changes only the volume on its selected row",
+            && (after.music.volume == before.music.volume || row == 2)
+            && (after.map_settings == before.map_settings || row == 3),
+        "game: an Options tick changes only the setting on its selected row",
         json!({
             "row": row,
             "sfx": [before.audio.sfx_volume, after.audio.sfx_volume],
             "music": [before.music.volume, after.music.volume],
+            "map": [before.map_settings, after.map_settings],
         })
     );
     if after.screen == Screen::Main {
@@ -658,6 +660,7 @@ fn options(before: &State, after: &State) {
                 saved.sfx_volume == format!("{:.4}", after.audio.sfx_volume)
                     && saved.music_volume == format!("{:.4}", after.music.volume)
                     && saved.fullscreen == after.fullscreen.requested
+                    && saved.map_opacity == format!("{:.4}", after.map_settings.opacity)
             }),
             "game: leaving Options saves the settings it leaves with",
             json!({
@@ -665,6 +668,7 @@ fn options(before: &State, after: &State) {
                 "sfx": after.audio.sfx_volume,
                 "music": after.music.volume,
                 "fullscreen": after.fullscreen.requested,
+                "map": after.map_settings,
             })
         );
         props::sometimes!(true, "game: Options saves and returns to the main menu");

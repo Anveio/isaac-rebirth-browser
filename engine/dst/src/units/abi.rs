@@ -411,6 +411,47 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
         "abi: a settings boot from the authored resources publishes the plain settings boot's state",
         json!({ "seed": seed, "epoch": epoch, "display": resourced_display, "audio": [audio, resourced_audio], "error": error() })
     );
+    // The map reset carries presence flags for the display and audio
+    // settings beside the stored Map opacity.
+    let has_display = e.below(2) as u32;
+    let opacity = volume(e);
+    let map = abi::reset_with_map_preferences_v2(
+        seed,
+        epoch,
+        has_display,
+        fullscreen,
+        has_audio,
+        sfx,
+        music,
+        opacity,
+    );
+    let plain_map = snapshot();
+    let mapped = serde_json::from_slice::<State>(&plain_map).ok();
+    let resourced_map = load(authored, || {
+        abi::reset_with_boot_resources_and_map_preferences_v2(
+            seed,
+            epoch,
+            has_display,
+            fullscreen,
+            has_audio,
+            sfx,
+            music,
+            opacity,
+        )
+    });
+    props::always!(
+        map == 0
+            && mapped.as_ref().is_some_and(|state| {
+                state.map_settings.opacity == opacity
+                    && state.fullscreen.requested == (has_display == 1 && fullscreen == 1)
+                    && (has_audio == 0
+                        || (state.audio.sfx_volume == sfx && state.music.volume == music))
+            })
+            && resourced_map == Some(0)
+            && snapshot() == plain_map,
+        "abi: a map settings reset boots with the stored settings, from the authored resources too",
+        json!({ "opacity": opacity, "hasFullscreen": has_display, "hasAudio": has_audio, "result": [map, resourced_map], "error": error() })
+    );
 
     let previous = snapshot();
     let out_of_range = *e.pick(&[
@@ -427,7 +468,7 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
         (sfx, out_of_range)
     };
     let flag = e.range(2, u32::MAX);
-    let (case, result) = match e.below(4) {
+    let (case, result) = match e.below(6) {
         0 => (
             "fullscreen flag",
             abi::reset_with_fullscreen_preferences(seed, epoch, flag, has_audio, sfx, music),
@@ -440,6 +481,25 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
             "display volume",
             abi::reset_with_fullscreen_preferences(seed, epoch, fullscreen, 1, bad_sfx, bad_music),
         ),
+        3 => (
+            "map opacity",
+            abi::reset_with_map_preferences_v2(
+                seed,
+                epoch,
+                has_display,
+                fullscreen,
+                has_audio,
+                sfx,
+                music,
+                out_of_range,
+            ),
+        ),
+        4 => (
+            "map flag",
+            abi::reset_with_map_preferences_v2(
+                seed, epoch, flag, fullscreen, has_audio, sfx, music, opacity,
+            ),
+        ),
         _ => (
             "audio volume",
             abi::reset_with_audio_preferences(seed, epoch, bad_sfx, bad_music),
@@ -447,7 +507,7 @@ fn settings(e: &mut Entropy, authored: &[u8]) {
     };
     props::always!(
         result == 1 && !error().is_empty() && snapshot() == previous,
-        "abi: a settings reset refuses flags other than zero or one and stored volumes outside the unit interval, keeping the previous game",
+        "abi: a settings reset refuses flags other than zero or one and stored volumes or Map opacity outside the unit interval, keeping the previous game",
         json!({ "case": case, "flag": flag, "volumes": [bad_sfx, bad_music], "result": result })
     );
 }

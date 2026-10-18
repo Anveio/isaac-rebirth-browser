@@ -24,6 +24,7 @@ use rebirth_cleanroom::input;
 use rebirth_cleanroom::keyboard::{
     DeviceConfig, InputConfigs, Keyboard, CONFIGURABLE, DEFAULT_PAIRS,
 };
+use rebirth_cleanroom::map_presentation::MapPreferences;
 use rebirth_cleanroom::music::MusicEvent;
 use rebirth_cleanroom::options_menu::{AudioPreferences, SaveRequest, UnavailableRequest};
 use rebirth_cleanroom::save_host::SaveStore;
@@ -65,6 +66,11 @@ pub fn run(case: &mut Case) {
             }
             if e.chance(1, 3) {
                 tape.boot_input_configs = Some(stored_input_configs(e));
+            }
+            if e.chance(1, 3) {
+                tape.boot_map_preferences = Some(MapPreferences {
+                    opacity: stored_volume(e),
+                });
             }
             // The browser's own-save storage, which a menu readmission reads.
             if e.chance(1, 2) {
@@ -321,12 +327,16 @@ impl Simulation {
                         .boot_fullscreen_preferences
                         .is_none_or(|display| state.fullscreen.requested == display.fullscreen)
                         && state.keyboard == configs.keyboard()
-                        && state.input_configs == configs,
+                        && state.input_configs == configs
+                        && tape
+                            .boot_map_preferences
+                            .is_none_or(|map| state.map_settings == map),
                     "game: boot starts with the stored settings",
                     json!({
                         "audio": tape.boot_audio_preferences,
                         "fullscreen": tape.boot_fullscreen_preferences,
                         "inputConfigs": tape.boot_input_configs,
+                        "map": [tape.boot_map_preferences, state.map_settings],
                         "sfx": state.audio.sfx_volume,
                         "music": state.music.volume,
                         "requested": state.fullscreen.requested,
@@ -663,6 +673,23 @@ impl Simulation {
                 has_audio,
                 sfx_volume,
                 music_volume,
+            ),
+            Reset::Map {
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
+            } => abi::reset_with_map_preferences_v2(
+                seed,
+                epoch,
+                has_fullscreen,
+                fullscreen,
+                has_audio,
+                sfx_volume,
+                music_volume,
+                opacity,
             ),
             Reset::InputConfigs { request } => {
                 let pointer = abi::request_ptr(request.len());
