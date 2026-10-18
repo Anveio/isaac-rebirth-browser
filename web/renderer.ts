@@ -70,6 +70,7 @@ const BASEMENT_PROPS = { actor: "gfx/grid/props_01_basement.anm2", allowCaves: f
 const DECORATION_PROPS: Record<string, { actor: string; allowCaves: boolean }> = {
   "gfx/backdrop/01_basement.png": BASEMENT_PROPS,
   "gfx/backdrop/02_cellar.png": BASEMENT_PROPS,
+  "gfx/backdrop/03_caves.png": { actor: "gfx/grid/props_03_caves.anm2", allowCaves: true },
   "gfx/backdrop/05_depths.png": { actor: "gfx/grid/props_05_depths.anm2", allowCaves: false },
   "gfx/backdrop/09_sheol.png": { actor: "gfx/grid/props_09_sheol.anm2", allowCaves: false },
   ...Object.fromEntries(["0a_library", "0b_shop", "0c_isaacsroom", "0d_barrenroom", "0e_arcade", "0e_diceroom", "0f_secretroom"]
@@ -90,6 +91,9 @@ function decorationClip(names: readonly string[], seed: number, allowCaves: bool
   return name;
 }
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
+// Rock Init (56ee03..56f076) replaces grid_rock.anm2's layer-0 sheet by
+// backdrop; Basement keeps the authored rocks_basement.png.
+const ROCK_SHEETS: Record<string, string> = { "gfx/backdrop/03_caves.png": "gfx/grid/rocks_caves.png" };
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
   if (!animation) return undefined;
@@ -289,7 +293,9 @@ export class Renderer {
         this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant);
         this.drawnGrid.push({ index, kind: 7, animation: "pit", frame: entity.variant });
       } else if (rock) {
-        this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame);
+        const rockSheet = ROCK_SHEETS[state.room.appearance.backdrop];
+        this.assets.draw(ctx, "gfx/grid/grid_rock.anm2", rock.animation, x, y, rock.frame,
+          rockSheet ? { spritesheets: { 0: rockSheet } } : {});
         this.drawnGrid.push({ index, kind: entity.kind, ...rock });
       } else if (entity.kind === 12 && entity.sourceOwner?.tnt) {
         const sprite = entity.sourceOwner.tnt.sprite;

@@ -52,3 +52,29 @@ The public selected bank is retained separately from all local Native
 observations, manifests, traces and PNGs. Its replay binds the same immutable
 artifact; recordings for a different artifact must be authored afresh rather
 than relabeled as current-runtime evidence.
+
+## Caves I descent (#413)
+
+`EV9BP18Q-descent` carries the run past Basement II. Each game clears Basement I's Monstro room with its own keys, takes the trapdoor, walks Basement II's rooms 7 → 8 → 0 and clears the Larry Jr. room, also with its own keys. The shared tail then re-anchors in that boss room and is graded through the trapdoor, the stage transition and the Caves I arrival.
+
+The original's whole segment is fixed fixture keys. A research controller (projected-shot dodging) found them once, and a fresh original replays them exactly. The port records its segment closed-loop per build, one leg per floor.
+
+Both games end the segment hurt: the original at 4/6, the port at 2/6 in the recorded run. The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
+
+| Case | Paired checkpoints | Required tail checks |
+| --- | ---: | ---: |
+| EV9BP18Q descent contrived | 247/247 | 2,742/2,742 |
+| EV9BP18Q descent recorded OS approach | 247/247 | 2,742/2,742 |
+
+**Graded:**
+- the arrived stage (3) and the Caves I stage seed (3627579401);
+- the room index at every `caves-i-*` capture;
+- one Caves I start-room wall assembly equal to an original GL wall-cache draw (two wall sets of three variants, chosen by `Random(walls)`).
+
+**Native layout:** at `caves-i-120` the native layout observer reads all 17 Caves I descriptors. The content workflow's generator reproduces every one: grid index, template, asset stage, door mask, and the decoration, spawn, following and room-init seeds.
+
+**Diagnostics only:** health (each game's own fights), MT trapdoor seeds, and full-frame RGBA (mean channel error 3.8 at `caves-i-120`).
+
+**Port gaps found while building the fixture:**
+- Basement II room 8's slot machine (6.1) is never spawned (#645). The fixture's `routeAvoid` keeps both walks off its cells.
+- The award's rock destruction on cells 37 and 97 is ported (fix_award_pos Destroy(1)). Rock particles and the worm roll's effects stay unadmitted, as for blasts.

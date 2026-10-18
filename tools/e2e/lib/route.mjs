@@ -80,6 +80,8 @@ export function routingView(s) {
     keys: s.inventory.keys,
     // Live fireplaces, which a route may shoot out rather than walk around.
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
+    // Solid poop cells, which a walk may shoot out rather than route around.
+    poops: s.room.grid ? s.room.grid.cells.flatMap((c, i) => (c.entity?.kind === 14 && c.entity.collisionClass !== 0 ? [i] : [])) : [],
     openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33)),
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
     // Living door-shutting enemies and enemy shots, for fight().

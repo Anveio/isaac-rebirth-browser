@@ -109,11 +109,11 @@ impl Nightmares {
     }
 
     pub fn select_normal_basement(&mut self, stage: u32) -> Result<(), String> {
-        if !matches!(stage, 1 | 2) {
-            return Err("stage resource routing admits ordinary Basement I/II only".into());
+        if !matches!(stage, 1..=4) {
+            return Err("stage resource routing admits ordinary Basement and Caves only".into());
         }
-        // 5b8345..5b835b selects ((stage-1)&~1)+alternate. Both ordinary
-        // Basement floors route0; twelve constructor entries start at12.
+        // 5b8345..5b835b selects ((stage-1)&~1)+alternate. Ordinary Basement
+        // floors route 0 and Caves floors 2; twelve constructor entries start at 12.
         self.stage_resources[stage as usize] = (stage - 1) & !1;
         Ok(())
     }

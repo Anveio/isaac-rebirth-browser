@@ -97,11 +97,6 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
         return Ok(());
     };
     let selected = Grid::new(descriptor.clone())?.blast_candidates(origin, radius)?;
-    let decoration_seed = state
-        .room
-        .descriptor
-        .as_ref()
-        .map_or(0, |descriptor| descriptor.decoration_seed);
     for index in selected {
         if crate::doors::try_blow_open(state, index, true)? {
             continue;
@@ -132,79 +127,100 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
             });
             continue;
         }
-        if !matches!(rock.kind, 2 | 4) || rock.state != 1 {
-            continue;
-        }
-        let tinted = rock.kind == 4;
-        // Destroy56c670: the rock-local RNG35 on the spawn seed. Its state1
-        // pre-step always draws Int(50); a zero rolls rare Worm effects
-        // (1000.63, shared MT), unadmitted like the rubble particles.
-        let mut local = crate::items::Rng::new(rock.spawn_seed, [5, 9, 7]);
-        if local.bounded(50) == 0 {
-            let worms = local.bounded(5);
-            local.bounded(worms + 1);
-        }
-        let variant = rock.variant;
-        let width = usize::from(grid.width);
-        let repairs: &[(isize, i32)] = match variant {
-            0..=2 => &[],
-            1000 => &[(1, -1)],
-            1001 => &[(-1, -1)],
-            1002 => &[(width as isize, -1)],
-            1003 => &[(-(width as isize), -1)],
-            1004 => &[(width as isize + 1, 1), (width as isize, 0), (1, -1)],
-            1005 => &[(width as isize, 1), (width as isize - 1, 0), (-1, -1)],
-            1006 => &[(1, 3), (1 - width as isize, 2), (-(width as isize), -1)],
-            1007 => &[(-1, 3), (-(width as isize) - 1, 2), (-(width as isize), -1)],
-            _ => continue,
-        };
-        let rock = grid.cells[index].entity.as_mut().expect("selected rock");
-        rock.state = 2;
-        rock.collision_class = 0;
-        state
-            .room
-            .path_costs
-            .as_mut()
-            .ok_or("Rock destruction requires source Room.Init path costs")?
-            .store(index, 900)?;
-        for &(offset, frame) in repairs {
-            let Some(neighbor) = index.checked_add_signed(offset) else {
-                continue;
-            };
-            let Some(rock) = grid
-                .cells
-                .get_mut(neighbor)
-                .and_then(|cell| cell.entity.as_mut())
-                .filter(|entity| entity.kind == 2)
-            else {
-                continue;
-            };
-            // SetType56c240(-1) chooses the normal authored frame from a new
-            // local RNG35; it does not consume the shared effects/audio stream.
-            rock.variant = if frame < 0 {
-                crate::room_spawns::next35(decoration_seed.wrapping_add(neighbor as u32) | 1) % 3
-            } else {
-                1000 + frame as u32
-            };
-        }
-        // Normal Basement Rock emits this real sound request before particles.
-        // Unsupported effect families remain unadmitted, without cursor shifts.
-        state.audio.admit(
-            &mut state.boot_lifecycle.shared,
-            state.system_clock.system_counter - 1,
-            crate::audio::SoundRequest {
-                id: 137,
-                volume: 1.0,
-                delay: 2,
-                looping: false,
-                pitch: 1.0,
-            },
-        );
-        if tinted {
-            tinted_reward(state, index, &mut local)?;
-        }
+        destroy_rock(state, index)?;
     }
     Ok(())
+}
+
+/// Rock.Destroy56c670 for an intact ordinary (kind2) or tinted (kind4) rock;
+/// its immediate argument only changes bomb rocks. Returns whether a rock
+/// broke; other kinds and broken rocks are left as they are.
+pub(crate) fn destroy_rock(state: &mut State, index: usize) -> Result<bool, String> {
+    let decoration_seed = state
+        .room
+        .descriptor
+        .as_ref()
+        .map_or(0, |descriptor| descriptor.decoration_seed);
+    let grid = state
+        .room
+        .grid
+        .as_mut()
+        .ok_or("Rock destruction requires the admitted room grid")?;
+    let Some(rock) = grid.cells[index].entity.as_mut() else {
+        return Ok(false);
+    };
+    if !matches!(rock.kind, 2 | 4) || rock.state != 1 {
+        return Ok(false);
+    }
+    let tinted = rock.kind == 4;
+    // Destroy56c670: the rock-local RNG35 on the spawn seed. Its state1
+    // pre-step always draws Int(50); a zero rolls rare Worm effects
+    // (1000.63, shared MT), unadmitted like the rubble particles.
+    let mut local = crate::items::Rng::new(rock.spawn_seed, [5, 9, 7]);
+    if local.bounded(50) == 0 {
+        let worms = local.bounded(5);
+        local.bounded(worms + 1);
+    }
+    let variant = rock.variant;
+    let width = usize::from(grid.width);
+    let repairs: &[(isize, i32)] = match variant {
+        0..=2 => &[],
+        1000 => &[(1, -1)],
+        1001 => &[(-1, -1)],
+        1002 => &[(width as isize, -1)],
+        1003 => &[(-(width as isize), -1)],
+        1004 => &[(width as isize + 1, 1), (width as isize, 0), (1, -1)],
+        1005 => &[(width as isize, 1), (width as isize - 1, 0), (-1, -1)],
+        1006 => &[(1, 3), (1 - width as isize, 2), (-(width as isize), -1)],
+        1007 => &[(-1, 3), (-(width as isize) - 1, 2), (-(width as isize), -1)],
+        _ => return Ok(false),
+    };
+    let rock = grid.cells[index].entity.as_mut().expect("selected rock");
+    rock.state = 2;
+    rock.collision_class = 0;
+    state
+        .room
+        .path_costs
+        .as_mut()
+        .ok_or("Rock destruction requires source Room.Init path costs")?
+        .store(index, 900)?;
+    for &(offset, frame) in repairs {
+        let Some(neighbor) = index.checked_add_signed(offset) else {
+            continue;
+        };
+        let Some(rock) = grid
+            .cells
+            .get_mut(neighbor)
+            .and_then(|cell| cell.entity.as_mut())
+            .filter(|entity| entity.kind == 2)
+        else {
+            continue;
+        };
+        // SetType56c240(-1) chooses the normal authored frame from a new
+        // local RNG35; it does not consume the shared effects/audio stream.
+        rock.variant = if frame < 0 {
+            crate::room_spawns::next35(decoration_seed.wrapping_add(neighbor as u32) | 1) % 3
+        } else {
+            1000 + frame as u32
+        };
+    }
+    // Normal Basement Rock emits this real sound request before particles.
+    // Unsupported effect families remain unadmitted, without cursor shifts.
+    state.audio.admit(
+        &mut state.boot_lifecycle.shared,
+        state.system_clock.system_counter - 1,
+        crate::audio::SoundRequest {
+            id: 137,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    if tinted {
+        tinted_reward(state, index, &mut local)?;
+    }
+    Ok(true)
 }
 
 /// Tinted rock reward 56d440 for a fresh character without trinkets: one or
