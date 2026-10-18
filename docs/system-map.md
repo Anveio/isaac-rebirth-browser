@@ -839,6 +839,26 @@ all verdicts. Intermediate adfb OS14 lost passes are recovered and its failed
 reports remain preserved. Broader saved actors/items/rooms and progression,
 14 canonical menu/gameplay-scope errors,28 seed separators and28 penalty-stage
 rows remain open.
+PR696's Save foundation is merged at `9f952efd`. It removes the 4,096 walking
+paint cutoff while retaining the 4 MiB complete-document bound. Capacity
+failure produces no partial packet, sends one failed acknowledgement,
+preserves older stored bytes and resumes the pending Tick. Exact main715
+baseline `7ad918af` and candidate `92dc82b9` pass fresh build/ABI, affected
+preview and runtime 4/4 each. Four same-Native Save controls retain all 3,748
+ordered rows per role (3,650 pass / 98 fail), zero changed/lost passes and
+unchanged pixel metrics; 33 own-save guards pass per control. The 98 failures
+are 28 ambient velocity-word rows, 14 canonical scope rows, 28 seed separators
+and 28 penalty-stage rows. Earlier Source C native port Rust/C ABI capacity, shipped
+WASM differential and Browser over-bound results retain their separate scopes;
+complete direct WASM owner bytes remain unobserved and the under-bound Browser
+wrapper failure remains retained. The merged current-main native port library
+check passes separately; its wrapper's failed label remains preserved.
+Unmerged H (`65178aba`), on frozen main715 plus Save6, passes build/runtime 4/4
+and two actual Save comparisons gain 56 rows with zero lost passes: 3,706 pass /
+42 fail. All 66 own-save guards pass through same-process Continue and pixels
+are unchanged. The 42 failures are 28 ambient velocity words and 14 canonical
+scope rows. H's ordinary-run driver and natural reload remain unqualified;
+these results add no Factory/Get or whole-game parity claim.
 [Save/Continue scope](save-continue.md) preserves exact current and historical
 producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
