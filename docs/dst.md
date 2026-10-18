@@ -215,11 +215,16 @@ through the menus), a run started from Random (`Random run`) and its
 GameOver popup's Exit to the menus (`menus after a Random run's GameOver`),
 a fire cooldown left above a newly lowered fire delay (`fire cooldown above
 the max fire delay`), an Options setting held past its hold-repeat threshold
-(`Options hold repeat`), and each property met (`property:<message>`). The summary
+(`Options hold repeat`), and each property met (`property:<message>`).
+`rooms` cases count too (`roomsReached`), so a kind only a later floor's
+rooms place, such as Mega Fatty (264) in a Caves I boss room, shows as
+simulated once the unit plays it; `reached` and `firstSteps` hold only
+`game` cases, the ones with tapes for `cover.py` and `chase.py` to cut. A
+census entry is a measurement, never a requirement. The summary
 line names the implemented NPC kinds no case simulated
 (from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
 generated floors contained but no case entered. Unsimulated kinds are split
-by whether any authored Basement or special room places them
+by whether any authored Basement, Caves or special room places them
 (`unplacedNpcKinds`): a kind no room places, such as one from a later stage,
 is reachable only when another entity spawns it, so it is not a driver gap.
 A `removed:<kind>` key records an NPC of that kind leaving a room the player

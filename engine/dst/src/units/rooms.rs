@@ -18,6 +18,7 @@
 //! transition a trapdoor starts must arrive, and a Tick that fails on the way
 //! is a violation too.
 use super::game::{expected_rejection, seeded_run, Driver};
+use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::props;
@@ -39,6 +40,7 @@ const TRAPDOOR_FRAMES: u32 = 120;
 const DESCENTS: usize = 16;
 
 pub fn run(case: &mut Case) {
+    let _census = coverage::rooms_case();
     let e = &mut *case.entropy;
     let Ok(code) = seed::encode(e.nonzero_u32()) else {
         return;
@@ -223,7 +225,10 @@ fn apply(game: &mut Game, command: Command, label: &impl Fn() -> Value) -> bool 
     let expected = expected_rejection(&game.state, &command);
     let tick = matches!(command, Command::Tick { .. });
     let result = match panic::catch_unwind(AssertUnwindSafe(|| game.command(command.clone()))) {
-        Ok(result) => result,
+        Ok(result) => {
+            coverage::observe(&game.state);
+            result
+        }
         Err(_) => {
             props::unreachable!(
                 "rooms: entering and playing rooms never panics the engine",
