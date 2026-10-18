@@ -223,6 +223,7 @@ export async function browserScenario(page, { initialSeed = FOUNDATION_REFERENCE
     return { initialSeed, bootEpochSeed, commands, states: actualTrace.states, backendEvents: actualTrace.backendEvents,
       bootAudioPreferences: actualTrace.bootAudioPreferences, bootFullscreenPreferences: actualTrace.bootFullscreenPreferences,
       bootInputConfigs: actualTrace.bootInputConfigs,
+      bootMapPreferences: actualTrace.bootMapPreferences,
       frames, timings, tickRate: 60, seed: states.at(-1).runSeed, inputTransport: "actual DOM keyboard; manually stepped WASM simulation; recorded audio backend callbacks" };
   };
   await enterSeededRun(page, manualSeedText, { onCommand: record, onCheckpoint: capture,
@@ -306,7 +307,7 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayExecutable;
-export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootElapsed = undefined) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences, bootElapsed = undefined) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayExecutable) {
     const metadata = spawnSync("cargo", ["metadata", "--locked", "--manifest-path", "engine/Cargo.toml", "--no-deps", "--format-version", "1"], { cwd: ROOT, encoding: "utf8" });
@@ -329,7 +330,7 @@ export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEv
     if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
   }
   assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
-  const replay = spawnSync(nativeReplayExecutable, [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, ...(bootElapsed && { bootElapsed }), commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(nativeReplayExecutable, [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, ...(bootElapsed && { bootElapsed }), commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');
@@ -366,11 +367,11 @@ export async function verify({ references, output = join(ROOT, ".cache/foundatio
     assert.deepEqual(run.frames.map((frame) => frame.label), CHECKPOINTS, "Every declared original checkpoint must be captured in order");
     assert.deepEqual(errors, [], "Browser keyboard/render pipeline cannot hide errors");
     save(join(output, "commands.json"), { initialSeed: run.initialSeed, bootEpochSeed: run.bootEpochSeed, commands: run.commands,
-      bootAudioPreferences: run.bootAudioPreferences, bootFullscreenPreferences: run.bootFullscreenPreferences, bootInputConfigs: run.bootInputConfigs });
+      bootAudioPreferences: run.bootAudioPreferences, bootFullscreenPreferences: run.bootFullscreenPreferences, bootInputConfigs: run.bootInputConfigs, bootMapPreferences: run.bootMapPreferences });
     save(join(output, "wasm-states.json"), run.states);
     save(join(output, "command-performance.json"), { tickRate: run.tickRate, measurements: run.timings, nativePhaseComparison: "Unavailable: native observations are process lifetime CPU/RSS, not corresponding simulation/render phase timers" });
     try {
-      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents, run.bootAudioPreferences, run.bootFullscreenPreferences, run.bootInputConfigs);
+      const native = nativeReplay(run.initialSeed, run.commands, run.bootEpochSeed, run.backendEvents, run.bootAudioPreferences, run.bootFullscreenPreferences, run.bootInputConfigs, run.bootMapPreferences);
       save(join(output, "rust-states.json"), native);
       for (let index = 0; index < native.length; index++) assert.equal(exactStateDifference(native[index], run.states[index]), null, `Native Rust/WASM state divergence after command ${index}`);
       report.checks.push({ id: "actual-keyboard-menu-seed-movement-shooting", status: "pass", commands: run.commands.length, statesCompared: native.length, scope: "Exact native Rust/WASM foundation state; original game hidden state is not observed" });
