@@ -4008,7 +4008,9 @@ impl Game {
                         .expect("first entered descriptor has authored admission")
                         .selectors
                         .clone();
-                    let counter = self.state.game_update_count.wrapping_add(1);
+                    // Room.Init reads the current Game+CE9F4 for its immediate
+                    // critter Update, as does the admitted Room.Update below.
+                    let counter = self.state.game_update_count;
                     let viewer = self
                         .state
                         .departure_position
