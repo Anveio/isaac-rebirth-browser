@@ -4231,10 +4231,12 @@ impl Game {
             controlled_knife_homing::rebuild_partition(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
-            bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
+            //4549D1 completes the NPC/Bomb partition's self-pairs before
+            //454A0A queries that partition against the actual Players.
             npcs::nonplayer_contacts(&mut self.state)?;
             bombs::bomb_contacts(&mut self.state)?;
+            bombs::player_contacts(&mut self.state)?;
+            npcs::player_contacts(&mut self.state)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             // Actual full manager contact pass uses typed ground coordinates.
             self.state.tear_partition = self
