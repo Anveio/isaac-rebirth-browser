@@ -37,6 +37,7 @@ mod creep_effects;
 pub mod critters;
 pub mod dingle;
 pub mod dips;
+pub mod display_settings;
 mod doors;
 mod dr_fetus;
 pub mod duke;
@@ -679,6 +680,7 @@ pub struct State {
     pub input_configs: keyboard::InputConfigs,
     #[serde(default)]
     pub map_settings: map_presentation::MapPreferences,
+    pub gamma_settings: display_settings::GammaPreferences,
     #[serde(default)]
     pub minimap_presentation: map_presentation::MapPresentation,
     #[serde(default)]
@@ -917,6 +919,7 @@ impl Game {
             None,
             keyboard::InputConfigs::default(),
             None,
+            None,
         )
     }
     pub fn new_with_resources(
@@ -1002,6 +1005,35 @@ impl Game {
         input_configs: Option<keyboard::InputConfigs>,
         map: Option<map_presentation::MapPreferences>,
     ) -> Result<Self, String> {
+        Self::new_with_settings_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            preferences,
+            fullscreen,
+            input_configs,
+            map,
+            None,
+        )
+    }
+    /// Additive global display input; legacy constructors retain Gamma1.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "each argument is a separate declared boot input: seeds, resources, audio, fullscreen, input, map and Gamma preferences"
+    )]
+    pub fn new_with_settings_preferences(
+        initial_seed: u32,
+        boot_epoch_seed: u32,
+        resources: Option<challenges::ResourceInputs>,
+        preferences: Option<options_menu::AudioPreferences>,
+        fullscreen: Option<fullscreen::FullscreenPreferences>,
+        input_configs: Option<keyboard::InputConfigs>,
+        map: Option<map_presentation::MapPreferences>,
+        gamma: Option<display_settings::GammaPreferences>,
+    ) -> Result<Self, String> {
+        let gamma = gamma
+            .map(display_settings::GammaPreferences::validate)
+            .transpose()?;
         let map = map
             .map(map_presentation::MapPreferences::validate)
             .transpose()?;
@@ -1033,6 +1065,7 @@ impl Game {
             fullscreen,
             input_configs,
             map,
+            gamma,
         )
     }
     #[expect(
@@ -1048,6 +1081,7 @@ impl Game {
         fullscreen: Option<fullscreen::FullscreenPreferences>,
         input_configs: keyboard::InputConfigs,
         map: Option<map_presentation::MapPreferences>,
+        gamma: Option<display_settings::GammaPreferences>,
     ) -> Result<Self, String> {
         let run_seed = seed::encode(initial_seed)?;
         let (boot_lifecycle, saved_game, boot_level_grid) =
@@ -1109,6 +1143,7 @@ impl Game {
                 keyboard: input_configs.keyboard(),
                 input_configs,
                 map_settings: map.unwrap_or_default(),
+                gamma_settings: gamma.unwrap_or_default(),
                 minimap_presentation: map_presentation::MapPresentation::default(),
                 fullscreen: fullscreen::FullscreenState::from_preferences(fullscreen)?,
                 challenge_selection: None,
@@ -3651,6 +3686,7 @@ impl Game {
                 &mut self.state.audio,
                 &mut self.state.music,
                 &mut self.state.map_settings,
+                &mut self.state.gamma_settings,
                 &mut self.state.boot_lifecycle.shared,
                 audio_counter,
             )?;
@@ -3687,6 +3723,7 @@ impl Game {
                         &self.state.music,
                         &self.state.fullscreen,
                         &self.state.map_settings,
+                        &self.state.gamma_settings,
                     )?;
                     self.state.screen = Screen::Main;
                     //59CAC0 stores the new page now; next iteration's view
@@ -5906,6 +5943,58 @@ pub extern "C" fn reset_with_input_configs(initial_seed: u32, boot_epoch_seed: u
             boot.fullscreen_preferences,
             Some(boot.input_configs),
             boot.map_preferences,
+        )
+    });
+    match result {
+        Ok(game) => {
+            GAME.with(|state| *state.borrow_mut() = Some(game));
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+/// Explicit global preference inputs; no mutable runtime state is accepted.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct SettingsBoot {
+    #[serde(default)]
+    with_resources: bool,
+    #[serde(default)]
+    audio_preferences: Option<options_menu::AudioPreferences>,
+    #[serde(default)]
+    fullscreen_preferences: Option<fullscreen::FullscreenPreferences>,
+    #[serde(default)]
+    input_configs: Option<keyboard::InputConfigs>,
+    #[serde(default)]
+    map_preferences: Option<map_presentation::MapPreferences>,
+    gamma_preferences: display_settings::GammaPreferences,
+}
+#[no_mangle]
+pub extern "C" fn reset_with_settings_preferences(initial_seed: u32, boot_epoch_seed: u32) -> u32 {
+    let result = REQUEST.with(|request| {
+        let boot: SettingsBoot =
+            serde_json::from_slice(&request.borrow()).map_err(|error| error.to_string())?;
+        let resources = if boot.with_resources {
+            Some(BOOT_RESOURCE.with(|buffer| {
+                serde_json::from_slice::<challenges::ResourceInputs>(&buffer.borrow())
+                    .map_err(|error| error.to_string())
+            })?)
+        } else {
+            None
+        };
+        Game::new_with_settings_preferences(
+            initial_seed,
+            boot_epoch_seed,
+            resources,
+            boot.audio_preferences,
+            boot.fullscreen_preferences,
+            boot.input_configs,
+            boot.map_preferences,
+            Some(boot.gamma_preferences),
         )
     });
     match result {

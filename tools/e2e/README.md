@@ -708,3 +708,16 @@ See [the scoped results and remaining issues](../../docs/map-opacity.md).
 Natural reload/migration, banner/controller, fullmix and complete sharedMT
 parity need separate evidence. Source registration alone is not a passing live
 qualification.
+
+`options-gamma` extends the existing Options public-clock capture with fixed
+clamp/repeat/Back inputs and one unfiltered OS seed/boot case. It requires actual
+f32 settings, authored percentage, final GPU parameters and separate Browser
+reload owners under Preferences V4. The recorded bank passes 1,376 functional
+fields and 26/26 required percentage regions after the sampler precision fix;
+full-frame diagnostics remain 10/40 exact. Historical V2/V3 IO is a separate
+contract, not a regrade of old captures.
+
+```sh
+npm run test:e2e -- options-gamma --no-build --production-directory FROZEN
+npm run test:e2e -- options-gamma --scenarios references/isaac/cases/options-gamma/recorded-fixed-and-1k6qhddf-v1.json --no-build --production-directory FROZEN
+```
