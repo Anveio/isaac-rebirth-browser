@@ -66,3 +66,69 @@ test("releasing a held bomb key in seed entry preserves text-only typing and the
   expect(after.inventory.bombs).toBe(0); expect(after.bombs).toHaveLength(1);
   expect(after.pressed).not.toContain("KeyE");
 });
+
+
+test("the public Keyboard Map binding controls the expanded map after Back", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto("/"); await waitForReady(page);
+  await page.evaluate(() => {
+    const game = (window as any).game;
+    game.pause(); game.reset(2184569263, { trace: true });
+  });
+  const state = async () => page.evaluate(() => (window as any).game.snapshot());
+  const step = async (count: number) => page.evaluate(count => (window as any).game.step(count), count);
+  const press = async (code: string, settle = 24, held = 12) => {
+    await page.keyboard.down(code); await step(held);
+    await page.keyboard.up(code); if (settle) await step(settle);
+  };
+  await step(63);
+  for (const screen of ["profile", "main"]) {
+    await press("Enter", 72); expect((await state()).screen).toBe(screen);
+  }
+  for (let row = 0; row < 3; row++) await press("ArrowDown");
+  for (const screen of ["options", "controls", "keyboard"]) {
+    await press("Enter", 72); expect((await state()).screen).toBe(screen);
+  }
+  const before = (await state()).keyboard.bindings;
+  for (let row = 0; row < 12; row++) await press("ArrowDown");
+  expect((await state()).controlsMenu.selection).toBe(12);
+  await press("Enter"); expect((await state()).controlsMenu.waiting).toBe(true);
+  await press("KeyI");
+  const configured = await state();
+  expect(configured.controlsMenu.waiting).toBe(false);
+  expect(configured.keyboard.bindings).toEqual(before.map((pair: number[], action: number) => action === 13 ? [73, -1] : pair));
+  for (const screen of ["controls", "options", "main"]) {
+    await press("Escape", 72); expect((await state()).screen).toBe(screen);
+  }
+  for (let row = 0; row < 3; row++) await press("ArrowUp");
+  await press("Enter", 72); expect((await state()).screen).toBe("character");
+  await press("Tab", 108); expect((await state()).screen).toBe("seed");
+  await page.keyboard.type("T1PK6Y0W");
+  await press("Enter", 72); await press("Enter", 300);
+  expect((await state()).screen).toBe("playing");
+  await press("Tab", 18, 8);
+  const oldKey = await state();
+  expect(oldKey.publicActions.held[13]).toBe(false);
+  expect(oldKey.minimapPresentation.mode).toBe(0);
+  expect(oldKey.minimapPresentation.expandedAlpha).toBe(0);
+  await page.keyboard.down("KeyI"); await step(8);
+  const held = await state();
+  expect(held.publicActions.held[13]).toBe(true);
+  expect(held.controlsMenu.unavailableActions).not.toContain(13);
+  await page.keyboard.up("KeyI"); await step(18);
+  const opened = await state();
+  expect(opened.publicActions.held[13]).toBe(false);
+  expect(opened.minimapPresentation.mode).toBe(2);
+  expect(opened.minimapPresentation.expandedLatched).toBe(true);
+  expect(Math.fround(opened.minimapPresentation.expandedAlpha)).toBe(Math.fround(.3));
+  expect(opened.keyboard.bindings[13]).toEqual([73, -1]);
+  await press("KeyI", 18, 2);
+  const closed = await state();
+  expect(closed.minimapPresentation.mode).toBe(0);
+  expect(closed.minimapPresentation.expandedLatched).toBe(false);
+  expect(closed.minimapPresentation.expandedAlpha).toBe(0);
+  const feedback = await page.evaluate(() => (window as any).game.feedback());
+  expect(feedback.runtimeFailed).toBe(false);
+  expect(feedback.truncated).toBe(false);
+  expect(feedback.events.filter((event: any) => event.kind === "unavailableControl" && event.action === 13)).toEqual([]);
+});

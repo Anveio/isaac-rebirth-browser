@@ -189,7 +189,8 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `player-death` | Normal Isaac death clip, GameOver freeze and deferred popup restart/exit actions | [player-death.mjs](tools/e2e/player-death.mjs) `--count 2` |
 | `run-admission` | Initial run admission: menu confirmation clock anchor and Player control enable timing | [run-admission.mjs](tools/e2e/run-admission.mjs) `--count 2` |
 | `audio` | SFX admission and Web Audio output | [audio.mjs](tools/e2e/audio.mjs) `--count 2` |
-| `options-audio` | Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed | [options-audio.mjs](tools/e2e/options-audio.mjs) `--count 1` |
+| `options-map` | Map opacity repeats/clamps/Back and short-Tab map surfaces: fixed route plus unfiltered OS seed/boot, actual owners and required render regions | [options-map-suite.mjs](tools/e2e/options-map-suite.mjs) `--count 1` |
+| `options-audio` | Options SFX/Music arrows and Back: actual owner/backend requests, saved public inputs and final run seed | [options-audio.mjs](tools/e2e/options-audio.mjs) `--count 1 --preferences-schema 3` |
 | `music` | Music channels, fades and queued tracks | [music.mjs](tools/e2e/music.mjs) `--count 2` |
 | `footprint-admission` | Footprint cadence at admission: fixed regression and OS-random admitted miniboss room; exact initial NPC fields | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entity-scenarios.py --helper-arg --room-type --helper-arg 6 --helper-arg --contrived --helper-arg PHCVWE1C:1 --helper-arg --count --helper-arg 1 --helper-arg --attempts --helper-arg 256 --helper-arg --stop-after-capture --helper-arg entry-40 --comparator tools/foundation/footprint-admission-state-pair.mjs --public-clock-schedule --archive-native-evidence --native-frame-timeout 120` |
 | `entities` | Every authored entity, room-shape and boss spec in tools/e2e/entities/: admission, AI, damage, death and room state | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/entities-scenarios.py --comparator tools/foundation/entity-state-pair.mjs --native-frame-timeout 120` |
@@ -252,6 +253,7 @@ Actual browser cases below are discovered from the executable browser scenario s
 | original GPU shadow and light masks match all complete native targets for independent seeds and movement | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
 | focus lifecycle clears held controls and resumes without undoing explicit diagnostic pause | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | releasing a held bomb key in seed entry preserves text-only typing and the first gameplay press | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
+| the public Keyboard Map binding controls the expanded map after Back | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | fresh source title fade, f32 animation, loop and retained reentry clock match seven complete original frames | [title.spec.ts](tools/tests/title.spec.ts) |
 
 Selected GPU-mask checkpoints below come directly from the native fixture manifest consumed by the browser gate. Each selected case compares every straight RGBA byte in both complete targets with zero tolerance. Controlled cases require actual X11 delivery, complete paired GL phases, binary/log/target hashes and independently repeated original evidence; this remains a graphics-target contract, not full original state or frame parity.
