@@ -184,9 +184,15 @@ try {
   };
   if (FIGHT) {
     const memory = { orbit: 1, lead: hasFlag('--lead') };
+    // The boss pedestal spawns at the clear in cell 97: a player standing on
+    // or beside it then takes the item in the port alone, which leaves an
+    // empty pedestal (subtype 0) where the original's keeps its item. A fight
+    // that goes on to the stage exit (no --no-corner) steers around those
+    // cells as if they were solid.
+    const PEDESTAL_CELLS = hasFlag('--no-corner') ? [] : [82, 96, 97, 98, 112];
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
-      await hold(state.player.controls ? fightKeys(state, memory) : []);
+      await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
     }
