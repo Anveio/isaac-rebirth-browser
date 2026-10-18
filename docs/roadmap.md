@@ -174,12 +174,12 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 50 raw pointer/sequence differences. The outer raw-index guard fails; its
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
-Missing: controllers, mouse, reload acceptance and remaining remapped action
-callbacks, including drop and restart. The configurable Map action has the
+Missing: controllers, mouse, Native process reload, Browser OS-process
+restart and remaining remapped action callbacks, including drop and restart. The configurable Map action has the
 separate bounded scope above. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: qualify own-saved Keyboard reload; drop (Ctrl) and restart (R); gamepad.
+Next: Native own-saved Keyboard process reload; drop (Ctrl) and restart (R); gamepad.
 
 No open bugs.
 
