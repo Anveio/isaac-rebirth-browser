@@ -61,8 +61,8 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
 // --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
-// around in those rooms: an authored slot machine (6.x) blocks the player in
-// both games, but the routing grid does not count slot bodies as solid.
+// around in those rooms, beyond the routing grid's own solid cells (which
+// include NPC and slot bodies).
 const ROUTE_AVOID = new Map((flag('--route-avoid', '') || '').split(';').filter(Boolean)
   .map(item => item.split(':')).map(([room, cells]) => [Number(room), cells.split(',').map(Number)]));
 // --hurt: the original's fixture fight ends below full health. Basement II's
