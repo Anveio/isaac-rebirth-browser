@@ -38,8 +38,9 @@ pub struct Pathfinder {
     /// +734: last target whose cell was open (cost <= 999).
     #[serde(default = "zero")]
     pub last_target: WorldVector,
-    /// Port frontier, not a source field: a probe off the lattice of a room
-    /// larger than 200 cells read Room+e94 as -1 (see `cost`).
+    /// Port frontier, not a source field: a MoveRandomly probe or FindGridPath
+    /// read off the lattice of a room larger than 200 cells took Room+e94 as
+    /// -1 (see `cost`).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub unmodelled_crawlspace_read: bool,
 }
@@ -347,14 +348,14 @@ fn cell_of(world: &NpcWorld, point: WorldVector) -> i32 {
     world.grid.index(point).map_or(-1, |index| index as i32)
 }
 
-/// A Room+e98 word by native index; -1 reads Room+e94 (see `cost`).
-fn cost_at(world: &NpcWorld, index: i32) -> Result<i32, String> {
+/// A Room+e98 word by native index; -1 reads Room+e94 as `cost` does.
+fn cost_at(world: &NpcWorld, path: &mut Pathfinder, index: i32) -> Result<i32, String> {
     if index < 0 {
         let descriptor = world.grid.descriptor();
-        if u32::from(descriptor.width) * u32::from(descriptor.height) <= 200 {
-            return Ok(-1);
+        if u32::from(descriptor.width) * u32::from(descriptor.height) > 200 {
+            path.unmodelled_crawlspace_read = true;
         }
-        return Err("FindGridPath read Room+e94, which is not modelled".into());
+        return Ok(-1);
     }
     world
         .path_costs
@@ -566,7 +567,7 @@ fn find_with(
     friction: &mut f32,
 ) -> Result<(), String> {
     let mut goal = cell_of(world, target);
-    if goal >= 0 && cost_at(world, goal)? <= 999 {
+    if goal >= 0 && cost_at(world, path, goal)? <= 999 {
         path.last_target = target;
     } else if path.last_target != ZERO {
         goal = cell_of(world, path.last_target);
@@ -587,7 +588,7 @@ fn find_with(
     let mut slowdown = 1.0;
     if world.game_counter.wrapping_add(1).is_multiple_of(3) {
         let probe = npc.position + normalized(npc.velocity) * 40.0;
-        let ahead = cost_at(world, cell_of(world, probe))?;
+        let ahead = cost_at(world, path, cell_of(world, probe))?;
         if (1..=949).contains(&ahead) {
             slowdown = 0.7;
         }
@@ -618,7 +619,8 @@ fn find_with(
         target
     } else {
         let timer = path.replan;
-        if cost_at(world, path.cell)? != 1000 && timer <= 0 {
+        let cell = path.cell;
+        if cost_at(world, path, cell)? != 1000 && timer <= 0 {
             path.replan = random.bounded(10) as i32 + 10;
             flood(path, world, goal)?;
         } else {
