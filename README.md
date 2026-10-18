@@ -10,6 +10,7 @@ npm run check                                 # build + every live suite
 npm run test:e2e -- --list                    # registered live suites
 npm run test:e2e:paired -- --replay-cases PATH
 npm run matrix:update                         # sync TEST_MATRIX.md
+python3 tools/foundation/decode-rooms.py --prepare-private-caves  # before raw cargo
 ```
 
 | Subsystem | Root |

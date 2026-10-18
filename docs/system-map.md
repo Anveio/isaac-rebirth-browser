@@ -17,6 +17,22 @@ Merged source and a passing captured artifact are separate qualifications. The
 records below retain their own source, WASM and input bindings; none is an
 automatic rerun on advancing `main` or confirmation of the served build.
 
+PR680 adds Hopper 29.0, Trite 29.1 and Flaming Hopper 54.0 source through
+`engine/src/hoppers.rs`, including typed admission, hop/grid behavior and fire
+conversion. The existing `entities/hopper` and `entities/trite` drivers declare
+admission coverage. Independent live qualification on pinned main `ca408124`
+is **UNRUN**; merged source and inputs establish no Original/Browser,
+fire-conversion, shared-MT or pixel acceptance. Bulk imports keep their owner.
+
+Caves I (stage 3) generation is still seed-dependent: selecting Double Trouble
+(boss range 3700..3749) stops generation because rectangular boss placement
+is unimplemented. Separately, its wall catalogue is built before selection
+and labels set 1 as patches 0..2 instead of 3..5. The reviewed catalogue
+correction is unbuilt and live-unrun; it changes metadata, not wall quads or
+RNG order, and does not fix Double Trouble. A real set 1 arrival and unchanged
+Basement controls remain required. Caves II (stage 4) and later stages remain
+outside this scope.
+
 | Area | Implemented source | Independent live scope and remaining work |
 | --- | --- | --- |
 | Options audio/display leaf | Partial eight-row main-family navigation, actual SFX/Music settings, preferences loaded before construction, Back save and a Browser fullscreen intent/result bridge. Controls and Map opacity have separate bounded scopes; Gamma has a separate bounded functional slice below; Filter and Popups callbacks remain separate. | The 37-file rebase on head `402af20e` preserves PR629/630 and final footprint tools. Its immutable artifact `99f8986d`/1,407 passes build and the same-Native 428/428-field Options replay with zero errors. All 428 rows and 16 Browser PNG bytes equal historical 3a9; this is not computed Native RGBA equality. The same artifact also passes both unchanged Browser runtime tests (2/2, no skipped or flaky cases). Default paired-kernel replays preserve every prior row and actual value: fixed 5999/5999 passes; recorded HH936E8Z retains 78 failures among 6060 checks, with zero lost passes. The historical main4820-based artifact 3a9 passes runtime 2/2, fixed SFX 368/368 and canonical free-SKU 1778 plus four named transport rows; its outer launcher FAIL remains beside the strict additive readout. Main 16d8 retains typed-zero FAIL. The historical 403/1112 history cap FAIL remains. The registered `options-audio` suite first passes 866/866 fields on a716/99f with one fixed and one unfiltered OS seed/epoch/hold case. Fresh Native/Browser integration on main634-based `4ca034b8` replays that unchanged fixed plus recorded `JWMM YY0Y` bank: 866/866 pass, without new draws or filtering. All 32 Browser PNG bytes equal 99f; fresh Native object identities and journal sequence labels differ, with zero verdict changes. Current history caps (400/1112 and 400/1142) and 16/32 pixel diagnostics remain failed. Current capture-tool producer `404a5617` replays the same fixed/JWMM inputs against fresh Native processes on unchanged `2a706930`: 866/866 fields pass, all 32 Browser PNG files equal main0ad and 50 raw pointer/sequence rows differ with zero verdict changes. The outer raw-index guard fails; independent diagnostics verify unchanged staged entries, Source, artifact and inputs. That receipt and all history/RGBA failures remain preserved. Other callbacks, broader OS/reload, shaders, integrated fullscreen/fatal recovery and full mixed PCM/MT remain open; durable Controls tooling remains separate. |
