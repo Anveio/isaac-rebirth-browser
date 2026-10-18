@@ -60,3 +60,4 @@ gfx/226.000_skinny.anm2
 gfx/206.000_crazy long legs.anm2
 gfx/206.001_small crazy long legs.anm2
 gfx/240.000_wall creep.anm2
+gfx/220.000_squirt.anm2
