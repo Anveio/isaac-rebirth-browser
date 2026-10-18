@@ -535,7 +535,9 @@ export class Renderer {
       // Catalogue-driven families: the engine names the authored actor.
       ctx.save();
       ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-      ctx.scale(npc.flipX ? -1 : 1, 1);
+      // Wall Creep: sprite rotation +2cc onto its wall, and +2fd on a side wall.
+      if (npc.wallCreep) ctx.rotate(npc.wallCreep.rotation * Math.PI / 180);
+      ctx.scale(npc.flipX ? -1 : 1, npc.wallCreep?.flipY ? -1 : 1);
       this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
       // ANM2 overlay slot (Gemini's head) draws over the main clip.
       if (npc.overlay) this.assets.draw(ctx, npc.actor, npc.overlay.animation, 0, 0, npc.overlay.clock, { scale, color });

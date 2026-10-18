@@ -157,6 +157,7 @@ pub mod stage_transition;
 mod target_eligibility;
 pub mod tnt;
 pub mod traversal;
+pub mod wall_creep;
 pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
