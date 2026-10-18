@@ -105,6 +105,16 @@ pub(crate) enum Birth {
     Npc(SpawnSelector),
     /// Creep 5516d0 hurt of the player from a spawner-run first update.
     CreepHit,
+    /// A projectile 9.v other than the blood shot, e.g. Mega Fatty's puke 9.3.
+    VariantProjectile(ProjectileBirth, u32),
+    /// Player TakeDamage(1.0, flags 0, countdown 30) from an NPC's AI (Mega
+    /// Fatty's fart hits a player within 100 px).
+    PlayerHurt,
+    /// Mega Fatty's SUCK 4dd438: every pulled actor's velocity gains
+    /// `normalize(center - pos)·k / friction`, `k = clamp(0.9(600 - L)/600, 0, 0.9)`.
+    Suck(WorldVector),
+    /// Game::ShakeScreen 551da0: Game+ce9fc = the duration (no draws).
+    Shake(i32),
     /// Room5cbb30 Hurt(damage) on the grid cell under `position` (a no-op
     /// outside the room or on an empty cell).
     GridHurt {
@@ -260,6 +270,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
+    &crate::mega_fatty::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

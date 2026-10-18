@@ -98,6 +98,7 @@ pub mod level2_flies;
 pub mod level_progress;
 pub mod maggots;
 pub mod map_presentation;
+pub mod mega_fatty;
 pub mod menu_lifecycle;
 pub mod menu_presentation;
 pub mod monstro;
@@ -5094,6 +5095,26 @@ impl Game {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::VariantProjectile(birth, variant) => {
+                self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
+                    variant,
+                    ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+                })
+            }
+            entities::Birth::PlayerHurt => {
+                combat::try_damage_player(&mut self.state, 1, 60, 0).map(|_| ())
+            }
+            entities::Birth::Shake(duration) => {
+                self.state
+                    .game_shake
+                    .get_or_insert_with(Default::default)
+                    .overwrite_duration(duration);
+                Ok(())
+            }
+            entities::Birth::Suck(center) => {
+                mega_fatty::suck(&mut self.state, center);
+                Ok(())
+            }
             entities::Birth::FlyExplosion {
                 seed,
                 position,
