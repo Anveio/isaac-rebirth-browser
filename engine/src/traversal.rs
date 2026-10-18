@@ -332,7 +332,13 @@ pub(crate) fn advance_transition(
         // Room.Init's pit linking (5cf550) follows its grid construction in
         // admit_room_pickups.
         None => {
-            Room::from_floor_descriptor_with_special(&state.floor, state.current_room, special)?
+            let layout = crate::surprise::layout(&mut state.floor, state.current_room, special)?;
+            Room::from_floor_descriptor_with_layout(
+                &state.floor,
+                state.current_room,
+                special,
+                layout,
+            )?
         }
     };
     // Reentry owns a new Room.Init timestamp, independent of saved geometry.

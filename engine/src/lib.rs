@@ -50,6 +50,7 @@ mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
+mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
@@ -69,6 +70,7 @@ pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod greed;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
@@ -5125,16 +5127,22 @@ impl Game {
                 self.state.room.authored_actor_order.push(actor);
                 self.state.actor_scheduler.admit(actor)
             }
-            entities::Birth::Projectile(birth) => self.admit_enemy_projectile(|id| {
-                enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
-            }),
+            entities::Birth::Projectile(birth) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
+                    spawner_type,
+                    ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+                })
+            }
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
             entities::Birth::VariantProjectile(birth, variant) => {
+                let spawner_type = self.state.room.npcs[index].kind;
                 self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
                     variant,
+                    spawner_type,
                     ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
                 })
             }
