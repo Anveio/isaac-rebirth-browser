@@ -179,9 +179,9 @@ pub fn basement() -> Vec<RoomAsset> {
 /// stages.xml room set 3, the Caves I/II catalogue (Level stages 3 and 4).
 pub fn caves() -> Vec<RoomAsset> {
     decode(include_bytes!(
-        "../../references/isaac/rebirth/resources/rooms/03.caves.stb"
+        "../../.cache/private-base-assets/rooms/03.caves.stb"
     ))
-    .expect("checked-in authored Caves STB")
+    .expect("pinned owner-private Caves STB")
 }
 
 /// Resolve complete authored groups through the descriptor's original catalogue

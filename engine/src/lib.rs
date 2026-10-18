@@ -74,6 +74,7 @@ mod grid_hazards;
 pub mod grid_records;
 pub mod gushers;
 mod health_damage;
+pub mod hoppers;
 mod horfs;
 pub mod information_animation;
 mod inner_eye;
