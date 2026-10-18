@@ -157,6 +157,11 @@ export function fightKeys(view, memory) {
       // Keep room to dodge: walls within 50 units cost in proportion.
       const nx = player.x + ux * 20, ny = player.y + uy * 20;
       for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
+      // Tears fly along one axis: favour moves that line the player up with
+      // the target on an axis, so they hit.
+      const offNow = Math.min(Math.abs(dx), Math.abs(dy));
+      const offNext = Math.min(Math.abs(target.x - nx), Math.abs(target.y - ny));
+      if (offNow > 20) score += (offNow - offNext) / 20 * 0.6;
     } else for (const shot of shots) {
       const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
       if (near < 45) score -= (45 - near) / 15;
