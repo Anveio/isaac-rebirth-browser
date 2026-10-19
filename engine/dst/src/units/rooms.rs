@@ -80,6 +80,7 @@ pub fn run(case: &mut Case) {
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");
     props::sometimes!(stage == 3, "rooms: Caves I's rooms are played");
+    props::sometimes!(stage == 4, "rooms: Caves II's rooms are played");
     let start = game.state.current_room;
     let descriptors = game.state.floor.descriptors.clone();
     let Some(from_slot) = first_door(&descriptors[start].neighbors) else {

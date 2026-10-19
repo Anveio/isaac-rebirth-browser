@@ -68,8 +68,12 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
 ```
 
 - **Groups** (`GROUPS` in [`suites.mjs`](suites.mjs)) are `@boot`, `@rooms`,
-  `@stage`, `@pickups`, `@items`, `@combat`, `@monsters` and `@audio`. A suite
-  may sit in several; the registry refuses a suite in none.
+  `@stage`, `@stage-long`, `@pickups`, `@items`, `@combat`, `@monsters` and
+  `@audio`. A suite may sit in several; the registry refuses a suite in none.
+  `@stage-long` holds `stage-descent`, the three-floor Caves II descent. A full
+  run includes it, but `@stage` does not: each of its two cases plays about
+  63,000 frames per game and takes about 45 minutes (5,375 s for both on a
+  shared four-core host, recording the port's three legs once).
 - **`--case PATTERNS`** matches the id each suite prints for a case and names its
   directory by. Names differ by driver: `scenario.id` for paired-game and
   state-pair suites (`health-soul-phase0`, `gaper-random-0`), `name` elsewhere

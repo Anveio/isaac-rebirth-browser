@@ -46,8 +46,12 @@ EXIT_LEG = 3000
 PADDING_STEP = 600
 # Frames both games stand still after re-entering the boss room.
 ANCHOR_IDLE = 120
+# Frames the port's walk may spend in each route room of a later floor, whose
+# live foes it fights clear before the doors open; a descent floor's
+# `roomFrames` sets its own.
+ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
-ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
+ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -121,9 +125,11 @@ def frames(actions):
 
 
 def window(fixture):
-    """Frames from boss-room-arrival to exit-start for this fixture's fights."""
+    """Frames from boss-room-arrival to exit-start for this fixture's fights. A
+    fixture whose later floors take longer than WINDOW each (Caves I's eight-room
+    route and Mega Fatty) names its own window."""
     floors = len(fixture.get('descent', [None]))
-    return WINDOW * floors + EXIT_LEG * (floors - 1)
+    return fixture.get('window', WINDOW * floors + EXIT_LEG * (floors - 1))
 
 
 def final_rooms(fixture):
@@ -159,8 +165,14 @@ def descended(result, fixture, production_directory):
         # routing grid's own solid cells.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         last = index + 1 == len(floors)
-        leg = port_fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
+        # A floor's `fight` budget covers a longer boss (Mega Fatty's 600 HP).
+        leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
+                         *(['--room-frames', floor.get('roomFrames', ROUTE_ROOM_FRAMES)] if index else []),
+                         # A floor's `fightFlags` tune its port leg's closed-loop fight
+                         # (boss-route-record.mjs --dodge, --orbit, --boss-radius):
+                         # Caves I's fire rooms and Mega Fatty's 30-shot bursts.
+                         *map(str, floor.get('fightFlags', [])),
                          *(['--route-avoid', avoid] if avoid else []),
                          *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
                          rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)

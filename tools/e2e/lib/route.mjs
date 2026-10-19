@@ -83,21 +83,36 @@ export function routingView(s) {
   return {
     room: s.currentRoom, transition: !!s.roomTransition, clear: s.room.combatClear,
     player: { x: (s.player.x - 32) / 0.65, y: (s.player.y + 46) / 0.65, controls: s.player.controlsEnabled,
-      full: s.player.maxHp <= s.player.hp + s.player.soulHp },
+      full: s.player.maxHp <= s.player.hp + s.player.soulHp, hp: s.player.hp + s.player.soulHp },
     grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed), s.room.slots ?? []),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     keys: s.inventory.keys,
+    // What the next floor's generation reads: [red, maxRed, soul] and coins.
+    health: [s.player.hp, s.player.maxHp, s.player.soulHp], coins: s.inventory.coins,
     // Live fireplaces, which a route may shoot out rather than walk around.
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
     // Solid poop cells, which a walk may shoot out rather than route around.
     poops: s.room.grid ? s.room.grid.cells.flatMap((c, i) => (c.entity?.kind === 14 && c.entity.collisionClass !== 0 ? [i] : [])) : [],
     openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33), s.room.slots ?? []),
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
-    // Living door-shutting enemies and enemy shots, for fight().
-    foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
-      .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
-    shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y })),
+    // Living door-shutting enemies and enemy shots, for fight(). Death is
+    // HP below 0 in both games: a Crazy Long Legs at exactly 0 still walks,
+    // fires and keeps the doors shut.
+    foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp >= 0)
+      .map(n => ({ kind: n.kind, boss: n.boss, radius: n.collisionRadius, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
+    shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, vx: p.velocity?.x ?? 0, vy: p.velocity?.y ?? 0 })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
+  };
+}
+
+// A small seeded generator (mulberry32) for --salt fight variants.
+export function saltedRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
@@ -116,7 +131,14 @@ export function fightKeys(view, memory) {
   const flight = memory.lead ? distance / 10 : 0;
   const ax = dx + (target.vx ?? 0) * flight, ay = dy + (target.vy ?? 0) * flight;
   const aim = Math.abs(ax) >= Math.abs(ay) ? (ax > 0 ? 'ArrowRight' : 'ArrowLeft') : (ay > 0 ? 'ArrowDown' : 'ArrowUp');
-  const radius = memory.lead ? 90 : target.boss ? 170 : 110, pull = (radius - distance) / radius * 2;
+  // --dodge sizes foes by their collision radius (Mega Fatty 40) rather than the
+  // boss flag, which the Fistula family's small pieces also carry.
+  const big = foe => (memory.dodge ? (foe.radius ?? (foe.boss ? 40 : 13)) >= 30 : foe.boss);
+  // --dodge holds dashers and burst shooters further out: a Squirt's (220) dash
+  // covers 80 units in four frames and a Crazy Long Legs (207) bursts 8 ways.
+  // Chasers such as Skinnies stay at 110, where the orbit keeps ahead of them.
+  const wide = foe => memory.dodge && [207, 220].includes(foe.kind);
+  const radius = memory.lead ? 90 : big(target) ? (memory.bossRadius ?? 170) : wide(target) ? 160 : 110, pull = (radius - distance) / radius * 2;
   const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
   const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
   const solid = (x, y) => {
@@ -134,10 +156,37 @@ export function fightKeys(view, memory) {
       if (solid(nx, ny)) score -= cost;
     }
     for (const foe of foes) {
-      const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = foe.boss ? 90 : 40;
+      const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = big(foe) ? 90 : 40;
       if (near < reach) score -= (90 - near) / 30;
     }
-    for (const shot of shots) {
+    if (memory.dodge) {
+      // Opt-in (--dodge): score each move against every shot's path over the
+      // next frames and keep clear of lit fireplaces, which burn on contact.
+      for (const shot of shots) for (const t of [2, 4, 6, 8, 12]) {
+        const near = Math.hypot(player.x + ux * 3.5 * t - (shot.x + shot.vx * t), player.y + uy * 3.5 * t - (shot.y + shot.vy * t));
+        if (near < 32) score -= (32 - near) / 8 * (t <= 6 ? 1.5 : 1);
+      }
+      for (const fire of view.fires ?? []) for (const look of [10, 20, 30]) {
+        const near = Math.hypot(fire.x - (player.x + ux * look), fire.y - (player.y + uy * look));
+        if (near < 36) score -= (36 - near) / 8;
+      }
+      // A foe's own motion (a boss's lunge) projected over the same frames.
+      for (const foe of foes) for (const t of [3, 6, 10, 15]) {
+        const near = Math.hypot(player.x + ux * 3.5 * t - (foe.x + (foe.vx ?? 0) * t), player.y + uy * 3.5 * t - (foe.y + (foe.vy ?? 0) * t));
+        const reach = (foe.radius ?? (foe.boss ? 40 : 13)) + 24;
+        if (near < reach) score -= (reach - near) / 12 * (t <= 6 ? 1.5 : 1);
+      }
+      // Keep room to dodge: walls within 50 units cost in proportion.
+      const nx = player.x + ux * 20, ny = player.y + uy * 20;
+      for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
+      // Tears fly along one axis: favour moves that line the player up with
+      // the target on an axis, so they hit.
+      const offNow = Math.min(Math.abs(dx), Math.abs(dy));
+      const offNext = Math.min(Math.abs(target.x - nx), Math.abs(target.y - ny));
+      if (offNow > 20) score += (offNow - offNext) / 20 * 0.6;
+      // --salt: a seeded jitter, so one fight can be tried along many paths.
+      if (memory.rng) score -= memory.rng() * memory.jitter;
+    } else for (const shot of shots) {
       const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
       if (near < 45) score -= (45 - near) / 15;
     }
