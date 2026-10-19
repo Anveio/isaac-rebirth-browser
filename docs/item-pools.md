@@ -104,3 +104,21 @@ Rosary and authored helper code have mapped source boundaries, while exceptional
 selector/Bible, health clamp/parity, active swap/use, altar grid-impact/prediction
 correction, native-origin/backdrop and pixel acceptance still need their own
 required cases.
+
+The separate trinket manager implements Get582180: one manager shift2 draw
+seeds the local shift35 retry stream. It tests31 candidates, consumes the
+unused last retry, then takes the fallback draw and increments before scanning
+all62 cells. Depleted signed counts reset from the actual current profile;
+unknown legacy availability or RNG words remain unknown. A real zero return
+stays zero and belongs to Pickup.Init's separate card-conversion owner.
+
+An immutable whole-batch admission checks every possible Kind2 selection before
+any Get, including reached resets. Explicit nonzero Init350 selectors bypass
+ItemPool. Unsupported subtype0 births invalidate both availability and manager
+RNG knownness; explicit nonzero births do not. This adds selection ownership,
+not natural350 body admission or retail Original parity. The process type5
+allocator increments and masks its cursor before inspecting active cells;
+reused cell bytes survive across allocations and room/run boundaries. Its
+complete allocation, active-skip and reclamation history remains a prerequisite
+for new350 body admission. DST properties check selection conservation,
+profile readsets, true0 and unknown history; live Original Get remains open.

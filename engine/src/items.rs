@@ -213,6 +213,81 @@ pub struct ItemPools {
     pub trinkets: Option<TrinketPool>,
 }
 
+///Close the selection readset for a complete Init350 batch before any Get.
+///Explicit nonzero selectors bypass ItemPool, including unknown legacy pools.
+///This proves neither the process type5 cell lifetime nor the body callbacks.
+pub fn preflight_trinket_init_batch(
+    pools: Option<&ItemPools>,
+    subtypes: &[u32],
+    current_achievements: Option<&[bool]>,
+) -> Result<(), String> {
+    let mut selections = 0usize;
+    for &subtype in subtypes {
+        if subtype == 0 {
+            selections += 1;
+        } else {
+            trinket_definition(subtype).ok_or("Init350 requires a typed Base Kind2 config")?;
+        }
+    }
+    if selections == 0 {
+        return Ok(());
+    }
+    let pools = pools.ok_or("Init350 Get requires its actual ItemPool manager")?;
+    let pool = pools
+        .trinkets
+        .as_ref()
+        .ok_or("Init350 Get requires known availability")?;
+    pool.validate()?;
+    let manager = pools
+        .secondary_rng
+        .ok_or("Init350 Get requires known ItemPool+49C RNG words")?;
+    if [manager.right_a, manager.left, manager.right_b] != [1, 5, 19] {
+        return Err("Init350 Get requires the actual secondary shift2 RNG".into());
+    }
+    //Count-only admission considers every possible selected ID. It never
+    //previews RNG, filters a result, or changes the real availability bytes.
+    let mut count = pool.count;
+    let mut remaining = None;
+    for _ in 0..selections {
+        let reset;
+        let pool = if count <= 0 {
+            let achievements = current_achievements
+                .filter(|bytes| bytes.len() == 179)
+                .ok_or("Init350 reset requires the actual current 179 profile bytes")?;
+            reset = TrinketPool::reset(achievements);
+            count = reset.count;
+            remaining = None;
+            &reset
+        } else {
+            pool
+        };
+        if remaining.is_none() {
+            let eligible = pool
+                .eligible
+                .as_ref()
+                .ok_or("Init350 Get requires known current-profile eligibility")?;
+            let mut available = 0usize;
+            for (id, (&available_byte, &eligible_byte)) in
+                pool.available.iter().zip(eligible).enumerate()
+            {
+                if available_byte && eligible_byte {
+                    trinket_definition(id as u32)
+                        .ok_or("Init350 pool includes an unowned Kind2 continuation")?;
+                    available += 1;
+                }
+            }
+            remaining = Some(available);
+        }
+        let available = remaining.as_mut().expect("selection readset initialized");
+        if *available == 0 {
+            return Err("Init350 batch reaches the separate Get0 card-conversion owner".into());
+        }
+        *available -= 1;
+        count -= 1;
+    }
+    Ok(())
+}
+
 impl ItemPools {
     pub fn new(seed: u32, achievements: &[bool]) -> Result<Self, String> {
         if seed == 0 || achievements.len() != 179 {
@@ -317,6 +392,77 @@ impl ItemPools {
         pool.available[index] = false;
         pool.count -= 1;
         Ok(true)
+    }
+
+    ///582180 uses the actual manager shift2 once, then a local shift35.
+    ///Only the depleted-count branch reads the current profile; no MT is used.
+    pub fn get_trinket(&mut self, current_achievements: Option<&[bool]>) -> Result<u32, String> {
+        let pool = self
+            .trinkets
+            .as_ref()
+            .ok_or("GetTrinket requires known pool availability")?;
+        pool.validate()?;
+        let manager = self
+            .secondary_rng
+            .ok_or("GetTrinket requires known ItemPool+49C RNG words")?;
+        if [manager.right_a, manager.left, manager.right_b] != [1, 5, 19] {
+            return Err("GetTrinket requires the actual secondary RNG shift2".into());
+        }
+        //Validate every reached readset before mutation. The actual reset
+        //still precedes the first RNG consumer at582191/5822AE.
+        let reset = if pool.count <= 0 {
+            Some(TrinketPool::reset(
+                current_achievements
+                    .filter(|bytes| bytes.len() == 179)
+                    .ok_or("GetTrinket reset requires the actual current 179 profile bytes")?,
+            ))
+        } else {
+            if pool.eligible.is_none() {
+                return Err("GetTrinket requires known current-profile eligibility".into());
+            }
+            None
+        };
+        let pool = self.trinkets.as_mut().expect("pool preflighted");
+        if let Some(reset) = reset {
+            *pool = reset;
+        }
+        let eligible = pool.eligible.as_ref().expect("eligibility preflighted");
+        let manager = self.secondary_rng.as_mut().expect("manager preflighted");
+        //5821C1 seeds the local RNG from the updated RAW manager word,
+        //not its bounded index. Zero is a real state and is never clamped.
+        let mut index = manager.bounded(62) as usize;
+        let mut retry = Rng::new(manager.state, [5, 9, 7]);
+        for _ in 0..31 {
+            if pool.available[index] && eligible[index] {
+                pool.available[index] = false;
+                pool.count -= 1;
+                return Ok(index as u32);
+            }
+            //5821E9 draws BEFORE decrementing attempts. The31st failed
+            //test consumes one more local result that is never tested.
+            index = retry.bounded(62) as usize;
+        }
+        //582209 draws again;582229 increments BEFORE testing each of62
+        //sequential cells. Logging on this branch has no RNG consumer.
+        index = retry.bounded(62) as usize;
+        for _ in 0..62 {
+            index = (index + 1) % 62;
+            if pool.available[index] && eligible[index] {
+                pool.available[index] = false;
+                pool.count -= 1;
+                return Ok(index as u32);
+            }
+        }
+        //5822B8 can really return0 despite a retained positive count.
+        //The caller owns50005D's separate card-conversion continuation.
+        Ok(0)
+    }
+
+    ///An unrepresented subtype0 Init can reset/select/remove through582180.
+    ///Neither its old availability nor the actual manager RNG stays known.
+    pub(crate) fn note_unrepresented_trinket_selection(&mut self) {
+        self.trinkets = None;
+        self.secondary_rng = None;
     }
 
     pub(crate) fn copy_for_save(&self) -> Result<Self, String> {
