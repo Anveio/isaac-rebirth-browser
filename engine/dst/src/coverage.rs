@@ -1,9 +1,13 @@
-//! A census of what the `game` workload reached, written to every report.
+//! A census of what the `game` and `rooms` workloads reached, written to
+//! every report.
 //!
 //! Must-hit properties bind the branches that matter; the census shows the
 //! rest, so a coverage gap (a room type never entered, an implemented NPC
 //! family never simulated) is visible in every run rather than only to a
-//! probe. It is a measurement, not a property: nothing here passes or fails.
+//! probe. It is a measurement, not a property: nothing here passes or fails,
+//! and no unit is required to keep reaching what it reaches today. The gaps
+//! count both units; `reached` and `firstSteps` hold only `game` cases,
+//! whose tapes the tools below cut.
 //!
 //! Each case also records the command at which it first reached every key,
 //! so `tools/dst/cover.py` can cut the shortest tape prefixes that bring a
@@ -21,6 +25,9 @@ struct Census {
     cases: u64,
     /// Cases that reached each key.
     reached: BTreeMap<String, u64>,
+    /// `rooms` cases, and the keys each reached; they have no tapes.
+    rooms_cases: u64,
+    rooms_reached: BTreeMap<String, u64>,
     /// Cases whose floors contained each room type.
     floor_reached: BTreeMap<u32, u64>,
     /// Each case's label with the command index that first reached each key.
@@ -36,8 +43,8 @@ struct Current {
     /// The live NPCs (id to kind) of the room the last observation saw, by
     /// floor and room.
     live: Option<((u32, usize), BTreeMap<u32, u32>)>,
-    /// Whether a `game` case is running; other units' properties are not
-    /// part of the census.
+    /// Whether a `game` or `rooms` case is running; other units' properties
+    /// are not part of the census.
     active: bool,
     /// Property sites (by address) already met, checked before formatting.
     met: HashSet<usize>,
@@ -52,6 +59,8 @@ struct Current {
 static CENSUS: Mutex<Census> = Mutex::new(Census {
     cases: 0,
     reached: BTreeMap::new(),
+    rooms_cases: 0,
+    rooms_reached: BTreeMap::new(),
     floor_reached: BTreeMap::new(),
     first_steps: Vec::new(),
 });
@@ -73,6 +82,34 @@ pub fn begin_case() {
             ..Current::default()
         }
     });
+}
+
+/// Starts a `rooms` case; dropping the guard folds it into the census.
+pub fn rooms_case() -> RoomsCase {
+    CURRENT.with(|current| {
+        *current.borrow_mut() = Current {
+            active: true,
+            ..Current::default()
+        }
+    });
+    RoomsCase
+}
+
+/// A running `rooms` case, folded into the census however the case ends.
+pub struct RoomsCase;
+
+impl Drop for RoomsCase {
+    fn drop(&mut self) {
+        let current = CURRENT.with(|current| std::mem::take(&mut *current.borrow_mut()));
+        let mut census = census();
+        census.rooms_cases += 1;
+        for key in current.keys.into_keys() {
+            *census.rooms_reached.entry(key).or_default() += 1;
+        }
+        for room_type in current.floor_rooms {
+            *census.floor_reached.entry(room_type).or_default() += 1;
+        }
+    }
 }
 
 /// A property call site the running case met (see `props::Site::record`).
@@ -105,6 +142,9 @@ pub fn end_case(label: &str) {
 
 /// Records what this published state shows the workload reaching.
 pub fn observe(state: &State) {
+    if !CURRENT.with(|current| current.borrow().active) {
+        return;
+    }
     let mut keys = vec![format!("screen:{:?}", state.screen)];
     // A run the profile started from Random: the menus must show Random
     // again afterwards, not the character it resolved to.
@@ -282,11 +322,12 @@ pub fn observe(state: &State) {
     });
 }
 
-/// Entity types some authored Basement or special room spawns: what a
+/// Entity types some authored Basement, Caves or special room spawns: what a
 /// floor can place directly. Other kinds appear only when spawned at runtime.
 fn authored_entity_types() -> BTreeSet<u32> {
     room_assets::basement()
         .iter()
+        .chain(room_assets::caves().iter())
         .chain(room_assets::special().iter())
         .flat_map(|asset| asset.spawns.iter())
         .flat_map(|group| group.entries.iter())
@@ -300,15 +341,18 @@ fn authored_entity_types() -> BTreeSet<u32> {
 pub fn report() -> Value {
     let census = census();
     let authored = authored_entity_types();
+    // Any unit's case reaching a key closes its gap.
+    let reached =
+        |key: &str| census.reached.contains_key(key) || census.rooms_reached.contains_key(key);
     let (unreached_npcs, unplaced_npcs): (Vec<u32>, Vec<u32>) = implemented_npc_kinds()
-        .filter(|kind| !census.reached.contains_key(&format!("npc:{kind}")))
+        .filter(|kind| !reached(&format!("npc:{kind}")))
         .partition(|kind| authored.contains(kind));
     // Simulated kinds whose death or retirement never ran.
     let unremoved_npcs: Vec<u32> = implemented_npc_kinds()
         .filter(|kind| {
-            census.reached.contains_key(&format!("npc:{kind}"))
-                && !census.reached.contains_key(&format!("removed:{kind}"))
-                && !census.reached.contains_key(&format!("extinguished:{kind}"))
+            reached(&format!("npc:{kind}"))
+                && !reached(&format!("removed:{kind}"))
+                && !reached(&format!("extinguished:{kind}"))
         })
         .collect();
     let unentered_rooms: Vec<u32> = census
@@ -316,10 +360,14 @@ pub fn report() -> Value {
         .keys()
         .copied()
         .filter(|room_type| {
-            !census.reached.keys().any(|key| {
-                key == &format!("room:{room_type}")
-                    || key.starts_with(&format!("room:{room_type}("))
-            })
+            !census
+                .reached
+                .keys()
+                .chain(census.rooms_reached.keys())
+                .any(|key| {
+                    key == &format!("room:{room_type}")
+                        || key.starts_with(&format!("room:{room_type}("))
+                })
         })
         .collect();
     let mut first_steps = census.first_steps.clone();
@@ -327,8 +375,10 @@ pub fn report() -> Value {
     let first_steps: BTreeMap<String, BTreeMap<String, u64>> = first_steps.into_iter().collect();
     json!({
         "gameCases": census.cases,
+        "roomsCases": census.rooms_cases,
         "firstSteps": first_steps,
         "reached": census.reached,
+        "roomsReached": census.rooms_reached,
         "floorRoomTypes": census.floor_reached,
         "unreachedNpcKinds": unreached_npcs,
         "unplacedNpcKinds": unplaced_npcs,
