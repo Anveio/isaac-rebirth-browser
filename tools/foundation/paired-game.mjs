@@ -3,10 +3,12 @@ import { validateSaveCapture } from './save-continue-guards.mjs';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, statfsSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, statfsSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
+import { createGzip } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { browserLaunchOptions, inspectBrowserGraphics } from './browser.mjs';
@@ -198,6 +200,13 @@ export async function nativeCapture(caseData, directory, nativeFrameTimeout, ori
   } catch (failure) {
     error = String(failure.message);
     writeFileSync(join(directory, 'controller-output.txt'), String(failure.stdout || '') + String(failure.stderr || '') + error);
+  }
+  // A long tape's GL command log runs to hundreds of MB and compresses about
+  // fiftyfold; its reader accepts either form (wall-quads.mjs).
+  const commands = join(directory, 'gl-trace', 'commands.jsonl');
+  if (glTrace && !reuseExisting && existsSync(commands)) {
+    await pipeline(createReadStream(commands), createGzip({ level: 6 }), createWriteStream(`${commands}.gz`));
+    unlinkSync(commands);
   }
   if (deferEvidence) return { status: error ? 'fail' : 'deferred-evidence', error, directory,
     manifestPath: join(directory, archiveNativeEvidence ? 'manifest.json.gz' : 'manifest.json'),
