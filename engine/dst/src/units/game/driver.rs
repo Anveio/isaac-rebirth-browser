@@ -327,9 +327,15 @@ impl Driver {
                 }
             }
             Screen::Main => {
+                // A returning player whose profile holds a saved run, such as
+                // the one a previous session stored on a deeper floor, often
+                // moves on from New Run to Continue below it.
+                let returning = state.saved_run_summary.is_some();
                 if state.main_selection == 0 {
                     match e.below(20) {
-                        0..=10 => self.press("Enter", 0),
+                        0..=10 if !returning => self.press("Enter", 0),
+                        0..=5 => self.press("Enter", 0),
+                        6..=10 => self.press(e.pick(&["ArrowDown", "KeyS"]), 0),
                         11..=14 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),
                         15 => self.press("Escape", 0),
                         _ => self.ticks(e),

@@ -161,6 +161,11 @@ pub fn observe(state: &State) {
     if state.screen == Screen::Options && options.left_held.max(options.right_held) > 49 {
         keys.push("Options hold repeat".to_owned());
     }
+    // A saved run the menus show, such as one a previous session stored on
+    // a floor it descended to.
+    if let Some(summary) = &state.saved_run_summary {
+        keys.push(format!("saved run on stage {}", summary.stage));
+    }
     if state.screen == Screen::Playing {
         // The floor's stage: a descent shows as `stage:2`, and a run started
         // after one as `new run after a descent`, from the menus also as
@@ -197,8 +202,16 @@ pub fn observe(state: &State) {
                     template.room_type, template.width, template.height
                 )
             });
-            if state.room.combat_clear && matches!(template.room_type, 5 | 6) {
-                keys.push(format!("cleared:{}", template.room_type));
+            if matches!(template.room_type, 5 | 6) {
+                // Each floor's boss and miniboss rooms: a staged chase deeper
+                // than one floor must reach this floor's, not the one an
+                // earlier floor already met.
+                let stage = state.floor.stage;
+                keys.push(format!("room:{} on stage {stage}", template.room_type));
+                if state.room.combat_clear {
+                    keys.push(format!("cleared:{}", template.room_type));
+                    keys.push(format!("cleared:{} on stage {stage}", template.room_type));
+                }
             }
             // The active-item descent's steps, each with the item still held:
             // a run that quits to a new one loses it.

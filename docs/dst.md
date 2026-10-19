@@ -139,8 +139,25 @@ fails, and answers a readmission with the stored document. Without the host
 a readmission finds no document, so Continue stays unavailable. A third of
 the host's cases boot as a returning player's browser: a previous session,
 a fresh game the same driver plays for 150 to 1,500 commands with a sound
-host, leaves the document it stored, and the case boots with it. The driver
-resumes a saved run from Continue about half the times it selects it. The
+host, leaves the document it stored, and the case boots with it. Another
+third boot after a previous session that went deeper than generated play
+reaches: it starts a seeded run with a sound host and descends as the
+`rooms` unit does (an open trapdoor under the player, whose own entry check
+decides each descent) until a trapdoor refuses. Each arrival's level
+admission saves the run, and the case boots with the document stored on one
+of the floors reached, chosen uniformly (`saved run on stage <n>` in the
+census). The tape holds only that document and public commands, so its
+import, export and readmission run through the WASM differential too.
+Continue refuses these runs today: it admits only a run saved in Basement
+I's starting room (`save_profiles`: `Continue has no owned load caller for
+this saved run yet`), and a refused Continue leaves the state unchanged.
+Once it admits deeper runs, the same cases resume Basement II and the Caves
+under every `game` property and the WASM differential, with no change here.
+Generated runs never reach past Basement II by play: a staged chase from
+the active-item descent's Basement II arrival (3 of 8 hearts) met that
+floor's boss in none of 256 branches, 63 of 64 dying first. While the
+profile holds a saved run, the driver often moves from New Run down to
+Continue, and resumes the run about half the times it selects Continue. The
 contracts see each command together with the host's answers:
 * the host's answers always succeed, and a Tick a write or readmission
   suspended advances its full count once answered;
@@ -209,7 +226,9 @@ in 1 of 192 and Larry Jr. lost both segment kinds in 47 of 64.
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
 reached, including each owned weapon collectible (`weapon:<id>`), each
-floor stage played (`stage:<n>`), a boss room entered, a boss room cleared
+floor stage played (`stage:<n>`), each stage's boss and miniboss rooms
+entered and cleared (`room:5 on stage 2`, `cleared:5 on stage 2`), a boss
+room entered, a boss room cleared
 and a descent made while an active item is held (`boss room holding an
 active item`, `boss room cleared holding an active item`, `descent holding
 an active item`), a run started after a descent (`new
@@ -394,10 +413,12 @@ Crazy Long Legs, Squirt, Charger and Spitty (207, 220, 23, 31), a locked chest
 tapes had another tape reaching it, so `--prune` retired those 31: the
 corpus went from 61 tapes and 103,088 commands on 87ddf06 to 38 tapes and
 84,483 commands, losing no key. Chocolate Milk
-(69) is not carried: its one reaching case collected it at command 7,897
-of 8,000, and that tape's replay with the WASM differential takes 943 s by
-itself (97 s natively), against 1,231 s for the whole 63-tape corpus on
-the four cores here. A shorter tape needs a case that collects it earlier.
+(69) was not carried then: its one reaching case collected it at command
+7,897 of 8,000, and that tape's replay with the WASM differential takes
+943 s by itself (97 s natively), against 1,231 s for the whole 63-tape
+corpus on the four cores here. A 07aca74f soak case collected it at command
+886, so `coverage-4e56a759026d97a0` (1,187 commands, 84 s with the WASM
+differential) carries it.
 
 `--resume TAPE` makes every generated `game` case replay that tape (with
 every check) and then drive on from its end, so exploration branches from an

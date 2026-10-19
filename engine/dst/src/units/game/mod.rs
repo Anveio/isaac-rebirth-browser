@@ -13,7 +13,7 @@ mod scout;
 
 pub(crate) use driver::Driver;
 pub(crate) use invariants::expected_rejection;
-pub(crate) use scout::seeded_run;
+pub(crate) use scout::{seeded_run, seeded_run_with};
 
 use crate::coverage;
 use crate::entropy::Entropy;
@@ -85,13 +85,21 @@ pub fn run(case: &mut Case) {
                 });
             }
             // The browser's own-save storage, which a menu readmission reads:
-            // sometimes what a previous session stored, as after a reload.
+            // sometimes what a previous session stored, as after a reload,
+            // and sometimes what one stored on a floor it descended to.
             if e.chance(1, 2) {
                 let mut host = saves::generated_host(e);
-                if e.chance(1, 3) {
-                    let steps = e.range(150, 1_500);
-                    previous = saves::previous_session(e, steps);
-                    host.stored.clone_from(&previous);
+                match e.below(3) {
+                    0 => {
+                        let steps = e.range(150, 1_500);
+                        previous = saves::previous_session(e, steps);
+                        host.stored.clone_from(&previous);
+                    }
+                    1 => {
+                        previous = saves::previous_descent(e);
+                        host.stored.clone_from(&previous);
+                    }
+                    _ => {}
                 }
                 tape.save_host = Some(host);
             }
