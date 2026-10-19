@@ -144,5 +144,5 @@ So the original's keys end at their research 3/6 again, with no bomb.
 
 **Port and harness findings while building the fixture:**
 - A Crazy Long Legs (207) at exactly 0.0 HP still walks, fires and keeps the doors shut, because death is HP below 0 in both games. The routing view now keeps foes at HP ≥ 0.
-- The port's Caves I route loses its two route-room half-hearts in room 11, to fireplace contact while Skinnies chase it.
+- Without `--rewind`, the port's Caves I route lost its two route-room half-hearts in room 11, to fireplace contact while Skinnies chase it; with `--rewind` the leg keeps them.
 - The wall-quad reader could not hold the 624 MB log in one string; #729 streams it.
