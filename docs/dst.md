@@ -139,9 +139,22 @@ fails, and answers a readmission with the stored document. Without the host
 a readmission finds no document, so Continue stays unavailable. A third of
 the host's cases boot as a returning player's browser: a previous session,
 a fresh game the same driver plays for 150 to 1,500 commands with a sound
-host, leaves the document it stored, and the case boots with it. The driver
-resumes a saved run from Continue about half the times it selects it. The
-contracts see each command together with the host's answers:
+host, leaves the document it stored, and the case boots with it. Another
+third boot after a previous session that went deeper than generated play
+reaches: it starts a seeded run with a sound host and descends as the
+`rooms` unit does (an open trapdoor under the player, whose own entry check
+decides each descent) until a trapdoor refuses. Each arrival's level
+admission saves the run, and the case boots with the document stored on one
+of the floors reached, chosen uniformly. The tape holds only that document
+and public commands, so Continue resumes Basement II or a Caves floor under
+every `game` property and the WASM differential, and a stage the port
+admits later joins without a change here. Generated runs had never reached
+past Basement II: a staged chase from the active-item descent's Basement II
+arrival (3 of 8 hearts) met that floor's boss in none of 256 branches, 63 of
+64 dying first. While the profile holds a saved run, the driver often moves
+from New Run down to Continue, and resumes the run about half the times it
+selects Continue. The contracts see each command together with the host's
+answers:
 * the host's answers always succeed, and a Tick a write or readmission
   suspended advances its full count once answered;
 * an acknowledgement for another revision, or for IO nothing requested, is
@@ -154,7 +167,7 @@ contracts see each command together with the host's answers:
   predate a save format the engine now refuses);
 * Continue (54ECE0) resumes the saved record's character, difficulty,
   challenge, seeds, stage and floor, whether this session saved the run or
-  a previous one.
+  a previous one, and sometimes a previous session's run on a deeper floor.
 
 In a room it plays before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a
@@ -209,7 +222,9 @@ in 1 of 192 and Larry Jr. lost both segment kinds in 47 of 64.
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
 reached, including each owned weapon collectible (`weapon:<id>`), each
-floor stage played (`stage:<n>`), a boss room entered, a boss room cleared
+floor stage played (`stage:<n>`), each stage's boss and miniboss rooms
+entered and cleared (`room:5 on stage 2`, `cleared:5 on stage 2`), a boss
+room entered, a boss room cleared
 and a descent made while an active item is held (`boss room holding an
 active item`, `boss room cleared holding an active item`, `descent holding
 an active item`), a run started after a descent (`new
