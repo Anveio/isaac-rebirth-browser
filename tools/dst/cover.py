@@ -17,10 +17,17 @@ A corpus can be the harvest too: given a census of an earlier corpus and that
 corpus's tapes, it carries the keys a rebuilt corpus lost from the old tapes'
 prefixes, as `coverage-<old name>-carried.json`. `tools/dst/chase.py
 --recipes` does this after every rebuild.
+
+A harvest only adds tapes. --prune takes a census of the corpus alone as
+--baseline and deletes, longest first, every tape this tool wrote whose keys
+the rest of the corpus reaches; regression, recipe and other named tapes stay.
+
+  python3 tools/dst/cover.py --prune --baseline B/report.json --out engine/dst/corpus
 """
 import argparse
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -31,6 +38,8 @@ def reached(report):
 
 
 CORPUS_LABEL = "game-replay-"
+# The names `written_name` gives: a generated case's seed or a carried tape.
+WRITTEN = re.compile(r"coverage-(?:[0-9a-f]{16}|.+-carried)")
 
 
 def harvested_tape(tapes, label):
@@ -150,11 +159,42 @@ def cover(binary, harvest, tapes, baseline, out=None, prefixes=(), budget=6000, 
     return written, missing, failed
 
 
+def prune(baseline, corpus):
+    """Delete the written tapes whose keys the rest of the corpus reaches,
+    longest first, so the corpus keeps every key in the fewest commands."""
+    keys = {
+        label.removeprefix(CORPUS_LABEL): set(first)
+        for label, first in baseline["coverage"]["firstSteps"].items()
+        if label.startswith(CORPUS_LABEL)
+    }
+    held = {path.stem for path in corpus.glob("*.json")}
+    if held != set(keys):
+        sys.exit(f"the census does not measure {corpus} as it stands "
+                 f"(unmeasured {sorted(held - set(keys))}, gone {sorted(set(keys) - held)}); census it again")
+    length = {name: len(json.loads((corpus / f"{name}.json").read_text())["commands"]) for name in keys}
+    # A recipe's tape is its scenario's, whatever its name.
+    chases = corpus.parent / "chases.json"
+    recipes = json.loads(chases.read_text()) if chases.exists() else []
+    recipes = {recipe["out"].removesuffix(".json") for recipe in recipes}
+    written = (name for name in keys if WRITTEN.fullmatch(name) and name not in recipes)
+    kept, retired = set(keys), []
+    for name in sorted(written, key=lambda name: (-length[name], name)):
+        if keys[name] <= set().union(*(keys[other] for other in kept if other != name)):
+            kept.discard(name)
+            (corpus / f"{name}.json").unlink()
+            retired.append(name)
+            print(f"retired {name} ({length[name]} commands): the rest of the corpus reaches its keys")
+    print(f"the corpus holds {sum(length[name] for name in kept)} commands, "
+          f"{sum(length[name] for name in retired)} fewer")
+    return retired
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--harvest", required=True, type=pathlib.Path)
-    parser.add_argument("--tapes", required=True, type=pathlib.Path)
+    parser.add_argument("--harvest", type=pathlib.Path)
+    parser.add_argument("--tapes", type=pathlib.Path)
     parser.add_argument("--baseline", required=True, type=pathlib.Path)
+    parser.add_argument("--prune", action="store_true", help="retire written tapes the rest of --out covers")
     parser.add_argument("--prefix", action="append", default=[], help="only keys starting with this (repeatable)")
     parser.add_argument("--budget", type=int, default=6000, help="most commands to add")
     parser.add_argument("--extend", type=int, default=300, help="commands kept past a key's first step")
@@ -162,6 +202,13 @@ def main():
     parser.add_argument("--verify", action="store_true", help="replay written tapes and drop any that miss")
     parser.add_argument("--binary", default="engine/dst/target/release/rebirth-dst")
     args = parser.parse_args()
+    if args.prune:
+        if not args.out:
+            parser.error("--prune needs --out, the corpus --baseline measured")
+        prune(json.loads(args.baseline.read_text()), args.out)
+        return 0
+    if not args.harvest or not args.tapes:
+        parser.error("--harvest and --tapes are required without --prune")
     _, _, failed = cover(
         args.binary,
         json.loads(args.harvest.read_text()),
