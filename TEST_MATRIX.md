@@ -342,7 +342,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 29 | 8 | 0 |
 | `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
 | `pickups` | regular pickup subtype rolls and the pickups each roll spawns as | 5 | 9 | 0 |
-| `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
+| `grid` | grid queries and ground-collision solvers on generated rooms | 15 | 4 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
@@ -562,10 +562,12 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | grid: admitted room grids are valid grids | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: every cell centre indexes back to its cell | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer ground resolution never fails for bounded motion | [grid.rs](engine/dst/src/units/grid.rs) |
+| Sometimes | grid: a nonplayer centre outside the room is clamped | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer ground resolution starts from the centre clamped to the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Sometimes | grid: an underflowing inward preview skips refinement | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer resolution keeps finite vectors | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: a nonplayer preview never changes velocity | [grid.rs](engine/dst/src/units/grid.rs) |
-| Always | grid: nonplayer resolution without contact changes nothing | [grid.rs](engine/dst/src/units/grid.rs) |
+| Always | grid: nonplayer resolution without contact only clamps the centre to the room | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: nonplayer correction moves only out along the contact normal | [grid.rs](engine/dst/src/units/grid.rs) |
 | Always | grid: a full nonplayer reflection leaves the wall | [grid.rs](engine/dst/src/units/grid.rs) |
 | Sometimes | grid: a residual-speed preview contact is resolved | [grid.rs](engine/dst/src/units/grid.rs) |
