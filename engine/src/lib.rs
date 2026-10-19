@@ -104,6 +104,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod levels;
 pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
@@ -3118,7 +3119,7 @@ impl Game {
             .descriptor
             .as_ref()
             .is_some_and(|descriptor| {
-                matches!(descriptor.asset_stage, 0 | 1 | 3)
+                grid_records::shape0_ambient(descriptor.asset_stage)
                     && descriptor.template.shape_index() == 0
                     && descriptor.template.room_type != 16
             })

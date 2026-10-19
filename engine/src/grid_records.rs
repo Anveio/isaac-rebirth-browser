@@ -433,7 +433,7 @@ fn admit_boundary_owned(
     // Catalogues 0 (special STB, holding the start room), 1 (Basement) and
     // 3 (Caves) share the shape0 ambient producer; 5cf45b..5cf46d skips only
     // backdrops 11 and 13, which no admitted stage selects.
-    if !matches!(descriptor.asset_stage, 0 | 1 | 3) || descriptor.template.shape_index() != 0 {
+    if !shape0_ambient(descriptor.asset_stage) || descriptor.template.shape_index() != 0 {
         return Err("ambient grid admission requires a fresh Basement or Caves shape0 room".into());
     }
     let grid = room
@@ -561,4 +561,9 @@ fn admit_ambient_shape0(
         attempt += 1;
     }
     Ok(())
+}
+
+/// The descriptor's room set admits the shape0 ambient producer.
+pub(crate) fn shape0_ambient(asset_stage: u8) -> bool {
+    crate::levels::chapter(u32::from(asset_stage)).is_some_and(|chapter| chapter.shape0_ambient)
 }

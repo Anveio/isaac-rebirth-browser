@@ -109,8 +109,10 @@ impl Nightmares {
     }
 
     pub fn select_normal_basement(&mut self, stage: u32) -> Result<(), String> {
-        if !matches!(stage, 1..=4) {
-            return Err("stage resource routing admits ordinary Basement and Caves only".into());
+        if crate::levels::node(stage).is_none() {
+            return Err(
+                "stage resource routing admits only the level framework's stage nodes".into(),
+            );
         }
         // 5b8345..5b835b selects ((stage-1)&~1)+alternate. Ordinary Basement
         // floors route 0 and Caves floors 2; twelve constructor entries start at 12.

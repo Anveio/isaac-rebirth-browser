@@ -584,43 +584,7 @@ impl MusicState {
 // Level stage and alternate flag select music. A room's authored asset-stage
 // can be zero for the special starting template and is not the Level stage.
 pub fn stage_track(stage: u32, alternate: bool) -> Option<u32> {
-    Some(match stage {
-        1 | 2 => {
-            if alternate {
-                4
-            } else {
-                1
-            }
-        }
-        3 | 4 => {
-            if alternate {
-                5
-            } else {
-                2
-            }
-        }
-        5 | 6 => {
-            if alternate {
-                6
-            } else {
-                3
-            }
-        }
-        7 | 8 => 7,
-        9 => {
-            if alternate {
-                10
-            } else {
-                11
-            }
-        }
-        11 => {
-            if alternate {
-                13
-            } else {
-                12
-            }
-        }
-        _ => return None,
-    })
+    crate::levels::chapter_id(stage, alternate)
+        .and_then(crate::levels::chapter)
+        .and_then(|chapter| chapter.music)
 }
