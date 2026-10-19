@@ -67,3 +67,4 @@ gfx/036.000_gurdy.anm2
 gfx/028.000_chub.anm2
 gfx/068.000_peep.anm2
 gfx/068.010_peep eye.anm2
+gfx/099.000_gurdy jr..anm2

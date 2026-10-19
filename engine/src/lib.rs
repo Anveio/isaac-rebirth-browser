@@ -80,6 +80,7 @@ pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
 pub mod gurdy;
+pub mod gurdy_jr;
 pub mod gushers;
 mod health_damage;
 pub mod hoppers;

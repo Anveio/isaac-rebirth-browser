@@ -342,6 +342,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::peep::FAMILY,
     &crate::boil::FAMILY,
     &crate::chub::FAMILY,
+    &crate::gurdy_jr::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,
