@@ -95,7 +95,7 @@ export function routingView(s) {
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
     // Living door-shutting enemies and enemy shots, for fight().
     foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
-      .map(n => ({ kind: n.kind, boss: n.boss, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
+      .map(n => ({ kind: n.kind, boss: n.boss, radius: n.collisionRadius, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
     shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, vx: p.velocity?.x ?? 0, vy: p.velocity?.y ?? 0 })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
   };
@@ -116,7 +116,10 @@ export function fightKeys(view, memory) {
   const flight = memory.lead ? distance / 10 : 0;
   const ax = dx + (target.vx ?? 0) * flight, ay = dy + (target.vy ?? 0) * flight;
   const aim = Math.abs(ax) >= Math.abs(ay) ? (ax > 0 ? 'ArrowRight' : 'ArrowLeft') : (ay > 0 ? 'ArrowDown' : 'ArrowUp');
-  const radius = memory.lead ? 90 : target.boss ? (memory.bossRadius ?? 170) : 110, pull = (radius - distance) / radius * 2;
+  // --dodge sizes foes by their collision radius (Mega Fatty 40) rather than the
+  // boss flag, which the Fistula family's small pieces also carry.
+  const big = foe => (memory.dodge ? (foe.radius ?? (foe.boss ? 40 : 13)) >= 30 : foe.boss);
+  const radius = memory.lead ? 90 : big(target) ? (memory.bossRadius ?? 170) : 110, pull = (radius - distance) / radius * 2;
   const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
   const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
   const solid = (x, y) => {
@@ -134,7 +137,7 @@ export function fightKeys(view, memory) {
       if (solid(nx, ny)) score -= cost;
     }
     for (const foe of foes) {
-      const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = foe.boss ? 90 : 40;
+      const near = Math.hypot(foe.x - (player.x + ux * 40), foe.y - (player.y + uy * 40)), reach = big(foe) ? 90 : 40;
       if (near < reach) score -= (90 - near) / 30;
     }
     if (memory.dodge) {
@@ -151,7 +154,7 @@ export function fightKeys(view, memory) {
       // A foe's own motion (a boss's lunge) projected over the same frames.
       for (const foe of foes) for (const t of [3, 6, 10, 15]) {
         const near = Math.hypot(player.x + ux * 3.5 * t - (foe.x + (foe.vx ?? 0) * t), player.y + uy * 3.5 * t - (foe.y + (foe.vy ?? 0) * t));
-        const reach = foe.boss ? 70 : 34;
+        const reach = (foe.radius ?? (foe.boss ? 40 : 13)) + 24;
         if (near < reach) score -= (reach - near) / 12 * (t <= 6 ? 1.5 : 1);
       }
       // Keep room to dodge: walls within 50 units cost in proportion.
