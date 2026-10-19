@@ -92,6 +92,8 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boil: Option<crate::boil::BoilState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_creep: Option<crate::wall_creep::WallCreepState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub squirt: Option<crate::squirt::SquirtState>,
@@ -144,6 +146,8 @@ pub struct Npc {
     pub fatty: Option<crate::fatty::FattyState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub greed: Option<crate::greed::GreedState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gurdy: Option<crate::gurdy::GurdyState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mega_fatty: Option<crate::mega_fatty::MegaFattyState>,
 }
@@ -932,6 +936,7 @@ impl Npc {
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            boil: None,
             wall_creep: None,
             squirt: None,
             wall_hugger: None,
@@ -952,6 +957,7 @@ impl Npc {
             hopper: None,
             fatty: None,
             greed: None,
+            gurdy: None,
             mega_fatty: None,
         }
     }

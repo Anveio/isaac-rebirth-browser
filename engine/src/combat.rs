@@ -875,6 +875,16 @@ impl DamageQueue {
         self.pending_flags = 0;
     }
 
+    /// A subclass AI zeroing queued entries in place (Boil 490ef0): the drain
+    /// subtracts nothing for them; the pending total and flags stay.
+    pub(crate) fn zero_events(&mut self, mut zero: impl FnMut(&DamageEvent) -> bool) {
+        for event in &mut self.events {
+            if zero(event) {
+                event.amount = 0.0;
+            }
+        }
+    }
+
     /// A subclass AI erasing queued entries (4fd320 vector erase) leaves the
     /// pending total and flags as they were.
     pub(crate) fn erase_events(&mut self, erase: impl Fn(&DamageEvent) -> bool) {
