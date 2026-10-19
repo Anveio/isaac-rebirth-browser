@@ -30,14 +30,14 @@ use std::panic::{self, AssertUnwindSafe};
 
 /// Full updates a stage transition may take before it counts as stuck;
 /// stage/rooms measured about 860.
-const ARRIVAL_FRAMES: u32 = 1_500;
+pub(crate) const ARRIVAL_FRAMES: u32 = 1_500;
 /// Full updates the run-start hold may keep the player's controls.
-const START_FRAMES: u32 = 600;
+pub(crate) const START_FRAMES: u32 = 600;
 /// Full updates an open trapdoor under the player gets to take them.
-const TRAPDOOR_FRAMES: u32 = 120;
+pub(crate) const TRAPDOOR_FRAMES: u32 = 120;
 /// Descents a case may chain, more than a run has stages, so only a
 /// refusing trapdoor ends the chain.
-const DESCENTS: usize = 16;
+pub(crate) const DESCENTS: usize = 16;
 
 pub fn run(case: &mut Case) {
     let _census = coverage::rooms_case();
@@ -136,29 +136,10 @@ pub fn run(case: &mut Case) {
 /// that does must arrive within `ARRIVAL_FRAMES`, on a deeper stage (an XL
 /// floor skips one).
 fn descend(game: &mut Game, e: &mut Entropy, code: &str) -> bool {
-    let state = &mut game.state;
-    let Some(width) = state.room.grid.as_ref().map(|grid| usize::from(grid.width)) else {
+    let from = game.state.stage;
+    if !plant_trapdoor(game, e) {
         return false;
-    };
-    let from = state.stage;
-    // The player's world position (the published position is 0.65 world
-    // scale, offset 32, -46) and the grid cell it stands in.
-    let x = (state.player.x - 32.0) / 0.65;
-    let y = (state.player.y + 46.0) / 0.65;
-    let column = ((x - 40.0) / 40.0).round().max(0.0) as usize;
-    let row = ((y - 120.0) / 40.0).round().max(0.0) as usize;
-    state.player.x = (40 + column * 40) as f64 * 0.65 + 32.0;
-    state.player.y = (120 + row * 40) as f64 * 0.65 - 46.0;
-    state.player.vx = 0.0;
-    state.player.vy = 0.0;
-    state.room.trapdoor = Some(Trapdoor {
-        grid_index: row * width + column,
-        state: 1,
-        spawn_seed: e.u32().max(1),
-        clip: TrapdoorClip::OpenAnimation,
-        frame: 10.0,
-        playing: false,
-    });
+    }
     let label = || json!({ "code": code, "at": "stage arrival", "from": from });
     let mut started = false;
     for frame in 0..ARRIVAL_FRAMES {
@@ -188,6 +169,35 @@ fn descend(game: &mut Game, e: &mut Entropy, code: &str) -> bool {
         json!({ "code": code, "from": from, "stage": game.state.stage })
     );
     arrived
+}
+
+/// Stands the player on their cell's centre over an open trapdoor (state 1,
+/// its open clip finished), so the trapdoor's own entry check decides the
+/// descent; false outside a room grid.
+pub(crate) fn plant_trapdoor(game: &mut Game, e: &mut Entropy) -> bool {
+    let state = &mut game.state;
+    let Some(width) = state.room.grid.as_ref().map(|grid| usize::from(grid.width)) else {
+        return false;
+    };
+    // The player's world position (the published position is 0.65 world
+    // scale, offset 32, -46) and the grid cell it stands in.
+    let x = (state.player.x - 32.0) / 0.65;
+    let y = (state.player.y + 46.0) / 0.65;
+    let column = ((x - 40.0) / 40.0).round().max(0.0) as usize;
+    let row = ((y - 120.0) / 40.0).round().max(0.0) as usize;
+    state.player.x = (40 + column * 40) as f64 * 0.65 + 32.0;
+    state.player.y = (120 + row * 40) as f64 * 0.65 - 46.0;
+    state.player.vx = 0.0;
+    state.player.vy = 0.0;
+    state.room.trapdoor = Some(Trapdoor {
+        grid_index: row * width + column,
+        state: 1,
+        spawn_seed: e.u32().max(1),
+        clip: TrapdoorClip::OpenAnimation,
+        frame: 10.0,
+        playing: false,
+    });
+    true
 }
 
 /// The driver plays `frames` full updates in the entered room; false after a

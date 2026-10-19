@@ -4,10 +4,12 @@
 //! later input sees the state. Without the host a game never stores a
 //! document, so a menu readmission finds none and Continue stays unavailable.
 use super::driver::Driver;
+use super::seeded_run_with;
 use crate::entropy::Entropy;
 use crate::harness;
 use crate::props;
 use crate::tape::Tape;
+use crate::units::rooms;
 use rebirth_cleanroom::save_host::{Response, SaveHost, SaveIo, SaveStore};
 use rebirth_cleanroom::save_profiles::Profiles;
 use rebirth_cleanroom::{seed, Command, Game, Screen};
@@ -61,6 +63,85 @@ pub fn previous_session(e: &mut Entropy, steps: u32) -> Option<String> {
         }
     }
     store?.stored
+}
+
+/// What a returning player's browser holds after a run that went deeper than
+/// its first floor, which a generated case seldom plays to. A previous
+/// session starts a seeded run with a sound save host and descends as the
+/// `rooms` unit does, through an open trapdoor under the player whose own
+/// entry check decides each descent, until one refuses. Each arrival's level
+/// admission saves the run, and the document stored on one of the floors it
+/// reached, chosen uniformly, is what the next session boots with: Continue
+/// resumes that floor through public inputs, so every stage the port admits
+/// plays under the `game` properties and the WASM differential. None when no
+/// trapdoor took the player or the session failed.
+pub fn previous_descent(e: &mut Entropy) -> Option<String> {
+    let mut tape = Tape::new(e.nonzero_u32(), e.u32());
+    let host = SaveHost::default();
+    tape.save_host = Some(host.clone());
+    let (booted, mut store) = tape.session().ok()?;
+    let code = seed::encode(e.nonzero_u32()).ok()?;
+    let mut sound = true;
+    let mut game = seeded_run_with(booted, &code, &mut |game, command| {
+        sound &= send(game, &mut store, &host, command);
+    })?;
+    let tick = || Command::Tick {
+        count: 1,
+        timestamp_millis: None,
+    };
+    for _ in 0..rooms::START_FRAMES {
+        if game.state.player.controls_enabled {
+            break;
+        }
+        sound &= send(&mut game, &mut store, &host, tick());
+    }
+    let mut documents = Vec::new();
+    for _ in 0..rooms::DESCENTS {
+        let from = game.state.stage;
+        if !sound || !rooms::plant_trapdoor(&mut game, e) {
+            break;
+        }
+        let mut started = false;
+        let mut arrived = false;
+        for frame in 0..rooms::ARRIVAL_FRAMES {
+            sound &= send(&mut game, &mut store, &host, tick());
+            let state = &game.state;
+            started |= state.stage_transition.active();
+            if !sound || (!started && frame >= rooms::TRAPDOOR_FRAMES) {
+                break;
+            }
+            if started
+                && state.stage > from
+                && !state.stage_transition.active()
+                && state.player.controls_enabled
+            {
+                arrived = true;
+                break;
+            }
+        }
+        match store.as_ref().and_then(|store| store.stored.clone()) {
+            Some(document) if arrived && sound => documents.push(document),
+            _ => break,
+        }
+    }
+    if documents.is_empty() {
+        return None;
+    }
+    let chosen = e.below(documents.len() as u64) as usize;
+    Some(documents.swap_remove(chosen))
+}
+
+/// Sends one command and has the host answer its save IO; false after a
+/// panic or a save IO the host could not answer.
+fn send(game: &mut Game, store: &mut Option<SaveStore>, host: &SaveHost, command: Command) -> bool {
+    match panic::catch_unwind(AssertUnwindSafe(|| game.command(command.clone()))) {
+        Ok(Ok(_)) => serve(store, Some(host), game, &command).is_ok(),
+        Ok(Err(_)) => true,
+        Err(_) => {
+            harness::take_panic();
+            false
+        }
+    }
 }
 
 /// The document a previous session stored loads at the next session's fresh
@@ -186,14 +267,20 @@ fn continued(before: &Game, after: &Game, imported: Option<&Profiles>) {
     );
     props::sometimes!(true, "game: a saved run is continued");
     let slot = usize::from(before.state.profile) - 1;
+    let previous = record.is_some_and(|record| {
+        imported
+            .and_then(|profiles| profiles.profiles.get(slot))
+            .and_then(|profile| profile.saved.as_ref())
+            == Some(record)
+    });
     props::sometimes!(
-        record.is_some_and(|record| {
-            imported
-                .and_then(|profiles| profiles.profiles.get(slot))
-                .and_then(|profile| profile.saved.as_ref())
-                == Some(record)
-        }),
+        previous,
         "game: Continue resumes a run a previous session saved"
+    );
+    // `previous_descent`'s documents: Basement II has been admitted since #654.
+    props::sometimes!(
+        previous && state.stage > 1,
+        "game: Continue resumes a run a previous session saved on a deeper floor"
     );
 }
 

@@ -254,33 +254,5 @@
         "room:8"
       ]
     ]
-  },
-  {
-    "out": "coverage-caves-descent.json",
-    "from": "regression-descent-with-active-item.json",
-    "steps": 3000,
-    "stages": [
-      [
-        "stage:2"
-      ],
-      [
-        "room:5 on stage 2"
-      ],
-      [
-        "cleared:5 on stage 2"
-      ],
-      [
-        "stage:3"
-      ],
-      [
-        "room:5 on stage 3"
-      ],
-      [
-        "cleared:5 on stage 3"
-      ],
-      [
-        "stage:4"
-      ]
-    ]
   }
 ]
