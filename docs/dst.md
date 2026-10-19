@@ -343,9 +343,10 @@ property set on every run, after the generated cases:
   that ordinary budgets seldom meet, so their AI runs through every property
   and the shipped WASM on every run. Others enter the room types every floor
   generates but players seldom reach (the key-locked shop, the bombed-open
-  super secret room), retire NPC kinds whose deaths ordinary runs never see,
-  and simulate kind 21, which no authored room places. Game tapes drift as
-  the engine evolves;
+  super secret room) or retire NPC kinds whose deaths ordinary runs never
+  see. `coverage-*-carried` tapes keep what a rebuilt tape's predecessor met
+  on the way and its recipe does not name. Game tapes drift as the engine
+  evolves;
   a regression tape that stops reproducing its finding is retired rather than
   kept under its label.
 
@@ -431,6 +432,21 @@ one command rebuilds all of them:
 ```sh
 python3 tools/dst/chase.py --recipes engine/dst/chases.json   # --only NAME for one
 ```
+
+A rebuilt tape reaches its recipe's keys, not everything the tape it replaces
+met on the way. The 40469d3 rebuild dropped Squirt (220) and a chest (pickup
+50), which the old Grub tape met before its Grub, and Crazy Long Legs (207),
+which the old Larry Jr. tape met. No other tape ran them, and only the next
+corpus census showed it. So a recipe run measures the corpus alone before and after
+(`corpus-before.json` and `corpus-after.json` in its work directory) and
+hands every key it lost to `cover.py`. A corpus census and that corpus's tapes
+serve as a harvest: `cover.py` cuts the replaced tapes' shortest prefixes that
+reach the lost keys and writes them as `coverage-<old name>-carried.json`.
+`coverage-grub-kill-carried` (3,013 commands: Squirt and the chest) and
+`coverage-larry-segments-carried` (1,212: Crazy Long Legs) carry the three
+40469d3 keys from the corpus before that rebuild. A carried tape has no
+recipe; when drift moves it off its keys, the census lists them and a harvest
+replaces it.
 
 `cover.py` skips keys that every reaching case met before its
 first command, such as the seed scout's must-hits: they come from case

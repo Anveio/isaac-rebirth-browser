@@ -31,14 +31,23 @@ rebuilds what a shared-MT change moved. A recipe's first stage is the
 scenario's precondition, such as `room:5` before a boss clear. Each chase
 starts from its own tape, cut just after the replay first reaches that
 stage, or from a fresh boot when drift moved the tape off it.
+
+A rebuilt tape reaches its recipe's keys, not whatever else the tape it
+replaces met on the way, such as an NPC family no other tape runs. So a
+recipe run measures the corpus before and after, and carries every key it
+lost from the replaced tapes' prefixes (`tools/dst/cover.py`).
 """
 import argparse
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import cover  # noqa: E402
 
 
 def run(binary, arguments):
@@ -51,6 +60,12 @@ def replay(binary, tape, report):
     result = json.loads(report.read_text())
     failed = [p["message"] for p in result["properties"] if p["status"] == "failed"]
     return set(result["coverage"]["reached"]), failed
+
+
+def census(binary, corpus, report):
+    """The corpus alone's report, as every DST run replays it."""
+    run(binary, ["--units", "game", "--cases", "0", "--corpus", str(corpus), "--report", str(report), "--allow-unmet"])
+    return json.loads(report.read_text())
 
 
 def precondition_cut(binary, tape, keys, report):
@@ -190,6 +205,13 @@ def main():
     # A recipe names a corpus tape, the prefix it branches from (by default
     # its own first `at` commands) and its stages; other keys override flags.
     corpus = args.recipes.parent / "corpus"
+    root = args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")
+    # A chase rerun into the same --work keeps the first run's census and
+    # replaced tapes, so what it carries is measured against the original.
+    replaced = root / "replaced"
+    replaced.mkdir(parents=True, exist_ok=True)
+    measured = root / "corpus-before.json"
+    before = json.loads(measured.read_text()) if measured.exists() else census(args.binary, corpus, measured)
     failed = 0
     for recipe in json.loads(args.recipes.read_text()):
         if args.only and recipe["out"] not in args.only:
@@ -203,8 +225,10 @@ def main():
         for key in ("cases", "steps", "rounds", "extend", "final_extend"):
             setattr(one, key, recipe.get(key, getattr(args, key)))
         print(f"== {recipe['out']}")
-        work = (args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")) / recipe["out"].removesuffix(".json")
+        work = root / recipe["out"].removesuffix(".json")
         work.mkdir(parents=True, exist_ok=True)
+        if one.out.exists() and not (replaced / one.out.name).exists():
+            shutil.copy(one.out, replaced / one.out.name)
         if one.source and not one.source.exists():
             print(f"{source} does not exist yet; chasing from a fresh boot")
             one.source = None
@@ -216,6 +240,15 @@ def main():
             else:
                 print(f"{source} reaches {one.stage[0]} at command {one.at - 1}")
         failed += build(one, work)
+    after = census(args.binary, corpus, root / "corpus-after.json")
+    lost = cover.reached(before) - cover.reached(after)
+    if lost:
+        print(f"== the rebuilt corpus lost {sorted(lost)}; carrying them from the replaced tapes")
+        # At most what the replaced tapes held, so no lost key is refused.
+        held = sum(len(json.loads(tape.read_text())["commands"]) for tape in replaced.glob("*.json"))
+        _, missing, broken = cover.cover(args.binary, before, replaced, after, out=corpus, budget=held, verify=True)
+        if missing or broken:
+            failed += 1
     return 1 if failed else 0
 
 
