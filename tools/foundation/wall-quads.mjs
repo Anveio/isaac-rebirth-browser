@@ -5,15 +5,26 @@
 // The original keeps no wall rects after pre-rendering, so its submitted
 // cache draws are the observation. Each draw is 44 textured quads (264
 // indices); a quad's source rect is its UVs scaled to the texture.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 
 // Submitted UVs sit within one f32 step of the authored pixels.
 const pixel = value => Math.round(value * 100) / 100;
 
+// The paired gate gzips the log once the original exits (paired-game.mjs). A
+// long tape's log outgrows one JS string, so its lines are read from the buffer.
+function* lines(path) {
+  const buffer = existsSync(path) ? readFileSync(path) : gunzipSync(readFileSync(`${path}.gz`));
+  for (let start = 0; start < buffer.length;) {
+    const newline = buffer.indexOf(10, start), end = newline < 0 ? buffer.length : newline;
+    if (end > start) yield buffer.toString('utf8', start, end);
+    start = end + 1;
+  }
+}
+
 export function originalWallAssemblies(commandsPath) {
   const sizes = new Map(), assemblies = [];
-  for (const line of readFileSync(commandsPath, 'utf8').split('\n')) {
-    if (!line) continue;
+  for (const line of lines(commandsPath)) {
     const item = JSON.parse(line);
     if (item.op === 'texture') sizes.set(item.id, [item.width, item.height]);
     if (item.op !== 'draw' || !item.cacheDraw || item.count !== 264) continue;
