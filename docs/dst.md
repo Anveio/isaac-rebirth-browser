@@ -394,10 +394,12 @@ Crazy Long Legs, Squirt, Charger and Spitty (207, 220, 23, 31), a locked chest
 tapes had another tape reaching it, so `--prune` retired those 31: the
 corpus went from 61 tapes and 103,088 commands on 87ddf06 to 38 tapes and
 84,483 commands, losing no key. Chocolate Milk
-(69) is not carried: its one reaching case collected it at command 7,897
-of 8,000, and that tape's replay with the WASM differential takes 943 s by
-itself (97 s natively), against 1,231 s for the whole 63-tape corpus on
-the four cores here. A shorter tape needs a case that collects it earlier.
+(69) was not carried then: its one reaching case collected it at command
+7,897 of 8,000, and that tape's replay with the WASM differential takes
+943 s by itself (97 s natively), against 1,231 s for the whole 63-tape
+corpus on the four cores here. A 07aca74f soak case collected it at command
+886, so `coverage-4e56a759026d97a0` (1,187 commands, 84 s with the WASM
+differential) carries it.
 
 `--resume TAPE` makes every generated `game` case replay that tape (with
 every check) and then drive on from its end, so exploration branches from an
