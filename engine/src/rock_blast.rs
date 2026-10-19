@@ -313,11 +313,17 @@ pub(crate) fn admit_reward(
                 group_seed: seed,
                 spawn_seed: seed,
             };
-            // Normal50's actual51 replacement requires the source-owned
-            // empty LeftHand operands; Red360 retains its own frontier.
+            // Both normal50 replacement outcomes need the actual LeftHand
+            // query. A missing Init owner must retain the callback gap
+            // after the real rock destruction, without failing the Tick.
             let Some(chest) = crate::chests::from_source_selector(id, &selector, true, state)?
             else {
-                return Err("tinted rock chest replacement is unsupported".into());
+                crate::attack_grid::GridCallbackOutcome::Unadmitted {
+                    taken: true,
+                    branch: "TintedRockChestInit",
+                }
+                .record_frontier(state, "bombGridDestroy");
+                return Ok(());
             };
             chest
         }

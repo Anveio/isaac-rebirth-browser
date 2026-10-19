@@ -303,11 +303,12 @@ pub(crate) fn backdrop(room_type: u32, variant: u32, stage: u32) -> (u32, Option
         5 if variant == 5000 => 13,
         // 5d49b0: an odd stage keeps its number, an even one drops by one,
         // and the alternate type (locked on a fresh profile) adds one.
-        0 | 1 | 4 | 5 | 6 => match stage {
-            1 | 2 => 1,
-            3 | 4 => 3,
-            _ => return (0, None),
-        },
+        0 | 1 | 4 | 5 | 6 => {
+            match crate::levels::stage_chapter(stage).and_then(|chapter| chapter.backdrop) {
+                Some(id) => id,
+                None => return (0, None),
+            }
+        }
         2 => 15,
         3 => 21,
         7 => 18,
@@ -697,7 +698,7 @@ pub(crate) fn basement_boss_blood(
         return Ok(Vec::new());
     };
     let template = &descriptor.template;
-    if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+    if !boss_blood_backdrop(stage) || template.room_type != 5 || template.variant == 5000 {
         return Ok(Vec::new());
     }
     let grid = crate::grid::Grid::new(
@@ -709,6 +710,11 @@ pub(crate) fn basement_boss_blood(
     floor_patches(&mut rng, BASEMENT);
     rng.next();
     boss_blood_scatter(&mut rng, &grid)
+}
+
+/// The stage chapter draws the bloody boss backdrop.
+fn boss_blood_backdrop(stage: u32) -> bool {
+    crate::levels::stage_chapter(stage).is_some_and(|chapter| chapter.boss_blood_backdrop)
 }
 
 /// The boss scatter's local draws: one Int(2) per grid cell in grid order,
@@ -745,7 +751,7 @@ impl Room {
             return Ok(());
         };
         let template = &descriptor.template;
-        if stage > 2 || template.room_type != 5 || template.variant == 5000 {
+        if !boss_blood_backdrop(stage) || template.room_type != 5 || template.variant == 5000 {
             return Ok(());
         }
         validate_backdrop_dimensions(template.width, template.height)?;
@@ -1119,11 +1125,13 @@ impl Room {
         // min + RandomFloat * (max - min). The overlay group follows the
         // Level's chapter (fxlayers `stage`): Basement fx2 spans 0..100,
         // Caves fx5 -10..10; both author their 1x1 overlays as [2, 3, 4, 5, 1].
-        let (overlay_folder, low, high) = if matches!(stage, 3 | 4) {
-            ("caves", -10.0_f32, 10.0_f32)
-        } else {
-            ("basement", 0.0_f32, 100.0_f32)
-        };
+        let crate::levels::Overlay {
+            folder: overlay_folder,
+            low,
+            high,
+        } = crate::levels::stage_chapter(stage)
+            .and_then(|chapter| chapter.overlay)
+            .unwrap_or(crate::levels::BASEMENT_OVERLAY);
         let mut fx = DecorationRng::new(decoration_seed);
         let overlay_variant = [2, 3, 4, 5, 1][(fx.next() % 5) as usize];
         let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * (high - low) + low);

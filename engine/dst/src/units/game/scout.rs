@@ -25,7 +25,7 @@ const MENU_COMMANDS: usize = 400;
 /// collectible.
 pub fn codes(booted: &Game, e: &mut Entropy, wanted: usize) -> Vec<String> {
     // Every candidate starts from the same open seed dialog.
-    let Some(dialog) = walk(booted.clone(), None) else {
+    let Some(dialog) = walk(booted.clone(), None, &mut send) else {
         return Vec::new();
     };
     let mut found = Vec::new();
@@ -33,7 +33,7 @@ pub fn codes(booted: &Game, e: &mut Entropy, wanted: usize) -> Vec<String> {
         let Ok(code) = seed::encode(e.nonzero_u32()) else {
             continue;
         };
-        let Some(game) = walk(dialog.clone(), Some(&code)) else {
+        let Some(game) = walk(dialog.clone(), Some(&code), &mut send) else {
             continue;
         };
         props::sometimes!(true, "game: the seed scout starts a seeded run");
@@ -51,7 +51,22 @@ pub fn codes(booted: &Game, e: &mut Entropy, wanted: usize) -> Vec<String> {
 
 /// A seeded run of `code`, started from `booted` through the public menus.
 pub(crate) fn seeded_run(booted: Game, code: &str) -> Option<Game> {
-    walk(walk(booted, None)?, Some(code))
+    seeded_run_with(booted, code, &mut send)
+}
+
+/// `seeded_run`, each command sent by `apply`, which may also answer the
+/// save IO the command leaves.
+pub(crate) fn seeded_run_with(
+    booted: Game,
+    code: &str,
+    apply: &mut dyn FnMut(&mut Game, Command),
+) -> Option<Game> {
+    let dialog = walk(booted, None, apply)?;
+    walk(dialog, Some(code), apply)
+}
+
+fn send(game: &mut Game, command: Command) {
+    let _ = game.command(command);
 }
 
 fn tap(queue: &mut VecDeque<Command>, code: &str) {
@@ -69,11 +84,15 @@ fn tap(queue: &mut VecDeque<Command>, code: &str) {
 
 /// Walks the menus by their published state: without a code, to the open
 /// seed dialog; with one, to a seeded run of it.
-fn walk(mut game: Game, code: Option<&str>) -> Option<Game> {
+fn walk(
+    mut game: Game,
+    code: Option<&str>,
+    apply: &mut dyn FnMut(&mut Game, Command),
+) -> Option<Game> {
     let mut queue = VecDeque::new();
     for _ in 0..MENU_COMMANDS {
         if let Some(command) = queue.pop_front() {
-            let _ = game.command(command);
+            apply(&mut game, command);
             continue;
         }
         let state = &game.state;

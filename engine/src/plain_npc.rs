@@ -124,6 +124,9 @@ pub(crate) fn walk_frame(npc: &mut Npc, horizontal: &str, vertical: &str, thresh
 fn death_clip(npc: &Npc) -> Option<&'static str> {
     let clip = if content::clip(&npc.actor, "Death").is_some() {
         "Death"
+    } else if npc.chub.as_ref().is_some_and(|state| state.segment == 2) {
+        // 4fc93d: Chub's tail.
+        "DeathBody02"
     } else if npc.parent.is_some() {
         "DeathBody01"
     } else {
@@ -269,7 +272,9 @@ fn advance_full(
     let mut friction = npc.base_friction;
     let mut revived = false;
     if npc.dead {
-        if npc.boss {
+        // 4fb640: type 28 enters the dying state 16 even for its non-boss
+        // body segments.
+        if npc.boss || npc.kind == 28 {
             if dead_ai && npc.state != 16 {
                 ai(npc, random, world, births, &mut friction)?;
             }

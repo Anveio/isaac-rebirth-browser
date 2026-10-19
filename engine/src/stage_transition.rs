@@ -374,30 +374,20 @@ pub(crate) fn floor_request(
     })
 }
 
-/// Level::SetNextStage585620 for the admitted ordinary stages. Alternate
-/// stages need Seeds stage bit0 clear and a Manager unlock byte that a fresh
-/// profile does not own; Curse of the Labyrinth is not admitted. Depths I
-/// (stage 5) has no admitted generator, so Caves II's trapdoor stays shut.
+/// Level::SetNextStage585620 for the admitted ordinary stages: the stage
+/// node's trapdoor edge, admitted only into another node. Alternate stages
+/// need Seeds stage bit0 clear and a Manager unlock byte that a fresh profile
+/// does not own; Curse of the Labyrinth is not admitted.
 pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
-    match stage {
-        1 => Ok(2),
-        2 => Ok(3),
-        3 => Ok(4),
-        _ => Err(format!(
-            "stage {stage} has no admitted next-stage generator"
-        )),
-    }
+    crate::levels::trapdoor(stage)
+        .ok_or_else(|| format!("stage {stage} has no admitted next-stage generator"))
 }
 
-/// Level::ShowName585500 names; alternate (Cellar) stages stay locked on a
-/// fresh profile, so SetNextStage585620 never selects them here.
+/// Level::ShowName585500 names from the stage nodes; alternate (Cellar)
+/// stages stay locked on a fresh profile, so SetNextStage585620 never
+/// selects them here.
 fn stage_name(stage: u32) -> &'static str {
-    match stage {
-        2 => "BASEMENT II",
-        3 => "CAVES I",
-        4 => "CAVES II",
-        _ => "BASEMENT I",
-    }
+    crate::levels::node(stage).map_or("BASEMENT I", |node| node.name)
 }
 
 /// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30
