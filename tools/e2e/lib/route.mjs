@@ -91,6 +91,9 @@ export function routingView(s) {
     health: [s.player.hp, s.player.maxHp, s.player.soulHp], coins: s.inventory.coins,
     // Live fireplaces, which a route may shoot out rather than walk around.
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
+    // Red creep pools (Effect 1000.22: a Skinny's trail, Mega Fatty's landing),
+    // which hurt a player standing on them.
+    creep: (s.spriteEffects ?? []).filter(e => e.creepEffect && !e.removed).map(e => ({ x: e.position.x, y: e.position.y, size: e.creepEffect.size })),
     // Solid poop cells, which a walk may shoot out rather than route around.
     poops: s.room.grid ? s.room.grid.cells.flatMap((c, i) => (c.entity?.kind === 14 && c.entity.collisionClass !== 0 ? [i] : [])) : [],
     openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33), s.room.slots ?? []),
@@ -168,7 +171,12 @@ export function fightKeys(view, memory) {
       }
       for (const fire of view.fires ?? []) for (const look of [10, 20, 30]) {
         const near = Math.hypot(fire.x - (player.x + ux * look), fire.y - (player.y + uy * look));
-        if (near < 36) score -= (36 - near) / 8;
+        if (near < 48) score -= (48 - near) / 6;
+      }
+      // Creep under the next few steps: a pool of scale 1 reaches about 36 units.
+      for (const pool of view.creep ?? []) for (const look of [4, 8, 14]) {
+        const near = Math.hypot(pool.x - (player.x + ux * look), pool.y - (player.y + uy * look)), reach = 12 + 24 * pool.size;
+        if (near < reach) score -= (reach - near) / 6;
       }
       // A foe's own motion (a boss's lunge) projected over the same frames.
       for (const foe of foes) for (const t of [3, 6, 10, 15]) {
