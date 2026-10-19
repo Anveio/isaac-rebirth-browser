@@ -93,6 +93,10 @@ pub(crate) struct SpawnedNpc {
     pub health_scale: f32,
     /// Max HP (+488) multiplier.
     pub max_health_scale: f32,
+    /// Added to HP (+484) after the scales (Gurdy's flies lose 2).
+    pub health_delta: f32,
+    /// Whether the APPEAR flag stays set (Gurdy's summons appear).
+    pub appear: bool,
 }
 
 /// Actors an NPC callback creates. Game admits them in this order.
@@ -326,6 +330,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::horfs::FAMILY,
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
+    &crate::boil::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,
@@ -342,6 +347,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::fatty::FAMILY,
     &crate::skinny::FAMILY,
     &crate::greed::FAMILY,
+    &crate::gurdy::FAMILY,
     &crate::mega_fatty::FAMILY,
     &crate::mulligans::FAMILY,
 ];
