@@ -195,9 +195,38 @@ function replayArgs(suite, directory) {
     ? [suite.replay ?? '--scenarios', relative(ROOT, join(directory, 'scenarios.json'))] : undefined;
 }
 
+// Cases that graded no checks at all: a crash, a full disk or a lost game
+// leaves 0/0, which reads as "identical" beside another 0/0 run, so they are
+// reported apart from cases that graded and failed.
+function ungradedCases(directory) {
+  let cases = [];
+  try { cases = JSON.parse(readFileSync(join(directory, 'report.json'), 'utf8')).cases ?? []; } catch {}
+  const count = item => typeof item.checks === 'number' ? item.checks : Array.isArray(item.checks) ? item.checks.length : undefined;
+  return cases.filter(item => count(item) === 0)
+    .map(item => {
+      const lines = String(item.error ?? '').split('\n').map(line => line.trim()).filter(Boolean);
+      return { id: item.id, error: lines.find(line => /Error\b|ENOSPC|ENOENT/.test(line)) ?? lines[0] ?? '' };
+    });
+}
+
+// Below this a suite's own evidence cannot be written; it is refused rather
+// than run into a 0/0 result.
+const MIN_FREE_DISK = 2 * 2 ** 30;
+
 async function runSuite(suite) {
   const release = await acquireHostSlot(suite.id);
-  try { return await runSuiteInSlot(suite); } finally { release(); }
+  try {
+    const free = freeBytes(ROOT);
+    if (free < MIN_FREE_DISK) {
+      const error = `refused: ${(free / 2 ** 30).toFixed(1)} GB free, below ${MIN_FREE_DISK / 2 ** 30} GB; free disk and rerun`;
+      const result = { id: suite.id, status: 'fail', exitCode: null, signal: null, error, seconds: 0, suiteArgs: suiteArgs };
+      report.suites.push(result);
+      writeJson(reportPath, report);
+      console.log(`✘ ${suite.id}: ${error}`);
+      return result;
+    }
+    return await runSuiteInSlot(suite);
+  } finally { release(); }
 }
 
 function runSuiteInSlot(suite) {
@@ -216,8 +245,11 @@ function runSuiteInSlot(suite) {
     });
     const finish = async (exitCode, signal, error) => {
       log.end();
-      const result = { id: suite.id, status: exitCode === 0 && !signal ? 'pass' : 'fail', exitCode, signal, error,
-        seconds: Math.round((Date.now() - startedAt) / 1000), suiteArgs: overrides, log: logPath, output: directory };
+      const ungraded = ungradedCases(directory);
+      const result = { id: suite.id, status: exitCode === 0 && !signal && !ungraded.length ? 'pass' : 'fail', exitCode, signal, error,
+        seconds: Math.round((Date.now() - startedAt) / 1000), suiteArgs: overrides, log: logPath, output: directory,
+        ...(ungraded.length && { ungraded }) };
+      for (const item of ungraded) console.log(`⚠ ${suite.id} ${item.id} graded no checks${item.error ? `: ${item.error}` : ''}`);
       if (result.status === 'fail') {
         result.replayArgs = replayArgs(suite, directory);
         if (result.replayArgs) result.replay = `npm run test:e2e -- ${suite.id} ${mergeReplayArgs(suite.id, overrides, result.replayArgs).map(shellQuote).join(' ')}`;
@@ -244,7 +276,8 @@ report.finishedAt = new Date().toISOString();
 writeJson(reportPath, report);
 console.log(`\n${report.suites.filter(suite => suite.status === 'pass').length}/${report.suites.length} suites passed — ${relative(ROOT, reportPath)}`);
 for (const suite of report.suites.filter(suite => suite.status === 'fail')) {
-  console.log(`  ✘ ${suite.id}: ${relative(ROOT, suite.log)}`);
+  console.log(`  ✘ ${suite.id}: ${suite.log ? relative(ROOT, suite.log) : suite.error}`);
+  if (suite.ungraded) console.log(`      graded no checks (not comparable): ${suite.ungraded.map(item => item.id).join(' ')}`);
   if (suite.replay) console.log(`      replay: ${suite.replay}`);
 }
 if (report.status === 'fail') console.log(`rerun every failed suite on the same cases: npm run test:e2e -- --rerun-failed ${relative(ROOT, runDirectory)}`);
