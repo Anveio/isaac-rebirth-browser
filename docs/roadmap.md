@@ -56,7 +56,7 @@ original/port footage, then filing what it saw here by these rules.
 
 | Milestone | What a player can do | Gate |
 | --- | --- | --- |
-| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Verify the complete route. PR654 adds Caves I descent source; selected-wall catalogue and current-build qualification remain separate. |
+| **M0 Basement run** | Play normal Isaac from the title through Basement I and II to the boss and trapdoor without a freeze | Verify the complete route. PR654/731 add descent through Caves I into Caves II; their bounded arrival evidence, selected-wall catalogue and current-build qualification remain separate. |
 | **M1 Chapter 1** | Basement I/II and Cellar with every Chapter 1 enemy, boss, room type and common item | All Chapter 1 bosses; shops, devil/angel rooms, Cellar unlock |
 | **M2 Chapters 2-4** | Caves/Catacombs, Depths/Necropolis, Womb/Utero, Mom and Mom's Heart | Other stage generators, their enemies and bosses |
 | **M3 Endgame** | Sheol/Cathedral, Dark Room/Chest, Satan, Isaac, ???, The Lamb, endings | Final floors, final bosses, ending cutscenes |
@@ -72,9 +72,9 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
-| [Floor generation](#floor-generation) | Partial | Normal Basement I/II and Caves I source | 0 |
+| [Floor generation](#floor-generation) | Partial | Normal Basement I/II and Caves I/II source; Depths catalogue only | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award, trapdoor, Basement I/II to Caves I source | 3 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor descent through Caves I into Caves II | 4 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
@@ -221,11 +221,18 @@ Double Trouble's rectangular boss rooms (no native Double Trouble or Caves II
 layout graded yet). The separate Caves set 1 wall catalogue labels patches 0..2
 instead of 3..5; its reviewed metadata correction
 is unbuilt and live-unrun. This does not change wall quads or RNG order.
-Missing: Cellar, Depths and later stages, Caves II's flagged-shop Greed swap,
-curses (Labyrinth, Lost,
+First-entry flagged-shop Greed/Super Greed substitution is implemented;
+re-entry and live fight parity remain open. PR732 adds the 506-room Depths
+catalogue without enabling its generator or authored actors.
+Floors are data in the [level framework](levels.md): stage nodes carry the
+progression (name, trapdoor edge, contract) and stages.xml chapters carry the
+room set, backdrop, overlay, music and boss chain. New floors are imported by
+filling those tables, not by bespoke code paths.
+Missing: Cellar, Depths and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
-Next: Cellar generation and unlock; curses.
+Next: import Depths I/II through the level framework; Cellar generation and
+unlock; curses.
 
 No open bugs.
 
@@ -257,19 +264,25 @@ name streak, chapter order, Womb/Utero to Sheol/Cathedral, final floors,
 endings.
 
 Port: boss clear award (with poop occupants), trapdoor, stage transition,
-Basement I to Basement II and PR654 Caves I descent source. The [carried-active follow-up](stage-exit-evidence.md)
+Basement I to Basement II, PR654's Caves I descent and PR731's Caves II
+descent. The latter's fixed/recorded-OS capture on `ad1a60b5` grades the
+shared arrival tail after each game's own fights; it does not qualify those
+fights or advancing main. The [carried-active follow-up](stage-exit-evidence.md)
 passes 48 mandatory identity/charge/reserve/ownership/descent checks across
 two active routes on frozen f837, with an ordinary control. Double Trouble
-seeds now generate Caves I; current arrival/catalogue qualification is separate. Missing: Caves II and
-later steps, alternate stages, endings.
+seeds now generate Caves I; Double Trouble and selected-wall catalogue
+qualification remain separate. Missing: Depths and later steps, alternate
+stages, endings. The Depths catalogue is imported but has no generator or
+descent admission.
 
 Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P1 | Caves I descent source landed (#654), Double Trouble boss rooms place, Caves II generates behind a refused trapdoor; the selected-wall catalogue also needs correction | issue; stage-exit-evidence.md |
+| #413 | P1 | Descent reaches Caves II (#731); Depths has a catalogue (#732) but no generator or descent, while Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
+| #735 | P2 | The stage-transition nightmare omits the floor progress bar (finished floors, Isaac head, clock, skull) above the spotlight | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
 
 ## Player
 
@@ -475,6 +488,11 @@ Port: natural coins, keys, bombs, hearts, supported normal/locked/Bomb Chest
 opening, troll bombs, collection and persistence. Missing: batteries,
 Big/red chest behavior and the room-clear reward table beyond the
 supported cases. Source admission is not complete chest parity.
+
+PR737 corrects the normal Chest Has61 gate and keeps an unowned
+tinted-rock Chest Init on a typed frontier. Its [three-case regression controls](chest-evidence.md#has61-correction-and-bounded-regression-evidence)
+retain all 296 required failures; positive61 and unknown-history containment
+still need live witnesses.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

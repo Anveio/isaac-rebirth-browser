@@ -81,6 +81,13 @@ Both games end the segment hurt: the original at 4/6, the port at 2/6 in the rec
 
 ## Caves II descent (#413)
 
+The results below belong to PR731's fresh capture on `ad1a60b5` (main
+`0cd8427e` merged). The later docs commit and merge of DST-only main
+`87ddf064` retain that shipped artifact; they add no new gameplay capture.
+Advancing main does not inherit this qualification. Caves II's exit remains
+refused because stage 5 has no admitted generator; PR732's Depths catalogue
+import does not change that boundary.
+
 `EV9BP18Q-caves2` carries `EV9BP18Q-descent` one floor further. Each game also clears Caves I's route 5 → 6 → 7 → 9 → 10 → 11 → 12 → 13 → 0 and Mega Fatty with its own keys. The shared tail then re-anchors in Mega Fatty's room and is graded through the trapdoor, the stage transition and the Caves II arrival. The suite is `stage-descent`, in the `@stage-long` group.
 
 **The original's segment** is fixed fixture keys, 47,740 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly.

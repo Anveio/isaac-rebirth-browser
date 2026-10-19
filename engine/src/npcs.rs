@@ -96,6 +96,8 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boil: Option<crate::boil::BoilState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub chub: Option<crate::chub::ChubState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_creep: Option<crate::wall_creep::WallCreepState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub squirt: Option<crate::squirt::SquirtState>,
@@ -534,6 +536,42 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let mut a = body(first);
             let mut b = body(second);
             if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
+                // 49bdf8: a charging Chub head bites a Charger or Spider.
+                for flipped in [false, true] {
+                    let (chub, other) = if flipped {
+                        (&*second, &mut *first)
+                    } else {
+                        (&*first, &mut *second)
+                    };
+                    if !crate::chub::bites(chub, other) {
+                        continue;
+                    }
+                    let source = combat::DamageSource {
+                        id: chub.id,
+                        entity_type: 0,
+                    };
+                    let health = other.health();
+                    other.damage.enqueue(
+                        health,
+                        combat::DamageEvent {
+                            amount: 20.0,
+                            kind: combat::DamageKind::RoomEffect,
+                            source,
+                            copied_source: None,
+                        },
+                    )?;
+                    state.audio.admit(
+                        &mut state.boot_lifecycle.shared,
+                        state.system_clock.system_counter.wrapping_sub(1),
+                        crate::audio::SoundRequest {
+                            id: 142,
+                            volume: 1.0,
+                            delay: 2,
+                            looping: false,
+                            pitch: 1.0,
+                        },
+                    );
+                }
                 // Fire49c249 first checks OTHER with the numeric NPC predicate
                 // 444800. Player, Tear and Bomb are excluded from this callback.
                 if first.kind == 33 {
@@ -593,6 +631,16 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             };
             let mut b = body(npc);
             if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
+                // 49bd60: a charging Chub head eats the bomb; no response.
+                // PORT GAP: bombs carry no tear flags yet, so none pass on.
+                let damage = bomb
+                    .shot
+                    .as_ref()
+                    .map_or(60.0, |shot| shot.explosion_damage);
+                if crate::chub::swallow(npc, damage, 0) {
+                    bomb.motion.lifetime = bombs::BombLifetime::Removed;
+                    break;
+                }
                 bomb.motion.position = a.position;
                 bomb.motion.presented_position = a.position;
                 bomb.motion.velocity = a.velocity;
@@ -940,6 +988,7 @@ impl Npc {
             dingle: None,
             peep: None,
             boil: None,
+            chub: None,
             wall_creep: None,
             squirt: None,
             wall_hugger: None,

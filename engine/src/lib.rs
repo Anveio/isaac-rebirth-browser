@@ -26,6 +26,7 @@ pub mod camera;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
+pub mod chub;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
@@ -103,6 +104,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod levels;
 pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
@@ -3118,7 +3120,7 @@ impl Game {
             .descriptor
             .as_ref()
             .is_some_and(|descriptor| {
-                matches!(descriptor.asset_stage, 0 | 1 | 3)
+                grid_records::shape0_ambient(descriptor.asset_stage)
                     && descriptor.template.shape_index() == 0
                     && descriptor.template.room_type != 16
             })
@@ -5208,6 +5210,15 @@ impl Game {
                 }
                 .admit_fly_explosion(seed, position, color.tint, color.offset)?;
                 Ok(())
+            }
+            entities::Birth::ExplosionEffect { seed, position } => {
+                explosion_effects::admit_explosion(
+                    &mut self.state,
+                    seed,
+                    position,
+                    crate::attack_color::AttackColor::WHITE,
+                )
+                .map(|_| ())
             }
             entities::Birth::GridHurt { position, damage } => {
                 let descriptor = self
