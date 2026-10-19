@@ -92,8 +92,18 @@ function decorationClip(names: readonly string[], seed: number, allowCaves: bool
 }
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 // Rock Init (56ee03..56f076) replaces grid_rock.anm2's layer-0 sheet by
-// backdrop; Basement keeps the authored rocks_basement.png.
-const ROCK_SHEETS: Record<string, string> = { "gfx/backdrop/03_caves.png": "gfx/grid/rocks_caves.png" };
+// backdrop (jump table 0x674158: 3 Caves, 5/6 Depths); Basement keeps the
+// authored rocks_basement.png.
+const ROCK_SHEETS: Record<string, string> = {
+  "gfx/backdrop/03_caves.png": "gfx/grid/rocks_caves.png",
+  "gfx/backdrop/05_depths.png": "gfx/grid/rocks_depths.png",
+};
+// GridEntity_Pit Init 568c00..568c29 replaces grid_pit.anm2's sheet on
+// backdrops 5 and 9; Basement and Caves keep the authored grid_pit.png.
+const PIT_SHEETS: Record<string, string> = {
+  "gfx/backdrop/05_depths.png": "gfx/grid/grid_pit_depths.png",
+  "gfx/backdrop/09_sheol.png": "gfx/grid/grid_pit_depths.png",
+};
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
   if (!animation) return undefined;
@@ -291,7 +301,9 @@ export class Renderer {
       const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
       if (entity.kind === 7) {
         // GridEntity_Pit 5684c0 stores its autotile frame as the variant.
-        this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant);
+        const pitSheet = PIT_SHEETS[state.room.appearance.backdrop];
+        this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant,
+          pitSheet ? { spritesheets: { 0: pitSheet } } : {});
         this.drawnGrid.push({ index, kind: 7, animation: "pit", frame: entity.variant });
       } else if (rock) {
         const rockSheet = ROCK_SHEETS[state.room.appearance.backdrop];

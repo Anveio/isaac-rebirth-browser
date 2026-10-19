@@ -520,6 +520,7 @@ fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, Strin
                     return Ok(boss);
                 }
             }
+            BossStep::Fixed(boss) => return Ok(boss),
         }
     }
     Err("stage chapter's boss chain selected no boss".into())
@@ -837,7 +838,7 @@ fn attempt(
         primary.state,
     );
     let selected = select(special, secret_seed, 7, (0, u32::MAX), 4, 0, 10)?;
-    if let Some(index) = fitting.secret(generator_state, &descriptors) {
+    let secret = fitting.secret(generator_state, &descriptors).map(|index| {
         record(
             &mut descriptors,
             &fitting,
@@ -847,7 +848,8 @@ fn attempt(
             selected.1,
             secret_seed,
         );
-    }
+        descriptors.len() - 1
+    });
     let remaining: Vec<_> = fitting
         .original_non_ends
         .iter()
@@ -912,6 +914,7 @@ fn attempt(
         flags,
         &request,
         miniboss_placed,
+        secret,
         shop,
         &mut descriptors,
     );
@@ -955,8 +958,10 @@ fn attempt(
 /// flag the secret room from stage 5 and the second the shop from stage 4;
 /// both need that no miniboss room was placed this attempt (589ff7 also
 /// clears it when flags 0x18000 are both set). Game+0x10eafc only counts
-/// payouts the port does not admit (552650), so its penalty stays 0. The
-/// flag's local R1000 (SetSeed shift 0xc) does not advance the primary.
+/// payouts the port does not admit (552650), so its penalty stays 0.
+/// Flagging the secret room (58a0c0..58a11b) reopens the shop's chance only
+/// when a local RandomInt(1000), seeded from the primary state with shift
+/// 0xc, returns 0; that local RNG does not advance the primary.
 /// PORT GAP: the five off-grid descriptors after it (58a137..58a433) and
 /// their primary words are not generated.
 fn surprise_miniboss(
@@ -964,10 +969,11 @@ fn surprise_miniboss(
     flags: &mut u64,
     request: &NormalBasementRequest,
     miniboss_placed: bool,
+    secret: Option<usize>,
     shop: Option<usize>,
     descriptors: &mut [Descriptor],
 ) {
-    let open = !miniboss_placed && *flags & 0x18000 != 0x18000;
+    let mut open = !miniboss_placed && *flags & 0x18000 != 0x18000;
     let mut base = if request.coins > 19 { 1.05_f32 } else { 1.0 };
     if *flags & 0x4000_0000 != 0 {
         base += 0.1;
@@ -978,10 +984,14 @@ fn surprise_miniboss(
         *flags &= !0x8000_0000;
     }
     let chance = base * 0.333_333_34_f32;
-    let mut random_float = || primary.next() as f32 * 2.328_306_4e-10_f32;
-    // The secret room's flag needs stage > 4; this generator admits stage <= 4.
-    random_float();
-    if chance > random_float() && open && request.stage > 3 {
+    let random_float = |primary: &mut Primary| primary.next() as f32 * 2.328_306_4e-10_f32;
+    if chance > random_float(primary) && open && request.stage > 4 {
+        if let Some(secret) = secret {
+            descriptors[secret].surprise_miniboss = true;
+            open = next12(primary.state) % 1000 == 0;
+        }
+    }
+    if chance > random_float(primary) && open && request.stage > 3 {
         if let Some(shop) = shop {
             descriptors[shop].surprise_miniboss = true;
         }
