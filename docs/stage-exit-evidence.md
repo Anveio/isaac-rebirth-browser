@@ -90,29 +90,38 @@ import does not change that boundary.
 
 `EV9BP18Q-caves2` carries `EV9BP18Q-descent` one floor further. Each game also clears Caves I's route 5 → 6 → 7 → 9 → 10 → 11 → 12 → 13 → 0 and Mega Fatty with its own keys. The shared tail then re-anchors in Mega Fatty's room and is graded through the trapdoor, the stage transition and the Caves II arrival. The suite is `stage-descent`, in the `@stage-long` group.
 
-**The original's segment** is fixed fixture keys, 47,740 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly.
+**The original's segment** is fixed fixture keys, 47,263 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly and leaves Caves I at 3/6 red with 1 coin.
 
-**The port's segment** is recorded closed-loop per build, one leg per floor. Its Caves I leg runs the recorder's `--dodge --salt 4` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+**The port's segment** is recorded closed-loop per build, one leg per floor. Its Caves I leg runs the recorder's `--dodge --salt 4 --rewind` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
 
 **Generation inputs.** Caves II's generation reads the departing player's health and coins:
 - full red health admits the Challenge and Sacrifice rooms;
 - a half heart without soul hearts admits the bedrooms;
 - more than four coins admits an Arcade.
 
-The port's leg ends Caves I on a half heart, while the original's research keys ended at 3/6. So, as `--hurt` blasts a port that ends at full health, the original's keys end with one blast of its own bomb:
-- **Where:** about (444, 277), row 4 column 10.
-- **Clearance:** 131 units from the nearest grid object, 146 from the open trapdoor, 150 from the pedestal and 185 from the hearts. The blast reaches 75 units.
-- **Effect:** the original drops from 3/6 to 1/6. Every grid cell, both hearts and the pedestal stay unchanged.
+The comparator grades those three predicates at the re-anchor; raw health and coins stay diagnostics. Both games leave Caves I neither full, nor on a half heart, nor holding five coins.
 
-Both games then leave Caves I with 1/6 red, neither full nor holding five coins. The comparator grades those three predicates at the re-anchor. The raw values differ by construction and stay diagnostics:
+**Why `--rewind`.** Without it, the port's Caves I leg survived on one lucky path. The bot plays on through every hit, and Caves I's route rooms and Mega Fatty hit it often:
+- Squirt lunges and the Dips a Squirt bursts into;
+- Crazy Long Legs pinning it to a wall;
+- fireplace contact while Skinnies chase it;
+- Mega Fatty's landing creep and puke volleys.
 
-| Field at the re-anchor | Original | Port |
-| --- | ---: | ---: |
-| Red health | 1/6 | 1/6 |
-| Coins | 1 | 0 |
-| Bombs | 0 (spent on the blast) | 1 |
+Measured headlessly across nine jitter seeds, the plain leg passed 1 of 9. It always entered Mega Fatty at 3/6, and its one pass ended on a half heart (1/6). That is the bedroom predicate, which the original's 3/6 does not meet. #731 aligned it by ending the original's keys with a blast of its own bomb.
 
-Neither generation nor the shared tail reads the bomb count. On EV9BP18Q's Caves II seed, the port's floor generator builds the same floor (every descriptor and seed) from the port's inputs and from the original's research inputs before the blast (3/6, 1 coin).
+`--rewind` takes the leg back over each hit it can avoid (tools/e2e/README.md, Route recorder):
+- **Per room,** across nine seeds each:
+
+  | Fight | No damage | Hits kept |
+  | --- | --- | --- |
+  | Room 6 (a Squirt) | 9/9 | none |
+  | Room 13 (two Crazy Long Legs; the plain leg died on 2/9) | 9/9 | none |
+  | Mega Fatty from 3/6 | 9/9 | none |
+  | Room 11 (Skinnies and fires) | 8/9 | one, after twelve tries |
+
+- **Whole leg:** LEGS.
+
+So the original's keys end at their research 3/6 again, with no bomb.
 
 | Case | Paired checkpoints | Required tail checks |
 | --- | ---: | ---: |

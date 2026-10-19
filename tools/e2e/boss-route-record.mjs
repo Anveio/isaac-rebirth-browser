@@ -31,6 +31,12 @@
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
+// --rewind: in a fight (a route room's or the boss room's), a health loss
+// restores the game 90 to 360 frames back and plays on with a fresh jitter
+// seed, the orbit flipped on every other try; after 12 tries at one spot the
+// hit stands. The kept keys are the path that took no hit; `rewound` reports
+// the rewinds and the hits kept. The headless page restores its WASM memory,
+// Chromium replays from reset to the save.
 //
 // The recorder plays the production snapshot's WASM headlessly through the
 // browser page's own engine, key and save modules (lib/headless-page.mjs);
@@ -64,6 +70,7 @@ const preserveAttempt = (name, value) => {
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const RECORDER = hasFlag('--browser-recorder') || process.env.E2E_BROWSER_RECORDER === '1' ? 'browser' : 'headless';
+const REWIND = hasFlag('--rewind'), REWIND_TRIES = 12;
 const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
@@ -136,7 +143,7 @@ try {
 }
 let browser;
 const actions = [], checkpoints = {};
-let frames = 0, status = 'fail', reason, end = null;
+let frames = 0, status = 'fail', reason, end = null, rewound = null;
 try {
   let page;
   if (RECORDER === 'browser') {
@@ -145,16 +152,27 @@ try {
   } else page = await headlessPage(server);
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
-  await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
+  const reset = () => page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
     window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
   }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
+  // Every key the page holds, by the name it was pressed with: a --rewind
+  // replay from reset releases them first.
+  const pageHeld = new Set();
+  const press = async (name, down) => {
+    if (down) pageHeld.add(name); else pageHeld.delete(name);
+    await page.keyboard[down ? 'down' : 'up'](name);
+  };
+  // A labelled step marker is itself replayed; captures are no-ops here.
+  const replay = async list => {
+    for (const action of list) {
+      if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
+      else if (action.type === 'key') await press(namedKeys[action.key] || action.key, action.down);
+    }
+  };
   const start = caseData.pairedTape.findIndex(action => action.label === FROM);
   assert.ok(start >= 0, `The case tape must reach ${FROM}`);
-  // A labelled step marker is itself replayed; captures are no-ops here.
-  for (const action of caseData.pairedTape.slice(0, start + 1)) {
-    if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
-    else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
-  }
+  await reset();
+  await replay(caseData.pairedTape.slice(0, start + 1));
   // Each capture also records where the port stood, for divergence reports,
   // and the port state the browser replay must reach there (`recorded`).
   let seen, seenAt = -1;
@@ -171,10 +189,10 @@ try {
   const held = new Set();
   const hold = async keys => {
     for (const code of [...held]) if (!keys.includes(code)) {
-      held.delete(code); await page.keyboard.up(code); actions.push({ type: 'key', key: tapeKey[code], down: false });
+      held.delete(code); await press(code, false); actions.push({ type: 'key', key: tapeKey[code], down: false });
     }
     for (const code of keys) if (!held.has(code)) {
-      held.add(code); await page.keyboard.down(code); actions.push({ type: 'key', key: tapeKey[code], down: true });
+      held.add(code); await press(code, true); actions.push({ type: 'key', key: tapeKey[code], down: true });
     }
   };
   const step = async count => {
@@ -183,6 +201,56 @@ try {
     const last = actions.at(-1);
     if (last?.type === 'step') last.frames += count; else actions.push({ type: 'step', frames: count });
   };
+  // --rewind (see the header): fight frames save every 30 frames; a health
+  // loss restores one of the last twelve saves and returns the loop's state.
+  let ring = [], sinceSave = 0, tries = 0, hitFrame = -Infinity, lastHp = null;
+  rewound = REWIND ? { rewinds: 0, hits: [] } : null;
+  const save = vars => ({ page: page.checkpoint?.(), actions: actions.length,
+    lastFrames: actions.at(-1)?.type === 'step' ? actions.at(-1).frames : undefined, frames, held: [...held],
+    pageHeld: [...pageHeld], labels: Object.keys(checkpoints), vars: structuredClone(vars) });
+  const load = async saved => {
+    actions.length = saved.actions;
+    if (saved.lastFrames !== undefined) actions.at(-1).frames = saved.lastFrames;
+    if (page.restore) {
+      page.restore(saved.page);
+      pageHeld.clear(); for (const name of saved.pageHeld) pageHeld.add(name);
+    } else {
+      // Chromium keeps no memory to restore: replay from reset to the save.
+      for (const name of [...pageHeld]) await press(name, false);
+      await reset();
+      await replay([...caseData.pairedTape.slice(0, start + 1), ...actions]);
+    }
+    frames = saved.frames;
+    held.clear(); for (const code of saved.held) held.add(code);
+    for (const label of Object.keys(checkpoints)) if (!saved.labels.includes(label)) delete checkpoints[label];
+    return structuredClone(saved.vars);
+  };
+  const rewindOnHit = async vars => {
+    if (!REWIND) return null;
+    const hp = state.player.hp;
+    if (lastHp !== null && hp < lastHp) {
+      // A hit more than 300 frames after the last one is a new spot.
+      if (frames > hitFrame + 300) tries = 0;
+      if (tries < REWIND_TRIES && ring.length) {
+        tries++; rewound.rewinds++; hitFrame = Math.max(hitFrame, frames);
+        // Two tries from 90-120 frames back, then two from 60 frames further back each.
+        const index = Math.max(0, ring.length - 4 - 2 * Math.floor((tries - 1) / 2));
+        const resumed = await load(ring[index]);
+        ring = ring.slice(0, index + 1); sinceSave = 0; lastHp = null;
+        state = await view();
+        return resumed;
+      }
+      rewound.hits.push({ room: state.room, frame: frames, health: [lastHp, hp] });
+      tries = 0; hitFrame = -Infinity;
+    }
+    lastHp = hp;
+    if ((sinceSave += STRIDE) >= 30) {
+      sinceSave = 0; ring.push(save(vars()));
+      if (ring.length > 12) ring.shift();
+    }
+    return null;
+  };
+  const rewindFrom = () => { ring = []; sinceSave = 0; lastHp = null; tries = 0; hitFrame = -Infinity; };
   // The paired preamble settles 60 frames before any route input.
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
@@ -246,6 +314,8 @@ try {
       if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) ({ point: centre, dir: incoming } = planStep(cells, door, incoming));
       return centre.x === door.x && centre.y === door.y ? doorKeys(avoiding(state.grid, cells), state.player, door) : toward(state.player, centre, 2);
     };
+    rewindFrom();
+    const routeVars = () => ({ budget, centre, incoming, orbit: routeFight.orbit, jitter: routeFight.jitter ?? null, salt: routeFight.salt ?? null });
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
       // A route room's foes can kill the port's player; say so, not a timeout.
@@ -280,6 +350,15 @@ try {
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
       state = await view();
+      const resumed = await rewindOnHit(routeVars);
+      if (resumed) {
+        // A fresh jitter seed per try, and the orbit flipped on every other one.
+        ({ budget, centre, incoming } = resumed);
+        routeFight.salt = (resumed.salt ?? 7) * 31 + tries;
+        routeFight.rng = saltedRandom(routeFight.salt); routeFight.jitter = Math.max(resumed.jitter ?? 0, 0.2);
+        routeFight.orbit = tries % 2 ? -resumed.orbit : resumed.orbit;
+        continue;
+      }
       if (frames % 20 === 0) checkpoint(`route-${frames}`);
     }
   }
@@ -313,11 +392,22 @@ try {
     // narrow every fight's orbit, and EV9BP18Q's Monstro then outlasts the
     // window.
     const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
-    for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
+    rewindFrom();
+    let left = FIGHT;
+    const fightVars = () => ({ left, orbit: memory.orbit, jitter: memory.jitter ?? null, salt: memory.salt ?? null });
+    for (; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
       if (state.player.hp <= 0) throw new Error(`The port's player died in the fight, ${FIGHT - left} frames in`);
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
+      const resumed = await rewindOnHit(fightVars);
+      if (resumed) {
+        left = resumed.left;
+        memory.salt = (resumed.salt ?? Number(flag('--salt', '0'))) * 31 + tries;
+        memory.rng = saltedRandom(memory.salt); memory.jitter = Math.max(resumed.jitter ?? 0, 0.2);
+        memory.orbit = tries % 2 ? -resumed.orbit : resumed.orbit;
+        continue;
+      }
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
       if (process.env.BOSS_ROUTE_DEBUG && (FIGHT - left) % 600 === 0) {
         const raw = JSON.parse(await page.evaluate(() => window.game.snapshotJson()));
@@ -534,5 +624,5 @@ try {
 // `end` is the port's last health and coins, which the next floor's
 // generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER, ...(rewound && { rewound }) }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;
