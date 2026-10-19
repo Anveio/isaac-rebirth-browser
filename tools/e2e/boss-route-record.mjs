@@ -124,7 +124,7 @@ try {
 }
 let browser;
 const actions = [], checkpoints = {};
-let frames = 0, status = 'fail', reason;
+let frames = 0, status = 'fail', reason, end = null;
 try {
   browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
@@ -476,6 +476,8 @@ try {
     }
     checkpoint('next-stage');
   }
+  const last = await view();
+  end = { health: last.health, coins: last.coins };
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);
@@ -501,6 +503,8 @@ try {
   for (const result of cleanup) if (result.status === 'rejected') failures.push(result.reason);
   if (failures.length) throw new AggregateError(failures, 'Recorder retention or cleanup failed');
 }
+// `end` is the port's last health and coins, which the next floor's
+// generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y] }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;

@@ -87,6 +87,8 @@ export function routingView(s) {
     grid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed), s.room.slots ?? []),
     doors: s.room.appearance.doors.map(d => ({ side: d.side, state: d.state, target: d.targetRoom, x: d.worldPosition.x, y: d.worldPosition.y })),
     keys: s.inventory.keys,
+    // What the next floor's generation reads: [red, maxRed, soul] and coins.
+    health: [s.player.hp, s.player.maxHp, s.player.soulHp], coins: s.inventory.coins,
     // Live fireplaces, which a route may shoot out rather than walk around.
     fires: s.room.npcs.filter(n => n.kind === 33 && !n.dead && !n.removed).map(n => ({ x: n.position.x, y: n.position.y })),
     // Solid poop cells, which a walk may shoot out rather than route around.
