@@ -148,8 +148,13 @@ the retained game flags, health and coins.
   flagged devil room takes Krampus 2300..2309. The pick seeds SetSeed(desc+0x4c,
   1), one next(), then 5d5600's SetSeed(s, 7) and one RandomFloat, and decays
   the picked weight by 0.1. Greed (50.0 / 50.1) spawns from the template at
-  grid 67. The port does not perform this swap yet, so stage 4 stays
-  unreachable (`next_stage`).
+  grid 67. The port performs this first-entry swap in `surprise::layout`;
+  re-entry still restores the existing room instead of repeating the pick,
+  weight decay and flag update. Greed/Super Greed gameplay remains live-ungraded.
+  PR731 admits stage 4 through Caves I's trapdoor and qualifies the bounded
+  [Caves II arrival](stage-exit-evidence.md#caves-ii-descent-413), without a
+  whole-layout or flagged-shop comparison. Stage 5 remains unadmitted;
+  PR732's Depths catalogue import alone does not enable its floor or descent.
 - **Boss-room fit (591b80 -> 58fad0 -> 58f480).** The boss room takes the
   first dead end farther than one step from the start for which one of six
   candidates around its connector `C` (incoming direction `d`, `o = (d+2)%4`)

@@ -153,7 +153,7 @@ fn admit_crater(state: &mut State, seed: u32, position: WorldVector) -> Result<u
     Ok(id)
 }
 
-fn admit_explosion(
+pub(crate) fn admit_explosion(
     state: &mut State,
     seed: u32,
     position: WorldVector,

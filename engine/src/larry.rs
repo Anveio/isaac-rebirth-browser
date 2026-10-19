@@ -520,7 +520,7 @@ fn descendants(npc: &Npc, world: &NpcWorld) -> Vec<u32> {
 
 /// 4f43d9: the head queues damage on every segment above the chain's
 /// lowest HP after pending damage. TakeDamage only queues; no draws.
-fn sync_health(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
+pub(crate) fn sync_health(npc: &mut Npc, world: &mut NpcWorld) -> Result<(), String> {
     let chain = descendants(npc, world);
     let mut lowest = npc.hp - npc.damage.pending_damage();
     for &id in &chain {

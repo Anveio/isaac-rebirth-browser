@@ -26,6 +26,7 @@ pub mod camera;
 pub mod challenges;
 pub mod champions;
 pub mod chests;
+pub mod chub;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
@@ -5236,6 +5237,15 @@ impl Game {
                 }
                 .admit_fly_explosion(seed, position, color.tint, color.offset)?;
                 Ok(())
+            }
+            entities::Birth::ExplosionEffect { seed, position } => {
+                explosion_effects::admit_explosion(
+                    &mut self.state,
+                    seed,
+                    position,
+                    crate::attack_color::AttackColor::WHITE,
+                )
+                .map(|_| ())
             }
             entities::Birth::GridHurt { position, damage } => {
                 let descriptor = self
