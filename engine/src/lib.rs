@@ -80,6 +80,7 @@ pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
 pub mod gurdy;
+pub mod gurdy_jr;
 pub mod gushers;
 mod health_damage;
 pub mod hoppers;
@@ -104,6 +105,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod levels;
 pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
@@ -121,6 +123,7 @@ pub mod npcs;
 pub mod options_menu;
 pub mod ordinary_placement;
 pub mod pathfinder;
+pub mod peep;
 pub mod phase;
 pub mod pickup_world_grants;
 pub mod pickups;
@@ -3146,7 +3149,7 @@ impl Game {
             .descriptor
             .as_ref()
             .is_some_and(|descriptor| {
-                matches!(descriptor.asset_stage, 0 | 1 | 3)
+                grid_records::shape0_ambient(descriptor.asset_stage)
                     && descriptor.template.shape_index() == 0
                     && descriptor.template.room_type != 16
             })
@@ -5308,6 +5311,12 @@ impl Game {
                 };
                 self.state.room.npcs[index].child = Some(id);
                 self.advance_npc(id, phase::Phase::Update)
+            }
+            entities::Birth::Parented(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                child.parent = Some(parent);
+                Ok(())
             }
             entities::Birth::Attached(selector) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(selector))?;

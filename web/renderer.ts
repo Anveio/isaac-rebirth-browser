@@ -274,7 +274,8 @@ export class Renderer {
       ctx.save();
       ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
       ctx.scale(sprite.scale.x, sprite.scale.y);
-      const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2" : "gfx/1000.022_creep (red).anm2";
+      const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2"
+        : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2" : "gfx/1000.022_creep (red).anm2";
       this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
         { color: { tint: sprite.tint, offsets: sprite.offsets } });
       ctx.restore();

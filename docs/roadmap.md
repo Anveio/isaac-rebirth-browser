@@ -74,7 +74,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II and Caves I/II source; Depths catalogue only | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor descent through Caves I into Caves II | 3 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor descent through Caves I into Caves II | 4 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
@@ -224,10 +224,15 @@ is unbuilt and live-unrun. This does not change wall quads or RNG order.
 First-entry flagged-shop Greed/Super Greed substitution is implemented;
 re-entry and live fight parity remain open. PR732 adds the 506-room Depths
 catalogue without enabling its generator or authored actors.
+Floors are data in the [level framework](levels.md): stage nodes carry the
+progression (name, trapdoor edge, contract) and stages.xml chapters carry the
+room set, backdrop, overlay, music and boss chain. New floors are imported by
+filling those tables, not by bespoke code paths.
 Missing: Cellar, Depths and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
-Next: Cellar generation and unlock; curses.
+Next: import Depths I/II through the level framework; Cellar generation and
+unlock; curses.
 
 No open bugs.
 
@@ -483,6 +488,11 @@ Port: natural coins, keys, bombs, hearts, supported normal/locked/Bomb Chest
 opening, troll bombs, collection and persistence. Missing: batteries,
 Big/red chest behavior and the room-clear reward table beyond the
 supported cases. Source admission is not complete chest parity.
+
+PR737 corrects the normal Chest Has61 gate and keeps an unowned
+tinted-rock Chest Init on a typed frontier. Its [three-case regression controls](chest-evidence.md#has61-correction-and-bounded-regression-evidence)
+retain all 296 required failures; positive61 and unknown-history containment
+still need live witnesses.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

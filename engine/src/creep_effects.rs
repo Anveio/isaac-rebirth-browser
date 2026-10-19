@@ -66,6 +66,17 @@ impl NpcEffectAdmission<'_> {
         self.admit_pool(22, seed, position, (0, 0), (scale, size), timeouts)
     }
 
+    /// Peep's Spawn550a40 of 1000.24 (yellow; the same code as 22) at sprite
+    /// `scale` (4c3f60), with 22's default timeouts.
+    pub(crate) fn admit_yellow_creep(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        scale: f32,
+    ) -> Result<u32, String> {
+        self.admit_pool(24, seed, position, (0, 0), (scale, 1.0), (125, 1))
+    }
+
     /// A green champion's Spawn550a40 of 1000.23 (4fb02a, default scale),
     /// whose timeout +7f0 and +7f4 it sets to 30 before the first update.
     pub(crate) fn admit_green_creep(
