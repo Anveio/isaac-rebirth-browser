@@ -1,9 +1,14 @@
 use rebirth_cleanroom::{
     fullscreen::FullscreenPreferences, options_menu::AudioPreferences, save_host::SaveHost,
-    Command, Game, MAX_REPLAY_COMMANDS, MAX_REPLAY_TICKS,
+    Command, Game, MAX_REPLAY_COMMANDS,
 };
 use serde::Deserialize;
 use std::io::{self, Read};
+
+/// A whole replay's simulation steps: twenty minutes at 60 Hz, a multi-floor
+/// descent. One Tick command stays within `MAX_COMMAND_TICKS`.
+const MAX_REPLAY_TICKS: u64 = 72_000;
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Replay {
@@ -57,7 +62,7 @@ fn main() {
             _ => None,
         })
         .sum();
-    if total_ticks > u64::from(MAX_REPLAY_TICKS) {
+    if total_ticks > MAX_REPLAY_TICKS {
         eprintln!("replay exceeds 72,000 total simulation steps");
         std::process::exit(1);
     }
