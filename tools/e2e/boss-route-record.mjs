@@ -32,8 +32,16 @@
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
+// The recorder plays the production snapshot's WASM headlessly through the
+// browser page's own engine, key and save modules (lib/headless-page.mjs);
+// --browser-recorder, or E2E_BROWSER_RECORDER=1 from a suite's flag, plays it
+// in Chromium instead. Each capture it emits carries `recorded`: the port's
+// room, position, health and coins there, which the paired gate's browser
+// replay must reach (paired-game.mjs recorderDivergence).
+//
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
-// bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
+// bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms, recorder }
+// on stdout.
 import assert from 'node:assert/strict';
 import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -42,6 +50,7 @@ import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
+import { headlessPage } from './lib/headless-page.mjs';
 import { doorKeys, fightKeys, routingView, saltedRandom, toward, waypoint } from './lib/route.mjs';
 
 // Optional private caller-owned archive; default stdout/result behavior is unchanged.
@@ -54,6 +63,7 @@ const preserveAttempt = (name, value) => {
 };
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
+const RECORDER = hasFlag('--browser-recorder') || process.env.E2E_BROWSER_RECORDER === '1' ? 'browser' : 'headless';
 const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
@@ -128,8 +138,11 @@ let browser;
 const actions = [], checkpoints = {};
 let frames = 0, status = 'fail', reason, end = null;
 try {
-  browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
-  const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  let page;
+  if (RECORDER === 'browser') {
+    browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
+    page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  } else page = await headlessPage(server);
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
   await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
@@ -142,12 +155,19 @@ try {
     if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
     else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
   }
-  // Each capture also records where the port stood, for divergence reports.
+  // Each capture also records where the port stood, for divergence reports,
+  // and the port state the browser replay must reach there (`recorded`).
+  let seen, seenAt = -1;
   const checkpoint = label => {
-    actions.push({ type: 'capture', label });
+    assert.equal(seenAt, frames, `Capture ${label} needs the state of its own frame`);
+    actions.push({ type: 'capture', label, recorded: { recorder: RECORDER, build: server.build.sha256, room: seen.currentRoom, position: [seen.player.x, seen.player.y],
+      health: [seen.player.hp, seen.player.maxHp, seen.player.soulHp], coins: seen.inventory.coins } });
     checkpoints[label] = { room: state.room, player: [state.player.x, state.player.y] };
   };
-  const view = async () => routingView(JSON.parse(await page.evaluate(() => window.game.snapshotJson())));
+  const view = async () => {
+    seen = JSON.parse(await page.evaluate(() => window.game.snapshotJson())); seenAt = frames;
+    return routingView(seen);
+  };
   const held = new Set();
   const hold = async keys => {
     for (const code of [...held]) if (!keys.includes(code)) {
@@ -512,5 +532,5 @@ try {
 // `end` is the port's last health and coins, which the next floor's
 // generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y], end }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;

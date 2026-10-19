@@ -33,9 +33,12 @@ const output = outputDirectory(name);
 // cases from their paired `case.json`, as the other paired suites accept.
 const recorded = flag('--scenarios'), replayCases = flag('--replay-cases');
 const readJson = path => JSON.parse(readFileSync(resolve(path), 'utf8'));
+// --browser-recorder reaches the helpers' route recorder (boss-route-record.mjs)
+// through the environment they pass on.
+const helperEnv = { ...process.env, ...(outerArgv.includes('--browser-recorder') && { E2E_BROWSER_RECORDER: '1' }) };
 const scenarios = replayCases ? { schema: 1, cases: replayCases.split(',').map(readJson) }
   : recorded ? readJson(recorded)
-  : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+  : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: helperEnv }));
 scenarios.cases = selectCases(scenarios.cases, item => item.scenario.id);
 if (flag('--case')) scenarios.caseFilter = flag('--case');
 writeJson(resolve(output, 'scenarios.json'), scenarios);
@@ -77,12 +80,15 @@ const cases = scenarios.cases.map((scenario, index) => {
   try { report = JSON.parse(readFileSync(target, 'utf8')); }
   catch { report = { status: 'fail', error: child.stderr || 'Comparator produced no report' }; }
   const failed = list => list?.filter(check => check.status === 'fail').length || 0;
+  // A browser replay that left its recording's path (paired-game.mjs
+  // recorderDivergence) fails the case whatever the comparator found.
+  const divergence = paired.cases?.find(item => item.directory === directory)?.recorderReplay;
   return {
     id: scenario.scenario.id,
-    status: child.status === 0 && !child.signal && report.status === 'pass' ? 'pass' : 'fail',
+    status: child.status === 0 && !child.signal && report.status === 'pass' && divergence?.status !== 'fail' ? 'pass' : 'fail',
     checks: report.checks?.length || 0, failures: failed(report.checks),
     diagnostics: report.diagnostics?.length || 0, diagnosticFailures: failed(report.diagnostics),
-    error: report.error || child.error?.message || (child.status ? child.stderr.trim().split('\n').at(-1) : undefined),
+    error: (divergence?.status === 'fail' ? divergence.error : undefined) || report.error || child.error?.message || (child.status ? child.stderr.trim().split('\n').at(-1) : undefined),
     report: target, staleRecording: stale(scenario),
   };
 });
