@@ -172,6 +172,9 @@ pub const TICK_RATE: u32 = 60;
 pub const ABI_VERSION: u32 = 2;
 pub const MAX_COMMAND_TICKS: u32 = 36_000;
 pub const MAX_REPLAY_COMMANDS: usize = 36_000;
+/// A whole replay's simulation steps: twenty minutes at 60 Hz, a multi-floor
+/// descent. One command stays within `MAX_COMMAND_TICKS`.
+pub const MAX_REPLAY_TICKS: u32 = 72_000;
 const MAX_REQUEST: usize = 65_536;
 const MAX_BOOT_RESOURCE: usize = 512 * 1024;
 
