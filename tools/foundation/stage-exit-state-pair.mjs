@@ -4,7 +4,8 @@
 // keys before `exit-start`; only the shared tail is graded:
 // the award trapdoor (TrapDoor 5711a0) and boss pedestal, the
 // StageTransition 5e38b0 states and counter, the player's Trapdoor/Appear
-// clips, visibility and controls, and the stage/room the transition admits.
+// clips, visibility and controls, the stage/room the transition admits and
+// the health and coin predicates the next floor's generation reads.
 // The trapdoor's spawn seed is an MT draw on each game's fight-dependent
 // stream and stays a diagnostic.
 import assert from 'node:assert/strict';
@@ -93,6 +94,23 @@ for (const label of labels) {
     .map(pickup => [pickup.subtype, [pickup.position.x, pickup.position.y]]);
   check(label, 'pedestals', pedestals, actualPedestals);
 }
+// The next floor's generation reads the departing Player's health and coins
+// (floor.rs): full health admits the Challenge and Sacrifice rooms, a half
+// heart without soul hearts the bedrooms, more than four coins an even
+// floor's Arcade. Each game fights with its own keys, so the raw values stay
+// diagnostics; the predicates the generator reads must agree. They are read
+// at the re-anchor, after the fight and before the pickup-free exit walk.
+const generation = (red, maxRed, soul, coins) => ({ fullHealth: maxRed <= red + soul,
+  lowHealth: (soul <= 0 && red <= 1) || (soul <= 2 && maxRed === 0), arcadeCoins: coins > 4 });
+{
+  const source = observations.get('re-anchor'), frame = frames.get('re-anchor');
+  const player = source?.gameplay?.players?.[0], coins = source?.carriedItems?.players?.[0]?.inventory?.coins;
+  const actual = frame?.state;
+  check('re-anchor', 'generation.inputs',
+    player && Number.isInteger(coins) ? generation(player.redHp, player.maxRedHp, player.soulHp, coins) : 'unobserved',
+    actual ? generation(actual.player.hp, actual.player.maxHp, actual.player.soulHp, actual.inventory.coins) : 'unobserved');
+  diagnostic('re-anchor', 'coins', coins ?? null, actual?.inventory.coins ?? null);
+}
 // A case predating `arrivedStage` is a Basement I exit.
 check('next-stage', 'arrivedStage', replay.stageExit?.arrivedStage ?? 2, finalStage);
 // The authored active fixture must retain a positive carried-item contract
@@ -163,7 +181,7 @@ if (native.graphicsTrace) {
 // The original logs each Level::Init seed; the last one is the next floor's.
 check('next-stage', 'stageSeed', native.observedState.stageSeed, frames.get('next-stage').state.stageSeed);
 const report = { schema: 1, status: checks.every(item => item.status === 'pass') ? 'pass' : 'fail',
-  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room. Declared carried active identity, charge and reserve require bounded Native reads and settled stage1→2 descent. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
+  scope: 'Shared tail from exit-start: boss award trapdoor and pedestal, StageTransition state/counter, player Trapdoor/Appear clip, visibility and controls, admitted stage, stage seed and room, and the next floor's generation inputs (health and coin predicates). Declared carried active identity, charge and reserve require bounded Native reads and settled stage1→2 descent. Per-game fights are not graded; MT trapdoor seeds are diagnostics',
   buildSha256: gate.build.sha256, sourceBinarySha256: gate.sourceBinarySha256,
   originalManifestSha256: hash(originalPath), browserManifestSha256: hash(browserPath),
   caseSha256: hash(resolve(directory, 'case.json')), checks, diagnostics };
