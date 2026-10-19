@@ -133,6 +133,12 @@ pub(crate) enum Birth {
         position: WorldVector,
         damage: i32,
     },
+    /// Spawn550a40 of the bomb explosion effect 1000.1 (Chub's swallowed
+    /// bomb), spawner NULL.
+    ExplosionEffect {
+        seed: u32,
+        position: WorldVector,
+    },
     /// Spawn550a40 of a pickup-less bomb (Troll Bomb variant 3), spawner NULL.
     Bomb {
         variant: u32,
@@ -331,6 +337,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
     &crate::boil::FAMILY,
+    &crate::chub::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,
