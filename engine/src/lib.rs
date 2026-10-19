@@ -50,6 +50,7 @@ mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
+pub mod squirt;
 mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
@@ -63,6 +64,7 @@ pub mod envy;
 pub mod familiars;
 pub mod fatty;
 pub mod fireplaces;
+pub mod fistula;
 pub mod floor;
 pub mod fly_effects;
 mod fmath;
@@ -99,6 +101,7 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
 pub mod mega_fatty;
@@ -157,6 +160,7 @@ pub mod stage_transition;
 mod target_eligibility;
 pub mod tnt;
 pub mod traversal;
+pub mod wall_creep;
 pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
@@ -5232,7 +5236,7 @@ impl Game {
                 if spawned.scale != 1.0 {
                     npc.sprite_scale = Some(spawned.scale);
                 }
-                npc.max_hp *= spawned.health_scale;
+                npc.max_hp *= spawned.max_health_scale;
                 npc.hp *= spawned.health_scale;
                 Ok(())
             }

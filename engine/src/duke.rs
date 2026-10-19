@@ -157,6 +157,7 @@ fn ai(
                     boss_spawned: true,
                     scale: 1.25,
                     health_scale: 1.8,
+                    max_health_scale: 1.8,
                 }));
             }
             tail(npc);
@@ -241,6 +242,7 @@ fn attack_flies(
             boss_spawned: true,
             scale: 1.0,
             health_scale: 1.0,
+            max_health_scale: 1.0,
         }));
     }
     if world.effects.tiny_fly_count() > TINY_FLY_CAP {

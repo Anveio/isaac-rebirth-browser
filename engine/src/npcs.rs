@@ -92,6 +92,10 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_creep: Option<crate::wall_creep::WallCreepState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub squirt: Option<crate::squirt::SquirtState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
     /// Entity+494: BaseUpdate discards every queued hit.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -928,6 +932,8 @@ impl Npc {
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            wall_creep: None,
+            squirt: None,
             wall_hugger: None,
             invincible: false,
             death_frame: 0,

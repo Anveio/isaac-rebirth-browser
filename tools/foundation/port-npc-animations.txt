@@ -57,3 +57,8 @@ gfx/016.001_mulligoon.anm2
 gfx/207.000_fatty.anm2
 gfx/207.001_pale fatty.anm2
 gfx/226.000_skinny.anm2
+gfx/206.000_crazy long legs.anm2
+gfx/206.001_small crazy long legs.anm2
+gfx/240.000_wall creep.anm2
+gfx/073.000_fistula small.anm2
+gfx/220.000_squirt.anm2
