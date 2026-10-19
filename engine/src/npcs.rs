@@ -92,6 +92,8 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub peep: Option<crate::peep::PeepState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boil: Option<crate::boil::BoilState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chub: Option<crate::chub::ChubState>,
@@ -984,6 +986,7 @@ impl Npc {
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            peep: None,
             boil: None,
             chub: None,
             wall_creep: None,
