@@ -242,6 +242,10 @@ try {
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
           ? centreKeys([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)
+          // With --dodge, a room's lit fireplaces (solid cells that burn about 23
+          // units out) are passed centre to centre too, never cut diagonally.
+          : routeFight.dodge && state.fires.length
+          ? centreKeys([...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])], door)
           : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;

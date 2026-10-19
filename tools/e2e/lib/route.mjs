@@ -119,7 +119,8 @@ export function fightKeys(view, memory) {
   // --dodge sizes foes by their collision radius (Mega Fatty 40) rather than the
   // boss flag, which the Fistula family's small pieces also carry.
   const big = foe => (memory.dodge ? (foe.radius ?? (foe.boss ? 40 : 13)) >= 30 : foe.boss);
-  const radius = memory.lead ? 90 : big(target) ? (memory.bossRadius ?? 170) : 110, pull = (radius - distance) / radius * 2;
+  // --dodge keeps smaller foes at 150: a Squirt's dash covers 80 units in four frames.
+  const radius = memory.lead ? 90 : big(target) ? (memory.bossRadius ?? 170) : memory.dodge ? 150 : 110, pull = (radius - distance) / radius * 2;
   const tangent = [-dy / distance * memory.orbit, dx / distance * memory.orbit];
   const want = [tangent[0] - dx / distance * pull, tangent[1] - dy / distance * pull];
   const solid = (x, y) => {
