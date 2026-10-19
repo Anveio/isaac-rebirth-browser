@@ -224,10 +224,15 @@ is unbuilt and live-unrun. This does not change wall quads or RNG order.
 First-entry flagged-shop Greed/Super Greed substitution is implemented;
 re-entry and live fight parity remain open. PR732 adds the 506-room Depths
 catalogue without enabling its generator or authored actors.
+Floors are data in the [level framework](levels.md): stage nodes carry the
+progression (name, trapdoor edge, contract) and stages.xml chapters carry the
+room set, backdrop, overlay, music and boss chain. New floors are imported by
+filling those tables, not by bespoke code paths.
 Missing: Cellar, Depths and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
-Next: Cellar generation and unlock; curses.
+Next: import Depths I/II through the level framework; Cellar generation and
+unlock; curses.
 
 No open bugs.
 
