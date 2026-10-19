@@ -119,7 +119,7 @@ Measured headlessly across nine jitter seeds, the plain leg passed 1 of 9. It al
   | Mega Fatty from 3/6 | 9/9 | none |
   | Room 11 (Skinnies and fires) | 8/9 | one, after twelve tries |
 
-- **Whole leg:** LEGS.
+- **Whole leg:** ten variations on one build: boss salts 1–6 at the fixture's route, and route salts 1–4 at salt 4. All ten pass and end Caves I at 5/6, with 2–28 rewinds each and no hit kept. Two of them first ended at 4/6, both from Mega Fatty's creep on the walk to the corner after the clear. The recorder now waits for live creep to dry before that walk; a fight that leaves no creep waits no frame.
 
 So the original's keys end at their research 3/6 again, with no bomb.
 

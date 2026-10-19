@@ -419,6 +419,15 @@ try {
     if (hasFlag('--no-corner')) { await hold([]); await step(1); }
   }
   if (FIGHT && !hasFlag('--no-corner')) {
+    // Red creep a fight left (Mega Fatty's landing pools) hurts for 125
+    // updates after it lands (creep_effects.rs): the corner walk waits it out
+    // rather than cross it; a fight that leaves none changes no key or frame.
+    const burning = () => seen.spriteEffects?.some(effect => effect.creepEffect && !effect.removed);
+    if (burning()) await hold([]);
+    for (let left = 600; burning(); left--) {
+      if (left <= 0) throw new Error('The fight\'s creep still burns 600 frames after the clear');
+      await step(1); state = await view();
+    }
     // A poop the port's own fight drops in the cell inside an open doorway
     // would wall off the shared re-anchor walk. The port shoots it out from
     // a free side cell before parking; the original's fixture fight is fixed.
