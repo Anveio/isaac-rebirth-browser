@@ -143,16 +143,16 @@
     "out": "regression-descent-with-active-item.json",
     "stages": [
       [
-        "active item held",
-        "npc:19"
+        "active item held"
       ],
       [
         "cleared:5"
       ],
       [
-        "stage:2"
+        "descent holding an active item"
       ]
-    ]
+    ],
+    "steps": 3000
   },
   {
     "out": "coverage-options-menu.json",
