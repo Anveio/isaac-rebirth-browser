@@ -396,7 +396,8 @@ export class Renderer {
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
-        this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
+        this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2"
+          : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
           projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
     for (const particle of state.fireParticles)
       if (!particle.removed && particle.visible)

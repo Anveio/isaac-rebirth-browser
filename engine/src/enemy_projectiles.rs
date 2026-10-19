@@ -74,6 +74,9 @@ pub struct EnemyProjectile {
     pub orbit_centre: Option<WorldVector>,
 }
 
+/// The purple fire projectile 9.2 (Mega Maw's FireRing).
+pub const PURPLE_FIRE: u32 = 2;
+
 /// Parented to its spawner (49efef SetParent447fc0).
 pub const FLAG_PARENTED: u32 = 0x80;
 /// Orbits +440 one way (5377e8).
@@ -188,9 +191,14 @@ impl EnemyProjectile {
             .checked_add(1)
             .ok_or("projectile update count exhausted")?;
         // Source536e37 selects a regular clip from actual scale every full;
-        // Worm scale1 remains6.
-        let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
-        let name = format!("RegularTear{size}");
+        // Worm scale1 remains6. The purple fire shot 9.2 plays its looping
+        // Flickering clip instead (5370f3).
+        let name = if self.variant == PURPLE_FIRE {
+            "Flickering".to_string()
+        } else {
+            let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
+            format!("RegularTear{size}")
+        };
         let frames = content::clip(content::entity(9, self.variant).actor, &name)
             .ok_or("hostile projectile scale requires an unadmitted authored clip")?
             .frames;
@@ -270,6 +278,14 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         .find(|projectile| projectile.id == id)
     {
         if projectile.advance(phase, &grid)? {
+            if projectile.variant == PURPLE_FIRE {
+                // 538b8c: a dead 9.2 spawns a tinted Poof 1000.15 at -10 px
+                // and plays no sound. PORT GAP: as for the other impacts,
+                // the effect itself is not constructed; only its seed is
+                // drawn.
+                projectile.impact_seed = Some(state.boot_lifecycle.shared.next_u32());
+                return Ok(());
+            }
             // Dead variant0 emits real effect11 seed then bounded4 rotation,
             // then SFX150 (wall) or258 (ground). FX rendering/constructor
             // consumers remain a separately documented stream gap.
