@@ -1020,14 +1020,18 @@ impl Room {
                 // that, 562a02..562a99 send secret, curse, treasure, arcade,
                 // boss rush, boss, challenge, devil and angel doors to their
                 // own anm2; the secret hole takes the Depths sheet on
-                // backdrops 5 and 9 (562c71..562ddd).
+                // backdrops 5 and 9 (562c71..562ddd) and the Caves sheet on
+                // backdrop 3 (5633e8).
                 spritesheet: if descriptor.template.room_type == 12
                     && destination.template.room_type == 1
                 {
                     Some("gfx/grid/door_13_librarydoor.png".into())
                 } else if secret {
-                    matches!(backdrop_id, 5 | 9)
-                        .then(|| "gfx/grid/door_08_holeinwall_depths.png".into())
+                    match backdrop_id {
+                        3 => Some("gfx/grid/door_08_holeinwall_caves.png".into()),
+                        5 | 9 => Some("gfx/grid/door_08_holeinwall_depths.png".into()),
+                        _ => None,
+                    }
                 } else if matches!(backdrop_id, 5 | 6)
                     && destination.template.room_type != 9
                     && ![descriptor, destination].iter().any(|room| {
