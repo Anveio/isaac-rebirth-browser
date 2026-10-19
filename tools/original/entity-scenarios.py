@@ -88,10 +88,14 @@ def fought(result, code, slot, frames):
                                    '--fight', str(frames), '--lead', '--no-corner', '--arrival', ''], cwd=ROOT, capture_output=True, text=True, timeout=3600)
     lines = recorded.stdout.strip().splitlines()
     port = json.loads(lines[-1]) if lines else {'status': 'fail', 'reason': recorded.stderr.strip()[-2000:]}
-    # A fight still raging when the budget runs out is kept as recorded, with
-    # its held keys released; any other recorder failure is an error.
-    if port['status'] != 'pass' and not str(port.get('reason')).startswith('Room not cleared'):
-        raise RuntimeError(f"Port fight for {code} slot {slot} failed: {port.get('reason')}")
+    # A fight still raging when the budget runs out, or one the port's player
+    # died in (the recorder stops at the death since #731), is kept as
+    # recorded with its held keys released: the original replays the same
+    # keys open-loop and keeps its own outcome. Any other recorder failure is
+    # an error.
+    reason = str(port.get('reason'))
+    if port['status'] != 'pass' and not reason.startswith(('Room not cleared', "The port's player died")):
+        raise RuntimeError(f"Port fight for {code} slot {slot} failed: {reason}")
     held = {}
     for action in port['actions']:
         if action['type'] == 'key':
