@@ -24,7 +24,8 @@
 // moves against enemy shots' projected paths and lit fireplaces; --orbit -1
 // starts the orbit the other way round and --boss-radius R holds bosses at R
 // units (default 170); --salt N seeds the orbit sign, boss radius and a
-// score jitter for one more fight variant; --no-corner
+// score jitter for one more fight variant, and --route-salt N the route
+// rooms' fights the same way; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -207,7 +208,11 @@ try {
     return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
       dir: path.length > 1 ? next % 5 : incoming, routed: true };
   };
-  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge') };
+  // --route-salt N (with --dodge) seeds the route rooms' orbit sign and score
+  // jitter, as --salt does the boss fight's.
+  const routeRng = flag('--route-salt') ? saltedRandom(Number(flag('--route-salt'))) : null;
+  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge'),
+    ...(routeRng ? { orbit: routeRng() < 0.5 ? -1 : 1, jitter: 0.05 + routeRng() * 0.3, rng: routeRng } : {}) };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
