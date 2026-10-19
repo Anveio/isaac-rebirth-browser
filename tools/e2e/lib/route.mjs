@@ -103,6 +103,17 @@ export function routingView(s) {
   };
 }
 
+// A small seeded generator (mulberry32) for --salt fight variants.
+export function saltedRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // One closed-loop fight decision: aim along the dominant axis at the nearest
 // foe and orbit it (bosses at 170 units, others at 110), steering away from
 // walls, solid cells, foes and enemy shots; `memory.orbit` flips when boxed in.
@@ -163,23 +174,16 @@ export function fightKeys(view, memory) {
         const reach = (foe.radius ?? (foe.boss ? 40 : 13)) + 24;
         if (near < reach) score -= (reach - near) / 12 * (t <= 6 ? 1.5 : 1);
       }
-      // Keep room to dodge: walls within 50 units cost in proportion, corners
-      // (two walls) more.
+      // Keep room to dodge: walls within 50 units cost in proportion.
       const nx = player.x + ux * 20, ny = player.y + uy * 20;
-      const gaps = [nx - 72, 568 - nx, ny - 152, 408 - ny];
-      for (const gap of gaps) if (gap < 50) score -= (50 - gap) / 25;
-      if (Math.min(gaps[0], gaps[1]) < 60 && Math.min(gaps[2], gaps[3]) < 60) score -= 1;
-      // Pinned against a body (Mega Fatty parked by a corner): getting out
-      // outranks every other term.
-      for (const foe of foes) {
-        const touch = (foe.radius ?? 13) + 20, now = Math.hypot(foe.x - player.x, foe.y - player.y);
-        if (now < touch) score += (Math.hypot(foe.x - nx, foe.y - ny) - now) * 0.4;
-      }
+      for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
       // Tears fly along one axis: favour moves that line the player up with
       // the target on an axis, so they hit.
       const offNow = Math.min(Math.abs(dx), Math.abs(dy));
       const offNext = Math.min(Math.abs(target.x - nx), Math.abs(target.y - ny));
       if (offNow > 20) score += (offNow - offNext) / 20 * 0.6;
+      // --salt: a seeded jitter, so one fight can be tried along many paths.
+      if (memory.rng) score -= memory.rng() * memory.jitter;
     } else for (const shot of shots) {
       const near = Math.hypot(shot.x - (player.x + ux * 25), shot.y - (player.y + uy * 25));
       if (near < 45) score -= (45 - near) / 15;

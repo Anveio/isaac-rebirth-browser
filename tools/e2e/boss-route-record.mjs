@@ -23,7 +23,8 @@
 // --lead aims ahead of each foe's velocity and orbits closer; --dodge scores
 // moves against enemy shots' projected paths and lit fireplaces; --orbit -1
 // starts the orbit the other way round and --boss-radius R holds bosses at R
-// units (default 170); --no-corner
+// units (default 170); --salt N seeds the orbit sign, boss radius and a
+// score jitter for one more fight variant; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -39,7 +40,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
-import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
+import { doorKeys, fightKeys, routingView, saltedRandom, toward, waypoint } from './lib/route.mjs';
 
 // Optional private caller-owned archive; default stdout/result behavior is unchanged.
 const attemptOutput = flag('--attempt-output');
@@ -269,7 +270,12 @@ try {
   if (FIGHT) {
     // --orbit -1 starts the boss orbit the other way round; --boss-radius R
     // holds bosses at R units instead of 170.
-    const memory = { orbit: Number(flag('--orbit', '1')), lead: hasFlag('--lead'), dodge: hasFlag('--dodge'),
+    // --salt N (with --dodge) seeds the orbit sign, a boss radius in 150..200
+    // and a per-decision score jitter; --orbit and --boss-radius still win.
+    const rng = flag('--salt') ? saltedRandom(Number(flag('--salt'))) : null;
+    const salted = rng ? { orbit: rng() < 0.5 ? -1 : 1, bossRadius: 150 + rng() * 50, jitter: 0.05 + rng() * 0.3 } : {};
+    const memory = { lead: hasFlag('--lead'), dodge: hasFlag('--dodge'), ...salted, rng,
+      ...(flag('--orbit') ? { orbit: Number(flag('--orbit')) } : salted.orbit ? {} : { orbit: 1 }),
       ...(flag('--boss-radius') ? { bossRadius: Number(flag('--boss-radius')) } : {}) };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
     // or beside it then takes the item in the port alone, which leaves an
