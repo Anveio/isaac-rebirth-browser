@@ -1015,10 +1015,29 @@ impl Room {
                 .into(),
                 // Door.Init562b48 uses the current room's backdrop palette,
                 // not the neighbor type. Library palettes14/15 replace every
-                // sheet of the ordinary door with the authored library PNG.
-                spritesheet: (descriptor.template.room_type == 12
-                    && destination.template.room_type == 1)
-                    .then(|| "gfx/grid/door_13_librarydoor.png".into()),
+                // sheet of the ordinary door with the authored library PNG,
+                // Depths palettes 5/6 with door_14 (table 0x6733f0). Before
+                // that, 562a02..562a99 send secret, curse, treasure, arcade,
+                // boss rush, boss, challenge, devil and angel doors to their
+                // own anm2; the secret hole takes the Depths sheet on
+                // backdrops 5 and 9 (562c71..562ddd).
+                spritesheet: if descriptor.template.room_type == 12
+                    && destination.template.room_type == 1
+                {
+                    Some("gfx/grid/door_13_librarydoor.png".into())
+                } else if secret {
+                    matches!(backdrop_id, 5 | 9)
+                        .then(|| "gfx/grid/door_08_holeinwall_depths.png".into())
+                } else if matches!(backdrop_id, 5 | 6)
+                    && destination.template.room_type != 9
+                    && ![descriptor, destination].iter().any(|room| {
+                        matches!(room.template.room_type, 4 | 5 | 10 | 11 | 14 | 15 | 17)
+                    })
+                {
+                    Some("gfx/grid/door_14_depthsdoor.png".into())
+                } else {
+                    None
+                },
                 x: (40.0 + 40.0 * column) * motion::WORLD_SCALE + 32.0 + inset_x,
                 y: (120.0 + 40.0 * row) * motion::WORLD_SCALE - 46.0 - 1.0 + inset_y,
                 target_room: *target as u32,
@@ -1124,7 +1143,8 @@ impl Room {
         // 2.3283064e-10 in f32) give the layer's x and y offsets as
         // min + RandomFloat * (max - min). The overlay group follows the
         // Level's chapter (fxlayers `stage`): Basement fx2 spans 0..100,
-        // Caves fx5 -10..10; both author their 1x1 overlays as [2, 3, 4, 5, 1].
+        // Caves fx5 and Depths fx6 -10..10; all three author their 1x1
+        // overlays as [2, 3, 4, 5, 1].
         let crate::levels::Overlay {
             folder: overlay_folder,
             low,
