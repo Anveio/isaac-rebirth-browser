@@ -17,7 +17,10 @@ before the shared tail: each game clears Basement I's boss room, takes its
 trapdoor, walks Basement II's room chain and clears that boss room too, all
 with its own keys (the original's are the fixture's fixed `originalFight`).
 The shared tail then re-anchors in the last boss room and grades its exit
-into the floor after it.
+into the floor after it. An `ownRoute` descent fixture shares no Basement I
+route: its `route` is the bare `boss-room-arrival` capture at gameplay start,
+and each game walks Basement I's room chain, fighting its rooms clear, with
+its own keys too.
 
 Contrived cases walk straight to the trapdoor. OS-random cases draw an idle
 wait and a waypoint for the approach; every recorded case replays exactly.
@@ -51,7 +54,8 @@ ANCHOR_IDLE = 120
 # `roomFrames` sets its own.
 ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
-ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
+ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II'),
+            5: ('depths-i', 'Depths I')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -171,13 +175,15 @@ def descended(result, fixture, production_directory):
     floor, each replaying the legs before it: the leg fights the boss room
     clear and parks (with --hurt as that floor's original fight ends), and on
     every floor but the last also takes the trapdoor; the next leg starts by
-    walking that floor's room chain into its boss room."""
+    walking that floor's room chain into its boss room. An `ownRoute`
+    fixture's first leg walks Basement I's chain from the starting room too."""
     actions, build = [], None
     floors = fixture['descent']
     for index, floor in enumerate(floors):
         marker = f'descent-{index}'
         case = {**result, 'pairedTape': result['pairedTape'] + keys_only(actions) + [{'type': 'capture', 'label': marker}]}
-        rooms = floor['rooms'][-1:] if index == 0 else floor['rooms']
+        walk = index > 0 or fixture.get('ownRoute', False)
+        rooms = floor['rooms'] if walk else floor['rooms'][-1:]
         # routeAvoid {room: [cells]}: cells the walk keeps off beyond the
         # routing grid's own solid cells.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
@@ -185,7 +191,7 @@ def descended(result, fixture, production_directory):
         # A floor's `fight` budget covers a longer boss (Mega Fatty's 600 HP).
         leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
-                         *(['--room-frames', floor.get('roomFrames', ROUTE_ROOM_FRAMES)] if index else []),
+                         *(['--room-frames', floor.get('roomFrames', ROUTE_ROOM_FRAMES)] if walk else []),
                          # A floor's `fightFlags` tune its port leg's closed-loop fight
                          # (boss-route-record.mjs --dodge, --orbit, --boss-radius):
                          # Caves I's fire rooms and Mega Fatty's 30-shot bursts.
