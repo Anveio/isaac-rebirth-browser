@@ -135,6 +135,8 @@ fn ai(
         // 488e30: HP x0.75, max HP untouched.
         health_scale: 0.75,
         max_health_scale: 1.0,
+        health_delta: 0.0,
+        appear: false,
     }));
     Ok(())
 }

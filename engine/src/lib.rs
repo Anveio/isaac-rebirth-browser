@@ -18,6 +18,7 @@ mod attack_grid;
 pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
+pub mod boil;
 pub mod bombs;
 pub mod boss_death;
 mod brimstone;
@@ -77,6 +78,7 @@ pub mod greed;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+pub mod gurdy;
 pub mod gushers;
 mod health_damage;
 pub mod hoppers;
@@ -5230,7 +5232,7 @@ impl Game {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
                 npc.velocity = spawned.velocity;
-                npc.no_appear = true;
+                npc.no_appear = !spawned.appear;
                 npc.spawner_type = spawned.spawner_type;
                 npc.boss_spawned = spawned.boss_spawned;
                 if spawned.scale != 1.0 {
@@ -5238,6 +5240,7 @@ impl Game {
                 }
                 npc.max_hp *= spawned.max_health_scale;
                 npc.hp *= spawned.health_scale;
+                npc.hp += spawned.health_delta;
                 Ok(())
             }
             entities::Birth::EnvyChild {
