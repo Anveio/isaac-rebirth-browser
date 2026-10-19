@@ -209,8 +209,10 @@ in 1 of 192 and Larry Jr. lost both segment kinds in 47 of 64.
 Every report carries a coverage census: the room types, NPC kinds, pickups and
 game features (owned collectibles, secret reveals, boss clears) each case
 reached, including each owned weapon collectible (`weapon:<id>`), each
-floor stage played (`stage:<n>`), a descent made while an active item is
-held (`descent holding an active item`), a run started after a descent (`new
+floor stage played (`stage:<n>`), a boss room entered, a boss room cleared
+and a descent made while an active item is held (`boss room holding an
+active item`, `boss room cleared holding an active item`, `descent holding
+an active item`), a run started after a descent (`new
 run after a descent`, and `new run from the menus after a descent` when it
 went through the menus), a run started from Random (`Random run`) and its
 GameOver popup's Exit to the menus (`menus after a Random run's GameOver`),

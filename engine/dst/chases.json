@@ -146,10 +146,10 @@
         "active item held"
       ],
       [
-        "room:5"
+        "boss room holding an active item"
       ],
       [
-        "cleared:5"
+        "boss room cleared holding an active item"
       ],
       [
         "descent holding an active item"

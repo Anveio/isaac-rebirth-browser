@@ -200,6 +200,14 @@ pub fn observe(state: &State) {
             if state.room.combat_clear && matches!(template.room_type, 5 | 6) {
                 keys.push(format!("cleared:{}", template.room_type));
             }
+            // The active-item descent's steps, each with the item still held:
+            // a run that quits to a new one loses it.
+            if active && template.room_type == 5 {
+                keys.push("boss room holding an active item".to_owned());
+                if state.room.combat_clear {
+                    keys.push("boss room cleared holding an active item".to_owned());
+                }
+            }
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
