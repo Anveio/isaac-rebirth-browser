@@ -94,6 +94,8 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boil: Option<crate::boil::BoilState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gurdy_jr: Option<crate::gurdy_jr::GurdyJrState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_creep: Option<crate::wall_creep::WallCreepState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub squirt: Option<crate::squirt::SquirtState>,
@@ -937,6 +939,7 @@ impl Npc {
             sprite_events: SpriteEvents::default(),
             dingle: None,
             boil: None,
+            gurdy_jr: None,
             wall_creep: None,
             squirt: None,
             wall_hugger: None,
