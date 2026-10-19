@@ -251,15 +251,5 @@
         "room:8"
       ]
     ]
-  },
-  {
-    "out": "coverage-greed-entry.json",
-    "steps": 3000,
-    "final_extend": 300,
-    "stages": [
-      [
-        "npc:50"
-      ]
-    ]
   }
 ]

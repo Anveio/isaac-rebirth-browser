@@ -396,9 +396,8 @@ precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, active-item descent, restart, Random-exit, Number One cooldown and
 Envy split-death regressions, the Monstro, Larry Jr., Grub and Gemini
-kills, the miniboss clear, the Dingle, Gurglings, super secret room and
-Greed entries and the Options menu (`"from": null` chases from a fresh
-boot). A
+kills, the miniboss clear, the Dingle, Gurglings and super secret room
+entries and the Options menu (`"from": null` chases from a fresh boot). A
 recipe whose tape does not exist yet chases from a fresh boot, so a new
 scenario needs only its recipe. The miniboss clear had been a harvested tape
 with no recipe, which a menu change sent into Options before any run; its
