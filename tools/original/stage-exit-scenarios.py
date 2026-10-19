@@ -47,7 +47,8 @@ PADDING_STEP = 600
 # Frames both games stand still after re-entering the boss room.
 ANCHOR_IDLE = 120
 # Frames the port's walk may spend in each route room of a later floor, whose
-# live foes it fights clear before the doors open.
+# live foes it fights clear before the doors open; a descent floor's
+# `roomFrames` sets its own.
 ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
 ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
@@ -167,7 +168,7 @@ def descended(result, fixture, production_directory):
         # A floor's `fight` budget covers a longer boss (Mega Fatty's 600 HP).
         leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
-                         *(['--room-frames', ROUTE_ROOM_FRAMES] if index else []),
+                         *(['--room-frames', floor.get('roomFrames', ROUTE_ROOM_FRAMES)] if index else []),
                          # A floor's `fightFlags` tune its port leg's closed-loop fight
                          # (boss-route-record.mjs --dodge, --orbit, --boss-radius):
                          # Caves I's fire rooms and Mega Fatty's 30-shot bursts.
