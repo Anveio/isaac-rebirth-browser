@@ -249,9 +249,17 @@ impl ItemQueryHistory {
 }
 
 ///An actual350 factory attempt has no body/contact owner yet. Its possible
-///later kind2 queue/held write makes only trinket-query completeness unknown.
+///later Kind2 queue/held write makes trinket-query completeness unknown;
+///subtype0 also makes the reached ItemPool selection history unknown.
 ///No contact, held value, cache request or effect is fabricated here.
-pub(crate) fn note_unrepresented_trinket_spawn(state: &mut State) {
+pub(crate) fn note_unrepresented_trinket_spawn(state: &mut State, subtype: u32) {
+    //4FFE80 bypasses Get for explicit nonzero IDs. Only the actual subtype0
+    //branch4FFE9A makes the ItemPool bytes and+49C RNG history unknown.
+    if subtype == 0 {
+        if let Some(pools) = &mut state.item_pools {
+            pools.note_unrepresented_trinket_selection();
+        }
+    }
     if let Some(history) = state
         .player_items
         .as_mut()

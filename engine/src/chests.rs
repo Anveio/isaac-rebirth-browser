@@ -261,7 +261,7 @@ pub(crate) fn try_open(state: &mut State, index: usize) -> Result<bool, String> 
         },
     )?;
     if births.iter().any(|birth| birth.variant == 350) {
-        crate::item_queries::note_unrepresented_trinket_spawn(state);
+        crate::item_queries::note_unrepresented_trinket_spawn(state, 0);
     }
     let chest = state.room.pickups[index]
         .chest
@@ -582,7 +582,7 @@ fn open_bounded_chest(
         },
     )?;
     if births.iter().any(|birth| birth.variant == 350) {
-        crate::item_queries::note_unrepresented_trinket_spawn(state);
+        crate::item_queries::note_unrepresented_trinket_spawn(state, 0);
     }
     let chest = state.room.pickups[index]
         .chest

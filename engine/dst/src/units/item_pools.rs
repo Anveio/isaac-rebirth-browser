@@ -45,6 +45,7 @@ pub fn run(case: &mut Case) {
         return;
     };
     constructed(&pools, &achievements, seed);
+    trinket_selection(&pools, &achievements);
 
     let mut shared = Mt19937::new(e.u32());
     let mut drawn = BTreeSet::new();
@@ -80,6 +81,135 @@ pub fn run(case: &mut Case) {
     props::always!(
         serde_json::from_value::<ItemPools>(saved).ok().as_ref() == Some(&pools),
         "item_pools: managers round-trip through JSON"
+    );
+}
+
+///Exercise the manager contract beyond the few selections reached by a run.
+///These are engine invariants, not Original evidence or Init350 body proof.
+fn trinket_selection(initial: &ItemPools, achievements: &[bool]) {
+    let mut pools = initial.clone();
+    let mut selected = BTreeSet::new();
+    let count = pools.trinkets.as_ref().expect("fresh trinket pool").count;
+    let batch = vec![0; count as usize];
+    let before = pools.clone();
+    props::always!(
+        items::preflight_trinket_init_batch(Some(&pools), &batch, None).is_ok() && pools == before,
+        "item_pools: a complete available trinket batch admits without previewing RNG"
+    );
+    let across_reset = vec![0; count as usize * 2 + 1];
+    props::always!(
+        items::preflight_trinket_init_batch(Some(&pools), &across_reset, Some(achievements))
+            .is_ok()
+            && items::preflight_trinket_init_batch(Some(&pools), &across_reset, None).is_err()
+            && pools == before,
+        "item_pools: whole-batch admission includes every reached profile reset before mutation"
+    );
+    for _ in 0..count {
+        let before = pools.clone();
+        let mut manager = before.secondary_rng.expect("fresh manager RNG");
+        manager.raw();
+        let id = pools.get_trinket(None);
+        let expected = id.as_ref().ok().copied().filter(|id| {
+            items::trinket_definition(*id).is_some() && *id != 47 && selected.insert(*id)
+        });
+        props::always!(
+            expected.is_some(),
+            "item_pools: trinket selection returns each available typed config at most once",
+            json!({ "id": id, "count": count, "selected": selected })
+        );
+        let pool = pools.trinkets.as_ref().expect("selected pool");
+        let previous = before.trinkets.as_ref().expect("previous pool");
+        props::always!(
+            pools.secondary_rng == Some(manager)
+                && pool.count == previous.count - 1
+                && pool.eligible == previous.eligible
+                && pool
+                    .available
+                    .iter()
+                    .zip(&previous.available)
+                    .filter(|(a, b)| a != b)
+                    .count()
+                    == 1
+                && expected.is_some_and(|id| !pool.available[id as usize])
+                && pools.root_rng == before.root_rng
+                && pools.pools == before.pools
+                && pools.pill_effects == before.pill_effects,
+            "item_pools: trinket Get consumes one manager draw and removes one availability byte"
+        );
+    }
+    let before = pools.clone();
+    props::always!(
+        pools.get_trinket(None).is_err() && pools == before,
+        "item_pools: depleted trinket reset requires the actual profile without partial mutation"
+    );
+    props::always!(
+        pools
+            .get_trinket(Some(achievements))
+            .is_ok_and(|id| selected.contains(&id))
+            && pools
+                .trinkets
+                .as_ref()
+                .is_some_and(|pool| pool.count == count - 1),
+        "item_pools: depleted trinket pool refills from the reached current profile"
+    );
+    let before = pools.clone();
+    pools.trinkets = None;
+    pools.secondary_rng = None;
+    let unknown = pools.clone();
+    props::always!(
+        pools.get_trinket(Some(achievements)).is_err()
+            && pools == unknown
+            && items::preflight_trinket_init_batch(None, &[41], None).is_ok()
+            && items::preflight_trinket_init_batch(Some(&pools), &[0, 41], Some(achievements))
+                .is_err(),
+        "item_pools: unknown selection history stays unknown while explicit Init bypasses Get"
+    );
+    //A retained positive count can disagree with current eligibility. True0
+    //is a source result, while the body preflight refuses its card tail.
+    pools = before;
+    let pool = pools.trinkets.as_mut().expect("retained pool");
+    pool.count = 1;
+    pool.eligible = Some(vec![false; 62]);
+    let previous = pools.clone();
+    props::always!(
+        items::preflight_trinket_init_batch(Some(&pools), &[0], None).is_err()
+            && pools == previous
+            && pools.get_trinket(None) == Ok(0)
+            && pools.trinkets == previous.trinkets,
+        "item_pools: Get0 preserves the count and availability instead of inventing a child"
+    );
+    pools = initial.clone();
+    pools.secondary_rng.as_mut().expect("manager RNG").state = 0;
+    let first = pools.trinkets.as_ref().and_then(|pool| {
+        pool.available
+            .iter()
+            .zip(pool.eligible.as_ref()?)
+            .position(|(available, eligible)| *available && *eligible)
+    });
+    props::always!(
+        pools.get_trinket(None).ok().map(|id| id as usize) == first
+            && pools.secondary_rng.is_some_and(|rng| rng.state == 0),
+        "item_pools: a real zero manager word follows the fallback without seed clamping"
+    );
+    pools = initial.clone();
+    pools.trinkets.as_mut().expect("pool").count = 1;
+    let before = pools.clone();
+    props::always!(
+        items::preflight_trinket_init_batch(Some(&pools), &[0, 0], None).is_err()
+            && items::preflight_trinket_init_batch(Some(&pools), &[0, 0], Some(achievements))
+                .is_ok()
+            && pools == before,
+        "item_pools: a saved count below eligibility reaches reset even with available bytes left"
+    );
+    let pool = pools.trinkets.as_mut().expect("pool");
+    pool.count = 2;
+    pool.eligible = Some((0..62).map(|id| id == 41).collect());
+    props::always!(
+        items::preflight_trinket_init_batch(Some(&pools), &[0, 0], Some(achievements)).is_err()
+            && pools.get_trinket(None) == Ok(41)
+            && pools.get_trinket(None) == Ok(0)
+            && pools.trinkets.as_ref().is_some_and(|pool| pool.count == 1),
+        "item_pools: a saved count above eligibility reaches true0 before the next reset"
     );
 }
 

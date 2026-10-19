@@ -342,7 +342,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `grid` | grid queries and ground-collision solvers on generated rooms | 14 | 3 | 0 |
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
-| `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
+| `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 32 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 80 | 62 | 2 |
 | `rooms` | every room a floor its trapdoors reach admits, entered and played | 2 | 8 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
@@ -605,6 +605,17 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | pathfinder: a flood crosses a stamped or costly open cell | [pathfinder.rs](engine/dst/src/units/pathfinder.rs) |
 | Unreachable | item_pools: valid construction fails | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: managers round-trip through JSON | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a complete available trinket batch admits without previewing RNG | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: whole-batch admission includes every reached profile reset before mutation | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: trinket selection returns each available typed config at most once | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: trinket Get consumes one manager draw and removes one availability byte | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: depleted trinket reset requires the actual profile without partial mutation | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: depleted trinket pool refills from the reached current profile | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: unknown selection history stays unknown while explicit Init bypasses Get | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: Get0 preserves the count and availability instead of inventing a child | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a real zero manager word follows the fallback without seed clamping | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a saved count below eligibility reaches reset even with available bytes left | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
+| Always | item_pools: a saved count above eligibility reaches true0 before the next reset | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: construction rejects a zero seed and malformed achievement tables | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: construction is a pure function of its seed and achievements | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
 | Always | item_pools: construction mirrors the authored pools and the profile's unlocks | [item_pools.rs](engine/dst/src/units/item_pools.rs) |
