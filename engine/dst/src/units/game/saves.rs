@@ -71,9 +71,10 @@ pub fn previous_session(e: &mut Entropy, steps: u32) -> Option<String> {
 /// `rooms` unit does, through an open trapdoor under the player whose own
 /// entry check decides each descent, until one refuses. Each arrival's level
 /// admission saves the run, and the document stored on one of the floors it
-/// reached, chosen uniformly, is what the next session boots with: Continue
-/// resumes that floor through public inputs, so every stage the port admits
-/// plays under the `game` properties and the WASM differential. None when no
+/// reached, chosen uniformly, is what the next session boots with: its
+/// import, export and menu readmission run natively and through the WASM
+/// ABI, and its Continue resumes that floor through public inputs once the
+/// port admits Continue past Basement I's starting room. None when no
 /// trapdoor took the player or the session failed.
 pub fn previous_descent(e: &mut Entropy) -> Option<String> {
     let mut tape = Tape::new(e.nonzero_u32(), e.u32());
@@ -267,20 +268,14 @@ fn continued(before: &Game, after: &Game, imported: Option<&Profiles>) {
     );
     props::sometimes!(true, "game: a saved run is continued");
     let slot = usize::from(before.state.profile) - 1;
-    let previous = record.is_some_and(|record| {
-        imported
-            .and_then(|profiles| profiles.profiles.get(slot))
-            .and_then(|profile| profile.saved.as_ref())
-            == Some(record)
-    });
     props::sometimes!(
-        previous,
+        record.is_some_and(|record| {
+            imported
+                .and_then(|profiles| profiles.profiles.get(slot))
+                .and_then(|profile| profile.saved.as_ref())
+                == Some(record)
+        }),
         "game: Continue resumes a run a previous session saved"
-    );
-    // `previous_descent`'s documents: Basement II has been admitted since #654.
-    props::sometimes!(
-        previous && state.stage > 1,
-        "game: Continue resumes a run a previous session saved on a deeper floor"
     );
 }
 

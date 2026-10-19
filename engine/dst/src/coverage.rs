@@ -161,6 +161,11 @@ pub fn observe(state: &State) {
     if state.screen == Screen::Options && options.left_held.max(options.right_held) > 49 {
         keys.push("Options hold repeat".to_owned());
     }
+    // A saved run the menus show, such as one a previous session stored on
+    // a floor it descended to.
+    if let Some(summary) = &state.saved_run_summary {
+        keys.push(format!("saved run on stage {}", summary.stage));
+    }
     if state.screen == Screen::Playing {
         // The floor's stage: a descent shows as `stage:2`, and a run started
         // after one as `new run after a descent`, from the menus also as
