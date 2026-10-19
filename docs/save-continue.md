@@ -9,9 +9,14 @@ The versioned, bounded Save packet contains explicit Player, ItemPool,
 Level/Room/GridRecord and profile owners. It does not replace the running
 Game/State. Quit reports the actual own-storage write result; fresh menu
 construction reads the actual stored bytes before selecting Main Continue.
-A failed latest write may leave an older valid own save. Each IO request
-suspends the current public Tick until its own response, including the
-remaining iterations of a batched Tick. Keyboard/InputConfigs, audio/display
+The complete encoded profile document is bounded at 4 MiB. Walking paint has
+no separate 4,096-record cutoff and is never truncated to fit. An actual
+capacity export failure produces no partial packet, receives exactly one
+failed-write acknowledgement, preserves every older stored byte and resumes
+the remaining public Tick iterations. Other export errors remain errors.
+An older valid own save may still be admitted after that failed latest write.
+Each IO request suspends the current public Tick until its own response,
+including the remaining iterations of a batched Tick. Keyboard/InputConfigs, audio/display
 preferences and the global clock retain their current owners. Constructor,
 cache and Room callbacks reconstruct the saved world; host data never supplies
 Native observations to WASM.
@@ -24,13 +29,45 @@ is unadmitted because this load caller cannot reconstruct it; the count is a
 conservative port list owner, not an inferred Native live/dead count. A legacy
 packet without this owner remains unknown and its Continue request is refused,
 while its own stored bytes remain intact. Ordinary
-walking footprints are admitted: they paint a transient backdrop and are not
-saved Blood7 bodies. Continue constructs the normal backdrop again, and both
-stationary restored endpoints require actual empty paint arrays. Other stains,
-room travel, special characters/modes, nonzero item callbacks, unsupported grid
-factories and progression remain explicit unsupported load domains. The packet
+walking footprints and other Blood7 paint are admitted: they use a transient
+backdrop and are not saved Blood7 bodies. Continue constructs the normal
+backdrop again; the earlier stationary restored endpoints require actual empty
+paint arrays. Other stain families, room travel, special characters/modes,
+nonzero item callbacks, unsupported grid factories and progression remain explicit unsupported load domains. The packet
 validator and this narrower load admission are separate; a durable packet does
 not by itself establish an implemented Continue caller for every saved state.
+
+## Current-room regular records at Save
+
+Game.Save now captures the supported regular pickups in actual manager order at
+the Room.Save boundary, before PlayerManager Save flushes queued grants. The
+RoomOut writer uses the same pure capture loop. The captured list is installed
+in the copied SavedRun room; it does not replace live bodies or widen Continue
+admission. This follows the mapped Original Game.Save `54F347` to Room.Save
+`5CE2D0` call chain.
+
+The fresh candidate on PR #711 base `248f2d09` has tree `46affff7` and frozen
+artifact `2a6cbdf4` (1,417 files; WASM `f415dc46`). Build, interface checks and
+the canonical affected preview pass; the preview selects 52 suites without
+running them. Its registered **Pause Quit saves live regular pickups in the
+current room** Browser regression passes all 28 checks, 18 capture labels and
+217 commands on the fixed public `PBW9YNC8` route. At paused room 7 / GameUpdate 91,
+four uncollected coins remain frozen through Quit. The actual revision 2 packet
+contains their exact ordered handles, positions, spawn/RNG seeds, charge,
+touched and saved-byte fields; the successful write, stored bytes and menu
+readmission identify the same packet.
+
+The two existing initial-room capacity contracts also pass on this artifact:
+35 checks for a complete packet, successful acknowledgement and Continue from
+its own store; 4,062 checks for rejecting the oversized write and Continuing
+from the unchanged older store. These remain Browser storage contracts.
+
+The retained Bomb-only baseline remains 27 pass / 1 fail: its packet omitted
+those same four live records. Earlier launch/observation failures and its
+separate retention hold remain preserved. This is a Browser storage contract
+witness, not Original actor-save packet parity. The visited-room packet does
+not establish later-room Continue, NPC restoration or reload support, and this
+PR #711 base qualification does not grade later public-main imports.
 
 ## Saved ambient restoration
 
@@ -82,6 +119,120 @@ checks remain required. The retained seven-capture Exit/audio case passes all
 Actual death/Exit, public clocks and three earlier SFX8 positive owners pass;
 pixels remain 4 pass / 3 fail. The earlier rejected capture and its ungraded
 audio remain preserved. This covers Exit, without a Restart or full PCM claim.
+
+## Save capacity and current integration scope
+
+PR696's six-file Save foundation is merged at `9f952efd`. Its fresh Browser
+qualification remains bound to exact main715.
+Fresh baseline `7ad918af` and Save candidate `92dc82b9` pass `check:build`,
+ABI/constructor checks, the canonical affected preview and all four public
+Browser runtime tests each. Four actual same-Native Save controls replay the
+unchanged fixed moving case and recorded `DL17GHC7` on both artifacts. Each
+role preserves all 3,748 ordered expected/actual/status rows: **3,650 pass /
+98 fail**, with zero lost passes, changed rows or pixel-metric changes.
+All 33 own-save guards pass on each control. The 98 failures comprise 28
+fixed-case ambient velocity-word rows, 14 canonical menu/gameplay-scope rows,
+28 seed-text separator rows and 28 last-penalty-stage rows. The original closed
+baseline leg was reused after its wrapper mirror failed; that failed wrapper
+remains failed. No new Original process or random draw was used.
+
+The merged current-main composition separately passes an isolated native port library check:
+`cargo check --locked --lib`. Its outer wrapper's failed label is preserved:
+the wrapper expected a literal `Checking` line, while Cargo compiled the fresh
+engine and exited zero. This compiler result adds no current-main Browser or
+gameplay qualification.
+
+Earlier frozen Source C capacity evidence retains its own artifact scope.
+The native port Rust/C ABI replay observes a complete 2,970,551-byte packet
+with 6,368 paint records, literal complete-owner/wire/store agreement and successful write
+continuation. The over-bound replay observes 13,334 footprint records, one
+failed capacity acknowledgement, unchanged older stored bytes and continued
+Tick progress. Existing shipped-WASM differential replay passes; it does not
+observe complete direct WASM SavedRun/Profiles owner bytes. Production Browser
+over-bound capacity passes separately. The under-bound Browser wrapper stops
+with `KeyError('fatal')`; its failed status and raw output remain preserved.
+These C results do not become main715 capacity gameplay evidence.
+
+The later H composition has its own fresh public-main134 artifact `7ddc18cc`
+(WASM `a3f2c0bb`). It passes `check:build`, ABI/constructor checks and all four
+Browser runtime controls. One unchanged fixed case reuses the full retained
+Original input bank: all 2,384 ordered expected/actual/status rows equal the
+older dbfab H candidate, **2,349 pass / 35 fail**, with zero lost passes,
+missing/new rows or changed Native expectations. All 33 own-save guards pass;
+all pixel metrics and source PNG hashes remain identical (17 pass / 14 fail).
+The 35 required failures remain 28 ambient velocity words and seven canonical
+scope rows, so the actual canonical invocation still exits failed. The earlier
+archive-parent wrapper preflight failure remains preserved separately.
+
+That main134 capture also passes real natural same-origin reload and
+own-storage Continue: the stored seed is exactly `T1PK 6Y0W`, the restored live
+seed stays `T1PK6Y0W`, and the owned penalty stage is zero. After public Continue, the player
+resumes at the valid x396 door inset; the public movement then takes the
+reciprocal room5-to-room6 transition. This is the captured valid door branch,
+not a same-room movement or Original-process reload claim. No current134
+baseline artifact, OS Save replay or ordinary-run replay is claimed; the
+ordinary consumer's actual dbfab and historical715 results remain below.
+The actual canonical main134 affected preview selects 52 suites. The H publication
+composes onto later main `3b08711d`, preserving Mega Fatty and the two unrelated
+quality-tool changes; these main134 tests do not become a gameplay grade for
+that later source tree.
+
+Persistent seed and penalty owners (H) have a separate fresh qualification on
+snapshot `dbfab9b0`: baseline `9e3c05e5` and shared H/tooling artifact `70cb3285`
+pass `check:build`, ABI/constructor checks and all four Browser runtime controls
+each. The candidate's actual affected preview selects 52 suites. The shared artifact's portable test files
+are separate from the seven H implementation/consumer paths. These results do
+not qualify the later main134 integration.
+
+On the same retained fixed Original case, the 2,384 ordered comparisons improve
+from **2,321 pass / 63 fail** to **2,349 pass / 35 fail**. Exactly 14 saved-seed
+separator rows and 14 last-penalty-stage rows turn green, with zero lost passes,
+missing/new rows or changed Native expectations. All 33 own-save guards pass
+per role. Every pixel metric and source PNG hash is unchanged. The 35 required
+failures remain 28 pre-Quit ambient velocity words and seven canonical scope
+rows; both suite exits remain failed. The recorded OS case was validated in the
+whole input bank but was not selected for this dbfab pair.
+
+The edited ordinary-run driver also runs on both fresh artifacts against the
+same retained `zero-epoch` Native case. Both pass all 801 saved-Player checks,
+the observed shared-MT cursor/624 words and required grid/owner comparisons.
+The candidate exercises the literal nine-character saved-seed guard; the
+baseline retains its older eight-character normalization. No new Native
+process or used input was drawn; the unchanged ordinary driver still makes
+four unused OS draws before loading the recorded scenario.
+
+Both fixed-case natural same-origin reloads and own-storage Continues pass.
+The stored documents differ in exactly three values: the run and summary seed
+strings gain the canonical space, and `lastPenaltyStage` changes from null to
+zero. Both resume with compact eight-character live seeds. The saved entry is
+identical, but fresh constructor seeds, epochs and complete shared-MT states
+differ. Observed positions match different valid door placements allowed by
+unchanged placement code: baseline starts at x396 and subsequently crosses to
+room6; H starts at x84 and moves within room5. The local selected slot and draw
+are not directly observed. This is not an identical-boot counterfactual or
+Original-process reload parity.
+
+H formats the persistent seed from validated numeric ownership while keeping
+the live codec compact. Continue accepts only the canonical legacy eight-character
+form or its exact nine-character form with one ASCII space after character4,
+both matching the saved numeric context. Fresh admitted penalty state starts
+at zero; missing or explicitly unknown legacy state stays unknown. Damage,
+cross-stage and Restart lifetime coverage beyond these initial-room controls
+remains separate.
+
+Historical H artifact `65178aba`, on frozen main715 plus Save6, passes build
+and runtime 4/4. Its unchanged fixed and recorded OS comparisons retain all
+3,748 rows and improve **3,650 pass / 98 fail** to **3,706 pass / 42 fail**:
+28 seed-text and 28 penalty-stage gains, with zero lost passes, missing/new rows
+or changed Native expectations. All 66 own-save guards pass; pixels remain
+17 pass / 14 fail per case. The 42 required failures remain 28 fixed-case
+ambient velocity words and 14 canonical scope rows; both suite exits remain
+failed. Its ordinary-run driver subsequently passed the retained `zero-epoch`
+case. A later audit of both complete raw reload reports, checkpoints and durable
+archives also proves both historical natural reloads passed. This explicitly
+corrects the earlier H readout and PR697 notes that labeled ordinary-run and
+natural reload unqualified; those earlier records remain preserved. Neither
+historical artifact establishes later-main, Factory/Get or whole-game parity.
 
 ## Earlier live scope
 

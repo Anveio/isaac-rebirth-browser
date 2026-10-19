@@ -1,5 +1,6 @@
 //!Neutral555300 children and the independent persistent crater record.
-//!The damage caller and ordinary Bomb helper retain their own owners.
+//!Damage callers retain their own owners; common Bomb/rock children share
+//!the actual Init, persistent record, scheduler and flags8 paint owners.
 use crate::{
     actors::{ActorKind, ActorRef},
     attack_color::AttackColor,
@@ -187,6 +188,58 @@ fn admit_explosion(
     Ok(id)
 }
 
+///555385..55550C and56C8EC..56CA73, after the caller's damage pass.
+///The crater Init consumes its real local35 frame and shared alpha, then the
+///actual child seed/P is appended before the explosion seed/Init. Neither
+///call site invokes an immediate Full; normal manager admission owns it.
+///Returns an actual Effect1 handle only when its current child owners are
+///admitted. An unavailable projection never rejects the caller's completed
+///damage Tick or fabricates actors, record history or a known MT footprint.
+pub(crate) fn admit_blast_children(
+    state: &mut State,
+    position: WorldVector,
+    color: AttackColor,
+) -> Result<Option<u32>, String> {
+    if !position.is_finite() || !color.is_finite() {
+        return Err("blast children require actual finite position/color".into());
+    }
+    if !admits_room(state) {
+        frontier(state, "blastChildrenRoomHistory");
+        frontier(state, "blastChildrenSharedDrawHistory");
+        return Ok(None);
+    }
+    if state.room.dynamic_crater_records.is_none() {
+        //Unknown prior records do not erase the real current child births.
+        //Keep None unknown; do not replace it with an invented empty vector.
+        frontier(state, "blastChildrenCraterRecordHistory");
+    }
+    state
+        .next_effect
+        .checked_add(2)
+        .ok_or("blast child handles exhausted")?;
+    if definition(1000, 1).is_none() || definition(1000, 18).is_none() {
+        frontier(state, "blastChildrenDefinitionHistory");
+        frontier(state, "blastChildrenSharedDrawHistory");
+        return Ok(None);
+    }
+    let seed = state.boot_lifecycle.shared.next_u32();
+    let id = admit_crater(state, seed, position)?;
+    let actual_seed = state
+        .sprite_effects
+        .iter()
+        .find(|effect| effect.id == id)
+        .ok_or("actual crater absent before record append")?
+        .spawn_seed;
+    if let Some(records) = state.room.dynamic_crater_records.as_mut() {
+        records.push(DynamicCraterRecord {
+            position,
+            spawn_seed: actual_seed,
+        });
+    }
+    let seed = state.boot_lifecycle.shared.next_u32();
+    admit_explosion(state, seed, position, color).map(Some)
+}
+
 /// TNT admits its actual explosion and crater BEFORE554490. Unlike555300,
 /// this GameSpawn18 call does not append a dynamic room crater record.
 pub(crate) fn admit_tnt_children(state: &mut State, position: WorldVector) -> Result<bool, String> {
@@ -263,25 +316,9 @@ pub(crate) fn explode_neutral(
         source,
         Some(copied_source),
     )?;
-    let seed = state.boot_lifecycle.shared.next_u32();
-    let id = admit_crater(state, seed, position)?;
-    let actual_seed = state
-        .sprite_effects
-        .iter()
-        .find(|e| e.id == id)
-        .ok_or("actual crater absent before record append")?
-        .spawn_seed;
-    state
-        .room
-        .dynamic_crater_records
-        .as_mut()
-        .expect("preflight record owner")
-        .push(DynamicCraterRecord {
-            position,
-            spawn_seed: actual_seed,
-        });
-    let seed = state.boot_lifecycle.shared.next_u32();
-    admit_explosion(state, seed, position, color)?;
+    //Damage has already run. Unavailable children must not turn that
+    //completed blast into a pre-admission refusal for the caller.
+    let _children = admit_blast_children(state, position, color)?;
     //550B30's three flags predicates are all false for actualflags0.
     //Neither child has an immediate Full at this555300 call site.
     Ok(true)

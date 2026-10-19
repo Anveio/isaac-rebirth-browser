@@ -25,6 +25,8 @@ wait and a waypoint for the approach; every recorded case replays exactly.
 import argparse
 import importlib.util
 import json
+import os
+import sys
 from pathlib import Path
 import random
 import subprocess
@@ -35,6 +37,7 @@ spec = importlib.util.spec_from_file_location('stage_exit_boss_routes', Path(__f
 routes = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(routes)
 FIXTURES = ROOT / 'references/isaac/foundation/stage-exit'
+RECORDINGS = ROOT / '.cache/stage-exit-recordings'
 # Frames from boss-room-arrival to exit-start; each game's fight must fit.
 WINDOW = 9000
 # Frames a descent adds per earlier floor for its trapdoor, the stage
@@ -43,23 +46,63 @@ EXIT_LEG = 3000
 PADDING_STEP = 600
 # Frames both games stand still after re-entering the boss room.
 ANCHOR_IDLE = 120
+# Frames the port's walk may spend in each route room of a later floor, whose
+# live foes it fights clear before the doors open; a descent floor's
+# `roomFrames` sets its own.
+ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
-ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I')}
+ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
 
 
+def retain(path, content):
+    """Exclusive attempt files remain private even when the caller aborts."""
+    with path.open('xb') as handle:
+        handle.write(content); handle.flush(); os.fsync(handle.fileno())
+
+
 def record(base, *args, rooms='0', arrival='', production_directory=None):
-    with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
-        json.dump(base, handle); handle.flush()
-        production = ['--production-directory', str(production_directory)] if production_directory else []
-        result = subprocess.run(['node', str(routes.RECORDER), '--case', handle.name, '--rooms', rooms, '--arrival', arrival, *production, *map(str, args)],
-                                cwd=ROOT, capture_output=True, text=True, timeout=3600)
-    lines = result.stdout.strip().splitlines()
-    if not lines:
-        raise RuntimeError(f'Stage-exit recorder failed: {result.stderr.strip()[-2000:]}')
-    return json.loads(lines[-1])
+    RECORDINGS.mkdir(parents=True, exist_ok=True)
+    attempt = Path(tempfile.mkdtemp(prefix='attempt-', dir=RECORDINGS))
+    parent = os.open(RECORDINGS, os.O_RDONLY | os.O_DIRECTORY)
+    try: os.fsync(parent)
+    finally: os.close(parent)
+    print(f'Stage-exit recorder attempt retained at {attempt}', file=sys.stderr, flush=True)
+    input_path = attempt / 'case.json'
+    retain(input_path, json.dumps(base).encode())
+    production = ['--production-directory', str(production_directory)] if production_directory else []
+    argv = ['node', str(routes.RECORDER), '--case', str(input_path), '--rooms', rooms, '--arrival', arrival,
+            '--attempt-output', str(attempt), *production, *map(str, args)]
+    retain(attempt / 'request.json', (json.dumps({'argv': argv, 'cwd': str(ROOT)}) + '\n').encode())
+    completed, failure, returned = None, None, False
+    try:
+        with (attempt / 'stdout.raw').open('xb') as stdout, (attempt / 'stderr.raw').open('xb') as stderr:
+            try:
+                completed = subprocess.run(argv, cwd=ROOT, stdout=stdout, stderr=stderr, timeout=3600)
+            finally:
+                for stream in (stdout, stderr):
+                    stream.flush(); os.fsync(stream.fileno())
+        lines = (attempt / 'stdout.raw').read_bytes().strip().splitlines()
+        if not lines:
+            raise RuntimeError(f'Stage-exit recorder produced no result; retained at {attempt}')
+        retain(attempt / 'returned-result.raw.json', lines[-1])
+        result = json.loads(lines[-1])
+        returned = True
+        return result
+    except BaseException as error:
+        failure = {'type': type(error).__name__, 'message': str(error)}
+        raise
+    finally:
+        retain(attempt / 'execution.json', (json.dumps({
+            'returnCode': completed.returncode if completed is not None else None,
+            'error': failure, 'returnedJsonParsed': returned,
+            'artifactObserved': (attempt / 'artifact.json').is_file(),
+        }) + '\n').encode())
+        directory = os.open(attempt, os.O_RDONLY | os.O_DIRECTORY)
+        try: os.fsync(directory)
+        finally: os.close(directory)
 
 
 def port_fight(base, *args, **options):
@@ -87,9 +130,11 @@ def frames(actions):
 
 
 def window(fixture):
-    """Frames from boss-room-arrival to exit-start for this fixture's fights."""
+    """Frames from boss-room-arrival to exit-start for this fixture's fights. A
+    fixture whose later floors take longer than WINDOW each (Caves I's eight-room
+    route and Mega Fatty) names its own window."""
     floors = len(fixture.get('descent', [None]))
-    return WINDOW * floors + EXIT_LEG * (floors - 1)
+    return fixture.get('window', WINDOW * floors + EXIT_LEG * (floors - 1))
 
 
 def final_rooms(fixture):
@@ -121,12 +166,18 @@ def descended(result, fixture, production_directory):
         marker = f'descent-{index}'
         case = {**result, 'pairedTape': result['pairedTape'] + keys_only(actions) + [{'type': 'capture', 'label': marker}]}
         rooms = floor['rooms'][-1:] if index == 0 else floor['rooms']
-        # routeAvoid {room: [cells]}: authored bodies that block the walk but
-        # that the routing grid does not count as solid (a slot machine).
+        # routeAvoid {room: [cells]}: cells the walk keeps off beyond the
+        # routing grid's own solid cells.
         avoid = ';'.join(f"{room}:{','.join(map(str, cells))}" for room, cells in floor.get('routeAvoid', {}).items())
         last = index + 1 == len(floors)
-        leg = port_fight(case, '--from', marker, '--fight', WINDOW, *hurt(floor.get('originalHealth')),
+        # A floor's `fight` budget covers a longer boss (Mega Fatty's 600 HP).
+        leg = port_fight(case, '--from', marker, '--fight', floor.get('fight', WINDOW), *hurt(floor.get('originalHealth')),
                          *([] if last else ['--exit', EXIT_LEG]),
+                         *(['--room-frames', floor.get('roomFrames', ROUTE_ROOM_FRAMES)] if index else []),
+                         # A floor's `fightFlags` tune its port leg's closed-loop fight
+                         # (boss-route-record.mjs --dodge, --orbit, --boss-radius):
+                         # Caves I's fire rooms and Mega Fatty's 30-shot bursts.
+                         *map(str, floor.get('fightFlags', [])),
                          *(['--route-avoid', avoid] if avoid else []),
                          *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
                          rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
@@ -255,11 +306,14 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
 
 
 def main():
+    global RECORDINGS
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contrived', action='append', default=[], metavar='FIXTURE', help='fixture name under references/.../stage-exit')
     parser.add_argument('--count', type=int, default=1, help='OS-random approach cases per fixture')
     parser.add_argument('--production-directory', help='Existing immutable production artifact for both public-input recordings')
+    parser.add_argument('--recordings-output', type=Path, default=RECORDINGS, help='Private recorder attempt archive, retained on every failure')
     args = parser.parse_args()
+    RECORDINGS = args.recordings_output.resolve()
     entropy = random.SystemRandom()
     cases, failures = [], []
     for name in args.contrived:
@@ -272,7 +326,8 @@ def main():
         for index in range(args.count):
             # The waypoint comes from an OS-shuffled candidate order: the
             # recorder takes the first one clear of the port's own solid
-            # cells (authored rocks, its fight's poops). A retry reshuffles.
+            # cells (authored rocks, its fight's poops) that it can route to,
+            # or takes the trapdoor directly when none is. A retry reshuffles.
             for _ in range(2):
                 solid = set(fixture.get('originalSolid', []))
                 # Turning at the waypoint carries the player about ten units

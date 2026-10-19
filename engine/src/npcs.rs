@@ -92,6 +92,12 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dingle: Option<crate::dingle::DingleState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boil: Option<crate::boil::BoilState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_creep: Option<crate::wall_creep::WallCreepState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub squirt: Option<crate::squirt::SquirtState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_hugger: Option<crate::wall_hugger::WallHuggerState>,
     /// Entity+494: BaseUpdate discards every queued hit.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -136,6 +142,14 @@ pub struct Npc {
     pub gemini: Option<crate::gemini::GeminiState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hopper: Option<crate::hoppers::HopperState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fatty: Option<crate::fatty::FattyState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub greed: Option<crate::greed::GreedState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gurdy: Option<crate::gurdy::GurdyState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mega_fatty: Option<crate::mega_fatty::MegaFattyState>,
 }
 
 /// One overlay clip of an NPC sprite, advanced with the main clip.
@@ -235,6 +249,10 @@ pub(crate) fn blast_hit_with_kind(
     line_clear: &dyn Fn(WorldVector) -> bool,
 ) -> Result<(), String> {
     for npc in &mut state.room.npcs {
+        // 554490 skips the blast's own source entity (a Mulligan's EXPLODE).
+        if npc.id == source.id && npc.kind == source.entity_type {
+            continue;
+        }
         if npc.dead
             || npc.removed
             || npc.entity_collision_class == 0
@@ -436,7 +454,13 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
             //health-unit conversion is also that rounded incoming amount.
             let health_units = contact_damage as u8;
             let immunity_presentations = u32::from(health_units) * 60;
-            combat::try_damage_player(state, health_units, immunity_presentations, 0)?;
+            combat::try_damage_player_from(
+                state,
+                health_units,
+                immunity_presentations,
+                0,
+                Some(npc.kind),
+            )?;
         }
         let original_position = player_body.position;
         combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {
@@ -912,6 +936,9 @@ impl Npc {
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,
+            boil: None,
+            wall_creep: None,
+            squirt: None,
             wall_hugger: None,
             invincible: false,
             death_frame: 0,
@@ -928,6 +955,10 @@ impl Npc {
             overlay: None,
             gemini: None,
             hopper: None,
+            fatty: None,
+            greed: None,
+            gurdy: None,
+            mega_fatty: None,
         }
     }
 

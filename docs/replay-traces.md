@@ -8,7 +8,10 @@ after a public command and real audio-device time. Replay inserts those actual
 callbacks at the recorded positions; it never synthesizes completions from ticks.
 
 Public command and backend metadata share a 4 MiB encoded-record budget and a
-36,000 record limit.
+36,000 record limit. These count records, not presented frames: one Tick record
+carries up to 36,000 steps. The native `replay` binary accepts at most 72,000
+steps in all (twenty minutes at 60 Hz), the same whole-tape bound the original's
+clock runner applies.
 Full state snapshots have a separate
 32 MiB budget. Each budget counts JSON record bodies; snapshot headers, array
 punctuation and browser object overhead are outside those byte counters.

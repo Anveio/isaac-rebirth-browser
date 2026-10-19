@@ -179,7 +179,7 @@ try {
           })));
         }
         const emptyIndices = state.room.grid.cells.flatMap((cell, index) => cell.entity ? [] : [index]);
-        assert.equal(summary.runSeed, observed.savedRun.seedText.replaceAll(' ', ''));
+        assert.equal(summary.runSeed, observed.savedRun.seedText, 'Actual Saved+EF80 seed text');
         assert.equal(summary.seededRun, observed.savedRun.seededRun);
         assert.equal(summary.stage, observed.savedRun.stage);
         assert.equal(summary.redHp, observed.savedRun.redHp); assert.equal(summary.maxRedHp, observed.savedRun.maxRedHp);

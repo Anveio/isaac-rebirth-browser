@@ -173,6 +173,13 @@ pub fn encode(seed: u32) -> Result<String, String> {
     }
     Ok(encode_bits(seed))
 }
+/// Formatter5E1170 retains nine bytes, leaving byte4 as ASCII space.
+/// Game.Save54F244 copies that string to Saved+EF80; no RNG is consumed.
+pub(crate) fn formatted(seed: u32) -> Result<String, String> {
+    let mut text = encode(seed)?;
+    text.insert(4, ' ');
+    Ok(text)
+}
 pub fn decode(text: &str) -> Result<u32, String> {
     let compact: String = text.chars().filter(|character| *character != ' ').collect();
     if compact.len() != 8 || !compact.is_ascii() {

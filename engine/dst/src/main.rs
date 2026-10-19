@@ -298,11 +298,14 @@ fn simulate() -> ExitCode {
         if allow_unmet { " (allowed)" } else { "" },
         if passed { "pass" } else { "fail" }
     );
-    let census = names.contains(&"game").then(coverage::report);
+    let census = names
+        .iter()
+        .any(|name| matches!(*name, "game" | "rooms"))
+        .then(coverage::report);
     if let Some(census) = &census {
         eprintln!(
-            "rebirth-dst coverage: {} game cases; NPC kinds never simulated: {} (and {} that no authored room places); simulated but never removed: {}; room types on floors never entered: {}",
-            census["gameCases"], census["unreachedNpcKinds"], census["unplacedNpcKinds"], census["unremovedNpcKinds"], census["unenteredRoomTypes"]
+            "rebirth-dst coverage: {} game and {} rooms cases; NPC kinds never simulated: {} (and {} that no authored room places); simulated but never removed: {}; room types on floors never entered: {}",
+            census["gameCases"], census["roomsCases"], census["unreachedNpcKinds"], census["unplacedNpcKinds"], census["unremovedNpcKinds"], census["unenteredRoomTypes"]
         );
     }
     if let Some(path) = &options.report {

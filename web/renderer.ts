@@ -395,7 +395,7 @@ export class Renderer {
     }
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
-        this.assets.draw(ctx, "gfx/009.000_projectile.anm2", projectile.animation,
+        this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
           projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
     for (const particle of state.fireParticles)
       if (!particle.removed && particle.visible)
@@ -422,6 +422,9 @@ export class Renderer {
       if (bomb.motion.lifetime === "alive")
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     for (const explosion of state.explosions) {
+      // Owned rows only project the real Effect1 frame/light. Draw it once
+      // through spriteEffects; old serialized adapter rows remain explicit.
+      if (explosion.sourceEffect !== undefined) continue;
       this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     }
     for (const bomb of state.bombs)
@@ -532,7 +535,9 @@ export class Renderer {
       // Catalogue-driven families: the engine names the authored actor.
       ctx.save();
       ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
-      ctx.scale(npc.flipX ? -1 : 1, 1);
+      // Wall Creep: sprite rotation +2cc onto its wall, and +2fd on a side wall.
+      if (npc.wallCreep) ctx.rotate(npc.wallCreep.rotation * Math.PI / 180);
+      ctx.scale(npc.flipX ? -1 : 1, npc.wallCreep?.flipY ? -1 : 1);
       this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
       // ANM2 overlay slot (Gemini's head) draws over the main clip.
       if (npc.overlay) this.assets.draw(ctx, npc.actor, npc.overlay.animation, 0, 0, npc.overlay.clock, { scale, color });

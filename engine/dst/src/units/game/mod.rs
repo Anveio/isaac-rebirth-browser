@@ -11,6 +11,10 @@ mod invariants;
 pub(crate) mod saves;
 mod scout;
 
+pub(crate) use driver::Driver;
+pub(crate) use invariants::expected_rejection;
+pub(crate) use scout::seeded_run;
+
 use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
@@ -41,6 +45,8 @@ pub fn run(case: &mut Case) {
     // `--resume`: replay a prefix (a boss room entered, say), then branch.
     let resume = case.resume.take();
     let prefix = resume.as_ref().map_or(&[][..], |tape| &tape.commands[..]);
+    // The document a generated case's previous session stored, if any.
+    let mut previous = None;
     let tape = match (replay, &resume) {
         (Some(tape), _) => tape,
         (None, Some(resume)) => resume.start(),
@@ -78,9 +84,16 @@ pub fn run(case: &mut Case) {
                     gamma: stored_gamma(e),
                 });
             }
-            // The browser's own-save storage, which a menu readmission reads.
+            // The browser's own-save storage, which a menu readmission reads:
+            // sometimes what a previous session stored, as after a reload.
             if e.chance(1, 2) {
-                tape.save_host = Some(saves::generated_host(e));
+                let mut host = saves::generated_host(e);
+                if e.chance(1, 3) {
+                    let steps = e.range(150, 1_500);
+                    previous = saves::previous_session(e, steps);
+                    host.stored.clone_from(&previous);
+                }
+                tape.save_host = Some(host);
             }
             tape
         }
@@ -89,6 +102,15 @@ pub fn run(case: &mut Case) {
     let Some(mut simulation) = Simulation::boot(&tape) else {
         return;
     };
+    // A tape's stored document is a previous session's too, unless it is
+    // one of the corrupt documents the generator stores (which never load).
+    let stored = tape
+        .save_host
+        .as_ref()
+        .and_then(|host| host.stored.as_deref());
+    if let Some(document) = previous.as_deref().or(stored) {
+        saves::reload(&tape, document, previous.is_some());
+    }
     let mut driver = driver::Driver::new(case.entropy);
     if !replaying {
         // Every generated case scouts, so the scout's own must-hits never hang
@@ -134,6 +156,8 @@ struct Simulation {
     game: Game,
     /// The save host's storage, with the tape's save host.
     store: Option<SaveStore>,
+    /// The profiles the session booted with: a previous session's document.
+    imported: Option<std::sync::Arc<rebirth_cleanroom::save_profiles::Profiles>>,
     tape: Tape,
     /// Ok/Err outcome and state digest after each command.
     trace: Vec<(bool, u64)>,
@@ -373,6 +397,7 @@ impl Simulation {
                 invariants::state(&game.state);
                 coverage::observe(&game.state);
                 Some(Self {
+                    imported: game.saved_profiles.clone(),
                     game,
                     store,
                     tape: tape.start(),
@@ -448,7 +473,13 @@ impl Simulation {
             Ok(()) => saves::serve(&mut self.store, host, &mut self.game, &command),
             Err(_) => Ok(Vec::new()),
         };
-        saves::check(&before, &command, &served, &self.game);
+        saves::check(
+            &before,
+            &command,
+            &served,
+            &self.game,
+            self.imported.as_deref(),
+        );
         if host.is_some() && e.chance(1, 40) {
             saves::round_trip(&self.tape, &self.game);
         }

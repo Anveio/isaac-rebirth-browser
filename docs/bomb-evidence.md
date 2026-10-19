@@ -393,3 +393,68 @@ no declared public clock plan or timestamp override. Complete Browser
 input/backend traces and actual PNGs were retained; RGBA differences were
 not computed. This short integration result is separate from the isolated
 parent/candidate qualification above.
+
+
+## Bomb and bomb-rock effect children: source follow-up
+
+The child-owner implementation connects fresh planted/Troll/Mega Troll/ordinary
+Dr. Fetus and bomb-rock helpers to real Effect1000/18 and1000/1 owners.
+Source555385..55550C and56C8EC..56CA73 run after damage and nested callbacks:
+crater seed/Init, persistent seed-and-position record, then explosion seed/Init.
+The crater owns its independent local35 frame and shared alpha; explosion Init
+owns its shared flip. Neither caller explicitly Updates a child. TNT keeps its
+different explosion-before-crater order and no record.
+
+The existing effect controllers own animation, first-Full SFX182, flags8 paint,
+retirement and crater reentry. Fresh `explosions` rows link their actual Effect1
+handle and only project frame/position for lights and diagnostics. This adds no
+random draw, sound or second rendered actor. Old serialized unowned rows retain
+their separate adapter; their restoration is unqualified. The bomb-rock grid
+callback moves before the actor fence, matching5D1384 grid Update before5D145A
+manager454DF0. A rock-born explosion gets that Full callback; a child born inside
+the Bomb actor pass waits for the next Full. This changes real callback/RNG
+order as well as rendering; the bomb-rock path still needs live qualification.
+
+The fresh public8b70 candidate18306e9a (1,417 files) passes `check:build`, the
+WASM ABI/constructor checks and Runtime4 (4/4). Its build also includes the
+separate Puke-texture export correction; that change receives no Bomb parity
+credit. Two unchanged fixed even/odd public Bomb tapes reuse their completed
+independent Original captures and run through actual DOM inputs on parent7ddc
+and the new candidate. Each route retains19 Native captures and18 paired
+checkpoints. Parent7ddc is the earlier public134+H/portable artifact; the later
+Mega NPC path is absent from both empty-room routes. This is a bounded route
+comparison, not a whole latest-main parent comparison or a fresh OS cohort.
+
+Both artifacts pass all290 canonical state fields and80 exact Bomb fields
+across the two routes. Their ordered keys, Native expectations, actual values
+and statuses are identical. A separate strict1000/1 manager/body comparison
+improves13/292 to256/292 passing rows:243 gains, zero lost passes and36 remaining
+failures. The additive child comparison remains FAIL. Nine actual child observations now expose the body, position,
+velocity, collision/configuration, animation, scale and color owners. These
+results do not qualify the transient18 painted actor or persistent record.
+
+All36 remaining child failures stay mandatory: spawn seed, local actor-RNG
+state, birth Game counter and flipX differ in each of the nine observations.
+Both routes observe Native child seed3546218048 versus port160956994, Native
+birth144 versus port143, and Native flipfalse versus porttrue. The one-count
+Game offset is already present at gameplay-start (Native42 versus port41) in
+both parent and candidate; the child copies the actual counter. Parent and
+candidate have identical whole624-word shared-MT states and cursors at all22
+Playing checkpoints. That endpoint agreement does not certify individual draws
+or Native stream alignment. The cached Native observer has no complete shared
+MT state, so the first causal draw remains unresolved; no seed, counter, flip
+or clock normalization is accepted.
+
+Strict RGBA remains14/36 passing and22/36 failing on both artifacts. Nine
+already-failing images change (four even, five odd), with no pixel gains or
+lost passes. All36 compared Native PNG hashes remain exact. Every historical
+center/near-wall, tinted-rock, Troll, shared-MT and pixel failure remains in its
+original report; this comparison does not regrade them.
+
+Dr/Troll/Mega Troll, bomb-rock and TNT caller qualification, crater18 paint/records,
+complete shared MT, modifiers, full damage/parent ownership, live-effect
+Save/Continue and full render/audio parity remain open. Unavailable
+Room11/descriptor/definition child owners preserve a nonfatal first frontier
+after completed damage, with their missing child/shared footprint unqualified.
+Known current children can execute while earlier crater records remain
+None/unknown; no empty history is fabricated.

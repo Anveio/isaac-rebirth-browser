@@ -18,6 +18,7 @@ mod attack_grid;
 pub mod attack_runtime;
 pub mod audio;
 pub mod blood_effects;
+pub mod boil;
 pub mod bombs;
 pub mod boss_death;
 mod brimstone;
@@ -50,6 +51,8 @@ mod explosion_effects;
 pub mod game_shake;
 pub mod spider_webs;
 pub mod sprite_color;
+pub mod squirt;
+mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
 mod technology;
@@ -60,7 +63,9 @@ mod controlled_knife_homing;
 pub mod controls_menu;
 pub mod envy;
 pub mod familiars;
+pub mod fatty;
 pub mod fireplaces;
+pub mod fistula;
 pub mod floor;
 pub mod fly_effects;
 mod fmath;
@@ -69,9 +74,11 @@ pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
 pub mod gluttony;
+pub mod greed;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
+pub mod gurdy;
 pub mod gushers;
 mod health_damage;
 pub mod hoppers;
@@ -96,14 +103,17 @@ pub mod lasers;
 pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
+pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
+pub mod mega_fatty;
 pub mod menu_lifecycle;
 pub mod menu_presentation;
 pub mod monstro;
 mod monstros_lung;
 pub mod motion;
 pub mod mt;
+pub mod mulligans;
 pub mod music;
 pub mod nightmares;
 pub mod npcs;
@@ -144,6 +154,7 @@ pub mod save_profiles;
 pub mod saved_game;
 pub mod seed;
 pub mod shop;
+pub mod skinny;
 pub mod slots;
 mod source_angles;
 pub mod stage_shooting_guard;
@@ -151,6 +162,7 @@ pub mod stage_transition;
 mod target_eligibility;
 pub mod tnt;
 pub mod traversal;
+pub mod wall_creep;
 pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
@@ -2215,8 +2227,14 @@ impl Game {
         record.admit_initial_room()?;
         let run = &record.run;
         let context = &record.context;
+        // Saved+EF80 owns the formatted string; the internal codec stays compact.
+        // Validation already joins either legacy8 or formatted9 to this number.
+        let run_seed = seed::encode(context.run_seed_value)?;
+        if run.run_seed != run_seed && run.run_seed != seed::formatted(context.run_seed_value)? {
+            return Err("saved seed text requires canonical legacy or formatted code".into());
+        }
         let mut run_seeds = seed::RunSeeds::new(context.run_seed_value)?;
-        run_seeds.admit_menu_seed_effect(&run.run_seed)?;
+        run_seeds.admit_menu_seed_effect(&run_seed)?;
         //54EE90 initializes ItemPool from SavedED94, then581CF0 restores
         //its actual saved tables. It does not request NewRun's14th seed draw.
         let constructed_pools = items::ItemPools::new(
@@ -2233,7 +2251,7 @@ impl Game {
             .ok_or("saved manager RNG is unknown")?;
         self.state.run_seeds = Some(run_seeds);
         self.state.run_seed_value = context.run_seed_value;
-        self.state.run_seed = run.run_seed.clone();
+        self.state.run_seed = run_seed;
         self.state.seeded_run = run.seeded_run;
         self.state.achievement_eligibility = !run.seeded_run;
         self.state.character = context.character.clone();
@@ -2549,6 +2567,7 @@ impl Game {
         )?;
         //Room.Save5CE418 captures actor records before PlayerManager.Save
         //can flush later grant callbacks. This is not a later live-state clone.
+        let regular_records = pickups::capture_regular_records(&self.state)?;
         let ambient_records = critters::capture_saved_records(&self.state);
         // Constructor 587ec0 initializes unused grid indices to -1; 58ced0
         // excludes only -3 special records. Fresh normal Level copies all135.
@@ -2560,12 +2579,13 @@ impl Game {
         //owned grant queue and applies the supported Player save boundary.
         let player_items = player_save::capture_at_manager_save(&mut self.state)?;
         self.saved_game.player_rng_seed = self.player_manager_secondary_rng.seed;
-        let saved = saved_game::SavedRun::copy_from(
+        let mut saved = saved_game::SavedRun::copy_from(
             &self.state,
             item_pools,
             grid_save.records,
             player_items,
-        );
+        )?;
+        saved.room.saved_regular_pickups = regular_records;
         self.state.saved_run_summary = Some(saved.summary(
             grid_save.empty,
             grid_save.occupied_pending,
@@ -2603,8 +2623,8 @@ impl Game {
                 .ok_or("profile save is missing its completed summary")?,
             context: save_profiles::RunContext::capture(&self.state, ambient_records),
         };
-        // A room holding more stains (or actors) than the record format
-        // admits refuses this save: the profile keeps its previous record
+        // A room holding more actors than the record format admits refuses
+        // this save: the profile keeps its previous record
         // and no write is requested, so the Tick and the run continue.
         if !record.rooms_within_supported_counts() {
             return Ok(());
@@ -2685,12 +2705,12 @@ impl Game {
 
     pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
         if let Some(request) = &self.save_write_request {
-            return Ok(request.packet.as_ref().clone());
+            return request.packet.export();
         }
-        self.serialize_profile_data()
+        self.serialize_profile_data()?.export()
     }
 
-    fn serialize_profile_data(&self) -> Result<Vec<u8>, String> {
+    fn serialize_profile_data(&self) -> Result<save_profiles::SaveWritePacket, String> {
         let fresh;
         let profiles = match self.saved_profiles.as_deref() {
             Some(profiles) => profiles,
@@ -2699,12 +2719,7 @@ impl Game {
                 &fresh
             }
         };
-        profiles.validate()?;
-        let bytes = serde_json::to_vec(&profiles).map_err(|error| error.to_string())?;
-        if bytes.len() > save_profiles::MAX_BYTES {
-            return Err("saved profiles exceed the supported 4 MiB format".into());
-        }
-        Ok(bytes)
+        profiles.write_packet()
     }
 
     ///A real application storage owner declares this capability before any
@@ -2737,7 +2752,7 @@ impl Game {
         self.save_write_request = Some(save_profiles::SaveWriteRequest {
             protocol: 1,
             revision: self.state.save_revision,
-            packet: std::sync::Arc::new(packet),
+            packet,
             remaining_ticks: None,
         });
         self.state.save_write_pending = true;
@@ -3596,6 +3611,8 @@ impl Game {
             shake.reset_duration();
         }
         self.state.source_cache_run_flags = Some(0);
+        // Stop54F54B follows Save; its copied penalty stage stays intact.
+        self.state.level_progress.last_penalty_stage = Some(0);
         // Stop54F571 ->576B70 follows the actual Save copy above.
         self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
         self.reconstruct_stopped_room_backdrop();
@@ -3619,6 +3636,8 @@ impl Game {
             // NewRun54eb20 itself has no clear; delay remains unchanged.
             // The same Stop54F571 clears history for both deferred requests.
             // NewRun itself never reconstructs unknown history from counts.
+            // Both deferred destinations pass Stop54F54B before dispatch.
+            self.state.level_progress.last_penalty_stage = Some(0);
             self.state.acquisition_history =
                 Some(acquisition_history::AcquisitionHistory::default());
             self.state.information_animation.clear();
@@ -4294,11 +4313,16 @@ impl Game {
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
         ordinary_placement::observe_room_boundary(&mut self.state);
+        if phase == phase::Phase::Update {
+            //5D1384 grid callbacks precede5D145A's manager454DF0 fence.
+            //A bomb rock's Effect1 therefore gets its first real Full here;
+            //a child born inside a Bomb actor callback remains fenced out.
+            rock_blast::advance_bomb_rocks(&mut self.state)?;
+            rock_blast::advance_markers(&mut self.state);
+        }
         let existing = self.state.actor_scheduler.full_phase();
         let mut player_updated = false;
         if phase == phase::Phase::Update {
-            rock_blast::advance_bomb_rocks(&mut self.state)?;
-            rock_blast::advance_markers(&mut self.state);
             self.refresh_room_boss_count();
             if let Some(counter) = &mut self.state.room.source_tear_slowdown_2494 {
                 if *counter > 0 {
@@ -5068,6 +5092,50 @@ impl Game {
         };
         self.advance_npc(id, phase::Phase::Update)
     }
+    /// Mulligan EXPLODE 4e8200: the blast (damage 40, radius 60, source the
+    /// Mulligan), the effect and burst draws, Kill's non-boss burst, then
+    /// the dead branch. The post-AI dead handling removes it this update.
+    fn mulligan_explode(&mut self, index: usize) -> Result<(), String> {
+        let (id, kind, position) = {
+            let npc = &self.state.room.npcs[index];
+            (npc.id, npc.kind, npc.position)
+        };
+        bombs::explode(
+            &mut self.state,
+            position,
+            60.0,
+            40.0,
+            combat::DamageSource {
+                id,
+                entity_type: kind,
+            },
+        )?;
+        let mut births = Vec::new();
+        mulligans::explode_shots(position, &mut self.state.boot_lifecycle.shared, &mut births);
+        // Kill 4464c0: the non-boss burst 445c60 at once.
+        self.state.audio.admit(
+            &mut self.state.boot_lifecycle.shared,
+            self.state.system_clock.system_counter.wrapping_sub(1),
+            audio::SoundRequest {
+                id: 30,
+                volume: 0.8,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+        let seed = self.state.boot_lifecycle.shared.next_u32();
+        let npc = &mut self.state.room.npcs[index];
+        npc.dead = true;
+        npc.death_effect_seed = Some(seed);
+        births.push(entities::Birth::Blood(seed));
+        mulligans::death(npc, &mut self.state.boot_lifecycle.shared, &mut births);
+        for birth in births {
+            self.admit_npc_birth(index, birth)?;
+        }
+        self.state.room.npcs[index].removed = true;
+        Ok(())
+    }
     /// Admits one NPC callback product at the callback's own return point.
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
@@ -5103,13 +5171,58 @@ impl Game {
                 self.state.room.authored_actor_order.push(actor);
                 self.state.actor_scheduler.admit(actor)
             }
-            entities::Birth::Projectile(birth) => self.admit_enemy_projectile(|id| {
-                enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
-            }),
+            entities::Birth::Projectile(birth) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
+                    spawner_type,
+                    ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+                })
+            }
             entities::Birth::Shot(shot) => self.admit_enemy_projectile(|id| {
                 enemy_projectiles::EnemyProjectile::birth(id, parent, shot)
             }),
             entities::Birth::CreepHit => creep_effects::hurt_player(&mut self.state),
+            entities::Birth::Fart {
+                position,
+                radius,
+                source,
+            } => {
+                fatty::fart(&mut self.state, position, radius, source);
+                Ok(())
+            }
+            entities::Birth::VariantProjectile(birth, variant) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                self.admit_enemy_projectile(|id| enemy_projectiles::EnemyProjectile {
+                    variant,
+                    spawner_type,
+                    ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
+                })
+            }
+            entities::Birth::PlayerHurt => {
+                combat::try_damage_player(&mut self.state, 1, 60, 0).map(|_| ())
+            }
+            entities::Birth::Shake(duration) => {
+                self.state
+                    .game_shake
+                    .get_or_insert_with(Default::default)
+                    .overwrite_duration(duration);
+                Ok(())
+            }
+            entities::Birth::Suck(center) => {
+                mega_fatty::suck(&mut self.state, center);
+                Ok(())
+            }
+            entities::Birth::UnportedBlueSpider => {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type: 3,
+                        variant: 73,
+                        subtype: 0,
+                    },
+                );
+                Ok(())
+            }
             entities::Birth::FlyExplosion {
                 seed,
                 position,
@@ -5138,18 +5251,25 @@ impl Game {
                 outcome.record_frontier(&mut self.state, "npcGridHurt");
                 Ok(())
             }
+            entities::Birth::Bomb {
+                variant,
+                seed,
+                position,
+            } => bombs::admit_conversion(&mut self.state, variant, seed, position),
+            entities::Birth::MulliganExplode => self.mulligan_explode(index),
             entities::Birth::Spawned(spawned) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(spawned.selector))?;
                 let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
                 npc.velocity = spawned.velocity;
-                npc.no_appear = true;
+                npc.no_appear = !spawned.appear;
                 npc.spawner_type = spawned.spawner_type;
                 npc.boss_spawned = spawned.boss_spawned;
                 if spawned.scale != 1.0 {
                     npc.sprite_scale = Some(spawned.scale);
                 }
-                npc.max_hp *= spawned.health_scale;
+                npc.max_hp *= spawned.max_health_scale;
                 npc.hp *= spawned.health_scale;
+                npc.hp += spawned.health_delta;
                 Ok(())
             }
             entities::Birth::EnvyChild {

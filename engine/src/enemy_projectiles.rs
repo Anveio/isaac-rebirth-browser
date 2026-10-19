@@ -60,6 +60,16 @@ pub struct EnemyProjectile {
     pub removed: bool,
     pub impact_seed: Option<u32>,
     pub impact_rotation: Option<u32>,
+    /// EntityRef +8: the spawner's entity type (0 unknown).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub spawner_type: u32,
+    /// Projectile 9.v: 0 blood, 3 puke (ProjectileParams+74).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub variant: u32,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 impl EnemyProjectile {
@@ -113,6 +123,8 @@ impl EnemyProjectile {
             removed: false,
             impact_seed: None,
             impact_rotation: None,
+            spawner_type: 0,
+            variant: 0,
         }
     }
 
@@ -128,18 +140,14 @@ impl EnemyProjectile {
             .full_updates
             .checked_add(1)
             .ok_or("projectile update count exhausted")?;
-        // Source536e37 selects a regular clip from actual scale every full.
-        // Fresh supported producers reach sizes5..7; Worm scale1 remains6.
+        // Source536e37 selects a regular clip from actual scale every full;
+        // Worm scale1 remains6.
         let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
-        let frames = match size {
-            5 => content::PROJECTILE_REGULAR5_FRAMES,
-            6 => content::PROJECTILE_REGULAR6_FRAMES,
-            7 => content::PROJECTILE_REGULAR7_FRAMES,
-            _ => {
-                return Err("hostile projectile scale requires an unadmitted authored clip".into())
-            }
-        };
-        self.animation = Some(format!("RegularTear{size}"));
+        let name = format!("RegularTear{size}");
+        let frames = content::clip(content::entity(9, self.variant).actor, &name)
+            .ok_or("hostile projectile scale requires an unadmitted authored clip")?
+            .frames;
+        self.animation = Some(name);
         self.animation_frame = self.full_updates % frames;
         self.animation_clock = self.animation_frame as f32;
         self.animation_playing = true;
@@ -258,7 +266,8 @@ pub fn player_contacts(state: &mut State) -> Result<(), String> {
         if !result.colliding {
             continue;
         }
-        let accepted = combat::try_damage_player(state, 1, 60, 0)?;
+        let source = Some(state.enemy_projectiles[index].spawner_type);
+        let accepted = combat::try_damage_player_from(state, 1, 60, 0, source)?;
         state.player.x = f64::from(player.position.x) * 0.65 + 32.0;
         state.player.y = f64::from(player.position.y) * 0.65 - 46.0;
         state.player.vx = f64::from(player.velocity.x) * 0.65;

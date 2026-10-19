@@ -13,3 +13,4 @@ engine/dst/target
 !web/*.json
 !references/isaac/rebirth/resources
 !antithesis
+!.cache/private-base-assets/rooms/03.caves.stb

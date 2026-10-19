@@ -20,7 +20,12 @@
 // closed-loop routing begins; the 60-frame settle applies only at gameplay-start.
 // --fight FRAMES then fights the room clear within FRAMES (lib/route.mjs
 // fightKeys) and parks the player in the bottom-left corner (`corner`);
-// --lead aims ahead of each foe's velocity and orbits closer; --no-corner
+// --lead aims ahead of each foe's velocity and orbits closer; --dodge scores
+// moves against enemy shots' projected paths and lit fireplaces; --orbit -1
+// starts the orbit the other way round and --boss-radius R holds bosses at R
+// units (default 170); --salt N seeds the orbit sign, boss radius and a
+// score jitter for one more fight variant, and --route-salt N the route
+// rooms' fights the same way; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -30,13 +35,23 @@
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
 // bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
-import { doorKeys, fightKeys, routingView, toward, waypoint } from './lib/route.mjs';
+import { doorKeys, fightKeys, routingView, saltedRandom, toward, waypoint } from './lib/route.mjs';
+
+// Optional private caller-owned archive; default stdout/result behavior is unchanged.
+const attemptOutput = flag('--attempt-output');
+const preserveAttempt = (name, value) => {
+  if (!attemptOutput) return;
+  const fd = openSync(join(attemptOutput, name), 'wx', 0o600);
+  try { writeFileSync(fd, JSON.stringify(value) + '\n'); fsyncSync(fd); }
+  finally { closeSync(fd); }
+};
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const rooms = flag('--rooms').split(',').map(Number);
@@ -49,7 +64,8 @@ const FROM = flag('--from', 'gameplay-start');
 const FIGHT = Number(flag('--fight', '0')), EXIT = Number(flag('--exit', '0'));
 const VIA = flag('--via') && flag('--via').split(',').map(Number);
 // --via-candidates X,Y;X,Y;... (an OS-shuffled order) takes the first one the
-// exit can use as its waypoint; the result reports it as `via`.
+// exit can use as its waypoint and route to; the result reports it as `via`.
+// With none, the exit takes the trapdoor directly and reports no `via`.
 const VIA_CANDIDATES = (flag('--via-candidates', '') || '').split(';').filter(Boolean).map(item => item.split(',').map(Number));
 let chosenVia = VIA ? { x: VIA[0], y: VIA[1] } : null;
 const IDLE = Number(flag('--idle', '0'));
@@ -62,8 +78,8 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
 // --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
-// around in those rooms: an authored slot machine (6.x) blocks the player in
-// both games, but the routing grid does not count slot bodies as solid.
+// around in those rooms, beyond the routing grid's own solid cells (which
+// include NPC and slot bodies).
 const ROUTE_AVOID = new Map((flag('--route-avoid', '') || '').split(';').filter(Boolean)
   .map(item => item.split(':')).map(([room, cells]) => [Number(room), cells.split(',').map(Number)]));
 // --hurt: the original's fixture fight ends below full health. Basement II's
@@ -101,10 +117,18 @@ function collectKeys(state, key) {
 }
 
 const server = await startProductionServer({ directory: flag('--production-directory') });
-const browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
-const actions = [], checkpoints = {};
-let frames = 0, status = 'fail', reason;
 try {
+  preserveAttempt('artifact.json', server.build);
+} catch (error) {
+  try { await server.close(); }
+  catch (cleanupError) { throw new AggregateError([error, cleanupError], 'Recorder artifact retention and server cleanup failed'); }
+  throw error;
+}
+let browser;
+const actions = [], checkpoints = {};
+let frames = 0, status = 'fail', reason, end = null;
+try {
+  browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
@@ -176,13 +200,20 @@ try {
         }
       }
     }
-    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming };
+    // No route: head straight for the goal (`routed` false), which crosses
+    // whatever lies between.
+    if (found === undefined) return { point: { x: goal.x, y: goal.y }, dir: incoming, routed: false };
     const path = [];
     for (let k = found; k !== undefined; k = previous.get(k)) path.unshift(k);
     const next = path[1] ?? path[0], cell = Math.floor(next / 5);
     return { point: cell === target ? { x: goal.x, y: goal.y } : { x: cell % w * 40 + 40, y: Math.floor(cell / w) * 40 + 120 },
-      dir: path.length > 1 ? next % 5 : incoming };
+      dir: path.length > 1 ? next % 5 : incoming, routed: true };
   };
+  // --route-salt N (with --dodge) seeds the route rooms' orbit sign and score
+  // jitter, as --salt does the boss fight's.
+  const routeRng = flag('--route-salt') ? saltedRandom(Number(flag('--route-salt'))) : null;
+  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge'),
+    ...(routeRng ? { orbit: routeRng() < 0.5 ? -1 : 1, jitter: 0.05 + routeRng() * 0.3, rng: routeRng } : {}) };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
     let budget = ROOM_FRAMES;
@@ -210,11 +241,18 @@ try {
       const inside = pedestals.includes(state.grid && cell(state.player.x, state.player.y));
       await hold(state.transition || !state.player.controls ? []
         : key ? collectKeys(state, key)
+        // A route room whose live foes keep its doors shut is fought clear
+        // (a descent's later floor: Caves I's Dips and Chargers).
+        : !usable && !state.clear && state.foes.length ? fightKeys(state, routeFight)
         // A cleared boss room's shared keys step from cell centre to cell
         // centre, off its open trapdoor, until the doorway is next. A centre
         // beside the trapdoor is 40 units from it, outside its entry radius.
         : !usable ? [] : inside ? ['KeyA'] : state.trapdoor
           ? centreKeys([state.trapdoor.gridIndex, ...AVOID, ...pedestals, ...pickupCells(state)], door)
+          // With --dodge, a room's lit fireplaces (solid cells that burn about 23
+          // units out) are passed centre to centre too, never cut diagonally.
+          : routeFight.dodge && state.fires.length
+          ? centreKeys([...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])], door)
           : doorKeys(avoiding(state.grid, [...pedestals, ...(ROUTE_AVOID.get(state.room) ?? [])]), state.player, door));
       if (process.env.BOSS_ROUTE_DEBUG && budget % 30 === 0) process.stderr.write(`${JSON.stringify({ room: state.room, budget, player: state.player, door, keys: [...held], transition: state.transition })}\n`);
       await step(STRIDE); budget -= STRIDE;
@@ -236,7 +274,15 @@ try {
     }
   };
   if (FIGHT) {
-    const memory = { orbit: 1, lead: hasFlag('--lead') };
+    // --orbit -1 starts the boss orbit the other way round; --boss-radius R
+    // holds bosses at R units instead of 170.
+    // --salt N (with --dodge) seeds the orbit sign, a boss radius in 150..200
+    // and a per-decision score jitter; --orbit and --boss-radius still win.
+    const rng = flag('--salt') ? saltedRandom(Number(flag('--salt'))) : null;
+    const salted = rng ? { orbit: rng() < 0.5 ? -1 : 1, bossRadius: 150 + rng() * 50, jitter: 0.05 + rng() * 0.3 } : {};
+    const memory = { lead: hasFlag('--lead'), dodge: hasFlag('--dodge'), ...salted, rng,
+      ...(flag('--orbit') ? { orbit: Number(flag('--orbit')) } : salted.orbit ? {} : { orbit: 1 }),
+      ...(flag('--boss-radius') ? { bossRadius: Number(flag('--boss-radius')) } : {}) };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
     // or beside it then takes the item in the port alone, which leaves an
     // empty pedestal (subtype 0) where the original's keeps its item. With
@@ -247,9 +293,15 @@ try {
     const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
     for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
+      if (state.player.hp <= 0) throw new Error(`The port's player died in the fight, ${FIGHT - left} frames in`);
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
+      if (process.env.BOSS_ROUTE_DEBUG && (FIGHT - left) % 600 === 0) {
+        const raw = JSON.parse(await page.evaluate(() => window.game.snapshotJson()));
+        writeFileSync(`${process.env.BOSS_ROUTE_DEBUG}.fight`, `${JSON.stringify({ fight: FIGHT - left, player: state.player, clear: state.clear, foes: state.foes,
+          npcs: raw.room.npcs.map(n => [n.kind, n.variant, n.hp, n.dead, n.removed, n.canShutDoors, Math.round(n.position.x), Math.round(n.position.y)]) })}\n`, { flag: 'a' });
+      }
     }
     checkpoint('clear');
     if (hasFlag('--no-corner')) { await hold([]); await step(1); }
@@ -381,14 +433,22 @@ try {
       return state.grid.solid[cell] !== '1'
         && ![cell - 15, cell + 15, cell - 1, cell + 1].some(next => interior(next) && state.grid.solid[next] === '1');
     };
+    // The award cells, --avoid and the port's own poops can wall the player
+    // off from a waypoint. A walk without a route heads straight across cells
+    // solid in one game alone, so only that game's player is stopped
+    // (Y9QL8QZM: the original's tail poop at cell 39 held its player while
+    // the port's walked on, and it took the trapdoor 16 frames later).
+    const routed = point => planStep([...AWARD_CELLS, ...AVOID, ...pickupCells(state)], point, 4).routed;
     if (!chosenVia && VIA_CANDIDATES.length) {
-      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }));
-      if (!found) throw new Error('exit via: no candidate waypoint clear of solid cells');
-      chosenVia = { x: found[0], y: found[1] };
+      // With no routed candidate the walk takes the trapdoor directly, as
+      // the contrived exit does.
+      const found = VIA_CANDIDATES.find(([x, y]) => usable({ x, y }) && routed({ x, y }));
+      chosenVia = found && { x: found[0], y: found[1] };
     }
     if (chosenVia) {
       const via = chosenVia;
       if (!usable(via)) throw new Error(`exit via: (${via.x}, ${via.y}) is beside a solid cell`);
+      if (!routed(via)) throw new Error(`exit via: no route to (${via.x}, ${via.y})`);
       await centreWalk(via, [...AWARD_CELLS, ...AVOID], () => Math.hypot(via.x - state.player.x, via.y - state.player.y) <= 6,
         `exit via: no way to (${via.x}, ${via.y}) in ${EXIT} frames`);
     }
@@ -422,13 +482,35 @@ try {
     }
     checkpoint('next-stage');
   }
+  const last = await view();
+  end = { health: last.health, coins: last.coins };
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);
 } finally {
-  await browser.close();
-  await server.close();
+  const failures = [];
+  try {
+    preserveAttempt('before-cleanup.json', { phase: 'before-cleanup', result: {
+      status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
+      via: chosenVia && [chosenVia.x, chosenVia.y],
+    } });
+  } catch (error) { failures.push(error); }
+  const cleanup = await Promise.allSettled([
+    Promise.resolve().then(() => browser?.close()),
+    Promise.resolve().then(() => server.close()),
+  ]);
+  const resources = cleanup.map((result, index) => ({
+    resource: index === 0 ? 'browser' : 'server',
+    status: index === 0 && !browser ? 'not-started' : result.status,
+    reason: result.status === 'rejected' ? String(result.reason) : null,
+  }));
+  try { preserveAttempt('cleanup.json', { phase: 'cleanup-complete', resources }); }
+  catch (error) { failures.push(error); }
+  for (const result of cleanup) if (result.status === 'rejected') failures.push(result.reason);
+  if (failures.length) throw new AggregateError(failures, 'Recorder retention or cleanup failed');
 }
+// `end` is the port's last health and coins, which the next floor's
+// generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y] }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;

@@ -159,24 +159,34 @@ def base_assets(root=ROOT):
     return result
 
 
+# stages.xml room sets the engine embeds from the owner archive: Caves (3) and
+# Depths (5). Basement and the special rooms are checked in.
+PRIVATE_ROOM_SETS = ('03.caves.stb', '05.depths.stb')
+
+
 def prepare_private_caves(root=ROOT):
-    """Derive only Caves in this Source tree's ignored private build cache."""
-    matches = [contents for path, contents in base_assets(root)
-               if path == 'resources/rooms/03.caves.stb']
+    """Derive only the private room sets in this Source tree's ignored build cache."""
+    assets = base_assets(root)
+    for name in PRIVATE_ROOM_SETS:
+        prepare_private_room_set(root, assets, name)
+
+
+def prepare_private_room_set(root, assets, name):
+    matches = [contents for path, contents in assets if path == f'resources/rooms/{name}']
     if len(matches) != 1:
-        raise ValueError('Pinned base archive must contain exactly one Caves room set')
+        raise ValueError(f'Pinned base archive must contain exactly one {name} room set')
     contents = matches[0]
-    target = root / '.cache/private-base-assets/rooms/03.caves.stb'
+    target = root / f'.cache/private-base-assets/rooms/{name}'
 
     def verify():
         if not target.is_file() or read_asset(target) != contents:
-            raise ValueError('Private Caves cache does not match the pinned base archive')
+            raise ValueError(f'Private {name} cache does not match the pinned base archive')
 
     if target.exists() or target.is_symlink():
         verify()
         return
     target.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary = tempfile.mkstemp(prefix='.03.caves-', dir=target.parent)
+    descriptor, temporary = tempfile.mkstemp(prefix=f'.{name}-', dir=target.parent)
     try:
         with os.fdopen(descriptor, 'wb') as stream:
             stream.write(contents)
@@ -201,14 +211,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path, nargs='?', help='An extracted base-Rebirth STB file')
     parser.add_argument('--all-base', action='store_true', help='Decode every declared stage from the original Linux rooms.a')
-    parser.add_argument('--prepare-private-caves', action='store_true', help='Prepare only the ignored Caves build input from the pinned owner archive')
+    parser.add_argument('--prepare-private-caves', action='store_true', help='Prepare only the ignored Caves and Depths build inputs from the pinned owner archive')
     parser.add_argument('--output', type=Path, help='JSON file for one STB, or a private JSON directory for --all-base')
     args = parser.parse_args()
     if args.prepare_private_caves:
         if args.source or args.all_base or args.output:
             parser.error('--prepare-private-caves cannot be combined with decoding arguments')
         prepare_private_caves()
-        print('Verified private Caves build input.')
+        print('Verified private Caves and Depths build inputs.')
         return 0
     if bool(args.source) == args.all_base:
         parser.error('Choose an STB source or --all-base')

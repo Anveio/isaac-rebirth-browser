@@ -323,7 +323,11 @@ Port: placement, fuse, motion, blast damage to player, NPCs and grid, Troll
 and Mega Troll conversion. Ordinary class5 Full ground response now follows
 entity contacts and both phases clamp to actual Room bounds; [scoped #349
 evidence](system-map.md#ordinary-bomb-late-grid-response-349) retains unresolved
-center/near-wall NPC timing. Missing: bomb-modifying items, craters, Bomb Bum
+center/near-wall NPC timing. A [bounded ordinary-Bomb child comparison](bomb-evidence.md#bomb-and-bomb-rock-effect-children-source-follow-up)
+connects real child owners and retains both fixed phase routes:290 canonical
+and80 Bomb fields pass unchanged;243 child-field gains leave36 seed/RNG/counter/flip
+failures. Strict RGBA remains14/36; crater18 records/paint and Dr/Troll/rock/TNT
+caller qualification remain open. Missing: bomb-modifying items, complete crater qualification, Bomb Bum
 and other variants.
 
 No open bugs. Bomb contact bugs are under *Collision and physics*.
@@ -425,6 +429,8 @@ Next: the rest of the Basement/Cellar spawn table.
 | #154 | P2 | Round Worm teleport positions diverge (Wall Hugger part now implemented) | e2e bomb-damage |
 | #536 | P2 | Gusher wanders a different way from the original after the Gaper morph | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
+| #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
+| #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
 
 ## Bosses
 
@@ -582,6 +588,7 @@ parity is a diagnostic only.
 | #670 | P3 | Enemy spawn smoke puffs draw light tan and opaque; the original's are dark grey and see-through | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
+| #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 
 ## Audio
 
@@ -599,6 +606,18 @@ No open bugs.
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
+Current-room Game.Save now copies the supported manager-ordered regular
+pickup list before PlayerManager Save flushes queued grants. Fresh PR #711 base
+candidate `46affff7`, artifact `2a6cbdf4` / WASM `f415dc46`, passes build/interface
+checks, affected selection of 52 suites and the registered fixed `PBW9YNC8` Browser test:
+28 checks, 18 labels and 217 commands. The actual packet retains all four live
+paused room 7 coins with matching write/store/menu-readmission bytes; the
+Bomb-only baseline remains 27 pass / 1 missing-list failure. Both existing
+initial-room capacity contracts also pass on this artifact (35 and 4,062 checks),
+covering own-store Continue and oversized-write rejection. This qualifies the
+storage writer, not later-room Continue, NPC restoration, Original actor-save
+packet parity or later-main gameplay. See [Save scope and replay](save-continue.md).
+
 Port: in-run SavedGame records, origin-local initial-room Save/Continue,
 natural reload and owned Tiny Bug/Fly/Wall Bug saved records through fresh Init.
 The successor137b also restores the physical/fast boundary and Stop Room's
@@ -613,8 +632,41 @@ The70 inherited failures remain14 canonical menu/gameplay-scope errors,
 28 seed separator rows and28 last-penalty-stage rows. Other saved rooms/items/
 actors, complete progression/unlocks, broader RNG/PCM and challenges beyond
 Challenge1 ingress remain open. Historical1b30/0af122 failures and listed-Bomb/
-legacy-refusal evidence retain their exact scope. See [Save scope and
-replay](save-continue.md).
+legacy-refusal evidence retain their exact scope. PR696 is merged at
+`9f952efd`: complete saves retain the 4 MiB limit without a 4,096 walking-paint
+cutoff; capacity refusal acknowledges once, keeps older bytes and resumes the
+Tick. Exact main715 baseline/candidate build and runtime 4/4 each pass. Four
+same-Native Save controls preserve 3,748 rows per role (3,650 pass / 98 fail),
+zero lost passes and pixel metrics; the 98 failures include 28 ambient velocity
+words, 14 canonical scope, 28 seed separator and 28 penalty-stage rows.
+Historical Source C capacity and failed wrappers retain their separate scopes.
+Fresh public-main134 H/tooling artifact `7ddc18cc` separately passes build/ABI
+and runtime 4/4. Its one fixed same-Native Save capture keeps all 2,384 ordered
+rows exactly equal to dbfab H: 2,349 pass / 35 fail, zero lost/missing/new or
+changed Native expectations, 33 own-save guards and unchanged pixels. Actual
+natural reload/Continue passes, with stored seed9/live seed8 and penalty0; the
+observed movement follows the valid room5-to-room6 door transition. The suite
+still fails its 28 ambient velocity and seven canonical scope rows. No new134
+baseline, OS or ordinary replay is claimed; its actual canonical affected
+preview selects 52 suites. Publication on later main3b08711d preserves Mega Fatty and unrelated
+quality tools without inheriting a later-main gameplay grade.
+
+H's separate snapshotdbfab qualification uses fresh baseline `9e3c05e5` and
+shared H/tooling artifact `70cb3285`: fresh build/ABI and runtime 4/4 each pass. The
+candidate's actual affected preview selects 52 suites. The same retained fixed Native case improves 2,321 pass /
+63 fail to 2,349 pass / 35 fail: 14 seed-text and 14 penalty-stage gains, zero
+lost/missing/new rows or changed Native expectations, unchanged pixels and
+33 own-save guards per role. The remaining 35 are 28 ambient velocity words
+and seven canonical scope rows; both comparison exits remain failed. Both
+ordinary-run replays pass on the same retained Native case, including the
+candidate's exact nine-character saved-seed guard. Both fixed natural reloads
+pass; their fresh boot RNG/epochs differ, and unchanged placement permits the
+observed different valid doors. This is no identical-boot counterfactual or
+Original-process reload parity. Historical main715 H retains its separately
+qualified fixed/OS 56 gains and 42 failures. Raw archive audit corrects its
+earlier ordinary/reload-unqualified notes; the old notes remain preserved.
+No main134 integration, Factory/Get or whole-game qualification is inherited.
+See [Save scope and replay](save-continue.md).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |

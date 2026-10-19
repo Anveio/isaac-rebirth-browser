@@ -4,9 +4,12 @@ then write the tape that does.
 
 Some coverage needs a chain of rare events: a boss room cleared, then a
 descent, then a new run. Each stage branches `--cases` generated cases from
-the prefix so far (`rebirth-dst --resume`). It keeps the case that reached
-all of the stage's census keys earliest, and cuts its tape `--extend`
-commands past that point. The next stage branches from there.
+the prefix so far (`rebirth-dst --resume`). It keeps the cases that reached
+all of the stage's census keys, earliest first, and cuts each tape
+`--extend` commands past that point. The next stage's first round branches
+from the earliest. A round that reaches nothing moves the next round to the
+next-earliest prefix, so one dead end, such as a boss entry no branch
+survives, spends a round rather than the chase.
 
 An engine change that moves the shared RNG moves every tape off its branch.
 A scenario tape is then rebuilt by rerunning its chase, not by hand. Keys
@@ -28,14 +31,23 @@ rebuilds what a shared-MT change moved. A recipe's first stage is the
 scenario's precondition, such as `room:5` before a boss clear. Each chase
 starts from its own tape, cut just after the replay first reaches that
 stage, or from a fresh boot when drift moved the tape off it.
+
+A rebuilt tape reaches its recipe's keys, not whatever else the tape it
+replaces met on the way, such as an NPC family no other tape runs. So a
+recipe run measures the corpus before and after, and carries every key it
+lost from the replaced tapes' prefixes (`tools/dst/cover.py`).
 """
 import argparse
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import cover  # noqa: E402
 
 
 def run(binary, arguments):
@@ -48,6 +60,12 @@ def replay(binary, tape, report):
     result = json.loads(report.read_text())
     failed = [p["message"] for p in result["properties"] if p["status"] == "failed"]
     return set(result["coverage"]["reached"]), failed
+
+
+def census(binary, corpus, report):
+    """The corpus alone's report, as every DST run replays it."""
+    run(binary, ["--units", "game", "--cases", "0", "--corpus", str(corpus), "--report", str(report), "--allow-unmet"])
+    return json.loads(report.read_text())
 
 
 def precondition_cut(binary, tape, keys, report):
@@ -65,32 +83,45 @@ def write_tape(path, tape, length):
 
 
 def chase(args, work):
-    prefix = None
+    """The tape of the earliest case that reached every stage, or None."""
+    prefixes = []
     if args.source:
         source = json.loads(args.source.read_text())
-        prefix = work / "from.json"
-        write_tape(prefix, source, args.at or len(source["commands"]))
+        prefixes = [work / "from.json"]
+        write_tape(prefixes[0], source, args.at or len(source["commands"]))
     for index, keys in enumerate(args.stage):
         keys = set(keys)
         last = index == len(args.stage) - 1
-        if prefix:
-            before, _ = replay(args.binary, prefix, work / f"stage-{index}-prefix.json")
-            if keys <= before:
-                print(f"stage {index}: the prefix already reaches {sorted(keys)}")
+        if prefixes:
+            usable, done = [], []
+            for rank, prefix in enumerate(prefixes):
+                before, _ = replay(args.binary, prefix, work / f"stage-{index}-prefix-{rank}.json")
+                if keys <= before:
+                    done.append(prefix)
+                elif keys & before:
+                    print(f"stage {index}: prefix {rank} already reaches {sorted(keys & before)}; "
+                          "their first steps cannot show a later hit", file=sys.stderr)
+                else:
+                    usable.append(prefix)
+            if done:
+                print(f"stage {index}: {len(done)} of {len(prefixes)} prefixes already reach {sorted(keys)}")
+                prefixes = done
                 continue
-            if keys & before:
-                print(f"stage {index}: the prefix already reaches {sorted(keys & before)}; "
-                      "their first steps cannot show a later hit", file=sys.stderr)
+            if not usable:
                 return None
-        found = None
+            prefixes = usable
+        found = []
         for attempt in range(args.rounds):
             seed = args.seed + 1000 * index + attempt
             out = work / f"stage-{index}-{attempt}"
             arguments = ["--units", "game", "--cases", str(args.cases), "--steps", str(args.steps),
                          "--seed", str(seed), "--tapes", str(out / "tapes"),
                          "--report", str(out / "report.json"), "--retain-all", "--allow-unmet"]
-            if prefix:
-                arguments += ["--resume", str(prefix)]
+            origin = ""
+            if prefixes:
+                rank = attempt % len(prefixes)
+                arguments += ["--resume", str(prefixes[rank])]
+                origin = f", prefix {rank} of {len(prefixes)}"
             started = time.monotonic()
             run(args.binary, arguments)
             first_steps = json.loads((out / "report.json").read_text())["coverage"]["firstSteps"]
@@ -100,7 +131,7 @@ def chase(args, work):
                 if keys <= first.keys()
             )
             partial = {key: sum(key in first for first in first_steps.values()) for key in sorted(keys)}
-            print(f"stage {index} round {attempt} (seed {seed}, {time.monotonic() - started:.0f}s): "
+            print(f"stage {index} round {attempt} (seed {seed}{origin}, {time.monotonic() - started:.0f}s): "
                   f"{len(hits)} of {len(first_steps)} cases reach {sorted(keys)}; per key {partial}")
             # A case that failed a property keeps only its violation tape: it
             # is a finding to look at, never a prefix to build on.
@@ -110,18 +141,21 @@ def chase(args, work):
                       f"see {out / 'tapes'} ({', '.join(violating)})", file=sys.stderr)
             hits = [hit for hit in hits if hit[1] not in violating]
             if hits:
-                step, label = hits[0]
-                tape = json.loads((out / "tapes" / f"{label}-case.json").read_text())
                 extend = args.final_extend if last else args.extend
-                length = min(step + 1 + extend, len(tape["commands"]))
-                found = work / f"stage-{index}.json"
-                write_tape(found, tape, length)
-                print(f"stage {index}: {label} reaches it at command {step}; prefix is now {length} commands")
+                # The next stage spreads at most one round over each prefix.
+                for rank, (step, label) in enumerate(hits[:args.rounds]):
+                    tape = json.loads((out / "tapes" / f"{label}-case.json").read_text())
+                    length = min(step + 1 + extend, len(tape["commands"]))
+                    found.append(work / f"stage-{index}-{rank}.json")
+                    write_tape(found[-1], tape, length)
+                    if rank == 0:
+                        print(f"stage {index}: {label} reaches it at command {step}; "
+                              f"prefix is now {length} commands")
                 break
         if not found:
             return None
-        prefix = found
-    return prefix
+        prefixes = found
+    return prefixes[0]
 
 
 def build(args, work):
@@ -171,6 +205,13 @@ def main():
     # A recipe names a corpus tape, the prefix it branches from (by default
     # its own first `at` commands) and its stages; other keys override flags.
     corpus = args.recipes.parent / "corpus"
+    root = args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")
+    # A chase rerun into the same --work keeps the first run's census and
+    # replaced tapes, so what it carries is measured against the original.
+    replaced = root / "replaced"
+    replaced.mkdir(parents=True, exist_ok=True)
+    measured = root / "corpus-before.json"
+    before = json.loads(measured.read_text()) if measured.exists() else census(args.binary, corpus, measured)
     failed = 0
     for recipe in json.loads(args.recipes.read_text()):
         if args.only and recipe["out"] not in args.only:
@@ -184,8 +225,13 @@ def main():
         for key in ("cases", "steps", "rounds", "extend", "final_extend"):
             setattr(one, key, recipe.get(key, getattr(args, key)))
         print(f"== {recipe['out']}")
-        work = (args.work or pathlib.Path(f".cache/dst/chase-{args.seed}")) / recipe["out"].removesuffix(".json")
+        work = root / recipe["out"].removesuffix(".json")
         work.mkdir(parents=True, exist_ok=True)
+        if one.out.exists() and not (replaced / one.out.name).exists():
+            shutil.copy(one.out, replaced / one.out.name)
+        if one.source and not one.source.exists():
+            print(f"{source} does not exist yet; chasing from a fresh boot")
+            one.source = None
         if one.source:
             one.at = precondition_cut(args.binary, one.source, one.stage[0], work / "precondition.json")
             if one.at is None:
@@ -194,6 +240,15 @@ def main():
             else:
                 print(f"{source} reaches {one.stage[0]} at command {one.at - 1}")
         failed += build(one, work)
+    after = census(args.binary, corpus, root / "corpus-after.json")
+    lost = cover.reached(before) - cover.reached(after)
+    if lost:
+        print(f"== the rebuilt corpus lost {sorted(lost)}; carrying them from the replaced tapes")
+        # At most what the replaced tapes held, so no lost key is refused.
+        held = sum(len(json.loads(tape.read_text())["commands"]) for tape in replaced.glob("*.json"))
+        _, missing, broken = cover.cover(args.binary, before, replaced, after, out=corpus, budget=held, verify=True)
+        if missing or broken:
+            failed += 1
     return 1 if failed else 0
 
 

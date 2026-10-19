@@ -37,6 +37,7 @@ struct Exports {
     command: TypedFunc<(), u32>,
     snapshot_ptr: TypedFunc<(), u32>,
     snapshot_len: TypedFunc<(), u32>,
+    error_ptr: TypedFunc<(), u32>,
     error_len: TypedFunc<(), u32>,
     public_keys_ptr: TypedFunc<(), u32>,
     public_keys_len: TypedFunc<(), u32>,
@@ -105,6 +106,7 @@ impl Module {
             command: export!("command"),
             snapshot_ptr: export!("snapshot_ptr"),
             snapshot_len: export!("snapshot_len"),
+            error_ptr: export!("error_ptr"),
             error_len: export!("error_len"),
             public_keys_ptr: export!("public_keys_ptr"),
             public_keys_len: export!("public_keys_len"),
@@ -246,9 +248,20 @@ impl Module {
             let error_published = wasm.error_len.call(&mut wasm.store, ()).map_err(trap)? != 0;
             let (native_ok, native_digest) = trace[index];
             if failed == native_ok || failed != error_published {
-                return Ok(Some(
-                    json!({ "step": index, "command": command, "wasmFailed": failed, "nativeOk": native_ok }),
-                ));
+                // The error the module published, so a WASM-only failure
+                // names its cause.
+                let error = match error_published {
+                    true => String::from_utf8_lossy(&wasm.read(wasm.error_ptr, wasm.error_len)?)
+                        .into_owned(),
+                    false => String::new(),
+                };
+                return Ok(Some(json!({
+                    "step": index,
+                    "command": command,
+                    "wasmFailed": failed,
+                    "wasmError": error,
+                    "nativeOk": native_ok,
+                })));
             }
             if !failed {
                 if let Err(error) = serve(&mut store, host, &mut wasm, command) {
@@ -347,7 +360,18 @@ impl SaveIo for Exports {
         published_io(&snapshot)
     }
     fn export(&mut self) -> Result<Vec<u8>, String> {
-        let document = self.read(self.save_data_ptr, self.snapshot_len)?;
+        let pointer = self.call(self.save_data_ptr, ())?;
+        if pointer == 0 {
+            // Preserve the actual export error, as Browser and native ABI do.
+            // Only the canonical capacity error authorizes a failed-write ack.
+            let error = self.read(self.error_ptr, self.error_len)?;
+            return Err(String::from_utf8(error).map_err(|error| error.to_string())?);
+        }
+        let length = self.call(self.snapshot_len, ())?;
+        let mut document = vec![0; length as usize];
+        self.memory
+            .read(&self.store, pointer as usize, &mut document)
+            .map_err(|error| error.to_string())?;
         if document.is_empty() {
             return Err("save_data_ptr refused".into());
         }

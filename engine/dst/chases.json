@@ -41,8 +41,22 @@
         "npc:19"
       ],
       [
-        "removed:19",
-        "removed:239"
+        "removed:19"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-grub-kill.json",
+    "from": null,
+    "steps": 8000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "npc:239"
+      ],
+      [
+        "removed:239",
+        "npc:23"
       ]
     ]
   },
@@ -104,20 +118,6 @@
     ]
   },
   {
-    "out": "coverage-charger-entry.json",
-    "from": "coverage-larry-segments.json",
-    "steps": 4000,
-    "final_extend": 300,
-    "stages": [
-      [
-        "screen:Playing"
-      ],
-      [
-        "npc:23"
-      ]
-    ]
-  },
-  {
     "out": "regression-number-one-cooldown.json",
     "stages": [
       [
@@ -143,16 +143,19 @@
     "out": "regression-descent-with-active-item.json",
     "stages": [
       [
-        "active item held",
-        "npc:19"
+        "active item held"
       ],
       [
-        "cleared:5"
+        "boss room holding an active item"
       ],
       [
-        "stage:2"
+        "boss room cleared holding an active item"
+      ],
+      [
+        "descent holding an active item"
       ]
-    ]
+    ],
+    "steps": 3000
   },
   {
     "out": "coverage-options-menu.json",
@@ -212,6 +215,43 @@
       ],
       [
         "property:game: a saved run is continued"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-miniboss-clear.json",
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "property:game: the player is in a miniboss room"
+      ],
+      [
+        "cleared:6"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-save-reload.json",
+    "from": null,
+    "steps": 2000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "property:game: a session boots with a run a previous session saved"
+      ],
+      [
+        "property:game: Continue resumes a run a previous session saved"
+      ]
+    ]
+  },
+  {
+    "out": "coverage-super-secret-entry.json",
+    "steps": 3000,
+    "final_extend": 300,
+    "stages": [
+      [
+        "room:8"
       ]
     ]
   }

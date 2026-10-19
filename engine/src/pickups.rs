@@ -1083,6 +1083,15 @@ impl Pickup {
 /// Room.Save5ce3d0 walks the live room list, excludes dead31f, then5c57c0
 /// accepts type5. Preserve only the regular families owned by this module.
 pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), String> {
+    state.room.saved_regular_pickups = capture_regular_records(state)?;
+    Ok(())
+}
+
+/// Capture once at Room.Save, before later PlayerManager.Save callbacks.
+/// The caller owns where the immutable record list is retained.
+pub(crate) fn capture_regular_records(
+    state: &crate::State,
+) -> Result<Vec<SavedRegularPickup>, String> {
     let mut records = Vec::new();
     for actor in state.actor_scheduler.full_phase() {
         if actor.kind != crate::actors::ActorKind::Pickup {
@@ -1130,8 +1139,7 @@ pub(crate) fn save_regular_records(state: &mut crate::State) -> Result<(), Strin
                 }),
         });
     }
-    state.room.saved_regular_pickups = records;
-    Ok(())
+    Ok(records)
 }
 
 /// RoomLoad5cf585 calls5c5860 for Descriptor+70..78 saved records. Each

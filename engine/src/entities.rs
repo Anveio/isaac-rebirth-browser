@@ -90,8 +90,14 @@ pub(crate) struct SpawnedNpc {
     pub boss_spawned: bool,
     /// Sprite scale (+2c4) multiplier.
     pub scale: f32,
-    /// HP and max HP multiplier.
+    /// HP (+484) multiplier.
     pub health_scale: f32,
+    /// Max HP (+488) multiplier.
+    pub max_health_scale: f32,
+    /// Added to HP (+484) after the scales (Gurdy's flies lose 2).
+    pub health_delta: f32,
+    /// Whether the APPEAR flag stays set (Gurdy's summons appear).
+    pub appear: bool,
 }
 
 /// Actors an NPC callback creates. Game admits them in this order.
@@ -106,12 +112,37 @@ pub(crate) enum Birth {
     Npc(SpawnSelector),
     /// Creep 5516d0 hurt of the player from a spawner-run first update.
     CreepHit,
+    /// Game::Fart 5522d0's knockback around `position` (see `fatty::fart`).
+    Fart {
+        position: WorldVector,
+        radius: f32,
+        source: u32,
+    },
+    /// A projectile 9.v other than the blood shot, e.g. Mega Fatty's puke 9.3.
+    VariantProjectile(ProjectileBirth, u32),
+    /// Player TakeDamage(1.0, flags 0, countdown 30) from an NPC's AI (Mega
+    /// Fatty's fart hits a player within 100 px).
+    PlayerHurt,
+    /// Mega Fatty's SUCK 4dd438: every pulled actor's velocity gains
+    /// `normalize(center - pos)·k / friction`, `k = clamp(0.9(600 - L)/600, 0, 0.9)`.
+    Suck(WorldVector),
+    /// Game::ShakeScreen 551da0: Game+ce9fc = the duration (no draws).
+    Shake(i32),
     /// Room5cbb30 Hurt(damage) on the grid cell under `position` (a no-op
     /// outside the room or on an empty cell).
     GridHurt {
         position: WorldVector,
         damage: i32,
     },
+    /// Spawn550a40 of a pickup-less bomb (Troll Bomb variant 3), spawner NULL.
+    Bomb {
+        variant: u32,
+        seed: u32,
+        position: WorldVector,
+    },
+    /// Mulligan EXPLODE 4e8200: its blast, effect seeds, cardinal burst, Kill
+    /// and dead branch, in the spawner's update order.
+    MulliganExplode,
     /// A mid-room NPC spawned with a velocity and its APPEAR flag cleared.
     FlungNpc(SpawnSelector, WorldVector),
     /// A mid-room NPC with spawner-written fields (Spawn550a40 then the
@@ -145,6 +176,10 @@ pub(crate) enum Birth {
         position: WorldVector,
         color: crate::sprite_color::Color,
     },
+    /// Kill47FC80 Have234 (Infestation 2): Player50c980 would spawn a
+    /// BlueSpider familiar 3.73 at the dying NPC. Port gap: that familiar is
+    /// unported, so nothing is spawned and the caller records the frontier.
+    UnportedBlueSpider,
 }
 
 pub(crate) type Advance =
@@ -220,7 +255,17 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         points,
     })?;
     let sample_position = npc.position;
-    collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    if npc.kind == 220 {
+        // 44364a: Squirt shares the Dip's 1.2 reflection scale.
+        collider.resolve_nonplayer_ground_bouncy(
+            grid,
+            &mut npc.position,
+            &mut npc.velocity,
+            false,
+        )?;
+    } else {
+        collider.resolve_nonplayer_ground(grid, &mut npc.position, &mut npc.velocity, false)?;
+    }
     // 442df8 records a solid sample independently of the summed normal.
     npc.grid_collided = collider
         .samples()
@@ -233,11 +278,45 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
 /// 442c2d: classes 3 and 5 both clamp the center to the room bounds before
 /// the sample loop (empty for zero points, e.g. Larry Jr.'s class 5).
 pub(crate) fn clamp_walls(npc: &mut Npc, grid: &Grid) -> Result<(), String> {
-    if matches!(npc.grid_collision_class, 3 | 5) {
-        npc.position = grid.clamp_room(npc.position, 0.0);
-        npc.presented_position = npc.position;
+    let clamped = grid.clamp_room(npc.position, 0.0);
+    match npc.grid_collision_class {
+        3 | 5 => npc.position = clamped,
+        // 442e40 / 442ef0: classes 1 and 2 clamp only x or only y, test no
+        // cells, and flag a grid hit when the centre sits on that bound.
+        1 => {
+            npc.grid_collided = on_bound(clamped.x, grid, true);
+            npc.position.x = clamped.x;
+        }
+        2 => {
+            npc.grid_collided = on_bound(clamped.y, grid, false);
+            npc.position.y = clamped.y;
+        }
+        _ => return Ok(()),
     }
+    npc.presented_position = npc.position;
     Ok(())
+}
+
+fn on_bound(value: f32, grid: &Grid, horizontal: bool) -> bool {
+    let low = grid.clamp_room(
+        WorldVector {
+            x: f32::MIN,
+            y: f32::MIN,
+        },
+        0.0,
+    );
+    let high = grid.clamp_room(
+        WorldVector {
+            x: f32::MAX,
+            y: f32::MAX,
+        },
+        0.0,
+    );
+    if horizontal {
+        value == low.x || value == high.x
+    } else {
+        value == low.y || value == high.y
+    }
 }
 
 /// One line per supported family.
@@ -252,7 +331,12 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::horfs::FAMILY,
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
+    &crate::boil::FAMILY,
+    &crate::long_legs::FAMILY,
+    &crate::fistula::FAMILY,
+    &crate::squirt::FAMILY,
     &crate::wall_hugger::FAMILY,
+    &crate::wall_creep::FAMILY,
     &crate::larry::FAMILY,
     &crate::maggots::FAMILY,
     &crate::duke::FAMILY,
@@ -261,6 +345,12 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gapers::FAMILY,
     &crate::gushers::FAMILY,
     &crate::hoppers::FAMILY,
+    &crate::fatty::FAMILY,
+    &crate::skinny::FAMILY,
+    &crate::greed::FAMILY,
+    &crate::gurdy::FAMILY,
+    &crate::mega_fatty::FAMILY,
+    &crate::mulligans::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

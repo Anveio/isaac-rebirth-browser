@@ -86,8 +86,10 @@ def validate_tape(tape):
             host_hold_seconds += seconds
         else:
             raise ValueError(f'Unsupported tape action: {kind}')
-    if total > 36000:
-        raise ValueError('Tape has more than 36000 presented frames')
+    # A whole tape may present twenty minutes at 60 Hz (a multi-floor descent);
+    # each step and the command list keep their own 36000 bounds.
+    if total > 72000:
+        raise ValueError('Tape has more than 72000 presented frames')
     if host_hold_seconds > 120:
         raise ValueError('Tape has more than 120 explicit real audio-device hold seconds')
 

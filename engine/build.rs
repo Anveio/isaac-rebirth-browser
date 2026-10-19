@@ -876,19 +876,6 @@ fn main() {
         "pub const BOSS_SCENE_FRAMES: u32 = {};\n",
         boss_scene["FrameNum"].as_u64().unwrap()
     ));
-    for size in [5, 6, 7] {
-        let projectile_name = format!("RegularTear{size}");
-        let projectile_clip = npc_clips["gfx/009.000_projectile.anm2"]["Animations"]
-            .as_array()
-            .expect("projectile clips missing")
-            .iter()
-            .find(|clip| clip["Name"] == projectile_name)
-            .expect("regular projectile clip missing");
-        generated.push_str(&format!(
-            "pub const PROJECTILE_REGULAR{size}_FRAMES: u32 = {};\n",
-            projectile_clip["FrameNum"].as_u64().unwrap()
-        ));
-    }
     let level2 = &npc_clips["gfx/213.000_level2fly.anm2"]["Animations"][0];
     assert_eq!(level2["Name"], "Idle");
     assert_eq!(level2["Loop"], true);

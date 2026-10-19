@@ -48,3 +48,19 @@ gfx/006.008_donationmachine.anm2
 gfx/029.000_hopper.anm2
 gfx/029.001_trite.anm2
 gfx/054.000_flaming hopper.anm2
+gfx/050.000_greed.anm2
+gfx/050.001_super greed.anm2
+gfx/009.003_puke projectile.anm2
+gfx/264.000_mega fatty.anm2
+gfx/016.000_mulligan.anm2
+gfx/016.001_mulligoon.anm2
+gfx/207.000_fatty.anm2
+gfx/207.001_pale fatty.anm2
+gfx/226.000_skinny.anm2
+gfx/206.000_crazy long legs.anm2
+gfx/206.001_small crazy long legs.anm2
+gfx/240.000_wall creep.anm2
+gfx/073.000_fistula small.anm2
+gfx/220.000_squirt.anm2
+gfx/030.000_boil.anm2
+gfx/036.000_gurdy.anm2

@@ -49,7 +49,21 @@ impl NpcEffectAdmission<'_> {
         spawner: (u32, u32),
         scale: f32,
     ) -> Result<u32, String> {
-        self.admit_pool(22, seed, position, spawner, scale, (125, 1))
+        self.admit_pool(22, seed, position, spawner, (scale, 1.0), (125, 1))
+    }
+
+    /// A 1000.22 a spawner writes before its first update: sprite `scale`
+    /// (+2c4), controller `size` (+818) and timeouts (+7f0, +7f4). Skinny's
+    /// trail (4b858b) leaves the first update to the scheduler.
+    pub(crate) fn admit_sized_creep(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        scale: f32,
+        size: f32,
+        timeouts: (i32, i32),
+    ) -> Result<u32, String> {
+        self.admit_pool(22, seed, position, (0, 0), (scale, size), timeouts)
     }
 
     /// A green champion's Spawn550a40 of 1000.23 (4fb02a, default scale),
@@ -60,7 +74,7 @@ impl NpcEffectAdmission<'_> {
         position: WorldVector,
         spawner: (u32, u32),
     ) -> Result<u32, String> {
-        self.admit_pool(23, seed, position, spawner, 1.0, (30, 30))
+        self.admit_pool(23, seed, position, spawner, (1.0, 1.0), (30, 30))
     }
 
     fn admit_pool(
@@ -69,7 +83,7 @@ impl NpcEffectAdmission<'_> {
         seed: u32,
         position: WorldVector,
         spawner: (u32, u32),
-        scale: f32,
+        (scale, size): (f32, f32),
         (time_to_live, raw_7f4): (i32, i32),
     ) -> Result<u32, String> {
         let config = definition(1000, variant).ok_or("authored Creep config absent")?;
@@ -116,10 +130,7 @@ impl NpcEffectAdmission<'_> {
             blood_effect: None,
             epic_fetus: None,
             explosion_effect: None,
-            creep_effect: Some(Controller {
-                counter: 0,
-                size: 1.0,
-            }),
+            creep_effect: Some(Controller { counter: 0, size }),
             fly_effect: None,
             footprint: false,
             critter: None,

@@ -816,6 +816,19 @@ match all 2,688 cost words, six complete occupancy sets and 360 semantic record
 fields; 228 seed/record failures remain blocking. Its strict W0 case passes
 18/18 on the same leaf artifact. Other backdrop/shape decorations and grid callbacks,
 post-acquisition Player state and complete saved-world restoration remain open.
+The current-room regular Save writer captures the supported manager-ordered
+pickup list before PlayerManager Save flushes queued grants and installs it in
+the copied SavedRun. Fresh PR #711 base candidate `46affff7` / artifact `2a6cbdf4`
+(1,417 files; WASM `f415dc46`) passes build/interface checks, affected selection
+52 and the registered fixed `PBW9YNC8` storage test: 28 checks, 18 labels and
+217 commands. All four paused room 7 coins now appear in the actual packet;
+write/store/menu readmission share its bytes. The retained Bomb-only baseline
+remains 27 pass / 1 missing-list failure. The same artifact also passes both
+initial-room capacity contracts (35 and 4,062 checks), including own-store
+Continue and retaining the older store after an oversized-write rejection.
+Later-room Continue, NPC restoration,
+Original actor-save packet parity and later-main gameplay remain unqualified.
+
 The public initial-room Save/Continue increment now writes bounded origin-local
 slots and reconstructs the world through Main and natural same-origin reload.
 On current404a/immutable1b30, fixed moving plus first unfiltered OS DL17GHC7
@@ -839,6 +852,46 @@ all verdicts. Intermediate adfb OS14 lost passes are recovered and its failed
 reports remain preserved. Broader saved actors/items/rooms and progression,
 14 canonical menu/gameplay-scope errors,28 seed separators and28 penalty-stage
 rows remain open.
+PR696's Save foundation is merged at `9f952efd`. It removes the 4,096 walking
+paint cutoff while retaining the 4 MiB complete-document bound. Capacity
+failure produces no partial packet, sends one failed acknowledgement,
+preserves older stored bytes and resumes the pending Tick. Exact main715
+baseline `7ad918af` and candidate `92dc82b9` pass fresh build/ABI, affected
+preview and runtime 4/4 each. Four same-Native Save controls retain all 3,748
+ordered rows per role (3,650 pass / 98 fail), zero changed/lost passes and
+unchanged pixel metrics; 33 own-save guards pass per control. The 98 failures
+are 28 ambient velocity-word rows, 14 canonical scope rows, 28 seed separators
+and 28 penalty-stage rows. Earlier Source C native port Rust/C ABI capacity, shipped
+WASM differential and Browser over-bound results retain their separate scopes;
+complete direct WASM owner bytes remain unobserved and the under-bound Browser
+wrapper failure remains retained. The merged current-main native port library
+check passes separately; its wrapper's failed label remains preserved.
+Fresh public-main134 H/tooling artifact `7ddc18cc` separately passes build/ABI
+and runtime 4/4. Its one fixed same-Native Save capture keeps all 2,384 ordered
+rows exactly equal to dbfab H: 2,349 pass / 35 fail, zero lost/missing/new or
+changed Native expectations, 33 own-save guards and unchanged pixels. Actual
+natural reload/Continue passes, with stored seed9/live seed8 and penalty0; the
+observed movement follows the valid room5-to-room6 door transition. The suite
+still fails its 28 ambient velocity and seven canonical scope rows. No new134
+baseline, OS or ordinary replay is claimed; its actual canonical affected
+preview selects 52 suites. Publication on later main3b08711d preserves Mega Fatty and unrelated
+quality tools without inheriting a later-main gameplay grade.
+
+H's separate snapshotdbfab qualification uses fresh baseline `9e3c05e5` and
+shared H/tooling artifact `70cb3285`: fresh build/ABI and runtime 4/4 each pass. The
+candidate's actual affected preview selects 52 suites. The same retained fixed Native case improves 2,321 pass /
+63 fail to 2,349 pass / 35 fail: 14 seed-text and 14 penalty-stage gains, zero
+lost/missing/new rows or changed Native expectations, unchanged pixels and
+33 own-save guards per role. The remaining 35 are 28 ambient velocity words
+and seven canonical scope rows; both comparison exits remain failed. Both
+ordinary-run replays pass on the same retained Native case, including the
+candidate's exact nine-character saved-seed guard. Both fixed natural reloads
+pass; their fresh boot RNG/epochs differ, and unchanged placement permits the
+observed different valid doors. This is no identical-boot counterfactual or
+Original-process reload parity. Historical main715 H retains its separately
+qualified fixed/OS 56 gains and 42 failures. Raw archive audit corrects its
+earlier ordinary/reload-unqualified notes; the old notes remain preserved.
+No main134 integration, Factory/Get or whole-game qualification is inherited.
 [Save/Continue scope](save-continue.md) preserves exact current and historical
 producer/artifact boundaries. [SavedGame evidence](../references/isaac/foundation/saved-game/README.md)
 retains the original reports and the correction that made those gaps blocking.
@@ -1086,7 +1139,7 @@ must not silently turn a room object into a generic enemy or delete it.
 | `Entity_Tear`, `Entity_Projectile`, `Entity_Laser`, `Entity_Knife` | Regular tears own source ground/height/full/fast prediction, ordered birth RNG/audio admission and next-full removal; RoundWorm has a typed type9 projectile | Complete RNG-dependent numerical parity, other weapons, tear Poof/death effects, broader projectile contacts and downstream callbacks |
 | `Entity_NPC` | Authored Fly/AttackFly/RoundWorm/Keeper/Fire and ordinary Monstro have typed source admission/update/contact/damage paths. Scoped paired failures remain required; implemented AI is not a whole-NPC parity claim. | Unsupported subclasses/champions, exact shared seeds/trajectories, final-boss rewards/death effects and exceptional spawn contexts |
 | `Entity_Familiar` | Leech cache/child270 admission, separate room sequence owner, appearance and real Poof15. Reviewed NPC Poof source now separates cached spawner words from its null linked parent; this correction has no new production/live acceptance. Four earlier fresh pairs retain25,131 mandatory failures despite matching scoped local/sprite/reveal/retirement fields. [Evidence](familiars.md) | Missing spawn/shared consumers and placement/sequence/Poof seeds, path/target/contact/heal, other subclasses, full cache completion and room-return lifecycle |
-| `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, source full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega conversion paths | Exact converted shared birth seeds, broader variant/grid/radial holdouts, craters and complete hurt/explosion rendering |
+| `Entity_Bomb`, `Game::BombDamage` | Rising-edge E placement, full/fast regular motion/fuse/blast, inventory debit, self/NPC/grid damage and typed Troll/Mega Troll conversion. Real1000/18+1 child/record order and grid-before-actor fence are implemented; two fixed ordinary-Bomb routes retain290 canonical/80 Bomb passes and add243 child passes (256/292), zero lost passes | All36 child seed/RNG/counter/flip failures remain; counter offset already exists at gameplay-start. StrictRGBA stays14/36 with22 failures. Crater18 paint/records and Dr/Troll/rock/TNT callers are unpaired here; converted seeds, Room11/unknown history, modifiers, complete shared MT, rendering/audio and live-effect Continue remain open. [Evidence](bomb-evidence.md#bomb-and-bomb-rock-effect-children-source-follow-up) |
 | `Entity_Pickup`, grid entities | Natural coin/key/bomb actors, collection and scoped persistence; deferred collectible grant and empty-altar motion; Chest constructor/opening source path; actual grid occupancy, rock/spike/door response and fresh signed448-word Room costs | Regular saved readmission and anchor corrections remain separately reviewed; hearts/other families, paid/modifier contexts, Chest loot/live completion, weighted path costs and other grid callbacks |
 | `ItemConfig`, `ItemPool`, player item evaluation | Pinned343 configurations/16 pools, independent source RNG owners, weighted depletion/eligibility, natural selection and first queued acquisition/charge. Four frozen-original/fresh-browser acquisition recoveries pass70,696 scoped checks; the default local paired tool captures both games fresh. [Evidence](item-pools.md) | Item-specific cache/stat/costumes, active use/swaps, pocket/trinket effects, broader familiars, progression/paid/override and exceptional selectors |
 | Graphics, `ANM2`, backdrop/shadow/FX | Authored sprite playback, actual source f32 transforms and scoped GPU light/shadow masks; supported actor/room renderers consume runtime state | Complete room/backdrop/sprite pixels, broader effects and native projection/composition edges |

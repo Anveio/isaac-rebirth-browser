@@ -25,7 +25,11 @@ export async function captureSaveOwn(page,directory,label,state) {
   };
   if(actual.storeText!==null)actual.store=await archive(actual.storeText);
   delete actual.storeText;
-  for(const event of actual.io.events)if(Object.hasOwn(event,'text')){event.packet=await archive(event.text);delete event.text;}
+  for(const event of actual.io.events)if(Object.hasOwn(event,'text')){
+    if(event.text===undefined&&event.status==='fail'&&typeof event.error==='string'&&event.error.length>0){
+      event.packetUnavailable={reason:'event-text-undefined',ownTextProperty:true};delete event.text;
+    }else{event.packet=await archive(event.text);delete event.text;}
+  }
   await save(join(directory,label+'.save-own.json'),actual);
   return actual;
 }
@@ -48,6 +52,10 @@ export async function reloadOwnSavedWorld(page,directory,caseData) {
     assert.equal(before.own.storeError,null);assert.ok(before.own.store,'Actual own saved bytes required before reload');
     const packet=JSON.parse(await readFile(before.own.store.path,'utf8'));
     const record=packet.profiles[0].saved;assert.ok(record,'Profile1 must actually retain its own saved run');
+    const code=caseData.seed.replaceAll(' ','').toUpperCase();
+    assert.match(code,/^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);
+    assert.equal(record.run.runSeed,code.slice(0,4)+' '+code.slice(4),'Actual fresh-writer Saved+EF80 text');
+    assert.equal(record.context.runSeedValue,caseData.seedValue);
     //No clear(), setItem(), addInitScript(), storageState(), reset() or Save ABI
     //is used here. The real constructor reads the same origin's existing bytes.
     await page.reload();await page.waitForFunction(()=>['true','failed'].includes(document.body.dataset.ready));
@@ -66,7 +74,7 @@ export async function reloadOwnSavedWorld(page,directory,caseData) {
     assert.equal(main.state.screen,'main');assert.equal(main.state.mainSelection,1);assert.equal(main.state.savedLoadValid,true);
     await press('Enter',300);const resumed=await checkpoint('reloaded-playing');
     assert.equal(resumed.state.screen,'playing');assert.equal(resumed.state.runSeedValue,caseData.seedValue);
-    assert.equal(resumed.state.runSeed,record.run.runSeed);assert.equal(resumed.state.stage,record.run.stage);
+    assert.equal(resumed.state.runSeed,caseData.seed.replaceAll(' ','').toUpperCase(),'Actual internal compact run code');assert.equal(resumed.state.stage,record.run.stage);
     assert.equal(resumed.state.currentRoom,record.run.currentRoom);
     assert.deepEqual(resumed.state.floor,record.run.floor,'Continue must actually reconstruct the stored floor, not just enable a menu');
     for(const field of ['hp','maxHp','soulHp','blackHeartMask','eternalHearts','goldenKey']){
