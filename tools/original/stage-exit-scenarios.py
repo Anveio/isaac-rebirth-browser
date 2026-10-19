@@ -117,6 +117,10 @@ def port_fight(base, *args, **options):
         # orbit loses, the leading aim and tighter orbit (fightKeys --lead)
         # records a different fight that may clear the room.
         leg = record(base, *args, '--lead', **options)
+    if leg['status'] != 'pass' and leg.get('reason') == "The port's player died in the fight":
+        # The same ungraded closed-loop fight, lost to the port's own death
+        # rather than to the clock: the leading aim records a different fight.
+        leg = record(base, *args, '--lead', **options)
     return leg
 
 
