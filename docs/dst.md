@@ -318,9 +318,11 @@ trapdoor (state 1, its open clip finished), so the trapdoor's own entry
 check (`advance_trapdoor`) decides the descent, and the stage transition
 runs NextStage, the nightmare scene and the next level's admission as in
 play. The chain ends at the first trapdoor that refuses, so every stage the
-port admits joins without a change to the unit. The case plays one of the
-floors it reached, chosen uniformly: it enters each room
-`traversal::admits` through the transition a door starts (`roomTransition`
+port admits joins without a change to the unit. The case plays every
+floor it reached, from one it picks uniformly, so every reached floor is
+played whatever the case count, and a case seed replays its first floor
+exactly as when a case played only that one. On each floor it enters each
+room `traversal::admits` through the transition a door starts (`roomTransition`
 out of the neighbor behind the target's first door, through that
 neighbor's door to it, as walking in does), and the game driver plays it
 for 300 to 900 full updates. The starting room stays the one the engine
@@ -342,7 +344,7 @@ reaches (Chub, Gurdy, Mega Fatty, Boil, Wall Creep and the rest) thereby
 runs under the 24 state invariants the game unit checks after every step:
 walls, finite motion, health and consumable bounds, identities, the actor
 schedule, room bookkeeping and the rest. 200 rooms cases evaluated them
-19.0 million times, about 95,000 per case. A report lists every property a
+44.6 million times, about 223,000 per case. A report lists every property a
 unit it ran evaluated, so a game invariant a rooms-only run fails is never
 hidden by the unit selection. A case reproduces from its seed:
 `rebirth-dst --units rooms --case-seed SEED`.
