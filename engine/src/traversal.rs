@@ -51,14 +51,17 @@ fn admitted_shape(template: &crate::room_templates::AuthoredTemplate) -> bool {
 /// A 1x1 boss room (type 5) or miniboss room (type 6) is admitted once a
 /// registered family constructs its authored boss. Boss rooms also need a
 /// bossportraits.xml presentation for their VS scene; minibosses enter without
-/// one. Other authored NPCs follow ordinary-room admission.
+/// one. Double Trouble's tall (13x14) and wide (26x7) boss rooms follow the
+/// same rule; their geometry, doors and scrolling are shape-generic. Other
+/// authored NPCs follow ordinary-room admission.
 fn supported_boss(
     descriptor: &crate::floor::Descriptor,
     special: Option<&[crate::room_assets::RoomAsset]>,
 ) -> bool {
     let room_type = descriptor.template.room_type;
-    if !matches!(room_type, 5 | 6)
-        || (descriptor.template.width, descriptor.template.height) != (13, 7)
+    let shape = (descriptor.template.width, descriptor.template.height);
+    if !(matches!(room_type, 5 | 6) && shape == (13, 7)
+        || room_type == 5 && matches!(shape, (13, 14) | (26, 7)))
     {
         return false;
     }
