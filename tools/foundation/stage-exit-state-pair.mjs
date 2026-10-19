@@ -110,6 +110,9 @@ const generation = (red, maxRed, soul, coins) => ({ fullHealth: maxRed <= red + 
     player && Number.isInteger(coins) ? generation(player.redHp, player.maxRedHp, player.soulHp, coins) : 'unobserved',
     actual ? generation(actual.player.hp, actual.player.maxHp, actual.player.soulHp, actual.inventory.coins) : 'unobserved');
   diagnostic('re-anchor', 'coins', coins ?? null, actual?.inventory.coins ?? null);
+  // Neither generation nor the shared tail reads the bomb count: a health-matching
+  // blast (--hurt, or the fixture's own keys) spends a bomb in one game only.
+  diagnostic('re-anchor', 'bombs', source?.carriedItems?.players?.[0]?.inventory?.bombs ?? null, actual?.inventory.bombs ?? null);
 }
 // A case predating `arrivedStage` is a Basement I exit.
 check('next-stage', 'arrivedStage', replay.stageExit?.arrivedStage ?? 2, finalStage);
