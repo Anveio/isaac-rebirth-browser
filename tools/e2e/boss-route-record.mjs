@@ -51,6 +51,7 @@
 import assert from 'node:assert/strict';
 import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
@@ -176,6 +177,9 @@ try {
   // Each capture also records where the port stood, for divergence reports,
   // and the port state the browser replay must reach there (`recorded`).
   let seen, seenAt = -1;
+  // Each room the recorder saw the port enter, at the frame it first saw it
+  // ([frame, room]); --rewind's fresh replay must agree (freshReplayCheck).
+  let entries = [];
   const checkpoint = label => {
     assert.equal(seenAt, frames, `Capture ${label} needs the state of its own frame`);
     actions.push({ type: 'capture', label, recorded: { recorder: RECORDER, build: server.build.sha256, room: seen.currentRoom, position: [seen.player.x, seen.player.y],
@@ -184,6 +188,7 @@ try {
   };
   const view = async () => {
     seen = JSON.parse(await page.evaluate(() => window.game.snapshotJson())); seenAt = frames;
+    if (seen.currentRoom !== entries.at(-1)?.[1]) entries.push([frames, seen.currentRoom]);
     return routingView(seen);
   };
   const held = new Set();
@@ -205,7 +210,7 @@ try {
   // loss restores one of the last twelve saves and returns the loop's state.
   let ring = [], sinceSave = 0, tries = 0, hitFrame = -Infinity, lastHp = null;
   rewound = REWIND ? { rewinds: 0, hits: [] } : null;
-  const save = vars => ({ page: page.checkpoint?.(), actions: actions.length,
+  const save = vars => ({ page: page.checkpoint?.(), actions: actions.length, entries: entries.length,
     lastFrames: actions.at(-1)?.type === 'step' ? actions.at(-1).frames : undefined, frames, held: [...held],
     pageHeld: [...pageHeld], labels: Object.keys(checkpoints), vars: structuredClone(vars) });
   const load = async saved => {
@@ -220,7 +225,7 @@ try {
       await reset();
       await replay([...caseData.pairedTape.slice(0, start + 1), ...actions]);
     }
-    frames = saved.frames;
+    frames = saved.frames; entries = entries.slice(0, saved.entries);
     held.clear(); for (const code of saved.held) held.add(code);
     for (const label of Object.keys(checkpoints)) if (!saved.labels.includes(label)) delete checkpoints[label];
     return structuredClone(saved.vars);
@@ -251,6 +256,35 @@ try {
     return null;
   };
   const rewindFrom = () => { ring = []; sinceSave = 0; lastHp = null; tries = 0; hitFrame = -Infinity; };
+  const freshReplayCheck = async () => {
+    const fresh = await headlessPage(server), game = window.game;
+    const diverged = what => new Error(`--rewind: a fresh replay of the kept keys ${what}; the headless page's restore is suspect`);
+    game.reset(caseData.initialSeed, { bootEpochSeed: caseData.bootEpochSeed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+    for (const action of caseData.pairedTape.slice(0, start + 1)) {
+      if (action.type === 'step') game.step(action.frames);
+      else if (action.type === 'key') await fresh.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
+    }
+    const rooms = [JSON.parse(game.snapshotJson()).currentRoom];
+    const roomAt = new Map([[0, rooms[0]]]);
+    let frame = 0;
+    for (const action of actions) {
+      if (action.type === 'key') await fresh.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
+      else if (action.type === 'step') for (let left = action.frames; left > 0; left--) {
+        const room = game.step(1).currentRoom; frame++;
+        roomAt.set(frame, room);
+        if (room !== rooms.at(-1)) rooms.push(room);
+      } else if (action.recorded) {
+        const now = JSON.parse(game.snapshotJson()), { recorder, build, ...expected } = action.recorded;
+        const replayed = { room: now.currentRoom, position: [now.player.x, now.player.y],
+          health: [now.player.hp, now.player.maxHp, now.player.soulHp], coins: now.inventory.coins };
+        if (!isDeepStrictEqual(replayed, expected)) throw diverged(`reached ${action.label} at ${JSON.stringify(replayed)}, recorded ${JSON.stringify(expected)}`);
+      }
+    }
+    for (const [at, room] of entries) if (roomAt.get(at) !== room) throw diverged(`stood in room ${roomAt.get(at)} at frame ${at}, where the recording entered room ${room}`);
+    if (!isDeepStrictEqual(rooms, entries.map(([, room]) => room))) throw diverged(`entered rooms ${rooms.join(',')}, the recording ${entries.map(([, room]) => room).join(',')}`);
+    const final = routingView(JSON.parse(game.snapshotJson()));
+    if (!isDeepStrictEqual({ health: final.health, coins: final.coins }, end)) throw diverged(`ended at ${JSON.stringify({ health: final.health, coins: final.coins })}, recorded ${JSON.stringify(end)}`);
+  };
   // The paired preamble settles 60 frames before any route input.
   if (FROM === 'gameplay-start') await step(60);
   let state = await view();
@@ -605,6 +639,10 @@ try {
   }
   const last = await view();
   end = { health: last.health, coins: last.coins };
+  // A headless --rewind restores WASM memory; a fresh page then replays the
+  // kept keys from boot and must reach the same rooms on the same frames,
+  // every recorded capture and the same end, or the restore is suspect.
+  if (REWIND && RECORDER === 'headless' && rewound.rewinds) await freshReplayCheck();
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);

@@ -73,9 +73,15 @@ export async function headlessPage(server) {
     if (owned?.command) dispatch(owned.command);
   };
   // The engine's whole state is its WASM linear memory (the module has no
-  // imports); the rest is the plain JS fields of the Engine (stain cache),
-  // SaveGameIO (revisions, events), storage and held keys. Memory grown since
-  // a checkpoint stays allocated and unused after a restore.
+  // imports), including a save write or menu readmission it still awaits.
+  // A checkpoint also keeps, and a restore puts back, the page state outside it:
+  // - `held`: the key-held set behind Playwright's repeat flag;
+  // - `current`: the frame state whose screen and pressed keys decide
+  //   seed-screen text and key ownership (web/host.ts gameKey);
+  // - SaveGameIO's consumed save revision and IO events, and the in-memory
+  //   storage a save write or menu readmission reads and writes;
+  // - the Engine's background-stain cache.
+  // Memory grown since a checkpoint stays allocated and unused after a restore.
   const memory = engine['wasm'].memory;
   return {
     checkpoint: () => ({ memory: new Uint8Array(memory.buffer).slice(), engine: { ...engine },
