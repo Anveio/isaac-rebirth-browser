@@ -93,8 +93,10 @@ export function routingView(s) {
     poops: s.room.grid ? s.room.grid.cells.flatMap((c, i) => (c.entity?.kind === 14 && c.entity.collisionClass !== 0 ? [i] : [])) : [],
     openGrid: s.room.grid && solidGrid(s.room.grid, s.room.npcs.filter(n => !n.dead && !n.removed && n.kind !== 33), s.room.slots ?? []),
     pickups: s.room.pickups.filter(p => !p.removed).map(p => ({ variant: p.variant, subtype: p.subtype, x: p.position.x, y: p.position.y })),
-    // Living door-shutting enemies and enemy shots, for fight().
-    foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp > 0)
+    // Living door-shutting enemies and enemy shots, for fight(). Death is
+    // HP below 0 in both games: a Crazy Long Legs at exactly 0 still walks,
+    // fires and keeps the doors shut.
+    foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp >= 0)
       .map(n => ({ kind: n.kind, boss: n.boss, radius: n.collisionRadius, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
     shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, vx: p.velocity?.x ?? 0, vy: p.velocity?.y ?? 0 })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
