@@ -227,6 +227,8 @@ try {
     };
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
+      // A route room's foes can kill the port's player; say so, not a timeout.
+      if (state.player.hp <= 0) throw new Error(`The port's player died in room ${state.room}`);
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
