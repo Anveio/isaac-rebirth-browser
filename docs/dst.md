@@ -396,8 +396,9 @@ precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, active-item descent, restart, Random-exit, Number One cooldown and
 Envy split-death regressions, the Monstro, Larry Jr., Grub and Gemini
-kills, the miniboss clear, the Dingle and Gurglings entries and the Options
-menu (`"from": null` chases from a fresh boot), and the Charger entry. A
+kills, the miniboss clear, the Dingle, Gurglings, super secret room and
+Greed entries and the Options menu (`"from": null` chases from a fresh
+boot). A
 recipe whose tape does not exist yet chases from a fresh boot, so a new
 scenario needs only its recipe. The miniboss clear had been a harvested tape
 with no recipe, which a menu change sent into Options before any run; its
@@ -412,9 +413,13 @@ that boot runs on every run too. Larry Jr. and the Grub (239) each have
 their own recipe: a shared one needed the run to meet both, which only an
 older tape's floor did, and a rebuild from a fresh boot met no Grub. Chargers
 live in a room chain generated floors seldom place, so no fresh-boot branch
-met one in 192; the Charger recipe branches from the Grub tape's entry into
-the Grub's room (`npc:239`), whose floor holds that chain, and 5 of 64
-branches met one on 540197a, where the Grub died in 11 of 64. A findings
+met one in 192. The Grub's death spawns two to five Chargers, Spitties or
+Maggots (4f2e56), so the Grub recipe's kill stage also needs a Charger
+(`npc:23`): on 7cfedf9 the Grub's room was entered in 1 of 64 fresh boots
+and killed in 2 of 64 branches from there, its death spawning a Charger, a
+Spitty and a Maggot. The separate Charger entry, which branched from the
+Grub tape's entry and met no Charger in 64 branches on 7cfedf9, is
+retired. A findings
 row gives its regression tape's length, command positions and failure
 counts as recorded; a rebuild keeps the scenario its recipe names, not
 those figures, which describe the tape that showed the fault.

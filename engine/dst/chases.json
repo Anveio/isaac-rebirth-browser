@@ -55,7 +55,8 @@
         "npc:239"
       ],
       [
-        "removed:239"
+        "removed:239",
+        "npc:23"
       ]
     ]
   },
@@ -113,20 +114,6 @@
     "stages": [
       [
         "npc:237"
-      ]
-    ]
-  },
-  {
-    "out": "coverage-charger-entry.json",
-    "from": "coverage-grub-kill.json",
-    "steps": 2000,
-    "final_extend": 300,
-    "stages": [
-      [
-        "npc:239"
-      ],
-      [
-        "npc:23"
       ]
     ]
   },
