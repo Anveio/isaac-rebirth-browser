@@ -270,6 +270,7 @@ Next: coordinate later-stage admission with the level workstream (#413).
 | #413 | P1 | Caves I descent source landed (#654), Double Trouble boss rooms place, Caves II generates behind a refused trapdoor; the selected-wall catalogue also needs correction | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
+| #735 | P2 | The stage-transition nightmare omits the floor progress bar (finished floors, Isaac head, clock, skull) above the spotlight | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
 
 ## Player
 
