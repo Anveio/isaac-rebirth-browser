@@ -248,9 +248,20 @@ impl Module {
             let error_published = wasm.error_len.call(&mut wasm.store, ()).map_err(trap)? != 0;
             let (native_ok, native_digest) = trace[index];
             if failed == native_ok || failed != error_published {
-                return Ok(Some(
-                    json!({ "step": index, "command": command, "wasmFailed": failed, "nativeOk": native_ok }),
-                ));
+                // The error the module published, so a WASM-only failure
+                // names its cause.
+                let error = match error_published {
+                    true => String::from_utf8_lossy(&wasm.read(wasm.error_ptr, wasm.error_len)?)
+                        .into_owned(),
+                    false => String::new(),
+                };
+                return Ok(Some(json!({
+                    "step": index,
+                    "command": command,
+                    "wasmFailed": failed,
+                    "wasmError": error,
+                    "nativeOk": native_ok,
+                })));
             }
             if !failed {
                 if let Err(error) = serve(&mut store, host, &mut wasm, command) {

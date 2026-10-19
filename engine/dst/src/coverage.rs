@@ -166,11 +166,21 @@ pub fn observe(state: &State) {
         // after one as `new run after a descent`, from the menus also as
         // `new run from the menus after a descent`.
         keys.push(format!("stage:{}", state.floor.stage));
-        let (deepest, menus) = CURRENT.with(|current| {
+        let (deepest, menus, descended) = CURRENT.with(|current| {
             let mut current = current.borrow_mut();
+            let descended = current.deepest > 0 && state.floor.stage > current.deepest;
             current.deepest = current.deepest.max(state.floor.stage);
-            (current.deepest, current.menus_after_descent)
+            (current.deepest, current.menus_after_descent, descended)
         });
+        // A run arriving on a deeper floor while it holds an active item:
+        // the descent's save keeps the item (Deck of Cards' regression).
+        let active = state
+            .player_items
+            .as_ref()
+            .is_some_and(|items| items.active_id != 0);
+        if descended && active {
+            keys.push("descent holding an active item".to_owned());
+        }
         if state.floor.stage == 1 && deepest > 1 {
             keys.push("new run after a descent".to_owned());
             if menus {
@@ -189,6 +199,14 @@ pub fn observe(state: &State) {
             });
             if state.room.combat_clear && matches!(template.room_type, 5 | 6) {
                 keys.push(format!("cleared:{}", template.room_type));
+            }
+            // The active-item descent's steps, each with the item still held:
+            // a run that quits to a new one loses it.
+            if active && template.room_type == 5 {
+                keys.push("boss room holding an active item".to_owned());
+                if state.room.combat_clear {
+                    keys.push("boss room cleared holding an active item".to_owned());
+                }
             }
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
