@@ -163,9 +163,18 @@ export function fightKeys(view, memory) {
         const reach = (foe.radius ?? (foe.boss ? 40 : 13)) + 24;
         if (near < reach) score -= (reach - near) / 12 * (t <= 6 ? 1.5 : 1);
       }
-      // Keep room to dodge: walls within 50 units cost in proportion.
+      // Keep room to dodge: walls within 50 units cost in proportion, corners
+      // (two walls) more.
       const nx = player.x + ux * 20, ny = player.y + uy * 20;
-      for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
+      const gaps = [nx - 72, 568 - nx, ny - 152, 408 - ny];
+      for (const gap of gaps) if (gap < 50) score -= (50 - gap) / 25;
+      if (Math.min(gaps[0], gaps[1]) < 60 && Math.min(gaps[2], gaps[3]) < 60) score -= 1;
+      // Pinned against a body (Mega Fatty parked by a corner): getting out
+      // outranks every other term.
+      for (const foe of foes) {
+        const touch = (foe.radius ?? 13) + 20, now = Math.hypot(foe.x - player.x, foe.y - player.y);
+        if (now < touch) score += (Math.hypot(foe.x - nx, foe.y - ny) - now) * 0.4;
+      }
       // Tears fly along one axis: favour moves that line the player up with
       // the target on an axis, so they hit.
       const offNow = Math.min(Math.abs(dx), Math.abs(dy));
