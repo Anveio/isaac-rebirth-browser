@@ -912,6 +912,18 @@ impl NpcEffectAdmission<'_> {
         Ok(())
     }
 
+    /// The caller moving a 1000.7 after its first update (Peep 4c341a).
+    pub(crate) fn move_blood(&mut self, id: u32, position: WorldVector) -> Result<(), String> {
+        let effect = self
+            .effects
+            .iter_mut()
+            .find(|e| e.id == id && e.variant == 7)
+            .ok_or("Blood move requires an admitted actual7")?;
+        effect.position = position;
+        effect.presented_position = position;
+        Ok(())
+    }
+
     pub(crate) fn set_blood_color(
         &mut self,
         id: u32,

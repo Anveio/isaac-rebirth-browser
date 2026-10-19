@@ -80,6 +80,7 @@ pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
 pub mod gurdy;
+pub mod gurdy_jr;
 pub mod gushers;
 mod health_damage;
 pub mod hoppers;
@@ -122,6 +123,7 @@ pub mod npcs;
 pub mod options_menu;
 pub mod ordinary_placement;
 pub mod pathfinder;
+pub mod peep;
 pub mod phase;
 pub mod pickup_world_grants;
 pub mod pickups;
@@ -5280,6 +5282,12 @@ impl Game {
                 };
                 self.state.room.npcs[index].child = Some(id);
                 self.advance_npc(id, phase::Phase::Update)
+            }
+            entities::Birth::Parented(selector) => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let child = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                child.parent = Some(parent);
+                Ok(())
             }
             entities::Birth::Attached(selector) => {
                 self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
