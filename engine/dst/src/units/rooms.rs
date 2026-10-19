@@ -8,16 +8,17 @@
 //! stage the port admits joins without a change here. The case plays one of
 //! the floors it reached, chosen uniformly: it enters each room
 //! `traversal::admits` lets the player enter, through the transition a door
-//! starts, and the game driver plays the room. The transition names the
-//! starting room as the room left and the target's first door as the one
-//! entered; admission reads only the target and its door.
+//! starts, and the game driver plays the room. The transition leaves the
+//! neighbor behind the target's first door through that neighbor's door to
+//! it, as walking in does, while the starting room stays the one the engine
+//! persists; admission reads only the target and its door.
 //!
 //! Only a failed or panicking Tick is a violation, signed by its error. A room
 //! the engine refuses is skipped, a player who walks back out has played the
 //! room, and a trapdoor that does not take the player refused the descent. A
 //! transition a trapdoor starts must arrive, and a Tick that fails on the way
 //! is a violation too.
-use super::game::{expected_rejection, seeded_run, Driver};
+use super::game::{expected_rejection, seeded_run, state_invariants, Driver};
 use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
@@ -83,14 +84,32 @@ pub fn run(case: &mut Case) {
     props::sometimes!(stage == 4, "rooms: Caves II's rooms are played");
     let start = game.state.current_room;
     let descriptors = game.state.floor.descriptors.clone();
-    let Some(from_slot) = first_door(&descriptors[start].neighbors) else {
-        return;
-    };
     for (index, descriptor) in descriptors.iter().enumerate() {
         if index == start || !traversal::admits(descriptor) {
             continue;
         }
         let Some(target_slot) = first_door(&descriptor.neighbors) else {
+            continue;
+        };
+        // The player arrives as walking in does: from the neighbor behind
+        // the target's first door, through that neighbor's door to it (the
+        // one facing it, when the neighbor has several).
+        let Some(from_room) = descriptor.neighbors[usize::from(target_slot)] else {
+            continue;
+        };
+        let facing = (target_slot % 4 + 2) % 4;
+        let doors_to_target = || {
+            descriptors[from_room]
+                .neighbors
+                .iter()
+                .enumerate()
+                .filter(|(_, neighbor)| **neighbor == Some(index))
+                .map(|(slot, _)| slot as u8)
+        };
+        let Some(from_slot) = doors_to_target()
+            .find(|slot| slot % 4 == facing)
+            .or_else(|| doors_to_target().next())
+        else {
             continue;
         };
         let template = &descriptor.template;
@@ -101,7 +120,7 @@ pub fn run(case: &mut Case) {
         props::sometimes!(template.room_type == 5, "rooms: a boss room is played");
         let mut entered = game.clone();
         entered.state.room_transition = Some(RoomTransition {
-            from_room: start,
+            from_room,
             target_room: index,
             from_slot,
             target_slot,
@@ -238,6 +257,9 @@ fn apply(game: &mut Game, command: Command, label: &impl Fn() -> Value) -> bool 
     let result = match panic::catch_unwind(AssertUnwindSafe(|| game.command(command.clone()))) {
         Ok(result) => {
             coverage::observe(&game.state);
+            // The game unit's state invariants hold on every floor the
+            // descent reaches; its must-hits stay the game unit's to meet.
+            props::always_only(|| state_invariants(&game.state));
             result
         }
         Err(_) => {

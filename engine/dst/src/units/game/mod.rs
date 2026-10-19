@@ -12,7 +12,7 @@ pub(crate) mod saves;
 mod scout;
 
 pub(crate) use driver::Driver;
-pub(crate) use invariants::expected_rejection;
+pub(crate) use invariants::{expected_rejection, state as state_invariants};
 pub(crate) use scout::{seeded_run, seeded_run_with};
 
 use crate::coverage;
