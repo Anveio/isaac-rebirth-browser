@@ -78,3 +78,55 @@ Both games end the segment hurt: the original at 4/6, the port at 2/6 in the rec
 **Port gaps found while building the fixture:**
 - Basement II room 8 authors a slot machine (6.1) at cell 67. The port spawns it as an idle body since #662. Until the routing grid (`tools/e2e/lib/route.mjs`) counted the cells slot bodies reach as solid, the port's own walk stalled against the machine: on main 0c6170d5, its Basement II leg failed "No way from room 8 to room 0 in 600 frames". The fixture then carried a hand-written `routeAvoid` (cells 52/67/82), and the original's recorded walk still passes the machine in column 8. The port's walk now routes around the machine's cell without it.
 - The award's rock destruction on cells 37 and 97 is ported (fix_award_pos Destroy(1)). Rock particles and the worm roll's effects stay unadmitted, as for blasts.
+
+## Caves II descent (#413)
+
+`EV9BP18Q-caves2` carries `EV9BP18Q-descent` one floor further. Each game also clears Caves I's route 5 → 6 → 7 → 9 → 10 → 11 → 12 → 13 → 0 and Mega Fatty with its own keys. The shared tail then re-anchors in Mega Fatty's room and is graded through the trapdoor, the stage transition and the Caves II arrival. The suite is `stage-descent`, in the `@stage-long` group.
+
+**The original's segment** is fixed fixture keys, 47,740 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly.
+
+**The port's segment** is recorded closed-loop per build, one leg per floor. Its Caves I leg runs the recorder's `--dodge --salt 4` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+
+**Generation inputs.** Caves II's generation reads the departing player's health and coins:
+- full red health admits the Challenge and Sacrifice rooms;
+- a half heart without soul hearts admits the bedrooms;
+- more than four coins admits an Arcade.
+
+The port's leg ends Caves I on a half heart, while the original's research keys ended at 3/6. So, as `--hurt` blasts a port that ends at full health, the original's keys end with one blast of its own bomb:
+- **Where:** about (444, 277), row 4 column 10.
+- **Clearance:** 131 units from the nearest grid object, 146 from the open trapdoor, 150 from the pedestal and 185 from the hearts. The blast reaches 75 units.
+- **Effect:** the original drops from 3/6 to 1/6. Every grid cell, both hearts and the pedestal stay unchanged.
+
+Both games then leave Caves I with 1/6 red, neither full nor holding five coins. The comparator grades those three predicates at the re-anchor. The raw values differ by construction and stay diagnostics:
+
+| Field at the re-anchor | Original | Port |
+| --- | ---: | ---: |
+| Red health | 1/6 | 1/6 |
+| Coins | 1 | 0 |
+| Bombs | 0 (spent on the blast) | 1 |
+
+Neither generation nor the shared tail reads the bomb count. On EV9BP18Q's Caves II seed, the port's floor generator builds the same floor (every descriptor and seed) from the port's inputs and from the original's research inputs before the blast (3/6, 1 coin).
+
+| Case | Paired checkpoints | Required tail checks |
+| --- | ---: | ---: |
+| EV9BP18Q caves2 contrived | 247/247 | 2,744/2,744 |
+| EV9BP18Q caves2 recorded OS approach | 247/247 | 2,748/2,748 |
+
+**Graded:**
+- the arrived stage (4) and the Caves II stage seed (1195341611);
+- the room index (5) at every `caves-ii-*` capture;
+- the Mega Fatty pedestal (item 346 at 320, 360) through the re-anchor and the transition;
+- the generation inputs;
+- seven wall assemblies, including the Caves II start room's, each equal to an original GL wall-cache draw.
+
+**Diagnostics only:** health, coins, bombs and the MT trapdoor seeds.
+
+**Cost:**
+- **Tape length:** each case plays about 63,000 frames per game, which the 72,000-frame replay budget admits (#729).
+- **Wall time:** the suite ran 5,375 s for both cases on a shared four-core host.
+- **Disk:** its directory peaked at 1,064 MB, with the paired gate gzipping each original's GL command log (624 MB raw per case). Free space stayed at 4.5 GB or more.
+
+**Port and harness findings while building the fixture:**
+- A Crazy Long Legs (207) at exactly 0.0 HP still walks, fires and keeps the doors shut, because death is HP below 0 in both games. The routing view now keeps foes at HP ≥ 0.
+- The port's Caves I route loses its two route-room half-hearts in room 11, to fireplace contact while Skinnies chase it.
+- The wall-quad reader could not hold the 624 MB log in one string; #729 streams it.

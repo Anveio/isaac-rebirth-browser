@@ -189,7 +189,7 @@ export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
   stage: ['stage-exit', 'monstro'],
-  // The three-floor Caves II descent runs about an hour per case (README).
+  // The three-floor Caves II descent runs about 45 minutes per case (README).
   'stage-long': ['stage-descent'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
   items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
