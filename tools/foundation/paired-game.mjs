@@ -125,7 +125,7 @@ export function declarePublicClockPlan(data) {
       total += action.frames;
     }
   }
-  assert.ok(total <= 36000);
+  assert.ok(total <= 72000, 'A paired tape presents at most twenty minutes (foundation-clock-run.py)');
   const nativeEntryPresentation = nativeBootstrapPresentations + prelude.reduce((sum, action) => sum + (action.type === 'step' ? action.frames : 0), 0);
   const nativeAcknowledgements = [0, nativeBootstrapPresentations].map(presentedFrame => ({presentedFrame, virtualElapsedNs: presentedFrame * presentationIntervalNanoseconds}));
   const nativeCaptures = [];
