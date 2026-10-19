@@ -28,7 +28,8 @@ pub(crate) fn finish_if_done(npc: &mut Npc) -> bool {
     if npc.animation_playing {
         return false;
     }
-    npc.boss_callback_pending = true;
+    // Chub's non-boss body segments die through state 16 without it.
+    npc.boss_callback_pending = npc.boss;
     npc.removed = true;
     npc.visible = false;
     true

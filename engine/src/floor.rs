@@ -2,6 +2,7 @@
 //! Independent stage primary, generator and local selector streams are kept
 //! separate. Authored catalogues supply every template and spawn selector.
 use crate::layout::{self, Cell, GeneratedRoom, Growth, GrowthRequest, GRID_CELLS, GRID_WIDTH};
+use crate::levels::BossStep;
 use crate::room_assets;
 use crate::room_templates::{AuthoredTemplate, SelectionRequest, TemplatePicker};
 use serde::{Deserialize, Serialize};
@@ -471,15 +472,11 @@ fn difficulty_band(stage: u32) -> (u8, u8) {
 }
 
 /// Boss variant base 584240 for a fresh profile (every achievement byte zero,
-/// no devil room visited). Odd floors choose and save a family; even floors
-/// use its retained flag to select the other member without consuming that
-/// extra draw. Stages 3/4 (Caves) share the draw chain and add Double
-/// Trouble's R10 at 5846d8; their families reuse flags 0x100000 and 0x10.
+/// no devil room visited), run from the stage chapter's draw chain.
 fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, String> {
-    let caves = matches!(stage, 3 | 4);
-    if !(caves || matches!(stage, 1 | 2)) {
-        return Err("boss selection admits only Basement and Caves floors".into());
-    }
+    let steps = crate::levels::stage_chapter(stage)
+        .and_then(|chapter| chapter.bosses)
+        .ok_or("boss selection requires the stage chapter's imported boss chain")?;
     let odd = stage % 2 == 1;
     // Odd floors draw R2 and save the family flag; even floors read it.
     let family = |flags: &mut u64, flag: u64, primary: &mut Primary| {
@@ -495,51 +492,37 @@ fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, Strin
             *flags & flag != 0
         }
     };
-    primary.next(); // Local RNG1 creation; fresh unavailable families never use it.
-    if primary.random(4) == 0 {
-        // Basement: Dingle 5020 / Gurglings 5140; Caves (0x675ec8): Mega
-        // Fatty 5050 / Mega Maw 5030, the even floor taking the other one.
-        let set = family(flags, 0x100000, primary);
-        return Ok(match (caves, odd == set) {
-            (false, true) => 5020,
-            (false, false) => 5140,
-            (true, true) => 5050,
-            (true, false) => 5030,
-        });
+    for step in steps {
+        match *step {
+            BossStep::Next => {
+                primary.next();
+            }
+            BossStep::Draw(bound) => {
+                primary.random(bound);
+            }
+            BossStep::Family {
+                chance,
+                flag,
+                when_set,
+                otherwise,
+            } => {
+                if chance.is_none_or(|chance| primary.random(chance) == 0) {
+                    let set = family(flags, flag, primary);
+                    return Ok(if odd == set { when_set } else { otherwise });
+                }
+            }
+            BossStep::Single {
+                chance,
+                odd_only,
+                boss,
+            } => {
+                if primary.random(chance) == 0 && (odd || !odd_only) {
+                    return Ok(boss);
+                }
+            }
+        }
     }
-    primary.random(2);
-    primary.random(5);
-    if caves && primary.random(10) == 0 {
-        // 5846d8 Double Trouble: a 2x1/1x2 room in 3700..3749.
-        return Ok(3700);
-    }
-    primary.random(2);
-    primary.random(3);
-    // 584488 R10: The Fallen needs a visited devil room (flag 0x40).
-    primary.random(10);
-    primary.random(3);
-    primary.random(4);
-    if primary.random(5) == 0 && odd {
-        // Duke of Flies 2010; Peep 2020 on Caves I.
-        return Ok(if caves { 2020 } else { 2010 });
-    }
-    primary.random(2);
-    if primary.random(4) == 0 && odd {
-        // 2050 on Basement I; Gurdy Jr. 3280 on Caves I.
-        return Ok(if caves { 3280 } else { 2050 });
-    }
-    primary.random(2);
-    primary.random(2);
-    primary.random(2);
-    // Basement: Monstro 1010 / Larry Jr. 1020; Caves: Gurdy 1040 / Chub
-    // 1030, the even floor taking the other one.
-    let set = family(flags, 16, primary);
-    Ok(match (caves, odd == set) {
-        (false, true) => 1010,
-        (false, false) => 1020,
-        (true, true) => 1040,
-        (true, false) => 1030,
-    })
+    Err("stage chapter's boss chain selected no boss".into())
 }
 fn record(
     descriptors: &mut Vec<Descriptor>,
@@ -916,7 +899,8 @@ fn attempt(
                 &mut descriptors,
                 &fitting,
                 index,
-                if request.stage <= 2 { 1 } else { 3 },
+                crate::levels::chapter_id(request.stage, false)
+                    .ok_or("normal rooms require the stage's room set")? as u8,
                 selected.0,
                 selected.1,
                 primary.state,
@@ -1074,20 +1058,18 @@ fn generate_normal_basement_inner(
     special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
     let stage_seed = request.stage_seed;
-    if !(1..=4).contains(&request.stage) {
-        return Err("normal generation admits only Basement I/II and Caves I/II".into());
-    }
+    let Some(node) = crate::levels::node(request.stage) else {
+        return Err("normal generation admits only the level framework's stage nodes".into());
+    };
     if stage_seed == 0 {
         return Err("nonzero stage seed required".into());
     }
     let special_assets =
         special.map_or_else(room_assets::special, <[room_assets::RoomAsset]>::to_vec);
     // 5d49b0: room set stage - even + (type != 0); stage type 0 only.
-    let basement_assets = if request.stage <= 2 {
-        room_assets::basement()
-    } else {
-        room_assets::caves()
-    };
+    let basement_assets = crate::levels::stage_chapter(request.stage)
+        .and_then(|chapter| chapter.rooms)
+        .ok_or("stage chapter has no imported room set")?();
     let mut special = TemplatePicker::new(
         special_assets
             .into_iter()
@@ -1172,14 +1154,8 @@ fn generate_normal_basement_inner(
             return Ok(Floor {
                 contract: if challenge.is_some() {
                     "source-authored-challenge1-neutral-filter-fresh-isaac-basement".into()
-                } else if request.stage == 1 {
-                    CONTRACT.into()
-                } else if request.stage == 2 {
-                    "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
-                } else if request.stage == 3 {
-                    "continuing-profile-normal-isaac-caves-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
                 } else {
-                    "continuing-profile-normal-isaac-caves-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity".into()
+                    node.contract.into()
                 },
                 stage: request.stage,
                 stage_seed,

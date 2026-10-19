@@ -204,12 +204,11 @@ pub(crate) fn for_descriptor_with_special(
     descriptor: &crate::floor::Descriptor,
     source: Option<&[RoomAsset]>,
 ) -> Result<RoomAsset, String> {
-    let mut catalog = match descriptor.asset_stage {
-        0 => source.map_or_else(special, <[RoomAsset]>::to_vec),
-        1 => basement(),
-        3 => caves(),
-        5 => depths(),
-        _ => return Err("unimplemented authored stage catalogue".into()),
+    let mut catalog = match (descriptor.asset_stage, source) {
+        (0, Some(source)) => source.to_vec(),
+        (id, _) => crate::levels::chapter(u32::from(id))
+            .and_then(|chapter| chapter.rooms)
+            .ok_or("unimplemented authored stage catalogue")?(),
     };
     if descriptor.catalog_index >= catalog.len() {
         return Err("descriptor authored index outside its stage catalogue".into());

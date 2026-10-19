@@ -60,6 +60,27 @@ static SITES: Mutex<Vec<&'static Site>> = Mutex::new(Vec::new());
 
 thread_local! {
     static VIOLATIONS: Cell<u64> = const { Cell::new(0) };
+    static ALWAYS_ONLY: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Runs `check` recording only its `always` and `unreachable` properties:
+/// another unit's state checks applied where its must-hits must neither be
+/// met nor counted, so they keep measuring that unit's own workload.
+pub fn always_only<T>(check: impl FnOnce() -> T) -> T {
+    struct Restore(bool);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            ALWAYS_ONLY.with(|only| only.set(self.0));
+        }
+    }
+    let _restore = Restore(ALWAYS_ONLY.with(|only| only.replace(true)));
+    check()
+}
+
+/// Whether a property of `kind` records here: always, except a `sometimes`
+/// or `reachable` inside [`always_only`].
+pub fn records(kind: Kind) -> bool {
+    matches!(kind, Kind::Always | Kind::Unreachable) || !ALWAYS_ONLY.with(Cell::get)
 }
 
 /// `always`/`unreachable` failures on this thread so far; a case compares it
@@ -241,19 +262,21 @@ macro_rules! property {
     ($sdk:ident, $kind:ident, $condition:expr, $message:literal, $details:expr, $signature:expr) => {{
         static SITE: $crate::props::Site =
             $crate::props::Site::new($message, $crate::props::Kind::$kind);
-        let condition: bool = $condition;
-        // A signature names a failure, so it is computed only for one.
-        let signature: Option<String> = if condition { None } else { $signature };
-        let owned;
-        let details: &::serde_json::Value =
-            if SITE.would_emit_signed(condition, signature.as_deref()) {
-                owned = $crate::props::with_context($details);
-                &owned
-            } else {
-                &$crate::props::NO_DETAILS
-            };
-        ::antithesis_sdk::$sdk!(condition, $message, details);
-        SITE.record_signed(condition, details, signature.as_deref());
+        if $crate::props::records($crate::props::Kind::$kind) {
+            let condition: bool = $condition;
+            // A signature names a failure, so it is computed only for one.
+            let signature: Option<String> = if condition { None } else { $signature };
+            let owned;
+            let details: &::serde_json::Value =
+                if SITE.would_emit_signed(condition, signature.as_deref()) {
+                    owned = $crate::props::with_context($details);
+                    &owned
+                } else {
+                    &$crate::props::NO_DETAILS
+                };
+            ::antithesis_sdk::$sdk!(condition, $message, details);
+            SITE.record_signed(condition, details, signature.as_deref());
+        }
     }};
 }
 
@@ -295,15 +318,17 @@ macro_rules! reachable {
     ($message:literal, $details:expr $(,)?) => {{
         static SITE: $crate::props::Site =
             $crate::props::Site::new($message, $crate::props::Kind::Reachable);
-        let owned;
-        let details: &::serde_json::Value = if SITE.would_emit(true) {
-            owned = $crate::props::with_context($details);
-            &owned
-        } else {
-            &$crate::props::NO_DETAILS
-        };
-        ::antithesis_sdk::assert_reachable!($message, details);
-        SITE.record(true, details);
+        if $crate::props::records($crate::props::Kind::Reachable) {
+            let owned;
+            let details: &::serde_json::Value = if SITE.would_emit(true) {
+                owned = $crate::props::with_context($details);
+                &owned
+            } else {
+                &$crate::props::NO_DETAILS
+            };
+            ::antithesis_sdk::assert_reachable!($message, details);
+            SITE.record(true, details);
+        }
     }};
 }
 
@@ -408,9 +433,17 @@ pub fn verdict(units: &[&str], wasm: bool) -> Vec<PropertyResult> {
                 class == module || class.starts_with(&format!("{module}::"))
             })
     };
+    // A property another unit evaluated (`always_only`) reports with the run,
+    // so its failures are never hidden by the unit selection.
+    let evaluated = |message: &str| {
+        sites
+            .get(message)
+            .is_some_and(|ledger| ledger.0 + ledger.1 > 0)
+    };
     let mut results: BTreeMap<&'static str, PropertyResult> = BTreeMap::new();
     for info in antithesis_sdk::assert::ANTITHESIS_CATALOG.iter() {
-        if !selected(info.class) || results.contains_key(info.message) {
+        if !(selected(info.class) || evaluated(info.message)) || results.contains_key(info.message)
+        {
             continue;
         }
         let (passes, fails, first_failure, signatures) =

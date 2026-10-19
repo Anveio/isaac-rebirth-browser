@@ -890,27 +890,39 @@ pub(crate) fn from_selector(
     selector: &SpawnSelector,
     appear: bool,
 ) -> Result<Option<Pickup>, String> {
-    from_selector_with_bomb_replacement(id, selector, appear, false)
+    from_selector_with_bomb_replacement(id, selector, appear, None)
 }
 
-/// The real50 ->51 replacement still passes LeftHand508FE0 at4FFF1E.
-/// Existing callers without this operand owner keep their prior frontier;
-/// direct51 never reaches that query. No missing trinket history becomes0.
+/// Both normal50's R50 outcomes reach LeftHand508FE0 at4FFF1E.
+/// Positive61 selects the separately unimplemented360 factory. Direct51
+/// skips this query, and missing query history never supplies a false value.
 pub(crate) fn from_source_selector(
     id: u32,
     selector: &SpawnSelector,
     appear: bool,
     state: &State,
 ) -> Result<Option<Pickup>, String> {
-    let no_left_hand = empty_trinket_inputs(state);
-    from_selector_with_bomb_replacement(id, selector, appear, no_left_hand)
+    let left_hand = state.player_items.as_ref().and_then(|owner| {
+        state
+            .player
+            .entity_source
+            .filter(|source| source.entity_type == 1 && source.variant == 0)?;
+        crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .has_trinket(61)
+    });
+    from_selector_with_bomb_replacement(id, selector, appear, left_hand)
 }
 
 fn from_selector_with_bomb_replacement(
     id: u32,
     selector: &SpawnSelector,
     appear: bool,
-    no_left_hand: bool,
+    left_hand: Option<bool>,
 ) -> Result<Option<Pickup>, String> {
     if selector.entity_type != 5 || !matches!(selector.variant, 50 | 51) {
         return Ok(None);
@@ -927,14 +939,13 @@ fn from_selector_with_bomb_replacement(
             // The real360 replacement keeps its own unimplemented owner.
             return Ok(None);
         }
-        if temporary.bounded(50) == 0 {
-            if !no_left_hand {
-                return Ok(None);
-            }
-            51
-        } else {
-            50
+        let variant = if temporary.bounded(50) == 0 { 51 } else { 50 };
+        //500271 and50027F both join4FFEF2 before the same61 query.
+        //A true result replaces either50 or51 with unsupported360.
+        if left_hand != Some(false) {
+            return Ok(None);
         }
+        variant
     } else {
         // Direct51 goes4FFEC3 ->4FFF38, with no R20/R50/LeftHand query.
         51
