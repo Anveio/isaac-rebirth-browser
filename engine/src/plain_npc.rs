@@ -135,8 +135,10 @@ fn death_clip(npc: &Npc) -> Option<&'static str> {
     content::clip(&npc.actor, clip).map(|_| clip)
 }
 
-/// A dead boss plays its death clip in state16 before 4f2d10 removes it.
-fn dying_boss(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
+/// State 16 (4fa56d): the death clip plays before 4f2d10 removes the NPC,
+/// with the boss callback only for a boss. Dead bosses enter it from the
+/// dead handling; Death's Head 212 sets it itself.
+pub(crate) fn dying(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
     let mut frame = npc.death_frame;
     if crate::boss_death::step(npc, &mut frame, &mut friction)? == 0 {
         match death_clip(npc) {
@@ -278,7 +280,7 @@ fn advance_full(
             if dead_ai && npc.state != 16 {
                 ai(npc, random, world, births, &mut friction)?;
             }
-            return dying_boss(npc, friction);
+            return dying(npc, friction);
         }
         // Dead NPCs keep negative HP through the next intermediate phase.
         // 4fa3eb then runs update_ai with dead set for every family before
@@ -339,7 +341,7 @@ fn advance_full(
     if npc.dead && npc.boss {
         // A boss that killed itself in its AI (Larry Jr.'s lone head) enters
         // state16 in the same update's post-AI handling.
-        return dying_boss(npc, friction);
+        return dying(npc, friction);
     }
     update_sprite(npc)?;
     npc.friction = friction;

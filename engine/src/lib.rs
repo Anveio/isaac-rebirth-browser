@@ -37,6 +37,7 @@ pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
 pub mod critters;
+pub mod deaths_head;
 pub mod dingle;
 pub mod dips;
 pub mod display_settings;
