@@ -298,8 +298,16 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) -> usize {
 /// included, and the room's clear and its award run whatever the room's
 /// shape. A player who dies, leaves or quits first leaves it undecided.
 fn clear_boss_room(game: &mut Game, room: usize, boss: &str, label: impl Fn() -> Value) {
+    // A requested Quit belongs to the driver; Escape must not turn it into resume.
+    if game.state.run_quit.input_pending
+        || game.state.run_quit.active()
+        || game.state.run_quit.system_pending
+    {
+        return;
+    }
     if game.state.paused {
-        for down in [true, false] {
+        // The driver can leave Escape held. Release it before the fresh edge.
+        for down in [false, true, false] {
             let escape = Command::Key {
                 code: "Escape".into(),
                 down,
@@ -325,9 +333,10 @@ fn clear_boss_room(game: &mut Game, room: usize, boss: &str, label: impl Fn() ->
     };
     let fighting =
         |game: &Game| present(game) && !game.state.paused && game.state.room_transition.is_none();
-    if !fighting(game) {
+    if !present(game) {
         return;
     }
+    // A still-present paused or stuck transition must reach the clear assertion.
     for _ in 0..CLEAR_FRAMES {
         if game.state.room.combat_clear || !fighting(game) {
             break;
@@ -346,7 +355,20 @@ fn clear_boss_room(game: &mut Game, room: usize, boss: &str, label: impl Fn() ->
                 },
                 copied_source: None,
             };
-            if npc.damage.enqueue(health, hit).is_err() {
+            let queued = npc.damage.enqueue(health, hit);
+            props::always!(
+                queued.is_ok(),
+                "rooms: lethal damage in a boss room enqueues without an error",
+                json!({
+                    "case": label(),
+                    "boss": boss,
+                    "npc": [npc.id, npc.kind, npc.variant, npc.state],
+                    "health": [health.hp, health.max_hp],
+                    "error": queued.as_ref().err(),
+                }),
+                signature: boss
+            );
+            if queued.is_err() {
                 return;
             }
         }
