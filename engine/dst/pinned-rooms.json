@@ -1,5 +1,20 @@
 [
   {
+    "name": "coverage-gemini-kill-pinned",
+    "code": "DN379LBR",
+    "stage": 1,
+    "room": 0,
+    "template": [
+      5,
+      2050
+    ],
+    "seed": 15887536506512421006,
+    "reaches": [
+      "npc:79",
+      "removed:79"
+    ]
+  },
+  {
     "name": "regression-basement-hopper-state",
     "code": "9Y4P1T0R",
     "stage": 1,
