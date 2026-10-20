@@ -8,6 +8,8 @@ import { InputConfigIO, validateInputConfigs } from './input-configs';
 import { Feedback } from './feedback';
 import { FullscreenRuntime } from './fullscreen';
 import { SaveGameIO } from './save-games';
+import { gameKey, resetWithSaves, settleSaveIO } from './host';
+import wasmUrl from './generated/engine.wasm?url';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const status = document.querySelector<HTMLElement>('#status')!;
@@ -37,7 +39,12 @@ async function boot() {
   let bootGammaPreferences = savedPreferences?.gamma ?? null;
   //Real saved settings precede the first Title Music admission, as5B9930
   //precedes MenuInit. No post-constructor command may discard its Start.
-  const [engine, renderer, audio] = await Promise.all([Engine.create(initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined, bootMapPreferences ?? undefined, bootGammaPreferences ?? undefined), Renderer.load(canvas), AudioRuntime.load()]);
+  const wasm = async () => {
+    const response = await fetch(wasmUrl);
+    if (!response.ok) throw new Error(`WASM load failed: ${response.status}`);
+    return response.arrayBuffer();
+  };
+  const [engine, renderer, audio] = await Promise.all([wasm().then(bytes => Engine.create(bytes, initialSeed, bootEpochSeed, undefined, bootAudioPreferences ?? undefined, bootFullscreenPreferences ?? undefined, bootInputConfigs ?? undefined, bootMapPreferences ?? undefined, bootGammaPreferences ?? undefined)), Renderer.load(canvas), AudioRuntime.load()]);
   const saveGames = new SaveGameIO();
   let saveFailureVisible = false;
   const reportSaveFailure = () => {
@@ -62,19 +69,7 @@ async function boot() {
     if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
     const previousAmbienceUpdate = currentState.ambience.updateSequence;
     try {
-      let state = engine.command(command);
-      //A batched public Tick can stop before a System iteration for real IO.
-      //No rendering, audio callback or next public input sees partial Main state.
-      for (let responses = 0; ; responses++) {
-        if (!state.saveWritePending && !state.saveReadmissionPending) break;
-        //One write and one menu read can belong to one public System interval.
-        const maxResponses = command.type === 'tick' ? command.count * 2 : 1;
-        if (responses >= maxResponses) throw new Error('Save IO made no bounded tick progress');
-        if (state.saveWritePending) {
-          if (!saveGames.consume(engine, state.saveRevision)) reportSaveFailure();
-        } else if (!saveGames.readmit(engine, state.saveRevision)) reportSaveFailure();
-        state = engine.snapshot();
-      }
+      const state = settleSaveIO(engine, saveGames, command, engine.command(command), reportSaveFailure);
       currentState = state;
       feedback.consume(state.optionsMenu.unavailableRequests, state.screen);
       //Settings5B8DB0 IO precedes SetMenu's audio confirmation. Back remains
@@ -150,18 +145,14 @@ async function boot() {
     // button owns focus. Other game keydowns require the actual canvas focus.
     const noticeEscape = feedback.visible && event.code === 'Escape';
     if (down && document.activeElement !== canvas && !noticeEscape) return;
-    // Releases belong to the key's real pressed owner, regardless of focus or
-    // modifier flags. Unowned browser keyups must not be captured by the game.
-    if (!down && !held) return;
-    const seedText = currentState.screen === 'seed' && /^[a-z0-9]$/i.test(event.key)
-      && !event.ctrlKey && !event.altKey && !event.metaKey;
-    if (!supported.has(event.code) && !seedText) return;
+    const owned = gameKey({ code: event.code, key: event.key, down, repeat: event.repeat,
+      ctrlKey: event.ctrlKey, altKey: event.altKey, metaKey: event.metaKey }, currentState, supported);
+    if (!owned) return;
     event.preventDefault();
     if (down && event.isTrusted) { void audio.unlock().catch(console.error); fullscreen.gesture(event); }
-    if (down && event.repeat) return;
+    if (!owned.command) return;
     try {
-      if (down && seedText) dispatch({ type: 'text', text: event.key.toUpperCase() });
-      else dispatch({ type: 'key', code: event.code, down });
+      dispatch(owned.command);
     } catch (error) {
       status.textContent = String(error);
       status.hidden = false;
@@ -246,9 +237,9 @@ async function boot() {
       const loadedFullscreenPreferences = options.fullscreenPreferences ?? stored?.fullscreen ?? {fullscreen: false};
       const loadedMapPreferences = options.mapPreferences ?? stored?.map ?? null;
       const loadedGammaPreferences = options.gammaPreferences ?? stored?.gamma ?? null;
-      currentState = engine.reset(seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
-        loadedFullscreenPreferences, loadedInputConfigs ?? undefined, loadedMapPreferences ?? undefined, loadedGammaPreferences ?? undefined, options.bootElapsed);
-      if (!saveGames.load(engine)) reportSaveFailure();
+      if (!resetWithSaves(engine, saveGames, seed, options.bootEpochSeed ?? 0, options.resources, loadedAudioPreferences ?? undefined,
+        loadedFullscreenPreferences, loadedInputConfigs ?? undefined, loadedMapPreferences ?? undefined, loadedGammaPreferences ?? undefined,
+        options.bootElapsed)) reportSaveFailure();
       currentState = engine.snapshot();
       feedback.resetDispatch();
       if (options.inputConfigs === undefined) reportInputConfigLoadFailure();
