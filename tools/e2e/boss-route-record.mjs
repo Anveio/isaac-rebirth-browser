@@ -31,6 +31,12 @@
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
+// --rewind: in a fight (a route room's or the boss room's), a health loss
+// restores the game 90 to 360 frames back and plays on with a fresh jitter
+// seed, the orbit flipped on every other try; after 12 tries at one spot the
+// hit stands. The kept keys are the path that took no hit; `rewound` reports
+// the rewinds and the hits kept. The headless page restores its WASM memory,
+// Chromium replays from reset to the save.
 //
 // The recorder plays the production snapshot's WASM headlessly through the
 // browser page's own engine, key and save modules (lib/headless-page.mjs);
@@ -45,6 +51,7 @@
 import assert from 'node:assert/strict';
 import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
@@ -64,6 +71,7 @@ const preserveAttempt = (name, value) => {
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
 const RECORDER = hasFlag('--browser-recorder') || process.env.E2E_BROWSER_RECORDER === '1' ? 'browser' : 'headless';
+const REWIND = hasFlag('--rewind'), REWIND_TRIES = 12;
 const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
@@ -87,6 +95,9 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --anchor-door ROOM names the room whose doorway the shared tail re-anchors
+// through before it walks onto the trapdoor (stage-exit-scenarios.py).
+const ANCHOR_DOOR = flag('--anchor-door') === undefined ? null : Number(flag('--anchor-door'));
 // --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
 // around in those rooms, beyond the routing grid's own solid cells (which
 // include NPC and slot bodies).
@@ -136,7 +147,7 @@ try {
 }
 let browser;
 const actions = [], checkpoints = {};
-let frames = 0, status = 'fail', reason, end = null;
+let frames = 0, status = 'fail', reason, end = null, rewound = null;
 try {
   let page;
   if (RECORDER === 'browser') {
@@ -145,19 +156,33 @@ try {
   } else page = await headlessPage(server);
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
-  await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
+  const reset = () => page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
     window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
   }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
+  // Every key the page holds, by the name it was pressed with: a --rewind
+  // replay from reset releases them first.
+  const pageHeld = new Set();
+  const press = async (name, down) => {
+    if (down) pageHeld.add(name); else pageHeld.delete(name);
+    await page.keyboard[down ? 'down' : 'up'](name);
+  };
+  // A labelled step marker is itself replayed; captures are no-ops here.
+  const replay = async list => {
+    for (const action of list) {
+      if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
+      else if (action.type === 'key') await press(namedKeys[action.key] || action.key, action.down);
+    }
+  };
   const start = caseData.pairedTape.findIndex(action => action.label === FROM);
   assert.ok(start >= 0, `The case tape must reach ${FROM}`);
-  // A labelled step marker is itself replayed; captures are no-ops here.
-  for (const action of caseData.pairedTape.slice(0, start + 1)) {
-    if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
-    else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
-  }
+  await reset();
+  await replay(caseData.pairedTape.slice(0, start + 1));
   // Each capture also records where the port stood, for divergence reports,
   // and the port state the browser replay must reach there (`recorded`).
   let seen, seenAt = -1;
+  // Each room the recorder saw the port enter, at the frame it first saw it
+  // ([frame, room]); --rewind's fresh replay must agree (freshReplayCheck).
+  let entries = [];
   const checkpoint = label => {
     assert.equal(seenAt, frames, `Capture ${label} needs the state of its own frame`);
     actions.push({ type: 'capture', label, recorded: { recorder: RECORDER, build: server.build.sha256, room: seen.currentRoom, position: [seen.player.x, seen.player.y],
@@ -166,15 +191,16 @@ try {
   };
   const view = async () => {
     seen = JSON.parse(await page.evaluate(() => window.game.snapshotJson())); seenAt = frames;
+    if (seen.currentRoom !== entries.at(-1)?.[1]) entries.push([frames, seen.currentRoom]);
     return routingView(seen);
   };
   const held = new Set();
   const hold = async keys => {
     for (const code of [...held]) if (!keys.includes(code)) {
-      held.delete(code); await page.keyboard.up(code); actions.push({ type: 'key', key: tapeKey[code], down: false });
+      held.delete(code); await press(code, false); actions.push({ type: 'key', key: tapeKey[code], down: false });
     }
     for (const code of keys) if (!held.has(code)) {
-      held.add(code); await page.keyboard.down(code); actions.push({ type: 'key', key: tapeKey[code], down: true });
+      held.add(code); await press(code, true); actions.push({ type: 'key', key: tapeKey[code], down: true });
     }
   };
   const step = async count => {
@@ -182,6 +208,85 @@ try {
     frames += count;
     const last = actions.at(-1);
     if (last?.type === 'step') last.frames += count; else actions.push({ type: 'step', frames: count });
+  };
+  // --rewind (see the header): fight frames save every 30 frames; a health
+  // loss restores one of the last twelve saves and returns the loop's state.
+  let ring = [], sinceSave = 0, tries = 0, hitFrame = -Infinity, lastHp = null;
+  rewound = REWIND ? { rewinds: 0, hits: [] } : null;
+  const save = vars => ({ page: page.checkpoint?.(), actions: actions.length, entries: entries.length,
+    lastFrames: actions.at(-1)?.type === 'step' ? actions.at(-1).frames : undefined, frames, held: [...held],
+    pageHeld: [...pageHeld], labels: Object.keys(checkpoints), vars: structuredClone(vars) });
+  const load = async saved => {
+    actions.length = saved.actions;
+    if (saved.lastFrames !== undefined) actions.at(-1).frames = saved.lastFrames;
+    if (page.restore) {
+      page.restore(saved.page);
+      pageHeld.clear(); for (const name of saved.pageHeld) pageHeld.add(name);
+    } else {
+      // Chromium keeps no memory to restore: replay from reset to the save.
+      for (const name of [...pageHeld]) await press(name, false);
+      await reset();
+      await replay([...caseData.pairedTape.slice(0, start + 1), ...actions]);
+    }
+    frames = saved.frames; entries = entries.slice(0, saved.entries);
+    held.clear(); for (const code of saved.held) held.add(code);
+    for (const label of Object.keys(checkpoints)) if (!saved.labels.includes(label)) delete checkpoints[label];
+    return structuredClone(saved.vars);
+  };
+  const rewindOnHit = async vars => {
+    if (!REWIND) return null;
+    const hp = state.player.hp;
+    if (lastHp !== null && hp < lastHp) {
+      // A hit more than 300 frames after the last one is a new spot.
+      if (frames > hitFrame + 300) tries = 0;
+      if (tries < REWIND_TRIES && ring.length) {
+        tries++; rewound.rewinds++; hitFrame = Math.max(hitFrame, frames);
+        // Two tries from 90-120 frames back, then two from 60 frames further back each.
+        const index = Math.max(0, ring.length - 4 - 2 * Math.floor((tries - 1) / 2));
+        const resumed = await load(ring[index]);
+        ring = ring.slice(0, index + 1); sinceSave = 0; lastHp = null;
+        state = await view();
+        return resumed;
+      }
+      rewound.hits.push({ room: state.room, frame: frames, health: [lastHp, hp] });
+      tries = 0; hitFrame = -Infinity;
+    }
+    lastHp = hp;
+    if ((sinceSave += STRIDE) >= 30) {
+      sinceSave = 0; ring.push(save(vars()));
+      if (ring.length > 12) ring.shift();
+    }
+    return null;
+  };
+  const rewindFrom = () => { ring = []; sinceSave = 0; lastHp = null; tries = 0; hitFrame = -Infinity; };
+  const freshReplayCheck = async () => {
+    const fresh = await headlessPage(server), game = window.game;
+    const diverged = what => new Error(`--rewind: a fresh replay of the kept keys ${what}; the headless page's restore is suspect`);
+    game.reset(caseData.initialSeed, { bootEpochSeed: caseData.bootEpochSeed, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)), trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+    for (const action of caseData.pairedTape.slice(0, start + 1)) {
+      if (action.type === 'step') game.step(action.frames);
+      else if (action.type === 'key') await fresh.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
+    }
+    const rooms = [JSON.parse(game.snapshotJson()).currentRoom];
+    const roomAt = new Map([[0, rooms[0]]]);
+    let frame = 0;
+    for (const action of actions) {
+      if (action.type === 'key') await fresh.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
+      else if (action.type === 'step') for (let left = action.frames; left > 0; left--) {
+        const room = game.step(1).currentRoom; frame++;
+        roomAt.set(frame, room);
+        if (room !== rooms.at(-1)) rooms.push(room);
+      } else if (action.recorded) {
+        const now = JSON.parse(game.snapshotJson()), { recorder, build, ...expected } = action.recorded;
+        const replayed = { room: now.currentRoom, position: [now.player.x, now.player.y],
+          health: [now.player.hp, now.player.maxHp, now.player.soulHp], coins: now.inventory.coins };
+        if (!isDeepStrictEqual(replayed, expected)) throw diverged(`reached ${action.label} at ${JSON.stringify(replayed)}, recorded ${JSON.stringify(expected)}`);
+      }
+    }
+    for (const [at, room] of entries) if (roomAt.get(at) !== room) throw diverged(`stood in room ${roomAt.get(at)} at frame ${at}, where the recording entered room ${room}`);
+    if (!isDeepStrictEqual(rooms, entries.map(([, room]) => room))) throw diverged(`entered rooms ${rooms.join(',')}, the recording ${entries.map(([, room]) => room).join(',')}`);
+    const final = routingView(JSON.parse(game.snapshotJson()));
+    if (!isDeepStrictEqual({ health: final.health, coins: final.coins }, end)) throw diverged(`ended at ${JSON.stringify({ health: final.health, coins: final.coins })}, recorded ${JSON.stringify(end)}`);
   };
   // The paired preamble settles 60 frames before any route input.
   if (FROM === 'gameplay-start') await step(60);
@@ -246,8 +351,12 @@ try {
       if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) ({ point: centre, dir: incoming } = planStep(cells, door, incoming));
       return centre.x === door.x && centre.y === door.y ? doorKeys(avoiding(state.grid, cells), state.player, door) : toward(state.player, centre, 2);
     };
+    rewindFrom();
+    const routeVars = () => ({ budget, centre, incoming, orbit: routeFight.orbit, jitter: routeFight.jitter ?? null, salt: routeFight.salt ?? null });
     while (state.room !== target) {
       if (budget <= 0 && process.env.BOSS_ROUTE_DEBUG) writeFileSync(process.env.BOSS_ROUTE_DEBUG, await page.evaluate(() => window.game.snapshotJson()));
+      // A route room's foes can kill the port's player; say so, not a timeout.
+      if (state.player.hp <= 0) throw new Error(`The port's player died in room ${state.room}`);
       if (budget <= 0) throw new Error(`No way from room ${state.room} to room ${target} in ${ROOM_FRAMES} frames`);
       const door = state.doors.find(d => d.target === target);
       if (!door) throw new Error(`Room ${state.room} has no door to room ${target}`);
@@ -278,6 +387,15 @@ try {
       await step(STRIDE); budget -= STRIDE;
       // Route checkpoints let both games' positions be compared on the way.
       state = await view();
+      const resumed = await rewindOnHit(routeVars);
+      if (resumed) {
+        // A fresh jitter seed per try, and the orbit flipped on every other one.
+        ({ budget, centre, incoming } = resumed);
+        routeFight.salt = (resumed.salt ?? 7) * 31 + tries;
+        routeFight.rng = saltedRandom(routeFight.salt); routeFight.jitter = Math.max(resumed.jitter ?? 0, 0.2);
+        routeFight.orbit = tries % 2 ? -resumed.orbit : resumed.orbit;
+        continue;
+      }
       if (frames % 20 === 0) checkpoint(`route-${frames}`);
     }
   }
@@ -311,11 +429,22 @@ try {
     // narrow every fight's orbit, and EV9BP18Q's Monstro then outlasts the
     // window.
     const PEDESTAL_CELLS = hasFlag('--keep-off-pedestal') ? [82, 96, 97, 98, 112] : [];
-    for (let left = FIGHT; !(state.clear && !state.foes.length); left -= STRIDE) {
+    rewindFrom();
+    let left = FIGHT;
+    const fightVars = () => ({ left, orbit: memory.orbit, jitter: memory.jitter ?? null, salt: memory.salt ?? null });
+    for (; !(state.clear && !state.foes.length); left -= STRIDE) {
       if (left <= 0) throw new Error(`Room not cleared in ${FIGHT} fight frames`);
       if (state.player.hp <= 0) throw new Error(`The port's player died in the fight, ${FIGHT - left} frames in`);
       await hold(state.player.controls ? fightKeys({ ...state, grid: avoiding(state.grid, PEDESTAL_CELLS) }, memory) : []);
       await step(STRIDE); state = await view();
+      const resumed = await rewindOnHit(fightVars);
+      if (resumed) {
+        left = resumed.left;
+        memory.salt = (resumed.salt ?? Number(flag('--salt', '0'))) * 31 + tries;
+        memory.rng = saltedRandom(memory.salt); memory.jitter = Math.max(resumed.jitter ?? 0, 0.2);
+        memory.orbit = tries % 2 ? -resumed.orbit : resumed.orbit;
+        continue;
+      }
       if (frames % 20 === 0) checkpoint(`fight-${frames}`);
       if (process.env.BOSS_ROUTE_DEBUG && (FIGHT - left) % 600 === 0) {
         const raw = JSON.parse(await page.evaluate(() => window.game.snapshotJson()));
@@ -327,6 +456,15 @@ try {
     if (hasFlag('--no-corner')) { await hold([]); await step(1); }
   }
   if (FIGHT && !hasFlag('--no-corner')) {
+    // Red creep a fight left (Mega Fatty's landing pools) hurts for 125
+    // updates after it lands (creep_effects.rs): the corner walk waits it out
+    // rather than cross it; a fight that leaves none changes no key or frame.
+    const burning = () => seen.spriteEffects?.some(effect => effect.creepEffect && !effect.removed);
+    if (burning()) await hold([]);
+    for (let left = 600; burning(); left--) {
+      if (left <= 0) throw new Error('The fight\'s creep still burns 600 frames after the clear');
+      await step(1); state = await view();
+    }
     // A poop the port's own fight drops in the cell inside an open doorway
     // would wall off the shared re-anchor walk. The port shoots it out from
     // a free side cell before parking; the original's fixture fight is fixed.
@@ -384,8 +522,8 @@ try {
     const keepOff = () => new Set([state.trapdoor?.gridIndex, ...AVOID, ...pickupCells(state),
       ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))]);
     // 0-1 BFS over the room's interior: open cells cost 0, solid poops 1.
-    const corridor = (from, to) => {
-      const off = keepOff(), cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
+    const corridor = (from, to, off = keepOff()) => {
+      const cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
       while (deque.length) {
         const cell = deque.shift();
         if (cell === to) break;
@@ -405,15 +543,19 @@ try {
       for (let cell = to; cell !== -1; cell = previous.get(cell)) path.unshift(cell);
       return path;
     };
-    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+    const innerCell = door => {
       const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
-      const inner = cellAt(door.x + inward[0], door.y + inward[1]);
+      return cellAt(door.x + inward[0], door.y + inward[1]);
+    };
+    // Shoots out the first poop on a route from its `from` end, standing in
+    // the cell before it.
+    const clearRoute = async (route, what) => {
       for (let tries = 0; ; tries++) {
-        const path = corridor(park, inner);
-        if (!path) throw new Error(`No corner route to the ${door.side} doorway`);
+        const path = route();
+        if (!path) throw new Error(`No ${what}`);
         const at = path.findIndex(cell => state.poops.includes(cell));
-        if (at < 0) break;
-        if (tries === 6) throw new Error(`Corner route to the ${door.side} doorway still crosses poops`);
+        if (at < 0) return;
+        if (tries === 6) throw new Error(`The ${what} still crosses poops`);
         const poop = path[at], stand = path[at - 1];
         await walk({ x: 40 + stand % w * 40, y: 120 + Math.floor(stand / w) * 40 }, blocked, 600, 'route poop');
         const aim = { [1]: 'ArrowRight', [-1]: 'ArrowLeft', [w]: 'ArrowDown', [-w]: 'ArrowUp' }[poop - stand];
@@ -423,6 +565,20 @@ try {
         }
         await hold([]);
       }
+    };
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      await clearRoute(() => corridor(park, innerCell(door)), `corner route to the ${door.side} doorway`);
+    }
+    // The shared tail's exit walks from the re-anchor doorway's inner cell
+    // onto the trapdoor, keeping off the award cells below the trapdoor and
+    // --avoid. Port-only poops beside that cell can wall it in: under
+    // --rewind, EV9BP18Q's Larry Jr. fight left poops in cells 110 and 113
+    // beside the bottom doorway's cell 112, whose other neighbours (96, 97,
+    // 98) are award cells. Shoot them out from the trapdoor side.
+    const anchor = ANCHOR_DOOR === null ? undefined : state.doors.find(d => d.target === ANCHOR_DOOR);
+    if (anchor && state.trapdoor) {
+      const exitOff = () => new Set([...AWARD_CELLS.filter(cell => cell > 60), ...AVOID, ...pickupCells(state)]);
+      await clearRoute(() => corridor(state.trapdoor.gridIndex, innerCell(anchor), exitOff()), `route from the trapdoor to the ${anchor.side} doorway`);
     }
     await walk({ x: 40 + park % 15 * 40, y: 120 + Math.floor(park / 15) * 40 }, blocked, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
@@ -549,6 +705,10 @@ try {
   }
   const last = await view();
   end = { health: last.health, coins: last.coins };
+  // A headless --rewind restores WASM memory; a fresh page then replays the
+  // kept keys from boot and must reach the same rooms on the same frames,
+  // every recorded capture and the same end, or the restore is suspect.
+  if (REWIND && RECORDER === 'headless' && rewound.rewinds) await freshReplayCheck();
   status = 'pass';
 } catch (error) {
   reason = String(error.message || error);
@@ -577,5 +737,5 @@ try {
 // `end` is the port's last health and coins, which the next floor's
 // generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER, ...(rewound && { rewound }) }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;
