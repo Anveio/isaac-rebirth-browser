@@ -27,6 +27,7 @@ https://github.com/gibbed/Gibbed.Rebirth. Altered source, not the original tool.
 
 import argparse
 import fnmatch
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -360,6 +361,54 @@ def write_fonts(output, source):
     return len(fonts)
 
 
+def unlock_notification_catalog(actors, filenames, xml_path):
+    """Resolve real notification assets without assuming an XML root/path."""
+    def normalized(path):
+        return posixpath.normpath(path.replace('\\', '/')).removeprefix('resources/').lower()
+
+    matches = [path for path in actors
+               if normalized(path).rsplit('/', 1)[-1] == 'achievements.anm2']
+    if len(matches) != 1:
+        raise ValueError('Unlock notifications require exactly one authored Achievements.anm2')
+    actual_actor = matches[0]
+    actor_path = normalized(actual_actor)
+    source_bytes = xml_path.read_bytes()
+    authored = ET.fromstring(source_bytes)
+    if authored.tag != 'achievements' or not authored.get('gfxroot'):
+        raise ValueError('Achievement XML requires its actual achievements/gfxroot owner')
+    entries = list(authored)
+    if not entries or any(entry.tag != 'achievement' for entry in entries):
+        raise ValueError('Achievement XML requires its authored achievement definitions')
+    gfx_root = normalized(authored.attrib['gfxroot'])
+    graphics = [path for path in filenames
+                if path.startswith('resources/') and path.lower().endswith('.png')]
+    definitions, selected_graphics, seen = [], [], set()
+    for entry in entries:
+        if not {'id', 'text', 'gfx'}.issubset(entry.attrib) or not entry.attrib['text']:
+            raise ValueError('Achievement XML definition requires actual id/text/gfx attributes')
+        id_ = int(entry.attrib['id'])
+        if id_ < 0 or id_ > 178 or id_ in seen:
+            raise ValueError('Achievement XML IDs must be unique and in 0..178')
+        seen.add(id_)
+        gfx = entry.attrib['gfx']
+        resolved = None
+        if gfx:
+            requested = normalized(posixpath.join(gfx_root, gfx.replace('\\', '/')))
+            candidates = [path for path in graphics if normalized(path) == requested]
+            if len(candidates) != 1:
+                raise ValueError(f'Achievement {id_} graphics path is missing or ambiguous: {gfx}')
+            selected_graphics.append(candidates[0])
+            resolved = normalized(candidates[0])
+        # The catalogue's existing label field is metadata only; Base XML
+        # authors it as text. Preserve that exact value without inventing names.
+        definitions.append({'id': id_, 'name': entry.attrib['text'], 'gfx': resolved})
+    return actual_actor, {
+        'schema': 1, 'actor': actor_path,
+        'sourceXmlSha256': hashlib.sha256(source_bytes).hexdigest(),
+        'sourceDefinitionLabelAttribute': 'text', 'definitions': definitions,
+    }, selected_graphics
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--archive', type=Path, default=ROOT / 'references/isaac/linux/depot_250903/resources/packed/animations.a')
@@ -372,7 +421,13 @@ def main():
     parser.add_argument('--fonts-only', action='store_true', help='Only export standard BMFont authored glyph metrics')
     parser.add_argument('--graphics', action='store_true', help='Extract selected animations\' actual Linux PNG sheets, backdrop, controls and fonts')
     parser.add_argument('--graphic', action='append', help='Additional specific gfx/... Linux PNG resource; repeat as needed')
+    parser.add_argument('--unlock-notifications', action='store_true', help='Include the actual Achievements actor/XML graphics in this selected actor export')
+    parser.add_argument('--unlock-notification-xml', type=Path, default=ROOT / 'references/isaac/rebirth/resources/achievements.xml')
+    parser.add_argument('--unlock-notification-catalogue', type=Path, default=ROOT / 'web/generated/unlock-notifications/catalogue.json',
+                        help='Private generated notification catalogue (ignored by default)')
     args = parser.parse_args()
+    if args.unlock_notifications and (args.fonts_only or not args.json_output):
+        parser.error('--unlock-notifications requires an actor --json-output and cannot use --fonts-only')
     if args.select_file:
         selections = [line.strip() for line in args.select_file.read_text().splitlines()
                       if line.strip() and not line.lstrip().startswith('#')]
@@ -384,7 +439,8 @@ def main():
         print(json.dumps({'fonts': fonts, 'output': str(args.output)}))
         return
     names = {}
-    for path in args.filenames.read_text().splitlines():
+    filenames = args.filenames.read_text().splitlines()
+    for path in filenames:
         if path.startswith('resources/') and path.endswith('.anm2'):
             names[path_hash(path)] = path.removeprefix('resources/')
     # Base v1.05 authored name, listed publicly by Gibbed; newer inventories moved it.
@@ -408,6 +464,18 @@ def main():
         actors[path] = value
     if reader.at != len(binary):
         raise ValueError(f'Animation cache trailing bytes: {len(binary) - reader.at}')
+    notification_catalogue = None
+    if args.unlock_notifications:
+        actual_actor, notification_catalogue, notification_graphics = unlock_notification_catalog(
+            actors, filenames, args.unlock_notification_xml)
+        actor_path = notification_catalogue['actor']
+        if actor_path != actual_actor:
+            if actor_path in actors:
+                raise ValueError('Normalized notification actor is ambiguous')
+            actors[actor_path] = actors.pop(actual_actor)
+        args.select = (args.select or []) + [actor_path]
+        args.graphic = (args.graphic or []) + notification_graphics
+        args.graphics = True
     if args.select:
         for pattern in args.select:
             if not any(fnmatch.fnmatchcase(path, pattern) for path in actors):
@@ -437,6 +505,9 @@ def main():
     if args.json_output:
         args.json_output.parent.mkdir(parents=True, exist_ok=True)
         args.json_output.write_text(json.dumps(actors, separators=(',', ':')) + '\n')
+    if notification_catalogue is not None:
+        args.unlock_notification_catalogue.parent.mkdir(parents=True, exist_ok=True)
+        args.unlock_notification_catalogue.write_text(json.dumps(notification_catalogue, separators=(',', ':')) + '\n')
     (args.output / 'index.json').write_text(json.dumps({'source': str(args.archive), 'format': 'authored ANM2 asset data', 'actors': sorted(actors), 'unknown': unknown}, indent=2) + '\n')
     print(json.dumps({'actors': len(actors), 'unknown': len(unknown), 'fonts': fonts, 'graphics': len(graphics), 'output': str(args.output)}))
 

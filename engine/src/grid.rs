@@ -972,7 +972,6 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        *position = grid.clamp_room(*position, 0.0);
         self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.0)
     }
 
@@ -986,7 +985,6 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
-        *position = grid.clamp_room(*position, 0.0);
         self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.2)
     }
 
@@ -1013,6 +1011,9 @@ impl Collider {
     ) -> Result<Option<GridContact>, String> {
         if !position.is_finite() || !velocity.is_finite() {
             return Err("nonplayer collision requires finite world vectors".into());
+        }
+        if !ignores_pits {
+            *position = grid.clamp_room(*position, 0.0);
         }
         let mut normal = WorldVector { x: 0.0, y: 0.0 };
         for &sample in &self.samples {

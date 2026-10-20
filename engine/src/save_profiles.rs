@@ -5,7 +5,7 @@ use crate::{mt, saved_game, Profile, State};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const VERSION: u32 = 1;
+pub const VERSION: u32 = 2;
 pub const MAX_BYTES: usize = 4 * 1024 * 1024;
 ///The existing string-only save ABI reports this expected capacity refusal.
 ///Hosts acknowledge it as a failed write; other export errors stay errors.
@@ -35,6 +35,30 @@ pub mod shared {
 pub struct Profiles {
     pub version: u32,
     pub profiles: Vec<ProfileRecord>,
+}
+
+///Own V1 has explicit179/95 arrays and no collected history. Strict DTOs
+///prevent V2 omissions or foreign unknown fields from becoming a reset.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyProfiles {
+    version: u32,
+    profiles: Vec<LegacyProfileRecord>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyProfileRecord {
+    profile: LegacyProfile,
+    saved: Option<RunRecord>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LegacyProfile {
+    slot: u8,
+    unlocked_characters: Vec<String>,
+    selected_character: String,
+    achievements: Vec<bool>,
+    counters: Vec<i32>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -153,7 +177,42 @@ impl Profiles {
         if bytes.len() > MAX_BYTES {
             return Err(CAPACITY_ERROR.into());
         }
-        let value: Self = serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
+        let header: serde_json::Value =
+            serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
+        let version = header
+            .get("version")
+            .and_then(serde_json::Value::as_u64)
+            .ok_or("own profile version is absent")?;
+        let value = match version {
+            1 => {
+                let old: LegacyProfiles =
+                    serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
+                if old.version != 1 {
+                    return Err("invalid own V1 profile version".into());
+                }
+                Self {
+                    version: VERSION,
+                    profiles: old
+                        .profiles
+                        .into_iter()
+                        .map(|record| ProfileRecord {
+                            profile: Profile {
+                                slot: record.profile.slot,
+                                unlocked_characters: record.profile.unlocked_characters,
+                                selected_character: record.profile.selected_character,
+                                achievements: record.profile.achievements,
+                                counters: record.profile.counters,
+                                collected_history:
+                                    crate::persistent::CollectedHistory::legacy_own_v1(),
+                            },
+                            saved: record.saved,
+                        })
+                        .collect(),
+                }
+            }
+            2 => serde_json::from_slice(bytes).map_err(|error| error.to_string())?,
+            _ => return Err("unsupported own profile version; preserve original document".into()),
+        };
         value.validate()?;
         Ok(value)
     }
@@ -174,10 +233,11 @@ impl Profiles {
     ///Unknown versions and absent fields do not become a fresh default save.
     pub fn validate(&self) -> Result<(), String> {
         if self.version != VERSION || self.profiles.len() != 3 {
-            return Err("saved profiles require version1 and exactly three slots".into());
+            return Err("saved profiles require version2 and exactly three slots".into());
         }
         for (index, record) in self.profiles.iter().enumerate() {
             let profile = &record.profile;
+            profile.collected_history.validate()?;
             if usize::from(profile.slot) != index + 1
                 || profile.achievements.len() != 179
                 || profile.counters.len() != 95

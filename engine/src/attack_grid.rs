@@ -165,6 +165,8 @@ fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbac
         return Ok(GridCallbackOutcome::Handled(true));
     }
     let mut local = crate::items::Rng::new(spawn_seed, [1, 5, 16]);
+    //56A701 follows the break particles/local seed and precedes Spawn's raw.
+    crate::persistent_effects::add_counter(state, 4, 1)?;
     let seed = state.boot_lifecycle.shared.next_u32();
     admission(state).admit_explosion(seed, centre)?;
     state

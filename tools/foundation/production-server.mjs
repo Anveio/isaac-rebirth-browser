@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createReadStream, rmSync } from "node:fs";
-import { cp, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readdir, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, join, relative, resolve, sep } from "node:path";
@@ -48,7 +48,7 @@ async function buildIdentity(directory) {
 // and rebuilds cannot change bytes midway through an input/replay comparison.
 export async function startProductionServer({ directory = join(ROOT, "dist"), port = 0 } = {}) {
   assert.ok(Number.isInteger(port) && port >= 0 && port <= 65535, "Production server port must be 0..65535");
-  const source = resolve(directory);
+  const source = await realpath(resolve(directory));
   assert.ok((await stat(join(source, "index.html")).catch(() => null))?.isFile(), `Missing production build ${source}/index.html; run npm run build`);
   const scratch = await mkdtemp(join(tmpdir(), "isaac-production-"));
   // A suite that throws or exits without close() must not leak a dist copy.

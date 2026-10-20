@@ -1,4 +1,5 @@
 import { Assets } from "./animation";
+import unlockCatalogue from "./generated/unlock-notifications/catalogue.json";
 import { drawBossSplash } from "./boss-splash";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
@@ -200,6 +201,15 @@ export class Renderer {
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, alpha]);
         this.menu.drawLoadingImage(ctx, state, alpha);
       }
+    }
+    //System593CE4/412240 follows Game/Menu draw, before the System output pass.
+    //The manager survives Stop/NewRun; its loading byte alone gates this draw.
+    const notification = state.unlockNotifications;
+    if (notification?.state && notification.definitionLoaded && !state.unlockNotificationsLoading && notification.currentClip) {
+      const actor = unlockCatalogue.actor;
+      const sheet = this.assets.layerSpritesheet(actor, 3);
+      this.assets.draw(ctx, actor, notification.currentClip, 240, 135, notification.frame,
+        notification.gfx ? {spritesheets: {[sheet]: notification.gfx}} : {hiddenLayers: [3]});
     }
     gl.presentScreen(state.gammaSettings.gamma); gl.finish();
     this.context.reset(); this.context.imageSmoothingEnabled = false;
