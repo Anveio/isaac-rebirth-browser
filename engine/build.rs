@@ -407,7 +407,8 @@ fn attack_catalog(path: &Path) -> String {
 
 fn unlock_notification_catalog(xml: &Path, path: &Path, animations: &Path) -> String {
     let catalog: Value = serde_json::from_str(
-        &fs::read_to_string(path).expect("run python3 tools/foundation/prepare-unlock-notifications.py before Cargo"),
+        &fs::read_to_string(path)
+            .expect("run python3 tools/foundation/prepare-unlock-notifications.py before Cargo"),
     )
     .expect("parse authored unlock notification catalogue");
     assert_eq!(catalog["schema"], 1, "unlock notification catalogue schema");
@@ -816,7 +817,10 @@ fn main() {
         "cargo:rerun-if-changed={}",
         notification_catalogue.display()
     );
-    println!("cargo:rerun-if-changed={}", notification_animations.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        notification_animations.display()
+    );
     println!("cargo:rerun-if-changed={}", giantbook.display());
     println!(
         "cargo:rerun-if-changed={}",
