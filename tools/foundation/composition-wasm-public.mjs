@@ -5,8 +5,12 @@ import {createHash} from 'node:crypto';
 import {createGzip} from 'node:zlib';
 import {once} from 'node:events';
 import {fileURLToPath} from 'node:url';
+import {resetBootElapsed} from './verify.mjs';
 
 const sha=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+// composition-run.py's declared Native intro before the shared Title path.
+export const DECLARED_NATIVE_INTRO=[{type:'step',frames:180},{type:'key',key:'Return',down:true},{type:'step',frames:12},
+ {type:'key',key:'Return',down:false},{type:'step',frames:72}];
 const journalScope='Actual public-WASM ABI observations; no DOM, renderer, audio backend or Native-input claim.';
 
 // The caller supplies only declared public inputs and owns its input journal.
@@ -16,7 +20,9 @@ export function createPublicWasmRuntime({wasm,expectedWasmSha}) {
  const e=new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(wasm)),{}).exports;
  const decode=(p,n)=>new TextDecoder().decode(new Uint8Array(e.memory.buffer,p,n));
  const snapshot=()=>JSON.parse(decode(e.snapshot_ptr(),e.snapshot_len()));
- function reset(initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences) {
+ // bootElapsed is verify.mjs resetBootElapsed(declared Native tape): the fresh clock's
+ // elapsed time at the original's first rendered Title, as web/engine.ts applies it.
+ function reset(initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences,bootElapsed) {
   assert.ok(Number.isInteger(initialSeed)&&initialSeed>=1&&initialSeed<=0xffffffff);
   assert.ok(Number.isInteger(bootEpochSeed)&&bootEpochSeed>=0&&bootEpochSeed<=0xffffffff);
   if(audioPreferences!==undefined) {
@@ -49,6 +55,10 @@ export function createPublicWasmRuntime({wasm,expectedWasmSha}) {
    result=reset(true);
   }
   assert.equal(result,0,decode(e.error_ptr(),e.error_len()));
+  if(bootElapsed!==undefined) {
+   const {milliseconds,subMillisecondNanoseconds}=bootElapsed;
+   assert.equal(e.set_boot_elapsed(milliseconds,subMillisecondNanoseconds),0,decode(e.error_ptr(),e.error_len()));
+  }
  }
  function command(value) {
   const b=new TextEncoder().encode(JSON.stringify(value));const q=e.request_ptr(b.length);assert.ok(q);
@@ -87,7 +97,7 @@ const runtime=createPublicWasmRuntime({wasm,expectedWasmSha});
 const resources={challengesXml:fs.readFileSync(inputPaths.xml,'utf8'),specialRooms:[...fs.readFileSync(inputPaths.stb)]};
 const audioPreferences={sfxVolume:c.sfxVolume,musicVolume:0},fullscreenPreferences={fullscreen:false};
 assert.ok(Number.isFinite(audioPreferences.sfxVolume)&&audioPreferences.sfxVolume>=0&&audioPreferences.sfxVolume<=1);
-const resetInput={initialSeed:1,bootEpochSeed:c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences};
+const resetInput={initialSeed:1,bootEpochSeed:c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences,bootElapsed:resetBootElapsed(DECLARED_NATIVE_INTRO)};
 const producerBytes=fs.readFileSync(donor);
 fs.writeFileSync(out+'/composition-wasm-public-source.mjs',producerBytes,{flag:'wx'});
 const startupRecord={schema:1,protocol:'declared-preboot-audio-fullscreen-v1',phase:'before-reset',resetInput,
@@ -95,7 +105,7 @@ const startupRecord={schema:1,protocol:'declared-preboot-audio-fullscreen-v1',ph
 fs.writeFileSync(out+'/declared-startup-inputs.json',JSON.stringify(startupRecord)+'\n',{flag:'wx'});
 fs.writeFileSync(out+'/declared-reset-input.json',JSON.stringify(resetInput)+'\n',{flag:'wx'});
 assert.ok(Buffer.byteLength(JSON.stringify(resetInput))<=512*1024);
-runtime.reset(1,c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences);
+runtime.reset(1,c.bootEpochSeed,resources,audioPreferences,fullscreenPreferences,resetInput.bootElapsed);
 const journal=createPublicWasmJournal(out),append=journal.append;
 let presentation=0,gameplayPresentation=null,observations=0,completedTape=false;
 const commands=[],checkpoints=[];

@@ -9,7 +9,7 @@ import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { compareSavedRoomGrid } from '../foundation/saved-grid-compare.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, step, readTrace } from './lib/game.mjs';
@@ -85,7 +85,8 @@ try {
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(`${production.url}/?manual=1`); await waitForReady(page);
       // Both browser inputs come only from the saved public case, never native.
-      await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); }, scenario);
+      await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => { window.game.pause(); window.game.reset(initialSeed, { trace: true, bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); },
+        { ...scenario, bootElapsed: resetBootElapsed(nativeTape) });
       const compareMenu = async label => {
         const state = await snapshot(page), observed = observations.get(label), boot = state.bootLifecycle;
         checkpoints.push({ label, state }); assert.ok(observed && observed.status === 'pass');

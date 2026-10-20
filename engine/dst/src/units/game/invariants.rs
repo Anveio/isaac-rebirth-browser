@@ -989,6 +989,9 @@ pub fn state(state: &State) {
     // (443117) never moves a body at rest, so one born where the player
     // stands in an open doorway (a bomb dropped there) rests on the door
     // cell; the boundary walls and the space beyond them stay out of reach.
+    // Grid classes 1 and 2 clamp only x or only y and test no cells
+    // (442e40 / 442ef0, `entities::clamp_walls`): a Wall Creep on a top or
+    // bottom wall keeps its x inside the room, not its y.
     if state.room_transition.is_none() {
         let grid = state
             .room
@@ -999,30 +1002,44 @@ pub fn state(state: &State) {
             let npcs = state.room.npcs.iter().filter(|npc| !npc.removed);
             // Each body names its family (NPC type, pickup variant), which
             // signs a failure: one family's known escape cannot hide another.
-            let npcs = npcs
-                .filter(|npc| npc.grid_collision_class != 0)
-                .map(|npc| ("npc", npc.kind, npc.id, npc.position));
+            let npcs = npcs.filter(|npc| npc.grid_collision_class != 0).map(|npc| {
+                (
+                    "npc",
+                    npc.kind,
+                    npc.id,
+                    npc.position,
+                    npc.grid_collision_class,
+                )
+            });
             let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
             let pickups =
-                pickups.map(|pickup| ("pickup", pickup.variant, pickup.id, pickup.position));
+                pickups.map(|pickup| ("pickup", pickup.variant, pickup.id, pickup.position, 5));
             let bombs = state.bombs.iter();
-            let bombs = bombs.map(|bomb| ("bomb", 4, bomb.id, bomb.motion.position));
+            let bombs = bombs.map(|bomb| ("bomb", 4, bomb.id, bomb.motion.position, 5));
             let doorway = |position: WorldVector| {
                 grid.index(position)
                     .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
                     .is_some_and(|entity| entity.kind == 16)
             };
+            let outside = |position: WorldVector, class: u32| {
+                let clamped = grid.clamp_room(position, 0.0);
+                match class {
+                    1 => clamped.x != position.x,
+                    2 => clamped.y != position.y,
+                    _ => clamped != position,
+                }
+            };
             let escaped = npcs
                 .chain(pickups)
                 .chain(bombs)
-                .find(|(_, _, _, position)| {
-                    grid.clamp_room(*position, 0.0) != *position && !doorway(*position)
+                .find(|(_, _, _, position, class)| {
+                    outside(*position, *class) && !doorway(*position)
                 });
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
                 json!({ "body": escaped }),
-                signature: escaped.map_or(String::new(), |(body, family, _, _)| format!("{body} {family}"))
+                signature: escaped.map_or(String::new(), |(body, family, _, _, _)| format!("{body} {family}"))
             );
         }
     }

@@ -27,7 +27,8 @@ pub(crate) struct SpawnContext {
 
 /// The union of the owners any supported NPC callback reads or writes.
 pub(crate) struct NpcWorld<'a> {
-    /// Actual current Game full-update counter, including admission callbacks.
+    /// Actual current Game full-update counter (`State::native_game_frame`),
+    /// including admission callbacks.
     pub game_counter: u32,
     pub player: WorldVector,
     pub player_velocity: WorldVector,
@@ -156,6 +157,9 @@ pub(crate) enum Birth {
     /// A mid-room NPC the spawner parents to itself and adopts as its child
     /// (SetParent447fc0 + SetChild447f40), updated at once (vtable+0x18).
     Child(SpawnSelector),
+    /// A mid-room NPC parented to its spawner (SetParent447fc0 only; the
+    /// spawner's child stays unset, no immediate update): Peep's eyes.
+    Parented(SpawnSelector),
     /// Envy's split child 48c9d0: config row `variant % 10`, the split
     /// variant, the parent's seed, APPEAR cleared, updated at once.
     EnvyChild {
@@ -336,8 +340,10 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::horfs::FAMILY,
     &crate::gluttony::FAMILY,
     &crate::dingle::FAMILY,
+    &crate::peep::FAMILY,
     &crate::boil::FAMILY,
     &crate::chub::FAMILY,
+    &crate::gurdy_jr::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,

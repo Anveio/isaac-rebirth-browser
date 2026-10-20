@@ -25,10 +25,18 @@ struct Replay {
     boot_map_preferences: Option<rebirth_cleanroom::map_presentation::MapPreferences>,
     #[serde(default)]
     boot_gamma_preferences: Option<rebirth_cleanroom::display_settings::GammaPreferences>,
+    #[serde(default)]
+    boot_elapsed: Option<BootElapsed>,
     /// The browser's own-save storage; absent, the game has no save IO.
     #[serde(default)]
     save_host: Option<SaveHost>,
     commands: Vec<Command>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BootElapsed {
+    milliseconds: u32,
+    sub_millisecond_nanoseconds: u32,
 }
 fn main() {
     let mut input = String::new();
@@ -82,6 +90,14 @@ fn main() {
             std::process::exit(1);
         }
     };
+    if let Some(elapsed) = replay.boot_elapsed {
+        if let Err(error) =
+            game.set_boot_elapsed(elapsed.milliseconds, elapsed.sub_millisecond_nanoseconds)
+        {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    }
     let mut store = match replay
         .save_host
         .as_ref()
