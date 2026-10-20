@@ -163,9 +163,14 @@ export interface VolumeCallback {
   sequence: number; beforeSoundSequence: number; volume: number;
   loadedSlotVolumes: Record<string, number>;
 }
+export interface StopLoopingCallback {
+  sequence: number; beforeSoundSequence: number; beforeVolumeSequence: number;
+  loadedSlots: number[];
+}
 export interface AudioState {
   sfxVolume: number; nextSequence: number; events: SoundEvent[];
   nextVolumeSequence: number; volumeCallbacks: VolumeCallback[];
+  nextStopSequence: number; stopLoopingCallbacks: StopLoopingCallback[];
   pending: { id: number; volume: number; delay: number; looping: boolean; pitch: number }[];
   slots: Record<string, { lastTick: number | null; nextAllowed: number; lastVolume: number; loaded: boolean;
     samples: { looping: boolean; gain: number; pitch: number }[] }>;
@@ -367,6 +372,8 @@ export interface State {
     requestedTimeAnchorMs: number | null; initialFade: number; fadeRate: number;
     completionCallbacksPending: boolean };
   audio: AudioState;
+  unlockPopups: boolean | null; unlockNotificationsLoading: boolean;
+  unlockNotifications: {state: number; currentClip: string | null; frame: number; gfx: string | null; definitionLoaded: boolean} | null;
   music: MusicState;
   profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean; mapOpacity: string; gamma: string}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;

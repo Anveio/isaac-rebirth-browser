@@ -107,6 +107,7 @@ pub mod level2_flies;
 pub mod level_progress;
 pub mod levels;
 pub mod long_legs;
+pub mod living_restart;
 pub mod maggots;
 pub mod map_presentation;
 pub mod mega_fatty;
@@ -125,6 +126,8 @@ pub mod options_menu;
 pub mod ordinary_placement;
 pub mod pathfinder;
 pub mod peep;
+pub mod persistent;
+pub mod persistent_effects;
 pub mod phase;
 pub mod pickup_world_grants;
 pub mod pickups;
@@ -168,6 +171,7 @@ mod target_eligibility;
 pub mod tnt;
 pub mod traversal;
 pub mod wall_creep;
+pub mod unlock_notifications;
 pub mod wall_hugger;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
@@ -396,6 +400,7 @@ pub struct Profile {
     pub achievements: Vec<bool>,
     ///Actual Persistent+D4 array, initialized by5bc520 for a fresh profile.
     pub counters: Vec<i32>,
+    pub collected_history: persistent::CollectedHistory,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -682,6 +687,26 @@ pub struct State {
     pub run_start_request: RunStartRequest,
     #[serde(default)]
     pub run_quit: run_quit::RunQuit,
+    #[serde(default)]
+    pub living_restart: living_restart::LivingRestart,
+    #[serde(default)]
+    pub persistent_runtime: Option<persistent::Runtime>,
+    #[serde(default)]
+    pub unlock_notifications: Option<unlock_notifications::Runtime>,
+    #[serde(default)]
+    pub unlock_popups: Option<bool>,
+    #[serde(default)]
+    pub unlock_notifications_loading: bool,
+    #[serde(default)]
+    pub platform_achievement_backend: Option<persistent_effects::PlatformBackend>,
+    #[serde(default)]
+    pub platform_achievement_attempts: Vec<persistent_effects::PlatformAttempt>,
+    ///Ephemeral borrowable cache of Game's actual immutable resource owner.
+    ///It is rebuilt from that owner after a whole-Game deserialization.
+    #[serde(skip)]
+    persistent_catalog: Option<std::sync::Arc<challenges::Catalog>>,
+    #[serde(skip)]
+    persistent_callback_pre_counter: Option<u32>,
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
     pub run_tick: u32,
@@ -905,6 +930,17 @@ pub struct Game {
     save_write_request: Option<save_profiles::SaveWriteRequest>,
     #[serde(skip)]
     command_origin_screen: Option<Screen>,
+    #[serde(skip)]
+    living_write_resume: Option<living_restart::WriteResume>,
+    #[serde(skip)]
+    living_start_context: Option<living_restart::Context>,
+    ///An attempted host revision cannot be rolled back/retried when a later
+    ///port continuation reaches an unsupported Source callback.
+    #[serde(default)]
+    save_continuation_failure: Option<String>,
+    ///Malformed/older unknown own documents are preserved, not zero-migrated.
+    #[serde(default)]
+    profile_document_rejected: bool,
     #[serde(default, with = "save_profiles::shared")]
     pub saved_profiles: Option<std::sync::Arc<save_profiles::Profiles>>,
     pub player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng,
@@ -1169,6 +1205,19 @@ impl Game {
                 ),
                 run_start_request: RunStartRequest::default(),
                 run_quit: run_quit::RunQuit::default(),
+                living_restart: living_restart::LivingRestart::source_reset(),
+                persistent_runtime: Some(persistent::Runtime::fresh()),
+                unlock_notifications: Some(unlock_notifications::Runtime::fresh()?),
+                //Settings constructor5B8D03: System2DF88+29=Popups2DFB1.
+                unlock_popups: Some(true),
+                //411D5A initializes manager1408; living594710 does not reload it.
+                unlock_notifications_loading: false,
+                platform_achievement_backend: Some(
+                    persistent_effects::PlatformBackend::Unavailable,
+                ),
+                platform_achievement_attempts: Vec::new(),
+                persistent_catalog: Some(std::sync::Arc::new(challenge_catalog.clone())),
+                persistent_callback_pre_counter: None,
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
                 // system iteration is a full update; this clock is relative
@@ -1235,6 +1284,7 @@ impl Game {
                         selected_character: "Isaac".into(),
                         achievements: vec![false; 179],
                         counters: vec![0; 95],
+                        collected_history: persistent::CollectedHistory::source_reset(),
                     })
                     .collect(),
                 character_catalog: character_catalog(),
@@ -1300,6 +1350,10 @@ impl Game {
             save_io_enabled: false,
             save_write_request: None,
             command_origin_screen: None,
+            living_write_resume: None,
+            living_start_context: None,
+            save_continuation_failure: None,
+            profile_document_rejected: false,
             saved_profiles: None,
             player_manager_secondary_rng: saved_game::PlayerManagerSecondaryRng::default(),
             challenge_catalog,
@@ -1311,6 +1365,9 @@ impl Game {
     }
     /// Invalid commands leave all state, including held keys, unchanged.
     pub fn command(&mut self, command: Command) -> Result<(), String> {
+        if let Some(error) = &self.save_continuation_failure {
+            return Err(error.clone());
+        }
         if self.menu_readmission.is_some() || self.save_write_request.is_some() {
             return Err("complete actual own save IO before another public command".into());
         }
@@ -1340,6 +1397,11 @@ impl Game {
 
     fn apply(&mut self, command: Command) -> Result<(), String> {
         self.state.begin_command();
+        self.state.platform_achievement_attempts.clear();
+        if self.state.persistent_catalog.is_none() {
+            self.state.persistent_catalog =
+                Some(std::sync::Arc::new(self.challenge_catalog.clone()));
+        }
         match command {
             Command::MusicVolume { volume } => {
                 if !volume.is_finite() || !(0.0..=1.0).contains(&volume) {
@@ -1447,6 +1509,18 @@ impl Game {
             let presented = self.state.system_clock.next_phase() != phase::Phase::Skipped;
             let room_before = self.state.current_room;
             self.tick(timestamp_millis)?;
+            if let Some(resume) = &mut self.living_write_resume {
+                if self.save_write_request.is_none() || resume.interval.is_some() {
+                    return Err("living Restart has an invalid unfinished interval owner".into());
+                }
+                resume.interval = Some(living_restart::Interval {
+                    remaining_ticks: count - offset,
+                    timestamp_millis,
+                    presented,
+                    room_before,
+                });
+                return Ok(());
+            }
             if let Some(request) = &mut self.menu_readmission {
                 //This interval's clock input was consumed, but its System
                 //iteration has not advanced. Resolve IO before any next tick.
@@ -1918,6 +1992,34 @@ impl Game {
             .add_explosion_lights(&self.state.explosions);
     }
     fn start_run(&mut self) -> Result<(), String> {
+        self.start_run_until_initial_save()?;
+        self.finish_start_run_after_save()
+    }
+
+    fn start_run_until_initial_save(&mut self) -> Result<(), String> {
+        if self.profile_document_rejected {
+            return Err(
+                "unknown rejected own-profile document must be recovered or explicitly reset"
+                    .into(),
+            );
+        }
+        if self.living_start_context.is_none() {
+            //A new System request replaces the prior run's ownership. An
+            //unqualified Challenge/hard/selector must never reuse its context.
+            self.state.living_restart.context = None;
+            self.state.living_restart.pending = None;
+        }
+        if self.living_start_context.is_none()
+            && self.state.run_start_request.challenge_id.is_none()
+            && self.state.screen == Screen::Character
+            && self.state.character == "Isaac"
+            && self.state.difficulty == "normal"
+        {
+            self.state.living_restart.context = Some(living_restart::Context::normal_isaac(
+                self.state.boot_lifecycle.menu_seed_text.clone(),
+                self.state.seeded_run,
+            )?);
+        }
         // Character 59f470 passes the existing menu seed code to the System
         // request; Game 54eb20 decodes that code into its startup stream. This
         // also applies when no public seed dialog was entered: the real
@@ -1941,7 +2043,11 @@ impl Game {
             self.state.character = "Isaac".into();
             self.state.difficulty = "normal".into();
         }
-        self.state.run_seed_value = self.state.boot_lifecycle.menu_run_seed;
+        self.state.run_seed_value = if let Some(context) = &self.living_start_context {
+            seed::decode(&context.seed_code)?
+        } else {
+            self.state.boot_lifecycle.menu_run_seed
+        };
         self.state.run_seed = seed::encode(self.state.run_seed_value)?;
         let unlocked =
             &self.state.profiles[usize::from(self.state.profile - 1)].unlocked_characters;
@@ -1964,7 +2070,10 @@ impl Game {
         }
         self.state.character = chosen;
         let mut run_seeds = seed::RunSeeds::new(self.state.run_seed_value)?;
-        if self.state.screen == Screen::Character {
+        if let Some(context) = &self.living_start_context {
+            context.validate()?;
+            run_seeds.admit_menu_seed_effect(&context.seed_code)?;
+        } else if self.state.screen == Screen::Character {
             //59EE70 commits the actual typed code;59F617 forwards this same
             //menu string through594620/54EB20 to the5E1470 seed setter.
             //Fresh generated codes use that menu owner after5E1170 as well.
@@ -1974,6 +2083,15 @@ impl Game {
             //Restart and legacy paths retain their separate input owners.
             run_seeds.admit_formatted_seed_effect()?;
         }
+        //54EBFD copies sourceR9 before the new ItemPools/Player/Level owners.
+        let source_r9 = challenge.as_ref().map_or(self.state.seeded_run, |_| {
+            challenges::RunParameters::CHALLENGE_MENU.source_r9
+        });
+        self.state
+            .persistent_runtime
+            .as_mut()
+            .ok_or("Persistent run inhibit owner is unknown")?
+            .set_run_inhibit(source_r9);
         self.state.item_pools = Some(items::ItemPools::new(
             run_seeds.item_pool_seed(),
             &self.state.profiles[usize::from(self.state.profile - 1)].achievements,
@@ -1987,7 +2105,11 @@ impl Game {
         // any stage transition the last run was in.
         self.state.stage = 1;
         self.state.stage_transition = stage_transition::StageTransition::default();
-        self.state.system_clock.align_run_start()?;
+        if self.living_start_context.is_none() {
+            //Existing independently qualified menu/death timing stays separate.
+            self.state.system_clock.align_run_start()?;
+        }
+        self.state.living_restart.held_polls = Some(0);
         self.state.screen = Screen::Playing;
         self.state.paused = false;
         self.state.run_tick = 0;
@@ -2194,6 +2316,15 @@ impl Game {
             self.state.music.room(id);
         }
         self.save_supported_run()?;
+        Ok(())
+    }
+
+    fn finish_start_run_after_save(&mut self) -> Result<(), String> {
+        let challenge = if self.state.challenge_id == 0 {
+            None
+        } else {
+            Some(self.challenge_catalog.get(self.state.challenge_id)?.clone())
+        };
         if let Some(definition) = &challenge {
             challenges::initialize_player(&mut self.state, definition)?;
         } else {
@@ -2252,6 +2383,13 @@ impl Game {
         self.state.run_seed = run_seed;
         self.state.seeded_run = run.seeded_run;
         self.state.achievement_eligibility = !run.seeded_run;
+        //54EBFD precedes the saved-loader branch as well as fresh construction.
+        //Saved Player/Room callbacks must see the actual requested R9 already.
+        self.state
+            .persistent_runtime
+            .as_mut()
+            .ok_or("Persistent Continue inhibit owner is unknown")?
+            .set_run_inhibit(run.seeded_run);
         self.state.character = context.character.clone();
         self.state.difficulty = context.difficulty.clone();
         self.state.challenge_id = context.challenge_id;
@@ -2435,6 +2573,19 @@ impl Game {
         self.state
             .run_admission
             .initialize_saved(&mut self.state.player)?;
+        //The actual loaded queue replaces any previous live request; its
+        //unsupported contexts remain absent rather than borrowing that run.
+        self.state.living_restart = living_restart::LivingRestart::source_reset();
+        if self.state.character == "Isaac"
+            && self.state.difficulty == "normal"
+            && self.state.challenge_id == 0
+        {
+            self.state.living_restart.context = Some(living_restart::Context::normal_isaac(
+                self.state.run_seed.clone(),
+                self.state.seeded_run,
+            )?);
+            self.state.living_restart.held_polls = Some(0);
+        }
         self.state.run_start_request.resume_saved = false;
         //594BE4 joins594AD3 AFTER the saved loader's immediate callback;
         //the actual odd System pre-counter advances once at594BF0.
@@ -2641,6 +2792,10 @@ impl Game {
             .save_revision
             .checked_add(1)
             .ok_or("save revision exhausted")?;
+        if let Some(runtime) = &mut self.state.persistent_runtime {
+            runtime.mark_run_checksum_write();
+            runtime.take_dirty_flush()?;
+        }
         self.request_save_write()
     }
 
@@ -2690,7 +2845,14 @@ impl Game {
         if self.state.screen != Screen::Title || self.state.run_start_request.fading {
             return Err("saved profiles can only load into a fresh Title Game".into());
         }
-        let profiles = save_profiles::Profiles::from_bytes(bytes)?;
+        let profiles = match save_profiles::Profiles::from_bytes(bytes) {
+            Ok(profiles) => profiles,
+            Err(error) => {
+                self.profile_document_rejected = true;
+                return Err(error);
+            }
+        };
+        self.profile_document_rejected = false;
         self.state.profiles = profiles
             .profiles
             .iter()
@@ -2701,6 +2863,9 @@ impl Game {
     }
 
     pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
+        if let Some(error) = &self.save_continuation_failure {
+            return Err(error.clone());
+        }
         if let Some(request) = &self.save_write_request {
             return request.packet.export();
         }
@@ -2708,6 +2873,9 @@ impl Game {
     }
 
     fn serialize_profile_data(&self) -> Result<save_profiles::SaveWritePacket, String> {
+        if self.profile_document_rejected {
+            return Err("preserve rejected own-profile bytes; unknown legacy owners cannot be saved as zero".into());
+        }
         let fresh;
         let profiles = match self.saved_profiles.as_deref() {
             Some(profiles) => profiles,
@@ -2763,6 +2931,9 @@ impl Game {
         revision: u64,
         _write_succeeded: bool,
     ) -> Result<(), String> {
+        if let Some(error) = &self.save_continuation_failure {
+            return Err(error.clone());
+        }
         let mut next = self.clone();
         let request = next
             .save_write_request
@@ -2772,8 +2943,57 @@ impl Game {
             return Err("stale save write acknowledgement".into());
         }
         next.state.save_write_pending = false;
-        if let Some(remaining) = request.remaining_ticks {
-            next.advance_public_ticks(remaining, None)?;
+        let resumed = (|| -> Result<(), String> {
+            if let Some(resume) = next.living_write_resume.take() {
+                let interval = resume
+                    .interval
+                    .ok_or("living Restart acknowledgement has no consumed interval")?;
+                let completed = if let living_restart::ResumeStage::AfterCharacterProfileFlush {
+                    phase,
+                    pre_counter,
+                    bomb_triggered,
+                } = resume.stage
+                {
+                    next.complete_character_request()?;
+                    next.tick_after_character_request(phase, pre_counter, bomb_triggered)?;
+                    true
+                } else {
+                    next.resume_living_restart(resume.stage)?;
+                    if let Some(next_resume) = &mut next.living_write_resume {
+                        next_resume.interval = Some(interval);
+                        false
+                    } else {
+                        //The public clock was consumed before the first IO callback.
+                        //Only now finish this same System interval; never call tick().
+                        next.tick_after_menu_requests()?;
+                        true
+                    }
+                };
+                if completed {
+                    if interval.presented && next.state.screen == Screen::Playing {
+                        room_lights::present(&mut next.state);
+                        if next.state.current_room != interval.room_before {
+                            room_lights::present(&mut next.state);
+                        }
+                    }
+                    if let Some(request) = &mut next.save_write_request {
+                        request.remaining_ticks = Some(interval.remaining_ticks - 1);
+                    } else {
+                        next.advance_public_ticks(interval.remaining_ticks - 1, None)?;
+                    }
+                }
+            } else if let Some(remaining) = request.remaining_ticks {
+                next.advance_public_ticks(remaining, None)?;
+            }
+            Ok(())
+        })();
+        if let Err(error) = resumed {
+            //The exact revision was already attempted by the host. Retain
+            //that consumed acknowledgement and the completed Source prefix,
+            //make the real continuation error terminal, and never retry it.
+            next.save_continuation_failure = Some(error.clone());
+            *self = next;
+            return Err(error);
         }
         next.finish_public_command();
         *self = next;
@@ -2794,6 +3014,11 @@ impl Game {
         let slot = usize::from(self.state.profile - 1);
         profiles.profiles[slot].saved = None;
         profiles.profiles[slot].profile = self.state.profiles[slot].clone();
+        self.state
+            .persistent_runtime
+            .as_mut()
+            .ok_or("Persistent Clear checksum owner is unknown")?
+            .mark_run_checksum_write();
         self.state.save_revision = self
             .state
             .save_revision
@@ -2801,6 +3026,21 @@ impl Game {
             .ok_or("save revision exhausted")?;
         self.request_save_write()
     }
+    ///This first Restart slice owns only actual ordinary normal Isaac.
+    ///Unsupported requests retain the existing public capability failure.
+    fn living_restart_admitted(&self) -> bool {
+        !self.state.player.dead
+            && self.state.character == "Isaac"
+            && self.state.difficulty == "normal"
+            && self.state.challenge_id == 0
+            && self
+                .state
+                .living_restart
+                .context
+                .as_ref()
+                .is_some_and(|context| context.validate().is_ok())
+    }
+
     fn held(&self, action: usize) -> bool {
         self.state.keyboard.held(action, &self.state.pressed)
     }
@@ -3420,6 +3660,7 @@ impl Game {
                     .initialization
                 {
                     menu_lifecycle::Initialization::LoadFreshProfile { profile } => {
+                        self.state.persistent_runtime = Some(persistent::Runtime::fresh());
                         self.saved_game = self.state.boot_lifecycle.clear_saved_game();
                         self.saved_run = None;
                         self.state.saved_run_summary = None;
@@ -3499,7 +3740,13 @@ impl Game {
         let (profiles, rejected) = match bytes.map(save_profiles::Profiles::from_bytes).transpose()
         {
             Ok(profiles) => (profiles, false),
-            Err(_) => (None, true),
+            Err(error) => {
+                //An absent document owns a fresh constructor. Rejected own
+                //legacy bytes do not authorize manufacturing missing stats.
+                return Err(format!(
+                    "preserve rejected own-profile readmission: {error}"
+                ));
+            }
         };
         next.reconstruct_menu_from_profiles(request.profile, profiles)?;
         //Resume this exact interrupted System iteration: its public clock
@@ -3518,6 +3765,8 @@ impl Game {
         profile: u8,
         profiles: Option<save_profiles::Profiles>,
     ) -> Result<(), String> {
+        //594DC0's actual profile reset/load clears transient dirty/inhibit.
+        self.state.persistent_runtime = Some(persistent::Runtime::fresh());
         self.saved_profiles = profiles.map(std::sync::Arc::new);
         if let Some(profiles) = self.saved_profiles.as_deref() {
             self.state.profiles = profiles
@@ -3533,6 +3782,7 @@ impl Game {
                     selected_character: "Isaac".into(),
                     achievements: vec![false; 179],
                     counters: vec![0; 95],
+                    collected_history: persistent::CollectedHistory::source_reset(),
                 })
                 .collect();
         }
@@ -3620,6 +3870,8 @@ impl Game {
         self.state.boss_bar = BossBar::default();
         self.state.run_introduction.active = false;
         self.state.game_update_count = 0;
+        //Stop54F530 resets the real hold even when the destination is Main.
+        self.state.living_restart.held_polls = Some(0);
         self.state.minimap_presentation = map_presentation::MapPresentation::default();
         if let Some(shake) = &mut self.state.game_shake {
             shake.reset_duration();
@@ -3627,6 +3879,11 @@ impl Game {
         self.state.source_cache_run_flags = Some(0);
         // Stop54F54B follows Save; its copied penalty stage stays intact.
         self.state.level_progress.last_penalty_stage = Some(0);
+        self.state
+            .persistent_runtime
+            .as_mut()
+            .ok_or("Persistent Stop inhibit owner is unknown")?
+            .stop_clear_inhibit();
         // Stop54F571 ->576B70 follows the actual Save copy above.
         self.state.acquisition_history = Some(acquisition_history::AcquisitionHistory::default());
         self.reconstruct_stopped_room_backdrop();
@@ -3639,8 +3896,132 @@ impl Game {
         self.request_menu_readmission()?;
         Ok(())
     }
+
+    ///A profile-only callback preserves the retained old run and writes the
+    ///actual live Profile. It owns no Save/Clear RNG and no public tick.
+    fn flush_living_dirty_profile(&mut self) -> Result<bool, String> {
+        let runtime = self
+            .state
+            .persistent_runtime
+            .as_mut()
+            .ok_or("Persistent dirty owner is unknown")?;
+        if !runtime.take_dirty_flush()? {
+            return Ok(false);
+        }
+        let slot = usize::from(self.state.profile - 1);
+        let retained = self.saved_profiles.get_or_insert_with(|| {
+            std::sync::Arc::new(save_profiles::Profiles::fresh(&self.state.profiles))
+        });
+        std::sync::Arc::make_mut(retained).profiles[slot].profile =
+            self.state.profiles[slot].clone();
+        self.state.save_revision = self
+            .state
+            .save_revision
+            .checked_add(1)
+            .ok_or("save revision exhausted")?;
+        self.request_save_write()?;
+        Ok(true)
+    }
+
+    fn wait_living_write(&mut self, stage: living_restart::ResumeStage) -> bool {
+        if self.save_write_request.is_some() {
+            self.living_write_resume = Some(living_restart::WriteResume {
+                stage,
+                interval: None,
+            });
+            true
+        } else {
+            false
+        }
+    }
+
+    fn begin_living_restart_dispatch(&mut self) -> Result<(), String> {
+        self.state
+            .living_restart
+            .pending
+            .as_ref()
+            .ok_or("living Restart request disappeared")?
+            .validate()?;
+        //5E1D00 queries loaded/playing/looping on the actual output backend.
+        self.state.audio.stop_looping()?;
+        self.state.music.reset_pitch();
+        self.flush_living_dirty_profile()?;
+        if self.wait_living_write(living_restart::ResumeStage::AfterProfileFlush) {
+            return Ok(());
+        }
+        self.resume_living_restart(living_restart::ResumeStage::AfterProfileFlush)
+    }
+
+    fn resume_living_restart(&mut self, stage: living_restart::ResumeStage) -> Result<(), String> {
+        use living_restart::ResumeStage;
+        if stage == ResumeStage::AfterProfileFlush {
+            //Stop(false) deletes the old run, then performs actual120961 Clear.
+            self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+            self.invalidate_profile_run()?;
+            if self.wait_living_write(ResumeStage::AfterClear) {
+                return Ok(());
+            }
+            return self.resume_living_restart(ResumeStage::AfterClear);
+        }
+        if stage == ResumeStage::AfterClear {
+            //Stop54F54B clears Game+10ECDC before NewRun's initial Save.
+            self.state.level_progress.last_penalty_stage = Some(0);
+            self.state
+                .persistent_runtime
+                .as_mut()
+                .ok_or("Persistent Stop owner is unknown")?
+                .stop_clear_inhibit();
+            self.state.information_animation.clear();
+            self.state.acquisition_history =
+                Some(acquisition_history::AcquisitionHistory::default());
+            self.state.player_death = player_death::PlayerDeath::default();
+            self.state.stage_transition = stage_transition::StageTransition::default();
+            self.state.room_transition = None;
+            self.state.paused = false;
+            self.state.pause_menu = PauseMenu::hidden();
+            self.state.game_update_count = 0;
+            self.state.living_restart.held_polls = Some(0);
+            self.reconstruct_stopped_room_backdrop();
+            let context = self
+                .state
+                .living_restart
+                .pending
+                .clone()
+                .ok_or("living Restart queued context disappeared")?;
+            context.validate()?;
+            self.state.character = "Isaac".into();
+            self.state.difficulty = "normal".into();
+            self.state.seeded_run = context.source_r9;
+            self.state.achievement_eligibility = !context.source_r9;
+            self.state.run_start_request = RunStartRequest::default();
+            self.living_start_context = Some(context);
+            self.start_run_until_initial_save()?;
+            self.state.run_quit.save_enabled = Some(false);
+            if self.wait_living_write(ResumeStage::AfterInitialSave) {
+                return Ok(());
+            }
+            return self.resume_living_restart(ResumeStage::AfterInitialSave);
+        }
+        self.finish_start_run_after_save()?;
+        //594AD3 normalizes only after actual NewRun/initial Save/grants.
+        self.state.system_clock.align_run_start()?;
+        self.living_start_context = None;
+        self.state.living_restart.pending = None;
+        self.state.run_quit.save_enabled = Some(true);
+        Ok(())
+    }
+
     fn tick(&mut self, timestamp_millis: Option<u64>) -> Result<(), String> {
+        self.state.persistent_callback_pre_counter = Some(self.state.system_clock.system_counter);
         self.state.run_admission.clock.advance(timestamp_millis)?;
+        if self.state.system_clock.next_phase() != phase::Phase::Skipped
+            && self.state.living_restart.pending.is_some()
+        {
+            self.begin_living_restart_dispatch()?;
+            if self.living_write_resume.is_some() {
+                return Ok(());
+            }
+        }
         // Source 594a10 consumes the prior menu request before game dispatch.
         // Room construction and clock alignment happen here, after the f32
         // confirmation fade, rather than in the zero-tick DOM key callback.
@@ -3701,6 +4082,7 @@ impl Game {
 
     fn tick_after_menu_requests(&mut self) -> Result<(), String> {
         let audio_counter = self.state.system_clock.system_counter;
+        self.state.persistent_callback_pre_counter = Some(audio_counter);
         let phase = self.state.system_clock.advance()?;
         if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
             self.state.music.room(96);
@@ -3709,6 +4091,50 @@ impl Game {
             self.state
                 .public_actions
                 .advance(&self.state.pressed, &self.state.keyboard);
+            let notification_dispatch = !self.state.unlock_notifications_loading
+                && self
+                    .state
+                    .unlock_notifications
+                    .as_ref()
+                    .is_some_and(|runtime| runtime.active());
+            if notification_dispatch {
+                //The branch was sampled before Update. Finishing a popup does
+                //not fall through to Game in this same System interval.
+                self.state
+                    .unlock_notifications
+                    .as_mut()
+                    .expect("sampled active owner")
+                    .advance(
+                        audio_counter,
+                        self.state.unlock_notifications_loading,
+                        &mut self.state.audio,
+                        &mut self.state.boot_lifecycle.shared,
+                    )?;
+                self.state.tick += 1;
+                self.state.menu_animation_tick += 1;
+                self.state.music.flush_pending();
+                self.state.music.advance();
+                return Ok(());
+            }
+            if self.state.screen == Screen::Playing
+                && !self.state.nightmares.system_active
+                && self.living_restart_admitted()
+            {
+                if self.state.living_restart.poll(
+                    self.state.public_actions.held[16],
+                    self.state.weapon_admission.source_player_type,
+                )? {
+                    if self.profile_document_rejected {
+                        return Err("living Restart requires known own-profile stores".into());
+                    }
+                    persistent_effects::reset_counter21(&mut self.state, &self.challenge_catalog)?;
+                    self.state
+                        .living_restart
+                        .request_after_counter(&mut self.state.boot_lifecycle.shared)?;
+                    self.state.run_quit.save_enabled = Some(false);
+                    //Do not short-circuit the old Game's current presentation.
+                }
+            }
             if self.state.screen == Screen::Playing && self.state.run_quit.input_pending {
                 self.state.run_quit.input_pending = false;
                 if self.state.paused
@@ -3920,30 +4346,57 @@ impl Game {
             //No source callback has been admitted for these global actions.
             //Their real held/triggered owners remain observable; each actual
             //attempt emits an explicit capability failure, never a fake effect.
-            for action in [11, 12, 16, 17, 18] {
+            if !self.living_restart_admitted() && self.state.public_actions.triggered[16] {
+                self.state.controls_menu.unavailable_actions.push(16);
+            }
+            for action in [11, 12, 17, 18] {
                 if self.state.public_actions.triggered[action] {
                     self.state.controls_menu.unavailable_actions.push(action);
                 }
             }
         }
         if phase != phase::Phase::Skipped && self.state.screen != Screen::Playing {
-            let request = &mut self.state.run_start_request;
-            if request.fading {
-                // Source 59b180 updates +4 before Character59d080 tests >=1.
-                // Forty f32 additions remain below one; the forty-first wins.
-                request.fade_alpha += 0.025_f32;
-                if request.fade_alpha >= 1.0_f32 {
-                    if request.challenge_id.is_some() && !request.system_pending {
-                        //59d080 explicitly assigns the empty seed code, decodes0,
-                        //then takes sharedRaw(max1), re-encodes and queues594620.
-                        self.state.seed_text.clear();
-                        self.state.seed_valid = false;
-                        let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
-                        self.state.boot_lifecycle.commit_character_seed(seed)?;
+            if self.state.run_start_request.fading {
+                //59B180 precedes Character59F470's fade>=1 callback.
+                self.state.run_start_request.fade_alpha += 0.025_f32;
+                if self.state.run_start_request.fade_alpha >= 1.0_f32
+                    && !self.state.run_start_request.system_pending
+                {
+                    if self.state.screen == Screen::Character
+                        && !self.state.run_start_request.resume_saved
+                    {
+                        //59F579: selected type9/Eden decrements20, then Saved
+                        //valid F448 independently controls the counter21 reset.
+                        if self.state.character_selection == 9 {
+                            persistent_effects::add_counter(&mut self.state, 20, -1)?;
+                        }
+                        match self.state.saved_load_valid {
+                            Some(true) => persistent_effects::reset_counter21(
+                                &mut self.state,
+                                &self.challenge_catalog,
+                            )?,
+                            Some(false) => {}
+                            None => {
+                                return Err(
+                                    "Character confirmation Saved validity owner is unknown".into(),
+                                )
+                            }
+                        }
+                        self.flush_living_dirty_profile()?;
+                        if self.wait_living_write(
+                            living_restart::ResumeStage::AfterCharacterProfileFlush {
+                                phase,
+                                pre_counter: audio_counter,
+                                bomb_triggered,
+                            },
+                        ) {
+                            return Ok(());
+                        }
                     }
-                    request.system_pending = true;
+                    self.complete_character_request()?;
                 }
             }
+            let request = &mut self.state.run_start_request;
             if request.input_pending {
                 request.input_pending = false;
                 request.fading = true;
@@ -3958,6 +4411,28 @@ impl Game {
                 self.state.run_admission.confirm_menu_request();
             }
         }
+        self.tick_after_character_request(phase, audio_counter, bomb_triggered)
+    }
+
+    fn complete_character_request(&mut self) -> Result<(), String> {
+        if self.state.run_start_request.challenge_id.is_some() {
+            //Existing59D080 Challenge request remains a distinct seed owner.
+            self.state.seed_text.clear();
+            self.state.seed_valid = false;
+            let seed = self.state.boot_lifecycle.shared.next_u32().max(1);
+            self.state.boot_lifecycle.commit_character_seed(seed)?;
+        }
+        self.state.run_start_request.system_pending = true;
+        Ok(())
+    }
+
+    fn tick_after_character_request(
+        &mut self,
+        phase: phase::Phase,
+        audio_counter: u32,
+        bomb_triggered: bool,
+    ) -> Result<(), String> {
+        self.state.persistent_callback_pre_counter = Some(audio_counter);
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
         let nightmare_dispatch = if phase == phase::Phase::Skipped {
@@ -5476,7 +5951,7 @@ impl Game {
         player_costume229::begin_full(&mut self.state, phase);
         spider_webs::begin_player_update(&mut self.state, phase)?;
         let had_game_over = self.state.player_death.game_over.is_some();
-        if player_death::advance(&mut self.state, phase) {
+        if player_death::advance(&mut self.state, phase)? {
             if !had_game_over && self.state.player_death.game_over.is_some() {
                 //558900's GameOver Init reaches594910 at558A79.55CE40
                 //removes its own file then tail-calls the actual55BD80 Clear.

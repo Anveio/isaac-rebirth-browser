@@ -101,9 +101,10 @@ impl SaveHost {
 }
 
 impl SaveStore {
-    /// Answers the save IO `command` left pending. One write and one menu read
-    /// can belong to one public System interval, so a Tick allows two
-    /// responses per tick and any other command one.
+    /// Answers the save IO `command` left pending. Living Restart can flush a
+    /// dirty profile, Clear the run, then write its fresh initial Save in one
+    /// public System interval. A Tick allows three responses per interval;
+    /// any other command allows one.
     pub fn service(
         &mut self,
         host: &SaveHost,
@@ -111,7 +112,7 @@ impl SaveStore {
         command: &Command,
     ) -> Result<Vec<Response>, String> {
         let budget = match command {
-            Command::Tick { count, .. } => u64::from(*count) * 2,
+            Command::Tick { count, .. } => u64::from(*count) * 3,
             _ => 1,
         };
         let mut responses = Vec::new();

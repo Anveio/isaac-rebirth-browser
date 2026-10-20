@@ -1,5 +1,5 @@
 import catalogue from './audio-data.json';
-import type { Ambience, SoundEvent, VolumeCallback } from './engine';
+import type { Ambience, SoundEvent, VolumeCallback, StopLoopingCallback } from './engine';
 import { MusicRuntime } from './music';
 
 const urls = import.meta.glob('../references/isaac/rebirth/resources/sfx/**/*.wav', {
@@ -59,6 +59,9 @@ export class AudioRuntime {
   private traceEnabled = false;
   private trace: OutputEvent[] = [];
   private lastVolumeSequence = -1;
+  private lastStopSequence = -1;
+  private stopTrace: { sequence: number; beforeSoundSequence: number; stopped: {slot: number; path: string; voice: number}[] }[] = [];
+  private stopTraceTruncated = false;
   private volumeTrace: { sequence: number; beforeSoundSequence: number; updates: {slot: number; path: string; voice: number; gain: number}[] }[] = [];
   private volumeTraceTruncated = false;
   private traceTruncated = false;
@@ -83,11 +86,30 @@ export class AudioRuntime {
     await this.music.unlock();
   }
 
-  consume(events: readonly SoundEvent[], callbacks: readonly VolumeCallback[] = []): void {
+  consume(events: readonly SoundEvent[], callbacks: readonly VolumeCallback[] = [], stops: readonly StopLoopingCallback[] = []): void {
+    type Control = { kind: 'volume'; value: VolumeCallback } | { kind: 'stop'; value: StopLoopingCallback };
+    const controls: Control[] = [
+      ...callbacks.map(value => ({kind: 'volume' as const, value})),
+      ...stops.map(value => ({kind: 'stop' as const, value})),
+    ];
+    //A Stop captures both sequence boundaries. At an equal sound boundary,
+    //its before-volume sequence distinguishes callbacks on either side.
+    controls.sort((left, right) => {
+      const sound = left.value.beforeSoundSequence - right.value.beforeSoundSequence;
+      if (sound) return sound;
+      if (left.kind === 'volume' && right.kind === 'volume') return left.value.sequence - right.value.sequence;
+      if (left.kind === 'stop' && right.kind === 'stop') return left.value.sequence - right.value.sequence;
+      if (left.kind === 'stop' && right.kind === 'volume') return left.value.beforeVolumeSequence <= right.value.sequence ? -1 : 1;
+      if (left.kind === 'volume' && right.kind === 'stop') return right.value.beforeVolumeSequence <= left.value.sequence ? 1 : -1;
+      throw new Error('Unknown ordered audio callback');
+    });
     let index = 0;
     const applyThrough = (beforeSequence: number) => {
-      while (index < callbacks.length && callbacks[index]!.beforeSoundSequence <= beforeSequence)
-        this.volume(callbacks[index++]!);
+      while (index < controls.length && controls[index]!.value.beforeSoundSequence <= beforeSequence) {
+        const callback = controls[index++]!;
+        if (callback.kind === 'volume') this.volume(callback.value);
+        else this.stopLooping(callback.value);
+      }
     };
     for (const event of events) {
       applyThrough(event.sequence);
@@ -99,6 +121,28 @@ export class AudioRuntime {
     }
     // A volume setter with no sound admission still invokes the callback.
     applyThrough(Infinity);
+  }
+
+  private stopLooping(callback: StopLoopingCallback): void {
+    if (callback.sequence <= this.lastStopSequence) return;
+    this.lastStopSequence = callback.sequence;
+    const stopped: {slot: number; path: string; voice: number}[] = [];
+    for (const id of callback.loadedSlots) {
+      const sound = catalogue.sounds.find(sound => sound.id === id);
+      if (!sound) throw new Error('Stop callback requires a configured loaded sound slot');
+      for (const sample of sound.samples) for (let index = 0; index < this.voices.length; index++) {
+        const voice = this.voices[index];
+        //The actual active voice and AudioBufferSourceNode.loop own both
+        //queries. A retained logical sample flag is not a playing backend.
+        if (!voice || voice.path !== sample.path || !voice.source.loop) continue;
+        stopped.push({slot: id, path: sample.path, voice: index});
+        this.release(index);
+      }
+    }
+    if (this.traceEnabled) {
+      if (this.stopTrace.length === TRACE_LIMIT) this.stopTraceTruncated = true;
+      else this.stopTrace.push({sequence: callback.sequence, beforeSoundSequence: callback.beforeSoundSequence, stopped});
+    }
   }
 
   private volume(callback: VolumeCallback): void {
@@ -186,6 +230,7 @@ export class AudioRuntime {
     for (let i = 0; i < this.voices.length; i++) this.release(i);
     this.lastSequence = -1;
     this.lastVolumeSequence = -1; this.volumeTrace = []; this.volumeTraceTruncated = false;
+    this.lastStopSequence = -1; this.stopTrace = []; this.stopTraceTruncated = false;
     this.traceEnabled = trace; this.trace = []; this.traceTruncated = false;
     this.music.reset(trace);
   }
@@ -196,6 +241,7 @@ export class AudioRuntime {
       waitingForUnlock: this.context.state === 'running' ? 0 : this.voices.filter(Boolean).length,
       activeVoices: this.voices.map((voice, index) => voice && { voice: index, path: voice.path }).filter(Boolean),
       events: structuredClone(this.trace), truncated: this.traceTruncated,
-      volumeCallbacks: structuredClone(this.volumeTrace), volumeCallbacksTruncated: this.volumeTraceTruncated, music: this.music.snapshot() };
+      volumeCallbacks: structuredClone(this.volumeTrace), volumeCallbacksTruncated: this.volumeTraceTruncated,
+      stopLoopingCallbacks: structuredClone(this.stopTrace), stopLoopingCallbacksTruncated: this.stopTraceTruncated, music: this.music.snapshot() };
   }
 }

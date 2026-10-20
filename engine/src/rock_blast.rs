@@ -118,6 +118,18 @@ pub fn destroy(state: &mut State, origin: WorldVector, radius: f32) -> Result<()
             outcome.record_frontier(state, "bombGridHurt");
             continue;
         }
+        //56C826 ->56D00D counts type5's first fuse setup here. Ordinary
+        //and tinted rocks use the shared Destroy callback below. State3's
+        //later bomb-rock detonation does not repeat this counter write.
+        if state
+            .room
+            .grid
+            .as_ref()
+            .and_then(|grid| grid.cells[index].entity.as_ref())
+            .is_some_and(|rock| rock.kind == 5 && rock.state == 1)
+        {
+            crate::persistent_effects::add_counter(state, 2, 1)?;
+        }
         let grid = state.room.grid.as_mut().expect("admitted room grid");
         let Some(rock) = grid.cells[index].entity.as_mut() else {
             continue;
@@ -149,14 +161,19 @@ pub(crate) fn destroy_rock(state: &mut State, index: usize) -> Result<bool, Stri
     let grid = state
         .room
         .grid
-        .as_mut()
+        .as_ref()
         .ok_or("Rock destruction requires the admitted room grid")?;
-    let Some(rock) = grid.cells[index].entity.as_mut() else {
+    let Some(rock) = grid.cells[index].entity.as_ref() else {
         return Ok(false);
     };
     if !matches!(rock.kind, 2 | 4) || rock.state != 1 {
         return Ok(false);
     }
+    //56C826 ->56D00D precedes Int50 and variant dispatch for every intact
+    //ordinary/tinted Destroy caller, including boss award-cell cleanup.
+    crate::persistent_effects::add_counter(state, 2, 1)?;
+    let grid = state.room.grid.as_mut().expect("admitted room grid");
+    let rock = grid.cells[index].entity.as_mut().expect("selected rock");
     let tinted = rock.kind == 4;
     // Destroy56c670: the rock-local RNG35 on the spawn seed. Its state1
     // pre-step always draws Int(50); a zero rolls rare Worm effects
@@ -236,6 +253,8 @@ fn tinted_reward(
     index: usize,
     local: &mut crate::items::Rng,
 ) -> Result<(), String> {
+    //56D455 precedes Int10 and its current unlocked-SmallRock branch.
+    crate::persistent_effects::add_counter(state, 3, 1)?;
     //The existing reward operator owns the empty-trinket context only.
     //A positive held/Kind2 query must not borrow that negative readset.
     if state
@@ -253,9 +272,28 @@ fn tinted_reward(
             .ok_or("tinted reward requires room grid")?,
     )?;
     let position = grid.position(index).ok_or("tinted rock outside its grid")?;
-    // Int(10)==0 offers Small Rock only once Persistent+0x3c unlocks it; a
-    // fresh profile has not destroyed the tinted rocks that unlock it.
-    local.bounded(10);
+    //A newly awarded12 is visible in this SAME callback. Have90 reads the
+    //actual permanent count (not TEMP or an inferred fresh inventory).
+    if local.bounded(10) == 0 && state.profiles[usize::from(state.profile - 1)].achievements[12] {
+        let owner = state
+            .player_items
+            .as_ref()
+            .ok_or("Small Rock requires Player item owner")?;
+        let have = crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .have(90)
+        .ok_or("Small Rock Have90 owner is unknown")?;
+        if !have {
+            //56DDA4's raw is local; no item-pool selection/removal is called.
+            let seed = local.raw();
+            crate::pickups::admit_collectible(state, 90, position, seed)?;
+            return Ok(());
+        }
+    }
     let mut count = 2;
     if local.bounded(3) != 0 {
         // Its velocity only feeds trinket bonuses, which need trinkets.

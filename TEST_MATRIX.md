@@ -276,6 +276,8 @@ Actual browser cases below are discovered from the executable browser scenario s
 | authored stage banner matches the original text region and leaves gameplay enabled | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
 | pause composes original paper, actual seed and stats while freezing the run | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
 | original GPU shadow and light masks match all complete native targets for independent seeds and movement | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
+| living Restart queues at poll61 and drains three real writes in the next public interval | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
+| living Restart preserves the public seed and drains two inhibited writes in the next public interval | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | focus lifecycle clears held controls and resumes without undoing explicit diagnostic pause | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | releasing a held bomb key in seed entry preserves text-only typing and the first gameplay press | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | the public Keyboard Map binding controls the expanded map after Back | [runtime.spec.ts](tools/tests/runtime.spec.ts) |

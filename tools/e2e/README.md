@@ -1,5 +1,12 @@
 # Live e2e suites
 
+`controls --living-restart` adds the normal seeded living-Isaac R60/release/R61
+route through the existing Controls/paired producer. Three fixed phase/pause
+controls and one first unfiltered OS seed/boot draw require actual read-only
+Native hold/queue/Persistent owners, physical input and next-dispatch behavior.
+This source mode is unqualified until a fresh artifact and real two-game run;
+historical Restart grades do not transfer. [Scope](../../docs/living-restart.md).
+
 Each suite runs the fresh original game and the immutable production build with
 the same public inputs (keys, text, ticks, seeds) and compares what each game
 observably does. Native observations never enter WASM.
