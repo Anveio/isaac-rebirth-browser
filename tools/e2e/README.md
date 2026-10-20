@@ -82,7 +82,7 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
     death fails the helper before any comparison, with `Port descent leg N for
     EV9BP18Q-caves2 failed: The port's player died in room R` (a route room) or
     `… died in the fight, F frames in` (the boss). That is the bot, not a
-    parity failure. The Caves I leg runs `--rewind`, so a death takes twelve
+    parity failure. Every leg runs `--rewind`, so a death takes twelve
     failed tries at one hit.
 - **`--case PATTERNS`** matches the id each suite prints for a case and names its
   directory by. Names differ by driver: `scenario.id` for paired-game and
@@ -550,8 +550,8 @@ the headless recording at LABEL`, naming the headless recorder as the suspect
 these checks, as state-pair's stale-recording warning says.
 
 `--rewind` makes a closed-loop fight keep its health, where a bot that plays
-on through every hit survives only on a lucky path. EV9BP18Q-caves2's Caves I
-leg uses it.
+on through every hit survives only on a lucky path. Every leg of both EV9BP18Q
+descents uses it.
 - **On a health loss** in a route room's or the boss room's fight, the
   recorder restores the game from a save 90 to 360 frames back.
 - **Then** it plays on with a fresh jitter seed, the orbit flipped on every

@@ -67,7 +67,7 @@ Each leg runs the recorder's `--dodge --rewind` (`fightFlags`), which shapes onl
   - Under `--rewind`, the port's Larry Jr. fight left poops in cells 110 and 113, beside the bottom doorway's cell 112, whose other neighbours (96–98) are award cells. The shared exit then walked into the pedestal.
   - The fight now shoots out the first port poop on the cheapest trapdoor-to-doorway route, as it already does for the corner-to-doorway route.
 
-Both games end the segment hurt: the original at 4/6, the port at 2/6 in the recorded run. The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
+Both games end the segment hurt at 4/6: the original by its fixed keys, the port with `--rewind` (Basement I's one blast, `--hurt`, and no hit kept since). The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
 
 | Case | Paired checkpoints | Required tail checks |
 | --- | ---: | ---: |
@@ -111,27 +111,33 @@ import does not change that boundary.
 
 The comparator grades those three predicates at the re-anchor; raw health and coins stay diagnostics. Both games leave Caves I neither full, nor on a half heart, nor holding five coins.
 
-**Why `--rewind`.** Without it, the port's Caves I leg survived on one lucky path. The bot plays on through every hit, and Caves I's route rooms and Mega Fatty hit it often:
+**Why `--rewind`.** The bot plays on through every hit, and Caves I's route rooms and Mega Fatty hit it often:
 - Squirt lunges and the Dips a Squirt bursts into;
 - Crazy Long Legs pinning it to a wall;
 - fireplace contact while Skinnies chase it;
 - Mega Fatty's landing creep and puke volleys.
 
-Measured headlessly across nine jitter seeds, the plain leg passed 1 of 9. It always entered Mega Fatty at 3/6, and its one pass ended on a half heart (1/6). That is the bedroom predicate, which the original's 3/6 does not meet. #731 aligned it by ending the original's keys with a blast of its own bomb.
+Without `--rewind`, a leg survives only on a lucky path. After #754, no seed pin #759 searched found one: every pin died or stalled in a Caves I route room.
 
-`--rewind` takes the leg back over each hit it can avoid (tools/e2e/README.md, Route recorder):
-- **Per room,** across nine seeds each:
+`--rewind` takes the leg back over each hit it can avoid (tools/e2e/README.md, Route recorder). Mega Fatty's red creep hurts for 125 updates after it lands, so the corner walk after the clear waits it out; a fight that leaves no creep waits no frame. I measured it headlessly on engine `f06b38bd…` (main 2344e31e), with every leg on `--dodge --rewind`:
 
-  | Fight | No damage | Hits kept |
-  | --- | --- | --- |
-  | Room 6 (a Squirt) | 9/9 | none |
-  | Room 13 (two Crazy Long Legs; the plain leg died on 2/9) | 9/9 | none |
-  | Mega Fatty from 3/6 | 9/9 | none |
-  | Room 11 (Skinnies and fires) | 8/9 | one, after twelve tries |
+| Caves I variation | Caves I leg | Rewinds | Hits kept | Leaves Caves I at |
+| --- | ---: | ---: | ---: | --- |
+| none (the fixture) | 19,943 frames | 14 | 0 | 4/6 |
+| boss `--salt 1` | 20,273 | 24 | 0 | 4/6 |
+| boss `--salt 2` | 20,281 | 13 | 0 | 4/6 |
+| boss `--salt 3` | 18,897 | 17 | 0 | 4/6 |
+| boss `--salt 4` | 19,061 | 15 | 0 | 4/6 |
+| `--route-salt 1` | — | 1 | 0 | fails: room 9 not cleared in its 2,400-frame budget |
+| `--route-salt 2` | 18,089 | 14 | 0 | 4/6 |
 
-- **Whole leg:** ten variations on one build: boss salts 1–6 at the fixture's route, and route salts 1–4 at salt 4. All ten pass and end Caves I at 5/6, with 2–28 rewinds each and no hit kept. Two of them first ended at 4/6, both from Mega Fatty's creep on the walk to the corner after the clear. The recorder now waits for live creep to dry before that walk; a fight that leaves no creep waits no frame.
+- **Route salt 1:** room 9's kind-73 enemies keep adding Chargers, and the leg ran out of budget with one Charger at 1 HP left. The player was alive at 4/6.
+- **The Basement legs** are the same in every row:
+  - Basement I takes 1 rewind and keeps no hit. It ends at full health, so `--hurt` takes it to 4/6.
+  - Basement II takes no rewind and ends at 4/6.
+- **Wall time:** each helper run took 785–904 s, sharing a four-core host with a live suite.
 
-So the original's keys end at their research 3/6 again, with no bomb.
+So the original's keys end at their research 3/6, with no bomb.
 
 | Case | Paired checkpoints | Required tail checks |
 | --- | ---: | ---: |
