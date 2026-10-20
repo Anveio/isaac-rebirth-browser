@@ -423,16 +423,21 @@ property set on every run, after the generated cases:
 
 Every report's census records, per case, the command at which the case first
 reached each key (`coverage.firstSteps`). `tools/dst/cover.py` turns that into
-corpus upkeep. Harvest with `--retain-all`, measure the corpus alone
-(`--units game --cases 0 --corpus engine/dst/corpus --report …`), and the
-tool cuts the shortest harvested prefixes, running 300 commands past each
-first contact, that cover the keys the corpus misses:
+corpus upkeep. Harvest with `--retain-all`, census what every run replays
+(the corpus tapes and the pinned rooms; with `--cases 0` the `rooms` unit
+plays only the pins), and the tool cuts the shortest harvested prefixes,
+running 300 commands past each first contact, that cover the keys the census
+misses. A census's keys are its game tapes' (`coverage.reached`) and its
+pins' (`coverage.roomsReached`), so no tape is cut for a key a pin already
+reaches; `--prune` still weighs game tapes only against one another, so a
+pin never retires a tape:
 
 ```sh
 engine/dst/target/release/rebirth-dst --units game --cases 64 --steps 4000 \
   --retain-all --tapes H/tapes --report H/report.json
-engine/dst/target/release/rebirth-dst --units game --cases 0 \
-  --corpus engine/dst/corpus --report B.json
+engine/dst/target/release/rebirth-dst --units game,rooms --cases 0 \
+  --corpus engine/dst/corpus --pins engine/dst/pinned-rooms.json \
+  --allow-unmet --report B.json
 python3 tools/dst/cover.py --harvest H/report.json --tapes H/tapes \
   --baseline B.json --prefix npc: --out engine/dst/corpus --verify
 ```
