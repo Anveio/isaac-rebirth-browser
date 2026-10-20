@@ -28,6 +28,20 @@
     ]
   },
   {
+    "name": "regression-caves-mega-fatty-landing",
+    "code": "NCYMQQBG",
+    "stage": 3,
+    "room": 0,
+    "template": [
+      5,
+      5050
+    ],
+    "seed": 9381976191760545088,
+    "reaches": [
+      "npc:264"
+    ]
+  },
+  {
     "name": "regression-caves-pathfinder-e94",
     "code": "CGVFTQDN",
     "stage": 3,
