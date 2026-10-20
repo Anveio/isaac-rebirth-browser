@@ -354,7 +354,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 84 | 63 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 85 | 64 | 2 |
 | `rooms` | every room a floor its trapdoors reach admits, entered and played | 2 | 8 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 35 | 3 | 0 |
 
@@ -781,6 +781,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: a game resumed from its serialized midpoint reaches the same end | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: the C ABI agrees with direct dispatch | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a document a previous session stored loads at the next session's Title unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: a document in an older own format loads as the current format, which then reloads unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Sometimes | game: a session loads a document in an older own format | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a session boots with a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: the save host answers every save write and menu readmission a command leaves | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write is stored | [saves.rs](engine/dst/src/units/game/saves.rs) |
