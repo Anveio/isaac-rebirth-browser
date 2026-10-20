@@ -74,6 +74,8 @@ pub struct EnemyProjectile {
     pub orbit_centre: Option<WorldVector>,
 }
 
+/// The bone projectile 9.1 (Bony's throw).
+pub const BONE: u32 = 1;
 /// The purple fire projectile 9.2 (Mega Maw's FireRing).
 pub const PURPLE_FIRE: u32 = 2;
 
@@ -192,9 +194,11 @@ impl EnemyProjectile {
             .ok_or("projectile update count exhausted")?;
         // Source536e37 selects a regular clip from actual scale every full;
         // Worm scale1 remains6. The purple fire shot 9.2 plays its looping
-        // Flickering clip instead (5370f3).
+        // Flickering clip and the bone shot 9.1 its Move clip (538860).
         let name = if self.variant == PURPLE_FIRE {
             "Flickering".to_string()
+        } else if self.variant == BONE {
+            "Move".to_string()
         } else {
             let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
             format!("RegularTear{size}")
@@ -278,6 +282,17 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         .find(|projectile| projectile.id == id)
     {
         if projectile.advance(phase, &grid)? {
+            if projectile.variant == BONE {
+                // 538b3e: a dead 9.1 bursts into eight Tooth Particles
+                // 1000.35 at speed 2u + 1 and plays no sound. The shot's
+                // ColorMod is the default one, as SpawnParticles assumes.
+                let position = projectile.position;
+                let speed = {
+                    let u = state.boot_lifecycle.shared.uniform();
+                    (u + u) + 1.0
+                };
+                return crate::poop_effects::spawn_particles(state, 35, position, 8, speed);
+            }
             if projectile.variant == PURPLE_FIRE {
                 // 538b8c: a dead 9.2 spawns a tinted Poof 1000.15 at -10 px
                 // and plays no sound. PORT GAP: as for the other impacts,

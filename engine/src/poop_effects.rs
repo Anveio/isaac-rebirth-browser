@@ -140,6 +140,11 @@ impl Admission<'_> {
         self.admit(27, Controller::Particle27(Particle::Initializing), birth)
     }
 
+    /// Tooth Particle35, the same rock-debris controller as Wood27.
+    pub fn admit_tooth_particle(&mut self, birth: ParticleBirth) -> Result<u32, String> {
+        self.admit(35, Controller::Particle27(Particle::Initializing), birth)
+    }
+
     /// 4fc0f9 real43 factory has V0/spawnerNULL and NO immediate Update.
     pub fn admit_explosion(&mut self, seed: u32, position: WorldVector) -> Result<u32, String> {
         self.admit(
@@ -189,7 +194,7 @@ impl Admission<'_> {
             collision_damage: 22.0,
             hp: config.base_hp,
             max_hp: config.base_hp,
-            grid_collision_class: if matches!(variant, 5 | 27 | 58) { 3 } else { 0 },
+            grid_collision_class: if matches!(variant, 5 | 27 | 35 | 58) { 3 } else { 0 },
             entity_collision_class: 0,
             flags: 0,
             visible: true,
@@ -231,7 +236,7 @@ impl Admission<'_> {
             .iter_mut()
             .find(|effect| effect.id == id)
             .ok_or("explicit initial58 Update requires an admitted effect")?;
-        if !matches!(effect.variant, 5 | 27 | 58) || effect.full_updates != 0 {
+        if !matches!(effect.variant, 5 | 27 | 35 | 58) || effect.full_updates != 0 {
             return Err(
                 "explicit initial particle Update must run once on its actual birth".into(),
             );
@@ -432,6 +437,7 @@ pub(crate) fn spawn_particles(
         let id = match variant {
             58 => admission.admit_particle(birth)?,
             27 => admission.admit_wood_particle(birth)?,
+            35 => admission.admit_tooth_particle(birth)?,
             _ => {
                 return Err(format!(
                     "SpawnParticles Effect 1000.{variant} is not admitted"
@@ -524,10 +530,23 @@ fn wood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<(), St
     match particle {
         Particle::Initializing => {
             let vertical_velocity = -5.0_f32 - shared.uniform() * 10.0_f32;
-            let clip = ["Gib1", "Gib2", "Gib3", "Gib4"][shared.bounded(4) as usize];
-            effect.sprite.animation = clip.into();
-            effect.sprite.frame = 0.0;
-            effect.sprite.playing = false;
+            if effect.variant == 35 {
+                // 464efd: ToothGib01..04; one in three stops on frame 0, the
+                // rest Play(force = false), keeping a playing ToothGib01.
+                let clip = ["ToothGib01", "ToothGib02", "ToothGib03", "ToothGib04"]
+                    [shared.bounded(4) as usize];
+                let stop = shared.bounded(3) == 0;
+                if stop || effect.sprite.animation != clip {
+                    effect.sprite.animation = clip.into();
+                    effect.sprite.frame = 0.0;
+                    effect.sprite.playing = !stop;
+                }
+            } else {
+                let clip = ["Gib1", "Gib2", "Gib3", "Gib4"][shared.bounded(4) as usize];
+                effect.sprite.animation = clip.into();
+                effect.sprite.frame = 0.0;
+                effect.sprite.playing = false;
+            }
             *particle = Particle::Flying(Flight {
                 height: -23.0,
                 vertical_velocity,
@@ -536,6 +555,11 @@ fn wood_update(effect: &mut SpriteEffect, shared: &mut Mt19937) -> Result<(), St
             });
         }
         Particle::Flying(flight) => {
+            // 4638b5: a tooth is removed once its clip is finished, then
+            // falls on as usual.
+            if effect.variant == 35 && !effect.sprite.playing {
+                effect.removed = true;
+            }
             flight.vertical_velocity =
                 (0.9_f32 * flight.vertical_velocity + 0.1_f32) + flight.gravity;
             flight.height += flight.vertical_velocity;
@@ -630,10 +654,10 @@ pub fn advance_full(
     }
     base_update(effect)?;
     match effect.variant {
-        27 | 58 => particle_update(effect, shared)?,
+        27 | 35 | 58 => particle_update(effect, shared)?,
         5 => return Err("Blood Particle Update requires its state-level spawn owner".into()),
         43 => explosion_update(effect, shared, audio, system_counter)?,
-        _ => return Err("poop effect dispatch requires actual27/58/43 variant".into()),
+        _ => return Err("poop effect dispatch requires actual27/35/58/43 variant".into()),
     }
     finish_update(effect)
 }
@@ -677,7 +701,7 @@ pub fn advance_fast(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String
 
 /// Actual late full grid callback, after the manager's flags8 paint pass.
 pub fn full_grid_contact(effect: &mut SpriteEffect, grid: &Grid) -> Result<(), String> {
-    if !matches!(effect.variant, 5 | 27 | 58)
+    if !matches!(effect.variant, 5 | 27 | 35 | 58)
         || !effect.active
         || effect.removed
         || effect.flags & 8 != 0
