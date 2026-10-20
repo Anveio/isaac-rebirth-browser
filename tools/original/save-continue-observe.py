@@ -11,7 +11,26 @@ def load(name,path):
 standard=load('save_canonical_paired','tools/original/foundation-paired-observer.py')
 identity=load('save_native_identity','tools/original/native-identity.py')
 reader=load('save_state_reader','tools/original/state-observer.py')
-SDK_SHA=identity.OFFLINE_STORAGE_SDK_SHA256
+# prepare-offline.sh compiles the offline SDK stub locally, so its bytes and
+# export offsets depend on the toolchain. The deployed stub must be the one
+# unwrap.py recorded in this depot's provenance, and the export is located in
+# that file's own dynamic symbol table.
+SDK_PROVENANCE=ROOT/'.cache/original-runtime/offline-depot/provenance.json'
+
+def elf_export(data,name):
+    if data[:4]!=b'\x7fELF' or data[4]!=2 or data[5]!=1:raise ValueError('SDK is not a little-endian ELF64 object')
+    shoff,=struct.unpack_from('<Q',data,0x28);shentsize,shnum=struct.unpack_from('<HH',data,0x3a)
+    sections=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+i*shentsize) for i in range(shnum)]
+    dynsym=[x for x in sections if x[1]==11]
+    if len(dynsym)!=1:raise ValueError('SDK has no single dynamic symbol table')
+    _,_,_,_,offset,size,link,_,_,entsize=dynsym[0];strtab=sections[link][4]
+    found=[]
+    for at in range(offset,offset+size,entsize):
+        st_name,st_info,_,st_shndx,st_value,_=struct.unpack_from('<IBBHQQ',data,at)
+        end=data.index(b'\0',strtab+st_name)
+        if st_shndx and st_info&0xf==2 and data[strtab+st_name:end]==name.encode():found.append(st_value)
+    if len(found)!=1:raise ValueError(f'SDK does not export one {name}')
+    return found[0]
 RUN_HEADER=bytes.fromhex('49534141434e475f4753523030313800')
 PROFILE_HEADER=bytes.fromhex('49534141434e47534156453036522020')
 ARCHIVE_LABELS={'save-pre-pause','save-before-quit','save-main-settled','save-continued-playing'}
@@ -56,9 +75,9 @@ def details(pid,context):
         prefix=read(0x8ecf60,1024)
         if b'\0' not in prefix:raise ValueError('Unterminated Source save root')
         sdk=(ROOT/'.cache/original-runtime/offline-depot/lib64/libsteam_api.so').resolve(strict=True)
-        sdk_stat=sdk.stat();sdk_sha=hashlib.sha256(sdk.read_bytes()).hexdigest()
+        sdk_stat=sdk.stat();sdk_bytes=sdk.read_bytes();sdk_sha=hashlib.sha256(sdk_bytes).hexdigest()
         sdk_after=sdk.stat()
-        if sdk_sha!=SDK_SHA or (sdk_stat.st_dev,sdk_stat.st_ino,sdk_stat.st_size,sdk_stat.st_mtime_ns,sdk_stat.st_ctime_ns)!=(sdk_after.st_dev,sdk_after.st_ino,sdk_after.st_size,sdk_after.st_mtime_ns,sdk_after.st_ctime_ns):raise ValueError('Unmatched or changed deployed SDK')
+        if sdk_sha!=json.loads(SDK_PROVENANCE.read_text())['derivedSteamApiSha256'] or (sdk_stat.st_dev,sdk_stat.st_ino,sdk_stat.st_size,sdk_stat.st_mtime_ns,sdk_stat.st_ctime_ns)!=(sdk_after.st_dev,sdk_after.st_ino,sdk_after.st_size,sdk_after.st_mtime_ns,sdk_after.st_ctime_ns):raise ValueError('Unmatched or changed deployed SDK')
         sdk_bases=[]
         for line in map_text.splitlines():
             parts=line.split(None,5)
@@ -66,7 +85,7 @@ def details(pid,context):
                 device=tuple(int(x,16) for x in parts[3].split(':'))
                 if device!=(os.major(sdk_stat.st_dev),os.minor(sdk_stat.st_dev)) or int(parts[4])!=sdk_stat.st_ino:raise ValueError('Mapped SDK inode/device differs from hashed file')
                 sdk_bases.append(int(parts[0].split('-')[0],16))
-        if len(sdk_bases)!=1 or u64(0x8e5ef0)!=sdk_bases[0]+0x6390:raise ValueError('Unmatched actual SteamRemoteStorage export')
+        if len(sdk_bases)!=1 or u64(0x8e5ef0)!=sdk_bases[0]+elf_export(sdk_bytes,'SteamRemoteStorage'):raise ValueError('Unmatched actual SteamRemoteStorage export')
         cloud=boolean(system+0x2dfb9)
         environ=Path(f'/proc/{pid}/environ').read_bytes()
         if len(environ)>128*1024:raise ValueError('Owned environment exceeds bound')
