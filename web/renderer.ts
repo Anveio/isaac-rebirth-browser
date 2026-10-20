@@ -13,7 +13,7 @@ const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 const PARTICLE_ACTORS: Record<number, string> = {
   5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
-  58: "gfx/1000.058_poop particle.anm2",
+  35: "gfx/1000.035_tooth particle.anm2", 58: "gfx/1000.058_poop particle.anm2",
 };
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
@@ -407,7 +407,8 @@ export class Renderer {
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
         this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2"
-          : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
+          : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2"
+          : projectile.variant === 1 ? "gfx/009.001_bone projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
           projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
     for (const particle of state.fireParticles)
       if (!particle.removed && particle.visible)
@@ -445,7 +446,7 @@ export class Renderer {
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
       if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
-      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 5) {
+      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 35 || effect.variant === 5) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
           ? controller.particle58.flying.layerRotation
