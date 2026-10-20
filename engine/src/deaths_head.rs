@@ -33,7 +33,9 @@ fn spawn(id: u32, selector: &SpawnSelector, context: &SpawnContext) -> Result<Op
         return Ok(None);
     }
     if !selector.position.is_finite() || selector.spawn_seed == 0 {
-        return Err("Death's Head requires bounded authored position and nonzero spawn seed".into());
+        return Err(
+            "Death's Head requires bounded authored position and nonzero spawn seed".into(),
+        );
     }
     let config = content::entity(212, 0);
     let mut npc = Npc {
