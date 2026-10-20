@@ -436,21 +436,27 @@ try {
     // cleared boss room's door walk does above. A turn at walking speed can
     // leave the player circling a centre just outside the 4-unit radius,
     // never inside it on a sampled frame (Y9QL8QZM random, waypoint
-    // (480, 320): 4.4-5.9 units round cell 41's centre every 20 frames). Six
-    // sampled strides in a row within 8 units of one centre without arriving
-    // is that orbit, not an approach: an approach at walking speed (about 17
-    // units a stride) crosses the 4-8 band in one stride. The walk then
-    // releases the keys, lets the player coast to rest and takes the centre
-    // as reached. Only the final approach may enter the trapdoor; any other
-    // walk that does fails with that reason.
+    // (480, 320): 4.4-5.9 units round cell 41's centre every 20 frames).
+    // The steering is a function of the sampled position, so a sample that
+    // repeats an earlier one exactly (position and keys, 4-8 units from the
+    // same centre) is that orbit and never arrives; a wobble that settles
+    // never repeats one. The walk then releases the keys, lets the player
+    // coast to rest and takes the centre as reached. Only the final approach
+    // may enter the trapdoor; any other walk that does fails with that reason.
     const centreWalk = async (goal, cells, arrived, failure, entry = false) => {
-      let target = centreOf(state.player), incoming = 4, circling = 0;
+      let target = centreOf(state.player), incoming = 4;
+      const orbit = new Set();
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
         if (!entry && state.stageTransition !== 0) throw new Error(`${failure.replace(/ in \d+ frames$/, '')}: the player entered the trapdoor`);
         const distance = Math.hypot(target.x - state.player.x, target.y - state.player.y);
-        circling = distance > 4 && distance <= 8 ? circling + 1 : 0;
-        if (circling === 6) {
+        let circling = false;
+        if (distance > 4 && distance <= 8) {
+          const sample = `${state.player.x},${state.player.y},${toward(state.player, target, 2).join('+')}`;
+          circling = orbit.has(sample);
+          orbit.add(sample);
+        } else orbit.clear();
+        if (circling) {
           await hold([]);
           for (let rest = 60, last = state.player; rest > 0; rest -= STRIDE) {
             await step(STRIDE); state = await view(); left -= STRIDE;
@@ -458,8 +464,8 @@ try {
             last = state.player;
           }
         }
-        if (distance <= 4 || circling === 6) {
-          circling = 0;
+        if (distance <= 4 || circling) {
+          orbit.clear();
           ({ point: target, dir: incoming } = planStep([...cells, ...pickupCells(state)], goal, incoming));
         }
         await hold(toward(state.player, target, 2));
