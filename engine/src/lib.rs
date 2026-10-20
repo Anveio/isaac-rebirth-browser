@@ -5241,6 +5241,20 @@ impl Game {
                     ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
                 })
             }
+            entities::Birth::FlaggedProjectile(birth, variant, params) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                let params = params.admitted()?;
+                self.admit_enemy_projectile(|id| {
+                    enemy_projectiles::EnemyProjectile {
+                        variant,
+                        spawner_type,
+                        ..enemy_projectiles::EnemyProjectile::birth_with_parameters(
+                            id, parent, birth,
+                        )
+                    }
+                    .with_flags(params)
+                })
+            }
             entities::Birth::PlayerHurt => {
                 combat::try_damage_player(&mut self.state, 1, 60, 0).map(|_| ())
             }

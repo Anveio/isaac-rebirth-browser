@@ -89,6 +89,11 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
 - **`--rerun-failed`** reruns each failed suite with the replay flags its run
   recorded. A suite that died before recording its bank runs fresh. A failed run
   prints this command.
+- **A stage-exit approach that fails generation** records no case to replay.
+  Its failure names its draw as a command that regenerates and pairs exactly
+  that case: `npm run test:e2e -- stage-exit --helper-arg --approach
+  --helper-arg FIXTURE:IDLE:X,Y`. The command's helper arguments replace the
+  suite's whole list.
 
 A slice is an inner-loop tool. Merging still needs the suites your change
 touches, compared against main.
