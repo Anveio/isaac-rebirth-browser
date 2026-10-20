@@ -238,8 +238,8 @@ entered and cleared (`room:5 on stage 2`, `cleared:5 on stage 2`), a boss
 room entered, a boss room cleared, each larger boss room shape cleared
 (`cleared:5(26x7)`, beside `room:5(26x7)` for entering it), each champion
 color an NPC simulated with, alone and with its floor's stage (`champion:11`,
-`champion:11 on stage 5`), so a chase can cut a tape to a rare color where it
-rolled, and a descent made while an active item is held (`boss room holding an
+`champion:11 on stage 5`; only `rooms` cases reach the later floors' colors),
+and a descent made while an active item is held (`boss room holding an
 active item`, `boss room cleared holding an active item`, `descent holding
 an active item`), a run started after a descent (`new
 run after a descent`, and `new run from the menus after a descent` when it
