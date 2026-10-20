@@ -135,6 +135,7 @@ pub(crate) fn reset_counter21(
 pub(crate) fn mark_collected(state: &mut crate::State, id: u32) -> Result<(), String> {
     let catalog = state
         .persistent_catalog
+        .0
         .as_ref()
         .cloned()
         .ok_or("Persistent Challenge catalogue owner is unknown")?;
@@ -161,6 +162,7 @@ pub(crate) fn add_counter(
 ) -> Result<(), String> {
     let catalog = state
         .persistent_catalog
+        .0
         .as_ref()
         .cloned()
         .ok_or("Persistent Challenge catalogue owner is unknown")?;
