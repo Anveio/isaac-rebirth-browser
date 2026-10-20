@@ -238,7 +238,6 @@ pub(crate) fn check_departure(
             full_updates: 0,
             boss_scene: None,
         });
-        state.departure_velocity = Some(crate::bombs::player_velocity(state));
         state.player.vx = 0.0;
         state.player.vy = 0.0;
         // Transition request5dcfc0 writes Player+7d4 at5dd048. Fast room
