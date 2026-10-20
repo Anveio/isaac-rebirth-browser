@@ -88,6 +88,8 @@ export async function startProductionServer({ directory = join(ROOT, "dist"), po
     });
     return {
       url: `http://127.0.0.1:${server.address().port}`,
+      // The served copy itself, for a reader without a browser (the headless e2e page).
+      directory: snapshot,
       build: { ...identity, source, scope: "Immutable snapshot of production build bytes; source/native replay equality is checked separately" },
       close: async () => {
         await new Promise((done, reject) => server.close((error) => error ? reject(error) : done()));

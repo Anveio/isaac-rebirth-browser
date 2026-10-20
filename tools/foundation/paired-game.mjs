@@ -7,7 +7,7 @@ import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSyn
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pipeline } from 'node:stream/promises';
-import { promisify } from 'node:util';
+import { isDeepStrictEqual, promisify } from 'node:util';
 import { createGzip } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { PNG } from 'pngjs';
@@ -510,6 +510,30 @@ function pixelJobs(caseData, native, browser, directory) {
   } catch { return []; }
 }
 
+// The route recorder (tools/e2e/boss-route-record.mjs) marks each capture it
+// emits with the port state it reached there (`recorded`). The browser's
+// replay of the same keys on the same build must reach each one in the same
+// room, position, health and coins. A miss fails the case and names the
+// recorder: its game, not the port's rules, left the replay's path.
+// A recording replayed on another build feeds closed-loop keys to a different
+// game; its marks are not compared (state-pair.mjs warns of the stale replay).
+export function recorderDivergence(caseData, browser, build) {
+  const frames = new Map(browser.frames.map(frame => [frame.label, frame]));
+  const marked = caseData.pairedTape.filter(action => action.type === 'capture' && action.recorded?.build === build);
+  for (const { label, recorded: { recorder, build: ignored, ...expected } } of marked) {
+    const state = frames.get(label)?.state;
+    const seen = state && { room: state.currentRoom, position: [state.player.x, state.player.y],
+      health: [state.player.hp, state.player.maxHp, state.player.soulHp], coins: state.inventory.coins };
+    if (isDeepStrictEqual(seen, expected)) continue;
+    const suspect = recorder === 'headless'
+      ? 'the headless recorder (tools/e2e/lib/headless-page.mjs) is suspect; re-record with --browser-recorder'
+      : 'the port replayed its own browser recording differently (port nondeterminism)';
+    return { status: 'fail', checked: marked.length, label, recorder, expected, seen: seen ?? null,
+      error: `Browser replay left the ${recorder} recording at ${label}: recorded ${JSON.stringify(expected)}, replayed ${JSON.stringify(seen ?? null)}; ${suspect}` };
+  }
+  return { status: 'pass', checked: marked.length };
+}
+
 function comparePair(caseData, native, browser, directory, exactPixels, stateComparator, pixelResults = new Map()) {
   mkdirSync(directory, { recursive: true });
   const checks = [];
@@ -715,6 +739,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
         }
         const pixelResults = await comparePixelPairs(pixelJobs(caseData, native, candidate, join(directory, 'comparison')));
         const checks = comparePair(caseData, native, candidate, join(directory, 'comparison'), exactPixels, stateComparator, pixelResults);
+        // Only a completed browser capture can have left a recording's path.
+        const recorderReplay = candidate.status === 'pass' ? recorderDivergence(caseData, candidate, server.build.sha256) : undefined;
         if (movementComparator) {
           const state = movementComparator(native,candidate);
           assert.ok(Array.isArray(state) && state.length > 0,'Actual independent movement/coasting aggregate is required');
@@ -726,9 +752,11 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
             manifestPath: native.manifestPath, evidence: native.evidence,
             ...(publicClockPlan && {publicClockValidation}) },
           browser: { status: candidate.status, failures: candidate.failures, ...(controlsOwnReload && {keyboardOwnReload: candidate.keyboardOwnReload}) }, checks,
+          ...(recorderReplay?.checked && { recorderReplay }), ...(recorderReplay?.status === 'fail' && { error: recorderReplay.error }),
           ...(publicClockPlan && {publicClockPlan: {path: join(directory, 'public-clock-plan.json'), nativeEntryPresentation: publicClockPlan.nativeEntryPresentation}}),
           status: native.status === 'pass' && candidate.status === 'pass'
             && (!publicClockPlan || publicClockValidation?.status === 'pass')
+            && recorderReplay?.status !== 'fail'
             && checks.every(check => check.status === 'pass') ? 'pass' : 'fail' };
         if (mtDraws) {
           try {
@@ -748,6 +776,7 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       try { save(join(directory, 'report.json'), result); }
       catch (error) { result.status = 'fail'; result.evidenceWriteError = String(error); }
       process.stdout.write(`${result.status}: ${result.checks.filter(check => check.status === 'pass').length}/${result.checks.length} paired checkpoints\n`);
+      if (result.recorderReplay?.status === 'fail') process.stdout.write(`${result.recorderReplay.error}\n`);
       // An unresolved Chromium close must not overlap the next Original.
       // Its failed case/report is retained; outer finally retries cleanup.
       if (browser) break;
