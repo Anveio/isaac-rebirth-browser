@@ -43,6 +43,20 @@
     ]
   },
   {
+    "name": "regression-caves-globin-pit-wall",
+    "code": "3DD2CBKW",
+    "stage": 4,
+    "room": 16,
+    "template": [
+      1,
+      461
+    ],
+    "seed": 2578138192765226671,
+    "reaches": [
+      "npc:24"
+    ]
+  },
+  {
     "name": "regression-caves-mega-fatty-landing",
     "code": "NCYMQQBG",
     "stage": 3,

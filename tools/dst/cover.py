@@ -3,9 +3,10 @@
 
 Every DST report records, per game case, the command at which the case first
 reached each coverage key (`coverage.firstSteps`). Given a harvest run with
-`--retain-all` and a baseline report of the corpus alone (`--units game
---cases 0 --corpus engine/dst/corpus`, what every run is sure to reach), this
-picks harvested prefixes greedily, most new keys per command first, until the
+`--retain-all` and a baseline census of what every run is sure to reach (the
+corpus tapes and the pinned rooms: `--units game,rooms --cases 0 --corpus
+engine/dst/corpus --pins engine/dst/pinned-rooms.json`), this picks
+harvested prefixes greedily, most new keys per command first, until the
 keys the harvest reached but the baseline missed are covered, then writes them
 as `coverage-<case seed>.json` tapes. With --verify it replays each written tape
 and keeps it only if the replay reaches its keys.
@@ -34,7 +35,13 @@ import tempfile
 
 
 def reached(report):
+    """The keys a report's game cases reached, the ones tapes can carry."""
     return set(report["coverage"]["reached"])
+
+
+def census_keys(report):
+    """The keys a census reached: its game tapes' and its pinned rooms'."""
+    return reached(report) | set(report["coverage"].get("roomsReached", {}))
 
 
 CORPUS_LABEL = "game-replay-"
@@ -117,7 +124,7 @@ def replay_reaches(binary, tape, keys):
 def cover(binary, harvest, tapes, baseline, out=None, prefixes=(), budget=6000, extend=300, verify=False):
     """Write the chosen prefixes to `out`; returns (written paths, keys left
     uncovered, whether a candidate failed its replay)."""
-    wanted = reached(harvest) - reached(baseline)
+    wanted = reached(harvest) - census_keys(baseline)
     # A key every reaching case met before its first command comes from case
     # generation itself (the seed scout), which no tape carries.
     first_steps = harvest["coverage"]["firstSteps"].values()
