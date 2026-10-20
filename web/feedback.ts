@@ -5,6 +5,7 @@ type Event = { kind: 'blockedMusicBackend'; status: 'fail'; command: MusicBacken
   | { kind: 'unavailableControl'; status: 'fail'; action: number; message: string }
   | { kind: 'platformFailure'; status: 'fail'; operation: 'fullscreen'; error: string }
   | { kind: 'unavailableOption'; status: 'fail'; sequence: number; row: number; message: string }
+  | { kind: 'savedProfileAdmissionRefused'; status: 'fail'; command: Command; error: string; lastBrowserState: { screen: State['screen']; tick: number } }
   | { kind: 'runtimeFailure'; status: 'fail'; command: Command | null; error: string; lastBrowserState: { screen: State['screen']; tick: number } };
 const LIMIT = 256;
 const messages: Record<number, string> = {
@@ -76,6 +77,12 @@ export class Feedback {
     // A late host rejection must not replace the halted game's Reload UI.
     if (this.runtimeFailed) return;
     this.show('platformFailure', 'Fullscreen could not be changed. You can keep using the menu.');
+  }
+
+  savedProfileAdmissionRefused(command: Command, error: string, state: State): void {
+    this.record({kind: 'savedProfileAdmissionRefused', status: 'fail', command: structuredClone(command), error,
+      lastBrowserState: {screen: state.screen, tick: state.tick}});
+    this.show('savedProfileAdmissionRefused', 'The saved profile could not be loaded. You can still use the menus.');
   }
 
   runtimeFailure(command: Command | null, error: unknown, state: State): void {
