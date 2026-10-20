@@ -23,9 +23,10 @@ use crate::coverage;
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::props;
+use rebirth_cleanroom::combat::{DamageEvent, DamageKind, DamageSource};
 use rebirth_cleanroom::stage_transition::{Trapdoor, TrapdoorClip};
 use rebirth_cleanroom::traversal::{self, RoomTransition, TransitionPhase};
-use rebirth_cleanroom::{seed, Command, Game};
+use rebirth_cleanroom::{seed, Command, Game, Screen};
 use serde_json::{json, Value};
 use std::panic::{self, AssertUnwindSafe};
 
@@ -39,19 +40,46 @@ pub(crate) const TRAPDOOR_FRAMES: u32 = 120;
 /// Descents a case may chain, more than a run has stages, so only a
 /// refusing trapdoor ends the chain.
 pub(crate) const DESCENTS: usize = 16;
+/// Further runs each case descends to fight only their floors' bosses.
+const BOSS_RUNS: usize = 10;
+/// Full updates a boss room gets to clear while its enemies keep taking
+/// lethal hits; a boss that splits, burrows or jumps takes longer.
+const CLEAR_FRAMES: u32 = 1_500;
+/// Full updates after a clear, for its award and trapdoor to land.
+const AWARD_FRAMES: u32 = 60;
 
 pub fn run(case: &mut Case) {
     let _census = coverage::rooms_case();
     let e = &mut *case.entropy;
-    let Ok(code) = seed::encode(e.nonzero_u32()) else {
+    let Some((code, floors)) = descend_run(e) else {
         return;
     };
-    let Ok(booted) = Game::new(e.nonzero_u32()) else {
-        return;
-    };
-    let Some(mut game) = seeded_run(booted, &code) else {
-        return;
-    };
+    // The case plays every floor, from one it picks: every reached floor is
+    // played whatever the case count, and a case seed replays its first
+    // floor exactly as when a case played only that one.
+    let first = e.below(floors.len() as u64) as usize;
+    let rest = (0..floors.len()).filter(|&index| index != first);
+    for index in std::iter::once(first).chain(rest) {
+        play_floor(&floors[index], e, &code, Play::Every);
+    }
+    // A tall or wide boss room is a few floors in a hundred, so the case
+    // also descends further runs and fights only their bosses: an ordinary
+    // run clears a boss room of each shape the floors place.
+    for _ in 0..BOSS_RUNS {
+        if let Some((code, floors)) = descend_run(e) {
+            for floor in &floors {
+                play_floor(floor, e, &code, Play::Bosses);
+            }
+        }
+    }
+}
+
+/// A seeded run started through the public menus, past its start hold, and
+/// every floor its trapdoors reach, Basement I first.
+fn descend_run(e: &mut Entropy) -> Option<(String, Vec<Game>)> {
+    let code = seed::encode(e.nonzero_u32()).ok()?;
+    let booted = Game::new(e.nonzero_u32()).ok()?;
+    let mut game = seeded_run(booted, &code)?;
     // Past the run-start hold, in the first floor's starting room.
     for _ in 0..START_FRAMES {
         if game.state.player.controls_enabled {
@@ -62,13 +90,9 @@ pub fn run(case: &mut Case) {
             1,
             || json!({ "code": code, "at": "first floor" }),
         ) {
-            return;
+            return None;
         }
     }
-    // Every floor the run's trapdoors reach, Basement I first. The case
-    // plays them all, from one it picks: every reached floor is played
-    // whatever the case count, and a case seed replays its first floor
-    // exactly as when a case played only that one.
     let mut floors = vec![game];
     while floors.len() <= DESCENTS {
         let Some(floor) = floors.last() else { break };
@@ -78,16 +102,22 @@ pub fn run(case: &mut Case) {
         }
         floors.push(next);
     }
-    let first = e.below(floors.len() as u64) as usize;
-    let rest = (0..floors.len()).filter(|&index| index != first);
-    for index in std::iter::once(first).chain(rest) {
-        play_floor(&floors[index], e, &code);
-    }
+    Some((code, floors))
 }
 
-/// Enters and plays every room `traversal::admits` on the floor `game`
-/// stands on, each from a copy of it.
-fn play_floor(game: &Game, e: &mut Entropy, code: &str) {
+/// Which of a floor's rooms a case enters.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Play {
+    /// Every admitted room, each played by the driver.
+    Every,
+    /// Only the boss rooms, whose fights end at once.
+    Bosses,
+}
+
+/// Enters every room `traversal::admits` on the floor `game` stands on (or
+/// only its boss rooms), each from a copy of it, and plays it; a boss room's
+/// fight then ends.
+fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) {
     let stage = game.state.stage;
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");
@@ -96,7 +126,8 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str) {
     let start = game.state.current_room;
     let descriptors = game.state.floor.descriptors.clone();
     for (index, descriptor) in descriptors.iter().enumerate() {
-        if index == start || !traversal::admits(descriptor) {
+        let boss = descriptor.template.room_type == 5;
+        if index == start || !traversal::admits(descriptor) || (rooms == Play::Bosses && !boss) {
             continue;
         }
         let Some(target_slot) = first_door(&descriptor.neighbors) else {
@@ -140,22 +171,123 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str) {
             boss_scene: None,
         });
         entered.state.player.controls_enabled = false;
-        let frames = e.range(300, 900);
+        let frames = match rooms {
+            Play::Every => e.range(300, 900),
+            Play::Bosses => 0,
+        };
         let label = || {
             json!({
                 "code": code,
                 "stage": stage,
                 "room": index,
                 "template": [template.room_type, template.variant, &template.name],
+                "shape": [template.width, template.height],
             })
         };
         if !play(&mut entered, frames, e, label) {
             continue;
         }
-        props::sometimes!(
-            entered.state.current_room == index,
-            "rooms: the player is still in the entered room after playing it"
-        );
+        if rooms == Play::Every {
+            props::sometimes!(
+                entered.state.current_room == index,
+                "rooms: the player is still in the entered room after playing it"
+            );
+        }
+        if boss {
+            clear_boss_room(&mut entered, index, &template.name, label);
+        }
+    }
+}
+
+/// Ends the fight in boss room `room`, where the driver left the player.
+/// The driver's pause menu closes and its room transition ends first, so
+/// the room updates. Then each full update every enemy alive takes a lethal
+/// hit through its own damage queue, the room-wide way Black Heart's effect
+/// lands (523eaa), so each boss dies by its own rules, its splits and spawns
+/// included, and the room's clear and its award run whatever the room's
+/// shape. A player who dies, leaves or quits first leaves it undecided.
+fn clear_boss_room(game: &mut Game, room: usize, boss: &str, label: impl Fn() -> Value) {
+    if game.state.paused {
+        for down in [true, false] {
+            let escape = Command::Key {
+                code: "Escape".into(),
+                down,
+            };
+            if !apply(game, escape, &label) {
+                return;
+            }
+        }
+    }
+    for _ in 0..ARRIVAL_FRAMES {
+        if !game.state.paused && game.state.room_transition.is_none() {
+            break;
+        }
+        if !tick(game, 1, &label) {
+            return;
+        }
+    }
+    // A driver that quit the run or walked out leaves no fight to finish.
+    let present = |game: &Game| {
+        game.state.screen == Screen::Playing
+            && game.state.current_room == room
+            && !game.state.player.dead
+    };
+    let fighting =
+        |game: &Game| present(game) && !game.state.paused && game.state.room_transition.is_none();
+    if !fighting(game) {
+        return;
+    }
+    for _ in 0..CLEAR_FRAMES {
+        if game.state.room.combat_clear || !fighting(game) {
+            break;
+        }
+        for npc in &mut game.state.room.npcs {
+            if npc.removed || npc.dead || !(10..1000).contains(&npc.kind) {
+                continue;
+            }
+            let health = npc.health();
+            let hit = DamageEvent {
+                amount: health.hp.max(0.0) + 1.0,
+                kind: DamageKind::RoomEffect,
+                source: DamageSource {
+                    id: 0,
+                    entity_type: 0,
+                },
+                copied_source: None,
+            };
+            if npc.damage.enqueue(health, hit).is_err() {
+                return;
+            }
+        }
+        if !tick(game, 1, &label) {
+            return;
+        }
+    }
+    let cleared = game.state.room.combat_clear;
+    props::always!(
+        cleared || !present(game),
+        "rooms: a boss room is cleared once its enemies keep taking lethal hits",
+        json!({
+            "case": label(),
+            "paused": game.state.paused,
+            "screen": game.state.screen,
+            "runTick": game.state.run_tick,
+            "gameOver": game.state.player_death.game_over.is_some(),
+            "transition": game.state.room_transition.as_ref().map(|transition| transition.phase),
+            "live": game
+                .state
+                .room
+                .npcs
+                .iter()
+                .filter(|npc| !npc.removed)
+                .map(|npc| [npc.kind, npc.variant, npc.state])
+                .collect::<Vec<_>>(),
+        }),
+        signature: boss
+    );
+    if cleared {
+        props::sometimes!(true, "rooms: a boss room is cleared");
+        tick(game, AWARD_FRAMES, &label);
     }
 }
 
