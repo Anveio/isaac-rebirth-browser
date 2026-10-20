@@ -357,7 +357,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 85 | 64 | 2 |
-| `rooms` | every room a floor its trapdoors reach admits, entered and played | 2 | 8 | 1 |
+| `rooms` | every room a floor its trapdoors reach admits, entered and played | 3 | 9 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 35 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
@@ -806,6 +806,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | rooms: a large room is played | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Sometimes | rooms: a boss room is played | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Sometimes | rooms: the player is still in the entered room after playing it | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Always | rooms: a boss room is cleared once its enemies keep taking lethal hits | [rooms.rs](engine/dst/src/units/rooms.rs) |
+| Sometimes | rooms: a boss room is cleared | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Sometimes | rooms: a run arrives on the next stage | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Always | rooms: a stage transition a trapdoor starts arrives within 1,500 full updates | [rooms.rs](engine/dst/src/units/rooms.rs) |
 | Unreachable | rooms: entering and playing rooms never panics the engine | [rooms.rs](engine/dst/src/units/rooms.rs) |
