@@ -81,7 +81,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Collision and physics](#collision-and-physics) | Partial | Player, actor, grid and pickup contacts | 3 |
 | [Grid objects](#grid-objects) | Partial | Rocks and tinted rewards, bomb rocks, spikes, poop, TNT Full countdown/nonrare blast, webs, trapdoor, decorations | 2 |
 | [Enemies](#enemies) | Partial | Ordinary NPC families, now including Hopper/Trite and Flaming Hopper source | 3 |
-| [Bosses](#bosses) | Partial | 8 boss/miniboss families, including Envy/Super Envy | 2 |
+| [Bosses](#bosses) | Partial | Basement families and additional Caves boss source; live scopes remain separate | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
 | [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill, held Save and Range Down/Up use | 0 |
@@ -450,14 +450,20 @@ Next: the rest of the Basement/Cellar spawn table.
 Rebirth scope: about 50 bosses and minibosses, champion bosses, VS screen,
 boss health bar, boss rush.
 
-Port (8 families): Monstro 20, Larry Jr. 19, Grub 239, Gluttony 49,
+Existing live suites cover Monstro 20, Larry Jr. 19, Grub 239, Gluttony 49,
 The Duke of Flies 67, Gemini 79, Dingle 261 and Envy/Super Envy 51;
 VS scene from boss portraits. Envy's new live cases remain red, and Super
 Envy's short upper-door admission prefix passes 5,301 fields after the
 [footprint counter fix](player-footprints.md), with 12 gains and no losses;
 full fight, children and clear remain unqualified (#605). The bounded registered admission suite catches the historical parent bug; its unchanged recorded `HH936E8Z` OS case still fails78 initial Envy position/velocity rows on counter4029, with actual room/NPC admission passing. Fresh PR629 artifact f0eb retains those same78 failures and adds115/113 passing draw-order-presence rows without changing earlier fields; no overlapping order coverage is claimed. Missing: other Chapter 1 bosses
-(Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), later bosses
-including Gurdy/Gurdy Jr., remaining champion variants and Super Gluttony.
+(Widow, Pin, Famine, Steven, Fistula, Lust and the other sins), other later bosses,
+remaining champion variants and Super Gluttony.
+
+Additional merged source constructs Mega Fatty 264.0, Gurdy 36.0, Chub 28.0,
+Peep 68.0 with its 68.10 eyes, and Gurdy Jr. 99.0. Their
+[matrix entries](../TEST_MATRIX.md) record source contracts and port-only
+probes, with no live Original AI comparison. These admissions do not qualify
+their fights, boss death drops, shared MT or pixels.
 
 A separately closed Source-only cohort retained all 8,192 OS draws before
 floor evaluation. Independent Shop planning evaluated every draw and selected
@@ -712,7 +718,7 @@ Bugs in a test route or tool rather than in the game.
 
 - #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
 - #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
-- #438 resolves the source-derived admission/death clock mismatch; [scoped clock evidence](player-death.md) retains the fresh OS cohort's required Original audio-observation failure, pixel reds and incomplete audio acceptance.
+- #438 / PR660 moves the declared pre-Title elapsed time into the verification reset and uses plain ticks; the shipped app does not call this ingress. Historical [death clock evidence](player-death.md) keeps its timestamped transport, required Original audio-observation failure and pixel reds. The [matrix](../TEST_MATRIX.md) separately retains the clock merge's worse entity rows and lost checkpoint passes.
 - [PR615](https://github.com/Anveio/isaac-rebirth-browser/pull/615) restores the fresh Title/frame0 and black fade on GameOver Exit; clock and audio qualification remain separate.
 
 - [PR614](https://github.com/Anveio/isaac-rebirth-browser/pull/614) resolves #349 ordinary-bomb ground response after NPC contacts and Room clamping; [scoped qualification](system-map.md#ordinary-bomb-late-grid-response-349) preserves unresolved Hugger timing and existing regression failures.
