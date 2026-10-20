@@ -11,7 +11,7 @@ use crate::{grid::Grid, motion::WorldVector, State};
 /// Game54fa82 has already incremented the actual Game+ce9f4 owner before this
 /// callback; paused gameplay and doorway freezes do not advance that counter.
 pub fn advance_markers(state: &mut State) {
-    if !state.game_update_count.is_multiple_of(3) {
+    if !state.native_game_frame().is_multiple_of(3) {
         return;
     }
     if let Some(costs) = &mut state.room.path_costs {

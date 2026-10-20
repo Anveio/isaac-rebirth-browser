@@ -39,6 +39,7 @@ import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'nod
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
+import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
 import { doorKeys, fightKeys, routingView, saltedRandom, toward, waypoint } from './lib/route.mjs';
@@ -131,9 +132,9 @@ try {
   const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
-  await page.evaluate(({ initialSeed, bootEpochSeed }) => {
-    window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
-  }, caseData);
+  await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
+    window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+  }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
   const start = caseData.pairedTape.findIndex(action => action.label === FROM);
   assert.ok(start >= 0, `The case tape must reach ${FROM}`);
   // A labelled step marker is itself replayed; captures are no-ops here.

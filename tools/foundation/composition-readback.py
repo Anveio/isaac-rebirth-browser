@@ -41,6 +41,29 @@ pins = {str(path): digest(path) for directory in (native_dir, browser_dir) if di
 native, browser = None, None
 
 
+# The Native bootstrap grammar's intro: 180 presentations, then the Title
+# skip (Return down, 12, up, 72). native_readback builds its tape from this
+# prefix; declared_startup derives the Browser reset clock from it.
+NATIVE_INTRO = [{'type': 'step', 'frames': 180}, {'type': 'capture', 'label': 'intro'},
+                {'type': 'key', 'key': 'Return', 'down': True}, {'type': 'step', 'frames': 12},
+                {'type': 'key', 'key': 'Return', 'down': False}, {'type': 'step', 'frames': 72}]
+# verify.mjs NATIVE_LOADER_PRESENTATIONS, TITLE_FIRST_RENDER_AFTER_SKIP and
+# PRESENTATION_NS, restated so this readback derives the clock independently.
+LOADER_PRESENTATIONS, TITLE_RENDER_AFTER_SKIP, PRESENTATION_NS = 30, 9, 16_667_000
+
+
+def declared_boot_elapsed(tape):
+    """The fresh clock's elapsed time at Native's first rendered Title."""
+    release = next(i for i, action in enumerate(tape) if action['type'] == 'key' and not action['down'])
+    assert not any(action['type'] == 'capture' and action['label'].startswith('title') for action in tape[:release])
+    frames = sum(action['frames'] for action in tape[:release] if action['type'] == 'step')
+    after = tape[release + 1:]
+    first_key = next((i for i, action in enumerate(after) if action['type'] == 'key'), len(after))
+    assert sum(action['frames'] for action in after[:first_key] if action['type'] == 'step') >= TITLE_RENDER_AFTER_SKIP
+    nanoseconds = (LOADER_PRESENTATIONS + frames + TITLE_RENDER_AFTER_SKIP) * PRESENTATION_NS
+    return {'milliseconds': nanoseconds // 1_000_000, 'subMillisecondNanoseconds': nanoseconds % 1_000_000}
+
+
 def compact_native_readback(reader, manifest, progress):
     """Validate complete canonical bytes; keep only observation validity here.
 
@@ -168,7 +191,7 @@ def native_readback():
         expect(options.getfloat('Options', name), expected)
     # Independent native bootstrap grammar. Dense admission begins at the
     # actual confirm; no gameplay state during those312 steps is discarded.
-    tape = [{'type': 'step', 'frames': 180}, {'type': 'capture', 'label': 'intro'}]
+    tape = [dict(action) for action in NATIVE_INTRO[:2]]
     def native_press(key, label, settle):
         tape.append({'type': 'key', 'key': key, 'down': True})
         tape.extend([{'type': 'step', 'frames': 1}] * 12 if label == 'gameplay-start'
@@ -281,7 +304,12 @@ def declared_startup():
     expect((record['schema'], record['protocol'], record['phase']),
            (1, 'declared-preboot-audio-fullscreen-v1', 'before-reset'))
     expect(record['resetInput'], reset)
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'})
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'})
+    # The reset clock must equal the elapsed time independently derived from
+    # Native's declared intro (3850 ms + 77,000 ns), not merely be well formed.
+    boot_elapsed = declared_boot_elapsed(NATIVE_INTRO + [{'type': 'capture', 'label': 'title'}])
+    expect(boot_elapsed, {'milliseconds': 3850, 'subMillisecondNanoseconds': 77_000})
+    expect(reset['bootElapsed'], boot_elapsed)
     expect(reset['initialSeed'], 1)
     expect(reset['bootEpochSeed'], case['bootEpochSeed'])
     expected_audio = {'sfxVolume': case['sfxVolume'] if pocket else 0, 'musicVolume': 0}
@@ -307,6 +335,11 @@ def declared_startup():
         expect(browser['startupRecord'], record)
         expect(browser['trace']['bootAudioPreferences'], reset['audioPreferences'])
         expect(browser['trace']['bootFullscreenPreferences'], reset['fullscreenPreferences'])
+        # The Browser's actual reset clock, as its own trace recorded it.
+        expect(browser['trace']['clockInput'], {
+            'initialTimestampMillis': case['bootEpochSeed'] * 1000 + boot_elapsed['milliseconds'],
+            'initialSubMillisecondNanoseconds': boot_elapsed['subMillisecondNanoseconds'],
+            'presentationIntervalNanoseconds': PRESENTATION_NS})
     return record
 
 
@@ -381,7 +414,7 @@ def wasm_node_readback():
         expect(digest(Path(record['path'])), record['sha256'])
     expect(digest(a.wasm_artifact), a.wasm_sha)
     reset = json.loads((browser_dir / 'declared-reset-input.json').read_bytes())
-    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+    expect(set(reset), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'}
            if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
     if startup_record is None:
         assert 'startupProtocol' not in result and 'startupRecord' not in result
@@ -494,7 +527,7 @@ def browser_readback():
         expect(browser['declaredResourceHashes']['specialRooms'], digest(Path(case['fixture']['specialRoomsPath'])))
         if 'specialRoomsSha256' in case['fixture']:
             expect(browser['declaredResourceHashes']['specialRooms'], case['fixture']['specialRoomsSha256'])
-    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences'}
+    expect(set(resources), {'initialSeed', 'bootEpochSeed', 'resources', 'audioPreferences', 'fullscreenPreferences', 'bootElapsed'}
            if startup_record is not None else {'initialSeed', 'bootEpochSeed', 'resources'})
     expect(set(resources['resources']), {'challengesXml', 'specialRooms'} if case['fixture'].get('specialRoomsPath') else {'challengesXml'})
     assert browser['declaredFullResetJsonBytes'] <= 512 * 1024

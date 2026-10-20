@@ -74,16 +74,20 @@ parity, player world position/velocity and relative clocks remain required;
 every mismatch is retained. Complete selected snapshots, commands and backend
 callback states are streamed losslessly with independently recorded hashes.
 
-The producer declares each Browser presentation's public `timestampMillis`
-before launching the original. Its schedule uses only the selected boot epoch,
-the original launcher's declared 30 bootstrap presentations, and the declared
-Native and Browser tape intervals through `before-run-confirmation`. It
-derives the Browser's first Title time from those public lifecycle boundaries;
-it does not copy an observed clock or request anchor. The complete Native tape
-and timestamped Browser command plan are retained in `public-clock-plan.json`.
-The actual original bootstrap, presentation counts and elapsed nanoseconds must
-then validate that declaration, while the Browser trace must preserve every
-timestamped command exactly. Existing gameplay comparisons remain unchanged.
+The producer declares its public clock plan before launching the original.
+The plan uses only the selected boot epoch, the original launcher's declared
+30 bootstrap presentations, and the declared Native and Browser tape intervals
+through `before-run-confirmation`. It derives the Browser's first Title time
+from those public lifecycle boundaries; it does not copy an observed clock or
+request anchor. The shared helper `resetBootElapsed` (`tools/foundation/verify.mjs`)
+derives the same interval from the declared Native tape, and the producer
+asserts the two agree. The Browser reset starts its clock there
+(`bootElapsed`) and then advances by plain ticks; no command carries a wall
+time. The complete Native tape and plan are retained in
+`public-clock-plan.json`. The actual original bootstrap, presentation counts
+and elapsed nanoseconds must then validate that declaration, and the Browser
+trace's `clockInput` must equal the declared boot clock. Existing gameplay
+comparisons remain unchanged.
 
 The first frozen four-case cohort executes all 1,368 dense phases and 12,504
 checks on artifact `fa86a65280ede95da479a4ce98839ae30969fdc9b9bfdb8f42911c25bb0c55c6`.
@@ -147,13 +151,20 @@ independent integer readings produce elapsed 3,001 versus 3,000 milliseconds,
 explaining the first fade mismatch at step 181 and age/controls at step 229.
 Fresh original observations confirm these predictions from the public tapes.
 
-The correction supplies the same independently declared public wall time to
-both games through the existing timestamp command. It changes no runtime
-clock, fade threshold, f32 subtraction, age counter or comparison tolerance.
-The first Title time can vary with public intro-skip input, so neither 231
-presentations nor 77,000 nanoseconds becomes a runtime constant. Historical
-reports retain their original failures; other live producers must establish
-their own complete public clock schedule before claiming age parity.
+#609 first supplied that declared wall time per presentation through the
+timestamp command. #438 keeps #609's derivation and validation but moves the
+correction to one mechanism shared by every producer: each producer declares
+its Native tape, and `resetBootElapsed` derives the Browser's boot clock from
+it (first intro-skip release, plus its frames, plus the 30 bootstrap and nine
+Title-render presentations). The runtime receives it once through
+`set_boot_elapsed`, an ingress the shipped game never calls. Fade thresholds,
+f32 subtraction, age counters and comparison tolerances are unchanged. The
+first Title time varies with public intro-skip input, so neither 231
+presentations nor 77,000 nanoseconds is a runtime constant. With the boot
+clock corrected, native Game+ce9f4 equals the port's `game_update_count`
+(`State::native_game_frame`), so the former `+ 1` counter compensations and
+the critter loader replay are removed. Historical reports retain their
+original failures.
 
 The corrected producer passes all four replayed cases on the same immutable
 `88b3ec75` artifact
@@ -166,13 +177,10 @@ This qualifies the equal-clock admission producer and that artifact. It does
 not regrade the earlier captures, fix a game runtime, qualify another suite's
 clock plan, or establish introductory cutscene or full-frame visual parity.
 
-The paired [normal-death gate](player-death.md) now independently declares and
-validates its own complete public clock plan, using the optional timestamped
-step path. Its retained four-case selected-field gate passes on a separately
-bound combined runtime; its fresh OS cohort retains one required Original
-audio-observation failure. Pixel and complete audio acceptance remain open.
-Other paired drivers retain the default count-only transport until their own
-clock contracts are qualified.
+The paired [normal-death gate](player-death.md) and the other paired drivers
+that opt into `publicClockSchedule` declare and validate their own complete
+public clock plan; their Browser uses the same `resetBootElapsed` boot clock
+with plain one-presentation ticks.
 
 ## Unsupported character requests
 

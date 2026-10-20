@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { waitForReady, nativeReplay } from '../foundation/verify.mjs';
+import { waitForReady, nativeReplay, resetBootElapsed } from '../foundation/verify.mjs';
 import { exactStateDifference } from '../foundation/compare.mjs';
 import { installBrowserAudioObserver } from './audio-api-observer.mjs';
 import { compareQueuedMusicOutput, compareMusicDeviceCheckpoint } from './music-output-evidence.mjs';
@@ -150,11 +150,12 @@ try {
       const origin = observations.get('title-entry').systemCounter;
       page = await browser.newPage(); const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.addInitScript(installBrowserAudioObserver); await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      const apiBegin = await page.evaluate(({ seed, boot, volume }) => { const begin = window.__audioApi.events.length;
-        window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, trace: true,
+      const bootElapsed = resetBootElapsed(tape.native);
+      const apiBegin = await page.evaluate(({ seed, boot, bootElapsed, volume }) => { const begin = window.__audioApi.events.length;
+        window.game.pause(); window.game.reset(seed, { bootEpochSeed: boot, bootElapsed, trace: true,
           audioPreferences: {sfxVolume: 0, musicVolume: volume}, fullscreenPreferences: {fullscreen: false} });
         return begin;
-      }, { seed: native.seedValue, boot: scenario.bootEpochSeed, volume: scenario.volume });
+      }, { seed: native.seedValue, boot: scenario.bootEpochSeed, bootElapsed, volume: scenario.volume });
       check('initial autoplay suspended', (await page.evaluate(() => window.game.audio())).contextState, 'suspended');
       const commands = [], states = [];
       let intendedSeedEntry = false; const intendedPressed = new Set();
@@ -250,7 +251,7 @@ try {
       check('actual Native public audio options', native.audioOptions, {sfxVolume: 0, musicVolume: scenario.volume});
       check('complete actual public DOM command tape', trace.commands, commands);
       assert.ok(trace.backendEvents.length >= 4, 'Actual music completion/intro-loop callbacks must be recorded');
-      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences, trace.bootInputConfigs, trace.bootMapPreferences, trace.bootGammaPreferences);
+      const rust = nativeReplay(native.seedValue, trace.commands, scenario.bootEpochSeed, trace.backendEvents, trace.bootAudioPreferences, trace.bootFullscreenPreferences, trace.bootInputConfigs, trace.bootMapPreferences, trace.bootGammaPreferences, bootElapsed);
       for (let i = 0; i < rust.length; i++) assert.equal(exactStateDifference(rust[i], trace.states[i]), null, `Actual callback replay divergence after public command${i}`);
       check('full public states replay actual backend callbacks', rust.length, trace.states.length);
       const api = await evaluateJson(page, async () => { await Promise.all(window.__audioApi.pending); return { events: structuredClone(window.__audioApi.events), truncated: window.__audioApi.truncated }; });

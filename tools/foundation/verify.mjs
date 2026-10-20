@@ -64,9 +64,44 @@ export async function waitForReady(page) {
   assert.equal(boot.ready, "true", `Browser boot failed: ${boot.error}`);
 }
 
+// foundation-clock-run.py presents this many loader frames before replaying a
+// declared tape (its `step 30` bootstrap).
+export const NATIVE_LOADER_PRESENTATIONS = 30;
+// The browser resets at the original's first rendered Title, this many
+// presentations after the intro-skip key is released (audio's `title-ready`).
+export const TITLE_FIRST_RENDER_AFTER_SKIP = 9;
+// The Title then settles for this many presentations before the first press.
+export const TITLE_SETTLE_TICKS = 63;
+export const PRESENTATION_NS = 16_667_000;
+
+// The original's wall clock has advanced through every native presentation
+// before the browser reset: its loader frames, the declared tape through the
+// intro-skip release, and the Title's first render. Derived from the case's
+// declared tape, never fitted.
+export function resetBootElapsed(nativeTape) {
+  assert.ok(Array.isArray(nativeTape), "Boot clock derivation requires the declared native tape");
+  const release = nativeTape.findIndex(action => action.type === "key" && !action.down);
+  assert.ok(release > 0, "Declared native tape must skip the intro with a key press and release");
+  assert.ok(!nativeTape.slice(0, release).some(action => action.type === "capture" && /^title/.test(action.label)),
+    "Boot clock derivation needs the native tape with its intro, not a browser tape that starts at the Title");
+  const frames = nativeTape.slice(0, release).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
+  const after = nativeTape.slice(release + 1);
+  const firstKey = after.findIndex(action => action.type === "key");
+  const settled = after.slice(0, firstKey < 0 ? after.length : firstKey).reduce((sum, action) => sum + (action.type === "step" ? action.frames : 0), 0);
+  assert.ok(settled >= TITLE_FIRST_RENDER_AFTER_SKIP, "Declared tape must reach the Title before its next key");
+  const nanoseconds = (NATIVE_LOADER_PRESENTATIONS + frames + TITLE_FIRST_RENDER_AFTER_SKIP) * PRESENTATION_NS;
+  return { milliseconds: Math.floor(nanoseconds / 1e6), subMillisecondNanoseconds: nanoseconds % 1e6 };
+}
+
+// A paired case's complete native tape: its own `tape`, or the source-only
+// prelude followed by the shared paired tape.
+export function declaredNativeTape(caseData) {
+  return caseData.tape ?? [...(caseData.bootstrap?.sourceOnlyPrelude ?? []), ...caseData.pairedTape];
+}
+
 // The requested setup is independent of the observed trace and browser screen.
 export function manualSeedCommands(seedText) {
-  const commands = [{ type: "tick", count: 63 }];
+  const commands = [{ type: "tick", count: TITLE_SETTLE_TICKS }];
   const press = (code, settle) => commands.push({ type: "key", code, down: true }, { type: "tick", count: 12 },
     { type: "key", code, down: false }, { type: "tick", count: settle });
   for (let index = 0; index < 3; index++) press("Enter", 72);
@@ -273,7 +308,7 @@ export function compareCapturedFrames(frames, original, output) {
 }
 
 let nativeReplayExecutable;
-export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences, bootGammaPreferences) {
+export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEvents = [], bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences, bootGammaPreferences, bootElapsed = undefined) {
   assert.ok(Number.isInteger(bootEpochSeed) && bootEpochSeed >= 0 && bootEpochSeed <= 0xffffffff, "Boot epoch seed must be an unsigned 32-bit value");
   if (!nativeReplayExecutable) {
     const metadata = spawnSync("cargo", ["metadata", "--locked", "--manifest-path", "engine/Cargo.toml", "--no-deps", "--format-version", "1"], { cwd: ROOT, encoding: "utf8" });
@@ -296,7 +331,7 @@ export function nativeReplay(initialSeed, commands, bootEpochSeed = 0, backendEv
     if (i < commands.length) { timeline.push(commands[i]); publicStateIndices.push(timeline.length); }
   }
   assert.equal(eventIndex, backendEvents.length, 'Audio callback positions must be ordered and inside the public command tape');
-  const replay = spawnSync(nativeReplayExecutable, [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences, bootGammaPreferences }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const replay = spawnSync(nativeReplayExecutable, [], { cwd: ROOT, input: JSON.stringify({ initialSeed, bootEpochSeed, ...(bootElapsed && { bootElapsed }), commands: timeline, bootAudioPreferences, bootFullscreenPreferences, bootInputConfigs, bootMapPreferences, bootGammaPreferences }), encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
   assert.equal(replay.status, 0, replay.stderr);
   const allStates = replay.stdout.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(allStates.length, timeline.length + 1, 'Native replay must emit every public and actual audio callback state');

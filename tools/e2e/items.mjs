@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { compareRoomContext } from './item-room-evidence.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, stepSnapshot, readTrace } from './lib/game.mjs';
@@ -216,9 +216,9 @@ try {
       const errors = [];
       page.on('pageerror', error => errors.push(String(error)));
       await page.goto(server.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({ seedValue, bootEpochSeed }) => {
-        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 1, musicVolume: 1}, fullscreenPreferences: {fullscreen: false} });
-      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+      await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+        window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 1, musicVolume: 1}, fullscreenPreferences: {fullscreen: false} });
+      }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed: resetBootElapsed(native.tape) });
       const start = await enterSeededRun(page, item.code);
       assertSeededRun(start, item.code, item.seedValue);
       const expected = [...manualSeedCommands(item.code)];
