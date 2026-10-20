@@ -634,3 +634,14 @@ change legitimately alters a documented contract, update the unit's model in
 the same change. Fix or record every violation and never weaken a property or
 its workload to pass. Run `npm run matrix:update` after adding or renaming
 properties.
+
+Before a PR that adds properties, make sure none can go unmet by chance:
+- Run the corpus-only census (`rebirth-dst --units game --cases 0 --corpus
+  engine/dst/corpus`). A `game` property met only by generated cases is a
+  flake, because a 12-case `test:dst` run can miss it. Give it a corpus tape
+  that meets it every run, as `coverage-boot-elapsed` does for #761's boot
+  clock.
+- In the other units, which have no corpus, a must-hit that a 12-case run
+  meets only a few times is a flake too. Make the workload reach it on
+  purpose, as the blast workload's draw on the envelope does for
+  `bombs: a player stands on a blast's edge`.
