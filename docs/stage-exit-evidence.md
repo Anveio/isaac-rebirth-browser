@@ -59,6 +59,14 @@ than relabeled as current-runtime evidence.
 
 The original's whole segment is fixed fixture keys. A research controller (projected-shot dodging) found them once, and a fresh original replays them exactly. The port records its segment closed-loop per build, one leg per floor.
 
+Each leg runs the recorder's `--dodge --rewind` (`fightFlags`), which shapes only the port's own keys.
+- **Why the flags.** #754 stopped the port placing a ChangeRoom-tail footprint at route frame 133 (Basement I room 6 → 7). The shared random stream then runs four draws behind the earlier build, and every closed-loop fight after it plays differently.
+  - On main ce792a8d, the unflagged Basement II fight died 2,462 frames in.
+  - #759 pinned that leg to `--dodge`. `--rewind` now takes each leg back over each hit it can avoid.
+- **`--anchor-door`.** The last fight leaves the re-anchor doorway a route onto the trapdoor.
+  - Under `--rewind`, the port's Larry Jr. fight left poops in cells 110 and 113, beside the bottom doorway's cell 112, whose other neighbours (96–98) are award cells. The shared exit then walked into the pedestal.
+  - The fight now shoots out the first port poop on the cheapest trapdoor-to-doorway route, as it already does for the corner-to-doorway route.
+
 Both games end the segment hurt: the original at 4/6, the port at 2/6 in the recorded run. The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
 
 | Case | Paired checkpoints | Required tail checks |
@@ -92,7 +100,9 @@ import does not change that boundary.
 
 **The original's segment** is fixed fixture keys, 47,263 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly and leaves Caves I at 3/6 red with 1 coin.
 
-**The port's segment** is recorded closed-loop per build, one leg per floor. Its Caves I leg runs the recorder's `--dodge --salt 4 --rewind` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+**The port's segment** is recorded closed-loop per build, one leg per floor. Every leg runs the recorder's `--dodge --rewind` (`fightFlags`), and Caves I's leg has a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+
+**No seed pins.** #754 changed the port's random stream at route frame 133, so every closed-loop fight after it plays differently (Caves I descent, above). #759 kept stage-exit green with a Basement II `--dodge` pin, but no Caves I seed pin it searched reached Mega Fatty: boss salts 1–7 and 12 and route salts 1–6 each died or stalled in a route room. With `--rewind` on every leg, no leg depends on one lucky path.
 
 **Generation inputs.** Caves II's generation reads the departing player's health and coins:
 - full red health admits the Challenge and Sacrifice rooms;

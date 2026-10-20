@@ -306,12 +306,15 @@ def main():
                 'LD_LIBRARY_PATH': str(source / 'lib64') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else ''),
                 'ISAAC_CLOCK_GATE_FPS': str(args.fps), 'ISAAC_CLOCK_GATE_STEP_NS': str(args.step_ns),
                 'ISAAC_CLOCK_GATE_EPOCH_SEED': str(args.boot_epoch_seed)})
+    # Each observer owns its own directory; the graphics one is reported after
+    # the run, so it keeps its own name rather than a `trace` the audio and MT
+    # observers rebind.
+    graphics_trace = out / 'gl-trace'
     if args.gl_trace:
-        trace = out / 'gl-trace'
-        trace.mkdir(exist_ok=True)
+        graphics_trace.mkdir(exist_ok=True)
         env['LD_PRELOAD'] = str(gate) + ' ' + str(args.gl_trace.resolve()) + (' ' + os.environ['LD_PRELOAD'] if os.environ.get('LD_PRELOAD') else '')
-        env['ISAAC_GL_TRACE_DIR'] = str(trace)
-        env['ISAAC_GL_TRACE_CONTROL'] = str(trace / 'request')
+        env['ISAAC_GL_TRACE_DIR'] = str(graphics_trace)
+        env['ISAAC_GL_TRACE_CONTROL'] = str(graphics_trace / 'request')
         # The graphics observer records submitted draws, so every released
         # frame must still draw them (see foundation-clock-gate.c).
         env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
@@ -528,7 +531,7 @@ def main():
                 raise RuntimeError('Original did not read back the requested seed; deterministic time/input may be incomplete')
             report['seedReadbackMatchesCodec'] = True
             if args.gl_trace:
-                report['graphicsTrace'] = {'path': str(trace / 'commands.jsonl'), 'continuous': args.trace_every_frame, 'scope': 'public graphics submitted data; hidden state unknown'}
+                report['graphicsTrace'] = {'path': str(graphics_trace / 'commands.jsonl'), 'continuous': args.trace_every_frame, 'scope': 'public graphics submitted data; hidden state unknown'}
             report['performance'] = debug.process_performance(proc.pid, started)
             measured = [p for p in acknowledgements if 'advanceHostWallMs' in p]
             report['performance']['controlledAdvances'] = {'presentedFrames': sum(p['requestedPresentationFrames'] for p in measured),
