@@ -54,5 +54,19 @@
     "reaches": [
       "npc:19"
     ]
+  },
+  {
+    "name": "regression-caves-wall-creep-top-wall",
+    "code": "XS7ZVZ9H",
+    "stage": 4,
+    "room": 10,
+    "template": [
+      1,
+      521
+    ],
+    "seed": 5631231141561346337,
+    "reaches": [
+      "npc:240"
+    ]
   }
 ]
