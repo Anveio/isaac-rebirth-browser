@@ -1,6 +1,7 @@
 import baseSceneData from "./scene-data.json";
 import minimapData from "./generated/minimap-data.json";
 import informationData from "./information-data.json";
+import notificationInformationData from "./generated/unlock-notifications/information-data.json";
 import doorData from "./door-data.json";
 import gridData from "./grid-data.json";
 import npcData from "./npc-data.json";
@@ -12,7 +13,7 @@ import bloodTearData from "./blood-tear-data.json";
 import costume229Data from "./costume229-data.json";
 import bossSplashData from "./boss-splash-data.json";
 import pocketData from "./pocket-data.json";
-const sceneData = { ...minimapData, ...informationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
+const sceneData = { ...minimapData, ...informationData, ...notificationInformationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...pocketData };
 import fontData from "./font-data.json";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
@@ -29,7 +30,7 @@ interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimati
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
 /** Sprite color (tint RGBA, offset RGB in 0..1), combined with each keyframe as Color::operator*= 42f590 does. */
 export interface SpriteColor { tint: readonly number[]; offsets: readonly number[]; }
-export interface DrawOptions { color?: SpriteColor; scale?: number; layers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
+export interface DrawOptions { color?: SpriteColor; scale?: number; layers?: number[]; hiddenLayers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 // Authored sheets are relative to the anm2's root path and may climb out of
@@ -52,6 +53,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/minimap2.png",
   "../references/isaac/rebirth/resources/gfx/ui/bgblack.png",
   "../references/isaac/rebirth/resources/gfx/ui/giantbook/**/*.png",
+  "../references/isaac/rebirth/resources/gfx/ui/achievement/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/stage/**/*.png",
   "../references/isaac/rebirth/resources/gfx/ui/pausescreen.png",
   "../references/isaac/rebirth/resources/gfx/ui/menu_mystuff.png",
@@ -221,6 +223,12 @@ export class Assets {
     if (!actor) throw new Error(`Missing authored animation: ${path}`);
     return actor.Animations.map(animation => animation.Name);
   }
+  layerSpritesheet(path: string, layerId: number): number {
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    const layer = actor?.Layers.find(candidate => candidate.Id === layerId);
+    if (!layer) throw new Error(`Missing authored layer ${path}:${layerId}`);
+    return layer.SpritesheetId;
+  }
   /** The spritesheet image an authored layer samples. */
   layerImage(path: string, layerId: number): HTMLImageElement {
     const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
@@ -252,7 +260,7 @@ export class Assets {
     const animation = actor.Animations.find(animation => animation.Name === name); if (!animation) throw new Error(`Missing animation ${path}:${name}`);
     const root = sampleFrame(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible || root.AlphaTint <= 0) return;
     for (const layer of animation.LayerAnimations) {
-      if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId)) continue;
+      if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId) || options.hiddenLayers?.includes(layer.LayerId)) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]);
       // The root keyframe colour combines into every layer (tints multiply,

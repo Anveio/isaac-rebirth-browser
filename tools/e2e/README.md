@@ -1,5 +1,22 @@
 # Live e2e suites
 
+`controls --living-restart` runs the normal seeded living-Isaac R60/release/R61
+route through the existing Controls/paired producer. Three fixed phase/pause
+controls and one first unfiltered OS seed/boot draw require actual read-only
+Native hold/queue/Persistent owners, physical input and next-dispatch behavior.
+`--scenarios BANK` replays without entropy; `--case` selects after validating and
+retaining the whole bank. The supported source scope is normal Isaac, normal
+difficulty, Challenge0.
+
+On frozen `05fe0fc5` (merged PR768's reviewed tree), fresh Native and actual Browser
+pass fixed phase-0 plus recorded OS `0YY1FRN4`: 288/288 checkpoints and
+19,988/19,988 scalar rows, all byte-exact against the preceding v8 values/statuses
+with zero lost passes. Full-frame diagnostics retain 20 pass/268 fail. Browser
+runtime passes 6/6, including separate seeded/unseeded DOM own-storage checks.
+Earlier full-four-case, Save/migration results and actual capacity failures keep
+their own scopes. Broader R contexts, the unseeded Native draw, natural R reload
+and complete MT/PCM/RGBA remain open. [Evidence and retained failures](../../docs/living-restart.md#qualified-captures).
+
 Each suite runs the fresh original game and the immutable production build with
 the same public inputs (keys, text, ticks, seeds) and compares what each game
 observably does. Native observations never enter WASM.

@@ -35,9 +35,10 @@
     "affected:map": "node tools/e2e/affected.mjs --update-map",
     "case:keep": "node tools/e2e/keep-case.mjs",
     "assets:minimap": "python3 tools/foundation/prepare-minimap.py",
-    "predev": "npm run assets:minimap",
-    "pretypecheck": "npm run assets:minimap",
-    "prebuild": "npm run assets:minimap"
+    "predev": "npm run assets:minimap && npm run assets:unlock-notifications",
+    "pretypecheck": "npm run assets:minimap && npm run assets:unlock-notifications",
+    "prebuild": "npm run assets:minimap",
+    "assets:unlock-notifications": "python3 tools/foundation/prepare-unlock-notifications.py"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

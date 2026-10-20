@@ -89,7 +89,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
 | [Audio](#audio) | Partial | SFX and floor music | 0 |
-| [Saves and metagame](#saves-and-metagame) | Partial | Origin-local initial-room Save/Continue and own reload; Native restoration gaps remain | 1 |
+| [Saves and metagame](#saves-and-metagame) | Partial | Origin-local initial-room Save/Continue, own reload and living normal-Isaac R; broader restoration remains open | 1 |
 | [Co-op](#co-op) | Missing | None | 0 |
 | [Test routes and tooling](#test-routes-and-tooling) | n/a | Live e2e, DST, playtest | 3 |
 
@@ -175,11 +175,15 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, Native process reload, Browser OS-process
-restart and remaining remapped action callbacks, including drop and restart. The configurable Map action has the
-separate bounded scope above. Strict pixels and history caps remain red;
+restart and remaining remapped action callbacks, including drop and broader R
+contexts. Configurable Map and living normal-Isaac R have separate bounded
+scopes; [living R](living-restart.md) is implemented for normal difficulty and
+Challenge0, with seeded paired evidence and separate seeded/unseeded Browser
+own-storage checks. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: Native own-saved Keyboard process reload; drop (Ctrl) and restart (R); gamepad.
+Next: Native own-saved Keyboard process reload; drop (Ctrl), broader R contexts
+and natural R reload; gamepad.
 
 No open bugs.
 
@@ -644,6 +648,10 @@ packet parity or later-main gameplay. See [Save scope and replay](save-continue.
 
 Port: in-run SavedGame records, origin-local initial-room Save/Continue,
 natural reload and owned Tiny Bug/Fly/Wall Bug saved records through fresh Init.
+Living normal-Isaac R now has ordered profile/Clear/initial-save acknowledgements
+and version2 collected-history ownership ([scope](living-restart.md)). Its fresh
+seeded pair and Browser storage checks do not qualify complete Save restoration
+or nonzero legacy migration; earlier strict Save failures remain separate.
 The successor137b also restores the physical/fast boundary and Stop Room's
 Backdrop seed constructor. The unchanged fixed/OS Original inputs retain all1714
 inherited rows:1644 pass/70 fail,52 gains and zero lost passes versus0af. All14

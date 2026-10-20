@@ -1,5 +1,132 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page, type TestInfo } from "@playwright/test";
 import { waitForReady } from "../foundation/verify.mjs";
+
+// Exercise the production host's real own-storage continuation. No profile
+// document or dirty flag is installed by the driver; fresh contexts own both
+// cases. The older V1 same-origin upgrade remains separate historical evidence.
+async function checkLivingRestart(page: Page, info: TestInfo, seedCode: string | null) {
+  const inputs: unknown[] = [], checkpoints: unknown[] = [];
+  const state = () => page.evaluate(() => (window as any).game.snapshot());
+  const own = () => page.evaluate(() => {
+    const io = (window as any).game.saveGames();
+    return { io, store: localStorage.getItem(io.key) };
+  });
+  const step = async (count: number) => {
+    inputs.push({ type: "tick", count });
+    return page.evaluate(count => {
+      (window as any).game.step(count); return (window as any).game.snapshot();
+    }, count);
+  };
+  const key = async (code: string, down: boolean) => {
+    inputs.push({ type: "DOM-key", code, down });
+    await page.keyboard[down ? "down" : "up"](code);
+  };
+  const press = async (code: string, settle = 72) => {
+    await key(code, true); await step(12); await key(code, false); await step(settle);
+  };
+  const checkpoint = async (label: string) => {
+    const captured = { label, state: await state(), own: await own() };
+    checkpoints.push(captured); return captured;
+  };
+  const clockNs = (s: any) => BigInt(s.runAdmission.clock.milliseconds) * 1_000_000n
+    + BigInt(s.runAdmission.clock.subMillisecondNanoseconds);
+  try {
+    await page.goto("/?manual=1"); await waitForReady(page);
+    await page.evaluate(() => (window as any).game.pause()); await page.locator("#game").focus();
+    expect((await own()).io.events).toContainEqual({ operation: "load", status: "absent" });
+    await step(63);
+    for (const screen of ["profile", "main", "character"]) {
+      await press("Enter"); expect((await state()).screen).toBe(screen);
+    }
+    if (seedCode !== null) {
+      await press("Tab", 108); expect((await state()).screen).toBe("seed");
+      // The canonical public seed glyph tape, with real keyup ownership.
+      for (const text of seedCode) {
+        await key(text.toLowerCase(), true); await step(12);
+        await key(text.toLowerCase(), false); await step(6);
+      }
+      expect((await state()).seedText).toBe(seedCode); await press("Enter");
+      expect((await state()).screen).toBe("character");
+    }
+    await press("Enter", 300);
+    const before = await checkpoint("before-R"), s = before.state, seeded = seedCode !== null;
+    expect(s.screen).toBe("playing"); expect(s.character).toBe("Isaac"); expect(s.difficulty).toBe("normal");
+    expect(s.challengeId).toBe(0); expect(s.seededRun).toBe(seeded); expect(s.achievementEligibility).toBe(!seeded);
+    expect(s.persistentRuntime).toEqual({ dirty: false, inhibit: seeded });
+    expect(s.livingRestart.context.sourceR9).toBe(seeded); expect(s.livingRestart.context.seedCode).toBe(s.runSeed);
+    expect(s.livingRestart.heldPolls).toBe(0); expect(s.livingRestart.pending).toBeNull();
+    expect(s.systemClock.interpolationEnabled).toBe(true); expect(s.nightmares.systemActive).toBe(false);
+    expect(s.unlockNotifications.state).toBe(0); expect(s.player.dead).toBe(false);
+    expect(before.own.io.declared).toBe(true); expect(before.own.io.storageAvailable).toBe(true);
+    expect(before.own.io.truncated).toBe(false); expect(before.own.store).not.toBeNull();
+    expect(before.own.io.events.some((event: any) => event.operation === "save" && event.status === "pass" && event.text === before.own.store)).toBe(true);
+    const retained = JSON.parse(before.own.store!), slot = s.profile - 1, revision = s.saveRevision;
+    expect(retained.version).toBe(2); expect(retained.profiles[slot].saved).not.toBeNull();
+    expect(s.profiles[slot].counters[21]).toBe(0);
+    if (seeded) expect(s.runSeed).toBe(seedCode);
+    await key("KeyR", true); const pressed = await state();
+    expect(pressed.pressed).toContain("KeyR"); expect(pressed.livingRestart.heldPolls).toBe(0); expect(pressed.tick).toBe(s.tick);
+    for (let poll = 1; poll <= 60; poll++) {
+      const actual = await step(1);
+      expect(actual.tick).toBe(s.tick + poll); expect(actual.systemClock.systemCounter).toBe(s.systemClock.systemCounter + poll);
+      expect(actual.livingRestart.heldPolls).toBe(poll); expect(actual.livingRestart.pending).toBeNull();
+      expect(actual.runSeed).toBe(s.runSeed); expect(actual.saveRevision).toBe(revision);
+      expect(actual.persistentRuntime.dirty).toBe(false); expect(actual.publicActions.held[16]).toBe(true);
+      expect(actual.player.dead).toBe(false); expect(actual.nightmares.systemActive).toBe(false); expect(actual.unlockNotifications.state).toBe(0);
+    }
+    const held60 = await checkpoint("held-60"); expect(held60.own).toEqual(before.own);
+    expect(held60.state.gameUpdateCount).toBeGreaterThan(s.gameUpdateCount);
+    const polled = await step(1), held61 = await checkpoint("held-61-queued");
+    expect(polled.tick).toBe(held60.state.tick + 1); expect(polled.systemClock.systemCounter).toBe(held60.state.systemClock.systemCounter + 1);
+    expect(polled.gameUpdateCount).toBe(held60.state.gameUpdateCount + (held60.state.systemClock.systemCounter % 2 === 0 ? 1 : 0));
+    expect(polled.livingRestart.heldPolls).toBe(0); expect(polled.livingRestart.pending).not.toBeNull();
+    expect(polled.runSeed).toBe(s.runSeed); expect(polled.saveRevision).toBe(revision); expect(polled.runQuit.saveEnabled).toBe(false);
+    expect(polled.persistentRuntime).toEqual({ dirty: !seeded, inhibit: seeded });
+    expect(polled.profiles[slot].counters).toEqual(s.profiles[slot].counters); expect(held61.own).toEqual(before.own);
+    const requested = polled.livingRestart.pending.seedCode;
+    if (seeded) expect(requested).toBe(s.runSeed);
+    await key("KeyR", false); const released = await state();
+    expect(released.tick).toBe(polled.tick); expect(released.systemClock).toEqual(polled.systemClock);
+    const restarted = await step(1), after = await checkpoint("next-public-interval");
+    expect(restarted.tick).toBe(polled.tick + 1);
+    expect(clockNs(restarted) - clockNs(polled)).toBe(BigInt(polled.runAdmission.clock.nanosecondsPerStep));
+    expect(restarted.systemClock.systemCounter).toBe(polled.systemClock.systemCounter + polled.systemClock.systemCounter % 2 + 1);
+    expect(restarted.runSeed).toBe(requested); expect(restarted.livingRestart.pending).toBeNull(); expect(restarted.livingRestart.heldPolls).toBe(0);
+    expect(restarted.runQuit.saveEnabled).toBe(true); expect(restarted.persistentRuntime).toEqual({ dirty: false, inhibit: seeded });
+    expect(restarted.seededRun).toBe(seeded); expect(restarted.achievementEligibility).toBe(!seeded);
+    expect(restarted.saveWritePending).toBe(false); expect(restarted.saveReadmissionPending).toBe(false); expect(restarted.player.dead).toBe(false);
+    expect(after.own.io.truncated).toBe(false); expect(after.own.io.events.slice(0, before.own.io.events.length)).toEqual(before.own.io.events);
+    const writes = after.own.io.events.slice(before.own.io.events.length), count = seeded ? 2 : 3;
+    expect(writes).toHaveLength(count); expect(restarted.saveRevision).toBe(revision + count);
+    for (let i = 0; i < writes.length; i++) {
+      expect(writes[i].operation).toBe("save"); expect(writes[i].status).toBe("pass"); expect(writes[i].revision).toBe(revision + i + 1);
+    }
+    const packets = writes.map((event: any) => JSON.parse(event.text));
+    for (const packet of packets) expect(packet.version).toBe(2);
+    if (!seeded) expect(packets[0].profiles[slot].saved).toEqual(retained.profiles[slot].saved);
+    expect(packets[count - 2].profiles[slot].saved).toBeNull();
+    const initial = packets[count - 1].profiles[slot].saved; expect(initial).not.toBeNull();
+    // Save owns its literal legacy/current wire spelling. R owns the selected
+    // code and numeric seed, and must carry those through the actual initial Save.
+    expect(initial.run.runSeed.replaceAll(" ", "")).toBe(requested); expect(initial.context.runSeedValue).toBe(restarted.runSeedValue);
+    expect(initial.run.seededRun).toBe(seeded); expect(initial.run.stage).toBe(1);
+    expect(initial.run.gameUpdateCount).toBe(0); expect(initial.run.currentRoom).toBe(initial.run.floor.startingDescriptor);
+    expect(initial.run.acquisitionHistory.firstRecords).toEqual({}); expect(after.own.store).toBe(writes.at(-1).text);
+    expect((await page.evaluate(() => (window as any).game.feedback())).runtimeFailed).toBe(false);
+  } finally {
+    try { await checkpoint("final-actual"); }
+    catch (error) { checkpoints.push({ label: "final-readback-failure", error: String(error) }); }
+    await info.attach("public-R61-inputs-and-readback", { body: JSON.stringify({ inputs, checkpoints }), contentType: "application/json" });
+  }
+}
+
+test("living Restart queues at poll61 and drains three real writes in the next public interval", async ({ page }, info) => {
+  test.setTimeout(60_000); await checkLivingRestart(page, info, null);
+});
+
+test("living Restart preserves the public seed and drains two inhibited writes in the next public interval", async ({ page }, info) => {
+  test.setTimeout(60_000); await checkLivingRestart(page, info, "T1PK6Y0W");
+});
 
 test("focus lifecycle clears held controls and resumes without undoing explicit diagnostic pause", async ({ page }) => {
   await page.goto("/"); await waitForReady(page);

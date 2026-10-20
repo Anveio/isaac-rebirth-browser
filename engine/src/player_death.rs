@@ -71,9 +71,9 @@ pub fn after_damage(state: &mut State, flags: u32) -> Result<(), String> {
 /// and returns before ordinary controls, cooldown and shot/active callbacks.
 /// RoomFast5cd920 also invokes virtual18 for Player, with flags318 bit4000:
 /// Base447190 skips main ANM advancement, but the dead branch still executes.
-pub fn advance(state: &mut State, phase: Phase) -> bool {
+pub fn advance(state: &mut State, phase: Phase) -> Result<bool, String> {
     if !state.player.dead {
-        return false;
+        return Ok(false);
     }
     if phase != Phase::Skipped {
         // Player531864 calls Base447190 before the dead branch5318a5.
@@ -96,9 +96,11 @@ pub fn advance(state: &mut State, phase: Phase) -> bool {
         {
             state.player.visible = false;
             if state.player_death.game_over.is_none() {
-                // Source52e8ee is immediate Play93, followed by queue8.
+                //52E8EE's Music calls precede Manager5BF8F0; its primary
+                //Player arm5BFA15 updates counter9 before Popup558900/Clear.
                 state.music.play(93);
                 state.music.queue(8);
+                crate::persistent_effects::add_counter(state, 9, 1)?;
                 state.player_death.game_over = Some(GameOver {
                     state: 2,
                     damage_flags: state.player_death.last_damage_flags,
@@ -108,7 +110,7 @@ pub fn advance(state: &mut State, phase: Phase) -> bool {
             }
         }
     }
-    true
+    Ok(true)
 }
 
 /// Game54f760 invokes popup557650 on actual released System input, then

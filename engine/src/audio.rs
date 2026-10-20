@@ -58,6 +58,17 @@ pub struct VolumeCallback {
     pub loaded_slot_volumes: BTreeMap<u32, f32>,
 }
 
+///5E1D00 queries actual backend playing/looping for every loaded sample.
+///This ordered request carries loaded slots; backend voice life remains there.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StopLoopingCallback {
+    pub sequence: u64,
+    pub before_sound_sequence: u64,
+    pub before_volume_sequence: u64,
+    pub loaded_slots: Vec<u32>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(
     rename_all = "camelCase",
@@ -73,6 +84,8 @@ pub struct AudioState {
     pub pending: Vec<SoundRequest>,
     pub next_volume_sequence: u64,
     pub volume_callbacks: Vec<VolumeCallback>,
+    pub next_stop_sequence: u64,
+    pub stop_looping_callbacks: Vec<StopLoopingCallback>,
 }
 
 #[derive(Deserialize)]
@@ -87,6 +100,10 @@ struct SavedAudioState {
     next_volume_sequence: u64,
     #[serde(default)]
     volume_callbacks: Vec<VolumeCallback>,
+    #[serde(default)]
+    next_stop_sequence: u64,
+    #[serde(default)]
+    stop_looping_callbacks: Vec<StopLoopingCallback>,
 }
 
 impl TryFrom<SavedAudioState> for AudioState {
@@ -156,6 +173,31 @@ impl TryFrom<SavedAudioState> for AudioState {
             previous_callback = Some(callback.sequence);
             previous_boundary = callback.before_sound_sequence;
         }
+        let mut previous_stop = None;
+        let mut previous_stop_boundary = 0;
+        let mut previous_volume_boundary = 0;
+        for callback in &saved.stop_looping_callbacks {
+            if callback.sequence >= saved.next_stop_sequence
+                || previous_stop.is_some_and(|sequence| callback.sequence <= sequence)
+                || callback.before_sound_sequence < previous_stop_boundary
+                || callback.before_sound_sequence > saved.next_sequence
+                || callback.before_volume_sequence < previous_volume_boundary
+                || callback.before_volume_sequence > saved.next_volume_sequence
+                || callback
+                    .loaded_slots
+                    .windows(2)
+                    .any(|pair| pair[0] >= pair[1])
+                || callback
+                    .loaded_slots
+                    .iter()
+                    .any(|id| !saved.slots.contains_key(id))
+            {
+                return Err("audio continuation has invalid Stop-looping callbacks".into());
+            }
+            previous_stop = Some(callback.sequence);
+            previous_stop_boundary = callback.before_sound_sequence;
+            previous_volume_boundary = callback.before_volume_sequence;
+        }
         Ok(Self {
             sfx_volume: saved.sfx_volume,
             slots: saved.slots,
@@ -164,6 +206,8 @@ impl TryFrom<SavedAudioState> for AudioState {
             pending: saved.pending,
             next_volume_sequence: saved.next_volume_sequence,
             volume_callbacks: saved.volume_callbacks,
+            next_stop_sequence: saved.next_stop_sequence,
+            stop_looping_callbacks: saved.stop_looping_callbacks,
         })
     }
 }
@@ -202,6 +246,8 @@ impl Default for AudioState {
             pending: Vec::new(),
             next_volume_sequence: 0,
             volume_callbacks: Vec::new(),
+            next_stop_sequence: 0,
+            stop_looping_callbacks: Vec::new(),
         }
     }
 }
@@ -276,9 +322,29 @@ impl AudioState {
         Ok(())
     }
 
+    pub fn stop_looping(&mut self) -> Result<(), String> {
+        let sequence = self.next_stop_sequence;
+        self.next_stop_sequence = sequence
+            .checked_add(1)
+            .ok_or("SFX Stop callback sequence exhausted")?;
+        self.stop_looping_callbacks.push(StopLoopingCallback {
+            sequence,
+            before_sound_sequence: self.next_sequence,
+            before_volume_sequence: self.next_volume_sequence,
+            loaded_slots: self
+                .slots
+                .iter()
+                .filter(|(_, slot)| slot.loaded)
+                .map(|(id, _)| *id)
+                .collect(),
+        });
+        Ok(())
+    }
+
     pub fn begin_command(&mut self) {
         self.events.clear();
         self.volume_callbacks.clear();
+        self.stop_looping_callbacks.clear();
     }
 
     pub fn flush_pending(&mut self, shared: &mut Mt19937, system_counter: u32) {

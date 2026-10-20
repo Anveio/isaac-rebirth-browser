@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {scopedState} from './paired-game.mjs';
+import {readOwnProfilePacket} from './save-continue-guards.mjs';
 const hash=raw=>createHash('sha256').update(raw).digest('hex');
 export function saveOwnerState(source,actual,gameplay,candidate) {
   const checks=[];
@@ -101,7 +102,7 @@ export function saveOwnerState(source,actual,gameplay,candidate) {
     for(const file of native.files){assert.equal(file.status,'pass');assert.equal(file.headerMatchesSource,true);add('Native.actual-file-checksum:'+file.kind,native.profileRunChecksum,file.checksumOwner);}
     add('Native.actual-Saved-checksum',native.profileRunChecksum,native.savedRunChecksum);
     const store=candidate.ownSave.store;assert.ok(store);const raw=readFileSync(store.path);assert.equal(hash(raw),store.sha256);
-    const packet=JSON.parse(raw);assert.equal(packet.version,1);assert.equal(packet.profiles.length,3);const saved=packet.profiles[0].saved;assert.ok(saved);
+    const packet=readOwnProfilePacket(raw);const saved=packet.profiles[0].saved;assert.ok(saved);
     const run=saved.run,items=run.playerItems;
     const entry=saved.context.levelEntry,sourceEntry=native.saved.entryPosition;
     assert.ok(entry&&entry.position&&sourceEntry,'Actual saved entry owners must be present');
