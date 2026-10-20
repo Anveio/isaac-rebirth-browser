@@ -992,6 +992,18 @@ pub fn state(state: &State) {
     // Grid classes 1 and 2 clamp only x or only y and test no cells
     // (442e40 / 442ef0, `entities::clamp_walls`): a Wall Creep on a top or
     // bottom wall keeps its x inside the room, not its y.
+    // Class 5 and 6 clamp the centre to the room (442c2d) and only then
+    // refine away from the solid samples (443117) by at most max(speed, 2)
+    // px, with no clamp after. A crowd can push a body into a pit faster than
+    // that, and once its clamped centre lies in a cell its class treats as
+    // solid, the refinement leaves the centre past the room's edge: the
+    // source contract stops there. The cell is read 1 px inside the clamped
+    // centre, so a centre clamped onto the edge reads the interior cell
+    // beside it, never the wall. The exemption reaches only one refinement
+    // past the clamp, max(speed, 2) with speed the reflected speed. The
+    // pass leaves v = reflected * (1 + (inward / speed) * 0.5), whose normal
+    // part is -0.8 * (n . v) - 0.1, so |inward| / speed < 1.25 and the factor
+    // exceeds 0.375: speed < |v| / 0.375, read from the published velocity.
     if state.room_transition.is_none() {
         let grid = state
             .room
@@ -1009,13 +1021,18 @@ pub fn state(state: &State) {
                     npc.id,
                     npc.position,
                     npc.grid_collision_class,
+                    npc.velocity,
                 )
             });
             let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
             let pickups =
-                pickups.map(|pickup| ("pickup", pickup.variant, pickup.id, pickup.position, 5));
+                pickups.map(|pickup| {
+                ("pickup", pickup.variant, pickup.id, pickup.position, 5, pickup.velocity)
+            });
             let bombs = state.bombs.iter();
-            let bombs = bombs.map(|bomb| ("bomb", 4, bomb.id, bomb.motion.position, 5));
+            let bombs = bombs.map(|bomb| {
+                ("bomb", 4, bomb.id, bomb.motion.position, 5, bomb.motion.velocity)
+            });
             let doorway = |position: WorldVector| {
                 grid.index(position)
                     .and_then(|index| grid.descriptor().cells[index].entity.as_ref())
@@ -1029,12 +1046,27 @@ pub fn state(state: &State) {
                     _ => clamped != position,
                 }
             };
+            let in_solid = |position: WorldVector, class: u32, velocity: WorldVector| {
+                let cell = grid.collision_at(grid.clamp_room(position, 1.0));
+                let solid = match class {
+                    5 => cell > 0,
+                    6 => cell > 1,
+                    _ => false,
+                };
+                let clamped = grid.clamp_room(position, 0.0);
+                let (dx, dy) = (position.x - clamped.x, position.y - clamped.y);
+                let speed = (velocity.x * velocity.x + velocity.y * velocity.y).sqrt();
+                solid && (dx * dx + dy * dy).sqrt() <= (speed / 0.375).max(2.0)
+            };
             let escaped = npcs
                 .chain(pickups)
                 .chain(bombs)
-                .find(|(_, _, _, position, class)| {
-                    outside(*position, *class) && !doorway(*position)
-                });
+                .find(|(_, _, _, position, class, velocity)| {
+                    outside(*position, *class)
+                        && !doorway(*position)
+                        && !in_solid(*position, *class, *velocity)
+                })
+                .map(|(body, family, id, position, class, _)| (body, family, id, position, class));
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
