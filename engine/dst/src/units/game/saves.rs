@@ -170,6 +170,9 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         );
     } else {
         let migrated = again.as_deref().ok();
+        let owners = migrated
+            .ok_or_else(|| "migration did not export a document".to_owned())
+            .and_then(|bytes| migrated_v1_owners(document.as_bytes(), bytes));
         let stable = migrated.is_some_and(|bytes| {
             tape.boot().is_ok_and(|mut third| {
                 third.enable_save_io(1).is_ok()
@@ -179,12 +182,17 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         });
         props::always!(
             enabled.is_ok()
+                && imported.is_ok()
+                && owners.is_ok()
                 && migrated.and_then(own_version) == Some(u64::from(save_profiles::VERSION))
                 && stable,
             "game: a document in an older own format loads as the current format, which then reloads unchanged",
-            json!({ "enabled": enabled, "from": own_version(document.as_bytes()), "to": migrated.and_then(own_version), "stable": stable })
+            json!({ "enabled": enabled, "from": own_version(document.as_bytes()), "to": migrated.and_then(own_version), "stable": stable, "owners": owners })
         );
-        props::sometimes!(true, "game: a session loads a document in an older own format");
+        props::sometimes!(
+            true,
+            "game: a session loads a document in an older own format"
+        );
     }
     let saved_run = next.saved_profiles.as_ref().is_some_and(|profiles| {
         profiles
@@ -206,6 +214,36 @@ fn own_version(bytes: &[u8]) -> Option<u64> {
         .as_u64()
 }
 
+/// Compare every original V1 owner, projecting only the declared V2 metadata.
+fn migrated_v1_owners(original: &[u8], exported: &[u8]) -> Result<(), String> {
+    let original: serde_json::Value =
+        serde_json::from_slice(original).map_err(|error| error.to_string())?;
+    let mut actual: serde_json::Value =
+        serde_json::from_slice(exported).map_err(|error| error.to_string())?;
+    if original["version"] != 1 || actual["version"] != 2 {
+        return Err("own V1 must migrate to the declared V2 format".into());
+    }
+    let profiles = actual["profiles"]
+        .as_array_mut()
+        .ok_or("migrated profiles are not an array")?;
+    for record in profiles {
+        let profile = record["profile"]
+            .as_object_mut()
+            .ok_or("migrated profile is not an object")?;
+        let expected = json!({ "origin": "ownVersion1Unknown", "values": vec![None::<bool>; 347] });
+        if profile.remove("collectedHistory") != Some(expected) {
+            return Err("own V1 migration must retain exactly 347 unknown history entries".into());
+        }
+    }
+    actual["version"] = json!(1);
+    if let Some((path, _, _)) = crate::json_diff::first(&original, &actual) {
+        return Err(format!(
+            "own V1 migration changed an original owner at {path}"
+        ));
+    }
+    Ok(())
+}
+
 /// Answers the save IO a command left pending; a panic is an error.
 pub fn serve(
     store: &mut Option<SaveStore>,
@@ -225,6 +263,7 @@ pub fn serve(
 pub fn check(
     before: &Game,
     command: &Command,
+    result: &Result<(), String>,
     served: &Result<Vec<Response>, String>,
     after: &Game,
     imported: Option<&Profiles>,
@@ -234,6 +273,35 @@ pub fn check(
         "game: the save host answers every save write and menu readmission a command leaves",
         json!({ "command": command, "error": served.as_ref().err() })
     );
+    if before.rejected_profile_document() {
+        props::always!(
+            after.rejected_profile_document()
+                && after.export_save_data().is_err()
+                && served.as_ref().is_ok_and(Vec::is_empty)
+                && before.state.save_revision == after.state.save_revision
+                && before.saved_profiles == after.saved_profiles
+                && !after.state.save_write_pending
+                && !after.state.save_readmission_pending,
+            "game: rejected profile documents stay quarantined without host writes",
+            json!({ "command": command, "result": result, "served": format!("{served:?}") })
+        );
+        let confirms = matches!(command, Command::Key { code, down: true }
+            if code == "Enter" && !before.state.pressed.contains(code)
+                && (matches!(before.state.screen, Screen::Character | Screen::Challenge)
+                    || (before.state.screen == Screen::Main && before.state.main_selection == 1)));
+        if confirms {
+            props::always!(
+                result.is_err()
+                    && after == before
+                    && !after.state.run_start_request.input_pending
+                    && !after.state.run_start_request.resume_saved
+                    && !after.state.run_start_request.fading
+                    && !after.state.run_start_request.system_pending,
+                "game: quarantined profile confirmation is rejected before a run request",
+                json!({ "command": command, "result": result })
+            );
+        }
+    }
     for response in served.as_deref().unwrap_or_default() {
         match *response {
             Response::Write { stored, .. } => {
@@ -354,6 +422,15 @@ pub fn stale_acknowledgement(game: &Game, e: &mut Entropy) {
 pub fn round_trip(tape: &Tape, game: &Game) {
     let state = &game.state;
     if state.save_write_pending || state.save_readmission_pending {
+        return;
+    }
+    if game.rejected_profile_document() {
+        props::always!(
+            game.export_save_data().is_err()
+                && !state.save_write_pending
+                && !state.save_readmission_pending,
+            "game: quarantined profile documents cannot export a fresh replacement"
+        );
         return;
     }
     let Ok(document) = game.export_save_data() else {

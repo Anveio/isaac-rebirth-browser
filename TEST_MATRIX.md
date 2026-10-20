@@ -286,6 +286,7 @@ Actual browser cases below are discovered from the executable browser scenario s
 | releasing a held bomb key in seed entry preserves text-only typing and the first gameplay press | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | the public Keyboard Map binding controls the expanded map after Back | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | Gamma arrows reach the final display owner and Back survives a real document reload | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
+| a rejected stored profile refuses admission while menus remain usable and unrelated errors stay fatal | [runtime.spec.ts](tools/tests/runtime.spec.ts) |
 | Save capacity under writes the complete packet and Continues its own store | [save-capacity.spec.ts](tools/tests/save-capacity.spec.ts) |
 | Save capacity over fails ACK once and Continues the unchanged older store | [save-capacity.spec.ts](tools/tests/save-capacity.spec.ts) |
 | Pause Quit saves live regular pickups in the current room | [save-capacity.spec.ts](tools/tests/save-capacity.spec.ts) |
@@ -356,7 +357,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 85 | 64 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 89 | 64 | 2 |
 | `rooms` | every room a floor its trapdoors reach admits, entered and played | 3 | 9 | 1 |
 | `abi` | the exported C ABI transport the browser bridge drives | 35 | 3 | 0 |
 
@@ -774,6 +775,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: controls lost outside a named hold come back within 600 full updates | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a boot elapsed declaration is refused once a Tick ran | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: quarantine preserves the host's original document and write revision | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a batched Tick simulates exactly what single Ticks do | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
@@ -787,6 +789,8 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a session loads a document in an older own format | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a session boots with a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: the save host answers every save write and menu readmission a command leaves | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: rejected profile documents stay quarantined without host writes | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: quarantined profile confirmation is rejected before a run request | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write is stored | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write's storage fails | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a menu readmission loads the stored document | [saves.rs](engine/dst/src/units/game/saves.rs) |
@@ -795,6 +799,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: Continue resumes a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: a stale or unrequested save acknowledgement is refused without change | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a stale acknowledgement arrives while save IO is pending | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: quarantined profile documents cannot export a fresh replacement | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: a save document exports and imports back unchanged | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: the seed scout starts a seeded run | [scout.rs](engine/dst/src/units/game/scout.rs) |
 | Sometimes | game: a scouted seed offers a weapon collectible | [scout.rs](engine/dst/src/units/game/scout.rs) |

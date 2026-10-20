@@ -569,10 +569,18 @@ impl Simulation {
         saves::check(
             &before,
             &command,
+            &result,
             &served,
             &self.game,
             self.imported.as_deref(),
         );
+        if before.rejected_profile_document() {
+            props::always!(
+                self.store == before_store,
+                "game: quarantine preserves the host's original document and write revision",
+                json!({ "command": command })
+            );
+        }
         if host.is_some() && e.chance(1, 40) {
             saves::round_trip(&self.tape, &self.game);
         }

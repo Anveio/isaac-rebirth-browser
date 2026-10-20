@@ -304,3 +304,103 @@ test("Gamma arrows reach the final display owner and Back survives a real docume
   expect(loaded.preferences.events.some((event: any) => event.operation === 'load' &&
     event.status === 'pass' && event.key === 'isaac-rebirth.options.v4' && event.value.gamma === '1.5000')).toBe(true);
 });
+
+
+test("a rejected stored profile refuses admission while menus remain usable and unrelated errors stay fatal", async ({ page }, info) => {
+  test.setTimeout(60_000);
+  const inputs: unknown[] = [], checkpoints: unknown[] = [];
+  const state = () => page.evaluate(() => (window as any).game.snapshot());
+  const checkpoint = async (label: string) => {
+    const actual = await page.evaluate(() => {
+      const game = (window as any).game, io = game.saveGames();
+      return { state: game.snapshot(), io, stored: localStorage.getItem(io.key), feedback: game.feedback() };
+    });
+    checkpoints.push({ label, ...actual }); return actual;
+  };
+  const key = async (code: string, down: boolean) => {
+    inputs.push({ type: "DOM-key", code, down });
+    await page.keyboard[down ? "down" : "up"](code);
+  };
+  const step = async (count: number) => {
+    inputs.push({ type: "tick", count });
+    return page.evaluate(count => (window as any).game.step(count), count);
+  };
+  const press = async (code: string) => {
+    await key(code, true); await step(12); await key(code, false); await step(72);
+  };
+  try {
+    inputs.push({ type: "page", url: "/?manual=1" });
+    await page.goto("/?manual=1"); await waitForReady(page);
+    const fresh = await checkpoint("fresh-own-origin");
+    expect(fresh.io.events).toContainEqual({ operation: "load", status: "absent" });
+    expect(fresh.stored).toBeNull();
+    // An intentional fault in this browser's own transport, never a Native
+    // document, fabricated Game state or replacement engine snapshot.
+    inputs.push({ type: "own-storage-fault", key: fresh.io.key, text: "null" });
+    await page.evaluate(() => {
+      const key = (window as any).game.saveGames().key;
+      localStorage.setItem(key, "null");
+    });
+    inputs.push({ type: "real-document-reload" });
+    await page.reload(); await waitForReady(page);
+    await page.evaluate(() => (window as any).game.pause());
+    await page.locator("#game").focus();
+    const loaded = await checkpoint("actual-rejected-own-load");
+    expect(loaded.stored).toBe("null");
+    expect(loaded.io.declared).toBe(true); expect(loaded.io.truncated).toBe(false);
+    expect(loaded.io.events.some((event: any) => event.operation === "load" && event.status === "fail")).toBe(true);
+    expect(loaded.feedback.runtimeFailed).toBe(false);
+    await step(63);
+    for (const screen of ["profile", "main", "character"]) {
+      await press("Enter"); expect((await state()).screen).toBe(screen);
+    }
+    const before = await checkpoint("before-refused-confirmation");
+    // Resume BEFORE the refusal. No explicit step/resume afterward may hide
+    // an accidental automaticPaused halt in the actual browser dispatcher.
+    inputs.push({ type: "automatic-ticks", operation: "resume-before-refusal" });
+    await page.evaluate(() => (window as any).game.resume());
+    await key("Enter", true); await key("Enter", false);
+    const refused = await checkpoint("actual-refused-confirmation");
+    expect(refused.state.screen).toBe("character");
+    expect(refused.state.runStartRequest.inputPending).toBe(false);
+    expect(refused.state.runStartRequest.resumeSaved).toBe(false);
+    expect(refused.state.runStartRequest.fading).toBe(false);
+    expect(refused.state.runStartRequest.systemPending).toBe(false);
+    expect(refused.state.saveWritePending).toBe(false); expect(refused.state.saveReadmissionPending).toBe(false);
+    expect(refused.state.saveRevision).toBe(before.state.saveRevision);
+    expect(refused.state.profiles).toEqual(before.state.profiles);
+    expect(refused.io).toEqual(loaded.io); expect(refused.stored).toBe("null");
+    expect(refused.feedback.runtimeFailed).toBe(false); expect(refused.feedback.truncated).toBe(false);
+    const failures = refused.feedback.events.filter((event: any) => event.kind === "savedProfileAdmissionRefused");
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({ status: "fail", command: { type: "key", code: "Enter", down: true },
+      error: "unknown rejected own-profile document must be recovered or explicitly reset", lastBrowserState: { screen: "character" } });
+    await expect(page.locator("#game-feedback")).toContainText("The saved profile could not be loaded.");
+    await expect.poll(async () => (await state()).tick).toBeGreaterThan(refused.state.tick);
+    await key("Escape", true); await key("Escape", false);
+    await expect.poll(async () => (await state()).screen).toBe("main");
+    const navigated = await checkpoint("back-and-automatic-ticks-still-usable");
+    expect(navigated.feedback.runtimeFailed).toBe(false); expect(navigated.io).toEqual(loaded.io);
+    expect(navigated.stored).toBe("null");
+    await expect.poll(async () => (await state()).tick).toBeGreaterThan(navigated.state.tick);
+    // The actual quarantine flag alone must not reclassify unrelated errors.
+    const invalid = { type: "audioVolume", sfx_volume: 2 };
+    inputs.push({ type: "public-command-fatal-control", command: invalid });
+    const fatal = await page.evaluate(command => {
+      let error: string | null = null;
+      try { (window as any).game.command(command); } catch (failure) { error = String(failure); }
+      return { error, feedback: (window as any).game.feedback() };
+    }, invalid);
+    expect(fatal.error).not.toBeNull(); expect(fatal.feedback.runtimeFailed).toBe(true);
+    expect(fatal.feedback.events.at(-1)).toMatchObject({ kind: "runtimeFailure", status: "fail", command: invalid });
+    await expect(page.getByRole("button", { name: "Reload", exact: true })).toBeVisible();
+    expect((await checkpoint("unrelated-error-retains-fatal-path")).stored).toBe("null");
+  } finally {
+    try { await checkpoint("final-actual"); }
+    catch (error) { checkpoints.push({ label: "final-readback-failure", error: String(error) }); }
+    await info.attach("own-profile-quarantine-inputs-and-readback", {
+      body: JSON.stringify({ scope: "Own browser transport fault and runtime error classification; no Original-game parity claim", inputs, checkpoints }),
+      contentType: "application/json",
+    });
+  }
+});
