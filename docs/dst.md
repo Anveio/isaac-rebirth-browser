@@ -583,7 +583,11 @@ and the room's play, and not on the rest of the workload. Its failures carry
 reports whether it drifted (`coverage.pins`; the drifted ones in
 `driftedPins` and on the summary line): no floor of its run reached its
 stage, its room is another template or was not entered, or the room missed
-one of its `reaches` keys. Drift is a measurement, as a corpus tape's lost
+one of its `reaches` keys. A pin that fails a property is judged by its
+failures: a failure can end its descent or its room before the stage or a
+key is reached (a halt at the very spawn that records the key), so what a
+failing pin did not reach is undecided rather than drift; its room and
+template are still checked. Drift is a measurement, as a corpus tape's lost
 keys are: a drifted pin still runs, but it may no longer meet what it
 guards, so the health check refreshes it. A pin keeps only keys of what the
 game does (an NPC kind, a pickup, a champion color), never a port gap's
@@ -593,16 +597,18 @@ marker, so no pin requires a gap to stay open.
 
 ```sh
 python3 tools/dst/pin.py --binary B search --name NAME --code C --stage S \
-  --room R --template T.V --reaches KEY --fails TEXT --write
+  --room R --template T.V --reaches KEY --signature TEXT --write
 python3 tools/dst/pin.py --binary B check            # --only NAME for one
 python3 tools/dst/pin.py --binary B refresh --only NAME
 ```
 
 A finding's `dst.at` names its run code, stage, room and template. `search`
-plays `--tries` seeds of that room (32 by default) in one run. With
-`--fails`, on an engine that still has the finding, it keeps the first seed
-whose case fails with TEXT in a signature or its details; without it, the
-first that fails nothing and reaches every key. It replays the kept seed
+plays `--tries` seeds of that room (32 by default) in one run. On an engine
+that still has the finding, `--signature` keeps the first seed whose case
+fails a property with exactly that signature (`npc 24`, not `npc 240`), and
+`--fails` the first with TEXT anywhere in a failure's signature or details,
+for an unsigned property. Without either it keeps the first seed that fails
+nothing and reaches every key. It replays the kept seed
 alone before printing or writing it. `check` replays each pin alone and
 fails if one fails a property or drifted. `refresh` searches a new passing
 seed for a drifted pin's room; a room its run's generation moved needs a

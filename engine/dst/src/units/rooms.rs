@@ -108,13 +108,18 @@ pub fn run(case: &mut Case) {
 }
 
 /// Plays the pinned room; why the pin drifted, if it no longer stands where
-/// it was pinned.
+/// it was pinned. A pin that fails a property is judged by its failures: a
+/// failure can end its descent or its room before it reaches its stage or a
+/// key (a halt at the very spawn a key records), so what a failing pin did
+/// not reach is undecided, not drift. Its room and template are still facts.
 fn run_pin(pin: &Pin, e: &mut Entropy) -> Option<String> {
+    let violations = props::violations();
+    let decided = |drift: String| (props::violations() == violations).then_some(drift);
     let Some(floors) = descend_floors(&pin.code, e, |floor| floor.state.stage >= pin.stage) else {
-        return Some("the run did not start".into());
+        return decided("the run did not start".into());
     };
     let Some(floor) = floors.iter().find(|floor| floor.state.stage == pin.stage) else {
-        return Some(format!("no descent reached stage {}", pin.stage));
+        return decided(format!("no descent reached stage {}", pin.stage));
     };
     let Some(descriptor) = floor.state.floor.descriptors.get(pin.room) else {
         return Some(format!("stage {} has no room {}", pin.stage, pin.room));
@@ -135,7 +140,10 @@ fn run_pin(pin: &Pin, e: &mut Entropy) -> Option<String> {
         .filter(|key| !coverage::reached(key))
         .map(String::as_str)
         .collect();
-    (!missed.is_empty()).then(|| format!("the room did not reach {}", missed.join(", ")))
+    if missed.is_empty() {
+        return None;
+    }
+    decided(format!("the room did not reach {}", missed.join(", ")))
 }
 
 /// A seeded run and the floors it descends to.
