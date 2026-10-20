@@ -275,14 +275,15 @@ bootstrap, interval, acknowledgements and capture times must validate that
 prior declaration. They never choose Browser timestamps. Native evidence
 loading and clock validation stay deferred until Browser capture has closed.
 
-The shared paired gate keeps this schedule off by default; only this driver
-opts in. Clocked steps send the predeclared count-one timestamps through
-`game.step(1, timestampMillis)` without drawing. The complete actual command
-trace must equal the declaration. Omitting the optional timestamp retains the
-previous count-only bulk command. Splitting a group into count-one commands
-changes command/event batching; the qualification does not claim a
-transport change limited to timestamps. Field comparisons, required source
-observations, mandatory death coverage and existing pixel laws are unchanged.
+The shared paired gate keeps this schedule off by default; this driver opts in.
+Since #438 the Browser clock is not carried by step timestamps: its reset
+starts at the boot epoch plus `resetBootElapsed` of the declared Native tape,
+the trace's `clockInput` must equal that declaration, and each declared
+presentation is one plain `game.step(1)`. The complete actual tick trace must
+equal the plan. Field comparisons, required source observations, mandatory
+death coverage and existing pixel laws are unchanged. The qualification below
+used #616's earlier per-presentation timestamps; it remains historical
+evidence for that capture.
 
 Production
 `70314c6fae40e3001df91b48b6af56f7ea6fcf2e1aa4f3aef6e53cb11ed34a9c`

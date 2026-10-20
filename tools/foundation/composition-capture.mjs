@@ -7,6 +7,8 @@ import {fileURLToPath} from 'node:url';
 import {writeJsonEvidence} from './browser-evidence.mjs';
 import {BrowserProgress} from './composition-progress.mjs';
 import { evaluateJson } from '../e2e/lib/game.mjs';
+import {resetBootElapsed} from './verify.mjs';
+import {DECLARED_NATIVE_INTRO} from './composition-wasm-public.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
@@ -81,7 +83,8 @@ export async function captureComposition(browser, server, declaration, directory
   const initialSeed = 1; // Independently declared reset placeholder, never native admitted seed.
   const audioPreferences = {sfxVolume: declaration.pocketInit || declaration.pocketCollection || declaration.commonSku?.schema === 'source-public-common-sku-v1' ? declaration.sfxVolume : 0, musicVolume: 0};
   assert.ok([audioPreferences.sfxVolume, audioPreferences.musicVolume].every(value => Number.isFinite(value) && value>=0 && value<=1));
-  const resetInput = {initialSeed,bootEpochSeed:declaration.bootEpochSeed,resources,audioPreferences,fullscreenPreferences:{fullscreen:false}};
+  const resetInput = {initialSeed,bootEpochSeed:declaration.bootEpochSeed,resources,audioPreferences,fullscreenPreferences:{fullscreen:false},
+    bootElapsed:resetBootElapsed(DECLARED_NATIVE_INTRO)};
   const resourceBytes = Buffer.byteLength(JSON.stringify(resources));
   const resetBytes = Buffer.byteLength(JSON.stringify(resetInput));
   assert.ok(resourceBytes <= 512 * 1024 && resetBytes <= 512 * 1024 && xml.length <= 64 * 1024);
@@ -144,8 +147,8 @@ export async function captureComposition(browser, server, declaration, directory
     await page.goto(server.url+'/?manual=1');
     await page.waitForFunction(()=>['true','failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(()=>document.body.dataset.ready),'true');
-    await page.evaluate(({initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences})=>{
-      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,audioPreferences,fullscreenPreferences,trace:true});
+    await page.evaluate(({initialSeed,bootEpochSeed,resources,audioPreferences,fullscreenPreferences,bootElapsed})=>{
+      window.game.pause();window.game.reset(initialSeed,{bootEpochSeed,resources,audioPreferences,fullscreenPreferences,bootElapsed,trace:true});
     },resetInput);
     // Native intro is separately declared. The shared public path begins at
     // the existing first-Title boundary, not at an invented common boot tick.

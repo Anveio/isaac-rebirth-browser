@@ -166,7 +166,7 @@ pub(crate) fn restore_saved_records(
             effect.position = position;
             effect.presented_position = position;
         } else {
-            update(state, id, state.game_update_count)?;
+            update(state, id, state.native_game_frame())?;
         }
     }
     Ok(())
@@ -571,7 +571,7 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
                 critter.loader_update_pending = false;
             }
             // Game54fa82 already incremented this owner before the actor pass.
-            update(state, id, state.game_update_count)
+            update(state, id, state.native_game_frame())
         }
     }
 }

@@ -9,7 +9,7 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
-import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, enterSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { compareCamera, captureCameraVisibility } from './camera-checks.mjs';
 import { compareChests } from './chest-checks.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
@@ -122,9 +122,9 @@ try {
       page = await browser.newPage({ viewport: { width: 960, height: 540 } });
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(({seed, bootEpochSeed, sfxVolume}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed,
+      await page.evaluate(({seed, bootEpochSeed, bootElapsed, sfxVolume}) => { window.game.pause(); window.game.reset(seed, { trace: true, bootEpochSeed, bootElapsed,
         audioPreferences: {sfxVolume, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); },
-        {seed: scenario.runSeed, bootEpochSeed, sfxVolume: declaredSfxVolume === undefined ? 0 : sfxVolume});
+        {seed: scenario.runSeed, bootEpochSeed, bootElapsed: resetBootElapsed(scenario.tape), sfxVolume: declaredSfxVolume === undefined ? 0 : sfxVolume});
       const seeded = await enterSeededRun(page, scenario.code);
       await writeFile(join(directory, 'browser-input.json'), JSON.stringify({ schema: 1, seeded,
         trace: await readTrace(page), expectedCommands }, null, 2) + '\n');

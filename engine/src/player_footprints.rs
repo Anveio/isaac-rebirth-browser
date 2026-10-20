@@ -17,7 +17,7 @@ pub(crate) fn advance(state: &mut State, velocity: WorldVector) -> Result<(), St
     // Ordinary Full dispatch already increments it before Player callbacks;
     // ChangeRoom's admitted Room.Update uses the unchanged counter.
     // A clear Player+d68 byte is required; no supported player sets it.
-    let counter = state.game_update_count;
+    let counter = state.native_game_frame();
     if !counter.is_multiple_of(6) {
         return Ok(());
     }

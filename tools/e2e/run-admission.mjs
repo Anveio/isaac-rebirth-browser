@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../foundation/verify.mjs';
 import { writeBrowserEvidence } from '../foundation/browser-evidence.mjs';
 import { flag, selectCases } from './lib/cli.mjs';
 import { snapshot, readTrace } from './lib/game.mjs';
@@ -55,7 +55,7 @@ const report = {schema: 1, status: 'running', scope: 'Live real original and pro
     'Native introductory cutscene and absolute pre-Title system counter are omitted; raw source/browser counters and relative clocks remain observable.',
     'Unmapped room/NPC/background-effect constructors, rendering and complete gameplay parity remain separate.'],
   production: production.build, clockInput: bank.clockInput, caseFilter: bank.caseFilter,
-  publicClockSchedule: 'Each browser presentation receives the millisecond timestamp independently declared by the boot epoch, native bootstrap and public tapes. Native clock observations are validation only.', cases: []};
+  publicClockSchedule: 'The browser reset clock starts at the boot epoch plus resetBootElapsed of the declared native tape, which must equal this plan; browser presentations advance by plain ticks. Native clock observations are validation only.', cases: []};
 try {
   browser = await chromium.launch(browserLaunchOptions());
   report.graphics = await inspectBrowserGraphics(browser);
@@ -101,16 +101,17 @@ try {
       const browserBeforeRunPresentations = prefix.reduce((sum, command) => sum + (command.type === 'tick' ? command.count : 0), 0);
       const browserEntryNativePresentation = nativeBeforeRunPresentation - browserBeforeRunPresentations;
       assert.ok(Number.isSafeInteger(browserEntryNativePresentation) && browserEntryNativePresentation >= 0);
+      // The shared reset clock (verify.mjs resetBootElapsed of this native
+      // tape) must name the same public interval this plan derives; the
+      // browser then advances by plain ticks, never per-tick timestamps.
+      const bootElapsed = resetBootElapsed(c.tape);
+      assert.equal(bootElapsed.milliseconds * 1e6 + bootElapsed.subMillisecondNanoseconds,
+        browserEntryNativePresentation * bank.clockInput.presentationIntervalNanoseconds,
+        'The reset boot clock must equal the declared public clock plan');
       let declaredPresentation = browserEntryNativePresentation;
       const clockCommands = command => {
-        if (command.type !== 'tick') return [command];
-        return Array.from({length: command.count}, () => {
-          declaredPresentation++;
-          const timestampMillis = c.bootEpochSeed * 1000
-            + Math.floor(declaredPresentation * bank.clockInput.presentationIntervalNanoseconds / 1e6);
-          assert.ok(Number.isSafeInteger(timestampMillis) && timestampMillis >= 0);
-          return {type: 'tick', count: 1, timestampMillis};
-        });
+        if (command.type === 'tick') declaredPresentation += command.count;
+        return [command];
       };
       const prefixCommands = prefix.flatMap(clockCommands);
       assert.equal(declaredPresentation, nativeBeforeRunPresentation);
@@ -163,7 +164,7 @@ try {
       page = await browser.newPage({viewport: {width: 960, height: 540}});
       const errors = []; page.on('pageerror', error => errors.push(String(error)));
       await page.goto(production.url + '/?manual=1'); await waitForReady(page);
-      await page.evaluate(c => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false}}); }, c);
+      await page.evaluate(({c, bootElapsed}) => { window.game.pause(); window.game.reset(c.runSeed, {trace: true, bootEpochSeed: c.bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false}}); }, {c, bootElapsed});
       const deliver = async command => {
         if (command.type === 'tick') await page.evaluate(command => { window.game.command(command); }, command);
         else if (command.type === 'key') await page.keyboard[command.down ? 'down' : 'up'](command.code);
@@ -200,6 +201,7 @@ try {
           const sourceNow = c.bootEpochSeed * 1000 + Math.floor(original.context.virtualElapsedNs / 1e6);
           check(label, 'own-relative-request-clock-ms', actual.clock.milliseconds - actual.requestedTimeAnchorMs,
             sourceNow - source.requestedTimeAnchorMs);
+          check(label, 'request-anchor-ms', actual.requestedTimeAnchorMs, source.requestedTimeAnchorMs);
         }
         if (source.systemState === 2 && state.screen === 'playing') {
           check(label, 'initial-fade-f32', Math.fround(actual.initialFade), Math.fround(source.initialFade));
@@ -218,8 +220,8 @@ try {
         backendEvents: trace.backendEvents.length};
       result.browserEvidence = await writeBrowserEvidence(join(directory, 'browser-states.json.gz'), {states, trace, expectedCommands});
       assertInputProvenance(trace, expectedCommands, c.runSeed, c.bootEpochSeed);
-      assert.deepEqual(trace.clockInput, {initialTimestampMillis: c.bootEpochSeed * 1000,
-        initialSubMillisecondNanoseconds: 0, presentationIntervalNanoseconds: 16_667_000});
+      assert.deepEqual(trace.clockInput, {initialTimestampMillis: c.bootEpochSeed * 1000 + bootElapsed.milliseconds,
+        initialSubMillisecondNanoseconds: bootElapsed.subMillisecondNanoseconds, presentationIntervalNanoseconds: 16_667_000});
       assert.equal(trace.backendStateTruncated, false);
       assert.ok(trace.backendEvents.every(event => event.state?.schema === 1));
       assert.deepEqual(errors, []);
