@@ -1230,7 +1230,9 @@ impl Game {
                     persistent_effects::PlatformBackend::Unavailable,
                 ),
                 platform_achievement_attempts: Vec::new(),
-                persistent_catalog: CatalogCache(Some(std::sync::Arc::new(challenge_catalog.clone()))),
+                persistent_catalog: CatalogCache(Some(std::sync::Arc::new(
+                    challenge_catalog.clone(),
+                ))),
                 persistent_callback_pre_counter: None,
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
