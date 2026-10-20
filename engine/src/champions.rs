@@ -107,7 +107,14 @@ pub(crate) fn apply(npc: &mut Npc, color: u32, shared: &mut Mt19937) -> Result<(
         8 => npc.grid_collision_class = 3,
         9 => champion.timer = Some(shared.bounded(30) + 60),
         10 => champion.timer = Some(shared.bounded(20) + 40),
-        11 => return Err("champion color 11 requires its actual light effect owner".into()),
+        11 => {
+            // 47f9f0: MT.next seeds a Pulling Effect 1000.57 parented to the
+            // champion. PORT GAP: the effect is not constructed. Its Init
+            // (4594ac) and Update (45beb8: follow the parent, removed without
+            // one) draw nothing, so only its seed is drawn; later actors'
+            // sequence ids stay one below the source's.
+            shared.next_u32();
+        }
         _ => {}
     }
     npc.hp = npc.max_hp;
