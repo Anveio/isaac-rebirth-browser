@@ -259,7 +259,7 @@ try {
   const freshReplayCheck = async () => {
     const fresh = await headlessPage(server), game = window.game;
     const diverged = what => new Error(`--rewind: a fresh replay of the kept keys ${what}; the headless page's restore is suspect`);
-    game.reset(caseData.initialSeed, { bootEpochSeed: caseData.bootEpochSeed, trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+    game.reset(caseData.initialSeed, { bootEpochSeed: caseData.bootEpochSeed, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)), trace: true, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
     for (const action of caseData.pairedTape.slice(0, start + 1)) {
       if (action.type === 'step') game.step(action.frames);
       else if (action.type === 'key') await fresh.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
