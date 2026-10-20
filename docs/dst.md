@@ -375,7 +375,10 @@ walls, finite motion, health and consumable bounds, identities, the actor
 schedule, room bookkeeping and the rest. 200 rooms cases evaluated them
 44.6 million times, about 223,000 per case. A report lists every property a
 unit it ran evaluated, so a game invariant a rooms-only run fails is never
-hidden by the unit selection. A case reproduces from its seed:
+hidden by the unit selection. While a room plays, every property the case
+records names the room under `dst.at` (run code, stage, room index,
+template and shape), the game invariants' too, and a stage arrival names
+its run and the stage it left. A case reproduces from its seed:
 `rebirth-dst --units rooms --case-seed SEED`.
 
 ### Tapes and the corpus

@@ -216,6 +216,11 @@ pub struct Context {
     pub case_seed: Option<u64>,
     pub step: u64,
     pub tape: Option<String>,
+    /// Where in the case its unit stands, when the unit names it (a `rooms`
+    /// case's run, floor and room), so a property the unit does not own,
+    /// such as a game invariant, names it too.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub at: Option<Value>,
 }
 
 thread_local! {
@@ -237,6 +242,22 @@ pub fn set_step(step: u64) {
 
 pub fn set_tape(path: Option<String>) {
     CONTEXT.with(|current| current.borrow_mut().tape = path);
+}
+
+/// Names where in the case its unit stands, until the guard drops.
+pub struct At;
+
+impl At {
+    pub fn new(at: Value) -> Self {
+        CONTEXT.with(|current| current.borrow_mut().at = Some(at));
+        At
+    }
+}
+
+impl Drop for At {
+    fn drop(&mut self) {
+        CONTEXT.with(|current| current.borrow_mut().at = None);
+    }
 }
 
 pub fn context() -> Context {

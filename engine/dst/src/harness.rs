@@ -228,6 +228,7 @@ fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
         case_seed: seed,
         step: 0,
         tape: replay.map(|(name, _)| name.clone()),
+        at: None,
     });
     let label = match (replay, seed) {
         (Some((name, _)), _) => format!("{}-replay-{name}", unit.name),
