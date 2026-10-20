@@ -163,12 +163,17 @@ impl OptionsMenu {
         Ok(action)
     }
 
+    /// A fresh Options UI keeps the host transport: its sequences and what
+    /// the command has published so far, which a batched Tick that returns to
+    /// the menus publishes with its later iterations'.
     pub fn reinitialize(&mut self) {
-        let sequence = self.next_save_sequence;
-        let unavailable_sequence = self.next_unavailable_sequence;
-        *self = Self::default();
-        self.next_save_sequence = sequence;
-        self.next_unavailable_sequence = unavailable_sequence;
+        *self = Self {
+            next_save_sequence: self.next_save_sequence,
+            save_requests: std::mem::take(&mut self.save_requests),
+            next_unavailable_sequence: self.next_unavailable_sequence,
+            unavailable_requests: std::mem::take(&mut self.unavailable_requests),
+            ..Self::default()
+        };
     }
 
     pub fn begin_command(&mut self) {

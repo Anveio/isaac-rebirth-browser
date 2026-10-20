@@ -35,12 +35,17 @@ pub enum Action {
 }
 impl ControlsMenu {
     ///Fresh Menu9/10 UI reconstruction keeps the global Keyboard/InputConfigs
-    ///owners and this host transport sequence. Reusing an already acknowledged
-    ///sequence would cause InputConfigIO to ignore a later real save request.
+    ///owners and this host transport: its sequence and what the command has
+    ///published so far. Reusing an already acknowledged sequence would cause
+    ///InputConfigIO to ignore a later real save request, and a batched Tick
+    ///that returns to the menus publishes its earlier iterations' too.
     pub fn reinitialize(&mut self) {
-        let sequence = self.next_save_sequence;
-        *self = Self::default();
-        self.next_save_sequence = sequence;
+        *self = Self {
+            next_save_sequence: self.next_save_sequence,
+            save_requests: std::mem::take(&mut self.save_requests),
+            unavailable_actions: std::mem::take(&mut self.unavailable_actions),
+            ..Self::default()
+        };
     }
 
     pub fn begin_command(&mut self) {
