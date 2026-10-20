@@ -992,6 +992,14 @@ pub fn state(state: &State) {
     // Grid classes 1 and 2 clamp only x or only y and test no cells
     // (442e40 / 442ef0, `entities::clamp_walls`): a Wall Creep on a top or
     // bottom wall keeps its x inside the room, not its y.
+    // Class 5 and 6 clamp the centre to the room (442c2d) and only then
+    // refine away from the solid samples (443117) by at most max(speed, 2)
+    // px, with no clamp after. A crowd can push a body into a pit faster than
+    // that, and once its clamped centre lies in a cell its class treats as
+    // solid, the refinement leaves the centre past the room's edge: the
+    // source contract stops there. The cell is read 1 px inside the clamped
+    // centre, so a centre clamped onto the edge reads the interior cell
+    // beside it, never the wall.
     if state.room_transition.is_none() {
         let grid = state
             .room
@@ -1029,11 +1037,21 @@ pub fn state(state: &State) {
                     _ => clamped != position,
                 }
             };
+            let in_solid = |position: WorldVector, class: u32| {
+                let cell = grid.collision_at(grid.clamp_room(position, 1.0));
+                match class {
+                    5 => cell > 0,
+                    6 => cell > 1,
+                    _ => false,
+                }
+            };
             let escaped = npcs
                 .chain(pickups)
                 .chain(bombs)
                 .find(|(_, _, _, position, class)| {
-                    outside(*position, *class) && !doorway(*position)
+                    outside(*position, *class)
+                        && !doorway(*position)
+                        && !in_solid(*position, *class)
                 });
             props::always!(
                 escaped.is_none(),
