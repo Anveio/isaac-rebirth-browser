@@ -27,7 +27,8 @@ pub(crate) struct SpawnContext {
 
 /// The union of the owners any supported NPC callback reads or writes.
 pub(crate) struct NpcWorld<'a> {
-    /// Actual current Game full-update counter, including admission callbacks.
+    /// Actual current Game full-update counter (`State::native_game_frame`),
+    /// including admission callbacks.
     pub game_counter: u32,
     pub player: WorldVector,
     pub player_velocity: WorldVector,
@@ -262,7 +263,8 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
         points,
     })?;
-    let sample_position = npc.position;
+    // 442df8 samples the centre the collider's 442c2d clamp yields.
+    let sample_position = grid.clamp_room(npc.position, 0.0);
     if npc.kind == 220 {
         // 44364a: Squirt shares the Dip's 1.2 reflection scale.
         collider.resolve_nonplayer_ground_bouncy(

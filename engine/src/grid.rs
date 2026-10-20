@@ -959,7 +959,9 @@ impl Collider {
         }))
     }
 
-    /// Source ordinary nonplayer ground class5. Unlike the player solver,
+    /// Source ordinary nonplayer ground class5. Like class3, 442c2d clamps
+    /// the centre to the room bounds before the samples, at any speed and in
+    /// prediction (442c3b..69). Unlike the player solver,
     /// position correction only runs for inward motion. Full collision first
     /// reflects the normal component, then scales the entire velocity using
     /// the original inward dot and reflected speed. Prediction preserves it.
@@ -970,11 +972,13 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
+        *position = grid.clamp_room(*position, 0.0);
         self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.0)
     }
 
     /// 44364a..443681: Dip (217) and type 220 scale the reflection impulse
-    /// `inward * 1.8 - 0.1` by 1.2 (66acfc) before the speed rescale.
+    /// `inward * 1.8 - 0.1` by 1.2 (66acfc) before the speed rescale. The
+    /// same class5 query, so the same 442c2d clamp.
     pub fn resolve_nonplayer_ground_bouncy(
         &self,
         grid: &Grid,
@@ -982,6 +986,7 @@ impl Collider {
         velocity: &mut WorldVector,
         preview: bool,
     ) -> Result<Option<GridContact>, String> {
+        *position = grid.clamp_room(*position, 0.0);
         self.resolve_nonplayer_ground_class(grid, position, velocity, preview, false, 1.2)
     }
 

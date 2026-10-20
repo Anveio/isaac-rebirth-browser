@@ -22,6 +22,7 @@ import { startProductionServer } from './production-server.mjs';
 import { audioObservedBrowser } from '../e2e/lib/audio-owners.mjs';
 import { evaluateJson, readTrace } from '../e2e/lib/game.mjs';
 import {readBrowserControls,installPhysicalObserver} from './controls-browser-observe.mjs';
+import { declaredNativeTape, resetBootElapsed } from './verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SOURCE = 'tools/original/foundation-paired-scenarios.py';
@@ -138,20 +139,16 @@ export function declarePublicClockPlan(data) {
       nativeAcknowledgements.push({presentedFrame: frame, virtualElapsedNs: frame * presentationIntervalNanoseconds});
     } else if (action.type === 'capture') nativeCaptures.push({label: action.label, presentedFrame: frame, virtualElapsedNs: frame * presentationIntervalNanoseconds});
   }
-  const browserTickCommands = [];
-  frame = nativeEntryPresentation;
-  for (const action of data.pairedTape) if (action.type === 'step') {
-    for (let index = 0; index < action.frames; index++) {
-      frame++;
-      const timestampMillis = data.bootEpochSeed * 1000 + Math.floor(frame * presentationIntervalNanoseconds / 1e6);
-      assert.ok(Number.isSafeInteger(timestampMillis) && timestampMillis >= 0);
-      browserTickCommands.push({type: 'tick', count: 1, timestampMillis});
-    }
-  }
+  // The Browser keeps one clock mechanism: its reset starts at the boot epoch
+  // plus resetBootElapsed of this declared tape (#438). Each declared
+  // presentation is then one plain tick; no command carries a wall time.
+  const browserBootElapsed = resetBootElapsed(declaredNativeTape(data));
+  const browserTickCommands = data.pairedTape.flatMap(action => action.type === 'step'
+    ? Array.from({length: action.frames}, () => ({type: 'tick', count: 1})) : []);
   return {schema: 1, scope: 'Independent public clock declaration before either capture; no observed Native clock or counter is an input',
     bootEpochSeed: data.bootEpochSeed, nativeBootstrapPresentations, presentationIntervalNanoseconds,
     nativeEntryPresentation, sourceOnlyPrelude: prelude, pairedTape: data.pairedTape,
-    nativeAcknowledgements, nativeCaptures, browserTickCommands};
+    nativeAcknowledgements, nativeCaptures, browserBootElapsed, browserTickCommands};
 }
 
 export function validateNativeClockPlan(data, plan, native) {
@@ -263,22 +260,19 @@ export async function browserCapture(browser, server, caseData, directory, archi
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed, mtDraws, startup }) => {
-      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, trace: true, ...startup });
+    await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed, mtDraws, startup }) => {
+      window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true, ...startup });
       if (mtDraws) window.game.mtDraws.enable();
-    }, { ...caseData, mtDraws, startup });
+    }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)), mtDraws, startup });
     let presentations = 0;
-    let publicTickIndex = 0;
     for (const action of caseData.pairedTape) {
       if (action.type === 'step') {
         // Steps transfer no state: serializing a full snapshot per step costs
         // several times the step itself (see tools/e2e/lib/game.mjs).
         if (publicClockPlan) {
-          const commands = publicClockPlan.browserTickCommands.slice(publicTickIndex, publicTickIndex + action.frames);
-          assert.equal(commands.length, action.frames);
-          await page.evaluate(commands => { for (const command of commands) window.game.step(1, command.timestampMillis); }, commands);
-          publicTickIndex += action.frames;
-          expectedCommands.push(...commands);
+          // One declared presentation per step call, as the plan records.
+          await page.evaluate(count => { for (let index = 0; index < count; index++) window.game.step(1); }, action.frames);
+          for (let index = 0; index < action.frames; index++) expectedCommands.push({ type: 'tick', count: 1 });
         } else {
           await page.evaluate(count => { window.game.step(count); }, action.frames);
           expectedCommands.push({ type: 'tick', count: action.frames });
@@ -338,8 +332,12 @@ export async function browserCapture(browser, server, caseData, directory, archi
       save(join(directory, 'trace-archive.json'), evidence);
     } else save(join(directory, 'trace.json'), trace);
     if (publicClockPlan) {
-      assert.equal(publicTickIndex, publicClockPlan.browserTickCommands.length, 'Every declared public timestamp must be consumed');
       assert.deepEqual(trace.commands.filter(command => command.type === 'tick'), publicClockPlan.browserTickCommands);
+      const elapsed = publicClockPlan.browserBootElapsed;
+      assert.deepEqual(trace.clockInput, {initialTimestampMillis: publicClockPlan.bootEpochSeed * 1000 + elapsed.milliseconds,
+        initialSubMillisecondNanoseconds: elapsed.subMillisecondNanoseconds,
+        presentationIntervalNanoseconds: publicClockPlan.presentationIntervalNanoseconds},
+        'The Browser clock must start at the declared public boot clock');
     }
     assert.equal(trace.enabled, true); assert.equal(trace.inputTraceTruncated, false);
     assert.equal(trace.backendStateTruncated, false, 'Every actual backend callback must retain its complete snapshot');

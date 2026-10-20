@@ -711,8 +711,6 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     {
         let grid = room_grid(state)?;
         let motion = &mut state.bombs[index].motion;
-        //442C3B..69 clamps class5 before samples, including at zero speed.
-        motion.presented_position = grid.clamp_room(motion.presented_position, 0.0);
         let mut preview_velocity = motion.velocity;
         bomb_collider().resolve_nonplayer_ground(
             &grid,
@@ -876,8 +874,6 @@ pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
             resolve_shot_grid(bomb, &grid, false)?;
         } else {
             let motion = &mut bomb.motion;
-            //The outer442B90 class5 query owns center clamping before samples.
-            motion.position = grid.clamp_room(motion.position, 0.0);
             bomb_collider().resolve_nonplayer_ground(
                 &grid,
                 &mut motion.position,

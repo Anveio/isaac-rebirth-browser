@@ -368,6 +368,18 @@ fn cooldown(e: &mut Entropy) {
     props::sometimes!(placements > 1, "bombs: a player places bombs back to back");
 }
 
+/// A point `distance` from `centre` in a random direction, taken from a
+/// normalized random vector: host trig would tie the case to the
+/// platform's libm.
+fn away(e: &mut Entropy, centre: WorldVector, distance: f64) -> WorldVector {
+    let (x, y) = (f64::from(signed(e, 1.0)), f64::from(signed(e, 1.0)));
+    let length = (x * x + y * y).sqrt().max(1e-9);
+    WorldVector {
+        x: (f64::from(centre.x) + distance * x / length) as f32,
+        y: (f64::from(centre.y) + distance * y / length) as f32,
+    }
+}
+
 fn blast(e: &mut Entropy) {
     let bomb = if e.chance(1, 32) {
         wild(e, 1000.0)
@@ -380,20 +392,15 @@ fn blast(e: &mut Entropy) {
         _ => unit(e) * 200.0,
     };
     let reach = f64::from(radius) + ISAAC_RADIUS;
-    // Mostly near the envelope, sometimes on the bomb itself.
+    // Mostly near the envelope, sometimes on the bomb itself, and sometimes
+    // on the envelope, which a uniform distance almost never meets.
     let player = match e.below(16) {
         0 => bomb,
         1 => wild(e, 1000.0),
+        2 => away(e, bomb, reach),
         _ => {
-            // A direction from a normalized random vector: host trig would
-            // tie the case to the platform's libm.
-            let (x, y) = (f64::from(signed(e, 1.0)), f64::from(signed(e, 1.0)));
-            let length = (x * x + y * y).sqrt().max(1e-9);
             let distance = reach * f64::from(unit(e)) * 1.5;
-            WorldVector {
-                x: (f64::from(bomb.x) + distance * x / length) as f32,
-                y: (f64::from(bomb.y) + distance * y / length) as f32,
-            }
+            away(e, bomb, distance)
         }
     };
     let velocity = if e.chance(1, 32) {

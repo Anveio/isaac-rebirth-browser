@@ -143,6 +143,21 @@ fn nonplayer(
     let Ok(contact) = result else {
         return;
     };
+    // 442c2d: the class5 query clamps the centre to the room bounds before
+    // its samples, so the rest of its contract holds from the clamped centre.
+    let clamped = grid.clamp_room(start, 0.0);
+    props::sometimes!(
+        clamped != start,
+        "grid: a nonplayer centre outside the room is clamped"
+    );
+    let (mut from_clamped, mut clamped_velocity) = (clamped, motion);
+    let clamped_contact =
+        collider.resolve_nonplayer_ground(grid, &mut from_clamped, &mut clamped_velocity, preview);
+    props::always!(
+        clamped_contact == Ok(contact) && from_clamped == position && clamped_velocity == velocity,
+        "grid: nonplayer ground resolution starts from the centre clamped to the room",
+        json!({ "clamped": clamped, "fromClamped": from_clamped, "after": position, "inputs": details() })
+    );
     // Source 443117 -> 44346c: an inward preview whose squared speed underflows
     // skips refinement (no contact, nothing changed) where the full update
     // still resolves the contact.
@@ -167,13 +182,13 @@ fn nonplayer(
     );
     match contact {
         None => props::always!(
-            position == start && velocity == motion,
-            "grid: nonplayer resolution without contact changes nothing",
+            position == clamped && velocity == motion,
+            "grid: nonplayer resolution without contact only clamps the centre to the room",
             details()
         ),
         Some(contact) => {
             props::always!(
-                along_normal(start, position, contact.normal),
+                along_normal(clamped, position, contact.normal),
                 "grid: nonplayer correction moves only out along the contact normal",
                 json!({ "after": position, "normal": contact.normal, "inputs": details() })
             );

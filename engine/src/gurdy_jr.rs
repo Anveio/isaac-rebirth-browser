@@ -104,7 +104,10 @@ fn ai(
     births: &mut Vec<Birth>,
     friction: &mut f32,
 ) -> Result<(), String> {
-    let mut state = npc.gurdy_jr.take().ok_or("Gurdy Jr. requires its AI state")?;
+    let mut state = npc
+        .gurdy_jr
+        .take()
+        .ok_or("Gurdy Jr. requires its AI state")?;
     let result = step(npc, &mut state, random, world, births, friction);
     npc.gurdy_jr = Some(state);
     result

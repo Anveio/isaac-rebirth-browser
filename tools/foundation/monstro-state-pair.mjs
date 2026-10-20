@@ -33,7 +33,7 @@ for(const action of replay.pairedTape){
   check(checks,label,'npc.authoredSeedOrder',natives.map(a=>[a.type,a.spawnSeed]),port.map(a=>[a.kind,a.spawnSeed]));
   check(checks,label,'room.identity',source.room.descriptorIndex,actual.currentRoom);
   check(checks,label,'system.phase',phase,actual.systemClock.systemCounter%2);
-  check(diagnostics,label,'game.absoluteCounterPendingLoader',source.nativePhase.fullGameUpdates,actual.gameUpdateCount);
+  check(diagnostics,label,'game.fullUpdates',source.nativePhase.fullGameUpdates,actual.gameUpdateCount);
   const player=source.players[0];assert.ok(player);
   check(checks,label,'player.hp',player.redHp,actual.player.hp);check(checks,label,'player.immunity',player.damageCountdown,actual.damageCooldown);
   assert.equal(typeof source.room.combatClear,'boolean');assert.ok(Number.isInteger(source.room.combatClearCountdown));

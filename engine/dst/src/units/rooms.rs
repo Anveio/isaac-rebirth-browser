@@ -65,8 +65,10 @@ pub fn run(case: &mut Case) {
             return;
         }
     }
-    // Every floor the run's trapdoors reach, Basement I first; the case
-    // plays one of them.
+    // Every floor the run's trapdoors reach, Basement I first. The case
+    // plays them all, from one it picks: every reached floor is played
+    // whatever the case count, and a case seed replays its first floor
+    // exactly as when a case played only that one.
     let mut floors = vec![game];
     while floors.len() <= DESCENTS {
         let Some(floor) = floors.last() else { break };
@@ -76,7 +78,16 @@ pub fn run(case: &mut Case) {
         }
         floors.push(next);
     }
-    let game = floors.swap_remove(e.below(floors.len() as u64) as usize);
+    let first = e.below(floors.len() as u64) as usize;
+    let rest = (0..floors.len()).filter(|&index| index != first);
+    for index in std::iter::once(first).chain(rest) {
+        play_floor(&floors[index], e, &code);
+    }
+}
+
+/// Enters and plays every room `traversal::admits` on the floor `game`
+/// stands on, each from a copy of it.
+fn play_floor(game: &Game, e: &mut Entropy, code: &str) {
     let stage = game.state.stage;
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");

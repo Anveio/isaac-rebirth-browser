@@ -13,6 +13,9 @@ spec.loader.exec_module(clock)
 
 def tape(case):
     actions = clock.default_tape(case['code'])
+    # A longer declared intro moves the browser reset boundary later in the
+    # original's clock; the harness derives the reset clock from this tape.
+    actions[0] = {'type': 'step', 'frames': actions[0]['frames'] + case.get('introWait', 0)}
     actions = actions[:next(i for i, a in enumerate(actions) if a.get('label') == 'character-seeded') + 1]
     if case['beforeRunWait']:
         actions.append({'type': 'step', 'frames': case['beforeRunWait']})
@@ -54,6 +57,8 @@ def main():
          'beforeRunWait': 0, 'heldKey': None, 'selection': 'contrived dense idle fade'},
         {'name': 'opposite-phase-held-input', 'code': 'QSYVKMSE', 'bootEpochSeed': 0,
          'beforeRunWait': 1, 'heldKey': 'd', 'selection': 'contrived one declared menu presentation and held movement'},
+        {'name': 'long-intro', 'code': 'T1PK6Y0W', 'bootEpochSeed': 123456789, 'introWait': 17,
+         'beforeRunWait': 0, 'heldKey': None, 'selection': 'contrived 17-presentation longer intro before the Title'},
     ]
     for index in range(args.count):
         vector = clock.codec.random_vector()

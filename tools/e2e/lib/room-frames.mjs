@@ -20,7 +20,7 @@ import { gzipSync } from 'node:zlib';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions, inspectBrowserGraphics } from '../../foundation/browser.mjs';
 import { startProductionServer } from '../../foundation/production-server.mjs';
-import { assertInputProvenance, assertSeededRun, manualSeedCommands, waitForReady } from '../../foundation/verify.mjs';
+import { assertInputProvenance, assertSeededRun, manualSeedCommands, resetBootElapsed, waitForReady } from '../../foundation/verify.mjs';
 import { ROOT, flag, outputDirectory, selectCases, writeJson } from './cli.mjs';
 import { snapshot, readTrace } from './game.mjs';
 import { declarePublicClockPlan, validateNativeClockPlan } from '../../foundation/paired-game.mjs';
@@ -82,23 +82,22 @@ function declareRoomClock(tape, menuCommands, bootEpochSeed) {
   const prefixPresentations = menuCommands.reduce((sum, command) => sum + (command.type === 'tick' ? command.count : 0), 0);
   const browserEntryPresentation = plan.nativeEntryPresentation - prefixPresentations;
   assert.ok(Number.isSafeInteger(browserEntryPresentation) && browserEntryPresentation >= 0);
-  let presentation = browserEntryPresentation;
+  // The Browser reset clock already stands at the entry presentation; the
+  // declared menu intervals then advance it with plain public ticks.
+  const bootElapsed = resetBootElapsed(tape);
+  assert.equal(bootElapsed.milliseconds * 1e6 + bootElapsed.subMillisecondNanoseconds,
+    browserEntryPresentation * plan.presentationIntervalNanoseconds,
+    'The reset boot clock must equal the declared public clock plan');
   const prefixTicks = menuCommands.flatMap(command => command.type !== 'tick' ? []
-    : Array.from({length: command.count}, () => {
-      presentation++;
-      const timestampMillis = plan.bootEpochSeed * 1000
-        + Math.floor(presentation * plan.presentationIntervalNanoseconds / 1e6);
-      assert.ok(Number.isSafeInteger(timestampMillis) && timestampMillis >= 0);
-      return {type: 'tick', count: 1, timestampMillis};
-    }));
-  assert.equal(presentation, plan.nativeEntryPresentation);
-  return {data, plan: {...plan, browserEntryPresentation, browserPrefixCommands: menuCommands,
+    : Array.from({length: command.count}, () => ({type: 'tick', count: 1})));
+  assert.equal(browserEntryPresentation + prefixTicks.length, plan.nativeEntryPresentation);
+  return {data, bootElapsed, plan: {...plan, browserEntryPresentation, browserPrefixCommands: menuCommands,
     browserTickCommands: [...prefixTicks, ...plan.browserTickCommands]}};
 }
 
 // Keep the existing menu inputs, physical glyph release and screen checks.
-// Only the tick delivery changes: all grouped intervals consume their prior
-// one-presentation timestamps through the existing public step API.
+// Only the tick delivery changes: all grouped intervals are delivered as
+// declared one-presentation ticks through the existing public step API.
 async function enterClockedRun(page, menuCommands, tick, record) {
   const screens = ['profile', 'main', 'character', 'character', 'playing'];
   let glyph, enteredText = false, checkedSeed = false, state;
@@ -267,6 +266,8 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
   assert.equal(baseline.observation.nativePhase.systemIterations % 2, 0);
   suite.checkBaseline?.(baseline);
   const rows = new Map(native.debugObservations.map(row => [row.context.presentedFrame, row]));
+  const bootElapsed = clock.bootElapsed;
+  assert.deepEqual(resetBootElapsed(native.tape), bootElapsed, 'Native must run the declared tape');
 
   //The complete Native process and source validation finish before a
   //Browser is admitted. Keep only the actual rows used below.
@@ -294,14 +295,14 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
   const expected = [];
   const tick = async (count, readState = false) => {
     const commands = clock.plan.browserTickCommands.slice(publicTickIndex, publicTickIndex + count);
-    assert.equal(commands.length, count, 'Every public presentation needs its previously declared timestamp');
+    assert.equal(commands.length, count, 'Every public presentation needs its previously declared tick');
     let state;
     if (wasmNode) {
       for (const command of commands) send(command);
       if (readState) state = runtime.snapshot();
     } else {
       const text = await page.evaluate(({commands, readState}) => {
-        for (const command of commands) window.game.step(1, command.timestampMillis);
+        for (const _ of commands) window.game.step(1);
         return readState ? window.game.snapshotJson() : null;
       }, {commands, readState});
       if (readState) state = JSON.parse(text);
@@ -316,9 +317,9 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
       runtime = createPublicWasmRuntime({ wasm: resolve(wasmNode), expectedWasmSha: wasmSha });
       journal = createPublicWasmJournal(directory);
       //The same public reset as the existing Browser path; no resource or state override.
-      runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, {sfxVolume: 0, musicVolume: 0}, {fullscreen: false});
+      runtime.reset(item.seedValue, scenarios.bootEpochSeed, undefined, {sfxVolume: 0, musicVolume: 0}, {fullscreen: false}, bootElapsed);
       await writeJson(join(directory, 'declared-reset-input.json'),
-        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+        { initialSeed: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false}, bootElapsed });
     } else {
     browser = await chromium.launch(browserLaunchOptions());
     caseResult.graphics = await inspectBrowserGraphics(browser);
@@ -326,9 +327,9 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
     page.on('pageerror', error => errors.push(String(error)));
     await page.goto(`${server.url}/?manual=1`);
     await waitForReady(page);
-    await page.evaluate(({ seedValue, bootEpochSeed }) => {
-      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
-    }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed });
+    await page.evaluate(({ seedValue, bootEpochSeed, bootElapsed }) => {
+      window.game.pause(); window.game.reset(seedValue, { trace: true, bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} });
+    }, { seedValue: item.seedValue, bootEpochSeed: scenarios.bootEpochSeed, bootElapsed });
     }
     // Menu/seed/run intervals and every tick are declared before execution;
     // deferred Music run admission is never bypassed.
@@ -376,7 +377,7 @@ async function runCase({ suite, item, scenarios, directory, server, caseResult, 
       if (key) { if (wasmNode) send({ type: 'key', code, down: false }); else await page.keyboard.up(key); expected.push({ type: 'key', code, down: false }); }
     }
 
-    assert.equal(publicTickIndex, clock.plan.browserTickCommands.length, 'Every declared timestamp is consumed exactly once');
+    assert.equal(publicTickIndex, clock.plan.browserTickCommands.length, 'Every declared tick is consumed exactly once');
     completedTape = true;
     if (wasmNode) {
       assert.deepEqual(actualCommands, expected, 'Every declared public ABI input is sent exactly once');
