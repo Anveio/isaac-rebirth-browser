@@ -63,8 +63,13 @@ def replay(binary, tape, report):
 
 
 def census(binary, corpus, report):
-    """The corpus alone's report, as every DST run replays it."""
-    run(binary, ["--units", "game", "--cases", "0", "--corpus", str(corpus), "--report", str(report), "--allow-unmet"])
+    """The census of what every DST run replays: the corpus tapes and the
+    pinned rooms beside them."""
+    arguments = ["--units", "game,rooms", "--cases", "0", "--corpus", str(corpus), "--report", str(report), "--allow-unmet"]
+    pins = corpus.parent / "pinned-rooms.json"
+    if pins.exists():
+        arguments += ["--pins", str(pins)]
+    run(binary, arguments)
     return json.loads(report.read_text())
 
 
@@ -241,7 +246,7 @@ def main():
                 print(f"{source} reaches {one.stage[0]} at command {one.at - 1}")
         failed += build(one, work)
     after = census(args.binary, corpus, root / "corpus-after.json")
-    lost = cover.reached(before) - cover.reached(after)
+    lost = cover.census_keys(before) - cover.census_keys(after)
     if lost:
         print(f"== the rebuilt corpus lost {sorted(lost)}; carrying them from the replaced tapes")
         # At most what the replaced tapes held, so no lost key is refused.

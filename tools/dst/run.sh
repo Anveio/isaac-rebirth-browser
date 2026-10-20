@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Antithesis DST with seeded entropy: builds the production engine.wasm and the
 # harness, keeps the Antithesis image's build context holding their inputs,
-# runs every unit, replays the corpus tapes through the game unit and
-# checks every game tape against the shipped WASM.
+# runs every unit, replays the corpus tapes through the game unit, plays the
+# pinned rooms through the rooms unit and checks every game tape against the
+# shipped WASM.
 # DST_CASES/DST_STEPS size the run; extra arguments pass to rebirth-dst
 # (e.g. --seed 0x… or --case-seed … --units game to reproduce a case).
 set -euo pipefail
@@ -21,5 +22,6 @@ echo "DST report and retained tapes: $output"
 exec "$target_directory/release/rebirth-dst" --units all \
   --cases "${DST_CASES:-12}" --steps "${DST_STEPS:-1500}" \
   --wasm web/generated/engine.wasm --corpus engine/dst/corpus \
+  --pins engine/dst/pinned-rooms.json \
   --tapes "$output/tapes" \
   --report "$output/report.json" "$@"

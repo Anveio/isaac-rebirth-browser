@@ -19,7 +19,7 @@ mod phase;
 mod pickups;
 mod room_spawns;
 mod room_templates;
-mod rooms;
+pub(crate) mod rooms;
 mod seed_codec;
 mod tears;
 

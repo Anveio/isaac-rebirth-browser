@@ -72,9 +72,9 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
-| [Floor generation](#floor-generation) | Partial | Normal Basement I/II and Caves I/II source; Depths catalogue only | 0 |
+| [Floor generation](#floor-generation) | Partial | Normal Basement I/II, Caves I/II and Depths I source; live Depths I qualification open | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor descent through Caves I into Caves II | 4 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor source through Depths I; Caves I/II arrival evidence retains its artifact scope | 4 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
@@ -226,17 +226,19 @@ layout graded yet). The separate Caves set 1 wall catalogue labels patches 0..2
 instead of 3..5; its reviewed metadata correction
 is unbuilt and live-unrun. This does not change wall quads or RNG order.
 First-entry flagged-shop Greed/Super Greed substitution is implemented;
-re-entry and live fight parity remain open. PR732 adds the 506-room Depths
-catalogue without enabling its generator or authored actors.
+re-entry and live fight parity remain open. PR732 imports the 506-room Depths
+catalogue; PR780 admits Depths I (stage 5) generation, its chapter boss chain
+and secret/shop surprise-miniboss rules, with Depths backdrop, door and render
+geometry. Depths I layout and descent have no live Original comparison.
 Floors are data in the [level framework](levels.md): stage nodes carry the
 progression (name, trapdoor edge, contract) and stages.xml chapters carry the
 room set, backdrop, overlay, music and boss chain. New floors are imported by
 filling those tables, not by bespoke code paths.
-Missing: Cellar, Depths and later stage generation, curses (Labyrinth, Lost,
+Missing: Cellar, Depths II and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
-Next: import Depths I/II through the level framework; Cellar generation and
-unlock; curses.
+Next: qualify Depths I against the Original; import Depths II through the
+level framework; Cellar generation and unlock; curses.
 
 No open bugs.
 
@@ -275,15 +277,16 @@ fights or advancing main. The [carried-active follow-up](stage-exit-evidence.md)
 passes 48 mandatory identity/charge/reserve/ownership/descent checks across
 two active routes on frozen f837, with an ordinary control. Double Trouble
 seeds now generate Caves I; Double Trouble and selected-wall catalogue
-qualification remain separate. Missing: Depths and later steps, alternate
-stages, endings. The Depths catalogue is imported but has no generator or
-descent admission.
+qualification remain separate. PR780 adds source admission from Caves II
+into Depths I; no fixture takes that exit yet and no live Depths I Original
+comparison is claimed. Missing: Depths II and later steps, alternate stages
+and endings.
 
 Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P1 | Descent reaches Caves II (#731); Depths has a catalogue (#732) but no generator or descent, while Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
+| #413 | P1 | Source descent reaches Depths I (#780), whose live layout/arrival comparison remains open; Depths II and later steps, Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
 | #735 | P2 | The stage-transition nightmare omits the floor progress bar (finished floors, Isaac head, clock, skull) above the spotlight | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
