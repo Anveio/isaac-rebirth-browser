@@ -283,7 +283,12 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
                   *(['--avoid', ','.join(map(str, avoid))] if avoid else []), rooms=back, arrival='re-anchor',
                   production_directory=production_directory)
     if tail['status'] != 'pass':
-        return None, f"port-exit: {tail['reason']}"
+        # The drawn idle and the waypoint the recorder walked to replay this
+        # approach exactly (--approach), through the suite runner.
+        chosen = tail.get('via') or via
+        drawn = f"{fixture['name']}:{idle}" + (f":{chosen[0]},{chosen[1]}" if chosen else '')
+        replay = f"npm run test:e2e -- stage-exit --helper-arg --approach --helper-arg {drawn}"
+        return None, f"port-exit ({replay}): {tail['reason']}"
     # The recorder reports the candidate waypoint it walked through.
     via = tail.get('via') or via
     if tail.get('build') != base.get('portRecordedBuild'):
@@ -323,15 +328,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contrived', action='append', default=[], metavar='FIXTURE', help='fixture name under references/.../stage-exit')
     parser.add_argument('--count', type=int, default=1, help='OS-random approach cases per fixture')
+    parser.add_argument('--approach', action='append', default=[], metavar='FIXTURE:IDLE[:X,Y]',
+                        help="one approach case with this idle and exit waypoint, as a failed OS-random case's reason prints it")
     parser.add_argument('--production-directory', help='Existing immutable production artifact for both public-input recordings')
     parser.add_argument('--recordings-output', type=Path, default=RECORDINGS, help='Private recorder attempt archive, retained on every failure')
     args = parser.parse_args()
     RECORDINGS = args.recordings_output.resolve()
     entropy = random.SystemRandom()
-    cases, failures = [], []
+    cases, failures, fixtures = [], [], {}
+    def load(name):
+        if name not in fixtures:
+            fixture = {**json.loads((FIXTURES / f'{name}.json').read_text()), 'name': name}
+            fixtures[name] = (fixture, *fought(fixture, args.production_directory))
+        return fixtures[name]
     for name in args.contrived:
-        fixture = {**json.loads((FIXTURES / f'{name}.json').read_text()), 'name': name}
-        base, fights = fought(fixture, args.production_directory)
+        fixture, base, fights = load(name)
         built, reason = case(fixture, base, fights, f'{name}-contrived', False, 0, None, args.production_directory)
         if built is None:
             raise ValueError(f'Contrived stage exit {name} failed: {reason}')
@@ -359,6 +370,16 @@ def main():
                 failures.append({'fixture': name, 'error': reason})
             else:
                 cases.append(built)
+    for spec in args.approach:
+        name, idle, *point = spec.split(':')
+        via = [int(value) for value in point[0].split(',')] if point else None
+        fixture, base, fights = load(name)
+        identifier = f"{name}-approach-{idle}" + (f"-{via[0]}-{via[1]}" if via else '')
+        built, reason = case(fixture, base, fights, identifier, True, int(idle), via, args.production_directory)
+        if built is None:
+            failures.append({'fixture': name, 'error': reason})
+        else:
+            cases.append(built)
     print(json.dumps({'schema': 1, 'failures': failures, 'cases': cases}))
 
 

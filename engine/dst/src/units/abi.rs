@@ -202,6 +202,46 @@ pub fn run(case: &mut Case) {
     input_configs(e, &authored);
     gamma(e, &authored);
     saves(e);
+    boot_clock(e);
+}
+
+/// The boot clock a controlled harness declares (`set_boot_elapsed`, #660):
+/// accepted right after reset; refused with an error and the snapshot kept
+/// before any reset, with a sub-millisecond part of 1 ms or more, once the
+/// clock moved, or once a Tick ran.
+fn boot_clock(e: &mut Entropy) {
+    let unset = std::thread::spawn(|| (abi::set_boot_elapsed(0, 0), error())).join();
+    props::always!(
+        matches!(&unset, Ok((1, message)) if !message.is_empty()),
+        "abi: set_boot_elapsed before reset fails with an error"
+    );
+    let (seed, epoch) = (e.nonzero_u32(), e.u32());
+    abi::reset(seed, epoch);
+    let fresh = snapshot();
+    let invalid = 1_000_000 + e.u32() % (u32::MAX - 999_999);
+    props::always!(
+        abi::set_boot_elapsed(e.u32(), invalid) == 1 && !error().is_empty() && snapshot() == fresh,
+        "abi: set_boot_elapsed refuses a sub-millisecond part of 1 ms or more with an error and keeps the game",
+        json!({ "subMillisecondNanoseconds": invalid })
+    );
+    let declared = (e.range(1, 86_400_000), e.range(0, 1_000_000));
+    props::always!(
+        abi::set_boot_elapsed(declared.0, declared.1) == 0 && abi::error_len() == 0,
+        "abi: set_boot_elapsed right after reset succeeds and clears the error",
+        json!({ "declared": declared })
+    );
+    let moved = snapshot();
+    props::always!(
+        abi::set_boot_elapsed(0, 0) == 1 && !error().is_empty() && snapshot() == moved,
+        "abi: set_boot_elapsed after the clock moved fails with an error and keeps the game"
+    );
+    abi::reset(seed, epoch);
+    let ticked = send(br#"{"type":"tick","count":1}"#) == Some(0);
+    let after = snapshot();
+    props::always!(
+        ticked && abi::set_boot_elapsed(0, 0) == 1 && !error().is_empty() && snapshot() == after,
+        "abi: set_boot_elapsed after a Tick fails with an error and keeps the game"
+    );
 }
 
 /// The own-save transport `web/engine.ts` calls (`save_input_ptr`,
