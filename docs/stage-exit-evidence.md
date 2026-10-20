@@ -59,6 +59,8 @@ than relabeled as current-runtime evidence.
 
 The original's whole segment is fixed fixture keys. A research controller (projected-shot dodging) found them once, and a fresh original replays them exactly. The port records its segment closed-loop per build, one leg per floor.
 
+Its Basement II leg runs the recorder's `--dodge` (`fightFlags`), which shapes only the port's own keys. #754 stopped the port placing a ChangeRoom-tail footprint at route frame 133 (Basement I room 6 → 7). The shared random stream then runs four draws behind the earlier build, and every closed-loop fight after it plays differently. On main ce792a8d, the unflagged Basement II fight died 2,462 frames in.
+
 Both games end the segment hurt: the original at 4/6, the port at 2/6 in the recorded run. The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
 
 | Case | Paired checkpoints | Required tail checks |
