@@ -120,6 +120,17 @@ pub(crate) enum Birth {
     },
     /// A projectile 9.v other than the blood shot, e.g. Mega Fatty's puke 9.3.
     VariantProjectile(ProjectileBirth, u32),
+    /// A FireProjectiles shot of variant `.1` whose ProjectileParams carry
+    /// flags and a centre (49ee5d/49ee8c).
+    #[expect(
+        dead_code,
+        reason = "Mega Maw 262's FireRing (4e0833) is the first producer"
+    )]
+    FlaggedProjectile(
+        ProjectileBirth,
+        u32,
+        crate::enemy_projectiles::ProjectileFlags,
+    ),
     /// Player TakeDamage(1.0, flags 0, countdown 30) from an NPC's AI (Mega
     /// Fatty's fart hits a player within 100 px).
     PlayerHurt,
