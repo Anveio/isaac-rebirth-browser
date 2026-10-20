@@ -348,9 +348,9 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `contact` | mass contact responses against momentum, centre-of-mass and overlap oracles | 15 | 4 | 0 |
 | `pathfinder` | FindGridPath's flood against an independent node-weighted Dijkstra | 6 | 5 | 0 |
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
-| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 80 | 62 | 2 |
+| `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 84 | 63 | 2 |
 | `rooms` | every room a floor its trapdoors reach admits, entered and played | 2 | 8 | 1 |
-| `abi` | the exported C ABI transport the browser bridge drives | 30 | 3 | 0 |
+| `abi` | the exported C ABI transport the browser bridge drives | 35 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -758,9 +758,14 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | game: boot publishes the first Title with its seeds | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot starts with the stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Sometimes | game: a game boots with stored audio, fullscreen and input settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a declared boot elapsed time advances the fresh reset clock by exactly that time | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Sometimes | game: a game boots with a declared boot elapsed time | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a boot elapsed declaration is refused once the reset clock moved | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a boot elapsed time with a sub-millisecond part of 1 ms or more is refused | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: boot is a pure function of its seeds and stored settings | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Unreachable | game: public commands never panic the engine | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: controls lost outside a named hold come back within 600 full updates | [mod.rs](engine/dst/src/units/game/mod.rs) |
+| Always | game: a boot elapsed declaration is refused once a Tick ran | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a rejected command leaves the whole game unchanged | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: a batched Tick simulates exactly what single Ticks do | [mod.rs](engine/dst/src/units/game/mod.rs) |
 | Always | game: published states round-trip losslessly through their validators | [mod.rs](engine/dst/src/units/game/mod.rs) |
@@ -807,6 +812,11 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: rejected commands leave the snapshot unchanged | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: every published snapshot is a valid state | [abi.rs](engine/dst/src/units/abi.rs) |
 | Sometimes | abi: a well-formed command is rejected | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: set_boot_elapsed before reset fails with an error | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: set_boot_elapsed refuses a sub-millisecond part of 1 ms or more with an error and keeps the game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: set_boot_elapsed right after reset succeeds and clears the error | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: set_boot_elapsed after the clock moved fails with an error and keeps the game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: set_boot_elapsed after a Tick fails with an error and keeps the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: save documents are bounded at 4 MiB | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a fresh Title declares save IO and loads a save document | [abi.rs](engine/dst/src/units/abi.rs) |
