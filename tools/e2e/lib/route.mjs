@@ -99,10 +99,47 @@ export function routingView(s) {
     // HP below 0 in both games: a Crazy Long Legs at exactly 0 still walks,
     // fires and keeps the doors shut.
     foes: s.room.npcs.filter(n => n.canShutDoors && !n.dead && !n.removed && n.hp >= 0)
-      .map(n => ({ kind: n.kind, boss: n.boss, radius: n.collisionRadius, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
+      .map(n => ({ kind: n.kind, boss: n.boss, radius: n.collisionRadius, hp: n.hp, x: n.position.x, y: n.position.y, vx: n.velocity.x, vy: n.velocity.y })),
     shots: s.enemyProjectiles.filter(p => !p.dead && !p.removed).map(p => ({ x: p.position.x, y: p.position.y, vx: p.velocity?.x ?? 0, vy: p.velocity?.y ?? 0 })),
     stage: s.stage, stageTransition: s.stageTransition.state, trapdoor: s.room.trapdoor,
   };
+}
+
+// Fight decisions (one per two-frame recorder stride) without a foe losing HP
+// before an unstick fight walks to a lane of fire.
+const STALL = 150;
+
+// Keys toward the nearest cell, by the grid route, that shares a row or column
+// with the target at least two cells out with every cell between open, aiming
+// down that lane; null when no reachable cell has one.
+function laneKeys(grid, player, target) {
+  const [sc, sr] = cellOf(player.x, player.y), [tc, tr] = cellOf(target.x, target.y);
+  const inside = (c, r) => c >= 0 && r >= 0 && c < grid.w && r < grid.h;
+  if (!inside(sc, sr)) return null;
+  const open = (c, r) => inside(c, r) && grid.solid[r * grid.w + c] !== '1';
+  const lane = (c, r) => {
+    const span = Math.abs(tc - c) + Math.abs(tr - r);
+    if ((c !== tc && r !== tr) || span < 2) return false;
+    for (let k = 1; k < span; k++) if (!open(c + Math.sign(tc - c) * k, r + Math.sign(tr - r) * k)) return false;
+    return true;
+  };
+  const key = (c, r) => r * grid.w + c, previous = new Map([[key(sc, sr), -1]]), queue = [[sc, sr]];
+  let found;
+  while (queue.length) {
+    const [c, r] = queue.shift();
+    if (lane(c, r)) { found = [c, r]; break; }
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = key(nc, nr);
+      if (!open(nc, nr) || previous.has(k)) continue;
+      previous.set(k, key(c, r)); queue.push([nc, nr]);
+    }
+  }
+  if (!found) return null;
+  const [fc, fr] = found, path = [];
+  for (let k = key(fc, fr); k !== -1; k = previous.get(k)) path.unshift(k);
+  const next = path[Math.min(1, path.length - 1)];
+  const aim = fc === tc ? (tr > fr ? 'ArrowDown' : 'ArrowUp') : (tc > fc ? 'ArrowRight' : 'ArrowLeft');
+  return [...toward(player, { x: next % grid.w * 40 + 40, y: Math.floor(next / grid.w) * 40 + 120 }, 4), aim];
 }
 
 // A small seeded generator (mulberry32) for --salt fight variants.
@@ -121,11 +158,29 @@ export function saltedRandom(seed) {
 // walls, solid cells, foes and enemy shots; `memory.orbit` flips when boxed in.
 // With `memory.lead` (fast wall-bouncing foes such as Envy's heads) the aim
 // leads the foe by its velocity over a tear's flight time, and the orbit
-// closes to 90 units. Room bounds are the 1x1 playable box.
+// closes to 90 units. Room bounds are the playable box of the grid's room
+// (the 1x1 box without a grid).
 export function fightKeys(view, memory) {
   const { player, grid, foes, shots } = view;
   if (!foes.length) return [];
-  const target = foes.reduce((a, b) => Math.hypot(a.x - player.x, a.y - player.y) <= Math.hypot(b.x - player.x, b.y - player.y) ? a : b);
+  // memory.lineUp (Gurdy: a boss that never moves, ringed by regenerating
+  // Boils): the boss stays the target while one lives, and moves that line the
+  // player up with it on a row or column weigh as much as the orbit.
+  const pool = memory.lineUp && foes.some(foe => foe.boss) ? foes.filter(foe => foe.boss) : foes;
+  const target = pool.reduce((a, b) => Math.hypot(a.x - player.x, a.y - player.y) <= Math.hypot(b.x - player.x, b.y - player.y) ? a : b);
+  // The inner cells' centres, 8 units out: x 72..568 and y 152..408 in a 1x1 room.
+  const right = grid ? 40 * grid.w - 32 : 568, bottom = grid ? 40 * grid.h + 48 : 408;
+  // memory.unstick (route rooms): the orbit never lines up a foe that rocks or
+  // a wall shelter (a Fly beyond a rock diagonal, a Mulligan along a wall), and
+  // it can hold the doors shut for the room's whole budget. After STALL
+  // decisions in which no foe lost HP, walk to a clear lane of fire instead.
+  if (memory.unstick) {
+    const hp = foes.reduce((sum, foe) => sum + foe.hp, 0);
+    memory.stall = foes.length === memory.foeCount && hp >= memory.foeHp ? memory.stall + 1 : 0;
+    memory.foeCount = foes.length; memory.foeHp = hp;
+    const lane = memory.stall >= STALL && grid && laneKeys(grid, player, target);
+    if (lane) return lane;
+  }
   const dx = target.x - player.x, dy = target.y - player.y, distance = Math.hypot(dx, dy) || 1;
   // Isaac's tears cover about 10 world units per update.
   const flight = memory.lead ? distance / 10 : 0;
@@ -152,7 +207,7 @@ export function fightKeys(view, memory) {
     let score = ux * want[0] + uy * want[1];
     for (const look of [20, 45]) {
       const nx = player.x + ux * look, ny = player.y + uy * look, cost = look === 20 ? 3 : 1;
-      if (nx < 72 || nx > 568 || ny < 152 || ny > 408) score -= cost;
+      if (nx < 72 || nx > right || ny < 152 || ny > bottom) score -= cost;
       if (solid(nx, ny)) score -= cost;
     }
     for (const foe of foes) {
@@ -178,12 +233,12 @@ export function fightKeys(view, memory) {
       }
       // Keep room to dodge: walls within 50 units cost in proportion.
       const nx = player.x + ux * 20, ny = player.y + uy * 20;
-      for (const gap of [nx - 72, 568 - nx, ny - 152, 408 - ny]) if (gap < 50) score -= (50 - gap) / 25;
+      for (const gap of [nx - 72, right - nx, ny - 152, bottom - ny]) if (gap < 50) score -= (50 - gap) / 25;
       // Tears fly along one axis: favour moves that line the player up with
       // the target on an axis, so they hit.
       const offNow = Math.min(Math.abs(dx), Math.abs(dy));
       const offNext = Math.min(Math.abs(target.x - nx), Math.abs(target.y - ny));
-      if (offNow > 20) score += (offNow - offNext) / 20 * 0.6;
+      if (offNow > 20) score += (offNow - offNext) / 20 * (memory.lineUp ? 2 : 0.6);
       // --salt: a seeded jitter, so one fight can be tried along many paths.
       if (memory.rng) score -= memory.rng() * memory.jitter;
     } else for (const shot of shots) {

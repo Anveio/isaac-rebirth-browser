@@ -23,9 +23,10 @@
 // --lead aims ahead of each foe's velocity and orbits closer; --dodge scores
 // moves against enemy shots' projected paths and lit fireplaces; --orbit -1
 // starts the orbit the other way round and --boss-radius R holds bosses at R
-// units (default 170); --salt N seeds the orbit sign, boss radius and a
-// score jitter for one more fight variant, and --route-salt N the route
-// rooms' fights the same way; --no-corner
+// units (default 170); --line-up (with --dodge) keeps a boss the target over
+// its spawns and weighs lining up with it like the orbit; --salt N seeds the
+// orbit sign, boss radius and a score jitter for one more fight variant, and
+// --route-salt N the route rooms' fights the same way; --no-corner
 // ends at the clear without the doorway-poop shots and the corner park.
 // A parked fight fails if the port's player took the boss item (an empty
 // pedestal, subtype 0); --keep-off-pedestal then fights around its cells.
@@ -337,7 +338,7 @@ try {
   // --route-salt N (with --dodge) seeds the route rooms' orbit sign and score
   // jitter, as --salt does the boss fight's.
   const routeRng = flag('--route-salt') ? saltedRandom(Number(flag('--route-salt'))) : null;
-  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge'),
+  const routeFight = { orbit: 1, lead: false, dodge: hasFlag('--dodge'), unstick: true,
     ...(routeRng ? { orbit: routeRng() < 0.5 ? -1 : 1, jitter: 0.05 + routeRng() * 0.3, rng: routeRng } : {}) };
   for (let leg = 1; leg < rooms.length; leg++) {
     const target = rooms[leg];
@@ -348,6 +349,10 @@ try {
     // centre once the player stands at the current one.
     let centre = centreOf(state.player), incoming = 4;
     const centreKeys = (cells, door) => {
+      // A route room's fight carries the player off the walk's last centre
+      // (one cell away at most between steps): restart from its own cell
+      // rather than cut back across the room.
+      if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) > 60) ({ centre, incoming } = { centre: centreOf(state.player), incoming: 4 });
       if (Math.hypot(centre.x - state.player.x, centre.y - state.player.y) <= 4) ({ point: centre, dir: incoming } = planStep(cells, door, incoming));
       return centre.x === door.x && centre.y === door.y ? doorKeys(avoiding(state.grid, cells), state.player, door) : toward(state.player, centre, 2);
     };
@@ -418,7 +423,7 @@ try {
     // and a per-decision score jitter; --orbit and --boss-radius still win.
     const rng = flag('--salt') ? saltedRandom(Number(flag('--salt'))) : null;
     const salted = rng ? { orbit: rng() < 0.5 ? -1 : 1, bossRadius: 150 + rng() * 50, jitter: 0.05 + rng() * 0.3 } : {};
-    const memory = { lead: hasFlag('--lead'), dodge: hasFlag('--dodge'), ...salted, rng,
+    const memory = { lead: hasFlag('--lead'), dodge: hasFlag('--dodge'), lineUp: hasFlag('--line-up'), ...salted, rng,
       ...(flag('--orbit') ? { orbit: Number(flag('--orbit')) } : salted.orbit ? {} : { orbit: 1 }),
       ...(flag('--boss-radius') ? { bossRadius: Number(flag('--boss-radius')) } : {}) };
     // The boss pedestal spawns at the clear in cell 97: a player standing on
