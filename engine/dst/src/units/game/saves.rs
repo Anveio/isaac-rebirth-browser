@@ -11,7 +11,7 @@ use crate::props;
 use crate::tape::Tape;
 use crate::units::rooms;
 use rebirth_cleanroom::save_host::{Response, SaveHost, SaveIo, SaveStore};
-use rebirth_cleanroom::save_profiles::Profiles;
+use rebirth_cleanroom::save_profiles::{self, Profiles};
 use rebirth_cleanroom::{seed, Command, Game, Screen};
 use serde_json::json;
 use std::panic::{self, AssertUnwindSafe};
@@ -149,7 +149,9 @@ fn send(game: &mut Game, store: &mut Option<SaveStore>, host: &SaveHost, command
 /// Title, whatever that boot's seeds and settings, and exports back byte for
 /// byte. `fresh` marks a document this engine just stored, which must load;
 /// a replayed tape's document may predate a save format the engine now
-/// refuses, so a replay checks only a document that loads.
+/// refuses, so a replay checks only a document that loads. A replayed
+/// document in an older own format that loads is a migration (#768's V1 →
+/// V2): it exports in the current format, and that export reloads unchanged.
 pub fn reload(tape: &Tape, document: &str, fresh: bool) {
     let Ok(mut next) = tape.boot() else {
         return;
@@ -160,11 +162,30 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         return;
     }
     let again = next.export_save_data();
-    props::always!(
-        enabled.is_ok() && imported.is_ok() && again.as_deref().ok() == Some(document.as_bytes()),
-        "game: a document a previous session stored loads at the next session's Title unchanged",
-        json!({ "enabled": enabled, "imported": imported, "bytes": document.len() })
-    );
+    if fresh || own_version(document.as_bytes()) == Some(u64::from(save_profiles::VERSION)) {
+        props::always!(
+            enabled.is_ok() && imported.is_ok() && again.as_deref().ok() == Some(document.as_bytes()),
+            "game: a document a previous session stored loads at the next session's Title unchanged",
+            json!({ "enabled": enabled, "imported": imported, "bytes": document.len() })
+        );
+    } else {
+        let migrated = again.as_deref().ok();
+        let stable = migrated.is_some_and(|bytes| {
+            tape.boot().is_ok_and(|mut third| {
+                third.enable_save_io(1).is_ok()
+                    && third.import_save_data(bytes).is_ok()
+                    && third.export_save_data().as_deref().ok() == Some(bytes)
+            })
+        });
+        props::always!(
+            enabled.is_ok()
+                && migrated.and_then(own_version) == Some(u64::from(save_profiles::VERSION))
+                && stable,
+            "game: a document in an older own format loads as the current format, which then reloads unchanged",
+            json!({ "enabled": enabled, "from": own_version(document.as_bytes()), "to": migrated.and_then(own_version), "stable": stable })
+        );
+        props::sometimes!(true, "game: a session loads a document in an older own format");
+    }
     let saved_run = next.saved_profiles.as_ref().is_some_and(|profiles| {
         profiles
             .profiles
@@ -175,6 +196,14 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         saved_run,
         "game: a session boots with a run a previous session saved"
     );
+}
+
+/// The `version` an own profile document declares.
+fn own_version(bytes: &[u8]) -> Option<u64> {
+    serde_json::from_slice::<serde_json::Value>(bytes)
+        .ok()?
+        .get("version")?
+        .as_u64()
 }
 
 /// Answers the save IO a command left pending; a panic is an error.

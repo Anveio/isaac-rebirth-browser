@@ -63,6 +63,8 @@ pub enum BossStep {
         odd_only: bool,
         boss: u32,
     },
+    /// Selects `boss` without a draw.
+    Fixed(u32),
 }
 
 /// A Level stage's node in the progression state machine.
@@ -77,7 +79,7 @@ pub struct StageNode {
     pub contract: &'static str,
 }
 
-use BossStep::{Draw, Family, Next, Single};
+use BossStep::{Draw, Family, Fixed, Next, Single};
 
 /// Basement 584240 chain. Families: Dingle 5020 / Gurglings 5140, Monstro
 /// 1010 / Larry Jr. 1020; Duke of Flies 2010 and 2050 on odd floors only.
@@ -165,6 +167,45 @@ const CAVES_BOSSES: &[BossStep] = &[
     },
 ];
 
+/// Depths I (584240, stage 5; 0x675ec8[5] = 584624). Families: The Cage
+/// 5060 / The Gate 5040; Double Trouble 3750 (5847d0) and Loki 2030
+/// (584b6d). The draws that close the Basement and Caves chains end in
+/// normal table [4]'s fresh-profile Monstro II 1050 with no family draw
+/// (584b2f's R2 serves stages 1 and 3 only). Depths II never runs this
+/// chain: 58428a returns Mom 1060 for stage 6 right after the first word.
+const DEPTHS_BOSSES: &[BossStep] = &[
+    Next,
+    Family {
+        chance: Some(4),
+        flag: 0x100000,
+        when_set: 5060,
+        otherwise: 5040,
+    },
+    Draw(2),
+    Draw(5),
+    Single {
+        chance: 5,
+        odd_only: false,
+        boss: 3750,
+    },
+    Draw(2),
+    Draw(3),
+    Draw(10),
+    Draw(3),
+    Draw(4),
+    Single {
+        chance: 5,
+        odd_only: false,
+        boss: 2030,
+    },
+    Draw(2),
+    Draw(4),
+    Draw(2),
+    Draw(2),
+    Draw(2),
+    Fixed(1050),
+];
+
 pub const BASEMENT_OVERLAY: Overlay = Overlay {
     folder: "basement",
     low: 0.0,
@@ -236,11 +277,17 @@ pub const CHAPTERS: &[Chapter] = &[
         id: 5,
         name: "Depths",
         rooms: Some(room_assets::depths),
-        shape0_ambient: false,
-        backdrop: None,
-        overlay: None,
+        // 5cf45b excludes only backdrops 11 and 13.
+        shape0_ambient: true,
+        backdrop: Some(5),
+        // fxlayers id 6.
+        overlay: Some(Overlay {
+            folder: "depths",
+            low: -10.0,
+            high: 10.0,
+        }),
         music: Some(3),
-        bosses: None,
+        bosses: Some(DEPTHS_BOSSES),
         boss_blood_backdrop: false,
     },
     Chapter {
@@ -348,6 +395,12 @@ pub const STAGES: &[StageNode] = &[
         name: "CAVES II",
         trapdoor: Some(5),
         contract: "continuing-profile-normal-isaac-caves-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
+    },
+    StageNode {
+        stage: 5,
+        name: "DEPTHS I",
+        trapdoor: None,
+        contract: "continuing-profile-normal-isaac-depths-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
     },
 ];
 

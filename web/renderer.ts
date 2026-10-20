@@ -13,7 +13,7 @@ const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 const PARTICLE_ACTORS: Record<number, string> = {
   5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
-  58: "gfx/1000.058_poop particle.anm2",
+  35: "gfx/1000.035_tooth particle.anm2", 58: "gfx/1000.058_poop particle.anm2",
 };
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
@@ -93,8 +93,18 @@ function decorationClip(names: readonly string[], seed: number, allowCaves: bool
 }
 const ROCK_ANIMATIONS: Record<number, string> = { 2: "normal", 3: "black", 4: "tinted", 5: "bombrock", 6: "alt" };
 // Rock Init (56ee03..56f076) replaces grid_rock.anm2's layer-0 sheet by
-// backdrop; Basement keeps the authored rocks_basement.png.
-const ROCK_SHEETS: Record<string, string> = { "gfx/backdrop/03_caves.png": "gfx/grid/rocks_caves.png" };
+// backdrop (jump table 0x674158: 3 Caves, 5/6 Depths); Basement keeps the
+// authored rocks_basement.png.
+const ROCK_SHEETS: Record<string, string> = {
+  "gfx/backdrop/03_caves.png": "gfx/grid/rocks_caves.png",
+  "gfx/backdrop/05_depths.png": "gfx/grid/rocks_depths.png",
+};
+// GridEntity_Pit Init 568c00..568c29 replaces grid_pit.anm2's sheet on
+// backdrops 5 and 9; Basement and Caves keep the authored grid_pit.png.
+const PIT_SHEETS: Record<string, string> = {
+  "gfx/backdrop/05_depths.png": "gfx/grid/grid_pit_depths.png",
+  "gfx/backdrop/09_sheol.png": "gfx/grid/grid_pit_depths.png",
+};
 function rockSprite(kind: number, variant: number): { animation: string; frame: number } | undefined {
   const animation = ROCK_ANIMATIONS[kind];
   if (!animation) return undefined;
@@ -301,7 +311,9 @@ export class Renderer {
       const rock = entity.state === 1 ? rockSprite(entity.kind, entity.variant) : undefined;
       if (entity.kind === 7) {
         // GridEntity_Pit 5684c0 stores its autotile frame as the variant.
-        this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant);
+        const pitSheet = PIT_SHEETS[state.room.appearance.backdrop];
+        this.assets.draw(ctx, "gfx/grid/grid_pit.anm2", "pit", x, y, entity.variant,
+          pitSheet ? { spritesheets: { 0: pitSheet } } : {});
         this.drawnGrid.push({ index, kind: 7, animation: "pit", frame: entity.variant });
       } else if (rock) {
         const rockSheet = ROCK_SHEETS[state.room.appearance.backdrop];
@@ -407,7 +419,8 @@ export class Renderer {
     for (const projectile of state.enemyProjectiles)
       if (!projectile.removed && projectile.animation)
         this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2"
-          : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
+          : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2"
+          : projectile.variant === 1 ? "gfx/009.001_bone projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
           projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
     for (const particle of state.fireParticles)
       if (!particle.removed && particle.visible)
@@ -445,7 +458,7 @@ export class Renderer {
     for (const effect of state.spriteEffects) {
       // Source31f dead can coexist with31e active until a later Remove.
       if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
-      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 5) {
+      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 35 || effect.variant === 5) {
         const sprite = effect.sprite, controller = effect.poopEffect;
         const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
           ? controller.particle58.flying.layerRotation
