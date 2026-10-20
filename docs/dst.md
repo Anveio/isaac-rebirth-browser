@@ -503,9 +503,17 @@ every rebuild instead of naming a command. When drift moves the tape off its
 precondition (main's Gaper admission moved the descent tape out of Duke's
 room), the chase starts from a fresh boot instead. These tapes are the
 descent, active-item descent, restart, Random-exit, Number One cooldown and
-Envy split-death regressions, the Monstro, Larry Jr., Grub and Gemini
+Envy split-death regressions, the Monstro, Larry Jr. and Grub
 kills, the miniboss clear, the Dingle, Gurglings and super secret room
-entries and the Options menu (`"from": null` chases from a fresh boot). A
+entries and the Options menu (`"from": null` chases from a fresh boot).
+Gemini's kill left the recipes when the boss-room Entity+8 fix put its
+IsFrame attacks in native phase: random play from its room entry killed
+it in none of 288 branches (main about 1 in 100), so the pinned room
+`coverage-gemini-kill-pinned` (DN379LBR, Basement I room 0) holds
+`npc:79` and `removed:79`. The pin plays Gemini's AI and death under the
+`rooms` properties and state invariants; the `game` unit's contracts
+(replay, continuation, round trips, batched Ticks) and the shipped-WASM
+differential no longer cover that death. A
 recipe whose tape does not exist yet chases from a fresh boot, so a new
 scenario needs only its recipe. The miniboss clear had been a harvested tape
 with no recipe, which a menu change sent into Options before any run; its
