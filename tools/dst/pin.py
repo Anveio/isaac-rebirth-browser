@@ -8,11 +8,13 @@ room index and template, the seed of its boot, descent and play, and the
 census keys the room reaches. `rebirth-dst --pins` descends that run with
 that seed and plays only that room (`docs/dst.md`).
 
-`search` tries `--tries` seeds for one room in a single run. With `--fails
-TEXT` it keeps the first seed whose case fails a property with TEXT in its
-signature or details, for a finding not yet fixed; without it, the first
-whose room reaches every `--reaches` key with nothing failed. The kept seed
-is replayed alone to confirm it, then printed, or written with `--write`.
+`search` tries `--tries` seeds for one room in a single run. For a finding
+not yet fixed, `--signature TEXT` keeps the first seed whose case fails a
+property with exactly that signature (`npc 24` is not `npc 240`), and
+`--fails TEXT` the first with TEXT anywhere in a failure's signature or
+details. Without either it keeps the first whose room reaches every
+`--reaches` key with nothing failed. The kept seed is replayed alone to
+confirm it, then printed, or written with `--write`.
 
   python3 tools/dst/pin.py --binary B search --name regression-depths-champion-11 \\
       --code 7WEVL3X9 --stage 5 --room 19 --template 1.82 \\
@@ -21,7 +23,8 @@ is replayed alone to confirm it, then printed, or written with `--write`.
 `check` replays each pin alone and prints its verdict and drift, failing if
 any pin fails a property or drifted. A pin drifts when its run no longer
 reaches its stage, its room is another template or is not entered, or the
-room misses a key. `refresh --only NAME` searches a new seed for a drifted
+room misses a key; a pin that fails a property is judged by its failures,
+so what it did not reach is not drift. `refresh --only NAME` searches a new seed for a drifted
 pin with its recorded fields and writes it; a room generation moved
 elsewhere needs a new search from the finding's `dst.at`.
 """
@@ -75,8 +78,14 @@ def verdict(binary, pin, work):
     return drift, [(message, signature, details) for message, signature, _, details in failures(report)]
 
 
-def matches(text, signature, details):
-    return text in signature or text in json.dumps(details)
+def failing(options):
+    """Whether a failure's (signature, details) is the finding `search`
+    looks for, or None when it looks for a passing seed."""
+    if options.signature is not None:
+        return lambda signature, details: signature == options.signature
+    if options.fails is not None:
+        return lambda signature, details: options.fails in signature or options.fails in json.dumps(details)
+    return None
 
 
 def ordered(fields, seed):
@@ -85,18 +94,18 @@ def ordered(fields, seed):
     return {key: seed if key == "seed" else fields[key] for key in keys}
 
 
-def search(binary, fields, tries, fails, work):
+def search(binary, fields, tries, finding, work):
     """A pin for `fields` from the first of `tries` seeds that fails with
-    `fails`, or passes and reaches its keys; None if no seed does."""
+    `finding`, or passes and reaches its keys; None if no seed does."""
     candidates = []
     for index in range(tries):
         seed = int.from_bytes(os.urandom(8), "little")
         candidates.append(ordered({**fields, "name": f"{fields['name']}-{index}"}, seed))
     report = run_pins(binary, candidates, work)
     by_name = {pin["name"]: pin for pin in candidates}
-    if fails:
+    if finding:
         chosen = sorted(
-            (by_name[pin] for _, signature, pin, details in failures(report) if pin in by_name and matches(fails, signature, details)),
+            (by_name[pin] for _, signature, pin, details in failures(report) if pin in by_name and finding(signature, details)),
             key=lambda pin: candidates.index(pin),
         )
     else:
@@ -106,9 +115,9 @@ def search(binary, fields, tries, fails, work):
     for candidate in chosen:
         pin = {**candidate, "name": fields["name"]}
         drift, failed = verdict(binary, pin, work)
-        if fails and any(matches(fails, signature, details) for _, signature, details in failed):
+        if finding and any(finding(signature, details) for _, signature, details in failed):
             return pin
-        if not fails and drift is None and not failed:
+        if not finding and drift is None and not failed:
             return pin
     return None
 
@@ -133,7 +142,9 @@ def main():
     find.add_argument("--room", type=int, required=True)
     find.add_argument("--template", required=True, help="TYPE.VARIANT, as dst.at names it")
     find.add_argument("--reaches", action="append", default=[])
-    find.add_argument("--fails")
+    finding = find.add_mutually_exclusive_group()
+    finding.add_argument("--fails")
+    finding.add_argument("--signature")
     find.add_argument("--tries", type=int, default=32)
     find.add_argument("--write", action="store_true")
     check = commands.add_parser("check")
@@ -154,7 +165,7 @@ def main():
                 "template": [room_type, variant],
                 "reaches": options.reaches,
             }
-            pin = search(options.binary, fields, options.tries, options.fails, work)
+            pin = search(options.binary, fields, options.tries, failing(options), work)
             if pin is None:
                 sys.exit(f"none of {options.tries} seeds pinned {options.name}")
             print(json.dumps(pin, indent=2))
