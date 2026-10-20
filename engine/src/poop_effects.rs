@@ -194,7 +194,11 @@ impl Admission<'_> {
             collision_damage: 22.0,
             hp: config.base_hp,
             max_hp: config.base_hp,
-            grid_collision_class: if matches!(variant, 5 | 27 | 35 | 58) { 3 } else { 0 },
+            grid_collision_class: if matches!(variant, 5 | 27 | 35 | 58) {
+                3
+            } else {
+                0
+            },
             entity_collision_class: 0,
             flags: 0,
             visible: true,
