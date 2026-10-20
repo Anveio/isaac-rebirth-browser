@@ -230,6 +230,15 @@ pub fn observe(state: &State) {
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
+            // Each champion color simulated, alone and with its floor's
+            // stage, since a rare color rolls only on some floors.
+            if let Some(champion) = &npc.champion {
+                keys.push(format!("champion:{}", champion.color));
+                keys.push(format!(
+                    "champion:{} on stage {}",
+                    champion.color, state.floor.stage
+                ));
+            }
             // A Fireplace dies by going out (state 3, NoFire) and stays put.
             if npc.kind == 33 && npc.state == 3 {
                 keys.push("extinguished:33".to_owned());
