@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 tools/foundation/decode-rooms.py --prepare-private-caves
+python3 tools/foundation/prepare-unlock-notifications.py
 if ! command -v cargo >/dev/null; then source "$HOME/.cargo/env"; fi
 target_directory="$(cargo metadata --manifest-path engine/Cargo.toml --locked --no-deps --format-version 1 \
   | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).target_directory')"

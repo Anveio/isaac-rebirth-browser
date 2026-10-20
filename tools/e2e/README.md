@@ -1,5 +1,22 @@
 # Live e2e suites
 
+`controls --living-restart` runs the normal seeded living-Isaac R60/release/R61
+route through the existing Controls/paired producer. Three fixed phase/pause
+controls and one first unfiltered OS seed/boot draw require actual read-only
+Native hold/queue/Persistent owners, physical input and next-dispatch behavior.
+`--scenarios BANK` replays without entropy; `--case` selects after validating and
+retaining the whole bank. The supported source scope is normal Isaac, normal
+difficulty, Challenge0.
+
+On frozen `05fe0fc5` (merged PR768's reviewed tree), fresh Native and actual Browser
+pass fixed phase-0 plus recorded OS `0YY1FRN4`: 288/288 checkpoints and
+19,988/19,988 scalar rows, all byte-exact against the preceding v8 values/statuses
+with zero lost passes. Full-frame diagnostics retain 20 pass/268 fail. Browser
+runtime passes 6/6, including separate seeded/unseeded DOM own-storage checks.
+Earlier full-four-case, Save/migration results and actual capacity failures keep
+their own scopes. Broader R contexts, the unseeded Native draw, natural R reload
+and complete MT/PCM/RGBA remain open. [Evidence and retained failures](../../docs/living-restart.md#qualified-captures).
+
 Each suite runs the fresh original game and the immutable production build with
 the same public inputs (keys, text, ticks, seeds) and compares what each game
 observably does. Native observations never enter WASM.
@@ -74,6 +91,16 @@ npm run test:e2e -- --rerun-failed .cache/e2e/run-…
   run includes it, but `@stage` does not: each of its two cases plays about
   63,000 frames per game and takes about 45 minutes (5,375 s for both on a
   shared four-core host, recording the port's three legs once).
+  - **Levers:** `--case EV9BP18Q-caves2-contrived` skips the OS-random case's
+    two games. The port's legs are still recorded once for both cases. The
+    OS-random count is the helper's own `--count 1` (a `--helper-arg` in
+    `suites.mjs`), so a command-line `--count` does not reach it.
+  - **The port's own player can die:** its legs are a closed-loop bot. A bot
+    death fails the helper before any comparison, with `Port descent leg N for
+    EV9BP18Q-caves2 failed: The port's player died in room R` (a route room) or
+    `… died in the fight, F frames in` (the boss). That is the bot, not a
+    parity failure. Every leg runs `--rewind`, so a death takes twelve
+    failed tries at one hit.
 - **`--case PATTERNS`** matches the id each suite prints for a case and names its
   directory by. Names differ by driver: `scenario.id` for paired-game and
   state-pair suites (`health-soul-phase0`, `gaper-random-0`), `name` elsewhere
@@ -538,6 +565,21 @@ recorded on its own build. Otherwise the case fails with `Browser replay left
 the headless recording at LABEL`, naming the headless recorder as the suspect
 (paired-game.mjs `recorderDivergence`). A bank replayed on another build skips
 these checks, as state-pair's stale-recording warning says.
+
+`--rewind` makes a closed-loop fight keep its health, where a bot that plays
+on through every hit survives only on a lucky path. Every leg of both EV9BP18Q
+descents uses it.
+- **On a health loss** in a route room's or the boss room's fight, the
+  recorder restores the game from a save 90 to 360 frames back.
+- **Then** it plays on with a fresh jitter seed, the orbit flipped on every
+  other try.
+- **After twelve tries** at one spot the hit stands.
+- **The kept keys** are the path that avoided the hit, and `rewound` in the
+  output counts rewinds and kept hits.
+- **Saves:** the headless page's `checkpoint`/`restore` copy its WASM memory
+  (the module has no imports) and its JS fields. Chromium replays from reset to
+  the save instead, so both give the same keys, and the divergence check above
+  still grades the result.
 
 ## No CI
 

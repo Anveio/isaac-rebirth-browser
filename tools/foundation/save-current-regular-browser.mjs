@@ -6,6 +6,7 @@ import {mkdir,readFile,readdir,stat,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {gzipSync} from 'node:zlib';
 import {captureSaveOwn} from './save-continue-browser.mjs';
+import {OWN_PROFILE_SCHEMA,readOwnProfilePacket} from './save-continue-guards.mjs';
 import {inspectBrowserGraphics} from './browser.mjs';
 import {evaluateJson,readTrace,step} from '../e2e/lib/game.mjs';
 import {acquireHostSlot} from '../e2e/lib/host-slots.mjs';
@@ -99,7 +100,7 @@ async function runWriterCase(page,output) {
     const main=rows.find(r=>r.label==='save-main-settled'),prior=rows.find(r=>r.label==='save-before-quit');
     check('Actual newer write and own menu readmission',()=>{assert.ok(paused&&prior&&main?.own.store);assert.equal(main.state.screen,'main');assert.equal(main.state.saveRevision,prior.state.saveRevision+1);assert.equal(main.state.savedLoadValid,true);const writes=main.own.io.events.filter(e=>e.operation==='save'&&e.revision>prior.state.saveRevision);assert.equal(writes.length,1);assert.equal(writes[0].status,'pass');assert.equal(writes[0].packet.sha256,main.own.store.sha256);assert.ok(main.own.io.events.some(e=>e.operation==='readmit'&&e.status==='pass'&&e.packet?.sha256===main.own.store.sha256));});
     if(main?.own.store){
-      const raw=await readFile(main.own.store.path);assert.equal(hash(raw),main.own.store.sha256);const packet=JSON.parse(raw);assert.equal(packet.version,1);assert.equal(packet.profiles.length,3);const record=packet.profiles[0].saved;
+      const raw=await readFile(main.own.store.path);assert.equal(hash(raw),main.own.store.sha256);const packet=readOwnProfilePacket(raw);const record=packet.profiles[0].saved;
       check('Actual Room.Save packet clock and ordered current regular records',()=>{assert.ok(paused&&record);assert.equal(record.run.gameUpdateCount,paused.state.gameUpdateCount);assert.equal(record.run.currentRoom,paused.state.currentRoom);assert.equal(record.context.runSeedValue,caseData.seedValue);assert.equal(record.run.runSeed,'PBW9 YNC8');assert.deepEqual(record.run.room.savedRegularPickups,paused.records);});
     }
   }catch(error){fatal=String(error.stack??error);}
@@ -108,7 +109,7 @@ async function runWriterCase(page,output) {
     catch(error){checks.push({name:'terminal retention',status:'fail',error:String(error)});}
     page.off('pageerror',onPageError);
     try{await budget();}catch(error){fatal=[fatal,String(error.stack??error)].filter(Boolean).join('\n');}
-    const report={schema:1,status:!fatal&&checks.every(row=>row.status==='pass')?'pass':'fail',fatal:fatal??null,
+    const report={schema:1,ownProfileSchema:OWN_PROFILE_SCHEMA,status:!fatal&&checks.every(row=>row.status==='pass')?'pass':'fail',fatal:fatal??null,
       inputId:caseData.scenario.id,buildSha256,graphics,checks,labels:rows.map(row=>row.label),actualCommands:commands.length,
       scope:'Actual public current-room live-body to own packet/write/readmission only. No Original actor-save parity, Native, Continue, reload or legacy Save comparison grade.'};
     await save(join(output,'report.json'),report);

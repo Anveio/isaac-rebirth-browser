@@ -40,6 +40,13 @@ case reproduces exactly. With `--entropy antithesis` every draw calls
 `antithesis_sdk::random::get_random()`, letting the platform steer and replay
 exploration. Units never read clocks, OS randomness or the SDK directly.
 
+The `game` unit's sampled checks (a batch re-run as single ticks, a snapshot
+round trip, a stale save acknowledgement, the continuation's midpoint) leave
+the simulation alone, so they draw from the state they check instead: a
+stream seeded by the digest of the state before the command and the command's
+index. A retained tape therefore replays exactly the checks its case ran, with
+no field `replay.rs` would refuse.
+
 Properties ([props.rs](../engine/dst/src/props.rs)) are Antithesis assertions:
 `always`, `sometimes`, `reachable` and `unreachable`. Each call forwards to the SDK macro of
 the same kind, so a platform run reports every property natively. Because the
@@ -271,12 +278,14 @@ Beyond its invariants, every `game` tape is checked by:
   outside `Game`'s serialization.
 * **Lossless publication.** Published states and whole games round-trip
   through JSON and the engine's own deserialization validators.
-* **Batched ticks.** A sampled `Tick` of up to 32 steps is re-run as that many
-  single ticks and must reach the identical game. Only command-level
+* **Batched ticks.** A `Tick` of up to 32 steps is re-run as that many single
+  ticks when sampled, and always when it changes screens or waits on save IO,
+  and must reach the identical game. Only command-level
   publication may differ: the batch publishes every step's outputs in order
   (what `State::begin_command` clears: sound and music events, SFX volume
   callbacks, settings and input-configuration saves, and unavailable-action
-  reports), and a screen change resets the menu
+  reports), including those before a step that returned to the menus, and a
+  screen change resets the menu
   animation counter at the command boundary. The same engine method defines
   which outputs a key ignored during a boss scene or the run-start fade may
   clear, so a new output cannot drift out of either check.
@@ -564,6 +573,7 @@ fix must follow source evidence rather than merely silence the property.
 | Main ported Envy and Super Envy (#605): a head that dies splits into two or three smaller heads whose runtime variants are `v + 10·level`, spawned from config row `v % 10`. Main's gib port (09a6c50) had Die look up the dying NPC's config by `(kind, variant)`, and no row 51.10 or 51.11 exists, so the first split head to die panicked with `entity is not authored in entities2.xml`. In the browser that traps the WASM and freezes the game. 28 of 64 cases branched from a Basement I run start hit it. | `Npc::config` is the single owner of the authored row an NPC was born from: the original keeps the config its spawn resolved, and Die 445c60, the champion roll and the grid colliders read it. Envy declares its runtime-variant mapping (`envy::config_variant`); every other family's runtime variant is its authored row. The death sound, gibs, champion roll and both colliders now read `npc.config()`. | `regression-envy-split-death` (599 commands) panics at command 568 without the fix; its `chases.json` recipe rebuilds it from the Envy entry to the first Envy death |
 | A bomb that destroyed a tinted rock froze the game when the rock's 56d440 reward drew a Megatroll Bomb (40/5): every tick after it failed with `unresolved pickup selector 40/5`. The chest-loot fix had made `pickups::definition_subtype` the owner of the transient Troll and Megatroll subtypes' temporary visual definition, but the newer tinted-rock reward (50167a5) handed the raw subtype to `Pickup::spawn`, which has no 40/5 definition. | `Pickup::spawn` resolves its definition and spritesheet through `definition_subtype` itself and keeps the real subtype, so no birth site can bypass the mapping; existing callers that pre-map behave identically (every corpus tape replays to the same state hash after every command). The reward's 40/5 then converts into a Megatroll Bomb actor on its first full update, as chest loot does. | The `pickups` unit spawns every rolled 40/3 and 40/5 and checks they draw the regular bomb's visual, which fails without the fix. `regression-tinted-rock-megatroll` no longer draws the reward since the shared MT moved it off its branch, and stays in the corpus as an ordinary workload (09cc3d1) |
 | The `game` driver kept its own copy of which rooms the player may enter. Main admitted large and miniboss rooms (#171, #181) but the copy did not, so DST never entered Gluttony's room. Lasers, the shared pathfinder and the laser invariants went unexercised; generated runs reached 8 of the 12 implemented NPC kinds. | `rebirth_cleanroom::traversal::admits` is the single owner of doorway admission (the engine's departure check uses it). The driver routes by it, and explorers head for the nearest unvisited admitted room. 48 generated runs then reached Gluttony and Pooters and met every `game` property without the corpus. | `game: the player is in a miniboss room` and `game: a laser is live`, which `coverage-miniboss-clear` meets on every run |
+| A batched Tick that returned to the menus dropped what its earlier steps had published. The menu reconstruction Pause Quit ends in (`reconstruct_menu_from_profiles`, directly or when the host answers the menu readmission) reset the Options and Controls menus to their defaults, keeping only their transport sequences, so the command's settings and input-configuration save requests and unavailable-action reports went with them. Single Ticks publish each step's before that step, so the browser reported an M (Mute, action 18) pressed during the quit fade only when it ran one step per command, and a settings save made earlier in the same batch would have been lost the same way. The shared-MT workstream met it on a8056a80: `game: a batched Tick simulates exactly what single Ticks do` failed at step 1994, single Ticks publishing `[18]` and the batch `[]`. Its retained tape did not fail under `--replay`, because the batch check was sampled from the case's entropy. | Both menus' reconstruction keeps the command's outbox along with the sequences (`OptionsMenu::reinitialize`, `ControlsMenu::reinitialize`). The harness now draws sampled checks from the state they check, so a retained tape replays them, and always re-runs a batch that changes screens or waits on save IO. | [`regression-quit-batch-keeps-mute-report`](../engine/dst/corpus/regression-quit-batch-keeps-mute-report.json) (67 commands, with a save host) pauses a run, confirms Quit, presses M and runs one 32-step Tick across the fade into the menus. Without the fix it fails the batched-Tick property at command 65 (single `[18]`, batch `[]`), as it does without a save host; with the fix both pass |
 
 ## Running on Antithesis
 

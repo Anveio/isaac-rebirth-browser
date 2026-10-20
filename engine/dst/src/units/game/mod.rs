@@ -149,7 +149,7 @@ pub fn run(case: &mut Case) {
         } else {
             driver.next(&simulation.game.state, case.entropy)
         };
-        if !simulation.step(command, case.entropy) {
+        if !simulation.step(command) {
             case.retain(&simulation.tape, "panic");
             return;
         }
@@ -162,7 +162,8 @@ pub fn run(case: &mut Case) {
     }
 }
 
-/// Batched Ticks up to this length are re-run as single Ticks when sampled.
+/// Batched Ticks up to this length are re-run as single Ticks when sampled
+/// and whenever they change screens or wait on save IO.
 const BATCH_SAMPLE_TICKS: u32 = 32;
 
 struct Simulation {
@@ -519,7 +520,20 @@ impl Simulation {
     }
 
     /// Applies one command with every per-step check; false ends the case.
-    fn step(&mut self, command: Command, e: &mut Entropy) -> bool {
+    /// The draws of the checks a command samples. They come from the state
+    /// before the command and its index, not from the case's entropy, so a
+    /// retained tape replays exactly the checks its case ran.
+    fn checks(&self) -> Entropy {
+        let before = self
+            .trace
+            .last()
+            .map_or_else(|| digest(&self.game.state), |&(_, digest)| digest);
+        let index = self.tape.commands.len() as u64;
+        Entropy::seeded(before ^ index.wrapping_mul(0x9e37_79b9_7f4a_7c15))
+    }
+
+    fn step(&mut self, command: Command) -> bool {
+        let e = &mut self.checks();
         let before = self.game.clone();
         let before_store = self.store.clone();
         self.tape.commands.push(command.clone());
@@ -574,19 +588,25 @@ impl Simulation {
         invariants::state(&self.game.state);
         self.controls_return();
         coverage::observe(&self.game.state);
-        if e.chance(1, 50) {
+        let sampled = e.chance(1, 50);
+        if sampled {
             self.snapshot_round_trip();
-            if let (
-                Ok(()),
-                Command::Tick {
-                    count,
-                    timestamp_millis: None,
-                },
-            ) = (&result, &command)
-            {
-                if (2..=BATCH_SAMPLE_TICKS).contains(count) {
-                    self.batch_matches_single_ticks(&before, before_store, *count);
-                }
+        }
+        // A batch that changes screens or waits on save IO crosses what a
+        // command boundary resets (a menu reconstruction, a System iteration
+        // the host resumes), so it is always re-run as single Ticks.
+        let crosses = before.state.screen != self.game.state.screen
+            || served.as_ref().is_ok_and(|responses| !responses.is_empty());
+        if let (
+            Ok(()),
+            Command::Tick {
+                count,
+                timestamp_millis: None,
+            },
+        ) = (&result, &command)
+        {
+            if (sampled || crosses) && (2..=BATCH_SAMPLE_TICKS).contains(count) {
+                self.batch_matches_single_ticks(&before, before_store, *count);
             }
         }
         self.trace.push((result.is_ok(), digest(&self.game.state)));
@@ -698,7 +718,7 @@ impl Simulation {
         coverage::end_case(&case.label);
         self.snapshot_round_trip();
         self.replay_matches();
-        self.continuation_matches(case.entropy);
+        self.continuation_matches(&mut self.checks());
         self.abi_matches();
         if let Some(module) = case.wasm {
             module.differential(&self.tape, &self.trace);

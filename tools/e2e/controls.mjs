@@ -15,6 +15,10 @@ for (const name of ['--output','--production-directory','--scenarios'])
 assert.equal(flag('--reuse-original'),undefined,'Registered Controls requires fresh Native; cached Native reuse is not admitted by this producer');
 const recorded=flag('--scenarios');
 const controlsOwnReload=process.argv.includes('--keyboard-own-reload');
+const livingRestart=process.argv.includes('--living-restart');
+assert.ok(!(livingRestart&&controlsOwnReload),'Restart and own Keyboard reload declare separate public routes');
+const restartComparer=livingRestart?(await import('../foundation/living-restart-state-pair.mjs')).restartComparer:undefined;
+const scenarioProducer=livingRestart?'tools/original/living-restart-scenarios.py':'tools/original/controls-scenarios.py';
 const reloadIds=['controls-movement-up-w-to-i-v1','controls-os-movement-up-w-to-i-v1'];
 const output=resolve(flag('--output',`.cache/e2e/controls/${Date.now()}-${process.pid}`));
 assert.ok(!existsSync(output),'Controls needs a fresh evidence directory');
@@ -23,11 +27,11 @@ const save=(path,data)=>writeFileSync(path,JSON.stringify(data,null,2)+'\n',{fla
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const fileDigest=path=>digest(readFileSync(path));
 const producer='tools/foundation/paired-game.mjs';
-const observer='tools/original/controls-paired-observer.py';
+const observer=livingRestart?'tools/original/living-restart-observe.py':'tools/original/controls-paired-observer.py';
 const sourcePaths=[
   'tools/e2e/lib/game.mjs', 'tools/foundation/pixel-pairs.mjs',
   'tools/e2e/controls.mjs','tools/e2e/lib/cli.mjs','tools/e2e/lib/original.mjs',
-  producer,'tools/foundation/controls-state-pair.mjs','tools/foundation/controls-bank-state-pair.mjs',
+  producer,'tools/foundation/verify.mjs','tools/foundation/controls-state-pair.mjs','tools/foundation/controls-bank-state-pair.mjs',
   'tools/foundation/controls-browser-observe.mjs','tools/foundation/browser.mjs',
   ...(controlsOwnReload ? ['tools/foundation/controls-keyboard-reload.mjs',
     'references/isaac/foundation/combat/tapes.json'] : []),
@@ -37,6 +41,8 @@ const sourcePaths=[
   'tools/e2e/lib/audio-owners.mjs','tools/e2e/audio-api-observer.mjs',
   'tools/original/controls-scenarios.py',observer,'tools/original/controls-keyboard-observe.py',
   'tools/original/controls-playing-keyboard-observe.py','tools/original/native-identity.py',
+  ...(livingRestart?['tools/original/controls-paired-observer.py',scenarioProducer,
+    'tools/foundation/living-restart-state-pair.mjs']:[]),
   'tools/original/audio-observer.py','tools/original/foundation-paired-observer.py',
   'tools/original/foundation-menu-observer.py','tools/original/foundation-combat-observe.py',
   'tools/original/state-observer.py','tools/original/foundation-clock-run.py',
@@ -62,17 +68,17 @@ try {
     assert.equal(fileDigest(target),before[name],'Archived executing Source must match its identity');
   }
   save(resolve(output,'source-before.json'),before);
-  producerIdentity={schema:1,mode:controlsOwnReload?'controls-own-keyboard-reload-v1':'controls-v1',binarySha256:ORIGINAL_SHA,
+  producerIdentity={schema:1,mode:livingRestart?'controls-living-restart-v1':controlsOwnReload?'controls-own-keyboard-reload-v1':'controls-v1',binarySha256:ORIGINAL_SHA,
     captureProducerSha256:before[producer],observerSha256:before[observer],
     sources:before,publicPreferences:{sfxVolume:1,musicVolume:1,fullscreen:false,inputConfigs:{devices:[]}}};
   save(resolve(output,'producer-identity.json'),producerIdentity);
   bank=JSON.parse(recorded!==undefined ? readFileSync(resolve(recorded),'utf8') :
-    execFileSync('python3',['tools/original/controls-scenarios.py','--count',flag('--count','1')],
+    execFileSync('python3',[scenarioProducer,...(livingRestart?[]:['--count',flag('--count','1')])],
       {cwd:ROOT,encoding:'utf8',maxBuffer:4*1024*1024}));
   // Every draw is retained before filtering and before either game.
   const generated=resolve(output,'generated-scenarios.json');
   save(generated,bank);
-  execFileSync('python3',['tools/original/controls-scenarios.py','--validate-bank',generated],{cwd:ROOT,encoding:'utf8'});
+  execFileSync('python3',[scenarioProducer,'--validate-bank',generated],{cwd:ROOT,encoding:'utf8'});
   //Validate/retain the complete generated bank first. This explicit Source
   //mode selects declared route IDs only, before either capture, never outcomes.
   const selectionArgv=controlsOwnReload && flag('--case')===undefined
@@ -83,7 +89,7 @@ try {
     'Own Keyboard reload admits only its fixed/OS W-to-I route; no other remapping tape');
   const scenarios=resolve(output,'scenarios.json');
   save(scenarios,bank);
-  execFileSync('python3',['tools/original/controls-scenarios.py','--validate-bank',scenarios],{cwd:ROOT,encoding:'utf8'});
+  execFileSync('python3',[scenarioProducer,'--validate-bank',scenarios],{cwd:ROOT,encoding:'utf8'});
   await assertOriginalBinary();
   const paths=bank.cases.map((data,index)=>{
     const path=resolve(output,`replay-${index}.json`);
@@ -94,8 +100,8 @@ try {
     try {
       assert.deepEqual(data.startup,{audioPreferences:{sfxVolume:1,musicVolume:1},fullscreenPreferences:{fullscreen:false},inputConfigs:{devices:[]}},
         'Every case independently declares the actual pre-constructor startup owners');
-      const comparers=data.fixedBankCaseId ? comparersFor(data) : {compareControls,compareMovement};
-      const requiredMovement=data.fixedBankCaseId ? Boolean(data.movementKind) : true;
+      const comparers=livingRestart?{compareControls:restartComparer(data)}:data.fixedBankCaseId ? comparersFor(data) : {compareControls,compareMovement};
+      const requiredMovement=livingRestart?false:data.fixedBankCaseId ? Boolean(data.movementKind) : true;
       assert.equal(Boolean(comparers.compareMovement),requiredMovement,'Each declared route owns its exact movement aggregate');
       const disk=statfsSync(output);
       assert.ok(Number(disk.bavail)*Number(disk.bsize)>4*1024**3,'Fresh Native Controls keeps the existing4GiB reserve');
@@ -132,10 +138,12 @@ finally {
     assert.deepEqual(after,before,'Executing Controls Source changed during the suite');
   } catch (error) { failure=[failure,String(error.stack??error)].filter(Boolean).join('\n'); }
 }
-const result={schema:1,...(controlsOwnReload && {controlsOwnReload:true,fullBank:false,
+const result={schema:1,...(livingRestart&&{livingRestart:true,scope:'Normal seeded Isaac public Controls/Back, menu R exclusion, hold60/release/hold61, actual pending request and next-dispatch/continuous-hold/reset from both phases plus paused control and first unfiltered OS seed/boot. General/dead/Challenge, unseeded request draw, full MT/PCM/RGBA and own-storage reload remain separate.'}),...(controlsOwnReload && {controlsOwnReload:true,fullBank:false,
   additionalScope:'Complete paired W-to-I input route plus actual Browser own-storage natural document load, reset-load and remapped gameplay. Native process reload, corrupt/hotplug/controller and Browser OS-process restart remain unqualified.'}),status:!failure && results.length===bank?.cases?.length && results.every(row=>row.status==='pass')?'pass':'fail',
   failure,producerIdentity,cases:results,
-  scope:controlsOwnReload
+  scope:livingRestart
+    ? 'Normal seeded Isaac public Controls/Back and typed seed; three fixed physical hold/release/phase/pause controls plus first unfiltered raw OS seed/boot case. Actual canonical Native identity, input, queue, hold/Persistent owners, source clock and Browser input/errors remain required. No general/dead/Challenge, unseeded request draw, full MT/PCM/RGBA or natural own-storage reload claim.'
+    :controlsOwnReload
     ? 'Filtered fixed/first-OS W-to-I paired routes plus mandatory real Browser own Keyboard save, natural document constructor load, separate reset-load and public remapped gameplay. All inherited Native/Browser clock/state/physical/movement guards remain required. No Native process reload, corrupt/hotplug/controller, Browser OS-process restart, fullRGBA or PCM claim.'
     : 'Four fixed routes plus recorded unfiltered OS Keyboard W-to-I: independent actual Menu9/10/24x2/physical-action/file/storage owners and required movement/coasting where declared; corrected duplicate SFX187 Menu-clock protocol. Canonical Native provenance/finalseed/clock and complete actual Browser input/error gates remain required. Executing producer Source is archived before draws/games and unchanged at completion. Every failure/partial is retained and later declared cases still execute. Full RGBA/history-cap diagnostics retained; no reload, alternatephysical overlap/controller/Skipped/PCM or wholeControls claim.'};
 save(resolve(output,'report.json'),result);

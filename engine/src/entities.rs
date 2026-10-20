@@ -122,15 +122,18 @@ pub(crate) enum Birth {
     VariantProjectile(ProjectileBirth, u32),
     /// A FireProjectiles shot of variant `.1` whose ProjectileParams carry
     /// flags and a centre (49ee5d/49ee8c).
-    #[expect(
-        dead_code,
-        reason = "Mega Maw 262's FireRing (4e0833) is the first producer"
-    )]
     FlaggedProjectile(
         ProjectileBirth,
         u32,
         crate::enemy_projectiles::ProjectileFlags,
     ),
+    /// Mega Maw's Summon (4e03fe): Spawn550a40 of a Hopper with no spawner,
+    /// then its +440 landing target, state 4, +f58 5 and a forced Hop clip
+    /// seeked to frame 5 (40fed0).
+    Hop {
+        selector: SpawnSelector,
+        target: WorldVector,
+    },
     /// Player TakeDamage(1.0, flags 0, countdown 30) from an NPC's AI (Mega
     /// Fatty's fart hits a player within 100 px).
     PlayerHurt,
@@ -356,6 +359,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::boil::FAMILY,
     &crate::chub::FAMILY,
     &crate::gurdy_jr::FAMILY,
+    &crate::mega_maw::FAMILY,
     &crate::long_legs::FAMILY,
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,

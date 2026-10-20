@@ -30,13 +30,14 @@ export function gameKey(input: KeyInput, state: State, supported: ReadonlySet<st
 
 /** A batched public Tick can stop before a System iteration for real IO.
  * Complete each save write and menu readmission the engine suspends on, so
- * no rendering, audio callback or next public input sees partial Main state.
+ * no rendering, audio callback or next public input sees partial System state.
  * `failed` hears a storage failure; the engine still continues. */
 export function settleSaveIO(engine: Engine, saves: SaveGameIO, command: Command, state: State, failed: () => void): State {
   for (let responses = 0; ; responses++) {
     if (!state.saveWritePending && !state.saveReadmissionPending) return state;
-    //One write and one menu read can belong to one public System interval.
-    const maxResponses = command.type === 'tick' ? command.count * 2 : 1;
+    //Living Restart can flush a dirty profile, Clear the run and write
+    //its fresh initial Save within the same public System interval.
+    const maxResponses = command.type === 'tick' ? command.count * 3 : 1;
     if (responses >= maxResponses) throw new Error('Save IO made no bounded tick progress');
     if (state.saveWritePending) {
       if (!saves.consume(engine, state.saveRevision)) failed();

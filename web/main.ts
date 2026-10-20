@@ -86,7 +86,7 @@ async function boot() {
       }
       feedback.consumeControls(state.controlsMenu.unavailableActions);
       fullscreen.consume(state.fullscreen.requests);
-      audio.consume(state.audio.events, state.audio.volumeCallbacks);
+      audio.consume(state.audio.events, state.audio.volumeCallbacks, state.audio.stopLoopingCallbacks);
       //Only an actual source Room.Update reissues ambience volume/pitch.
       //Pure key/backend/volume commands must not overwrite5E1DB0's retune.
       if (state.ambience.updateSequence !== previousAmbienceUpdate)

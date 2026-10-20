@@ -149,6 +149,10 @@ pub struct PillUseFrontiers {
 ///unknown prior counter remains unknown even though the actual use consumes
 ///the Pill. Cache completion is still the reached Range plan's own decision.
 fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
+    //5283D9 ->5283EE precede the effect/cache. Real Persistent callbacks now
+    //own these words; every new award retains its actual inline dependencies.
+    crate::persistent_effects::add_counter(state, 5, 1)?;
+    crate::persistent_effects::mark_collected(state, 43)?;
     let displayed_name = match state
         .run_seeds
         .as_ref()
@@ -172,8 +176,8 @@ fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
         .pill_use_frontiers
         .get_or_insert_with(Default::default);
     frontiers.player_be8 = true;
-    frontiers.persistent_counter5 = true;
-    frontiers.persistent_use43 = true;
+    frontiers.persistent_counter5 = false;
+    frontiers.persistent_use43 = false;
     frontiers.game_time_551dd0 = true;
     frontiers.identified_color = true;
     frontiers.unresolved_name_mode |= displayed_name.is_none();
