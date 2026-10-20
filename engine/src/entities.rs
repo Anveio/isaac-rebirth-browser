@@ -274,7 +274,8 @@ pub(crate) fn ground_collision(npc: &mut Npc, grid: &Grid) -> Result<(), String>
         scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
         points,
     })?;
-    let sample_position = npc.position;
+    // 442df8 samples the centre the collider's 442c2d clamp yields.
+    let sample_position = grid.clamp_room(npc.position, 0.0);
     if npc.kind == 220 {
         // 44364a: Squirt shares the Dip's 1.2 reflection scale.
         collider.resolve_nonplayer_ground_bouncy(

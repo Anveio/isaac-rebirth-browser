@@ -64,7 +64,7 @@ fn advance(
             scale: crate::motion::WorldVector { x: 1.0, y: 1.0 },
             points: npc.config().grid_points,
         })?;
-        let mut position = world.grid.clamp_room(npc.presented_position, 0.0);
+        let mut position = npc.presented_position;
         let mut velocity = npc.velocity;
         collider.resolve_nonplayer_ground(world.grid, &mut position, &mut velocity, true)?;
         npc.presented_position = position;

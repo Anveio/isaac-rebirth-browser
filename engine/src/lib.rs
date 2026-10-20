@@ -795,11 +795,6 @@ pub struct State {
     /// Room ambience loops 5c6980 (insect swarm and fire).
     #[serde(default)]
     pub ambience: ambience::Ambience,
-    /// The player's velocity when a door transition began, before departure
-    /// cleared it; the post-ChangeRoom admitted update's footprint reads it.
-    /// It lives through the transition, so a state saved during one keeps it.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub departure_velocity: Option<motion::WorldVector>,
     /// The player's world position while ChangeRoom runs the entered room's
     /// Room.Init, before the entry door placement: Room.Init's critter
     /// updates measure the player there.
@@ -1259,7 +1254,6 @@ impl Game {
                 room_transition: None,
                 stage_transition: stage_transition::StageTransition::default(),
                 ambience: ambience::Ambience::default(),
-                departure_velocity: None,
                 departure_position: None,
                 stage_effects,
                 inventory: Inventory {
@@ -2126,7 +2120,6 @@ impl Game {
         self.state.revealed_secret_connections.clear();
         self.state.persisted_rooms.clear();
         self.state.room_transition = None;
-        self.state.departure_velocity = None;
         self.state.departure_position = None;
         self.state.room = Room::from_floor_descriptor_with_special(
             &self.state.floor,
@@ -2337,7 +2330,6 @@ impl Game {
         self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.room_transition = None;
-        self.state.departure_velocity = None;
         self.state.departure_position = None;
         self.state.knife_query_partition = None;
         self.state.stage = run.stage;
@@ -2868,16 +2860,33 @@ impl Game {
     }
 
     /// The ChangeRoom Room.Update5d12a0 tail updates the Player first at the
-    /// unchanged counter. It leaves position and velocity unchanged; its only
-    /// shared draws are the 50c000 footprint, gated by the departing velocity.
+    /// unchanged counter, already placed at the entry door with zero velocity.
+    /// Its only shared draws are the 50c000 footprint, which reads the velocity
+    /// after this update's input (531c8f), so it fires only while a movement
+    /// key is still held. A native probe of 50c000 shows (0, -0.528) with Up
+    /// held and (0, 0) once released.
     fn admitted_update_footprint(&mut self, phase: phase::Phase) -> Result<(), String> {
         self.state.departure_position = None;
-        if let (phase::Phase::Update, Some(velocity)) =
-            (phase, self.state.departure_velocity.take())
-        {
-            player_footprints::advance(&mut self.state, velocity)?;
+        if phase != phase::Phase::Update {
+            return Ok(());
         }
-        Ok(())
+        let (dx, dy) = if self.state.player.controls_enabled {
+            (
+                i32::from(self.held(1)) - i32::from(self.held(0)),
+                i32::from(self.held(3)) - i32::from(self.held(2)),
+            )
+        } else {
+            (0, 0)
+        };
+        let velocity = motion::advance_world(
+            bombs::player_world(&self.state),
+            bombs::player_velocity(&self.state),
+            dx,
+            dy,
+            self.state.player_stats.move_speed,
+        )?
+        .1;
+        player_footprints::advance(&mut self.state, velocity)
     }
     /// The native list admits Player first, then supported selectors in their
     /// authored order. Persist that order with the room rather than regrouping

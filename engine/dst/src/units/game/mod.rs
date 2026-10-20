@@ -20,7 +20,7 @@ use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::json_diff;
 use crate::props;
-use crate::tape::{Reset, Tape};
+use crate::tape::{BootElapsed, Reset, Tape};
 use rebirth_cleanroom::audio::{SoundEvent, VolumeCallback};
 use rebirth_cleanroom::controls_menu;
 use rebirth_cleanroom::display_settings::GammaPreferences;
@@ -102,6 +102,11 @@ pub fn run(case: &mut Case) {
                     _ => {}
                 }
                 tape.save_host = Some(host);
+            }
+            // A controlled harness declares how long the original ran before
+            // its reset (#660); the shipped game never does.
+            if e.chance(1, 4) {
+                tape.boot_elapsed = Some(declared_boot_elapsed(e));
             }
             tape
         }
@@ -318,6 +323,29 @@ pub(crate) fn stored_input_configs(e: &mut Entropy) -> InputConfigs {
     InputConfigs { devices }
 }
 
+/// A boot clock a harness declares: the live suites' Native intro (30
+/// bootstrap, 180 intro and 9 Title presentations: 3,850 ms + 77,000 ns),
+/// none, any day's worth, or the widest the ingress takes.
+fn declared_boot_elapsed(e: &mut Entropy) -> BootElapsed {
+    let (milliseconds, sub_millisecond_nanoseconds) = match e.below(4) {
+        0 => (3_850, 77_000),
+        1 => (0, 0),
+        2 => (e.range(0, 86_400_000), e.range(0, 1_000_000)),
+        _ => (u32::MAX, 999_999),
+    };
+    BootElapsed {
+        milliseconds,
+        sub_millisecond_nanoseconds,
+    }
+}
+
+/// Whether `Game::set_boot_elapsed` refuses `declared` on `game`, leaving it
+/// unchanged.
+fn boot_clock_refuses(game: &Game, declared: (u32, u32)) -> bool {
+    let mut probe = game.clone();
+    probe.set_boot_elapsed(declared.0, declared.1).is_err() && probe == *game
+}
+
 /// A volume as the browser stores it: an Options step, an endpoint, or any
 /// four-decimal value within the unit interval.
 fn stored_volume(e: &mut Entropy) -> f32 {
@@ -397,6 +425,42 @@ impl Simulation {
                         && tape.boot_input_configs.is_some(),
                     "game: a game boots with stored audio, fullscreen and input settings"
                 );
+                // #660's harness ingress: a fresh reset clock takes exactly the
+                // declared time, and refuses a sub-millisecond part of 1 ms or
+                // more, or a second declaration once it moved, unchanged.
+                let clock = &state.run_admission.clock;
+                props::always!(
+                    tape.boot_elapsed.is_none_or(|elapsed| {
+                        clock.milliseconds
+                            == i64::from(boot_epoch_seed) * 1000 + i64::from(elapsed.milliseconds)
+                            && clock.sub_millisecond_nanoseconds
+                                == elapsed.sub_millisecond_nanoseconds
+                    }),
+                    "game: a declared boot elapsed time advances the fresh reset clock by exactly that time",
+                    json!({ "declared": tape.boot_elapsed, "clock": clock })
+                );
+                props::sometimes!(
+                    tape.boot_elapsed.is_some(),
+                    "game: a game boots with a declared boot elapsed time"
+                );
+                let moved = tape.boot_elapsed.is_some_and(|elapsed| {
+                    elapsed.milliseconds != 0 || elapsed.sub_millisecond_nanoseconds != 0
+                });
+                if moved {
+                    props::always!(
+                        boot_clock_refuses(&game, (0, 0)),
+                        "game: a boot elapsed declaration is refused once the reset clock moved",
+                        json!({ "declared": tape.boot_elapsed })
+                    );
+                } else {
+                    // Any sub-millisecond part from 1 ms up to u32::MAX.
+                    let invalid = 1_000_000 + initial_seed % (u32::MAX - 999_999);
+                    props::always!(
+                        boot_clock_refuses(&game, (boot_epoch_seed, invalid)),
+                        "game: a boot elapsed time with a sub-millisecond part of 1 ms or more is refused",
+                        json!({ "declared": [boot_epoch_seed, invalid] })
+                    );
+                }
                 let again = tape.session();
                 props::always!(
                     again.as_ref().ok() == Some(&(game.clone(), store.clone())),
@@ -469,6 +533,13 @@ impl Simulation {
                 return false;
             }
         };
+        if before.state.tick == 0 && self.game.state.tick > 0 {
+            props::always!(
+                boot_clock_refuses(&self.game, (0, 0)),
+                "game: a boot elapsed declaration is refused once a Tick ran",
+                json!({ "command": command, "tick": self.game.state.tick })
+            );
+        }
         // The browser answers the save IO a command leaves before any later
         // input sees the state, so the contracts below see both.
         let host = self.tape.save_host.as_ref();
@@ -761,7 +832,11 @@ impl Simulation {
                 abi::reset_with_settings_preferences(seed, epoch)
             }
         };
-        if reset != 0 {
+        // web/engine.ts declares a harness's boot clock inside reset.
+        let declared = self.tape.boot_elapsed.is_none_or(|elapsed| {
+            abi::set_boot_elapsed(elapsed.milliseconds, elapsed.sub_millisecond_nanoseconds) == 0
+        });
+        if reset != 0 || !declared {
             props::always!(false, "game: the C ABI agrees with direct dispatch");
             return;
         }

@@ -59,6 +59,8 @@ than relabeled as current-runtime evidence.
 
 The original's whole segment is fixed fixture keys. A research controller (projected-shot dodging) found them once, and a fresh original replays them exactly. The port records its segment closed-loop per build, one leg per floor.
 
+Its Basement II leg runs the recorder's `--dodge` (`fightFlags`), which shapes only the port's own keys. #754 stopped the port placing a ChangeRoom-tail footprint at route frame 133 (Basement I room 6 → 7). The shared random stream then runs four draws behind the earlier build, and every closed-loop fight after it plays differently. On main ce792a8d, the unflagged Basement II fight died 2,462 frames in.
+
 Both games end the segment hurt: the original at 4/6, the port at 2/6 in the recorded run. The Caves I generation they read is therefore the same: no Challenge room, start room descriptor 5.
 
 | Case | Paired checkpoints | Required tail checks |
@@ -92,7 +94,22 @@ import does not change that boundary.
 
 **The original's segment** is fixed fixture keys, 47,740 frames from Basement I's boss room to Caves I's corner. A research controller found the Caves I keys room by room, keeping the seeded variant that ended each room with the most health. A fresh original replays them exactly.
 
-**The port's segment** is recorded closed-loop per build, one leg per floor. Its Caves I leg runs the recorder's `--dodge --salt 4` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+**The port's segment** is recorded closed-loop per build, one leg per floor. Its Basement II leg runs `--dodge`, as EV9BP18Q-descent's does. Its Caves I leg runs the recorder's `--dodge --salt 12` (`fightFlags`) and a 2,400-frame budget per route room. Those flags shape only the port's own keys.
+
+**Red on main since #754.** On main ce792a8d the port's Caves I leg fails in a route room before Mega Fatty. The helper then records no case, and the suite fails. This search ran headlessly on main's engine:
+
+| Basement II flags | Caves I flags | Where the Caves I leg stopped |
+| --- | --- | --- |
+| `--dodge` | `--dodge --salt 12`, and salts 1–7 | died in room 10 |
+| `--dodge --salt 2`, `--dodge --salt 4` | `--dodge --salt 12` | died in room 11 |
+| `--dodge` | `--dodge --salt 12 --route-salt 1`, `2`, `6` | died in room 11 |
+| `--dodge` | `--dodge --salt 12 --route-salt 3` | died in room 7 |
+| `--dodge` | `--dodge --salt 12 --route-salt 4` | died in room 6 |
+| `--dodge` | `--dodge --salt 12 --route-salt 5` | room 9 not cleared in 2,400 frames, at 3/6 |
+| `--dodge --salt 4` | `--dodge --salt 12 --route-salt 1`, `2` | room 9 not cleared in 2,400 frames, at 1/6 |
+| `--dodge --salt 4` | `--dodge --salt 12 --route-salt 3` | died in room 11 |
+
+The original ends Caves I on a half heart, and the port's leg must end on one too. No seed pin above even reaches Mega Fatty. The pending `--rewind` leg replaces these pins.
 
 **Generation inputs.** Caves II's generation reads the departing player's health and coins:
 - full red health admits the Challenge and Sacrifice rooms;

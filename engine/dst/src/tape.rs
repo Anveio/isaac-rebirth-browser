@@ -32,10 +32,22 @@ pub struct Tape {
     pub boot_map_preferences: Option<MapPreferences>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub boot_gamma_preferences: Option<GammaPreferences>,
+    /// The boot clock a controlled harness declares right after reset (#660,
+    /// `Game::set_boot_elapsed`); the shipped game never declares one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub boot_elapsed: Option<BootElapsed>,
     /// The browser's own-save storage (`save_host`); absent, no save IO.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub save_host: Option<SaveHost>,
     pub commands: Vec<Command>,
+}
+
+/// replay.rs `bootElapsed`: the original's run time before the reset state.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BootElapsed {
+    pub milliseconds: u32,
+    pub sub_millisecond_nanoseconds: u32,
 }
 
 impl Tape {
@@ -48,6 +60,7 @@ impl Tape {
             boot_input_configs: None,
             boot_map_preferences: None,
             boot_gamma_preferences: None,
+            boot_elapsed: None,
             save_host: None,
             commands: Vec::new(),
         }
@@ -61,9 +74,10 @@ impl Tape {
         }
     }
 
-    /// The boot `replay.rs` and the browser's reset perform for this tape.
+    /// The boot `replay.rs` and the browser's reset perform for this tape,
+    /// with the boot clock a harness declares before any command.
     pub fn boot(&self) -> Result<Game, String> {
-        Game::new_with_settings_preferences(
+        let mut game = Game::new_with_settings_preferences(
             self.initial_seed,
             self.boot_epoch_seed,
             None,
@@ -72,7 +86,11 @@ impl Tape {
             self.boot_input_configs.clone(),
             self.boot_map_preferences,
             self.boot_gamma_preferences,
-        )
+        )?;
+        if let Some(elapsed) = self.boot_elapsed {
+            game.set_boot_elapsed(elapsed.milliseconds, elapsed.sub_millisecond_nanoseconds)?;
+        }
+        Ok(game)
     }
 
     /// The boot and, with a save host, its declared save IO and stored

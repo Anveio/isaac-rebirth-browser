@@ -661,10 +661,8 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     )?;
     let collider = collider();
     if phase == Phase::Interpolate {
-        let mut position = grid.clamp_room(
-            familiar.position + (familiar.velocity * familiar.current_friction) * 0.5,
-            0.0,
-        );
+        let mut position =
+            familiar.position + (familiar.velocity * familiar.current_friction) * 0.5;
         let mut velocity = familiar.velocity;
         collider.resolve_nonplayer_ground(&grid, &mut position, &mut velocity, true)?;
         familiar.presented_position = position;
@@ -753,7 +751,6 @@ pub(crate) fn grid_contacts(state: &mut State) -> Result<(), String> {
             .iter_mut()
             .find(|familiar| familiar.id == actor.id)
         {
-            familiar.position = grid.clamp_room(familiar.position, 0.0);
             collider().resolve_nonplayer_ground(
                 &grid,
                 &mut familiar.position,

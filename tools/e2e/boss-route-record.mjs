@@ -32,8 +32,16 @@
 // --exit FRAMES walks through --via X,Y onto the boss-room trapdoor and waits
 // out the stage transition (`next-stage`). --arrival '' skips that checkpoint.
 //
+// The recorder plays the production snapshot's WASM headlessly through the
+// browser page's own engine, key and save modules (lib/headless-page.mjs);
+// --browser-recorder, or E2E_BROWSER_RECORDER=1 from a suite's flag, plays it
+// in Chromium instead. Each capture it emits carries `recorded`: the port's
+// room, position, health and coins there, which the paired gate's browser
+// replay must reach (paired-game.mjs recorderDivergence).
+//
 // CASE.json is a paired case (pairedTape up to gameplay-start, initialSeed,
-// bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms } on stdout.
+// bootEpochSeed). Prints { status, actions, checkpoints, frames, rooms, recorder }
+// on stdout.
 import assert from 'node:assert/strict';
 import { closeSync, fsyncSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -42,6 +50,7 @@ import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { flag, hasFlag } from './lib/cli.mjs';
+import { headlessPage } from './lib/headless-page.mjs';
 import { doorKeys, fightKeys, routingView, saltedRandom, toward, waypoint } from './lib/route.mjs';
 
 // Optional private caller-owned archive; default stdout/result behavior is unchanged.
@@ -54,6 +63,7 @@ const preserveAttempt = (name, value) => {
 };
 
 const caseData = JSON.parse(readFileSync(flag('--case'), 'utf8'));
+const RECORDER = hasFlag('--browser-recorder') || process.env.E2E_BROWSER_RECORDER === '1' ? 'browser' : 'headless';
 const rooms = flag('--rooms').split(',').map(Number);
 // Frames allowed per room before the route is abandoned.
 const ROOM_FRAMES = Number(flag('--room-frames', '600'));
@@ -128,8 +138,11 @@ let browser;
 const actions = [], checkpoints = {};
 let frames = 0, status = 'fail', reason, end = null;
 try {
-  browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
-  const page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  let page;
+  if (RECORDER === 'browser') {
+    browser = await chromium.launch({ ...browserLaunchOptions(), headless: true });
+    page = await browser.newPage({ viewport: { width: 960, height: 540 } });
+  } else page = await headlessPage(server);
   await page.goto(server.url + '/?manual=1');
   await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
   await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
@@ -142,12 +155,19 @@ try {
     if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
     else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
   }
-  // Each capture also records where the port stood, for divergence reports.
+  // Each capture also records where the port stood, for divergence reports,
+  // and the port state the browser replay must reach there (`recorded`).
+  let seen, seenAt = -1;
   const checkpoint = label => {
-    actions.push({ type: 'capture', label });
+    assert.equal(seenAt, frames, `Capture ${label} needs the state of its own frame`);
+    actions.push({ type: 'capture', label, recorded: { recorder: RECORDER, build: server.build.sha256, room: seen.currentRoom, position: [seen.player.x, seen.player.y],
+      health: [seen.player.hp, seen.player.maxHp, seen.player.soulHp], coins: seen.inventory.coins } });
     checkpoints[label] = { room: state.room, player: [state.player.x, state.player.y] };
   };
-  const view = async () => routingView(JSON.parse(await page.evaluate(() => window.game.snapshotJson())));
+  const view = async () => {
+    seen = JSON.parse(await page.evaluate(() => window.game.snapshotJson())); seenAt = frames;
+    return routingView(seen);
+  };
   const held = new Set();
   const hold = async keys => {
     for (const code of [...held]) if (!keys.includes(code)) {
@@ -413,12 +433,41 @@ try {
   }
   if (EXIT) {
     // The shared exit keys step from cell centre to cell centre, as the
-    // cleared boss room's door walk does above.
-    const centreWalk = async (goal, cells, arrived, failure) => {
+    // cleared boss room's door walk does above. A turn at walking speed can
+    // leave the player circling a centre just outside the 4-unit radius,
+    // never inside it on a sampled frame (Y9QL8QZM random, waypoint
+    // (480, 320): 4.4-5.9 units round cell 41's centre every 20 frames).
+    // The steering is a function of the sampled position, so a sample that
+    // repeats an earlier one exactly (position and keys, 4-8 units from the
+    // same centre) is that orbit and never arrives; a wobble that settles
+    // never repeats one. The walk then releases the keys, lets the player
+    // coast to rest and takes the centre as reached. Only the final approach
+    // may enter the trapdoor; any other walk that does fails with that reason.
+    const centreWalk = async (goal, cells, arrived, failure, entry = false) => {
       let target = centreOf(state.player), incoming = 4;
+      const orbit = new Set();
       for (let left = EXIT; !arrived(); left -= STRIDE) {
         if (left <= 0) throw new Error(failure);
-        if (Math.hypot(target.x - state.player.x, target.y - state.player.y) <= 4) ({ point: target, dir: incoming } = planStep([...cells, ...pickupCells(state)], goal, incoming));
+        if (!entry && state.stageTransition !== 0) throw new Error(`${failure.replace(/ in \d+ frames$/, '')}: the player entered the trapdoor`);
+        const distance = Math.hypot(target.x - state.player.x, target.y - state.player.y);
+        let circling = false;
+        if (distance > 4 && distance <= 8) {
+          const sample = `${state.player.x},${state.player.y},${toward(state.player, target, 2).join('+')}`;
+          circling = orbit.has(sample);
+          orbit.add(sample);
+        } else orbit.clear();
+        if (circling) {
+          await hold([]);
+          for (let rest = 60, last = state.player; rest > 0; rest -= STRIDE) {
+            await step(STRIDE); state = await view(); left -= STRIDE;
+            if (Math.hypot(state.player.x - last.x, state.player.y - last.y) < 0.1) break;
+            last = state.player;
+          }
+        }
+        if (distance <= 4 || circling) {
+          orbit.clear();
+          ({ point: target, dir: incoming } = planStep([...cells, ...pickupCells(state)], goal, incoming));
+        }
         await hold(toward(state.player, target, 2));
         await step(STRIDE); state = await view();
       }
@@ -462,10 +511,26 @@ try {
     if (state.trapdoor.state !== 1) {
       const clear = cell => cell % 15 > 0 && cell % 15 < 14 && cell > 14 && cell < 120
         && state.grid.solid[cell] !== '1' && ![...AWARD_CELLS, ...AVOID].includes(cell);
+      const centre = cell => ({ x: 40 + cell % 15 * 40, y: 120 + Math.floor(cell / 15) * 40 });
       const away = [index - 2, index + 2, index + 30, index - 30].find(clear);
       if (away === undefined) throw new Error('No cell two away from the closed trapdoor');
-      const spot = { x: 40 + away % 15 * 40, y: 120 + Math.floor(away / 15) * 40 };
-      await centreWalk(spot, [...AWARD_CELLS, ...AVOID], () => Math.hypot(spot.x - state.player.x, spot.y - state.player.y) <= 4,
+      let spot = centre(away);
+      // The award cells and --avoid can cut the room in two (Y9QL8QZM: cells
+      // 22, 36-39, 51, 52, 82, 96-98 and 112 with solid 68 and 83), and a
+      // walk without a route heads straight over the reopening trapdoor. When
+      // that spot has no route, a player already two cells clear waits where
+      // it stands; otherwise it takes the nearest routed cell two cells clear.
+      if (!routed(spot)) {
+        const fromDoor = point => Math.hypot(point.x - door.x, point.y - door.y);
+        const cells = [...Array(120).keys()].filter(cell => clear(cell) && fromDoor(centre(cell)) >= 80)
+          .sort((a, b) => Math.hypot(centre(a).x - state.player.x, centre(a).y - state.player.y)
+            - Math.hypot(centre(b).x - state.player.x, centre(b).y - state.player.y));
+        const reachable = cells.find(cell => routed(centre(cell)));
+        if (fromDoor(state.player) >= 80) spot = null;
+        else if (reachable === undefined) throw new Error('No routed cell two away from the closed trapdoor');
+        else spot = centre(reachable);
+      }
+      if (spot) await centreWalk(spot, [...AWARD_CELLS, ...AVOID], () => Math.hypot(spot.x - state.player.x, spot.y - state.player.y) <= 4,
         `No way off the closed trapdoor in ${EXIT} frames`);
       await hold([]);
       for (let left = 300; state.trapdoor.state !== 1; left--) {
@@ -473,7 +538,7 @@ try {
         await step(1); state = await view();
       }
     }
-    await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`);
+    await centreWalk(door, pedestal, () => state.stageTransition !== 0, `No trapdoor entry in ${EXIT} frames`, true);
     await hold([]);
     for (let left = 1200; state.stageTransition !== 0 || !state.player.controls; left--) {
       if (left <= 0) throw new Error('The stage transition did not finish in 1200 frames');
@@ -512,5 +577,5 @@ try {
 // `end` is the port's last health and coins, which the next floor's
 // generation reads (stage-exit-state-pair.mjs compares their predicates).
 process.stdout.write(JSON.stringify({ status, reason, actions, checkpoints, frames, rooms, build: server.build.sha256,
-  via: chosenVia && [chosenVia.x, chosenVia.y], end }) + '\n');
+  via: chosenVia && [chosenVia.x, chosenVia.y], end, recorder: RECORDER }) + '\n');
 process.exitCode = status === 'pass' ? 0 : 1;
