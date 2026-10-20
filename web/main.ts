@@ -1,5 +1,5 @@
 import './style.css';
-import { Engine, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs, type MapPreferences, type GammaPreferences, type BootElapsed } from './engine';
+import { Engine, SavedProfileAdmissionRefused, type Command, type State, type ResourceInputs, type AudioPreferences, type FullscreenPreferences, type InputConfigs, type MapPreferences, type GammaPreferences, type BootElapsed } from './engine';
 import { Renderer } from './renderer';
 import { ReplayTrace } from './trace';
 import { AudioRuntime } from './audio';
@@ -69,7 +69,16 @@ async function boot() {
     if (feedback.runtimeFailed) throw new Error('Reload or reset after the recorded runtime failure');
     const previousAmbienceUpdate = currentState.ambience.updateSequence;
     try {
-      const state = settleSaveIO(engine, saveGames, command, engine.command(command), reportSaveFailure);
+      let commanded: State;
+      try { commanded = engine.command(command); }
+      catch (error) {
+        if (!(error instanceof SavedProfileAdmissionRefused)) throw error;
+        // Game.command refused atomically: retain this failed admission without
+        // publishing a successful trace, touching save IO or pausing the menu.
+        feedback.savedProfileAdmissionRefused(command, error.message, currentState);
+        return currentState;
+      }
+      const state = settleSaveIO(engine, saveGames, command, commanded, reportSaveFailure);
       currentState = state;
       feedback.consume(state.optionsMenu.unavailableRequests, state.screen);
       //Settings5B8DB0 IO precedes SetMenu's audio confirmation. Back remains

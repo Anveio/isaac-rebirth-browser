@@ -491,6 +491,7 @@ interface Exports extends WebAssembly.Exports {
   reset_with_boot_resources: (initialSeed: number, bootEpochSeed: number) => number;
   boot_resource_ptr: (length: number) => number;
   save_input_ptr: (length: number) => number; load_save_data: () => number; save_data_ptr: () => number;
+  rejected_profile_document: () => number;
   enable_saved_game_io: (protocol: number) => number;
   complete_saved_game_write: (low: number, high: number, succeeded: number) => number;
   complete_save_menu_readmission: (revisionLow: number, revisionHigh: number, loaded: number) => number;
@@ -502,6 +503,12 @@ interface Exports extends WebAssembly.Exports {
 }
 /** One shared-MT draw from the opt-in diagnostic log (e2e `--mt-draws`). */
 export interface MtDraw { counter: number; index: number; kind: "B" | "U" | "R"; site: string; }
+/** An actual atomic run-confirmation refusal, not a failed simulation Tick. */
+export class SavedProfileAdmissionRefused extends Error {
+  constructor(message: string) { super(message); this.name = 'SavedProfileAdmissionRefused'; }
+}
+const REJECTED_PROFILE_ADMISSION = 'unknown rejected own-profile document must be recovered or explicitly reset';
+
 export class Engine {
   /** The engine-owned key surface: the only codes `key` commands accept. */
   readonly publicKeys: ReadonlySet<string>;
@@ -528,7 +535,8 @@ export class Engine {
     const { instance } = await WebAssembly.instantiate(wasm);
     if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
-      || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
+      || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function"
+      || typeof instance.exports.rejected_profile_document !== "function")
       throw new Error("WASM engine ABI is stale; rebuild with npm run build:wasm");
     const engine = new Engine(instance.exports as Exports); engine.reset(initialSeed, bootEpochSeed, resources, audioPreferences, fullscreenPreferences, inputConfigs, mapPreferences, gammaPreferences); return engine;
   }
@@ -633,7 +641,17 @@ export class Engine {
     if (bytes.length > 65_536) throw new Error("Command exceeds 64 KiB");
     const ptr = this.wasm.request_ptr(bytes.length); if (ptr === 0) throw new Error("WASM request allocation failed");
     new Uint8Array(this.wasm.memory.buffer, ptr, bytes.length).set(bytes);
-    if (this.wasm.command() !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len()));
+    if (this.wasm.command() !== 0) {
+      const message = this.read(this.wasm.error_ptr(), this.wasm.error_len());
+      if (message === REJECTED_PROFILE_ADMISSION && command.type === 'key'
+        && command.code === 'Enter' && command.down && this.wasm.rejected_profile_document() === 1) {
+        const state = this.snapshot();
+        if (!state.pressed.includes('Enter') && (state.screen === 'character' || state.screen === 'challenge'
+          || state.screen === 'main' && state.mainSelection === 1))
+          throw new SavedProfileAdmissionRefused(message);
+      }
+      throw new Error(message);
+    }
     return this.snapshot();
   }
   importSaveData(text: string): void {
