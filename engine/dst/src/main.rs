@@ -23,7 +23,7 @@ use std::process::ExitCode;
 const USAGE: &str = "usage: rebirth-dst [--units all|a,b] [--cases N] [--steps N] [--seed U64]
                    [--case-seed U64] [--entropy seeded|antithesis] [--tapes DIR]
                    [--replay TAPE.json] [--resume TAPE.json] [--corpus DIR]
-                   [--wasm ENGINE.wasm]
+                   [--pins PINS.json] [--wasm ENGINE.wasm]
                    [--report PATH] [--allow-unmet] [--retain-all] [--jobs N]
                    [--list] [--setup-complete]";
 
@@ -38,6 +38,7 @@ struct Options {
     replay: Option<PathBuf>,
     resume: Option<PathBuf>,
     corpus: Option<PathBuf>,
+    pins: Option<PathBuf>,
     wasm: Option<PathBuf>,
     report: Option<PathBuf>,
     allow_unmet: bool,
@@ -59,6 +60,7 @@ fn parse() -> Result<Options, String> {
         replay: None,
         resume: None,
         corpus: None,
+        pins: None,
         wasm: None,
         report: None,
         allow_unmet: false,
@@ -91,6 +93,7 @@ fn parse() -> Result<Options, String> {
             "--replay" => options.replay = Some(value()?.into()),
             "--resume" => options.resume = Some(value()?.into()),
             "--corpus" => options.corpus = Some(value()?.into()),
+            "--pins" => options.pins = Some(value()?.into()),
             "--wasm" => options.wasm = Some(value()?.into()),
             "--report" => options.report = Some(value()?.into()),
             "--allow-unmet" => options.allow_unmet = true,
@@ -144,6 +147,17 @@ fn load_replays(options: &Options) -> Result<Vec<(String, tape::Tape)>, String> 
                 .map_err(|error| format!("{}: {error}", path.display()))
         })
         .collect()
+}
+
+/// `--pins` names the pinned rooms the rooms unit plays after its generated
+/// cases.
+fn load_pins(options: &Options) -> Result<Vec<units::rooms::Pin>, String> {
+    let Some(path) = &options.pins else {
+        return Ok(Vec::new());
+    };
+    let text =
+        std::fs::read_to_string(path).map_err(|error| format!("{}: {error}", path.display()))?;
+    serde_json::from_str(&text).map_err(|error| format!("{}: {error}", path.display()))
 }
 
 fn os_seed() -> u64 {
@@ -211,6 +225,13 @@ fn simulate() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+    let pins = match load_pins(&options) {
+        Ok(pins) => pins,
+        Err(error) => {
+            eprintln!("cannot read pinned rooms: {error}");
+            return ExitCode::from(2);
+        }
+    };
     // Generated game cases branch from the end of this tape.
     let resume = match options.resume.as_deref().map(tape::Tape::read).transpose() {
         Ok(resume) => resume,
@@ -243,6 +264,7 @@ fn simulate() -> ExitCode {
         tapes: options.tapes.clone(),
         replays,
         resume,
+        pins,
         wasm,
         retain_all: options.retain_all,
         jobs: options.jobs,
@@ -304,8 +326,8 @@ fn simulate() -> ExitCode {
         .then(coverage::report);
     if let Some(census) = &census {
         eprintln!(
-            "rebirth-dst coverage: {} game and {} rooms cases; NPC kinds never simulated: {} (and {} that no authored room places); simulated but never removed: {}; room types on floors never entered: {}",
-            census["gameCases"], census["roomsCases"], census["unreachedNpcKinds"], census["unplacedNpcKinds"], census["unremovedNpcKinds"], census["unenteredRoomTypes"]
+            "rebirth-dst coverage: {} game and {} rooms cases; NPC kinds never simulated: {} (and {} that no authored room places); simulated but never removed: {}; room types on floors never entered: {}; boss rooms entered but never cleared: {}; pinned rooms drifted: {}",
+            census["gameCases"], census["roomsCases"], census["unreachedNpcKinds"], census["unplacedNpcKinds"], census["unremovedNpcKinds"], census["unenteredRoomTypes"], census["unclearedBossRooms"], census["driftedPins"]
         );
     }
     if let Some(path) = &options.report {

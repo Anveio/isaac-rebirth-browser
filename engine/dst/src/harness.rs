@@ -2,6 +2,7 @@
 use crate::entropy::{splitmix64, Entropy, Mode};
 use crate::props::{self, Context};
 use crate::tape::Tape;
+use crate::units::rooms::Pin;
 use serde_json::json;
 use std::cell::RefCell;
 use std::panic::{self, AssertUnwindSafe};
@@ -28,6 +29,8 @@ pub struct Case<'a> {
     pub label: String,
     /// Retain every game tape (corpus harvesting), not only violating ones.
     pub retain_all: bool,
+    /// The pinned room this `rooms` case plays instead of generating a run.
+    pub pin: Option<Pin>,
 }
 
 impl Case<'_> {
@@ -109,6 +112,8 @@ pub struct Plan {
     pub replays: Vec<(String, Tape)>,
     /// A tape every generated game case replays before driving on.
     pub resume: Option<Tape>,
+    /// Pinned rooms the rooms unit plays after its generated cases.
+    pub pins: Vec<Pin>,
     pub wasm: Option<crate::wasm::Module>,
     pub retain_all: bool,
     /// Worker threads for seeded cases.
@@ -123,6 +128,8 @@ pub struct CaseRecord {
     pub case_seed: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replay: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pin: Option<String>,
     pub draws: u64,
 }
 
@@ -132,12 +139,14 @@ pub fn case_seed(master: u64, unit_index: usize, case: u64) -> u64 {
     splitmix64(&mut state)
 }
 
-/// One case to run: its unit and index, and the tape it replays, if any.
+/// One case to run: its unit and index, and the tape it replays or the
+/// room it pins, if any.
 struct Job<'a> {
     unit_index: usize,
     unit: &'a Unit,
     case: u64,
     replay: Option<&'a (String, Tape)>,
+    pin: Option<&'a Pin>,
 }
 
 /// Runs every case. Seeded cases are independent, so they spread over
@@ -151,17 +160,25 @@ pub fn run(plan: &Plan, units: &[(usize, &Unit)]) -> Vec<CaseRecord> {
         } else {
             &[]
         };
-        let generated = (0..plan.cases).map(|case| (case, None));
+        let pins: &[Pin] = if unit.name == "rooms" {
+            &plan.pins
+        } else {
+            &[]
+        };
+        let generated = (0..plan.cases).map(|case| (case, None, None));
         let replayed = replays
             .iter()
+            .map(|replay| (Some(replay), None))
+            .chain(pins.iter().map(|pin| (None, Some(pin))))
             .enumerate()
-            .map(|(index, replay)| (plan.cases + index as u64, Some(replay)));
-        for (case, replay) in generated.chain(replayed) {
+            .map(|(index, (replay, pin))| (plan.cases + index as u64, replay, pin));
+        for (case, replay, pin) in generated.chain(replayed) {
             jobs.push(Job {
                 unit_index: *unit_index,
                 unit,
                 case,
                 replay,
+                pin,
             });
         }
     }
@@ -206,16 +223,18 @@ fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
         unit,
         case,
         replay,
+        pin,
     } = *job;
     // Replays take their commands from the tape; their remaining choices
-    // (e.g. the continuation midpoint) stay seeded.
-    let seed = match (plan.mode, replay) {
-        (Mode::Seeded, None) => Some(
+    // (e.g. the continuation midpoint) stay seeded. A pin carries its seed.
+    let seed = match (plan.mode, replay, pin) {
+        (_, _, Some(pin)) => Some(pin.seed),
+        (Mode::Seeded, None, None) => Some(
             plan.case_seed
                 .unwrap_or_else(|| case_seed(plan.master_seed, unit_index, case)),
         ),
-        (_, Some(_)) => Some(case_seed(plan.master_seed, unit_index, case)),
-        (Mode::Antithesis, None) => None,
+        (_, Some(_), None) => Some(case_seed(plan.master_seed, unit_index, case)),
+        (Mode::Antithesis, None, None) => None,
     };
     let mut entropy = match seed {
         Some(seed) => Entropy::seeded(seed),
@@ -228,11 +247,14 @@ fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
         case_seed: seed,
         step: 0,
         tape: replay.map(|(name, _)| name.clone()),
+        pin: pin.map(|pin| pin.name.clone()),
+        at: None,
     });
-    let label = match (replay, seed) {
-        (Some((name, _)), _) => format!("{}-replay-{name}", unit.name),
-        (None, Some(seed)) => format!("{}-{seed:016x}", unit.name),
-        (None, None) => format!("{}-antithesis-{case}", unit.name),
+    let label = match (replay, pin, seed) {
+        (Some((name, _)), _, _) => format!("{}-replay-{name}", unit.name),
+        (None, Some(pin), _) => format!("{}-pin-{}", unit.name, pin.name),
+        (None, None, Some(seed)) => format!("{}-{seed:016x}", unit.name),
+        (None, None, None) => format!("{}-antithesis-{case}", unit.name),
     };
     let mut context = Case {
         entropy: &mut entropy,
@@ -246,6 +268,7 @@ fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
         wasm: plan.wasm.as_ref(),
         label,
         retain_all: plan.retain_all,
+        pin: pin.cloned(),
     };
     guarded(|| (unit.run)(&mut context));
     CaseRecord {
@@ -253,6 +276,7 @@ fn run_case(plan: &Plan, job: &Job<'_>) -> CaseRecord {
         case,
         case_seed: seed,
         replay: replay.map(|(name, _)| name.clone()),
+        pin: pin.map(|pin| pin.name.clone()),
         draws: entropy.draws(),
     }
 }

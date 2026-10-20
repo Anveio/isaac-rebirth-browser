@@ -1,0 +1,72 @@
+[
+  {
+    "name": "regression-basement-hopper-state",
+    "code": "9Y4P1T0R",
+    "stage": 1,
+    "room": 8,
+    "template": [
+      1,
+      104
+    ],
+    "seed": 6894193731689547955,
+    "reaches": [
+      "npc:29"
+    ]
+  },
+  {
+    "name": "regression-caves-chest-trinket",
+    "code": "WWEA87BT",
+    "stage": 3,
+    "room": 15,
+    "template": [
+      1,
+      345
+    ],
+    "seed": 12574460114799845279,
+    "reaches": [
+      "pickup:50"
+    ]
+  },
+  {
+    "name": "regression-caves-mega-fatty-landing",
+    "code": "NCYMQQBG",
+    "stage": 3,
+    "room": 0,
+    "template": [
+      5,
+      5050
+    ],
+    "seed": 9381976191760545088,
+    "reaches": [
+      "npc:264"
+    ]
+  },
+  {
+    "name": "regression-caves-pathfinder-e94",
+    "code": "CGVFTQDN",
+    "stage": 3,
+    "room": 8,
+    "template": [
+      1,
+      199
+    ],
+    "seed": 7006943192613717443,
+    "reaches": [
+      "npc:19"
+    ]
+  },
+  {
+    "name": "regression-caves-wall-creep-top-wall",
+    "code": "XS7ZVZ9H",
+    "stage": 4,
+    "room": 10,
+    "template": [
+      1,
+      521
+    ],
+    "seed": 5631231141561346337,
+    "reaches": [
+      "npc:240"
+    ]
+  }
+]

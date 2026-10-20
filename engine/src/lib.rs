@@ -37,6 +37,7 @@ pub mod controlled_tear;
 mod controlled_technology;
 mod creep_effects;
 pub mod critters;
+pub mod deaths_head;
 pub mod dingle;
 pub mod dips;
 pub mod display_settings;
@@ -74,13 +75,13 @@ pub mod fullscreen;
 pub mod gapers;
 pub mod gemini;
 pub mod gib_counts;
+pub mod globin;
 pub mod gluttony;
 pub mod greed;
 pub mod grid;
 mod grid_hazards;
 pub mod grid_records;
 pub mod gurdy;
-pub mod globin;
 pub mod gurdy_jr;
 pub mod gushers;
 mod health_damage;
@@ -1652,6 +1653,7 @@ impl Game {
                     {
                         return Err("Continue requires actual successful own profile load".into());
                     }
+                    self.require_profile_document()?;
                     let record = self.current_profile_save()?;
                     record.admit_initial_room()?;
                     //Main5A47B0 decodes the retained saved string for593470;
@@ -1715,6 +1717,7 @@ impl Game {
                         return Err("selected Challenge is locked".into());
                     }
                     definition.validate_initial_scope()?;
+                    self.require_profile_document()?;
                     self.state.run_start_request.challenge_id = Some(id);
                     self.state.run_start_request.input_pending = true;
                 }
@@ -1747,6 +1750,7 @@ impl Game {
                 "ArrowRight" | "KeyD" => self.select_character(1),
                 "Enter" if self.state.difficulty == "normal" => {
                     self.validate_run_character()?;
+                    self.require_profile_document()?;
                     self.state.run_start_request.challenge_id = None;
                     self.state.run_start_request.input_pending = true;
                 }
@@ -2013,13 +2017,18 @@ impl Game {
         self.finish_start_run_after_save()
     }
 
-    fn start_run_until_initial_save(&mut self) -> Result<(), String> {
+    fn require_profile_document(&self) -> Result<(), String> {
         if self.profile_document_rejected {
             return Err(
                 "unknown rejected own-profile document must be recovered or explicitly reset"
                     .into(),
             );
         }
+        Ok(())
+    }
+
+    fn start_run_until_initial_save(&mut self) -> Result<(), String> {
+        self.require_profile_document()?;
         if self.living_start_context.is_none() {
             //A new System request replaces the prior run's ownership. An
             //unqualified Challenge/hard/selector must never reuse its context.
@@ -2369,6 +2378,7 @@ impl Game {
     ///54ECE0 loads saved persistent stores into freshly constructed owners.
     ///No Game/State snapshot is installed and no NewRun/starting grant runs.
     fn continue_run(&mut self) -> Result<(), String> {
+        self.require_profile_document()?;
         let record = self.current_profile_save()?;
         record.admit_initial_room()?;
         let run = &record.run;
@@ -2877,6 +2887,12 @@ impl Game {
             .collect();
         self.saved_profiles = Some(std::sync::Arc::new(profiles));
         Ok(())
+    }
+
+    /// A rejected own document remains quarantined until a successful import.
+    /// This reports the actual transport owner, not a guessed save capability.
+    pub fn rejected_profile_document(&self) -> bool {
+        self.profile_document_rejected
     }
 
     pub fn export_save_data(&self) -> Result<Vec<u8>, String> {
@@ -7092,6 +7108,16 @@ pub extern "C" fn load_save_data() -> u32 {
             1
         }
     }
+}
+
+/// Read the actual quarantine owner without changing State or the last error.
+#[no_mangle]
+pub extern "C" fn rejected_profile_document() -> u32 {
+    GAME.with(|game| {
+        game.borrow()
+            .as_ref()
+            .map_or(0, |game| u32::from(game.rejected_profile_document()))
+    })
 }
 
 #[no_mangle]

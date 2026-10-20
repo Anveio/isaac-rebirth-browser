@@ -32,6 +32,8 @@ struct Census {
     floor_reached: BTreeMap<u32, u64>,
     /// Each case's label with the command index that first reached each key.
     first_steps: Vec<(String, BTreeMap<String, u64>)>,
+    /// Each pinned room played, with why it drifted, if it did.
+    pins: Vec<(String, Option<String>)>,
 }
 
 /// What the case running on this thread reached, and at which command.
@@ -63,6 +65,7 @@ static CENSUS: Mutex<Census> = Mutex::new(Census {
     rooms_reached: BTreeMap::new(),
     floor_reached: BTreeMap::new(),
     first_steps: Vec::new(),
+    pins: Vec::new(),
 });
 
 thread_local! {
@@ -110,6 +113,16 @@ impl Drop for RoomsCase {
             *census.floor_reached.entry(room_type).or_default() += 1;
         }
     }
+}
+
+/// Whether the case running on this thread has reached `key`.
+pub fn reached(key: &str) -> bool {
+    CURRENT.with(|current| current.borrow().keys.contains_key(key))
+}
+
+/// Records a pinned room played, and why it drifted, if it did.
+pub fn pinned(name: &str, drift: Option<String>) {
+    census().pins.push((name.to_owned(), drift));
 }
 
 /// A property call site the running case met (see `props::Site::record`).
@@ -194,14 +207,14 @@ pub fn observe(state: &State) {
         }
         if let Some(room) = state.floor.descriptors.get(state.current_room) {
             let template = &room.template;
-            keys.push(if (template.width, template.height) == (13, 7) {
-                format!("room:{}", template.room_type)
-            } else {
-                format!(
-                    "room:{}({}x{})",
-                    template.room_type, template.width, template.height
-                )
-            });
+            if (template.width, template.height) == (13, 7) {
+                // Preserve the legacy normal-room key alongside exact dimensions.
+                keys.push(format!("room:{}", template.room_type));
+            }
+            keys.push(format!(
+                "room:{}({}x{})",
+                template.room_type, template.width, template.height
+            ));
             if matches!(template.room_type, 5 | 6) {
                 // Each floor's boss and miniboss rooms: a staged chase deeper
                 // than one floor must reach this floor's, not the one an
@@ -211,6 +224,10 @@ pub fn observe(state: &State) {
                 if state.room.combat_clear {
                     keys.push(format!("cleared:{}", template.room_type));
                     keys.push(format!("cleared:{} on stage {stage}", template.room_type));
+                    keys.push(format!(
+                        "cleared:{}({}x{})",
+                        template.room_type, template.width, template.height
+                    ));
                 }
             }
             // The active-item descent's steps, each with the item still held:
@@ -224,6 +241,15 @@ pub fn observe(state: &State) {
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
+            // Each champion color simulated, alone and with its floor's
+            // stage, since a rare color rolls only on some floors.
+            if let Some(champion) = &npc.champion {
+                keys.push(format!("champion:{}", champion.color));
+                keys.push(format!(
+                    "champion:{} on stage {}",
+                    champion.color, state.floor.stage
+                ));
+            }
             // A Fireplace dies by going out (state 3, NoFire) and stays put.
             if npc.kind == 33 && npc.state == 3 {
                 keys.push("extinguished:33".to_owned());
@@ -401,9 +427,31 @@ pub fn report() -> Value {
                 })
         })
         .collect();
+    // Match exact dimensions only: a generic cleared:5 from another shape
+    // cannot close an entered shape's gap. Legacy aggregate keys stay available.
+    let uncleared_bosses: Vec<&str> = census
+        .reached
+        .keys()
+        .chain(census.rooms_reached.keys())
+        .filter(|key| key.starts_with("room:5("))
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .filter(|room| !reached(&room.replacen("room:", "cleared:", 1)))
+        .collect();
     let mut first_steps = census.first_steps.clone();
     first_steps.sort();
     let first_steps: BTreeMap<String, BTreeMap<String, u64>> = first_steps.into_iter().collect();
+    let pins: BTreeMap<&str, Option<&str>> = census
+        .pins
+        .iter()
+        .map(|(name, drift)| (name.as_str(), drift.as_deref()))
+        .collect();
+    let drifted: Vec<&str> = pins
+        .iter()
+        .filter(|(_, drift)| drift.is_some())
+        .map(|(name, _)| *name)
+        .collect();
     json!({
         "gameCases": census.cases,
         "roomsCases": census.rooms_cases,
@@ -415,5 +463,8 @@ pub fn report() -> Value {
         "unplacedNpcKinds": unplaced_npcs,
         "unremovedNpcKinds": unremoved_npcs,
         "unenteredRoomTypes": unentered_rooms,
+        "unclearedBossRooms": uncleared_bosses,
+        "pins": pins,
+        "driftedPins": drifted,
     })
 }

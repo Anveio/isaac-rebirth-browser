@@ -72,5 +72,6 @@ gfx/009.002_fire projectile.anm2
 gfx/262.000_megamaw.anm2
 gfx/009.001_bone projectile.anm2
 gfx/227.000_boney.anm2
+gfx/212.000_deathshead.anm2
 gfx/024.000_globin.anm2
 gfx/024.001_gazing globin.anm2
