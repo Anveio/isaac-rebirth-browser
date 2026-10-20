@@ -122,9 +122,14 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
     if descriptor.template.room_type != 5 {
         return Ok(());
     }
-    if (descriptor.template.width, descriptor.template.height) != (13, 7) {
-        return Err("boss clear award admits only 1x1 boss rooms".into());
-    }
+    // RoomConfig+3c: 0 is 13x7, 1 is 13x14, 2 is 26x7 and 3 is 26x14.
+    let (tall, wide) = match (descriptor.template.width, descriptor.template.height) {
+        (13, 7) => (false, false),
+        (13, 14) => (true, false),
+        (26, 7) => (false, true),
+        (26, 14) => (true, true),
+        _ => return Err("boss clear award admits only the four boss room shapes".into()),
+    };
     // 5c9745..5c975f: effective stage adds one under Curse of the Labyrinth.
     // The supported run admits no curses, so it is the numeric stage.
     let stage = state.stage;
@@ -151,9 +156,24 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
             y: center.y - 80.0,
         },
     );
+    // 5c933b..5c9737: a wide room centres the collectible between its
+    // interior bounds (Room+1c..+28) in x, a tall one in y; the trapdoor stays.
+    let minimum = WorldVector { x: 60.0, y: 140.0 };
+    let maximum = WorldVector {
+        x: 60.0 + (width - 2) as f32 * 40.0,
+        y: 140.0 + (usize::from(grid.height) - 2) as f32 * 40.0,
+    };
     let collectible_position = WorldVector {
-        x: center.x,
-        y: center.y + 80.0,
+        x: if wide {
+            (minimum.x + maximum.x) * 0.5
+        } else {
+            center.x
+        },
+        y: if tall {
+            (minimum.y + maximum.y) * 0.5
+        } else {
+            center.y + 80.0
+        },
     };
     let collectible_index = room_index(width, collectible_position);
     // 5c97c1 fix_award_pos5c8260 clears the trapdoor cell before its MT draw.
