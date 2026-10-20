@@ -184,6 +184,9 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) {
                 "shape": [template.width, template.height],
             })
         };
+        // Every property recorded while the room plays names it, the game
+        // invariants' too.
+        let _at = props::At::new(label());
         if !play(&mut entered, frames, e, label) {
             continue;
         }
@@ -303,6 +306,7 @@ fn descend(game: &mut Game, e: &mut Entropy, code: &str) -> bool {
         return false;
     }
     let label = || json!({ "code": code, "at": "stage arrival", "from": from });
+    let _at = props::At::new(label());
     let mut started = false;
     for frame in 0..ARRIVAL_FRAMES {
         if !tick(game, 1, label) {
