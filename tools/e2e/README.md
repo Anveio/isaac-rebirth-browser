@@ -497,6 +497,43 @@ must equal one of the original's 44-quad wall cache draws (patch source rects,
 destinations and flips), in entry order. It is off by default and enabled per
 suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it.
 
+### Route recorder
+
+Scenario helpers that need the port's own closed-loop keys (stage-exit and
+stage-descent, monstro, entities, shops) call
+[`boss-route-record.mjs`](boss-route-record.mjs). It plays the immutable
+production snapshot's WASM without a browser, through
+[`lib/headless-page.mjs`](lib/headless-page.mjs). That page runs the same
+engine, save and host modules as the browser page
+([`web/engine.ts`](../../web/engine.ts), [`web/save-games.ts`](../../web/save-games.ts)
+and [`web/host.ts`](../../web/host.ts), which `web/main.ts` imports). Those
+modules cover key ownership and seed-screen text, the reset before the save
+transport, and save write and menu readmission completion.
+
+Node loads those modules by type stripping, so they keep to erasable
+TypeScript. The headless page leaves out:
+- rendering;
+- audio, and the music backend callbacks it would send;
+- fullscreen;
+- preference and binding storage, which a fresh page has empty.
+
+The one copied browser behaviour is Playwright's US-layout key names (`keyEvent`
+there); any other name is refused.
+
+`--browser-recorder` (on a suite: `npm run test:e2e -- stage-exit
+--browser-recorder`, which state-pair passes on as `E2E_BROWSER_RECORDER=1`)
+records in headless Chromium instead. It is the cross-check when the headless
+page is in doubt. The recorder is several times faster headless; a stage-exit
+fight leg takes 34 s headless against 109 s in Chromium.
+
+Every capture the recorder emits carries `recorded`, the port state it reached
+there: room, position, health and coins, with the recorder and build. The
+paired gate's browser replay must reach the same values at each capture
+recorded on its own build. Otherwise the case fails with `Browser replay left
+the headless recording at LABEL`, naming the headless recorder as the suspect
+(paired-game.mjs `recorderDivergence`). A bank replayed on another build skips
+these checks, as state-pair's stale-recording warning says.
+
 ## No CI
 
 There is deliberately no CI (see [AGENTS.md](../../AGENTS.md)). Before you open

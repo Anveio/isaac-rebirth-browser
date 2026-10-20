@@ -1,5 +1,3 @@
-import wasmUrl from "./generated/engine.wasm?url";
-
 export type Screen = "title" | "profile" | "main" | "options" | "controls" | "keyboard" | "character" | "challenge" | "seed" | "playing";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
@@ -500,7 +498,9 @@ export interface MtDraw { counter: number; index: number; kind: "B" | "U" | "R";
 export class Engine {
   /** The engine-owned key surface: the only codes `key` commands accept. */
   readonly publicKeys: ReadonlySet<string>;
-  private constructor(private readonly wasm: Exports) {
+  private readonly wasm: Exports;
+  private constructor(wasm: Exports) {
+    this.wasm = wasm;
     const ptr = wasm.public_keys_ptr(), length = wasm.public_keys_len();
     const size = wasm.memory.buffer.byteLength;
     if (!Number.isSafeInteger(ptr) || ptr < 0 || !Number.isSafeInteger(length) || length <= 0
@@ -513,12 +513,12 @@ export class Engine {
       throw new Error("WASM public key surface must be a nonempty array of unique strings");
     this.publicKeys = new Set(keys as string[]);
   }
-  static async create(initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences, gammaPreferences?: GammaPreferences) {
+  /** `wasm` is the engine module's bytes: the page fetches them (main.ts),
+   * the headless e2e page reads the production snapshot's file. */
+  static async create(wasm: BufferSource, initialSeed: number, bootEpochSeed = 0, resources?: ResourceInputs, audioPreferences?: AudioPreferences, fullscreenPreferences?: FullscreenPreferences, inputConfigs?: InputConfigs, mapPreferences?: MapPreferences, gammaPreferences?: GammaPreferences) {
     Engine.validateSeed(initialSeed);
     Engine.validateBootSeed(bootEpochSeed);
-    const response = await fetch(wasmUrl);
-    if (!response.ok) throw new Error(`WASM load failed: ${response.status}`);
-    const { instance } = await WebAssembly.instantiate(await response.arrayBuffer());
+    const { instance } = await WebAssembly.instantiate(wasm);
     if (typeof instance.exports.abi_version !== "function" || instance.exports.abi_version() !== 2
       || typeof instance.exports.public_keys_ptr !== "function" || typeof instance.exports.public_keys_len !== "function"
       || typeof instance.exports.frame_snapshot_ptr !== "function" || typeof instance.exports.background_stains_ptr !== "function")
