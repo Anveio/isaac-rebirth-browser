@@ -146,6 +146,14 @@ def final_rooms(fixture):
     return fixture['descent'][-1]['rooms'] if 'descent' in fixture else fixture['rooms']
 
 
+def anchor_door(fixture):
+    """--anchor-door: the room whose doorway the shared tail re-anchors
+    through (case `back`), so the last fight leaves that doorway a route onto
+    the trapdoor."""
+    rooms = final_rooms(fixture)
+    return ['--anchor-door', rooms[-2]] if len(rooms) > 1 else []
+
+
 def hurt(health):
     """--hurt when [red, maxRed, soul] ends a fight below full health."""
     red, maximum, soul = health or [0, 0, 0]
@@ -184,6 +192,7 @@ def descended(result, fixture, production_directory):
                          *map(str, floor.get('fightFlags', [])),
                          *(['--route-avoid', avoid] if avoid else []),
                          *(['--avoid', ','.join(map(str, avoided(fixture)))] if last and avoided(fixture) else []),
+                         *(anchor_door(fixture) if last else []),
                          rooms=','.join(map(str, rooms)), arrival='', production_directory=production_directory)
         if leg['status'] != 'pass':
             raise RuntimeError(f"Port descent leg {index} for {fixture['name']} failed: {leg['reason']}")
@@ -219,7 +228,7 @@ def fought(fixture, production_directory=None):
     else:
         port = port_fight(result, '--from', 'boss-room-arrival', '--fight', WINDOW, *hurt(fixture.get('originalHealth')),
                           *(['--avoid', ','.join(map(str, avoided(fixture)))] if avoided(fixture) else []),
-                          production_directory=production_directory)
+                          *anchor_door(fixture), production_directory=production_directory)
     if port['status'] != 'pass':
         raise RuntimeError(f"Port fight for {fixture['name']} failed: {port['reason']}")
     build = port.get('build')

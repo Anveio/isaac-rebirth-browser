@@ -95,6 +95,9 @@ const AWARD_CELLS = [22, 36, 37, 38, 52, 82, 96, 97, 98, 112];
 // holds after its own fight (a solid Larry Jr. tail poop) that the port's own
 // fight need not leave, so the shared keys take one path in both games.
 const AVOID = (flag('--avoid', '') || '').split(',').filter(Boolean).map(Number);
+// --anchor-door ROOM names the room whose doorway the shared tail re-anchors
+// through before it walks onto the trapdoor (stage-exit-scenarios.py).
+const ANCHOR_DOOR = flag('--anchor-door') === undefined ? null : Number(flag('--anchor-door'));
 // --route-avoid ROOM:CELL,CELL;ROOM:CELL marks cells the route legs walk
 // around in those rooms, beyond the routing grid's own solid cells (which
 // include NPC and slot bodies).
@@ -519,8 +522,8 @@ try {
     const keepOff = () => new Set([state.trapdoor?.gridIndex, ...AVOID, ...pickupCells(state),
       ...state.pickups.filter(p => p.variant === 100).map(p => cellAt(p.x, p.y))]);
     // 0-1 BFS over the room's interior: open cells cost 0, solid poops 1.
-    const corridor = (from, to) => {
-      const off = keepOff(), cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
+    const corridor = (from, to, off = keepOff()) => {
+      const cost = new Map([[from, 0]]), previous = new Map([[from, -1]]), deque = [from];
       while (deque.length) {
         const cell = deque.shift();
         if (cell === to) break;
@@ -540,15 +543,19 @@ try {
       for (let cell = to; cell !== -1; cell = previous.get(cell)) path.unshift(cell);
       return path;
     };
-    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+    const innerCell = door => {
       const inward = { up: [0, 40], down: [0, -40], left: [40, 0], right: [-40, 0] }[door.side];
-      const inner = cellAt(door.x + inward[0], door.y + inward[1]);
+      return cellAt(door.x + inward[0], door.y + inward[1]);
+    };
+    // Shoots out the first poop on a route from its `from` end, standing in
+    // the cell before it.
+    const clearRoute = async (route, what) => {
       for (let tries = 0; ; tries++) {
-        const path = corridor(park, inner);
-        if (!path) throw new Error(`No corner route to the ${door.side} doorway`);
+        const path = route();
+        if (!path) throw new Error(`No ${what}`);
         const at = path.findIndex(cell => state.poops.includes(cell));
-        if (at < 0) break;
-        if (tries === 6) throw new Error(`Corner route to the ${door.side} doorway still crosses poops`);
+        if (at < 0) return;
+        if (tries === 6) throw new Error(`The ${what} still crosses poops`);
         const poop = path[at], stand = path[at - 1];
         await walk({ x: 40 + stand % w * 40, y: 120 + Math.floor(stand / w) * 40 }, blocked, 600, 'route poop');
         const aim = { [1]: 'ArrowRight', [-1]: 'ArrowLeft', [w]: 'ArrowDown', [-w]: 'ArrowUp' }[poop - stand];
@@ -558,6 +565,20 @@ try {
         }
         await hold([]);
       }
+    };
+    for (const door of state.doors.filter(d => /^open/i.test(d.state))) {
+      await clearRoute(() => corridor(park, innerCell(door)), `corner route to the ${door.side} doorway`);
+    }
+    // The shared tail's exit walks from the re-anchor doorway's inner cell
+    // onto the trapdoor, keeping off the award cells below the trapdoor and
+    // --avoid. Port-only poops beside that cell can wall it in: under
+    // --rewind, EV9BP18Q's Larry Jr. fight left poops in cells 110 and 113
+    // beside the bottom doorway's cell 112, whose other neighbours (96, 97,
+    // 98) are award cells. Shoot them out from the trapdoor side.
+    const anchor = ANCHOR_DOOR === null ? undefined : state.doors.find(d => d.target === ANCHOR_DOOR);
+    if (anchor && state.trapdoor) {
+      const exitOff = () => new Set([...AWARD_CELLS.filter(cell => cell > 60), ...AVOID, ...pickupCells(state)]);
+      await clearRoute(() => corridor(state.trapdoor.gridIndex, innerCell(anchor), exitOff()), `route from the trapdoor to the ${anchor.side} doorway`);
     }
     await walk({ x: 40 + park % 15 * 40, y: 120 + Math.floor(park / 15) * 40 }, blocked, 600, 'corner walk');
     // Pressing into the corner makes the parked position independent of the fight.
