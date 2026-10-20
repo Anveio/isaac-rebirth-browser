@@ -194,14 +194,14 @@ pub fn observe(state: &State) {
         }
         if let Some(room) = state.floor.descriptors.get(state.current_room) {
             let template = &room.template;
-            keys.push(if (template.width, template.height) == (13, 7) {
-                format!("room:{}", template.room_type)
-            } else {
-                format!(
-                    "room:{}({}x{})",
-                    template.room_type, template.width, template.height
-                )
-            });
+            if (template.width, template.height) == (13, 7) {
+                // Preserve the legacy normal-room key alongside exact dimensions.
+                keys.push(format!("room:{}", template.room_type));
+            }
+            keys.push(format!(
+                "room:{}({}x{})",
+                template.room_type, template.width, template.height
+            ));
             if matches!(template.room_type, 5 | 6) {
                 // Each floor's boss and miniboss rooms: a staged chase deeper
                 // than one floor must reach this floor's, not the one an
@@ -211,12 +211,10 @@ pub fn observe(state: &State) {
                 if state.room.combat_clear {
                     keys.push(format!("cleared:{}", template.room_type));
                     keys.push(format!("cleared:{} on stage {stage}", template.room_type));
-                    if (template.width, template.height) != (13, 7) {
-                        keys.push(format!(
-                            "cleared:{}({}x{})",
-                            template.room_type, template.width, template.height
-                        ));
-                    }
+                    keys.push(format!(
+                        "cleared:{}({}x{})",
+                        template.room_type, template.width, template.height
+                    ));
                 }
             }
             // The active-item descent's steps, each with the item still held:
@@ -416,13 +414,13 @@ pub fn report() -> Value {
                 })
         })
         .collect();
-    // Boss room shapes some case entered and none cleared: `room:5` and
-    // `room:5(26x7)` close with `cleared:5` and `cleared:5(26x7)`.
+    // Match exact dimensions only: a generic cleared:5 from another shape
+    // cannot close an entered shape's gap. Legacy aggregate keys stay available.
     let uncleared_bosses: Vec<&str> = census
         .reached
         .keys()
         .chain(census.rooms_reached.keys())
-        .filter(|key| *key == "room:5" || key.starts_with("room:5("))
+        .filter(|key| key.starts_with("room:5("))
         .map(String::as_str)
         .collect::<BTreeSet<_>>()
         .into_iter()
