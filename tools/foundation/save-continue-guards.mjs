@@ -4,10 +4,24 @@ import {createHash} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 const digest=value=>createHash('sha256').update(value).digest('hex');
+//The current producer explicitly qualifies its own V2 transport. Historical
+//V1 captures keep their archived producer and are never regraded as V2.
+export const OWN_PROFILE_SCHEMA=2;
+export function readOwnProfilePacket(raw) {
+  const packet=JSON.parse(raw);assert.equal(packet.version,OWN_PROFILE_SCHEMA);assert.equal(packet.profiles?.length,3);
+  for(const {profile} of packet.profiles) {
+    const history=profile?.collectedHistory;
+    assert.ok(history&&['sourceReset','ownVersion1Unknown'].includes(history.origin),'Actual V2 collected-history origin is mandatory');
+    assert.equal(history.values?.length,347,'Actual V2 collected-history capacity is mandatory');
+    assert.ok(history.values.every(value=>typeof value==='boolean'||value===null),'Unknown history remains distinct from known boolean ownership');
+    if(history.origin==='sourceReset')assert.ok(history.values.every(value=>typeof value==='boolean'),'Fresh constructor history cannot acquire unknown entries');
+  }
+  return packet;
+}
 export async function ownPacket(frame) {
   assert.ok(frame?.ownSave?.store,'Actual own store packet is required');
   const raw=await readFile(frame.ownSave.store.path);assert.equal(digest(raw),frame.ownSave.store.sha256);assert.equal(raw.length,frame.ownSave.store.bytes);
-  const packet=JSON.parse(raw);assert.equal(packet.version,1);assert.equal(packet.profiles?.length,3);
+  const packet=readOwnProfilePacket(raw);
   const record=packet.profiles[0].saved;assert.ok(record);return record;
 }
 export async function validateSaveCapture(frames,directory,caseData) {
@@ -54,7 +68,7 @@ export async function validateSaveCapture(frames,directory,caseData) {
     assert.equal(resumed.state.room.backgroundStains.length,0,'Room.Init must clear its transient footprint paint before postContinue movement');
     assertPublicRightMovement(resumed.state,moved.state,record.run.floor,record.run.currentRoom);
   });
-  await writeFile(join(directory,'save-own-guards.json'),JSON.stringify({schema:1,status:checks.every(row=>row.status==='pass')?'pass':'fail',checks,
+  await writeFile(join(directory,'save-own-guards.json'),JSON.stringify({schema:1,ownProfileSchema:OWN_PROFILE_SCHEMA,status:checks.every(row=>row.status==='pass')?'pass':'fail',checks,
     scope:'Mandatory actual own-IO and initial-room living Quit/Continue; no Native parity or dead-popup success inferred.'},null,2)+'\n',{flag:'wx'});
   return checks;
 }

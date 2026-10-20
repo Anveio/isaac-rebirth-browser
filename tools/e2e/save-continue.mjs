@@ -7,6 +7,7 @@ import {dirname,relative,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runPairedGate} from '../foundation/paired-game.mjs';
 import {saveOwnerState} from '../foundation/save-continue-state-pair.mjs';
+import {OWN_PROFILE_SCHEMA} from '../foundation/save-continue-guards.mjs';
 import {ROOT,flag,selectCases} from './lib/cli.mjs';
 import {ORIGINAL_SHA,assertOriginalBinary} from './lib/original.mjs';
 
@@ -48,7 +49,7 @@ try{
     copyFileSync(resolve(ROOT,path),destination);assert.equal(fileDigest(destination),before[path]);
   }
   save(resolve(output,'source-before.json'),before);
-  save(resolve(output,'producer-identity.json'),{schema:1,mode:'save-continue-v1',binarySha256:ORIGINAL_SHA,
+  save(resolve(output,'producer-identity.json'),{schema:1,mode:'save-continue-v1',ownProfileSchema:OWN_PROFILE_SCHEMA,binarySha256:ORIGINAL_SHA,
     captureProducerSha256:before['tools/foundation/paired-game.mjs'],observerSha256:before[observer],sources:before,
     publicPreferences:{sfxVolume:0,musicVolume:0,fullscreen:false,inputConfigs:{devices:[]}}});
   if(recorded!==undefined)bank=JSON.parse(readFileSync(resolve(recorded),'utf8'));
@@ -95,7 +96,7 @@ finally{
     assert.deepEqual(after,before,'Executing Save Source changed during capture');
   }catch(error){fatal=[fatal,String(error.stack??error)].filter(Boolean).join('\n');}
 }
-const report={schema:1,status:!fatal&&results.length===bank?.cases?.length&&results.every(row=>row.status==='pass')?'pass':'fail',
+const report={schema:1,ownProfileSchema:OWN_PROFILE_SCHEMA,status:!fatal&&results.length===bank?.cases?.length&&results.every(row=>row.status==='pass')?'pass':'fail',
   fatal,cases:results,caseFilter:bank?.caseFilter,
   selectedScope:bank?.caseFilter?'Explicit recorded or CLI subset; no complete default-bank acceptance':'Complete declared fixed plus OS bank',
   scope:'Selected moving-before-Save public inputs and recorded unfiltered OS seeds; actual living Quit file/packet, menu readmission, same-process Continue, resumed controls, fresh Room paint and natural same-origin reload. Native own files remain observations only. Strict canonical/current-System-family rows, all real IO failures and complete transport/clock/physical guards remain required; strict RGBA retained as diagnostics. Initial-room Isaac/normal/neutral-items admission only; no arbitrary actors/items/travel, Native process-reload proof, full MT/audio/pixels or whole Save claim.'};

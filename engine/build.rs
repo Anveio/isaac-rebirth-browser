@@ -405,6 +405,115 @@ fn attack_catalog(path: &Path) -> String {
     output
 }
 
+fn unlock_notification_catalog(xml: &Path, path: &Path, animations: &Path) -> String {
+    let catalog: Value = serde_json::from_str(
+        &fs::read_to_string(path)
+            .expect("run python3 tools/foundation/prepare-unlock-notifications.py before Cargo"),
+    )
+    .expect("parse authored unlock notification catalogue");
+    assert_eq!(catalog["schema"], 1, "unlock notification catalogue schema");
+    //Python3 is already required for the authored item catalogue. Hash bytes
+    //without embedding another copy of the original XML in generated data.
+    let source_hash = std::process::Command::new("python3")
+        .arg("-c")
+        .arg("import hashlib,pathlib,sys; print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())")
+        .arg(xml)
+        .output().expect("hash actual authored achievement XML");
+    assert!(source_hash.status.success(), "hash actual achievement XML");
+    let source_hash = String::from_utf8(source_hash.stdout).expect("achievement SHA256 is UTF-8");
+    assert_eq!(
+        catalog["sourceXmlSha256"].as_str(),
+        Some(source_hash.trim()),
+        "achievement XML changed; regenerate its actual notification catalogue"
+    );
+    let actor = catalog["actor"]
+        .as_str()
+        .expect("authored notification actor path");
+    let actors: Value = serde_json::from_str(
+        &fs::read_to_string(animations).expect("read authored information actors"),
+    )
+    .expect("parse authored information actors");
+    let authored = &actors[actor];
+    let layer3 = authored["Layers"]
+        .as_array()
+        .expect("notification layers")
+        .iter()
+        .find(|layer| layer["Id"] == 3)
+        .expect("authored notification layer3");
+    let sheet = layer3["SpritesheetId"]
+        .as_u64()
+        .expect("layer3 spritesheet ID");
+    assert!(sheet <= u64::from(u32::MAX));
+    assert!(
+        authored["Spritesheets"]
+            .as_array()
+            .expect("notification spritesheets")
+            .iter()
+            .any(|entry| entry["Id"] == sheet),
+        "layer3 spritesheet exists"
+    );
+    let mut generated = format!(
+        "pub const ACTOR: &str = {actor:?};\npub const LAYER3_SPRITESHEET: u32 = {sheet};\npub static CLIPS: &[Clip] = &[\n"
+    );
+    for name in ["Appear", "Idle", "Dissapear"] {
+        let clip = authored["Animations"]
+            .as_array()
+            .expect("notification clips")
+            .iter()
+            .find(|entry| entry["Name"] == name)
+            .expect("actual notification clip");
+        let frames = clip["FrameNum"]
+            .as_u64()
+            .expect("notification clip frame count");
+        assert!(frames > 0 && frames <= u64::from(u32::MAX));
+        let looping = clip["Loop"].as_bool().expect("notification clip loop flag");
+        assert!(
+            clip["Triggers"]
+                .as_array()
+                .expect("notification clip events")
+                .is_empty(),
+            "notification authored events require their actual callback owner"
+        );
+        generated.push_str(&format!(
+            "Clip {{ name: {name:?}, frames: {frames}, looping: {looping} }},\n"
+        ));
+    }
+    generated.push_str("];\npub static DEFINITIONS: &[Definition] = &[\n");
+    let mut seen = std::collections::BTreeSet::new();
+    let definitions = catalog["definitions"]
+        .as_array()
+        .expect("authored achievement definitions");
+    assert!(
+        !definitions.is_empty(),
+        "achievement definitions are not invented"
+    );
+    for entry in definitions {
+        let id = entry["id"].as_u64().expect("achievement ID");
+        assert!(
+            id <= 178 && seen.insert(id),
+            "unique authored achievement ID"
+        );
+        let name = entry["name"].as_str().expect("achievement name");
+        let authored_gfx = entry
+            .get("gfx")
+            .expect("achievement gfx is explicit, including null");
+        let gfx = if authored_gfx.is_null() {
+            "None".into()
+        } else {
+            let path = authored_gfx
+                .as_str()
+                .expect("actual achievement graphics path");
+            assert!(!path.is_empty(), "empty graphics disable layer3 explicitly");
+            format!("Some({path:?})")
+        };
+        generated.push_str(&format!(
+            "Definition {{ id: {id}, name: {name:?}, gfx: {gfx} }},\n"
+        ));
+    }
+    generated.push_str("];\n");
+    generated
+}
+
 fn information_catalog(xml: &str, path: &Path) -> String {
     let actors: Value =
         serde_json::from_str(&fs::read_to_string(path).expect("read authored stage animations"))
@@ -696,6 +805,22 @@ fn main() {
     let challenges = resources.join("challenges.xml");
     println!("cargo:rerun-if-changed={}", challenges.display());
     let information_animations = manifest.parent().unwrap().join("web/information-data.json");
+    let achievements = resources.join("achievements.xml");
+    let notification_inputs = manifest
+        .parent()
+        .unwrap()
+        .join("web/generated/unlock-notifications");
+    let notification_catalogue = notification_inputs.join("catalogue.json");
+    let notification_animations = notification_inputs.join("information-data.json");
+    println!("cargo:rerun-if-changed={}", achievements.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        notification_catalogue.display()
+    );
+    println!(
+        "cargo:rerun-if-changed={}",
+        notification_animations.display()
+    );
     println!("cargo:rerun-if-changed={}", giantbook.display());
     println!(
         "cargo:rerun-if-changed={}",
@@ -1035,6 +1160,15 @@ fn main() {
         ),
     )
     .expect("write authored information definition");
+    fs::write(
+        output.join("unlock_notification_catalog.rs"),
+        unlock_notification_catalog(
+            &achievements,
+            &notification_catalogue,
+            &notification_animations,
+        ),
+    )
+    .expect("write authored unlock notification definitions");
     fs::write(
         output.join("nightmare_catalog.rs"),
         nightmare_catalog(

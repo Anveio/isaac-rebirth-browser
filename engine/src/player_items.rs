@@ -1194,6 +1194,9 @@ pub(crate) fn add_collectible(
     touched: bool,
 ) -> Result<(), String> {
     let config = items::definition(id).ok_or("granted collectible config absent")?;
+    //52CDBC precedes52CDC4's permanent count; actual history is not owned-count
+    //membership. Inhibit and completion/notification callbacks stay exact.
+    crate::persistent_effects::mark_collected(state, id)?;
     //Validate the actual240 RNG owner before count or draws. Gameplay
     //contexts retain independent partial ownership and never refuse pickup.
     let treatment = if id == 240 {
