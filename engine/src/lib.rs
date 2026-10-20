@@ -667,6 +667,17 @@ fn pause_stat_frame(value: f32) -> u8 {
         };
     integer.clamp(1, 7) as u8
 }
+///A cache of Game's immutable Challenge catalogue owner, refilled from that
+///owner after a deserialization: every value compares equal.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct CatalogCache(pub(crate) Option<std::sync::Arc<challenges::Catalog>>);
+
+impl PartialEq for CatalogCache {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct State {
@@ -703,10 +714,13 @@ pub struct State {
     #[serde(default)]
     pub platform_achievement_attempts: Vec<persistent_effects::PlatformAttempt>,
     ///Ephemeral borrowable cache of Game's actual immutable resource owner.
-    ///It is rebuilt from that owner after a whole-Game deserialization.
+    ///It is rebuilt from that owner before the next command, so it is not
+    ///state: it neither serializes nor takes part in State equality.
     #[serde(skip)]
-    persistent_catalog: Option<std::sync::Arc<challenges::Catalog>>,
-    #[serde(skip)]
+    persistent_catalog: CatalogCache,
+    ///The System counter the current callback interval began at; a command
+    ///between Ticks reads the last one, so it serializes with the state.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     persistent_callback_pre_counter: Option<u32>,
     pub system_clock: phase::Clock,
     pub run_admission: run_admission::RunAdmission,
@@ -1217,7 +1231,9 @@ impl Game {
                     persistent_effects::PlatformBackend::Unavailable,
                 ),
                 platform_achievement_attempts: Vec::new(),
-                persistent_catalog: Some(std::sync::Arc::new(challenge_catalog.clone())),
+                persistent_catalog: CatalogCache(Some(std::sync::Arc::new(
+                    challenge_catalog.clone(),
+                ))),
                 persistent_callback_pre_counter: None,
                 // The public runtime starts at the first rendered Title,
                 // after the omitted native introductory cutscene. Its next
@@ -1399,9 +1415,9 @@ impl Game {
     fn apply(&mut self, command: Command) -> Result<(), String> {
         self.state.begin_command();
         self.state.platform_achievement_attempts.clear();
-        if self.state.persistent_catalog.is_none() {
+        if self.state.persistent_catalog.0.is_none() {
             self.state.persistent_catalog =
-                Some(std::sync::Arc::new(self.challenge_catalog.clone()));
+                CatalogCache(Some(std::sync::Arc::new(self.challenge_catalog.clone())));
         }
         match command {
             Command::MusicVolume { volume } => {
