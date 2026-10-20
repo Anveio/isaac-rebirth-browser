@@ -275,10 +275,11 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
                   production_directory=production_directory)
     if tail['status'] != 'pass':
         # The drawn idle and the waypoint the recorder walked to replay this
-        # approach exactly (--approach).
+        # approach exactly (--approach), through the suite runner.
         chosen = tail.get('via') or via
         drawn = f"{fixture['name']}:{idle}" + (f":{chosen[0]},{chosen[1]}" if chosen else '')
-        return None, f"port-exit (--approach {drawn}): {tail['reason']}"
+        replay = f"npm run test:e2e -- stage-exit --helper-arg --approach --helper-arg {drawn}"
+        return None, f"port-exit ({replay}): {tail['reason']}"
     # The recorder reports the candidate waypoint it walked through.
     via = tail.get('via') or via
     if tail.get('build') != base.get('portRecordedBuild'):
