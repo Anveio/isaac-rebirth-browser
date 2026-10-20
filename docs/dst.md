@@ -106,7 +106,7 @@ indexes each one's declared properties from source.
 | `pathfinder` | FindGridPath's flood (`pathfinder::flood_costs`, 5b498f) over room-shaped and arbitrary cost grids | an independent node-weighted Dijkstra: every label is the cell's shortest distance whatever order heap ties take; only open cells of the grid change; the owner is visited exactly when it lies within half the room's cells; without it the flood visits exactly the cells nearer than that cutoff, with it every cell nearer than the expansion that visits the owner and none farther, and that expansion runs to its end; purity; grids outside admission are rejected |
 | `item_pools` | the run-owned ItemPool manager (`docs/item-pools.md`) | selection never offers a collectible twice (Breakfast aside), comes from its pool, the treasure fallback, Breakfast or the Bible, and advances none of the manager's streams; depletion only lowers weights and fills the removed/selected maps; a zero-counter counterfactual isolates Rosary's Bible override and the candidate it marks; drains reach Breakfast within the catalog; locked collectibles survive every redraw; error rooms route with one shared draw and special rooms to their namesake pools; JSON continuation; rejections without mutation |
 | `game` | the whole engine through public commands, booted with or without the settings and input configuration the browser stored | per-step state invariants, per-command transition contracts (menus including Options, Controls and Keyboard bindings, the own-save protocol and Continue, run-start hold, pause, boss scenes, stage descents, death and GameOver), boot with stored settings, a harness's declared boot clock (#660, `set_boot_elapsed`: exactly the declared time on a fresh reset clock, refused unchanged with a sub-millisecond part of 1 ms or more, once the clock moved or once a Tick ran, and carried as a tape's `bootElapsed` through replay, the C ABI and the WASM; `coverage-boot-elapsed` boots the live suites' clock, so every run meets them), rejection of malformed inputs, tape replay, serialized-midpoint continuation, the C ABI, the shipped WASM |
-| `rooms` | every room `traversal::admits` on a floor a seeded run's trapdoors reach, through each trapdoor's own entry check and a door transition, and played by the game driver (after stage/rooms' room-entry scan) | no Tick fails and nothing panics, signed by the engine's error; a stage transition a trapdoor starts arrives within 1,500 full updates. A refused trapdoor or door is skipped and a player who walks back out has played the room, so no port gap is pinned |
+| `rooms` | every room `traversal::admits` on a floor a seeded run's trapdoors reach, through each trapdoor's own entry check and a door transition, and played by the game driver (after stage/rooms' room-entry scan); each boss room's fight then ends, there and on the floors of ten more runs a case descends for their bosses alone | no Tick fails and nothing panics, signed by the engine's error; a stage transition a trapdoor starts arrives within 1,500 full updates; a boss room is cleared once its enemies keep taking lethal hits, whatever its shape. A refused trapdoor or door is skipped and a player who walks back out has played the room, so no port gap is pinned |
 | `abi` | the exported C ABI the browser bridge drives | save documents bounded at 4 MiB, save IO declared only with protocol 1 at a fresh Title and documents loaded only there, corrupt documents refused keeping the game; framing bounds, malformed requests, failed resets, pre-reset commands on a fresh thread, the published key surface; a boot from the authored challenge XML and special-room STB through `reset_with_boot_resources` publishes and plays exactly like the plain boot, and truncated, unknown-field, oversized or corrupted resources fail with an error that keeps the previous game; the settings resets boot with their stored settings, publish the same state from the authored resources, and refuse presence flags other than zero or one and stored volumes or Map opacity outside the unit interval, keeping the previous game; the input-configuration reset boots with the stored configuration and the same state from the authored resources, and refuses more than 32 retained devices, duplicate or unprintable names, Keyboard bindings outside GLFW's keys and unknown request fields, keeping the previous game; the Gamma settings reset boots with every stored setting and the same state from the authored resources, boots what the input-configuration reset does at Gamma 1, and refuses a missing, null or out-of-range Gamma and unknown fields, keeping the previous game; `set_boot_elapsed` succeeds right after reset and fails with an error, keeping the game, before any reset, with a sub-millisecond part of 1 ms or more, once the clock moved or once a Tick ran |
 
 The `game` driver ([driver.rs](../engine/dst/src/units/game/driver.rs)) only
@@ -235,7 +235,10 @@ game features (owned collectibles, secret reveals, boss clears) each case
 reached, including each owned weapon collectible (`weapon:<id>`), each
 floor stage played (`stage:<n>`), each stage's boss and miniboss rooms
 entered and cleared (`room:5 on stage 2`, `cleared:5 on stage 2`), a boss
-room entered, a boss room cleared
+room entered, a boss room cleared, each larger boss room shape cleared
+(`cleared:5(26x7)`, beside `room:5(26x7)` for entering it), each champion
+color an NPC simulated with, alone and with its floor's stage (`champion:11`,
+`champion:11 on stage 5`; only `rooms` cases reach the later floors' colors),
 and a descent made while an active item is held (`boss room holding an
 active item`, `boss room cleared holding an active item`, `descent holding
 an active item`), a run started after a descent (`new
@@ -251,8 +254,9 @@ simulated once the unit plays it; `reached` and `firstSteps` hold only
 `game` cases, the ones with tapes for `cover.py` and `chase.py` to cut. A
 census entry is a measurement, never a requirement. The summary
 line names the implemented NPC kinds no case simulated
-(from `rebirth_cleanroom::implemented_npc_kinds`) and the room types that
-generated floors contained but no case entered. Unsimulated kinds are split
+(from `rebirth_cleanroom::implemented_npc_kinds`), the room types that
+generated floors contained but no case entered, and the boss rooms, by
+shape, that a case entered and none cleared (`unclearedBossRooms`). Unsimulated kinds are split
 by whether any authored Basement, Caves or special room places them
 (`unplacedNpcKinds`): a kind no room places, such as one from a later stage,
 is reachable only when another entity spawns it, so it is not a driver gap.
@@ -338,6 +342,24 @@ for 300 to 900 full updates. The starting room stays the one the engine
 persists, and admission reads only the target and its door, so the
 starting room need not neighbor the target.
 
+Then each boss room's fight ends. Once the driver's pause menu closes and
+its transition ends, every enemy alive takes a lethal hit through its own
+damage queue each full update, the room-wide way Black Heart's effect lands
+(523eaa), so each boss dies by its own rules, splits and spawns included,
+and the room's clear and its award run. The room must clear within 1,500
+full updates unless the player died, left or quit the run first. A tall or
+wide boss room (13x14, 26x7) is a few floors in a hundred, so each case also
+descends ten more runs and fights only their floors' bosses. No shape is
+named, so none the port admits is pinned; the further runs make an ordinary
+run reach each shape the floors place. In 200 cases on 197d870a with #774, 13x14 rooms
+were cleared in 55 cases and 26x7 rooms in 46 with six further runs; with
+ten, each of eight 12-case runs cleared both shapes, in 2 to 7 of its
+cases. Without #774 every such 12-case run fails `rooms: no Tick fails`
+10 to 13 times (`boss clear award admits only 1x1 boss rooms`), the halt
+#750 shipped. The fights also kill every boss the descent reaches: of the
+kinds `rooms` cases simulated, only 17, 49, 51, 50 and 218 now never die
+there.
+
 A trapdoor that does not take the player within 120 full updates refused
 the descent, which is not a violation; a transition it starts must arrive
 within 1,500, and a Tick that fails on the way is a violation like any
@@ -355,7 +377,10 @@ walls, finite motion, health and consumable bounds, identities, the actor
 schedule, room bookkeeping and the rest. 200 rooms cases evaluated them
 44.6 million times, about 223,000 per case. A report lists every property a
 unit it ran evaluated, so a game invariant a rooms-only run fails is never
-hidden by the unit selection. A case reproduces from its seed:
+hidden by the unit selection. While a room plays, every property the case
+records names the room under `dst.at` (run code, stage, room index,
+template and shape), the game invariants' too, and a stage arrival names
+its run and the stage it left. A case reproduces from its seed:
 `rebirth-dst --units rooms --case-seed SEED`.
 
 ### Tapes and the corpus
@@ -538,6 +563,7 @@ fix must follow source evidence rather than merely silence the property.
 
 | Finding | Resolution | Guard |
 | --- | --- | --- |
+| A rejected stored profile still let confirmation queue NewRun; deferred admission then failed inside a transactional Tick and left the request pending, so later valid Ticks failed again. | Character, Challenge and Continue confirmation share the rejected-document guard before queuing a request. Quarantine retains the profile, stored document and host write revision, refuses export, and reports a recoverable browser admission error; unrelated errors retain their fatal path. | [`regression-rejected-profile-admission`](../engine/dst/corpus/regression-rejected-profile-admission.json) keeps the first669 actual commands of retained case19, including its failed Tick at zero-based index668, with the original boot and stored `null` document unchanged. Four Always contracts check atomic confirmation, quarantine, host preservation and export refusal. |
 | Confirming a locked or unimplemented character queued a run whose start failed inside the transactional tick, so every later tick failed and the browser's frame loop stopped. | Fixed on main (#120): character confirmation validates the selection and rejects the input with state unchanged. | `regression-locked-character-start` |
 | Dip217 room actors (#127) are NPC collision class 4, but the NPC-pair and tear contact responses rejected type 217, so any room whose Dips touch (authored Basement rooms place them 40 px apart) failed every tick and stopped the browser's frame loop. | Fixed on main (#146): Dips take the normal-class `49b8f0` callback and `445710` mass response recorded in the Dip source contract. | `contact: every admitted pair at ordinary scales resolves` takes its NPC kinds from the engine's registry and fails 234 times with the #146 refusal planted back. `regression-dip-contact-freeze` was retired once the shared MT moved its Dips apart for the second time |
 | A Random run stores its resolved character in the menu's selected character. Since the GameOver popup can exit to the menus (#111), the Character menu then highlighted Random while confirming started the previous run's character, and the menu invariant failed. Latent while only Isaac is implemented. | The Exit path reloads the menus' character from the profile's selection, as Profile → Main already does. | `regression-random-run-exit-menu-character` (252 commands) dies on a Random run and takes the GameOver Exit at command 221; without the fix it fails the menu invariant 31 times. By 7f2f3b4 the shared MT had moved it to the pause menu's Quit, a different path to the menus, so its `chases.json` recipe now chases the census key `menus after a Random run's GameOver` from the Random run's start |

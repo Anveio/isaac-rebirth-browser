@@ -211,6 +211,12 @@ pub fn observe(state: &State) {
                 if state.room.combat_clear {
                     keys.push(format!("cleared:{}", template.room_type));
                     keys.push(format!("cleared:{} on stage {stage}", template.room_type));
+                    if (template.width, template.height) != (13, 7) {
+                        keys.push(format!(
+                            "cleared:{}({}x{})",
+                            template.room_type, template.width, template.height
+                        ));
+                    }
                 }
             }
             // The active-item descent's steps, each with the item still held:
@@ -224,6 +230,15 @@ pub fn observe(state: &State) {
         }
         for npc in state.room.npcs.iter().filter(|npc| !npc.removed) {
             keys.push(format!("npc:{}", npc.kind));
+            // Each champion color simulated, alone and with its floor's
+            // stage, since a rare color rolls only on some floors.
+            if let Some(champion) = &npc.champion {
+                keys.push(format!("champion:{}", champion.color));
+                keys.push(format!(
+                    "champion:{} on stage {}",
+                    champion.color, state.floor.stage
+                ));
+            }
             // A Fireplace dies by going out (state 3, NoFire) and stays put.
             if npc.kind == 33 && npc.state == 3 {
                 keys.push("extinguished:33".to_owned());
@@ -401,6 +416,18 @@ pub fn report() -> Value {
                 })
         })
         .collect();
+    // Boss room shapes some case entered and none cleared: `room:5` and
+    // `room:5(26x7)` close with `cleared:5` and `cleared:5(26x7)`.
+    let uncleared_bosses: Vec<&str> = census
+        .reached
+        .keys()
+        .chain(census.rooms_reached.keys())
+        .filter(|key| *key == "room:5" || key.starts_with("room:5("))
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .filter(|room| !reached(&room.replacen("room:", "cleared:", 1)))
+        .collect();
     let mut first_steps = census.first_steps.clone();
     first_steps.sort();
     let first_steps: BTreeMap<String, BTreeMap<String, u64>> = first_steps.into_iter().collect();
@@ -415,5 +442,6 @@ pub fn report() -> Value {
         "unplacedNpcKinds": unplaced_npcs,
         "unremovedNpcKinds": unremoved_npcs,
         "unenteredRoomTypes": unentered_rooms,
+        "unclearedBossRooms": uncleared_bosses,
     })
 }
