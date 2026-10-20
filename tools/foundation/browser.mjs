@@ -6,10 +6,14 @@ export function browserGraphicsProfile(value = process.env.FOUNDATION_BROWSER_GR
   return value;
 }
 
+// A system Chromium, then the cloud image's preinstalled one, whose revision
+// need not match the pinned Playwright's bundled download.
+const SYSTEM_CHROMIUM = ["/usr/bin/chromium", "/opt/pw-browsers/chromium"];
+
 export function browserLaunchOptions({ profile = browserGraphicsProfile() } = {}) {
   browserGraphicsProfile(profile);
   return {
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined),
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || SYSTEM_CHROMIUM.find(path => existsSync(path)),
     args: profile === "mesa"
       ? ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist", "--enable-webgl"]
       : ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
