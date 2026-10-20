@@ -1,15 +1,24 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
+import { chromium } from "@playwright/test";
 
 export function browserGraphicsProfile(value = process.env.FOUNDATION_BROWSER_GRAPHICS || "mesa") {
   assert.ok(["mesa", "swiftshader"].includes(value), `Unsupported FOUNDATION_BROWSER_GRAPHICS profile: ${value}`);
   return value;
 }
 
+// A system Chromium, else the pinned Playwright's own download, else the
+// cloud image's preinstalled Chromium, whose revision need not match the pin.
+function chromiumExecutable() {
+  if (existsSync("/usr/bin/chromium")) return "/usr/bin/chromium";
+  if (existsSync(chromium.executablePath())) return undefined;
+  return existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined;
+}
+
 export function browserLaunchOptions({ profile = browserGraphicsProfile() } = {}) {
   browserGraphicsProfile(profile);
   return {
-    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || (existsSync("/usr/bin/chromium") ? "/usr/bin/chromium" : undefined),
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || chromiumExecutable(),
     args: profile === "mesa"
       ? ["--use-gl=angle", "--use-angle=gl-egl", "--ignore-gpu-blocklist", "--enable-webgl"]
       : ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
