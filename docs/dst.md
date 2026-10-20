@@ -21,6 +21,7 @@ npm run test:dst -- --seed 0x1f2e3d4c5b6a7988     # rerun a whole recorded run
 engine/dst/target/release/rebirth-dst --units game --case-seed 7233388093878974408 --steps 5000
 engine/dst/target/release/rebirth-dst --replay .cache/dst/run-…/tapes/game-…-violation.json
 engine/dst/target/release/rebirth-dst --list      # the unit registry
+python3 tools/dst/pin.py --binary engine/dst/target/release/rebirth-dst check   # each pinned room alone
 npm run lint:dst                                  # rustfmt + strict clippy for the harness
 ```
 
@@ -381,7 +382,8 @@ hidden by the unit selection. While a room plays, every property the case
 records names the room under `dst.at` (run code, stage, room index,
 template and shape), the game invariants' too, and a stage arrival names
 its run and the stage it left. A case reproduces from its seed:
-`rebirth-dst --units rooms --case-seed SEED`.
+`rebirth-dst --units rooms --case-seed SEED`, but only while the unit draws
+as it did; a finding keeps its room as a pinned room (below).
 
 ### Tapes and the corpus
 
@@ -556,6 +558,64 @@ not replay that directory, so one unfixed finding does not turn every run red,
 but `--replay engine/dst/findings/NAME.json` reproduces it exactly. The fix
 moves the tape into the corpus as a `regression-*` tape.
 
+### Pinned rooms
+
+Game tapes reach only the floors a game case descends to, Basement I and II
+on today's corpus. A finding a `rooms` case met on a later floor, or in a
+room no tape enters, has no tape, and its case seed stops reproducing it as
+soon as the unit's draws change: another room played first, a boss fight
+that ends sooner. A pin in
+[engine/dst/pinned-rooms.json](../engine/dst/pinned-rooms.json) names the
+room instead:
+
+```json
+{ "name": "regression-caves-chest-trinket", "code": "WWEA87BT", "stage": 3, "room": 15,
+  "template": [1, 345], "seed": 12574460114799845279, "reaches": ["pickup:50"] }
+```
+
+`test:dst` passes `--pins engine/dst/pinned-rooms.json`, and the `rooms` unit
+plays every pin after its generated cases. A pin's case boots and starts the
+run its `code` seeds, descends with its `seed` until a floor reaches `stage`,
+enters only room `room` and plays it as a case plays every room, a boss
+room's fight included. So a pin depends on its run's generation, the descent
+and the room's play, and not on the rest of the workload. Its failures carry
+`dst.pin` beside `dst.at`, and it counts among `roomsCases`. Each pin also
+reports whether it drifted (`coverage.pins`; the drifted ones in
+`driftedPins` and on the summary line): no floor of its run reached its
+stage, its room is another template or was not entered, or the room missed
+one of its `reaches` keys. Drift is a measurement, as a corpus tape's lost
+keys are: a drifted pin still runs, but it may no longer meet what it
+guards, so the health check refreshes it. A pin keeps only keys of what the
+game does (an NPC kind, a pickup, a champion color), never a port gap's
+marker, so no pin requires a gap to stay open.
+
+`tools/dst/pin.py` finds and keeps pins:
+
+```sh
+python3 tools/dst/pin.py --binary B search --name NAME --code C --stage S \
+  --room R --template T.V --reaches KEY --fails TEXT --write
+python3 tools/dst/pin.py --binary B check            # --only NAME for one
+python3 tools/dst/pin.py --binary B refresh --only NAME
+```
+
+A finding's `dst.at` names its run code, stage, room and template. `search`
+plays `--tries` seeds of that room (32 by default) in one run. With
+`--fails`, on an engine that still has the finding, it keeps the first seed
+whose case fails with TEXT in a signature or its details; without it, the
+first that fails nothing and reaches every key. It replays the kept seed
+alone before printing or writing it. `check` replays each pin alone and
+fails if one fails a property or drifted. `refresh` searches a new passing
+seed for a drifted pin's room; a room its run's generation moved needs a
+new search from the finding.
+
+Three fixed findings that had only a case seed are pinned: the Hopper state
+(#690), the Room+e94 probe (#689) and the Chest350 trinket (#692), whose rows
+below name them. Each pin was searched among 2,000 seeds on 197d870a with
+its fix reverted, fails there with its finding's error and passes with the
+fix. Their rooms are those the findings named (9Y4P1T0R room 8, 1.104;
+CGVFTQDN room 8, 1.199; WWEA87BT room 15, 1.345), so generation had not
+moved them since.
+
 ## Findings
 
 A property that fails is a finding. DST shows that the engine misbehaves; the
@@ -584,9 +644,9 @@ fix must follow source evidence rather than merely silence the property.
 | The shared-MT stack (#398) ported the ambient Tiny Bugs, Tiny Flies and Wall Bugs. A Tiny Bug that wandered onto a pit failed the tick with `Tiny Bug pit recovery is outside supported grid objects`, and every later tick in the room failed the same way, freezing the browser's frame loop. The check assumed no admitted room places a pit, but Basement rooms do; two corpus tapes reached it within their first rooms. The same stack removed the renderer-only tear `impacts`, so the DST crate stopped compiling on main. | The pit branch now does what its source comment states: the bug returns to its previous position (Effect+440). The tear must-hit now looks for the sized TearPoof effect (1000.12, 13, 0x4f or 0x50) that replaced the impact. | `regression-tiny-bug-pit` (600 commands) fails 8 ticks without the fix |
 | Bodies pushed into walls (#365). A player walked a closed chest (5.50) into a bottom wall and settled its centre 10.8 px inside the wall cell; a locked chest (5.60) went into a corner, and one pushed up a door column passed the open door cell and left the grid; a Lil' Battery (5.90) and a Horf (12) went into side walls in front of a walking player; a Gaper behind a Gusher (11), a Larry Jr. segment beside a Charger (23) and a Mulligan (16) behind another pushed those bodies into walls; and Monstro (20), landing on a Gaper (10.1), threw it 27 px into the top wall row. Each time the contact response (4545d0) moved a ground body past the room's interior edge, and the late ground pass (442b90) left its centre there: it reflects only inward motion and corrects at most max(speed, 2) px, so a body the contact kept pushing ratcheted in. The source query clamps the centre to the room bounds before its samples for class 5 as for class 3 (442c2d; 442c3b..69 at any speed and in prediction), but the port's class-5 collider, unlike its class-3 one, left that clamp to its callers. Bombs (#614), familiars and the Gaper preview clamped; ground-walking NPCs, pickups, Dips, Monstro and the Roundworm did not. Once the `rooms` unit evaluated the state invariants (#748) it met the same gap often: of 2,000 cases on 59e1f9c, 281 failed, 218 with a locked chest (signature `pickup 60`), 46 with Mega Fatty (264) landing a jump aimed past a wall (`npc 264`, `--units rooms --case-seed 9306351262927921413`), 10 with a coin (`pickup 20`, `--case-seed 6758684668483473617`), 6 with a chest and one with a Gaper. | The class-5 collider (`resolve_nonplayer_ground` and the Dip's bouncy variant) clamps the centre before its samples, as `resolve_nonplayer_walls` does for class 3, so no caller can skip it; the callers' own clamps were folded into it. DST shows the engine now matches its source contract. It is not original evidence: whether the original's clamped positions match needs the live comparison #365 asks for, a contrived `chest-opening` case pushing a chest into a wall and through an open door, with the NPC suites the clamp touches. | `regression-player-pushes-chest-into-wall` (380 commands), `regression-player-pushes-horf-into-wall` (601) and `regression-monstro-landing-pushes-gaper-into-wall` (2,271) fail `game: grid-colliding bodies stay inside the room's walls` on 59e1f9c, at commands 379, 600 and 2270, and pass. The 2,000 `rooms` cases (`--seed 0x3d92ec53a1f3dfab`) all pass. The battery, Gusher, Charger and Mulligan tapes had drifted off their contacts by 59e1f9c and were retired; it still holds them |
 | A run whose Caves I boss draw is Double Trouble (layout 3700) could not arrive on Caves I. `advance_trapdoor` takes the player because `next_stage(2)` is admitted since #654, and the next level's admission (`admit_next_level`) propagates the generator's `Double Trouble's 2x1 boss room requires unimplemented boss placement` (floor.rs). The Tick fails, every retry reaches the same admission, and the browser halts on the first failure: about 9% of the `rooms` unit's Caves I arrivals through the trapdoor (9 of about 100 in 300 cases); stage/rooms measured 288 of 4,000 seeds. | Fixed on main (#688): the trapdoor takes the player only when the next floor generates from the exact request the level's admission uses, so a Double Trouble seed stays on Basement II until content's 2x1 fit admits it. The `rooms` unit descends through the trapdoor's own entry check, so a refusal is no violation. | `rebirth-dst --units rooms --case-seed 15207181494778813838` (seed 6CA0SPPZ, from Basement II) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` at the trapdoor's stage arrival before the fix and passes on 8a5e69f |
-| Playing a Caves I room failed the Tick with `pathfinder probe left the room grid; Room+e94 is not modelled`, in a curse room (10.8) and an ordinary one (1.199). Stage/rooms' scan found the same halt in 4 of about 8,700 Caves I room entries, with Larry Jr. in large rooms 1.321 and 1.349. | Fixed on main (#689): stage/rooms' Room+e94 fallback. | `rebirth-dst --units rooms --case-seed 1692406417774197375` (seed CGVFTQDN, Caves I room 8) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on 8a5e69f |
-| Opening a chest in a Caves I room (1.345) failed the Tick with `Chest350 Init/Get is outside the admitted grant-only slice`: the chest's loot rolled a trinket (5.350), whose Init/Get #668 refuses (`chests::admit_child`). Every later Tick against the chest fails the same way and the browser halts. It is the authored-trinket and TNT halts' refusal (#674, #677) on the chest path. Found by the `rooms` unit on 540197a. | Fixed on main (#692): the chest skips the 350 child and records it, as #674's authored-trinket path does. | `rebirth-dst --units rooms --case-seed 11399924783966766290` (seed WWEA87BT, Caves I room 15) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on da2d591 |
-| Playing a Basement I room (1.104) failed the Tick with `Hopper state 1 is not admitted`. The decoded 4cfcf0 dispatch handles only states 3 and 4 for Hoppers (29) and Leapers (54) and sends every other state to the shared tail, but the port refused any other state. Found once in 600 `rooms` cases on 6a1a0d41. | Fixed on main (#690): a Hopper or Leaper in any other state runs only the shared tail, as 4cfcf0 does. | `rebirth-dst --units rooms --case-seed 233620001356869716` (seed 9Y4P1T0R, Basement I room 8) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on dc38bee |
+| Playing a Caves I room failed the Tick with `pathfinder probe left the room grid; Room+e94 is not modelled`, in a curse room (10.8) and an ordinary one (1.199). Stage/rooms' scan found the same halt in 4 of about 8,700 Caves I room entries, with Larry Jr. in large rooms 1.321 and 1.349. | Fixed on main (#689): stage/rooms' Room+e94 fallback. | `rebirth-dst --units rooms --case-seed 1692406417774197375` (seed CGVFTQDN, Caves I room 8) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on 8a5e69f. The pinned room `regression-caves-pathfinder-e94` (Larry Jr., `npc:19`) fails with the same error with the fallback reverted and passes with it |
+| Opening a chest in a Caves I room (1.345) failed the Tick with `Chest350 Init/Get is outside the admitted grant-only slice`: the chest's loot rolled a trinket (5.350), whose Init/Get #668 refuses (`chests::admit_child`). Every later Tick against the chest fails the same way and the browser halts. It is the authored-trinket and TNT halts' refusal (#674, #677) on the chest path. Found by the `rooms` unit on 540197a. | Fixed on main (#692): the chest skips the 350 child and records it, as #674's authored-trinket path does. | `rebirth-dst --units rooms --case-seed 11399924783966766290` (seed WWEA87BT, Caves I room 15) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on da2d591. The pinned room `regression-caves-chest-trinket` (a chest, `pickup:50`) fails with the same error with the 350 child refused again and passes with the fix |
+| Playing a Basement I room (1.104) failed the Tick with `Hopper state 1 is not admitted`. The decoded 4cfcf0 dispatch handles only states 3 and 4 for Hoppers (29) and Leapers (54) and sends every other state to the shared tail, but the port refused any other state. Found once in 600 `rooms` cases on 6a1a0d41. | Fixed on main (#690): a Hopper or Leaper in any other state runs only the shared tail, as 4cfcf0 does. | `rebirth-dst --units rooms --case-seed 233620001356869716` (seed 9Y4P1T0R, Basement I room 8) failed `rooms: no Tick fails while a run enters and plays its floor's rooms` before the fix and passes on dc38bee. The pinned room `regression-basement-hopper-state` (a Hopper, `npc:29`) fails with `Hopper state 1 is not admitted` with the refusal restored and passes with the fix |
 | Isaac, holding keys, touched a Key Master (slot 6.7). Since #662 slots are admitted only as idle bodies, and a Player contact that would reach a slot's resource gate (`slots::player_contacts`, 539690) was an explicit error: `Key Master contact with keys is unadmitted`. Every later Tick against the Key Master failed the same way (60 of 60), and the browser halted on the first failure. Slot machines and beggars did the same with coins, Blood Donation and Devil Beggar on any touch, and NPC, pickup or bomb contact and explosions near a slot (`slots::unadmitted_contacts`, `slots::bomb_hit`). Found by the deep soak on 139d771. | Fixed forward: an unadmitted slot interaction no longer fails the Tick. Player contact keeps the idle body's mass response and skips the payout, resource gate or Blood Donation hurt; a flying or nonground Player takes that response without the grid-shift veto; NPC, pickup and bomb bodies pass through slots; explosions leave slots idle. Each skipped path is a documented port gap in `slots.rs` and the TEST_MATRIX slot row; payouts stay with the slots workstream. | [`corpus/regression-key-master-contact-halts`](../engine/dst/corpus/regression-key-master-contact-halts.json) (5,922 commands, with a save host) failed `game: valid Tick commands always succeed` at command 5921 before the fix |
 | Isaac, holding Technology 2 (collectible 152), fired its laser in a room with a slot machine (6.1). The laser's target query (`laser_runtime.rs`) refused any Slot actor, `Laser query Slot6 target membership is unadmitted`, so the Tick failed, as did all 60 later ones, and the browser halted. Found by the deep soak on 139d771. | Fixed forward: a slot is a non-target of the laser query, so the beam passes it. Its Slot6 membership is not decoded; TakeDamage53bd80 ignores every flag but explosion4, so a hit would deal nothing either way. The membership stays a documented port gap. | [`corpus/regression-laser-targets-slot-halts`](../engine/dst/corpus/regression-laser-targets-slot-halts.json) (4,789 commands) failed `game: valid Tick commands always succeed` at command 4788 before the fix |
 | A TNT barrel's blast rolled its 1-in-100 rare reward from the TNT's own RNG (`tnt.rs`), which removes a trinket from the pool and spawns it. The TNT owner refused that Remove/Init (`TNT rare trinket Remove/Init is outside the admitted slice`), so the Tick failed. The roll comes from the barrel's fixed seed, so every retry reached it again: 49 of the next 60 ticks failed, all after the blast frame, and the browser halted on the first. Found by the deep soak on 139d771. | Fixed forward as a recorded port gap: the blast skips the rare trinket's Remove/scatter/Init, records it (the barrel's reward frontier and the `RareTrinketPool` frontier) and continues; the blown barrel keeps its ordinary update. Porting the reward through the trinket pool stays with the trinket workstream (#668). | [`corpus/regression-tnt-rare-trinket`](../engine/dst/corpus/regression-tnt-rare-trinket.json) (150 commands, with a save host) failed `game: valid Tick commands always succeed` at command 149 before the fix |

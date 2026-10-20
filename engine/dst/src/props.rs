@@ -216,6 +216,9 @@ pub struct Context {
     pub case_seed: Option<u64>,
     pub step: u64,
     pub tape: Option<String>,
+    /// The pinned room a `rooms` case plays, if it plays one.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pin: Option<String>,
     /// Where in the case its unit stands, when the unit names it (a `rooms`
     /// case's run, floor and room), so a property the unit does not own,
     /// such as a game invariant, names it too.
