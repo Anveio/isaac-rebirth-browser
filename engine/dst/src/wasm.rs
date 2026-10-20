@@ -33,6 +33,7 @@ struct Exports {
     reset_with_input_configs: TypedFunc<(u32, u32), u32>,
     reset_with_settings_preferences: TypedFunc<(u32, u32), u32>,
     reset_with_map_preferences_v2: TypedFunc<MapReset, u32>,
+    set_boot_elapsed: TypedFunc<(u32, u32), u32>,
     request_ptr: TypedFunc<u32, u32>,
     command: TypedFunc<(), u32>,
     snapshot_ptr: TypedFunc<(), u32>,
@@ -102,6 +103,7 @@ impl Module {
             reset_with_input_configs: export!("reset_with_input_configs"),
             reset_with_settings_preferences: export!("reset_with_settings_preferences"),
             reset_with_map_preferences_v2: export!("reset_with_map_preferences_v2"),
+            set_boot_elapsed: export!("set_boot_elapsed"),
             request_ptr: export!("request_ptr"),
             command: export!("command"),
             snapshot_ptr: export!("snapshot_ptr"),
@@ -227,6 +229,18 @@ impl Module {
         };
         if reset.map_err(trap)? != 0 {
             return Ok(Some(json!({ "step": "reset" })));
+        }
+        // web/engine.ts declares a harness's boot clock inside reset.
+        if let Some(elapsed) = tape.boot_elapsed {
+            let declared = (elapsed.milliseconds, elapsed.sub_millisecond_nanoseconds);
+            if wasm
+                .set_boot_elapsed
+                .call(&mut wasm.store, declared)
+                .map_err(trap)?
+                != 0
+            {
+                return Ok(Some(json!({ "step": "bootElapsed" })));
+            }
         }
         // The browser declares save IO and loads its stored document before
         // the first command, then answers the save IO each command leaves.
