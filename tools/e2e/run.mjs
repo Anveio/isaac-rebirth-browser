@@ -115,14 +115,26 @@ if (suiteArgs.includes('--scenarios') && selected.length === 1 && selected[0].en
 }
 
 // Caller flags replace the registry's flag of the same name rather than
-// relying on each driver's parser to prefer the last occurrence.
+// relying on each driver's parser to prefer the last occurrence. A
+// pass-through flag always takes the next token, which is itself usually a
+// flag for the helper or comparator (`--helper-arg --count`), so that token
+// is neither a name nor left behind when its flag is replaced.
+const PASS_THROUGH = new Set(['--helper-arg', '--comparator-arg']);
+const takesValue = (args, index) => args[index + 1] !== undefined
+  && (PASS_THROUGH.has(args[index]) || !args[index + 1].startsWith('--'));
 function mergeArgs(defaults, overrides, replaced = []) {
-  const names = new Set([...overrides.filter(arg => arg.startsWith('--')), ...replaced]);
+  const names = new Set(replaced);
+  for (let index = 0; index < overrides.length; index++) {
+    if (!overrides[index].startsWith('--')) continue;
+    names.add(overrides[index]);
+    if (PASS_THROUGH.has(overrides[index])) index++;
+  }
   const merged = [];
   for (let index = 0; index < defaults.length; index++) {
-    const arg = defaults[index], takesValue = defaults[index + 1] !== undefined && !defaults[index + 1].startsWith('--');
-    if (names.has(arg)) { if (takesValue) index++; continue; }
+    const arg = defaults[index], value = takesValue(defaults, index);
+    if (names.has(arg)) { if (value) index++; continue; }
     merged.push(arg);
+    if (value) merged.push(defaults[++index]);
   }
   return [...merged, ...overrides];
 }

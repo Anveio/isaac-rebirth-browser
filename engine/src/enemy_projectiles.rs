@@ -66,6 +66,46 @@ pub struct EnemyProjectile {
     /// Projectile 9.v: 0 blood, 3 puke (ProjectileParams+74).
     #[serde(default, skip_serializing_if = "is_zero")]
     pub variant: u32,
+    /// +7f4 ProjectileFlags, OR'd in from ProjectileParams+54 (49ee5d).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub flags: u32,
+    /// +440 from ProjectileParams+60 (49ee8c): the orbit centre.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub orbit_centre: Option<WorldVector>,
+}
+
+/// The purple fire projectile 9.2 (Mega Maw's FireRing).
+pub const PURPLE_FIRE: u32 = 2;
+
+/// Parented to its spawner (49efef SetParent447fc0).
+pub const FLAG_PARENTED: u32 = 0x80;
+/// Orbits +440 one way (5377e8).
+pub const FLAG_ORBIT: u32 = 0x800;
+/// Orbits +440 the other way (537837 +7f5 & 0x10).
+pub const FLAG_ORBIT_REVERSE: u32 = 0x1000;
+/// Never collides with the grid (5371b0, 538050).
+pub const FLAG_NO_GRID: u32 = 0x2000;
+/// The ProjectileFlags the type-9 update admits; any other bit is refused.
+pub const ADMITTED_FLAGS: u32 = FLAG_PARENTED | FLAG_ORBIT | FLAG_ORBIT_REVERSE | FLAG_NO_GRID;
+
+/// A FireProjectiles shot whose ProjectileParams carry flags (+54) and a
+/// centre (+60).
+#[derive(Clone, Copy)]
+pub struct ProjectileFlags {
+    pub flags: u32,
+    pub centre: WorldVector,
+}
+
+impl ProjectileFlags {
+    /// Unadmitted bits are refused rather than silently ignored, so no
+    /// producer inherits motion the update does not implement.
+    pub fn admitted(self) -> Result<Self, String> {
+        let unadmitted = self.flags & !ADMITTED_FLAGS;
+        if unadmitted != 0 {
+            return Err(format!("unadmitted ProjectileFlags {unadmitted:#x}"));
+        }
+        Ok(self)
+    }
 }
 
 fn is_zero(value: &u32) -> bool {
@@ -125,7 +165,17 @@ impl EnemyProjectile {
             impact_rotation: None,
             spawner_type: 0,
             variant: 0,
+            flags: 0,
+            orbit_centre: None,
         }
+    }
+
+    /// 49ee5d/49ee8c: the flags and centre a FireProjectiles shot copies
+    /// from its ProjectileParams (checked by `ProjectileFlags::admitted`).
+    pub fn with_flags(mut self, params: ProjectileFlags) -> Self {
+        self.flags = params.flags;
+        self.orbit_centre = Some(params.centre);
+        self
     }
 
     pub fn advance(&mut self, phase: Phase, grid: &Grid) -> Result<bool, String> {
@@ -141,9 +191,14 @@ impl EnemyProjectile {
             .checked_add(1)
             .ok_or("projectile update count exhausted")?;
         // Source536e37 selects a regular clip from actual scale every full;
-        // Worm scale1 remains6.
-        let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
-        let name = format!("RegularTear{size}");
+        // Worm scale1 remains6. The purple fire shot 9.2 plays its looping
+        // Flickering clip instead (5370f3).
+        let name = if self.variant == PURPLE_FIRE {
+            "Flickering".to_string()
+        } else {
+            let size = (self.scale * 3.0 + 3.0).trunc().min(13.0) as u32;
+            format!("RegularTear{size}")
+        };
         let frames = content::clip(content::entity(9, self.variant).actor, &name)
             .ok_or("hostile projectile scale requires an unadmitted authored clip")?
             .frames;
@@ -157,13 +212,17 @@ impl EnemyProjectile {
             self.removed = true;
             return Ok(true); // Source impact producer executes after BaseUpdate.
         }
+        if self.flags & (FLAG_ORBIT | FLAG_ORBIT_REVERSE) != 0 {
+            self.orbit()?;
+        }
         self.falling_speed = (0.9 * self.falling_speed + 0.1) + self.falling_acceleration;
         self.height += self.falling_speed;
         if self.height < -50.0 {
             self.grid_collision_class = 0;
             self.entity_collision_class = 0;
         } else {
-            self.grid_collision_class = 4;
+            // 538050: a no-grid shot keeps grid class 0.
+            self.grid_collision_class = if self.flags & FLAG_NO_GRID != 0 { 0 } else { 4 };
             self.entity_collision_class = 4;
         }
         if self.height > -5.0 || (self.grid_contact && self.height >= -50.0) {
@@ -177,6 +236,31 @@ impl EnemyProjectile {
             return Err("hostile projectile motion overflowed".into());
         }
         Ok(false)
+    }
+}
+
+impl EnemyProjectile {
+    /// 5377e8: after BaseUpdate, steer along the tangent of the centre
+    /// offset plus half of it, keeping the speed. FLAG_ORBIT_REVERSE turns
+    /// the tangent round (538a90).
+    fn orbit(&mut self) -> Result<(), String> {
+        let centre = self
+            .orbit_centre
+            .ok_or("orbiting projectile requires its ProjectileParams centre")?;
+        let offset = WorldVector {
+            x: self.position.x - centre.x,
+            y: self.position.y - centre.y,
+        };
+        let mut tangent = WorldVector {
+            x: -offset.y,
+            y: offset.x,
+        };
+        if self.flags & FLAG_ORBIT_REVERSE != 0 {
+            tangent = tangent * -1.0;
+        }
+        let speed = (self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y).sqrt();
+        self.velocity = crate::npcs::normalized(offset * 0.5 + tangent) * speed;
+        Ok(())
     }
 }
 
@@ -194,6 +278,14 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         .find(|projectile| projectile.id == id)
     {
         if projectile.advance(phase, &grid)? {
+            if projectile.variant == PURPLE_FIRE {
+                // 538b8c: a dead 9.2 spawns a tinted Poof 1000.15 at -10 px
+                // and plays no sound. PORT GAP: as for the other impacts,
+                // the effect itself is not constructed; only its seed is
+                // drawn.
+                projectile.impact_seed = Some(state.boot_lifecycle.shared.next_u32());
+                return Ok(());
+            }
             // Dead variant0 emits real effect11 seed then bounded4 rotation,
             // then SFX150 (wall) or258 (ground). FX rendering/constructor
             // consumers remain a separately documented stream gap.

@@ -110,6 +110,7 @@ pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
 pub mod mega_fatty;
+pub mod mega_maw;
 pub mod menu_lifecycle;
 pub mod menu_presentation;
 pub mod monstro;
@@ -5210,6 +5211,35 @@ impl Game {
                     spawner_type,
                     ..enemy_projectiles::EnemyProjectile::birth_with_parameters(id, parent, birth)
                 })
+            }
+            entities::Birth::FlaggedProjectile(birth, variant, params) => {
+                let spawner_type = self.state.room.npcs[index].kind;
+                let params = params.admitted()?;
+                self.admit_enemy_projectile(|id| {
+                    enemy_projectiles::EnemyProjectile {
+                        variant,
+                        spawner_type,
+                        ..enemy_projectiles::EnemyProjectile::birth_with_parameters(
+                            id, parent, birth,
+                        )
+                    }
+                    .with_flags(params)
+                })
+            }
+            entities::Birth::Hop { selector, target } => {
+                self.admit_npc_birth(index, entities::Birth::Npc(selector))?;
+                let hopper = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                hopper.target = target;
+                hopper.state = 4;
+                hopper
+                    .hopper
+                    .as_mut()
+                    .ok_or("Mega Maw summon requires a Hopper")?
+                    .counter = 5;
+                plain_npc::play(hopper, "Hop", true);
+                hopper.animation_frame = 5;
+                hopper.animation_clock = 5.0;
+                Ok(())
             }
             entities::Birth::PlayerHurt => {
                 combat::try_damage_player(&mut self.state, 1, 60, 0).map(|_| ())
