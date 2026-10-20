@@ -4,8 +4,6 @@ import os
 from pathlib import Path
 
 NATIVE_SHA = '724b9c59ad4dc7964852a51728c0f76d2031a3dd3d0d6ba2dcade1faa7ea7d13'
-# Actual deployed offline SDK is an original input, not an output fixture.
-OFFLINE_STORAGE_SDK_SHA256 = 'f945b0f3287194611ed03da1dd1104a39a9df292fcaf7645de0852674d870874'
 _cache = {}
 
 
