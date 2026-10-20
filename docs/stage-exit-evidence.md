@@ -89,12 +89,11 @@ Both games end the segment hurt at 4/6: the original by its fixed keys, the port
 
 ## Caves II descent (#413)
 
-The results below belong to PR731's fresh capture on `ad1a60b5` (main
-`0cd8427e` merged). The later docs commit and merge of DST-only main
-`87ddf064` retain that shipped artifact; they add no new gameplay capture.
-Advancing main does not inherit this qualification. Caves II's exit remains
-refused because stage 5 has no admitted generator; PR732's Depths catalogue
-import does not change that boundary.
+The results below are the `--rewind` PR's fresh capture on `6fe87c9a`
+(main `2344e31e`'s tree and engine `f06b38bd…`). They equal PR731's counts on
+`ad1a60b5`. Advancing main does not inherit this qualification. Caves II's
+exit remains refused because stage 5 has no admitted generator; PR732's
+Depths catalogue import does not change that boundary.
 
 `EV9BP18Q-caves2` carries `EV9BP18Q-descent` one floor further. Each game also clears Caves I's route 5 → 6 → 7 → 9 → 10 → 11 → 12 → 13 → 0 and Mega Fatty with its own keys. The shared tail then re-anchors in Mega Fatty's room and is graded through the trapdoor, the stage transition and the Caves II arrival. The suite is `stage-descent`, in the `@stage-long` group.
 
