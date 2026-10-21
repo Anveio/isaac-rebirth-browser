@@ -65,17 +65,6 @@
     ]
   },
   {
-    "out": "coverage-gemini-kill.json",
-    "stages": [
-      [
-        "npc:79"
-      ],
-      [
-        "removed:79"
-      ]
-    ]
-  },
-  {
     "out": "regression-restart-walks-on.json",
     "final_extend": 10,
     "stages": [

@@ -3622,6 +3622,27 @@ impl Game {
     }
     /// Persisted Room clones retain supported actor handles in authored order.
     pub fn rebuild_room_actor_schedule(&mut self) -> Result<(), String> {
+        // Room.Init's backdrop pass (5c5b30) spawns the Basement boss blood
+        // before the authored entities, so Room5c6940 numbers those flags8
+        // stains first: a Larry Jr. room's nine segments take Entity+8 54..62
+        // after its 54 stains. They are the only background effects holding
+        // an identity since the room's schedule was last cleared.
+        let mut backdrop: Vec<(u32, familiars::SpriteEffect)> = self
+            .state
+            .sprite_effects
+            .iter()
+            .filter(|effect| effect.flags & 8 != 0)
+            .filter_map(|effect| {
+                self.state
+                    .actor_scheduler
+                    .sequence_id(actors::ActorRef {
+                        kind: actors::ActorKind::Effect,
+                        id: effect.id,
+                    })
+                    .map(|sequence| (sequence, effect.clone()))
+            })
+            .collect();
+        backdrop.sort_by_key(|(sequence, _)| *sequence);
         attack_runtime::reset_room_schedule(&mut self.state);
         //453ec0 resets all four actual manager count words on Room replacement.
         self.state.room.manager_counts = actors::ManagerCounts::default();
@@ -3634,6 +3655,15 @@ impl Game {
         if self.state.actor_scheduler.sequence_id(player).is_none() {
             self.state.actor_scheduler.admit(player)?;
             attack_runtime::reset_room_schedule(&mut self.state);
+        }
+        for (_, effect) in backdrop {
+            self.state
+                .actor_scheduler
+                .admit_background(actors::ActorRef {
+                    kind: actors::ActorKind::Effect,
+                    id: effect.id,
+                })?;
+            self.state.sprite_effects.push(effect);
         }
         for actor in self.state.room.authored_actor_order.iter().copied() {
             let admitted = match actor.kind {
