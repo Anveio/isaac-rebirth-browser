@@ -131,13 +131,15 @@ fn run_pin(pin: &Pin, e: &mut Entropy) -> Option<String> {
             pin.room, template[0], template[1]
         ));
     }
-    if play_floor(floor, e, &pin.code, Play::Room(pin.room)) == 0 {
-        return Some(format!("room {} was not entered", pin.room));
-    }
+    coverage::watch_pinned_room(&floor.state, pin.room);
+    play_floor(floor, e, &pin.code, Play::Room(pin.room));
+    let Some(reached) = coverage::pinned_room_keys() else {
+        return decided(format!("room {} was not entered", pin.room));
+    };
     let missed: Vec<&str> = pin
         .reaches
         .iter()
-        .filter(|key| !coverage::reached(key))
+        .filter(|key| !reached.contains(*key))
         .map(String::as_str)
         .collect();
     if missed.is_empty() {
@@ -204,8 +206,8 @@ enum Play {
 
 /// Enters every room `traversal::admits` on the floor `game` stands on (or
 /// only those `rooms` names), each from a copy of it, and plays it; a boss
-/// room's fight then ends. Returns how many rooms it entered.
-fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) -> usize {
+/// room's fight then ends.
+fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) {
     let stage = game.state.stage;
     props::sometimes!(stage == 1, "rooms: Basement I's rooms are played");
     props::sometimes!(stage == 2, "rooms: Basement II's rooms are played");
@@ -213,7 +215,6 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) -> usize {
     props::sometimes!(stage == 4, "rooms: Caves II's rooms are played");
     let start = game.state.current_room;
     let descriptors = game.state.floor.descriptors.clone();
-    let mut entered_rooms = 0;
     for (index, descriptor) in descriptors.iter().enumerate() {
         let boss = descriptor.template.room_type == 5;
         let wanted = match rooms {
@@ -265,7 +266,6 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) -> usize {
             boss_scene: None,
         });
         entered.state.player.controls_enabled = false;
-        entered_rooms += 1;
         let frames = match rooms {
             Play::Every | Play::Room(_) => e.range(300, 900),
             Play::Bosses => 0,
@@ -295,7 +295,6 @@ fn play_floor(game: &Game, e: &mut Entropy, code: &str, rooms: Play) -> usize {
             clear_boss_room(&mut entered, index, &template.name, label);
         }
     }
-    entered_rooms
 }
 
 /// Ends the fight in boss room `room`, where the driver left the player.

@@ -1022,16 +1022,43 @@ pub fn state(state: &State) {
                     npc.position,
                     npc.grid_collision_class,
                     npc.velocity,
+                    Some(npc.grid_collision_class),
                 )
             });
             let pickups = state.room.pickups.iter().filter(|pickup| !pickup.removed);
-            let pickups =
-                pickups.map(|pickup| {
-                ("pickup", pickup.variant, pickup.id, pickup.position, 5, pickup.velocity)
+            let pickups = pickups.map(|pickup| {
+                // Keep the existing outside check; only an actual class 5/6
+                // owner can justify the new refinement exemption.
+                let refinement_class = match (&pickup.regular_collision, &pickup.chest) {
+                    (Some(collision), None) => Some(collision.grid_collision_class),
+                    (None, Some(chest)) => Some(chest.grid_collision_class),
+                    _ => None,
+                };
+                (
+                    "pickup",
+                    pickup.variant,
+                    pickup.id,
+                    pickup.position,
+                    5,
+                    pickup.velocity,
+                    refinement_class,
+                )
             });
             let bombs = state.bombs.iter();
             let bombs = bombs.map(|bomb| {
-                ("bomb", 4, bomb.id, bomb.motion.position, 5, bomb.motion.velocity)
+                let refinement_class = bomb
+                    .shot
+                    .as_ref()
+                    .map_or(5, |shot| shot.grid_collision_class);
+                (
+                    "bomb",
+                    4,
+                    bomb.id,
+                    bomb.motion.position,
+                    5,
+                    bomb.motion.velocity,
+                    Some(refinement_class),
+                )
             });
             let doorway = |position: WorldVector| {
                 grid.index(position)
@@ -1046,11 +1073,11 @@ pub fn state(state: &State) {
                     _ => clamped != position,
                 }
             };
-            let in_solid = |position: WorldVector, class: u32, velocity: WorldVector| {
+            let in_solid = |position: WorldVector, class: Option<u32>, velocity: WorldVector| {
                 let cell = grid.collision_at(grid.clamp_room(position, 1.0));
                 let solid = match class {
-                    5 => cell > 0,
-                    6 => cell > 1,
+                    Some(5) => cell > 0,
+                    Some(6) => cell > 1,
                     _ => false,
                 };
                 let clamped = grid.clamp_room(position, 0.0);
@@ -1061,12 +1088,14 @@ pub fn state(state: &State) {
             let escaped = npcs
                 .chain(pickups)
                 .chain(bombs)
-                .find(|(_, _, _, position, class, velocity)| {
+                .find(|(_, _, _, position, class, velocity, refinement_class)| {
                     outside(*position, *class)
                         && !doorway(*position)
-                        && !in_solid(*position, *class, *velocity)
+                        && !in_solid(*position, *refinement_class, *velocity)
                 })
-                .map(|(body, family, id, position, class, _)| (body, family, id, position, class));
+                .map(|(body, family, id, position, class, _, _)| {
+                    (body, family, id, position, class)
+                });
             props::always!(
                 escaped.is_none(),
                 "game: grid-colliding bodies stay inside the room's walls",
