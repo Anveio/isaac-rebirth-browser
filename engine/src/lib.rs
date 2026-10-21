@@ -4656,8 +4656,8 @@ impl Game {
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     let restored_slots = slots::readmit_saved(&mut self.state);
                     item_queries::note_room_placement(&mut self.state);
-                    self.admitted_update_footprint(phase)?;
                     self.rebuild_room_actor_schedule()?;
+                    self.admitted_update_footprint(phase)?;
                     //5CF58E replays persistent+B8 records after ordinary5C5860.
                     crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
                     self.state.room.complete_initialization();
