@@ -82,5 +82,19 @@
     "reaches": [
       "npc:240"
     ]
+  },
+  {
+    "name": "regression-depths-champion-11",
+    "code": "7WEVL3X9",
+    "stage": 5,
+    "room": 19,
+    "template": [
+      1,
+      82
+    ],
+    "seed": 7176576809051470821,
+    "reaches": [
+      "champion:11 on stage 5"
+    ]
   }
 ]
