@@ -567,8 +567,8 @@ the headless recording at LABEL`, naming the headless recorder as the suspect
 these checks, as state-pair's stale-recording warning says.
 
 `--rewind` makes a closed-loop fight keep its health, where a bot that plays
-on through every hit survives only on a lucky path. Every leg of both EV9BP18Q
-descents uses it.
+on through every hit survives only on a lucky path. Every leg of the EV9BP18Q
+and EHCE2L6G descents uses it.
 - **On a health loss** in a route room's or the boss room's fight, the
   recorder restores the game from a save 90 to 360 frames back.
 - **Then** it plays on with a fresh jitter seed, the orbit flipped on every
@@ -580,6 +580,24 @@ descents uses it.
   (the module has no imports) and its JS fields. Chromium replays from reset to
   the save instead, so both give the same keys, and the divergence check above
   still grades the result.
+
+A route room's fight also keeps its doors from staying shut for the whole
+budget (`fightKeys` in [`lib/route.mjs`](lib/route.mjs)):
+- **Stalls:** after 150 decisions (300 frames) in which no foe lost HP, the
+  player walks the grid to the nearest cell sharing a row or column with its
+  target, at least two cells out with every cell between open, and shoots down
+  that lane. The orbit alone never lines up a foe behind a rock diagonal or
+  along a wall, such as EHCE2L6G Basement II's last Fly and Mulligan.
+- **Room size:** the fight's playable box follows the room's grid, so a 2x2
+  room's right and lower halves are not scored as outside it. A 1x1 room's
+  box is unchanged.
+- **After the fight**, a fireplace room's centre-to-centre walk restarts from
+  the player's own cell rather than steer back to the cell it entered by.
+
+`--line-up` (with `--dodge`) is the boss fight's opt-in for a boss that never
+moves among its spawns, such as Gurdy and its regenerating Boils. The boss stays
+the target while it lives, and moves that line the player up with it on a row
+or column weigh as much as the orbit.
 
 ## No CI
 

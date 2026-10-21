@@ -86,6 +86,13 @@ export const SUITES = [
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
     '--native-frame-timeout', '120', '--gl-trace'],
     'Three-floor descent through Basement I, Basement II and Caves I bosses, then the Caves II arrival'),
+  // The four-floor descent walks every floor's route from Basement I's start
+  // room with each game's own keys (ownRoute) and grades the exit into Depths I.
+  suite('stage-depths', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
+    '--helper-arg', '--contrived', '--helper-arg', 'EHCE2L6G-depths', '--helper-arg', '--count', '--helper-arg', '1',
+    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
+    '--native-frame-timeout', '120', '--gl-trace'],
+    'Four-floor descent through Basement I, Basement II, Caves I and Caves II bosses, then the Depths I arrival'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
   // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
   suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
@@ -189,8 +196,8 @@ export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
   stage: ['stage-exit', 'monstro'],
-  // The three-floor Caves II descent runs about 45 minutes per case (README).
-  'stage-long': ['stage-descent'],
+  // The three- and four-floor descents run 45 minutes or more per case (README).
+  'stage-long': ['stage-descent', 'stage-depths'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening'],
   items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars'],
