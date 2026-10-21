@@ -56,6 +56,17 @@ struct Current {
     menus_after_descent: bool,
     /// Whether the last state observed was a Random run's GameOver.
     random_game_over: bool,
+    /// Only a pin watches a named room; the ordinary case census stays whole.
+    pinned_room: Option<PinnedRoom>,
+}
+
+struct PinnedRoom {
+    run_seed: u32,
+    stage_seed: u32,
+    stage: u32,
+    room: usize,
+    /// None until an observation actually sees the target room loaded.
+    keys: Option<BTreeSet<String>>,
 }
 
 static CENSUS: Mutex<Census> = Mutex::new(Census {
@@ -115,9 +126,29 @@ impl Drop for RoomsCase {
     }
 }
 
-/// Whether the case running on this thread has reached `key`.
-pub fn reached(key: &str) -> bool {
-    CURRENT.with(|current| current.borrow().keys.contains_key(key))
+/// Starts the pin's observation window after its boot and descent. Keep the
+/// whole-case census intact, but do not let that history meet the pin's keys.
+pub fn watch_pinned_room(state: &State, room: usize) {
+    CURRENT.with(|current| {
+        current.borrow_mut().pinned_room = Some(PinnedRoom {
+            run_seed: state.run_seed_value,
+            stage_seed: state.floor.stage_seed,
+            stage: state.stage,
+            room,
+            keys: None,
+        });
+    });
+}
+
+/// Keys observed in the pin's actual room; None if it was never entered.
+pub fn pinned_room_keys() -> Option<BTreeSet<String>> {
+    CURRENT.with(|current| {
+        current
+            .borrow()
+            .pinned_room
+            .as_ref()
+            .and_then(|room| room.keys.clone())
+    })
 }
 
 /// Records a pinned room played, and why it drifted, if it did.
@@ -371,6 +402,24 @@ pub fn observe(state: &State) {
             current
                 .floor_rooms
                 .extend(rooms.map(|room| room.template.room_type));
+        }
+        if let Some(room) = current.pinned_room.as_mut() {
+            if state.screen == Screen::Playing
+                && state.run_seed_value == room.run_seed
+                && state.floor.stage_seed == room.stage_seed
+                && state.stage == room.stage
+                && state.floor.stage == room.stage
+                && state.current_room == room.room
+                && state
+                    .room
+                    .descriptor
+                    .as_ref()
+                    .is_some_and(|descriptor| descriptor.index == room.room)
+            {
+                room.keys
+                    .get_or_insert_with(BTreeSet::new)
+                    .extend(keys.iter().cloned());
+            }
         }
         let step = crate::props::step();
         for key in keys {

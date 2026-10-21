@@ -43,16 +43,30 @@ def run_pins(binary, pins, work):
     """The report of one run playing exactly `pins`."""
     path = work / "pins.json"
     report = work / "report.json"
+    expected = [pin["name"] for pin in pins]
+    if len(set(expected)) != len(expected):
+        sys.exit("pinned room names must be unique")
     path.write_text(json.dumps(pins, indent=2) + "\n")
+    # Every call must produce its own report, including isolated replays.
+    report.unlink(missing_ok=True)
     result = subprocess.run(
         [binary, "--units", "rooms", "--cases", "0", "--pins", str(path), "--report", str(report), "--allow-unmet"],
         check=False,
         capture_output=True,
         text=True,
     )
+    # Exit 1 is a property failure, which --fails searches deliberately keep.
+    # Startup, input, report-write and process failures are not pin verdicts.
+    if result.returncode not in (0, 1):
+        sys.exit(f"rebirth-dst exited {result.returncode}:\n{result.stderr}")
     if not report.exists():
         sys.exit(f"rebirth-dst wrote no report:\n{result.stderr}")
-    return json.loads(report.read_text())
+    data = json.loads(report.read_text())
+    census = (data.get("coverage") or {}).get("pins", {})
+    cases = [case.get("pin") for case in data.get("cases", [])]
+    if set(census) != set(expected) or len(cases) != len(expected) or set(cases) != set(expected):
+        sys.exit("rebirth-dst did not report every requested pinned room")
+    return data
 
 
 def failures(report):
@@ -74,7 +88,7 @@ def verdict(binary, pin, work):
     """The pin's drift, or None, and the (property, signature, details) it
     failed."""
     report = run_pins(binary, [pin], work)
-    drift = report["coverage"]["pins"].get(pin["name"])
+    drift = report["coverage"]["pins"][pin["name"]]
     return drift, [(message, signature, details) for message, signature, _, details in failures(report)]
 
 
@@ -111,7 +125,7 @@ def search(binary, fields, tries, finding, work):
     else:
         failed = {pin for _, _, pin, _ in failures(report)}
         drifts = report["coverage"]["pins"]
-        chosen = [pin for pin in candidates if drifts.get(pin["name"]) is None and pin["name"] not in failed]
+        chosen = [pin for pin in candidates if drifts[pin["name"]] is None and pin["name"] not in failed]
     for candidate in chosen:
         pin = {**candidate, "name": fields["name"]}
         drift, failed = verdict(binary, pin, work)
