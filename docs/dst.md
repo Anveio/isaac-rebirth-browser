@@ -623,11 +623,26 @@ Five fixed findings that had only a case seed are pinned: the Hopper state
 (#690), the Room+e94 probe (#689), the Chest350 trinket (#692), Mega Fatty's
 landing past a wall (#365) and the Wall Creep on a top wall, whose rows
 below name them. Each pin was searched on 197d870a with its fix reverted
-(the engine's, or the property's for the Wall Creep), fails there with its
-finding's error or signature and passes with the fix. Their rooms are those
+(the engine's, or the property's for the Wall Creep), was reported to fail there with its
+finding's error or signature and pass with the fix. Their rooms are those
 the findings named (9Y4P1T0R room 8, 1.104; CGVFTQDN room 8, 1.199;
-WWEA87BT room 15, 1.345; NCYMQQBG room 0, 5.5050; XS7ZVZ9H room 10, 1.521),
-so generation had not moved them since.
+WWEA87BT room 15, 1.345; NCYMQQBG room 0, 5.5050; XS7ZVZ9H room 10, 1.521).
+Those historical checks counted keys from the whole descent. With observation
+restricted to the actual loaded target room, the Chest pin misses `pickup:50`
+and the Room+e94 pin misses `npc:19`; both remain recorded as drifted. Their
+current descriptors still match. Finding those actors elsewhere in the run
+does not qualify the target room, and replacement pins need the actual
+fix-reverted failure before they can become regression guards.
+
+Target-key observation starts only after the loaded room, run seed, stage
+seed and descriptor identify the requested target. Rejected entry attempts
+do not count as entering it. `pin.py` removes the preceding report before
+each native call and requires a successful native invocation or a property
+failure report with the exact requested case and pin census. Native input
+errors, missing or stale reports and an unknown `--only` selection fail the
+health check. Temporary controls retain a real native input error after a
+valid pin: the old CLI reused the first report and exited successfully;
+the corrected CLI rejects the second invocation.
 
 A finding met after pins landed gets its pin before its fix merges: a
 search on main while main still has the finding, then a `check` after the
