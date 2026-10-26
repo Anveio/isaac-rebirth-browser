@@ -54,7 +54,9 @@ export class RunPresentation {
     if (menu.phase === "hidden") return;
     const animation = menu.phase === "appearing" ? "Appear" : menu.phase === "disappearing" ? "Dissapear" : "Idle";
     const tick = Math.floor(menu.age / 2);
-    this.assets.draw(ctx, PAUSE, animation, 288, 135, tick, { layers: [0, 1, 3, 5] });
+    // 5BA8D2 draws layer 4 (Blood) only at hard difficulty.
+    this.assets.draw(ctx, PAUSE, animation, 288, 135, tick,
+      { layers: state.difficultyPresentation.pauseBlood ? [0, 1, 3, 4, 5] : [0, 1, 3, 5] });
     const paper = this.assets.layerFrame(PAUSE, animation, 1, tick);
     if (paper?.Visible) this.attached(ctx, paper, 288, 135, () => {
       this.assets.draw(ctx, STATS, "Idle", 0, 0, 0, { layers: [0] });

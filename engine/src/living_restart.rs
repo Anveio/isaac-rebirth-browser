@@ -1,5 +1,6 @@
 //! Configurable living Restart's retained System request and held-poll owner.
 //! Old snapshots keep missing context unknown; public NewRun/Continue owns it.
+use crate::difficulty::Difficulty;
 use crate::{mt, seed};
 use serde::{Deserialize, Serialize};
 
@@ -8,7 +9,9 @@ use serde::{Deserialize, Serialize};
 pub struct Context {
     pub character_selector: u32,
     pub challenge_id: u32,
-    pub source_r8: u32,
+    /// The System request's r8 (Game+10ECD8), kept on the wire as sourceR8.
+    #[serde(rename = "sourceR8", with = "crate::difficulty::source")]
+    pub difficulty: Difficulty,
     pub source_r9: bool,
     pub seed_code: String,
     pub saved_loader: bool,
@@ -16,14 +19,14 @@ pub struct Context {
 }
 
 impl Context {
-    ///The existing ordinary Isaac front door owns selector0/R8normal0. This
-    ///constructor is used at its actual request/Continue completion, never
-    ///inferred from a later menu selection or current live inventory.
-    pub fn normal_isaac(code: String, source_r9: bool) -> Result<Self, String> {
+    ///The existing ordinary Isaac front door owns selector0 and the run's r8
+    ///difficulty. This constructor is used at its actual request/Continue
+    ///completion, never inferred from a later menu selection or live inventory.
+    pub fn isaac(code: String, source_r9: bool, difficulty: Difficulty) -> Result<Self, String> {
         let context = Self {
             character_selector: 0,
             challenge_id: 0,
-            source_r8: 0,
+            difficulty,
             source_r9,
             seed_code: code,
             saved_loader: false,
@@ -36,11 +39,10 @@ impl Context {
     pub fn validate(&self) -> Result<(), String> {
         if self.character_selector != 0
             || self.challenge_id != 0
-            || self.source_r8 != 0
             || self.saved_loader
             || self.special_start
         {
-            return Err("living Restart requires the owned normal Isaac request context".into());
+            return Err("living Restart requires the owned ordinary Isaac request context".into());
         }
         let value = seed::decode(&self.seed_code)?;
         if seed::encode(value)? != self.seed_code {

@@ -872,10 +872,9 @@ pub fn state(state: &State) {
             && state.controls_menu.selection < 18
             && state.controls_menu.column < 2
             && usize::from(state.character_selection) < catalog
-            && (state.difficulty == "normal" || state.difficulty == "hard")
             && state.profiles.len() == 3,
         "game: menu selections stay within their menus",
-        json!({ "profile": state.profile, "main": state.main_selection, "options": state.options_menu.selection, "controls": [state.controls_menu.selection, state.controls_menu.column], "character": state.character_selection, "difficulty": state.difficulty })
+        json!({ "profile": state.profile, "main": state.main_selection, "options": state.options_menu.selection, "controls": [state.controls_menu.selection, state.controls_menu.column], "character": state.character_selection, "difficulty": state.menu_difficulty })
     );
     if state.screen != Screen::Playing {
         props::always!(
