@@ -501,10 +501,13 @@ Next: remaining Chapter 1 bosses.
 Rebirth scope: coins, keys, bombs, hearts (all kinds), batteries, chests
 (normal, Bomb, locked, Big and red), pickup variants and drop tables.
 
-Port: natural coins, keys, bombs, hearts, supported normal/locked/Bomb Chest
-opening, troll bombs, collection and persistence. Missing: batteries,
-Big/red chest behavior and the room-clear reward table beyond the
-supported cases. Source admission is not complete chest parity.
+Port: natural coins, keys, bombs, hearts, Battery90 contact/charge source,
+supported normal/locked/Bomb Chest opening, troll bombs, collection and
+persistence. [Frozen Battery fixture evidence](shop-economy.md#first-common-sku-controls)
+covers free/priced no-active refusal and a paid undercharged grant; other
+Battery live branches and charge HUD/effect48 remain open. Missing: Big/red
+chest behavior and the room-clear reward table beyond the supported cases.
+Source admission is not complete chest parity.
 
 PR737 corrects the normal Chest Has61 gate and keeps an unowned
 tinted-rock Chest Init on a typed frontier. Its [three-case regression controls](chest-evidence.md#has61-correction-and-bounded-regression-evidence)
@@ -558,8 +561,9 @@ and PCM equality are unavailable in this Node result. Pocket coverage does
 not qualify basic coin/key/bomb/chest scenarios.
 
 Next: complete the remaining durable cases, 251/252 world/held conversions,
-Battery90, actual equipped effects/identification and complete save/Continue
-restoration, with real callback and audio evidence kept separate.
+remaining Battery90 live branches and charge effects, actual equipped
+effects/identification and complete save/Continue restoration, with real
+callback and audio evidence kept separate.
 
 No open bugs.
 

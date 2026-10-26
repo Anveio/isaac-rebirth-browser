@@ -688,7 +688,10 @@ export class Renderer {
     ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
     const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
       [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
-    const colorOptions = variant === 1
+    // Sprite color multiplies each keyframe (Color::operator*= 42f590). Poof01
+    // authors a 158 grey tint and an alpha fade from frame 3 to 24; replacing
+    // its keyframe color drew the spawn smoke light, opaque and longer-lived.
+    const colorOptions = variant === 1 || variant === 15
       ? { color: { tint: sprite.tint, offsets: sprite.offsets } }
       : { overrides: { 0: {
         RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
