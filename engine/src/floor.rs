@@ -1013,11 +1013,19 @@ fn surprise_miniboss(
 }
 
 pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
-    generate_normal_basement(first_floor(stage_seed, Difficulty::Normal, CurseInputs::default()))
+    generate_normal_basement(first_floor(
+        stage_seed,
+        Difficulty::Normal,
+        CurseInputs::default(),
+    ))
 }
 
 /// Basement I's request for a fresh character.
-pub fn first_floor(stage_seed: u32, difficulty: Difficulty, curse: CurseInputs) -> NormalBasementRequest {
+pub fn first_floor(
+    stage_seed: u32,
+    difficulty: Difficulty,
+    curse: CurseInputs,
+) -> NormalBasementRequest {
     NormalBasementRequest {
         stage: 1,
         stage_seed,

@@ -78,9 +78,14 @@ pub struct CurseInputs {
 }
 
 impl CurseInputs {
-    pub(crate) fn from_profile(profile: &crate::Profile, black_candle: bool) -> Result<Self, String> {
+    pub(crate) fn from_profile(
+        profile: &crate::Profile,
+        black_candle: bool,
+    ) -> Result<Self, String> {
         if profile.achievements.len() < 179 || profile.counters.len() != 95 {
-            return Err("curse sampler requires actual Persistent achievement/counter owners".into());
+            return Err(
+                "curse sampler requires actual Persistent achievement/counter owners".into(),
+            );
         }
         Ok(Self {
             achievement_4: profile.achievements[4],
@@ -102,9 +107,13 @@ pub(crate) fn sample_curse(
 ) -> CurseSample {
     let odds = crate::difficulty::rules(difficulty).curse_odds;
     let mut threshold = odds[0];
-    for (set, value) in [inputs.achievement_4, inputs.achievement_33, inputs.counter_10]
-        .into_iter()
-        .zip(&odds[1..])
+    for (set, value) in [
+        inputs.achievement_4,
+        inputs.achievement_33,
+        inputs.counter_10,
+    ]
+    .into_iter()
+    .zip(&odds[1..])
     {
         if set {
             threshold = *value;

@@ -348,15 +348,16 @@ pub fn transition(before: &State, command: &Command, after: &State) {
                 props::reachable!("game: a run starts through the public menus");
             }
             if run_started {
-                let floor = rebirth_cleanroom::stage_transition::curse_inputs(after).and_then(|curse| {
-                    rebirth_cleanroom::floor::generate_normal_basement(
-                        rebirth_cleanroom::floor::first_floor(
-                            seed::stage1_seed(after.run_seed_value),
-                            after.difficulty,
-                            curse,
-                        ),
-                    )
-                });
+                let floor =
+                    rebirth_cleanroom::stage_transition::curse_inputs(after).and_then(|curse| {
+                        rebirth_cleanroom::floor::generate_normal_basement(
+                            rebirth_cleanroom::floor::first_floor(
+                                seed::stage1_seed(after.run_seed_value),
+                                after.difficulty,
+                                curse,
+                            ),
+                        )
+                    });
                 // Held keys survive a GameOver restart, so a long tick can
                 // carry the new run's player on through doors once its start
                 // hold ends: the rooms it visits are a walk from the start.

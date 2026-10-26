@@ -25,7 +25,8 @@ const READ_FLAGS: [u64; 4] = [0x100, 64, 16, 0x100000];
 pub fn run(case: &mut Case) {
     let e = &mut *case.entropy;
     let catalogues = [room_assets::special(), room_assets::basement()];
-    let fresh = |stage_seed| floor::first_floor(stage_seed, Difficulty::Normal, CurseInputs::default());
+    let fresh =
+        |stage_seed| floor::first_floor(stage_seed, Difficulty::Normal, CurseInputs::default());
     // Only requests no stage generator can serve are pinned: a later stage
     // may be admitted once the port generates it.
     let stage = *e.pick(&[0, u32::MAX]);

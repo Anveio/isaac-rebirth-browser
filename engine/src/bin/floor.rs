@@ -66,7 +66,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         black_candle: request.black_candle,
     };
     let floor = rebirth_cleanroom::floor::generate_normal_basement(match request.stage {
-        None => rebirth_cleanroom::floor::first_floor(request.stage_seed, request.difficulty, curse),
+        None => {
+            rebirth_cleanroom::floor::first_floor(request.stage_seed, request.difficulty, curse)
+        }
         Some(stage) => rebirth_cleanroom::floor::NormalBasementRequest {
             stage,
             stage_seed: request.stage_seed,
