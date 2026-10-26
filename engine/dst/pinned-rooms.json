@@ -15,6 +15,20 @@
     ]
   },
   {
+    "name": "regression-basement-chest-trinket",
+    "code": "N7G2WKRE",
+    "stage": 1,
+    "room": 9,
+    "template": [
+      1,
+      176
+    ],
+    "seed": 12306501864897789438,
+    "reaches": [
+      "pickup:50"
+    ]
+  },
+  {
     "name": "regression-basement-hopper-state",
     "code": "9Y4P1T0R",
     "stage": 1,
@@ -26,20 +40,6 @@
     "seed": 6894193731689547955,
     "reaches": [
       "npc:29"
-    ]
-  },
-  {
-    "name": "regression-caves-chest-trinket",
-    "code": "WWEA87BT",
-    "stage": 3,
-    "room": 15,
-    "template": [
-      1,
-      345
-    ],
-    "seed": 12574460114799845279,
-    "reaches": [
-      "pickup:50"
     ]
   },
   {
