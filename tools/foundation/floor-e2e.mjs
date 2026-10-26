@@ -37,11 +37,15 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
     report.browserArtifact = server.build;
     browser = await chromium.launch({ headless: true, ...browserLaunchOptions() });
     report.graphics = await inspectBrowserGraphics(browser);
-    const page = await browser.newPage({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
-    await page.goto(server.url);
     for (const original of cases) {
       const result = { seed: original.seed, status: "fail" };
+      // Each original case boots a fresh, isolated profile, so each browser
+      // case gets its own context: a run admitted by an earlier case writes
+      // an origin-local save, and its Continue must not reach the next case.
+      const context = await browser.newContext({ viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 });
       try {
+        const page = await context.newPage();
+        await page.goto(server.url);
         assert.equal(original.status, "pass", JSON.stringify(original.error ?? original.differences));
         assert.match(original.nativeBinarySha256, /^[a-f0-9]{64}$/);
         assert.ok(Number.isInteger(original.bootEpochSeed) && original.bootEpochSeed >= 0 && original.bootEpochSeed <= 0xffffffff,
@@ -92,7 +96,7 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
           inputProvenance: { status: "pass", commands: trace.commands.length, initialSeed: trace.initialSeed,
             bootEpochSeed: trace.bootEpochSeed, originalBootEpochSeed: original.bootEpochSeed, manualSeed: original.seed },
           inputTransport: "actual DOM keyboard; production WASM; original public X11 tape" });
-      } catch (error) { result.error = error.message; }
+      } catch (error) { result.error = error.message; } finally { await context.close(); }
       report.cases.push(result);
     }
     report.status = report.cases.every((entry) => entry.status === "pass") ? "pass" : "fail";
