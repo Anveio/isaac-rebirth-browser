@@ -69,6 +69,10 @@ pub struct Nightmares {
     pub playing: bool,
     pub stage_index: u32,
     pub alternate: bool,
+    /// Floors Render5B76C0 lays out on the progress bar: 8, or 6 while the
+    /// Womb achievement is locked or the challenge ends at stage 6.
+    #[serde(default)]
+    pub progress_floors: u32,
 }
 impl Nightmares {
     pub fn new() -> Result<Self, String> {
@@ -100,6 +104,7 @@ impl Nightmares {
             playing: false,
             stage_index: 0,
             alternate: false,
+            progress_floors: 0,
         })
     }
 
@@ -124,7 +129,15 @@ impl Nightmares {
     /// Return true when this presentation belongs to Systemstate4; callers
     /// suppress Game/room/camera dispatch while retaining System/music updates.
     /// System5950a0 applies the pending request before the released input poll.
-    pub fn apply_request(&mut self, stage: u32) -> bool {
+    ///
+    /// `womb_unlocked` is Persistent achievement 4 (Manager+34 = PGD+20+4) and
+    /// `challenge_end_stage` the current challenge Config+70.
+    pub fn apply_request(
+        &mut self,
+        stage: u32,
+        womb_unlocked: bool,
+        challenge_end_stage: Option<u32>,
+    ) -> bool {
         if self.request_pending {
             self.request_pending = false;
             let actor = DEFINITIONS[self.order[self.path_index]].actor;
@@ -137,6 +150,18 @@ impl Nightmares {
             self.playing = true;
             self.stage_index = if stage == 11 { 9 } else { stage - 1 };
             self.path_index = (self.path_index + 1) % self.order.len();
+            // 5B77F0..5B7CB3: Womb locked limits the bar to Depths II except
+            // a fresh Womb I arrival; 5B7E10 a stage-6 challenge always does.
+            self.progress_floors = if challenge_end_stage == Some(6) {
+                6
+            } else if !womb_unlocked
+                && self.stage_index <= 7
+                && (self.stage_index != 6 || self.alternate)
+            {
+                6
+            } else {
+                8
+            };
             return true;
         }
         false
