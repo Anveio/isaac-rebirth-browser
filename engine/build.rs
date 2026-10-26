@@ -524,11 +524,14 @@ fn information_catalog(xml: &str, path: &Path) -> String {
         .expect("giantbook authored root")
         .trim_start_matches("resources/");
     let mut output = String::new();
-    for (id, constant) in [("13", "ETERNAL"), ("16", "BLACK_HEART")] {
-        let entry = xml
-            .split("<entry ")
-            .find(|entry| attribute(entry, "id") == Some(id))
-            .expect("authored information entry");
+    let mut table = String::from("pub static DEFINITIONS: &[(u32, Definition)] = &[\n");
+    for entry in xml.split("<entry ").skip(1) {
+        let id = attribute(entry, "id").expect("information entry id");
+        let constant = match id {
+            "13" => Some("ETERNAL"),
+            "16" => Some("BLACK_HEART"),
+            _ => None,
+        };
         let actor = format!(
             "{root}{}",
             attribute(entry, "anm2").expect("information actor")
@@ -540,6 +543,12 @@ fn information_catalog(xml: &str, path: &Path) -> String {
         )
         .to_lowercase();
         let name = attribute(entry, "anim").expect("information clip");
+        // Only definitions extracted into the information data are drawable;
+        // the two hard-wired entries must be among them.
+        if actors.get(&actor).is_none() {
+            assert!(constant.is_none(), "admitted information actor absent");
+            continue;
+        }
         let clip = actors[&actor]["Animations"]
             .as_array()
             .expect("authored information definition")
@@ -559,10 +568,18 @@ fn information_catalog(xml: &str, path: &Path) -> String {
                 .is_empty(),
             "information event callbacks require their actual owner"
         );
-        output.push_str(&format!(
-            "pub static {constant}_DEFINITION: Definition = Definition {{ actor: {actor:?}, clip: {name:?}, frames: {frames}, spritesheet: {spritesheet:?} }};\n"
-        ));
+        let definition = format!(
+            "Definition {{ actor: {actor:?}, clip: {name:?}, frames: {frames}, spritesheet: {spritesheet:?} }}"
+        );
+        table.push_str(&format!("    ({id}, {definition}),\n"));
+        if let Some(constant) = constant {
+            output.push_str(&format!(
+                "pub static {constant}_DEFINITION: Definition = {definition};\n"
+            ));
+        }
     }
+    table.push_str("];\n");
+    output.push_str(&table);
     output
 }
 
@@ -877,7 +894,7 @@ fn main() {
             .expect("Pickup frame count")
     ));
     for name in [
-        "Trapdoor", "Appear", "Death", "UseItem", "Hit", "Sad", "Happy",
+        "Trapdoor", "Appear", "Death", "UseItem", "Hit", "Sad", "Happy", "Jump",
     ] {
         let clip = player_actors["gfx/001.000_player.anm2"]["Animations"]
             .as_array()

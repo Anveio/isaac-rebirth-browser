@@ -858,7 +858,11 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
     //4453e7..4453fe vetoes a dead body independently of the collection
     //callback. A living Player's collection/queue guard still permits the
     //retained free class4 altar's physical response after504820 returns0.
-    if state.player.dead || pickup.variant != 100 || pickup.removed {
+    if state.player.dead
+        || state.player.entity_collision_off
+        || pickup.variant != 100
+        || pickup.removed
+    {
         return Ok(());
     }
     let lattice = grid::Grid::new(

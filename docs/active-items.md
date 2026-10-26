@@ -120,3 +120,145 @@ separately pending damage/delay source. Six damage and404 Flush comparisons
 remain red. [Compact current regression evidence](../references/isaac/foundation/items/pickup-guard-main-regression.json)
 records this jointly tested source scope without accepting passive1/4, every
 Anti-Gravity behavior, positive guard timers, or nonzero movement during guard.
+
+## Active slot, use table and status
+
+Picking up any active collectible fills the active slot (Player D74/D78).
+A second active swaps with the held one: `52AE90` removes the old active and
+`morph_swapped_active` turns the touched pedestal into the old item, carrying
+its charge. Shop pedestals and unowned charge words keep the old refusal. The
+HUD draws the held item sprite at (22,12) and the authored charge bar at
+(56,29), with the 573290 flash for 8 frames after a charge rise.
+
+Charges fill on room clear (`50A2B0`, including the AAA Battery trinket
+step). Overflow above the maximum goes to the Battery63 reserve D8C, and a
+discharge refills from the reserve (with the 9 Volt step). The Battery's
+Effect48 presentation remains a recorded frontier.
+
+Space use runs through one table, `active_items::USES`: one row per active
+with its GiantBook id and its `522250` leaf. Every row shares the same Use
+frame: the `52A640` guards (controls, 7D8, D80/D84, full charge, and the
+live-TEMP refusal for zero-charge cooldown items), the book request
+`5805C0(id, 3)`, the `522349` costume registration, the `5E4140` TEMP
+record, the leaf, the `5223C0` cache/Evaluate/3076 tail and `5295C0`
+discharge. An active without a row keeps its charge, and its use is recorded
+as an explicit unported-effect frontier. A row's unported operator (Bible on
+Mom/Satan, Revelations' `585820`, Blank Card with a held card) records a
+`UseLeaf` frontier instead of being treated as equal.
+
+How to Jump (`523481`) clamps `position + velocity*60` into the room, then
+steps back toward the Player by 10 units while the target is on a
+non-walkable grid or within reach of an enemy. It stores the landing target
+(Entity+440), clears velocity and both collision classes and plays the
+20-frame Jump clip unless flying. While TEMP282 lives, `5322BA` moves the
+Player by `(target - position) * f^2` each update (half a step on
+interpolation updates). TEMP282's removal (`517798`) restores entity class 4
+and re-evaluates flight (cache 0x80).
+
+The `active-items` e2e suite authors free active pedestals into the base
+start room of a public seeded run. Both games walk onto them and press Space.
+The comparer pairs every gameplay presentation and checks active id, charge,
+temporary records, health, Player position/velocity, collision state,
+controls, named main-sprite clip/frame and live pedestals. There are fixed
+cases for every ported leaf, a moving jump, a Yum Heart to How to Jump swap,
+and one unfiltered OS epoch per run.
+
+First complete run (fresh original and browser, all paired presentations):
+
+- Pass, zero failures: Bible33, Belial34, Necronomicon35, Book of Shadows58,
+  Revelations78, How to Jump282 standing, How to Jump282 moving right,
+  Blank Card286 with an empty card slot, Satanic Bible292, and the fresh OS
+  How to Jump282 epoch moving left.
+- The swap case (Yum Heart45 first, then How to Jump282 approached from the
+  side) still fails. On all 820 presentations, the active id, charge,
+  temporary records, health, pedestals and clips match, and the dropped
+  Yum Heart pedestal appears in both games. The Player body differs after
+  the Morph frame: 315 position and 193 velocity mismatches. In the original,
+  the newly morphed pedestal (age up to 20) takes the whole pair separation
+  and the Player keeps its velocity. The port splits the separation by mass
+  in `player_items::altar_contact`. That young-pedestal contact response is
+  not ported yet.
+- `active-item-use` keeps every Yum Heart field. Its failures are the
+  existing ones: two damaged-phase bomb-blast pedestal fields, Flush!291
+  and a fresh OS Chocolate Milk69 fire timer.
+
+The passing cases cover each row's exercised path only. The Partial rows'
+other branches stay frontiers, as noted in the table.
+
+| Id | Item | Max charge | Cooldown | Status | Notes |
+| --- | --- | --- | --- | --- | --- |
+| 33 | The Bible | 6 | 0 | Partial | Book: sound8, giant book, TEMP33 flight. Using it in a Mom/Satan room is a frontier; the costume is not drawn. |
+| 34 | The Book of Belial | 3 | 0 | Partial | Book: sound34, giant book, TEMP34 cache damage. The Belial costume is not drawn. |
+| 35 | The Necronomicon | 6 | 0 | Complete | Book: sound33, giant book, 40 damage to every non-friendly room NPC (shared with the Black Heart path). |
+| 36 | The Poop | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 37 | Mr. Boom | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 38 | Tammy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 39 | Mom's Bra | 3 | 220 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 40 | Kamikaze! | 0 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 41 | Mom's Pad | 3 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 42 | Bob's Rotten Head | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 43 | Pills here! | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 44 | Teleport! | 2 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 45 | Yum Heart | 4 | 0 | Complete | Heals two half-hearts, sound157, UseItem. Covered by `active-item-use`. |
+| 47 | Doctor's Remote | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 49 | Shoop da Whoop! | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 56 | Lemon Mishap | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 58 | Book of Shadows | 3 | 300 | Partial | Book: giant book and TEMP58 record. The shield and costume are not ported. |
+| 65 | Anarchist Cookbook | 3 | 35 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 66 | The Hourglass | 2 | 230 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 77 | My Little Unicorn | 6 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 78 | Book of Revelations | 6 | 0 | Partial | Book: two soul hearts, giant book. The 585820 call and level flag are a frontier. |
+| 83 | The Nail | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 84 | We Need To Go Deeper! | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 85 | Deck of Cards | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 86 | Monstro's Tooth | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 93 | The Gamekid | 6 | 200 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 97 | The Book of Sin | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 102 | Mom's Bottle of Pills | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 105 | The D6 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 107 | The Pinking Shears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 111 | The Bean | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 123 | Monster Manual | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 124 | Dead Sea Scrolls | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 126 | Razor Blade | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 127 | Forget Me Now | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 130 | A Pony | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 133 | Guppy's Paw | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 135 | IV Bag | 0 | 15 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 136 | Best Friend | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 137 | Remote Detonator | 0 | 2 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 145 | Guppy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 146 | Prayer Card | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 147 | Notched Axe | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 158 | Crystal Ball | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 160 | Crack the Sky | 4 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 164 | The Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 166 | D20 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 171 | Spider Butt | 2 | 120 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 175 | Dad's Key | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 177 | Portable Slot | 0 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 181 | White Pony | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 186 | Blood Rights | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 192 | Telepathy For Dummies | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 282 | How to Jump | 0 | 14 | Complete | Landing search (5c7e50/5c7080), TEMP282 interpolation, no grid/entity collision while airborne, Jump clip, 517798 landing. |
+| 283 | D100 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 284 | D4 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 285 | D10 | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 286 | Blank Card | 4 | 0 | Partial | Runs only with an empty card slot (UseItem "Pickup"). Holding a card is a frontier: card effects are not ported. |
+| 287 | Book of Secrets | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 288 | Box of Spiders | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 289 | Red Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 290 | The Jar | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 291 | Flush! | 6 | 0 | Missing | Exercised by a natural `active-item-use` route, which stays red. |
+| 292 | Satanic Bible | 6 | 0 | Complete | Two black hearts; no animation. |
+| 293 | Head of Krampus | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 294 | Butter Bean | 90 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 295 | Magic Fingers | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 296 | Converter | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 297 | Pandora's Box | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 298 | Unicorn Stump | 1 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 323 | Isaac's Tears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 324 | Undefined | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 325 | Scissors | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 326 | Breath of Life | 6 | 31 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 338 | The Boomerang | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |

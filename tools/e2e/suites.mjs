@@ -124,6 +124,8 @@ export const SUITES = [
     'Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs'),
   suite('pickup-interactions', e2e('pickup-interactions'), ['--count', '1'],
     'Sandbox Challenge start room: bomb pushing, tear knockback, Jera/cards, Blank Card and The Battery, graded per interaction'),
+  suite('active-items', e2e('item-composition'), ['--pockets', 'collection', '--active-items', '--count', '1'],
+    'Active pedestals in the start room: slot, charge, Space use leaves (How to Jump, books, Blank Card), swap; fixed and OS epochs'),
   suite('item-acquisition', e2e('items'), ['--acquisition', '--count', '2'], 'First collectible acquisition'),
   suite('stat-cache', e2e('items'), ['--stat-cache', '--count', '2'],
     'Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity'),
@@ -194,7 +196,7 @@ export const GROUPS = {
   // The three-floor Caves II descent runs about 45 minutes per case (README).
   'stage-long': ['stage-descent'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening', 'pickup-interactions'],
-  items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
+  items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'active-items', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars', 'pickup-interactions'],
   combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'tnt', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
   monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],

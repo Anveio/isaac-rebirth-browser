@@ -181,7 +181,20 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             inputs,
             state.weapon_admission.source_player_type,
             state.player.transformation_counts,
-        ) {
+        )
+        .or_else(|| {
+            item_pipeline::resolve_flight(
+                crate::item_queries::AppearanceQueries::new(
+                    state.player_items.as_ref().expect("checked cache owner"),
+                    state.weapon_cache.primary,
+                    state.player.entity_source,
+                    None,
+                ),
+                state.weapon_admission.source_player_type,
+                state.player.transformation_counts,
+                state.player.entity_source,
+            )
+        }) {
             state.player.flying = Some(flying);
             state.player.grid_collision_class = Some(grid_class);
             completed |= 128;

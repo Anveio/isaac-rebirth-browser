@@ -183,7 +183,8 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
 pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
     for index in 0..state.room.slots.len() {
         //4453a0 rejects a dead Player before either callback.
-        if state.player.dead {
+        //Entity+344 class0 (How to Jump in the air) has no pair collision.
+        if state.player.dead || state.player.entity_collision_off {
             break;
         }
         let slot = &state.room.slots[index];

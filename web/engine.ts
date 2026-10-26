@@ -446,7 +446,7 @@ export interface State {
   keyboard: {bindings: number[][]};
   inputConfigs: InputConfigs;
   controlsMenu: {deviceSelection: number; deviceHeld: number; selectedDevice: number | null; selection: number; column: number; waiting: boolean; nextSaveSequence: number; saveRequests: {sequence: number; configs: InputConfigs}[]; unavailableActions: number[]};
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | "Jump" | null; frame: number; playing: boolean; guard: boolean };
 
   gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;
