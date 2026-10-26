@@ -38,6 +38,7 @@ mod controlled_technology;
 mod creep_effects;
 pub mod critters;
 pub mod deaths_head;
+pub mod difficulty;
 pub mod dingle;
 pub mod dips;
 pub mod display_settings;
@@ -502,6 +503,9 @@ impl RunIntroduction {
         }
     }
 }
+fn no_charge_bar_flash() -> i32 {
+    -1
+}
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -754,7 +758,14 @@ pub struct State {
     pub challenge_run_parameters: Option<challenges::RunParameters>,
     pub character_selection: u8,
     pub character: String,
-    pub difficulty: String,
+    /// The run's Game difficulty (Game+10ECD8), fixed at run start.
+    pub difficulty: difficulty::Difficulty,
+    /// The character menu's difficulty selection, copied into a run it starts.
+    #[serde(default)]
+    pub menu_difficulty: difficulty::Difficulty,
+    /// The run difficulty's rows the renderer draws (HUD icon, pause layer).
+    #[serde(default)]
+    pub difficulty_presentation: difficulty::Presentation,
     pub seed_text: String,
     pub seed_valid: bool,
     pub run_seed: String,
@@ -891,6 +902,10 @@ pub struct State {
     pub run_introduction: RunIntroduction,
     #[serde(default)]
     pub boss_bar: BossBar,
+    ///HUD+61888 charge-bar flash countdown: FlashChargeBar573290 stores 8,
+    ///HUD::Update572D35 counts it down to -1; BarFull draws when odd or -1.
+    #[serde(default = "no_charge_bar_flash")]
+    pub charge_bar_flash: i32,
     pub pause_menu: PauseMenu,
 }
 
@@ -1267,7 +1282,9 @@ impl Game {
                 challenge_run_parameters: None,
                 character_selection: 0,
                 character: "Isaac".into(),
-                difficulty: "normal".into(),
+                difficulty: difficulty::Difficulty::Normal,
+                menu_difficulty: difficulty::Difficulty::Normal,
+                difficulty_presentation: difficulty::Presentation::default(),
                 seed_text: String::new(),
                 seed_valid: false,
                 run_seed,
@@ -1366,6 +1383,7 @@ impl Game {
                 bomb_action_was_down: false,
                 run_introduction: RunIntroduction::stage(false),
                 boss_bar: BossBar::default(),
+                charge_bar_flash: -1,
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
@@ -1746,23 +1764,15 @@ impl Game {
                     self.state.screen = Screen::Seed;
                 }
                 "ArrowUp" | "ArrowDown" | "KeyW" | "KeyS" => {
-                    self.state.difficulty = if self.state.difficulty == "normal" {
-                        "hard"
-                    } else {
-                        "normal"
-                    }
-                    .into()
+                    self.state.menu_difficulty = self.state.menu_difficulty.toggled();
                 }
                 "ArrowLeft" | "KeyA" => self.select_character(-1),
                 "ArrowRight" | "KeyD" => self.select_character(1),
-                "Enter" if self.state.difficulty == "normal" => {
+                "Enter" => {
                     self.validate_run_character()?;
                     self.require_profile_document()?;
                     self.state.run_start_request.challenge_id = None;
                     self.state.run_start_request.input_pending = true;
-                }
-                "Enter" => {
-                    return Err("only the observed normal-mode starting room is implemented".into())
                 }
                 _ => {}
             },
@@ -2045,13 +2055,17 @@ impl Game {
         if self.living_start_context.is_none()
             && self.state.run_start_request.challenge_id.is_none()
             && self.state.screen == Screen::Character
-            && self.state.character == "Isaac"
-            && self.state.difficulty == "normal"
         {
-            self.state.living_restart.context = Some(living_restart::Context::normal_isaac(
-                self.state.boot_lifecycle.menu_seed_text.clone(),
-                self.state.seeded_run,
-            )?);
+            // 59f63c passes the character menu's difficulty as the System
+            // request's r8, which 54eb4e stores at Game+10ECD8.
+            self.state.difficulty = self.state.menu_difficulty;
+            if self.state.character == "Isaac" {
+                self.state.living_restart.context = Some(living_restart::Context::isaac(
+                    self.state.boot_lifecycle.menu_seed_text.clone(),
+                    self.state.seeded_run,
+                    self.state.difficulty,
+                )?);
+            }
         }
         // Character 59f470 passes the existing menu seed code to the System
         // request; Game 54eb20 decodes that code into its startup stream. This
@@ -2074,7 +2088,8 @@ impl Game {
         if let Some(definition) = &challenge {
             definition.validate_initial_scope()?;
             self.state.character = "Isaac".into();
-            self.state.difficulty = "normal".into();
+            // 59d218 passes r8 0: every Challenge runs at normal difficulty.
+            self.state.difficulty = challenges::RunParameters::CHALLENGE_MENU.difficulty;
         }
         self.state.run_seed_value = if let Some(context) = &self.living_start_context {
             seed::decode(&context.seed_code)?
@@ -2213,6 +2228,7 @@ impl Game {
         //54FC2B starts the initial stage streak only after the opaque fade.
         self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.player = Player::starting();
@@ -2425,7 +2441,8 @@ impl Game {
             .ok_or("Persistent Continue inhibit owner is unknown")?
             .set_run_inhibit(run.seeded_run);
         self.state.character = context.character.clone();
-        self.state.difficulty = context.difficulty.clone();
+        // 54ed4d restores Game+10ECD8 from the save.
+        self.state.difficulty = context.difficulty;
         self.state.challenge_id = context.challenge_id;
         self.state.challenge_run_parameters = None;
         self.state.source_shot_speed_minimum = Some(false);
@@ -2499,6 +2516,7 @@ impl Game {
         self.state.player_animation = player_animation::PlayerAnimation::default();
         self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.stage_transition = stage_transition::StageTransition::default();
@@ -2610,13 +2628,12 @@ impl Game {
         //The actual loaded queue replaces any previous live request; its
         //unsupported contexts remain absent rather than borrowing that run.
         self.state.living_restart = living_restart::LivingRestart::source_reset();
-        if self.state.character == "Isaac"
-            && self.state.difficulty == "normal"
-            && self.state.challenge_id == 0
-        {
-            self.state.living_restart.context = Some(living_restart::Context::normal_isaac(
+        if self.state.character == "Isaac" && self.state.challenge_id == 0 {
+            // 594bc5 stashes the loaded Game+10ECD8 for Restart.
+            self.state.living_restart.context = Some(living_restart::Context::isaac(
                 self.state.run_seed.clone(),
                 self.state.seeded_run,
+                self.state.difficulty,
             )?);
             self.state.living_restart.held_polls = Some(0);
         }
@@ -3066,12 +3083,11 @@ impl Game {
             .ok_or("save revision exhausted")?;
         self.request_save_write()
     }
-    ///This first Restart slice owns only actual ordinary normal Isaac.
+    ///This Restart slice owns actual ordinary Isaac at either difficulty.
     ///Unsupported requests retain the existing public capability failure.
     fn living_restart_admitted(&self) -> bool {
         !self.state.player.dead
             && self.state.character == "Isaac"
-            && self.state.difficulty == "normal"
             && self.state.challenge_id == 0
             && self
                 .state
@@ -3938,6 +3954,7 @@ impl Game {
         self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.room_transition = None;
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.run_introduction.active = false;
         self.state.game_update_count = 0;
         //Stop54F530 resets the real hold even when the destination is Main.
@@ -4060,7 +4077,8 @@ impl Game {
                 .ok_or("living Restart queued context disappeared")?;
             context.validate()?;
             self.state.character = "Isaac".into();
-            self.state.difficulty = "normal".into();
+            // 594a10 restarts with the System request's stashed r8.
+            self.state.difficulty = context.difficulty;
             self.state.seeded_run = context.source_r9;
             self.state.achievement_eligibility = !context.source_r9;
             self.state.run_start_request = RunStartRequest::default();
@@ -4173,7 +4191,23 @@ impl Game {
         let audio_counter = self.state.system_clock.system_counter;
         self.state.persistent_callback_pre_counter = Some(audio_counter);
         let phase = self.state.system_clock.advance()?;
-        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+        let womb_unlocked = self
+            .state
+            .profiles
+            .get(usize::from(self.state.profile).wrapping_sub(1))
+            .and_then(|profile| profile.achievements.get(4))
+            .is_some_and(|&unlocked| unlocked);
+        let challenge_end_stage = match self.state.challenge_id {
+            0 => None,
+            id => Some(self.challenge_catalog.get(id)?.end_stage),
+        };
+        if phase != phase::Phase::Skipped
+            && self.state.nightmares.apply_request(
+                self.state.stage,
+                womb_unlocked,
+                challenge_end_stage,
+            )
+        {
             self.state.music.room(96);
         }
         if phase != phase::Phase::Skipped {
@@ -4287,8 +4321,9 @@ impl Game {
             character: usize::from(self.state.character_selection),
             seed: self.state.screen == Screen::Seed,
             challenge: self.state.challenge_selection.unwrap_or(0),
-            hard: self.state.difficulty == "hard",
+            hard: self.state.menu_difficulty == difficulty::Difficulty::Hard,
         };
+        self.state.difficulty_presentation = difficulty::Presentation::of(self.state.difficulty);
         //59B454 samples the dispatch page once. Main's opening Enter must
         //not also confirm Controls in the newly selected Options page.
         let options_callback = phase != phase::Phase::Skipped
@@ -5474,6 +5509,9 @@ impl Game {
     /// 572d48 counts the flash down; SetFill 5732a0 restarts it at 8 whenever
     /// the fill drops. No boss hides the bar and forgets the maximum.
     fn update_boss_bar(&mut self) {
+        if self.state.charge_bar_flash >= 0 {
+            self.state.charge_bar_flash -= 1;
+        }
         let bar = &mut self.state.boss_bar;
         if bar.flash >= 0 {
             bar.flash -= 1;

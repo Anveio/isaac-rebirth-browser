@@ -6,11 +6,13 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
+import pickupCatalog from "./pickup-data.json";
 import {drawPlayerLaser} from "./lasers";
 import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from "./engine";
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
+const PROGRESS = "gfx/ui/stage/progress.anm2";
 const PARTICLE_ACTORS: Record<number, string> = {
   5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
   35: "gfx/1000.035_tooth particle.anm2", 58: "gfx/1000.058_poop particle.anm2",
@@ -171,8 +173,10 @@ export class Renderer {
     gl.scale(this.canvas.width / 480, this.canvas.height / 270);
     const ctx = gl.asCanvasContext();
     if (state.nightmares.systemActive) {
-      if (state.nightmares.definitionLoaded && state.nightmares.currentActor)
+      if (state.nightmares.definitionLoaded && state.nightmares.currentActor) {
         this.assets.draw(ctx, state.nightmares.currentActor, "Scene", 240, 135, state.nightmares.frame);
+        if (state.nightmares.progressDefinitionLoaded) this.nightmareProgress(ctx, state);
+      }
     }
     else if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
@@ -676,6 +680,42 @@ export class Renderer {
       gl.restore();
     }
   }
+  /** Nightmare Render 5B76C0: the floor progress bar over the scene. The bar
+   * sprite takes the scene's FadeGuide null color (5B774E..5B77EA). Icons sit
+   * 27 apart at y 24 from x0 = 240 - (23n + 4(n - 1)) / 2 + 11.5. */
+  private nightmareProgress(ctx: CanvasRenderingContext2D, state: State): void {
+    const night = state.nightmares, actor = night.currentActor!;
+    const guide = this.assets.nullFrame(actor, "Scene", 0, Math.floor(night.frame));
+    const color = guide
+      ? { tint: [guide.RedTint, guide.GreenTint, guide.BlueTint, guide.AlphaTint], offsets: [guide.RedOffset, guide.GreenOffset, guide.BlueOffset] }
+      : { tint: [1, 1, 1, 1], offsets: [0, 0, 0] };
+    const f = Math.fround, step = 27, y = 24, current = night.stageIndex, floors = night.progressFloors;
+    const count = current + 1 < floors ? floors : current + 1;
+    const x0 = f(f(240 - f(f(count * 23 + (count - 1) * 4) * 0.5)) + 11.5);
+    const draw = (animation: string, x: number, frame = 0) =>
+      this.assets.draw(ctx, PROGRESS, animation, x, y, frame, { color });
+    const at = (index: number) => f(f(index * step) + x0);
+    for (let index = 0; index < count - 1; index++) draw("Connector", f(f(index * step) + f(x0 + 13.5)));
+    // Icon i shows resource[i + 1]; the tenth icon reads resource[11].
+    for (let index = 0; index <= current; index++)
+      draw("Levels", at(index), night.stageResources[index === 9 ? 11 : index + 1] ?? 12);
+    for (let index = 0; index < current; index++) draw("ClearFloor", at(index));
+    for (let index = current + 1; index < count; index++) draw("NotClearFloor", at(index));
+    if (current < floors) {
+      draw("BossIndicator", f(x0 + (floors === 6 ? 135 : 189)));
+      // Game+CE9F4 against the 36000-frame limit at CE9F8 (Game init 54E95C).
+      const limit = 36000, time = state.gameUpdateCount;
+      if (current <= 5 && time <= limit) draw("Clock", f(f(f(time / limit) * 135) + x0));
+    }
+    // The head walks in from the previous icon over scene frames 10..40
+    // unless the scene repeats the same stage.
+    let x = at(current);
+    if (!night.alternate) {
+      const frame = Math.min(Math.floor(night.frame), 40);
+      x = f(x - (frame > 10 ? f(f(1 - f((frame - 10) / 30)) * step) : step));
+    }
+    draw("IsaacIndicator", x, Math.floor(night.counter / 2) % 22);
+  }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
     const actors: Record<number, string> = { 1: "gfx/1000.001_bomb explosion.anm2",
       2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
@@ -858,6 +898,7 @@ export class Renderer {
     }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
+    this.activeItem(ctx, state);
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
@@ -878,8 +919,51 @@ export class Renderer {
       this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 20, 44 + pickup * 12, pickupFrames[pickup]!);
       this.assets.font(ctx, "pftempestasevencondensed", String(counts[pickup]).padStart(2, "0"), 36, 45 + pickup * 12);
     }
-    if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);
+    // HUD5742BD: one icon sits at (24, 84); the difficulty icon and the
+    // seeded icon together sit at (20, 84) and (36, 84).
+    const difficultyIcon = state.difficultyPresentation.hudIcon;
+    const seededIcon = state.achievementEligibility ? null : 5;
+    const icons = [difficultyIcon, seededIcon].filter((frame): frame is number => frame !== null);
+    icons.forEach((frame, index) => this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle",
+      icons.length === 1 ? 24 : 20 + index * 16, 84, frame));
     this.drawMaps(ctx, state);
+  }
+
+  /** HUD::Render573B8F: the held active's 32x32 art at (22,12) over a
+   * 30% black copy at +2,+2, a 1px white cross outline at full charge, then
+   * ui_chargebar at (56,29): BarEmpty, BarFull clipped from the top by the
+   * charge (red offset for Battery reserve) unless FlashChargeBar's countdown
+   * is even, and the BarOverlayN divider for the authored maximum. */
+  private activeItem(ctx: CanvasRenderingContext2D, state: State): void {
+    const owner = state.playerItems;
+    if (!owner?.activeId) return;
+    const item = pickupCatalog.items.find(entry => entry.id === owner.activeId && entry.kind === "active");
+    if (!item?.sprite) return;
+    const maximum = item.maxCharges ?? 0, [x, y] = [22, 12];
+    this.assets.drawImage(ctx, item.sprite, x + 2, y + 2, { tint: [0, 0, 0, 0.3], offsets: [0, 0, 0] });
+    if (maximum > 0 && owner.activeCharge === maximum) {
+      for (const [dx, dy] of [[-1, 0], [0, -1], [0, 1], [1, 0]] as const)
+        this.assets.drawImage(ctx, item.sprite, x + dx, y + dy, { tint: [0, 0, 0, 1], offsets: [1, 1, 1] });
+    }
+    this.assets.drawImage(ctx, item.sprite, x, y);
+    if (maximum <= 0) return;
+    const bar = "gfx/ui/ui_chargebar.anm2", [barX, barY] = [56, 29];
+    const charge = owner.activeSubordinateCharge !== 0 ? owner.activeSubordinateCharge / 450 : owner.activeCharge / maximum;
+    const reserve = Math.min(1, owner.reserveCharge / maximum);
+    this.assets.draw(ctx, bar, "BarEmpty", barX, barY);
+    const flash = state.chargeBarFlash;
+    if (flash < 0 || flash % 2 === 1) {
+      // AnimationState::Render's top-left clamp removes (1-ratio)*23+3 rows.
+      const clipped = (ratio: number) => {
+        const rows = (1 - ratio) * 23 + 3;
+        return { 0: { YCrop: rows, Height: 32 - rows, YPivot: 16 - rows } };
+      };
+      this.assets.draw(ctx, bar, "BarFull", barX, barY, 0, { overrides: clipped(charge) });
+      if (reserve > 0) this.assets.draw(ctx, bar, "BarFull", barX, barY, 0,
+        { overrides: clipped(reserve), color: { tint: [1, 1, 1, 1], offsets: [1, 0, 0] } });
+    }
+    const overlay = [1, 2, 3, 4, 6, 12].includes(maximum) ? `BarOverlay${maximum}` : null;
+    if (overlay) this.assets.draw(ctx, bar, overlay, barX, barY);
   }
 
   private drawMaps(ctx: CanvasRenderingContext2D, state: State): void {

@@ -91,7 +91,7 @@ def observe(pid,context):
     report['rootRngWords']=list(struct.unpack('<4I',read(root+0x48c,16)))
     report['secondaryRngWords']=list(struct.unpack('<4I',read(root+0x49c,16)))
     report['pillEffects']=list(struct.unpack('<10i',read(root+0x9b8,40)))
-    report['runSeeds']={'startSeed':struct.unpack('<I',read(game+0xa190,4))[0], 'rngWords':list(struct.unpack('<4I',read(game+0xa194,16))), 'initializedFields':list(struct.unpack('<13I',read(game+0xa1a4,52)))}
+    report['runSeeds']={'startSeed':struct.unpack('<I',read(game+0xa190,4))[0], 'rngWords':list(struct.unpack('<4I',read(game+0xa194,16))), 'initializedFields':list(struct.unpack('<13I',read(game+0xa1a4,52))),'effectMode':i32(game+0xa1d8)}
     for index,name in enumerate(names):
      record=root+8+0x48*index;begin,end=u64(record+8),u64(record+0x10)
      if end<begin or(end-begin)%24 or(end-begin)//24>1024:raise ValueError('Pool array outside bound')

@@ -31,11 +31,15 @@ def extract(resources):
             continue
         sprite = item.get('gfx')
         directory = 'trinkets' if item.tag == 'trinket' else 'collectibles'
-        items.append({
+        entry = {
             'id': int(item.attrib['id']), 'kind': item.tag,
             'name': item.get('name', ''), 'description': item.get('description', ''),
             'sprite': f'gfx/items/{directory}/{sprite.lower()}' if sprite else None,
-        })
+        }
+        if item.tag == 'active':
+            # ItemConfig+0x44 MaxCharges, read by HUD::Render's charge bar.
+            entry['maxCharges'] = int(item.get('maxcharges', '0'))
+        items.append(entry)
     return {
         'schema': 1,
         'sources': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()

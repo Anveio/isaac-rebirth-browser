@@ -289,6 +289,15 @@ async function boot() {
     },
   };
   Object.assign(window, { game });
+  // Playtest sandbox: `?sandbox=URL` names a JSON {challengesXml, specialRooms}
+  // (tools/playtest/sandbox.mjs writes one) that replaces Challenge 1 and the
+  // Start Room for this page; pick Challenges -> Sandbox to play it.
+  const sandbox = new URLSearchParams(location.search).get('sandbox');
+  if (sandbox) {
+    const response = await fetch(sandbox);
+    if (!response.ok) throw new Error(`Sandbox resources failed to load: ${response.status}`);
+    game.reset(randomSeed(), { bootEpochSeed, resources: await response.json() as ResourceInputs });
+  }
   draw(currentState);
   status.hidden = !saveFailureVisible;
   document.body.dataset.ready = 'true';
