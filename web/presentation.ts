@@ -17,15 +17,19 @@ export class RunPresentation {
     this.assets.draw(ctx, STREAK, "Text", 240, 48, tick, { layers: [0] });
     const frame = this.assets.layerFrame(STREAK, "Text", 0, tick);
     if (!frame?.Visible) return;
-    this.attached(ctx, frame, 240, 48, () => {
-      this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, -9, { align: "center", pixelSnap: true });
-      const subtitle = state.runIntroduction.subtitle;
-      if (subtitle) {
-        //571F68 loads PFTempestaSevenCondensed into HUD+300;5734F0
-        //selects it and draws the second line18 units below the title.
-        this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 9, { align: "center", pixelSnap: true });
-      }
-    });
+    // HUD::Render 574EA8 draws the 256x128 text target into a rectangle whose
+    // top-left is (240,48) + layer-0 offset - (0.5 * scaled width, 9): the 9 is
+    // not scaled, and the target scales from its top edge. ShowItemText 5732C0
+    // centres the title at target y 0 and 5734F0 puts the subtitle at y 18.
+    ctx.save();
+    ctx.translate(240 + frame.XPosition, 48 + frame.YPosition - 9);
+    ctx.scale(frame.XScale, frame.YScale);
+    ctx.globalAlpha *= frame.AlphaTint;
+    this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, 0, { align: "center", pixelSnap: true });
+    const subtitle = state.runIntroduction.subtitle;
+    //571F68 loads PFTempestaSevenCondensed into HUD+300 for the second line.
+    if (subtitle) this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 18, { align: "center", pixelSnap: true });
+    ctx.restore();
   }
 
   /** HUD boss bar (5746a9): ui_bosshealthbar.png background at (166, 8) and
