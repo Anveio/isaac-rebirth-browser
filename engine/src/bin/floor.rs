@@ -10,8 +10,9 @@ struct Request {
     stage_seed: u32,
     #[serde(default)]
     spawns: bool,
-    /// A later normal floor (2..4) with the retained game flags, health and
-    /// coins (a fresh character's when omitted); omitted, Basement I.
+    /// A later normal floor (any stage node) with the retained game flags,
+    /// health and coins (a fresh character's when omitted); omitted,
+    /// Basement I.
     #[serde(default)]
     stage: Option<u32>,
     #[serde(default)]
