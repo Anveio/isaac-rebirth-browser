@@ -398,7 +398,7 @@ pub(crate) fn floor_request(
 
 /// Level::Init's curse-sampler inputs (Persistent achievements 4/33, counter
 /// 10, Black Candle), read only when the run's rules draw the curse stream.
-pub(crate) fn curse_inputs(state: &State) -> Result<crate::challenges::CurseInputs, String> {
+pub fn curse_inputs(state: &State) -> Result<crate::challenges::CurseInputs, String> {
     if crate::difficulty::rules(state.difficulty).extra_rooms.is_none() {
         return Ok(crate::challenges::CurseInputs::default());
     }

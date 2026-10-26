@@ -348,6 +348,9 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
     );
 
     // Retries continue generator, primary and weight state.
+    let extra = rebirth_cleanroom::difficulty::rules(request.difficulty)
+        .extra_rooms
+        .unwrap_or(0);
     let reports = &floor.attempt_reports;
     let continuous = reports.windows(2).all(|pair| {
         pair[0].final_generator_state == pair[1].initial_generator_state
@@ -359,8 +362,9 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
             && reports.len() == floor.attempts as usize
             && reports.last().is_some_and(|last| last.outcome == "placed")
             && continuous
-            // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2 11..12.
-            && (request.stage * 10 / 3 + 5..=request.stage * 10 / 3 + 6)
+            // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2
+            // 11..12, plus the difficulty's extra rooms and curse-stream R2.
+            && (request.stage * 10 / 3 + 5 + extra..=request.stage * 10 / 3 + 6 + extra + extra.min(1))
                 .contains(&u32::from(floor.additional_rooms)),
         "floor: attempts are bounded, contiguous and end with a placement",
         json!({ "request": details(), "attempts": floor.attempts, "additionalRooms": floor.additional_rooms })
