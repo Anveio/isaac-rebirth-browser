@@ -112,8 +112,7 @@ export class MenuRenderer {
 
   private options(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
     const path = `${MENU}optionsmenu.anm2`;
-    // Main-family constructor5A6950 uses the authored normal paper. The
-    // missing setting consumers are not represented by fabricated gauges.
+    // Main-family constructor5A6950 uses the authored normal paper.
     const owned = new Set([3, 4, 5, 6, 7, 8, 20]);
     const actor = sceneData[path as keyof typeof sceneData];
     const layers = actor.Layers.map(layer => layer.Id).filter(id => !owned.has(id));
@@ -128,6 +127,12 @@ export class MenuRenderer {
       this.assets.draw(ctx, `${MENU}gammamenu.anm2`, "Counter", x + 300 - index * 11, y + 210, Number(digit));
     //5A79D9/5A7F70: source Settings fullscreen uses inverted layer frames.
     this.assets.draw(ctx, path, "Idle", x, y, state.fullscreen.requested ? 0 : 1, {layers: [6]});
+    //5A79B1/5A7990: Filter (layer 7) and Popups (layer 20) also draw frame
+    // !Settings+15 and !Settings+29. The port has no Filter setting, so it
+    // keeps the Settings constructor5B8CEB default 0 (OFF).
+    this.assets.draw(ctx, path, "Idle", x, y, 1, {layers: [7]});
+    if (state.unlockPopups !== null)
+      this.assets.draw(ctx, path, "Idle", x, y, state.unlockPopups ? 0 : 1, {layers: [20]});
     this.assets.draw(ctx, path, "Idle", x, y, state.optionsMenu.selection, {layers: [8]});
   }
 
