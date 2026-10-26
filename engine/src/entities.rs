@@ -46,6 +46,9 @@ pub(crate) struct NpcWorld<'a> {
     pub item_death_pickups: crate::item_death_effects::PickupAdmission<'a>,
     /// Room+0x10 descriptor type of the current room.
     pub room_type: u32,
+    /// Room::GetFrameCount 5cbbb0: Game+ce9f4 minus the Room.Init stamp
+    /// +159c, -1 while the room is not loaded; None without that stamp.
+    pub room_frame: Option<i32>,
     /// The room's other NPCs, live, for families that link actors.
     pub peers: Peers<'a>,
     /// The last contact pass's tear partition at live positions and radii
@@ -203,6 +206,26 @@ pub(crate) enum Birth {
     /// BlueSpider familiar 3.73 at the dying NPC. Port gap: that familiar is
     /// unported, so nothing is spawned and the caller records the frontier.
     UnportedBlueSpider,
+    /// Spawn550a40 or a Room producer of a type no family or owner ports
+    /// (Mom's Clotty/Maw summons, her death's Room+2480 particle rain):
+    /// nothing is spawned and the room records the factory frontier.
+    UnportedFactory {
+        entity_type: u32,
+        variant: u32,
+        subtype: u32,
+    },
+    /// Mom's init (4d3b80): Room::RemoveDoor 5cbee0 for slots 0..7, each
+    /// existing door replaced by a wall seeded with Random(), then the
+    /// current descriptor's door mask (+0x10) cleared.
+    RemoveDoors,
+    /// Mom's init (4d3c5b): every player's position (+448) is set.
+    PlacePlayer(WorldVector),
+    /// Mom's stomp (4d4819): Game554490 at `position`, damage 300, radius
+    /// 50, no line check, source Mom, DamageFlags 4.
+    MomStomp {
+        position: WorldVector,
+        source: u32,
+    },
 }
 
 pub(crate) type Advance =
@@ -381,6 +404,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::gurdy::FAMILY,
     &crate::mega_fatty::FAMILY,
     &crate::mulligans::FAMILY,
+    &crate::mom::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

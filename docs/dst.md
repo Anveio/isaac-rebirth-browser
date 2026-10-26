@@ -513,7 +513,11 @@ it in none of 288 branches (main about 1 in 100), so the pinned room
 `npc:79` and `removed:79`. The pin plays Gemini's AI and death under the
 `rooms` properties and state invariants; the `game` unit's contracts
 (replay, continuation, round trips, batched Ticks) and the shipped-WASM
-differential no longer cover that death. A
+differential no longer cover that death. The pinned room
+`coverage-mom-kill` (7WEVL3X9, Depths II room 0, template 5.1062) holds
+`npc:45`, `removed:45` and the stage-6 boss clear: it plays Mom's door
+removal, foot, door parts and death, then her clear's ending back to the
+menu. A
 recipe whose tape does not exist yet chases from a fresh boot, so a new
 scenario needs only its recipe. The miniboss clear had been a harvested tape
 with no recipe, which a menu change sent into Options before any run; its

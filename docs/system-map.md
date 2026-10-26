@@ -41,8 +41,10 @@ diagnostics stay retained. PR780 admits Caves II's exit into Depths I (stage 5),
 using PR732's 506-room catalogue. The source adds Depths chapter generation,
 secret/shop surprise-miniboss rules and backdrop, door and render geometry.
 No fixture takes this exit yet, and no live Depths I Original comparison is
-claimed. Depths I's trapdoor now admits Depths II (stage 6), whose Mom boss
-room is refused at its door; alternate stages and endings remain open. See
+claimed. Depths I's trapdoor now admits Depths II (stage 6), whose Mom
+(45.0/45.10, port-only) can be fought; her first clear returns to the menu
+through 5ca068's ending path without the cutscene. Alternate stages, the
+cutscene and Womb remain open. See
 [layout boundaries](room-layout-evidence.md) and
 [the artifact-bound descent](stage-exit-evidence.md#caves-ii-descent-413).
 

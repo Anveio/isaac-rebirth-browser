@@ -115,6 +115,7 @@ pub mod map_presentation;
 pub mod mega_fatty;
 pub mod mega_maw;
 pub mod menu_lifecycle;
+pub mod mom;
 pub mod menu_presentation;
 pub mod monstro;
 mod monstros_lung;
@@ -816,6 +817,11 @@ pub struct State {
     pub pressed: BTreeSet<String>,
     pub player: Player,
     pub player_death: player_death::PlayerDeath,
+    /// Manager 5947f0's cutscene request (+2f314/+2f318, return to the menu
+    /// +2f31c): the first Mom kill's ending (cutscene 3). The next System
+    /// iteration consumes it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ending_cutscene: Option<u32>,
     pub room: Room,
     #[serde(default)]
     pub camera: Option<camera::Camera>,
@@ -1310,6 +1316,7 @@ impl Game {
                 pressed: BTreeSet::new(),
                 player,
                 player_death: player_death::PlayerDeath::default(),
+                ending_cutscene: None,
                 room,
                 camera,
                 game_shake: Some(game_shake::GameShake::fresh()),
@@ -4117,6 +4124,25 @@ impl Game {
                 }
             }
         }
+        if self.state.ending_cutscene.take().is_some() {
+            // 594d80 starts the requested cutscene (Manager+f468, state 3)
+            // before any further Game update. When it ends with +2f31c set,
+            // 595424 clears Stop's save byte +2f2f8 and 594cb0 -> 5949a0 ->
+            // Stop54f3f0(false), whose 594910 removes the saved run, then
+            // returns to the menu (SetMenu +2f300 = 1, StartFadeIn).
+            // PORT GAP: there is no cutscene player; the menu follows at once.
+            self.state.level_progress.last_penalty_stage = Some(0);
+            self.state.acquisition_history =
+                Some(acquisition_history::AcquisitionHistory::default());
+            self.state.information_animation.clear();
+            self.reconstruct_stopped_room_backdrop();
+            self.saved_game = self.state.boot_lifecycle.clear_saved_game();
+            self.invalidate_profile_run()?;
+            self.state.run_start_request = RunStartRequest::default();
+            self.state.paused = false;
+            self.state.pause_menu = PauseMenu::hidden();
+            self.request_menu_readmission()?;
+        }
         if self.menu_readmission.is_some() {
             return Ok(());
         }
@@ -5580,6 +5606,14 @@ impl Game {
             .map(|knife| (knife.position, knife.collision_radius))
             .collect();
         let game_counter = self.state.native_game_frame();
+        let room_frame = if !self.state.room.loaded {
+            Some(-1)
+        } else {
+            self.state
+                .room
+                .initialization_game_update
+                .map(|initial| game_counter.wrapping_sub(initial) as i32)
+        };
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -5614,6 +5648,7 @@ impl Game {
                     scheduler: &mut self.state.actor_scheduler,
                 },
                 room_type,
+                room_frame,
                 peers: entities::Peers { before, after },
                 tear_probe: &tear_probe,
                 knife_probe: &knife_probe,
@@ -5643,6 +5678,53 @@ impl Game {
             child.id
         };
         self.advance_npc(id, phase::Phase::Update)
+    }
+    /// Room::RemoveDoor 5cbee0 for slots 0..7 (Mom's init 4d3b80): each
+    /// existing door is deleted and a Wall 15 takes its cell, Init with a
+    /// Random() seed. Then the descriptor's door mask (+0x10) is cleared
+    /// (4d3bb9), so later loads of the room build no doors either.
+    fn remove_doors(&mut self) -> Result<(), String> {
+        let width = usize::from(
+            self.state
+                .room
+                .grid
+                .as_ref()
+                .ok_or("Mom's door removal requires the room grid")?
+                .width,
+        );
+        for slot in 0..8_u8 {
+            let Some(at) = self
+                .state
+                .room
+                .appearance
+                .doors
+                .iter()
+                .position(|door| door.slot == slot)
+            else {
+                continue;
+            };
+            let door = self.state.room.appearance.doors.remove(at);
+            let column = ((door.world_position.x - 40.0) / 40.0) as usize;
+            let row = ((door.world_position.y - 120.0) / 40.0) as usize;
+            let seed = self.state.boot_lifecycle.shared.next_u32();
+            let grid = self.state.room.grid.as_mut().expect("checked grid");
+            let cell = grid
+                .cells
+                .get_mut(column + row * width)
+                .ok_or("removed door lies outside the room grid")?;
+            cell.entity = Some(grid::GridEntity {
+                kind: 15,
+                variant: 0,
+                state: 0,
+                collision_class: 4,
+                spawn_seed: seed,
+                source_owner: None,
+            });
+        }
+        // Door::Update polls the combat close; no door is left to play it.
+        self.state.room.combat_shut_door_slots.clear();
+        self.state.floor.descriptors[self.state.current_room].door_mask = 0;
+        Ok(())
     }
     /// Mulligan EXPLODE 4e8200: the blast (damage 40, radius 60, source the
     /// Mulligan), the effect and burst draws, Kill's non-boss burst, then
@@ -5803,6 +5885,52 @@ impl Game {
                     },
                 );
                 Ok(())
+            }
+            entities::Birth::UnportedFactory {
+                entity_type,
+                variant,
+                subtype,
+            } => {
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::Factory {
+                        entity_type,
+                        variant,
+                        subtype,
+                    },
+                );
+                Ok(())
+            }
+            entities::Birth::RemoveDoors => self.remove_doors(),
+            entities::Birth::PlacePlayer(position) => {
+                self.state.player.x = f64::from(position.x) * motion::WORLD_SCALE + 32.0;
+                self.state.player.y = f64::from(position.y) * motion::WORLD_SCALE - 46.0;
+                Ok(())
+            }
+            entities::Birth::MomStomp { position, source } => {
+                // 554490's >=100 branch draws the shake before the blast.
+                if self
+                    .state
+                    .camera
+                    .as_ref()
+                    .is_some_and(|camera| camera.source_shake_history_is_known())
+                {
+                    game_shake::from_blast(&mut self.state, 300.0);
+                } else {
+                    self.state
+                        .weapon_admission
+                        .record_unadmitted(self.state.weapon_cache.primary, "momStompShakeHistory");
+                }
+                bombs::explode_unchecked(
+                    &mut self.state,
+                    position,
+                    50.0,
+                    300.0,
+                    combat::DamageSource {
+                        id: source,
+                        entity_type: 45,
+                    },
+                )
             }
             entities::Birth::FlyExplosion {
                 seed,
