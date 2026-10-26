@@ -262,7 +262,7 @@ fn room_rect(state: &State) -> (WorldVector, WorldVector) {
 }
 
 /// 5c7e50: clamp into the room rectangle inset by a margin on every side.
-fn clamp_to_room(state: &State, position: WorldVector, margin: f32) -> WorldVector {
+pub(crate) fn clamp_to_room(state: &State, position: WorldVector, margin: f32) -> WorldVector {
     let (low, high) = room_rect(state);
     WorldVector {
         x: position.x.min(high.x - margin).max(low.x + margin),
@@ -282,7 +282,7 @@ fn grid_index(state: &State, position: WorldVector) -> Option<usize> {
 }
 
 /// 5c7080 -> 5c5af0: the grid collision class at a world position.
-fn grid_class(state: &State, position: WorldVector) -> u32 {
+pub(crate) fn grid_class(state: &State, position: WorldVector) -> u32 {
     let Some(index) = grid_index(state, position) else {
         return 4;
     };

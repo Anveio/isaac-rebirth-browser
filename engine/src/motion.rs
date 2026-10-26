@@ -129,6 +129,11 @@ pub(crate) fn advance_without_grid(
 }
 
 pub fn advance(player: &mut Player, room: &Room, dx: i32, dy: i32, move_speed: f32) {
+    if player.grid_collision_class == Some(0) {
+        advance_without_grid(player, dx, dy, move_speed)
+            .expect("gameplay input and world vectors are bounded");
+        return;
+    }
     let grid = player_grid(room);
     advance_in_grid(player, room, &grid, player_collider(), dx, dy, move_speed)
         .expect("gameplay input and world vectors are bounded");

@@ -99,8 +99,17 @@ fn use_black_heart(state: &mut State) -> Result<(), String> {
             pitch: 1.0,
         },
     );
-    //523eaa..523f3f visits the actual NPC vector, skips Entity318 bit10
-    //and calls virtual38. Flags0 makes countdown30 inert in446cf0.
+    damage_room_npcs(state, 40.0)?;
+    let owner = state.player_items.as_mut().expect("checked item owner");
+    owner.unevaluated_cache_flags |= config.cache_flags;
+    owner.active_flag_3076 = true;
+    Ok(())
+}
+
+/// The Necronomicon leaf 523E5A shared by the forced Black-heart Use:
+/// 523eaa..523f3f visits the actual NPC vector, skips Entity318 bit10
+/// and calls virtual38. Flags0 makes countdown30 inert in446cf0.
+pub(crate) fn damage_room_npcs(state: &mut State, amount: f32) -> Result<(), String> {
     for npc in &mut state.room.npcs {
         if !(10..1000).contains(&npc.kind) || npc.entity_flags() & 0x10 != 0 {
             continue;
@@ -111,7 +120,7 @@ fn use_black_heart(state: &mut State) -> Result<(), String> {
                 max_hp: npc.max_hp,
             },
             combat::DamageEvent {
-                amount: 40.0,
+                amount,
                 kind: combat::DamageKind::RoomEffect,
                 source: combat::DamageSource {
                     id: 0,
@@ -121,8 +130,5 @@ fn use_black_heart(state: &mut State) -> Result<(), String> {
             },
         )?;
     }
-    let owner = state.player_items.as_mut().expect("checked item owner");
-    owner.unevaluated_cache_flags |= config.cache_flags;
-    owner.active_flag_3076 = true;
     Ok(())
 }

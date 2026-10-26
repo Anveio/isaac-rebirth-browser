@@ -994,6 +994,10 @@ impl Pickup {
     }
 
     pub fn touches(&self, player: &Player) -> bool {
+        //Entity+344 class0 (How to Jump in the air) has no pair collision.
+        if player.entity_collision_off {
+            return false;
+        }
         let px = ((player.x - 32.0) / 0.65) as f32;
         let py = ((player.y + 46.0) / 0.65) as f32;
         let dx = px - self.position.x;

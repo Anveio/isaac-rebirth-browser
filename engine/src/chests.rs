@@ -750,7 +750,9 @@ fn admit_child(
 /// so the existing kernel retains the same pre-callback overlap geometry.
 pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
     let pickup = &state.room.pickups[index];
+    //Entity+344 class0 (How to Jump in the air) has no pair collision.
     if state.player.dead
+        || state.player.entity_collision_off
         || !matches!(pickup.variant, 50 | 51 | 60)
         || pickup.removed
         || pickup

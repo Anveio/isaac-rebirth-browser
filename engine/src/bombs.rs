@@ -906,7 +906,9 @@ pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
 ///Isaac does not push the bomb he stands on; at zero the bomb takes
 ///PlayerV*.4 and the mass response pushes it (pickup-interactions suite).
 pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
+    //Entity+344 class0 (How to Jump in the air) has no pair collision.
     if state.player.dead
+        || state.player.entity_collision_off
         || !state
             .bombs
             .iter()

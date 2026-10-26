@@ -1981,6 +1981,39 @@ pub(crate) fn resolve_neutral_flight(
     .then_some((false, 5))
 }
 
+///The whole Flight callback 512160..5152C0: the eight signed owned flight
+///counts (Transcendence20, Lord of the Pit82, A Pony130, White Pony181,
+///Holy Grail184, Fate179, Spirit of the Night159, Dead Dove185) summed with
+///JG, then 511D90's two transformation thresholds (3068/306C >= 3), TEMP33
+///and TEMP20 presence, Entity variant1 and BFC7/10. Each reached query must
+///be owned; any of them flies with D68=1/340=3, otherwise D68=0/340=5.
+pub(crate) fn resolve_flight(
+    queries: crate::item_queries::AppearanceQueries<'_>,
+    source_player_type: Option<u32>,
+    transformation_counts: Option<[i32; 2]>,
+    entity: Option<crate::PlayerEntitySource>,
+) -> Option<(bool, u32)> {
+    const FLYING: (bool, u32) = (true, 3);
+    let mut owned = 0_i32;
+    for id in [20, 82, 130, 181, 184, 179, 159, 185] {
+        owned = owned.wrapping_add(queries.raw_count(id)?);
+    }
+    if owned > 0 {
+        return Some(FLYING);
+    }
+    let [guppy, beelzebub] = transformation_counts?;
+    if guppy >= 3 || beelzebub >= 3 {
+        return Some(FLYING);
+    }
+    if queries.temporary_present(33)? || queries.temporary_present(20)? {
+        return Some(FLYING);
+    }
+    if entity?.variant == 1 || matches!(source_player_type?, 7 | 10) {
+        return Some(FLYING);
+    }
+    Some((false, 5))
+}
+
 ///All33 instructions of513C80..513D16 and their actual508FE0 helper
 ///own this callback's read footprint. Other inventory IDs do not add a Luck
 ///operator; they still require independently preserved input histories.

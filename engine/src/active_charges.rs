@@ -40,7 +40,14 @@ pub enum Frontier {
 pub enum EffectFrontier {
     HudFlash573290,
     BatteryEffect48,
-    RoomClearTail { source_pc: u32 },
+    RoomClearTail {
+        source_pc: u32,
+    },
+    /// An unported operator inside an otherwise ported 522250 leaf.
+    UseLeaf {
+        active_id: u32,
+        source_pc: u32,
+    },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -220,6 +227,15 @@ pub(crate) fn note_effect(state: &mut State, frontier: EffectFrontier) {
             state,
             crate::ordinary_placement::Frontier::PlayerUpdate {
                 field: format!("Unimplemented RoomClear tail at {source_pc:#x}"),
+            },
+        ),
+        EffectFrontier::UseLeaf {
+            active_id,
+            source_pc,
+        } => crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::PlayerUpdate {
+                field: format!("Unported active{active_id} leaf operator at {source_pc:#x}"),
             },
         ),
         EffectFrontier::HudFlash573290 => {}
@@ -429,11 +445,11 @@ pub(crate) fn before_advance(state: &mut State, controls_enabled: bool, full: bo
         );
         return;
     }
-    //Only the current concrete45 implementation closes its Use/discharge.
+    //Only the ported leaves (active_items::USES) close their Use/discharge.
     //Other reached per-ID guards/effects are conditional unavailable domains,
     //not a declaration that522250 actually ran. Empty and known refusals above
     //preserve the word owner; generic query uncertainty alone never clears it.
-    if id != 45 || d80 != 0 || d84 != 0 {
+    if crate::active_items::ported(id).is_none() || d80 != 0 || d84 != 0 {
         crate::active_charges::invalidate(
             state,
             &[
