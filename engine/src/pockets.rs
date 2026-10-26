@@ -216,14 +216,125 @@ fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
     Ok(())
 }
 
-///5282B0's Card arm for 2 of Clubs (23) and 2 of Diamonds (24). 52837C
-///stores Player+BE8 (an unowned word, kept as a frontier) and 528399 marks
-///persistent 61. UseCard526DB0 calls 50AA80: the card face goes into the
-///copied Sprite+7E0 and 50A5C0 force-plays UseItem. The jump-table arms
+///UseCard526DB0's Jera arm 527641. 455680 snapshots the room's type5 list
+///in manager order (spawns made below are not revisited). It skips
+///collectibles100, trinkets350 and Jera itself (300.29), 5080F0's
+///340/370/380 and the chests 50/51/60/360. Every other pickup is copied with
+///Game.Spawn550A40(5, variant, FindFreePosition5C7F30(position, 40, EDX0),
+///zero velocity, Player spawner, subtype, its own spawn seed+7D0); then
+///5280BE requests GiantBook 21, which freezes the game while it plays.
+///Returns false, changing nothing, when a source family, its Init or the
+///placement readset is not owned here; the caller keeps the frontier path.
+fn duplicate_room_pickups(state: &mut State) -> Result<bool, String> {
+    let Some(grid) = state.room.grid.clone() else {
+        return Ok(false);
+    };
+    let grid = crate::grid::Grid::new(grid)?;
+    let Some(costs) = state.room.path_costs.clone() else {
+        return Ok(false);
+    };
+    let sources: Vec<u32> = state
+        .actor_scheduler
+        .full_phase()
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Pickup)
+        .map(|actor| actor.id)
+        .collect();
+    for source in sources {
+        let Some(pickup) = state.room.pickups.iter().find(|pickup| pickup.id == source) else {
+            return Ok(false);
+        };
+        let (variant, subtype, anchor, seed) =
+            (pickup.variant, pickup.subtype, pickup.position, pickup.spawn_seed);
+        if matches!(variant, 100 | 350 | 340 | 370 | 380 | 50 | 51 | 60 | 360)
+            || (variant, subtype) == (300, 29)
+        {
+            continue;
+        }
+        if !matches!(variant, 10 | 20 | 30 | 40 | 70 | 90 | 300) || seed == 0 {
+            return Ok(false);
+        }
+        let Ok(occupied) = crate::ordinary_placement::positions(state) else {
+            return Ok(false);
+        };
+        let mut shared = state.boot_lifecycle.shared.clone();
+        let position =
+            crate::roundworm::find_free_position(anchor, 40.0, &mut shared, &grid, &costs, &occupied)?;
+        state.boot_lifecycle.shared = shared;
+        let handle = state.next_pickup;
+        let copy = if matches!(variant, 70 | 300) {
+            crate::Pickup::from_pocket_parts(
+                handle,
+                variant,
+                subtype,
+                seed,
+                position,
+                true,
+                crate::pickups::PocketSubtypeInputs::from_state(state),
+            )?
+        } else {
+            let selector = crate::room_spawns::SpawnSelector {
+                group_index: 0,
+                grid_index: 0,
+                category: crate::room_spawns::SpawnCategory::Entity,
+                entity_type: 5,
+                variant: variant as u16,
+                subtype: subtype as u16,
+                position,
+                group_seed: 0,
+                spawn_seed: seed,
+            };
+            crate::Pickup::from_source_selector(handle, &selector, true, state)?
+        };
+        let Some(mut copy) = copy else {
+            return Ok(false);
+        };
+        copy.birth_game_update = state.game_update_count;
+        // Game.Spawn copies the Player spawner's type/variant (550ACD..ADA).
+        copy.source_spawner = Some(crate::pickups::SourceSpawner {
+            entity_type: 1,
+            variant: 0,
+        });
+        copy.morph_links = Some(crate::pickups::MorphLinks {
+            parent498: None,
+            link4a0: None,
+            link4a8: None,
+        });
+        state.next_pickup = handle
+            .checked_add(1)
+            .ok_or("Jera pickup identity exhausted")?;
+        state.room.pickups.push(copy);
+        let actor = ActorRef {
+            kind: ActorKind::Pickup,
+            id: handle,
+        };
+        state.room.authored_actor_order.push(actor);
+        state.actor_scheduler.admit(actor)?;
+    }
+    if !state.information_animation.request_authored(21, 0) {
+        return Ok(false);
+    }
+    Ok(true)
+}
+
+///5282B0's Card arm for 2 of Clubs (23), 2 of Diamonds (24) and Jera (29).
+///52837C stores Player+BE8 (an unowned word, kept as a frontier) and 528399
+///marks persistent 61. UseCard526DB0 calls 50AA80: the card face goes into
+///the copied Sprite+7E0 and 50A5C0 force-plays UseItem. The jump-table arms
 ///527DE3/52752F add the current bombs/coins, or 2 when there are none
-///(AddBombs5086F0 clamps to 0..99; AddCoins518AB0). 5283AE then promotes
-///slot1 and clears its ID dword.
-fn use_two_card(state: &mut State, slot: PocketSlot) -> Result<(), String> {
+///(AddBombs5086F0 clamps to 0..99; AddCoins518AB0); 527641 is Jera above.
+///5283AE then promotes slot1 and clears its ID dword. Returns false, with
+///nothing changed, when Jera's duplicates are not owned here.
+fn use_card(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
+    if slot.id == 29 {
+        // Plan the whole room copy first; adopt it only when every source,
+        // Init and placement read is owned.
+        let mut trial = state.clone();
+        if !duplicate_room_pickups(&mut trial)? {
+            return Ok(false);
+        }
+        *state = trial;
+    }
     let owner = state
         .player_items
         .as_mut()
@@ -252,7 +363,8 @@ fn use_two_card(state: &mut State, slot: PocketSlot) -> Result<(), String> {
             let coins = state.inventory.coins as i32;
             player_items::add_coins(state, if coins == 0 { 2 } else { coins })?;
         }
-        _ => return Err("two-card arm requires Card 23 or 24".into()),
+        29 => {}
+        _ => return Err("card arm requires Card 23, 24 or 29".into()),
     }
     let held = state
         .player_items
@@ -261,7 +373,7 @@ fn use_two_card(state: &mut State, slot: PocketSlot) -> Result<(), String> {
         .ok_or("Card effect lost its held-slot owner before promotion")?;
     held.slots[0] = held.slots[1];
     held.slots[1].id = 0;
-    Ok(())
+    Ok(true)
 }
 
 ///5282B0 invokes the effect before reading CURRENT slot1 and shifting it.
@@ -286,9 +398,11 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
         .and_then(|owner| owner.held_pockets.as_ref())
         .filter(|held| held.frontier.is_none())
         .map(|held| held.slots[0])
-        .filter(|slot| slot.card && matches!(slot.id, 23 | 24))
+        .filter(|slot| slot.card && matches!(slot.id, 23 | 24 | 29))
     {
-        return use_two_card(state, slot);
+        if use_card(state, slot)? {
+            return Ok(());
+        }
     }
     let Some(owner) = state.player_items.as_mut() else {
         return Ok(());
