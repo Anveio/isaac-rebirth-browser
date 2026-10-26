@@ -247,7 +247,7 @@ fn depths_boss_award(state: &mut State) -> Result<bool, String> {
     if state.room.boss_presentation_index == 0x37 {
         return Err("special boss clear award is not admitted".into());
     }
-    if state.difficulty != "normal" {
+    if state.difficulty != crate::difficulty::Difficulty::Normal {
         // 5ca5a2 and the later stage-6 branches read Game+10ECD8 (hard
         // completion marks, achievements 167..177); none is ported.
         return Err("stage 6 boss award on hard difficulty is not admitted".into());

@@ -109,7 +109,7 @@ implements without the rule yet). The values are read from the disassembly.
   5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d): a per-character
   Persistent counter at 1 is raised to 2 at hard; 5ca5a2 also unlocks a
   per-character achievement (167..177) at hard. The port has no completion
-  marks.
+  marks: Mom's stage-6 clear award refuses with an error at hard.
 
 ## Verification
 
