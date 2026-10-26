@@ -472,11 +472,10 @@ fn difficulty_band(stage: u32) -> (u8, u8) {
 }
 
 /// Boss variant base 584240 for a fresh profile (every achievement byte zero,
-/// no devil room visited), run from the stage chapter's draw chain.
+/// no devil room visited), run from the stage's draw chain.
 fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, String> {
-    let steps = crate::levels::stage_chapter(stage)
-        .and_then(|chapter| chapter.bosses)
-        .ok_or("boss selection requires the stage chapter's imported boss chain")?;
+    let steps = crate::levels::bosses(stage)
+        .ok_or("boss selection requires the stage's imported boss chain")?;
     let odd = stage % 2 == 1;
     // Odd floors draw R2 and save the family flag; even floors read it.
     let family = |flags: &mut u64, flag: u64, primary: &mut Primary| {

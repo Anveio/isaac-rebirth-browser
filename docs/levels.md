@@ -5,9 +5,11 @@ stage-dependent consumer reads them instead of matching on stage numbers:
 
 - **Stage nodes** (`STAGES`, keyed by Level stage) are the progression state
   machine: the ShowName streak, the trapdoor edge (SetNextStage585620's
-  target) and the generated floor's contract. A stage without a node has no
-  generator, so no run start or trapdoor reaches it. A trapdoor edge is
-  admitted only into another node.
+  target), the generated floor's contract and, where 584240 treats that
+  stage alone differently, its own boss chain (Depths II runs only Mom's).
+  A stage without a node has no generator, so no run start or trapdoor
+  reaches it. A trapdoor edge is admitted only into another node, so an
+  edge may name a stage that has no node yet.
 - **Chapters** (`CHAPTERS`, keyed by stages.xml id) hold the parameters and
   assets the original keys by that id: the authored STB room set, the stage
   backdrop (backdrops.xml), the fxlayers.xml 1x1 overlay group, the music
@@ -25,7 +27,7 @@ field is imported with evidence.
 
 | Consumer | Reads |
 | --- | --- |
-| `floor::generate_normal_basement` | node (admission, contract), chapter room set and boss chain |
+| `floor::generate_normal_basement` | node (admission, contract, boss chain override), chapter room set and boss chain |
 | `room_assets::for_descriptor_with_special` | chapter room set by the descriptor's `asset_stage` |
 | `room::backdrop`, overlay setup | chapter backdrop and overlay |
 | `room` boss backdrop and blood scatter | chapter `boss_blood_backdrop` |
@@ -49,7 +51,9 @@ the stage, shared by every floor, and stay there.
    `Draw` steps that consume their roll.
 3. Admit `shape0_ambient` and `boss_blood_backdrop` only once their producers
    are verified for that backdrop.
-4. Add the stage nodes and point the previous node's trapdoor at them.
+4. Add the stage nodes and point the previous node's trapdoor at them. A
+   stage whose 584240 path leaves the chapter's chain carries its own
+   `bosses` steps on its node.
 5. Import or register the chapter's monsters and bosses; authored spawns
    without a family are dropped on admission (the `floor` bin's `spawns`
    output lists them per room).

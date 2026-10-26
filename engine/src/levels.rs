@@ -75,6 +75,8 @@ pub struct StageNode {
     /// SetNextStage585620's target when the boss trapdoor is taken. The edge
     /// is admitted only when that target is itself a node.
     pub trapdoor: Option<u32>,
+    /// A 584240 chain that replaces the chapter's for this stage only.
+    pub bosses: Option<&'static [BossStep]>,
     /// The generated floor's recorded contract.
     pub contract: &'static str,
 }
@@ -172,7 +174,7 @@ const CAVES_BOSSES: &[BossStep] = &[
 /// (584b6d). The draws that close the Basement and Caves chains end in
 /// normal table [4]'s fresh-profile Monstro II 1050 with no family draw
 /// (584b2f's R2 serves stages 1 and 3 only). Depths II never runs this
-/// chain: 58428a returns Mom 1060 for stage 6 right after the first word.
+/// chain (`MOM_BOSSES`).
 const DEPTHS_BOSSES: &[BossStep] = &[
     Next,
     Family {
@@ -205,6 +207,11 @@ const DEPTHS_BOSSES: &[BossStep] = &[
     Draw(2),
     Fixed(1050),
 ];
+
+/// Depths II (584240, stage 6): 584274 takes the first primary word for the
+/// local RNG (5c2cd0, which draws nothing more), then 58428a returns Mom
+/// 1060 (5843a0) before any pool or family draw, whatever the stage type.
+const MOM_BOSSES: &[BossStep] = &[Next, Fixed(1060)];
 
 pub const BASEMENT_OVERLAY: Overlay = Overlay {
     folder: "basement",
@@ -376,31 +383,44 @@ pub const STAGES: &[StageNode] = &[
         stage: 1,
         name: "BASEMENT I",
         trapdoor: Some(2),
+        bosses: None,
         contract: crate::floor::CONTRACT,
     },
     StageNode {
         stage: 2,
         name: "BASEMENT II",
         trapdoor: Some(3),
+        bosses: None,
         contract: "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
     },
     StageNode {
         stage: 3,
         name: "CAVES I",
         trapdoor: Some(4),
+        bosses: None,
         contract: "continuing-profile-normal-isaac-caves-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
     },
     StageNode {
         stage: 4,
         name: "CAVES II",
         trapdoor: Some(5),
+        bosses: None,
         contract: "continuing-profile-normal-isaac-caves-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
     },
     StageNode {
         stage: 5,
         name: "DEPTHS I",
-        trapdoor: None,
+        trapdoor: Some(6),
+        bosses: None,
         contract: "continuing-profile-normal-isaac-depths-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
+    },
+    StageNode {
+        stage: 6,
+        name: "DEPTHS II",
+        // SetNextStage585620 (table 0x675f10[6] = 585780) targets Womb I.
+        trapdoor: Some(7),
+        bosses: Some(MOM_BOSSES),
+        contract: "continuing-profile-normal-isaac-depths-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
     },
 ];
 
@@ -420,6 +440,14 @@ pub fn chapter(id: u32) -> Option<&'static Chapter> {
 /// The ordinary (stage type 0) chapter of a Level stage.
 pub fn stage_chapter(stage: u32) -> Option<&'static Chapter> {
     chapter_id(stage, false).and_then(chapter)
+}
+
+/// The 584240 boss chain `stage` runs: its node's own chain, else its
+/// chapter's.
+pub fn bosses(stage: u32) -> Option<&'static [BossStep]> {
+    node(stage)
+        .and_then(|node| node.bosses)
+        .or_else(|| stage_chapter(stage).and_then(|chapter| chapter.bosses))
 }
 
 pub fn node(stage: u32) -> Option<&'static StageNode> {
