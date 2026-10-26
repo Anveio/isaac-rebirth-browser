@@ -24,6 +24,7 @@ pub(crate) fn set_charge(state: &mut State, requested: i32) -> Result<(), String
             state,
             crate::active_charges::EffectFrontier::HudFlash573290,
         );
+        state.charge_bar_flash = 8;
         if !matches!(active_id, 164 | 289) {
             state.audio.admit(
                 &mut state.boot_lifecycle.shared,
@@ -83,6 +84,7 @@ pub(crate) fn set_charge(state: &mut State, requested: i32) -> Result<(), String
         state,
         crate::active_charges::EffectFrontier::HudFlash573290,
     );
+    state.charge_bar_flash = 8;
     state.audio.admit(
         &mut state.boot_lifecycle.shared,
         state.system_clock.system_counter.wrapping_sub(1),

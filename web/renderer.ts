@@ -6,6 +6,7 @@ import { GLMenuContext, type GLSurface } from "./gl-menu";
 import { StageComposer, type StageTargets } from "./gl-stage";
 import { RunPresentation } from "./presentation";
 import { PickupRenderer } from "./pickups";
+import pickupCatalog from "./pickup-data.json";
 import {drawPlayerLaser} from "./lasers";
 import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from "./engine";
 
@@ -895,6 +896,7 @@ export class Renderer {
     }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
+    this.activeItem(ctx, state);
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
@@ -923,6 +925,43 @@ export class Renderer {
     icons.forEach((frame, index) => this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle",
       icons.length === 1 ? 24 : 20 + index * 16, 84, frame));
     this.drawMaps(ctx, state);
+  }
+
+  /** HUD::Render573B8F: the held active's 32x32 art at (22,12) over a
+   * 30% black copy at +2,+2, a 1px white cross outline at full charge, then
+   * ui_chargebar at (56,29): BarEmpty, BarFull clipped from the top by the
+   * charge (red offset for Battery reserve) unless FlashChargeBar's countdown
+   * is even, and the BarOverlayN divider for the authored maximum. */
+  private activeItem(ctx: CanvasRenderingContext2D, state: State): void {
+    const owner = state.playerItems;
+    if (!owner?.activeId) return;
+    const item = pickupCatalog.items.find(entry => entry.id === owner.activeId && entry.kind === "active");
+    if (!item?.sprite) return;
+    const maximum = item.maxCharges ?? 0, [x, y] = [22, 12];
+    this.assets.drawImage(ctx, item.sprite, x + 2, y + 2, { tint: [0, 0, 0, 0.3], offsets: [0, 0, 0] });
+    if (maximum > 0 && owner.activeCharge === maximum) {
+      for (const [dx, dy] of [[-1, 0], [0, -1], [0, 1], [1, 0]] as const)
+        this.assets.drawImage(ctx, item.sprite, x + dx, y + dy, { tint: [0, 0, 0, 1], offsets: [1, 1, 1] });
+    }
+    this.assets.drawImage(ctx, item.sprite, x, y);
+    if (maximum <= 0) return;
+    const bar = "gfx/ui/ui_chargebar.anm2", [barX, barY] = [56, 29];
+    const charge = owner.activeSubordinateCharge !== 0 ? owner.activeSubordinateCharge / 450 : owner.activeCharge / maximum;
+    const reserve = Math.min(1, owner.reserveCharge / maximum);
+    this.assets.draw(ctx, bar, "BarEmpty", barX, barY);
+    const flash = state.chargeBarFlash;
+    if (flash < 0 || flash % 2 === 1) {
+      // AnimationState::Render's top-left clamp removes (1-ratio)*23+3 rows.
+      const clipped = (ratio: number) => {
+        const rows = (1 - ratio) * 23 + 3;
+        return { 0: { YCrop: rows, Height: 32 - rows, YPivot: 16 - rows } };
+      };
+      this.assets.draw(ctx, bar, "BarFull", barX, barY, 0, { overrides: clipped(charge) });
+      if (reserve > 0) this.assets.draw(ctx, bar, "BarFull", barX, barY, 0,
+        { overrides: clipped(reserve), color: { tint: [1, 1, 1, 1], offsets: [1, 0, 0] } });
+    }
+    const overlay = [1, 2, 3, 4, 6, 12].includes(maximum) ? `BarOverlay${maximum}` : null;
+    if (overlay) this.assets.draw(ctx, bar, overlay, barX, barY);
   }
 
   private drawMaps(ctx: CanvasRenderingContext2D, state: State): void {
