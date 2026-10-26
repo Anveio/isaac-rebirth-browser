@@ -467,7 +467,7 @@ export interface State {
   maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number; render: ActorRef[] };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
-  runIntroduction: RunIntroduction; bossBar: BossBar; pauseMenu: PauseMenu;
+  runIntroduction: RunIntroduction; bossBar: BossBar; chargeBarFlash: number; pauseMenu: PauseMenu;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }
