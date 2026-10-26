@@ -4147,7 +4147,23 @@ impl Game {
         let audio_counter = self.state.system_clock.system_counter;
         self.state.persistent_callback_pre_counter = Some(audio_counter);
         let phase = self.state.system_clock.advance()?;
-        if phase != phase::Phase::Skipped && self.state.nightmares.apply_request(self.state.stage) {
+        let womb_unlocked = self
+            .state
+            .profiles
+            .get(usize::from(self.state.profile).wrapping_sub(1))
+            .and_then(|profile| profile.achievements.get(4))
+            .is_some_and(|&unlocked| unlocked);
+        let challenge_end_stage = match self.state.challenge_id {
+            0 => None,
+            id => Some(self.challenge_catalog.get(id)?.end_stage),
+        };
+        if phase != phase::Phase::Skipped
+            && self.state.nightmares.apply_request(
+                self.state.stage,
+                womb_unlocked,
+                challenge_end_stage,
+            )
+        {
             self.state.music.room(96);
         }
         if phase != phase::Phase::Skipped {

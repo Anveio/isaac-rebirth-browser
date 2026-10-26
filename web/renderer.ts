@@ -11,6 +11,7 @@ import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from ".
 
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
+const PROGRESS = "gfx/ui/stage/progress.anm2";
 const PARTICLE_ACTORS: Record<number, string> = {
   5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
   35: "gfx/1000.035_tooth particle.anm2", 58: "gfx/1000.058_poop particle.anm2",
@@ -171,8 +172,10 @@ export class Renderer {
     gl.scale(this.canvas.width / 480, this.canvas.height / 270);
     const ctx = gl.asCanvasContext();
     if (state.nightmares.systemActive) {
-      if (state.nightmares.definitionLoaded && state.nightmares.currentActor)
+      if (state.nightmares.definitionLoaded && state.nightmares.currentActor) {
         this.assets.draw(ctx, state.nightmares.currentActor, "Scene", 240, 135, state.nightmares.frame);
+        if (state.nightmares.progressDefinitionLoaded) this.nightmareProgress(ctx, state);
+      }
     }
     else if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
@@ -673,6 +676,42 @@ export class Renderer {
       gl.drawImage(image, sourceX, sourceY, source.width, source.height, 0, 0, dest.width, dest.height);
       gl.restore();
     }
+  }
+  /** Nightmare Render 5B76C0: the floor progress bar over the scene. The bar
+   * sprite takes the scene's FadeGuide null color (5B774E..5B77EA). Icons sit
+   * 27 apart at y 24 from x0 = 240 - (23n + 4(n - 1)) / 2 + 11.5. */
+  private nightmareProgress(ctx: CanvasRenderingContext2D, state: State): void {
+    const night = state.nightmares, actor = night.currentActor!;
+    const guide = this.assets.nullFrame(actor, "Scene", 0, Math.floor(night.frame));
+    const color = guide
+      ? { tint: [guide.RedTint, guide.GreenTint, guide.BlueTint, guide.AlphaTint], offsets: [guide.RedOffset, guide.GreenOffset, guide.BlueOffset] }
+      : { tint: [1, 1, 1, 1], offsets: [0, 0, 0] };
+    const f = Math.fround, step = 27, y = 24, current = night.stageIndex, floors = night.progressFloors;
+    const count = current + 1 < floors ? floors : current + 1;
+    const x0 = f(f(240 - f(f(count * 23 + (count - 1) * 4) * 0.5)) + 11.5);
+    const draw = (animation: string, x: number, frame = 0) =>
+      this.assets.draw(ctx, PROGRESS, animation, x, y, frame, { color });
+    const at = (index: number) => f(f(index * step) + x0);
+    for (let index = 0; index < count - 1; index++) draw("Connector", f(f(index * step) + f(x0 + 13.5)));
+    // Icon i shows resource[i + 1]; the tenth icon reads resource[11].
+    for (let index = 0; index <= current; index++)
+      draw("Levels", at(index), night.stageResources[index === 9 ? 11 : index + 1] ?? 12);
+    for (let index = 0; index < current; index++) draw("ClearFloor", at(index));
+    for (let index = current + 1; index < count; index++) draw("NotClearFloor", at(index));
+    if (current < floors) {
+      draw("BossIndicator", f(x0 + (floors === 6 ? 135 : 189)));
+      // Game+CE9F4 against the 36000-frame limit at CE9F8 (Game init 54E95C).
+      const limit = 36000, time = state.gameUpdateCount;
+      if (current <= 5 && time <= limit) draw("Clock", f(f(f(time / limit) * 135) + x0));
+    }
+    // The head walks in from the previous icon over scene frames 10..40
+    // unless the scene repeats the same stage.
+    let x = at(current);
+    if (!night.alternate) {
+      const frame = Math.min(Math.floor(night.frame), 40);
+      x = f(x - (frame > 10 ? f(f(1 - f((frame - 10) / 30)) * step) : step));
+    }
+    draw("IsaacIndicator", x, Math.floor(night.counter / 2) % 22);
   }
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
     const actors: Record<number, string> = { 1: "gfx/1000.001_bomb explosion.anm2",
