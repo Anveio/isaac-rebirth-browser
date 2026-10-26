@@ -961,6 +961,62 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// One plain (flagless) regular tear against the live planted/converted
+/// bombs, after its NPC candidates. Tear545E80's type4 arm: a tear moving away
+/// from the bomb (dot(Bomb-Tear, TearV) < 0) at most 2 updates after birth
+/// (442B30) passes through; a shot bomb (7E8 marker) vetoes and the tear flies
+/// on. Otherwise the tear dies on the bomb (546318) and the mass response
+/// pushes it. Returns whether the tear died. 444810 (type 10..999) is false
+/// for a bomb, so tear effect flags never apply; the caller admits plain and
+/// spectral (bit0) tears, which take this path unchanged. Other flags
+/// (piercing, 0x1000, 0x80000...) take other arms and are not admitted here.
+pub(crate) fn tear_hit(
+    state: &mut State,
+    motion: &mut crate::projectiles::TearMotion,
+    radius: f32,
+    tear_id: u32,
+    birth_game_update: Option<u32>,
+) -> Result<bool, String> {
+    for index in 0..state.bombs.len() {
+        let bomb = &state.bombs[index];
+        if bomb.shot.is_some() || bomb.motion.lifetime != BombLifetime::Alive {
+            continue;
+        }
+        let mut tear = crate::combat::ContactBody {
+            id: tear_id,
+            entity_type: 2,
+            position: motion.position,
+            velocity: motion.velocity,
+            radius,
+            mass: 8.0,
+        };
+        let mut body = contact_body(bomb);
+        let delta = WorldVector {
+            x: body.position.x - tear.position.x,
+            y: body.position.y - tear.position.y,
+        };
+        let receding = delta.x * tear.velocity.x + delta.y * tear.velocity.y < 0.0;
+        let before = (tear, body);
+        let resolution = crate::combat::resolve_tear_bomb_contact(&mut tear, &mut body)?;
+        if !resolution.colliding && (tear, body) == before {
+            continue;
+        }
+        if receding {
+            let birth = birth_game_update
+                .ok_or("tear/bomb contact of a receding tear requires its birth update")?;
+            if state.game_update_count.wrapping_sub(birth) <= 2 {
+                continue;
+            }
+        }
+        motion.position = tear.position;
+        motion.presented_position = tear.position;
+        motion.velocity = tear.velocity;
+        commit_contact(&mut state.bombs[index], body);
+        return Ok(true);
+    }
+    Ok(false)
+}
+
 ///Same-type ties retain Bomb admission order. Both callbacks run; the first
 ///actual shot marker vetoes mass response. Legacy no-shot pairs stay untouched.
 pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {

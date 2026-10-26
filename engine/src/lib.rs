@@ -4990,11 +4990,15 @@ impl Game {
                         tear.motion,
                         tear.collision_radius,
                         tear.collision_damage,
+                        tear.birth_game_update,
+                        // Bomb contact admits plain and spectral (bit0) tears:
+                        // 444810 is false for type4, so bit0 is inert there.
+                        tear.attack_flags.0 & !1 == 0,
                     )
                 })
                 .collect();
             let partitioned_contacts = polyphemus_contact::contacts_all(&mut self.state)?;
-            for (id, mut motion, radius, damage) in tears {
+            for (id, mut motion, radius, damage, birth, plain) in tears {
                 if self.state.tears.iter().any(|tear| {
                     tear.id == id
                         && tear.controlled.is_none()
@@ -5014,7 +5018,9 @@ impl Game {
                     controlled_tear::contacts_actor(&mut self.state, id)?;
                     continue;
                 }
-                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
+                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some()
+                    || (plain && bombs::tear_hit(&mut self.state, &mut motion, radius, id, birth)?)
+                {
                     if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
                         motion.lifetime = projectiles::Lifetime::Dying;
                         tear.motion = motion;
