@@ -917,6 +917,11 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
 ///The achievement2 attempt remains unavailable for eligible high balances;
 ///the Shop caller checks that boundary before any purchase mutation.
 pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), String> {
+    add_coins(state, -price)
+}
+
+///AddCoins518AB0 for any signed delta (Shop debit, 2 of Diamonds credit).
+pub(crate) fn add_coins(state: &mut State, delta: i32) -> Result<(), String> {
     let owner = state
         .player_items
         .as_ref()
@@ -929,7 +934,7 @@ pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), Stri
     )
     .have(109)
     .ok_or("AddCoins Have109 history unavailable")?;
-    state.inventory.coins = add_inventory(state.inventory.coins, -price);
+    state.inventory.coins = add_inventory(state.inventory.coins, delta);
     if money_power {
         state
             .player_items

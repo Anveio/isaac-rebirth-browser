@@ -216,6 +216,54 @@ fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
     Ok(())
 }
 
+///5282B0's Card arm for 2 of Clubs (23) and 2 of Diamonds (24). 52837C
+///stores Player+BE8 (an unowned word, kept as a frontier) and 528399 marks
+///persistent 61. UseCard526DB0 calls 50AA80: the card face goes into the
+///copied Sprite+7E0 and 50A5C0 force-plays UseItem. The jump-table arms
+///527DE3/52752F add the current bombs/coins, or 2 when there are none
+///(AddBombs5086F0 clamps to 0..99; AddCoins518AB0). 5283AE then promotes
+///slot1 and clears its ID dword.
+fn use_two_card(state: &mut State, slot: PocketSlot) -> Result<(), String> {
+    let owner = state
+        .player_items
+        .as_mut()
+        .ok_or("Card use lost its Player owner")?;
+    owner
+        .pill_use_frontiers
+        .get_or_insert_with(Default::default)
+        .player_be8 = true;
+    crate::persistent_effects::mark_collected(state, 61)?;
+    let owner = state.player_items.as_mut().expect("checked Player owner");
+    owner.pickup_presentation = Some(player_items::PickupPresentation {
+        item_id: slot.id,
+        animation_frame: 0.0,
+        animation_playing: true,
+        pocket: Some(PocketPresentation::for_slot(slot)),
+        regular: None,
+    });
+    crate::player_animation::force_play(state, crate::player_animation::Clip::UseItem);
+    match slot.id {
+        23 => {
+            let bombs = state.inventory.bombs;
+            let added = if bombs == 0 { 2 } else { bombs };
+            state.inventory.bombs = (bombs + added).min(99);
+        }
+        24 => {
+            let coins = state.inventory.coins as i32;
+            player_items::add_coins(state, if coins == 0 { 2 } else { coins })?;
+        }
+        _ => return Err("two-card arm requires Card 23 or 24".into()),
+    }
+    let held = state
+        .player_items
+        .as_mut()
+        .and_then(|owner| owner.held_pockets.as_mut())
+        .ok_or("Card effect lost its held-slot owner before promotion")?;
+    held.slots[0] = held.slots[1];
+    held.slots[1].id = 0;
+    Ok(())
+}
+
 ///5282B0 invokes the effect before reading CURRENT slot1 and shifting it.
 ///Only the source-closed11/12 scalar arms consume current slots here; other
 ///effects preserve the existing typed frontier and conservative invalidation.
@@ -231,6 +279,16 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
     let resolved_pill = crate::pill_effect_history::resolve_held_pill(state);
     if let Some(effect @ (11 | 12)) = resolved_pill {
         return use_range_pill(state, effect);
+    }
+    if let Some(slot) = state
+        .player_items
+        .as_ref()
+        .and_then(|owner| owner.held_pockets.as_ref())
+        .filter(|held| held.frontier.is_none())
+        .map(|held| held.slots[0])
+        .filter(|slot| slot.card && matches!(slot.id, 23 | 24))
+    {
+        return use_two_card(state, slot);
     }
     let Some(owner) = state.player_items.as_mut() else {
         return Ok(());
