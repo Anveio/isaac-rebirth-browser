@@ -46,6 +46,7 @@ pub(crate) fn color(index: u32) -> crate::sprite_color::Color {
 
 pub(crate) struct Roll<'a> {
     pub stage: u32,
+    pub difficulty: crate::difficulty::Difficulty,
     pub player_items: Option<&'a PlayerItems>,
 }
 
@@ -63,9 +64,11 @@ pub(crate) fn roll(npc: &mut Npc, shared: &mut Mt19937, context: &Roll) -> Resul
             .get(CHAMPION_BELT)
             .is_some_and(|count| *count > 0)
     });
-    // 47f5a9/47f710: 0.2 with Champion Belt, otherwise 0.05. Hard mode and the
-    // Purple Heart trinket are not admitted runtime states.
-    let chance = if belt { 0.2 } else { 0.05 };
+    // 47f5a9/47f710: 0.2 with Champion Belt, otherwise 0.05, plus the
+    // difficulty's f32 bonus (47f5c6/47f725). Purple Heart's doubling after
+    // it is not an admitted runtime state.
+    let chance: f32 = if belt { 0.2 } else { 0.05 };
+    let chance = chance + crate::difficulty::rules(context.difficulty).champion_chance_bonus;
     if rng.uniform() >= chance {
         return Ok(false);
     }

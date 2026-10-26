@@ -25,6 +25,18 @@ struct Request {
     soul_hp: i32,
     #[serde(default)]
     coins: u32,
+    /// The run's Game difficulty, "normal" when omitted.
+    #[serde(default)]
+    difficulty: rebirth_cleanroom::difficulty::Difficulty,
+    /// Curse-sampler profile facts (a fresh profile's when omitted).
+    #[serde(default)]
+    achievement4: bool,
+    #[serde(default)]
+    achievement33: bool,
+    #[serde(default)]
+    counter10: bool,
+    #[serde(default)]
+    black_candle: bool,
 }
 fn full_red() -> u8 {
     6
@@ -47,20 +59,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("floor request exceeds 4096 bytes".into());
     }
     let request: Request = serde_json::from_str(&input)?;
-    let floor = match request.stage {
-        None => rebirth_cleanroom::floor::generate_basement(request.stage_seed)?,
-        Some(stage) => rebirth_cleanroom::floor::generate_normal_basement(
-            rebirth_cleanroom::floor::NormalBasementRequest {
-                stage,
-                stage_seed: request.stage_seed,
-                game_flags: request.game_flags,
-                red_hp: request.red_hp,
-                max_red_hp: request.max_red_hp,
-                soul_hp: request.soul_hp,
-                coins: request.coins,
-            },
-        )?,
+    let curse = rebirth_cleanroom::challenges::CurseInputs {
+        achievement_4: request.achievement4,
+        achievement_33: request.achievement33,
+        counter_10: request.counter10,
+        black_candle: request.black_candle,
     };
+    let floor = rebirth_cleanroom::floor::generate_normal_basement(match request.stage {
+        None => rebirth_cleanroom::floor::first_floor(request.stage_seed, request.difficulty, curse),
+        Some(stage) => rebirth_cleanroom::floor::NormalBasementRequest {
+            stage,
+            stage_seed: request.stage_seed,
+            game_flags: request.game_flags,
+            red_hp: request.red_hp,
+            max_red_hp: request.max_red_hp,
+            soul_hp: request.soul_hp,
+            coins: request.coins,
+            difficulty: request.difficulty,
+            curse,
+        },
+    })?;
     if !request.spawns {
         println!("{}", serde_json::to_string(&floor)?);
         return Ok(());

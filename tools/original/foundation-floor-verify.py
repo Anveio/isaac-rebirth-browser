@@ -31,7 +31,7 @@ def descriptors(values):
             for room in values]
 
 
-def capture_selected(output, codes, jobs):
+def capture_selected(output, codes, jobs, hard=False):
     runner = source.load_module('floor_clock_runner', ROOT / 'tools/original/foundation-clock-run.py')
     output.mkdir(parents=True, exist_ok=False)
     vectors = [{'code': code, 'seedValue': source.codec.decode_seed(code)} for code in codes]
@@ -45,6 +45,12 @@ def capture_selected(output, codes, jobs):
                 tape.append(action)
             if action['type'] == 'capture' and action['label'] == 'gameplay-start':
                 break
+        if hard:
+            # Down on the seeded Character page selects hard before the Return
+            # that starts the run.
+            start = max(i for i, action in enumerate(tape) if action.get('key') == 'Return' and action['down'])
+            tape[start:start] = [{'type': 'key', 'key': 'Down', 'down': True}, {'type': 'step', 'frames': 12},
+                                 {'type': 'key', 'key': 'Down', 'down': False}, {'type': 'step', 'frames': 30}]
         tape_path = output / f'case{index}-tape.json'
         tape_path.write_text(json.dumps(tape, indent=2) + '\n')
         directory = output / f'case{index}'
@@ -59,11 +65,12 @@ def capture_selected(output, codes, jobs):
         return list(executor.map(capture, enumerate(vectors, 1)))
 
 
-def compare(case, generator, catalogs):
-    source.validate_case(case, catalogs, allow_non_labyrinth_curses=True)
+def compare(case, generator, catalogs, hard=False):
+    source.validate_case(case, catalogs, allow_non_labyrinth_curses=True, hard=hard)
     observed = case['observation']
     public = observed['actualPublicLog']
-    process = subprocess.run([str(generator.resolve())], input=json.dumps({'stageSeed': public['stageSeed']}),
+    request = {'stageSeed': public['stageSeed']} | ({'difficulty': 'hard'} if hard else {})
+    process = subprocess.run([str(generator.resolve())], input=json.dumps(request),
         text=True, capture_output=True, timeout=20, check=True)
     predicted = json.loads(process.stdout)
     native_descriptors = descriptors(observed['descriptors'])
@@ -88,7 +95,8 @@ def compare(case, generator, catalogs):
         'nativeBinarySha256': observed['nativeBinarySha256'],
         'sourceOriginalLogSha256': hashlib.sha256(case['originalLogText'].encode()).hexdigest(),
         'sourceManifest': case.get('sourceManifest'),
-        'scope': 'complete ordered floor descriptors/grid/seeds/attempts; fresh normal Isaac without Labyrinth; other curse effects are separate; pre-RoomInit stream continuation'}
+        'difficulty': 'hard' if hard else 'normal',
+        'scope': 'complete ordered floor descriptors/grid/seeds/attempts; fresh Isaac without Labyrinth; other curse effects are separate; pre-RoomInit stream continuation'}
 
 
 def main():
@@ -98,6 +106,7 @@ def main():
     parser.add_argument('--count', type=int, default=2, help='Independent OS-random source seeds (0 replays only --seed codes)')
     parser.add_argument('--seed', action='append', default=[], help='Additional public contrived seed code')
     parser.add_argument('--jobs', type=int, default=2)
+    parser.add_argument('--hard', action='store_true', help='Start each captured run at hard difficulty (Down on the Character page)')
     parser.add_argument('--generator', type=Path, default=ROOT / 'engine/target/debug/floor')
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/original-floor' / str(time.time_ns()))
     parser.add_argument('--report', type=Path, default=ROOT / '.cache/foundation/floor-native.json')
@@ -117,7 +126,7 @@ def main():
             if vector['seedValue'] not in identities:
                 identities.add(vector['seedValue'])
                 random_codes.append(vector['code'])
-        paths += capture_selected(args.output, codes + random_codes, args.jobs)
+        paths += capture_selected(args.output, codes + random_codes, args.jobs, args.hard)
     elif args.seed:
         parser.error('--seed requires --capture')
     cases, results = [], []
@@ -125,7 +134,7 @@ def main():
         cases = source.portable_cases(source.REFERENCES / 'native-observations.json')
     for path in paths:
         try:
-            cases.append(source.captured_case(path))
+            cases.append(source.captured_case(path, args.hard))
         except (OSError, ValueError, KeyError, TypeError) as error:
             results.append({'status': 'fail', 'sourceManifest': str(path), 'error': str(error)})
     identities = set()
@@ -135,7 +144,7 @@ def main():
             if identity in identities:
                 raise ValueError('Duplicated independent original identity')
             identities.add(identity)
-            results.append(compare(case, args.generator, catalogs))
+            results.append(compare(case, args.generator, catalogs, args.hard))
         except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
             results.append({'status': 'fail', 'seed': case.get('seed'), 'error': str(error)})
     report = {'schema': 1, 'status': 'pass' if results and all(case['status'] == 'pass' for case in results) else 'fail',

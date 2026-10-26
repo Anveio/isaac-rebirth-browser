@@ -28,8 +28,16 @@ claim that the difficulty changes nothing there.
 
 | Row | Original | Normal | Hard | Consumer |
 | --- | --- | --- | --- | --- |
+| `champion_chance_bonus` | NPC Init 47f5c6/47f725: added to the champion chance (0.05, 0.2 with Champion Belt) | 0.0 | f32 0.15 (66ad1c) | `champions::roll` |
+| `curse_odds` | Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor; n for a fresh profile / achievement 4 / achievement 33 / counter 10 | 80 / 30 / 10 / 5 | 10 / 5 / 3 / 2 | `challenges::sample_curse` (Challenge floors, hard's extra rooms) |
+| `extra_rooms` | Level::Init 58c08e: rooms added to the floor's count, plus the curse stream's RandomInt(2) (58c089) | none | 2 | `floor::generate_normal_basement` |
+| `odd_stage_room_difficulty` | Level::Init 58c114/58c124: normal-room difficulty on odd stages | 1..5 | 5..10 | `floor::difficulty_band` (even stages are 5..10 at both) |
 | `hud_icon` | HUD 5742bd: hudpickups.anm2 frame under the counters | none | frame 4 | `web/renderer.ts` HUD, via `State::difficulty_presentation` |
 | `pause_blood` | Pause render 5ba8d2: pausescreen.anm2 layer 4 (Blood) | not drawn | drawn | `web/presentation.ts` pause |
+
+A curse the hard stream selects has no consumer, as on every ordinary floor
+at either difficulty: hard only raises its odds. Curse of the Labyrinth
+(58c061 multiplies the count by 1.8 before the extra rooms) stays a gap.
 
 The two presentation rows reach the renderer through
 `State::difficulty_presentation`, rebuilt from the run's difficulty on every
@@ -65,8 +73,8 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 | 594bb8 | System dispatch 594a10 | stashes a loaded run's value for Restart | living Restart context |
 | 5742bd | HUD 573a60 | difficulty icon | row `hud_icon` |
 | 5ba8d2 | pause render 5ba830 | Blood layer | row `pause_blood` |
-| 47f5c6, 47f725 | NPC Init 47ec60 | champion chance | gap |
-| 58bf7d | Level::Init 58be30 | curse odds, room count, room difficulty | gap |
+| 47f5c6, 47f725 | NPC Init 47ec60 | champion chance | row `champion_chance_bonus` |
+| 58bf7d | Level::Init 58be30 | curse odds, room count, room difficulty | rows `curse_odds`, `extra_rooms`, `odd_stage_room_difficulty` |
 | 4f27d8 | champion death drop 4f27a0 | drop odds | gap |
 | 5399ed | Slot 539540 | beggar payout threshold | gap |
 | 53c9fa, 53da69, 53ff04 | Slot 53c290 | slot prize odds and counts | gap |
@@ -79,17 +87,6 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 Each is a difficulty read whose consumer the port does not implement (or
 implements without the rule yet). The values are read from the disassembly.
 
-- **Champion chance** (NPC Init 47f5c6/47f725): the chance (0.05, or 0.2 with
-  Champion Belt) gains f32 0.15 (66ad1c) at hard, before Purple Heart's
-  doubling.
-- **Level::Init** (58bf7d sets a stack flag read at 58bf90..58bfd8, 58c08e,
-  58c114 and 58c124):
-  - curse odds: RandomInt(n) == 0 curses the floor, n = 80 / 30 / 10 / 5 at
-    normal and 10 / 5 / 3 / 2 at hard (base, achievement 4, achievement 33,
-    counter 10);
-  - room count: hard adds 2 + RandomInt(2) of the curse stream (58c089);
-  - room difficulty: odd stages draw normal rooms from difficulty 1..5 at
-    normal and 5..10 at hard (even stages 5..10 at both).
 - **Champion death drop** (4f27d8): a champion's color drop (jump table
   66e320) needs RandomInt(3) == 0 at hard; normal always drops. The port has
   no champion drops.

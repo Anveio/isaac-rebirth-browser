@@ -74,6 +74,19 @@ macro_rules! rules {
 }
 
 rules! {
+    /// NPC Init 47f5c6/47f725: added to the champion chance (0.05, or 0.2
+    /// with Champion Belt); hard adds f32 0.15 (66ad1c).
+    champion_chance_bonus: f32 = [0.0, 0.15],
+    /// Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor, n for
+    /// a fresh profile, achievement 4, achievement 33 and counter 10 (each
+    /// later one wins).
+    curse_odds: [u32; 4] = [[80, 30, 10, 5], [10, 5, 3, 2]],
+    /// Level::Init 58c08e: rooms added to the floor's count, plus the curse
+    /// stream's RandomInt(2) (58c089) that every floor draws.
+    extra_rooms: Option<u32> = [None, Some(2)],
+    /// Level::Init 58c114/58c124: the normal-room difficulty range on odd
+    /// stages (even stages draw 5..10 at both difficulties).
+    odd_stage_room_difficulty: (u8, u8) = [(1, 5), (5, 10)],
     /// HUD 5742bd: hudpickups.anm2 frame drawn under the pickup counters.
     hud_icon: Option<u32> = [None, Some(4)],
     /// Pause render 5ba8d2: pausescreen.anm2 layer 4 (Blood) is drawn.

@@ -1,6 +1,8 @@
 //! Source-derived normal Basement I/II generation for the fresh profile.
 //! Independent stage primary, generator and local selector streams are kept
 //! separate. Authored catalogues supply every template and spawn selector.
+use crate::challenges::CurseInputs;
+use crate::difficulty::Difficulty;
 use crate::layout::{self, Cell, GeneratedRoom, Growth, GrowthRequest, GRID_CELLS, GRID_WIDTH};
 use crate::levels::BossStep;
 use crate::room_assets;
@@ -22,6 +24,11 @@ pub struct NormalBasementRequest {
     pub max_red_hp: u8,
     pub soul_hp: i32,
     pub coins: u32,
+    /// The run's Game difficulty; its rules shape Level::Init.
+    pub difficulty: Difficulty,
+    /// The curse sampler's inputs, drawn from only when a rule needs the
+    /// curse stream (hard's extra rooms).
+    pub curse: CurseInputs,
 }
 
 /// A keys-only view of the descriptor map. With an owned fresh map, cells
@@ -70,6 +77,9 @@ pub struct Floor {
     pub contract: String,
     pub stage: u32,
     pub stage_seed: u32,
+    /// The Game difficulty the floor was generated at.
+    #[serde(default, skip_serializing_if = "is_normal")]
+    pub difficulty: Difficulty,
     ///None keeps the existing ordinary floor's unimplemented curse owner
     ///explicit. Challenge uses the actual local sampler and filtered mask.
     pub challenge_curse: Option<crate::challenges::CurseSample>,
@@ -462,10 +472,15 @@ fn select(
         picker.catalog()[selected.catalog_index].clone(),
     ))
 }
-/// 58c100..58c130 normal-mode difficulty: odd floors 1..5, even floors 5..10.
-fn difficulty_band(stage: u32) -> (u8, u8) {
+fn is_normal(difficulty: &Difficulty) -> bool {
+    *difficulty == Difficulty::Normal
+}
+
+/// 58c100..58c130: the normal-room difficulty range, the difficulty's row on
+/// odd floors and 5..10 on even floors.
+pub fn difficulty_band(stage: u32, difficulty: Difficulty) -> (u8, u8) {
     if stage % 2 == 1 {
-        (1, 5)
+        crate::difficulty::rules(difficulty).odd_stage_room_difficulty
     } else {
         (5, 10)
     }
@@ -887,8 +902,8 @@ fn attempt(
                 required_doors: fitting.mask(index),
                 min_variant: 0,
                 max_variant: u32::MAX,
-                min_difficulty: difficulty_band(request.stage).0,
-                max_difficulty: difficulty_band(request.stage).1,
+                min_difficulty: difficulty_band(request.stage, request.difficulty).0,
+                max_difficulty: difficulty_band(request.stage, request.difficulty).1,
             }) {
                 Ok(selected) => (
                     selected.catalog_index,
@@ -998,7 +1013,12 @@ fn surprise_miniboss(
 }
 
 pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
-    generate_normal_basement(NormalBasementRequest {
+    generate_normal_basement(first_floor(stage_seed, Difficulty::Normal, CurseInputs::default()))
+}
+
+/// Basement I's request for a fresh character.
+pub fn first_floor(stage_seed: u32, difficulty: Difficulty, curse: CurseInputs) -> NormalBasementRequest {
+    NormalBasementRequest {
         stage: 1,
         stage_seed,
         game_flags: 0,
@@ -1006,7 +1026,9 @@ pub fn generate_basement(stage_seed: u32) -> Result<Floor, String> {
         max_red_hp: 6,
         soul_hp: 0,
         coins: 0,
-    })
+        difficulty,
+        curse,
+    }
 }
 
 pub fn generate_normal_basement(request: NormalBasementRequest) -> Result<Floor, String> {
@@ -1022,20 +1044,11 @@ pub(crate) fn generate_normal_basement_with_special(
 
 pub(crate) fn generate_basement_with_special(
     stage_seed: u32,
+    difficulty: Difficulty,
+    curse: CurseInputs,
     special: Option<&[room_assets::RoomAsset]>,
 ) -> Result<Floor, String> {
-    generate_normal_basement_with_special(
-        NormalBasementRequest {
-            stage: 1,
-            stage_seed,
-            game_flags: 0,
-            red_hp: 6,
-            max_red_hp: 6,
-            soul_hp: 0,
-            coins: 0,
-        },
-        special,
-    )
+    generate_normal_basement_with_special(first_floor(stage_seed, difficulty, curse), special)
 }
 
 pub(crate) fn generate_challenge_basement(
@@ -1047,15 +1060,9 @@ pub(crate) fn generate_challenge_basement(
 ) -> Result<Floor, String> {
     definition.validate_initial_scope()?;
     generate_normal_basement_inner(
-        NormalBasementRequest {
-            stage: 1,
-            stage_seed,
-            game_flags: 0,
-            red_hp: 6,
-            max_red_hp: 6,
-            soul_hp: 0,
-            coins: 0,
-        },
+        // 59d218: Challenges run at normal difficulty; their own sampler
+        // below owns the curse stream.
+        first_floor(stage_seed, Difficulty::Normal, CurseInputs::default()),
         Some((definition, profile, has_black_candle)),
         special,
     )
@@ -1094,7 +1101,8 @@ fn generate_normal_basement_inner(
     // 58c18d queries actual normal templates in the floor's difficulty band;
     // 58c20f admits a rectangular shape only when its count exceeds four.
     let mut shape_counts = [0u32; 4];
-    let (minimum_difficulty, maximum_difficulty) = difficulty_band(request.stage);
+    let (minimum_difficulty, maximum_difficulty) =
+        difficulty_band(request.stage, request.difficulty);
     for template in basement.catalog() {
         if template.room_type == 1
             && (minimum_difficulty..=maximum_difficulty).contains(&template.difficulty)
@@ -1115,7 +1123,7 @@ fn generate_normal_basement_inner(
     };
     primary.next(); // 587ec0 reset; fixed global MT draws are a separate stream.
     primary.random(1); // Backdrop palette.
-    let count = (request.stage * 10 / 3 + 5 + primary.random(2)).min(20) as u8;
+    let count = (request.stage * 10 / 3 + 5 + primary.random(2)).min(20);
     let challenge_curse = challenge
         .map(|(definition, profile, has_black_candle)| {
             crate::challenges::sample_initial_curse(
@@ -1131,6 +1139,24 @@ fn generate_normal_basement_inner(
     if challenge_curse.is_some_and(|sample| sample.filtered_mask != 0) {
         return Err("Challenge floor requires unimplemented nonzero curse consumers".into());
     }
+    // 58c08e: the extra rooms take the curse stream's last RandomInt(2). The
+    // curse it may select has no consumer at any difficulty (Labyrinth's
+    // 58c061 count change included), as on every ordinary floor.
+    let count = count
+        + crate::difficulty::rules(request.difficulty)
+            .extra_rooms
+            .map_or(0, |rooms| {
+                rooms
+                    + crate::challenges::sample_curse(
+                        primary.state,
+                        request.stage as i32,
+                        request.difficulty,
+                        request.curse,
+                        |mask| mask,
+                    )
+                    .room_adjustment_result
+            });
+    let count = u8::try_from(count).map_err(|_| "floor room count exceeds the generator")?;
     let mut generator_state = primary.next(); // Constructor, once per floor.
     let mut flags = request.game_flags;
     let mut reports = Vec::new();
@@ -1168,6 +1194,7 @@ fn generate_normal_basement_inner(
                 },
                 stage: request.stage,
                 stage_seed,
+                difficulty: request.difficulty,
                 challenge_curse,
                 additional_rooms: count,
                 attempts: attempt_number,

@@ -1191,6 +1191,8 @@ impl Game {
         let player = Player::starting();
         let floor = floor::generate_basement_with_special(
             seed::stage1_seed(initial_seed),
+            difficulty::Difficulty::Normal,
+            challenges::CurseInputs::default(),
             special_room_assets.as_deref().map(Vec::as_slice),
         )?;
         let current_room = floor.starting_descriptor;
@@ -2262,6 +2264,8 @@ impl Game {
         } else {
             floor::generate_basement_with_special(
                 seed::stage1_seed(self.state.run_seed_value),
+                self.state.difficulty,
+                stage_transition::curse_inputs(&self.state)?,
                 self.special_room_assets.as_deref().map(Vec::as_slice),
             )?
         };
@@ -3293,6 +3297,7 @@ impl Game {
                     &mut self.state.boot_lifecycle.shared,
                     &champions::Roll {
                         stage: self.state.stage,
+                        difficulty: self.state.difficulty,
                         player_items: self.state.player_items.as_ref(),
                     },
                 )?;

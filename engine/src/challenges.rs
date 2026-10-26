@@ -58,20 +58,59 @@ pub(crate) fn sample_initial_curse(
     parameters: RunParameters,
     has_black_candle: bool,
 ) -> Result<CurseSample, String> {
-    if profile.achievements.len() < 179 || profile.counters.len() != 95 {
-        return Err("curse sampler requires actual Persistent achievement/counter owners".into());
+    Ok(sample_curse(
+        primary_state,
+        stage,
+        parameters.difficulty,
+        CurseInputs::from_profile(profile, has_black_candle)?,
+        |mask| definition.apply_curse_filter(mask),
+    ))
+}
+
+/// The Persistent and Player facts Level::Init's curse sampler reads.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct CurseInputs {
+    pub achievement_4: bool,
+    pub achievement_33: bool,
+    pub counter_10: bool,
+    /// 58c02e: Black Candle (260) skips the curse draw.
+    pub black_candle: bool,
+}
+
+impl CurseInputs {
+    pub(crate) fn from_profile(profile: &crate::Profile, black_candle: bool) -> Result<Self, String> {
+        if profile.achievements.len() < 179 || profile.counters.len() != 95 {
+            return Err("curse sampler requires actual Persistent achievement/counter owners".into());
+        }
+        Ok(Self {
+            achievement_4: profile.achievements[4],
+            achievement_33: profile.achievements[33],
+            counter_10: profile.counters[10] != 0,
+            black_candle,
+        })
     }
-    let mode_one = parameters.difficulty == crate::difficulty::Difficulty::Hard;
-    let mut threshold = if mode_one { 10 } else { 80 };
-    if profile.achievements[4] {
-        threshold = if mode_one { 5 } else { 30 };
+}
+
+/// Level::Init's local curse stream (58bffb..58c089), with `filter` applied
+/// to the selected mask (a Challenge's curse filter, or none).
+pub(crate) fn sample_curse(
+    primary_state: u32,
+    stage: i32,
+    difficulty: crate::difficulty::Difficulty,
+    inputs: CurseInputs,
+    filter: impl Fn(u32) -> u32,
+) -> CurseSample {
+    let odds = crate::difficulty::rules(difficulty).curse_odds;
+    let mut threshold = odds[0];
+    for (set, value) in [inputs.achievement_4, inputs.achievement_33, inputs.counter_10]
+        .into_iter()
+        .zip(&odds[1..])
+    {
+        if set {
+            threshold = *value;
+        }
     }
-    if profile.achievements[33] {
-        threshold = if mode_one { 3 } else { 10 };
-    }
-    if profile.counters[10] != 0 {
-        threshold = if mode_one { 2 } else { 5 };
-    }
+    let has_black_candle = inputs.black_candle;
     let mut local = items::Rng::new(primary_state, [5, 9, 7]);
     let mut draws = 0;
     let mut threshold_result = None;
@@ -97,12 +136,12 @@ pub(crate) fn sample_initial_curse(
             };
         }
     }
-    let filtered_mask = definition.apply_curse_filter(selected_mask);
+    let filtered_mask = filter(selected_mask);
     //58c089 consumes this even at normal difficulty/filter127;58c097 then restores
     //PRIMARY pointer before58c0ba Next. No additional localNext is invented.
     let room_adjustment_result = local.bounded(2);
     draws += 1;
-    Ok(CurseSample {
+    CurseSample {
         initial_local_state: primary_state,
         final_local_state: local.state,
         threshold,
@@ -112,7 +151,7 @@ pub(crate) fn sample_initial_curse(
         filtered_mask,
         room_adjustment_result,
         local_draws: draws,
-    })
+    }
 }
 
 impl ResourceInputs {

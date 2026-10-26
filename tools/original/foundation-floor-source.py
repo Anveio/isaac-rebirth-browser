@@ -73,15 +73,16 @@ def authored_catalogs():
     return catalogs, source
 
 
-def supplied_growth_input(stage_seed, additional):
+def supplied_growth_input(stage_seed, additional, hard=False):
     # Recovered caller contract, not fitted offsets: reset's discarded draw,
     # backdrop Random(1), room-count Random(2), generator-constructor Next.
+    # Hard (58c08e) adds 2 + the curse stream's RandomInt(2).
     state, words = stage_seed, []
     for _ in range(4):
         state = rng.next_state(state, rng.PUBLIC_SHIFTS[35])
         words.append(state)
-    if additional != 8 + words[2] % 2:
-        raise ValueError('Actual normal Basement room count violates recovered caller prefix')
+    if additional - (8 + words[2] % 2) not in ((2, 3) if hard else (0,)):
+        raise ValueError('Actual Basement room count violates recovered caller prefix')
     return {'generatorSeed': words[3], 'additionalRooms': additional, 'shapeMask': 15}
 
 
@@ -183,7 +184,7 @@ def validate_controller(case):
         raise ValueError('Actual X11 events were not consumed at the paired source phase')
 
 
-def validate_case(case, catalogs, *, allow_non_labyrinth_curses=False):
+def validate_case(case, catalogs, *, allow_non_labyrinth_curses=False, hard=False):
     validate_controller(case)
     observation = case['observation']
     provenance = case['provenance']
@@ -220,7 +221,7 @@ def validate_case(case, catalogs, *, allow_non_labyrinth_curses=False):
     stage_seed = integer(actual.get('stageSeed'), 1, 0xffffffff, 'actual stage seed')
     if stage_seed != codec.initial_stage_seed(actual['seedValue']):
         raise ValueError('Actual stage seed violates independently recovered startup RNG27')
-    if case['growthInput'] != supplied_growth_input(stage_seed, actual.get('rooms')):
+    if case['growthInput'] != supplied_growth_input(stage_seed, actual.get('rooms'), hard):
         raise ValueError('Supplied generator contract disagrees with source caller prefix')
     grid = observation['grid']
     count = integer(observation['descriptorCount'], 1, 128, 'descriptor count')
@@ -307,7 +308,7 @@ def portable_cases(path):
     return cases
 
 
-def captured_case(path):
+def captured_case(path, hard=False):
     manifest = json.loads(path.read_text())
     if manifest.get('status') != 'pass':
         raise ValueError('Independent original capture failed')
@@ -323,5 +324,5 @@ def captured_case(path):
             'memoryWritten': entry['observation']['memoryWritten'],
             'originalCheckpoint': {'context': entry['context']}},
         'observation': entry['observation'], 'actualLog': actual, 'controller': manifest,
-        'growthInput': supplied_growth_input(actual['stageSeed'], actual['rooms']),
+        'growthInput': supplied_growth_input(actual['stageSeed'], actual['rooms'], hard),
         'originalLogText': log}
