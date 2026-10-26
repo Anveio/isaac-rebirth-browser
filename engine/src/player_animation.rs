@@ -53,6 +53,8 @@ pub enum Clip {
     Hit,
     Sad,
     Happy,
+    /// How to Jump's 5235EB 50A5C0("Jump").
+    Jump,
 }
 
 impl Clip {
@@ -65,6 +67,7 @@ impl Clip {
             Self::Hit => "Hit",
             Self::Sad => "Sad",
             Self::Happy => "Happy",
+            Self::Jump => "Jump",
         }
     }
     fn frames(self) -> u32 {
@@ -76,6 +79,7 @@ impl Clip {
             Self::Hit => crate::content::PLAYER_HIT_FRAMES,
             Self::Sad => crate::content::PLAYER_SAD_FRAMES,
             Self::Happy => crate::content::PLAYER_HAPPY_FRAMES,
+            Self::Jump => crate::content::PLAYER_JUMP_FRAMES,
         }
     }
 }

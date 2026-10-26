@@ -402,7 +402,8 @@ fn tear_hit_receiver(
 }
 
 pub fn player_contacts(state: &mut State) -> Result<(), String> {
-    if state.room.npcs.is_empty() {
+    //Entity+344 class0 (How to Jump in the air) has no pair collision.
+    if state.room.npcs.is_empty() || state.player.entity_collision_off {
         return Ok(());
     }
     let grid = Grid::new(

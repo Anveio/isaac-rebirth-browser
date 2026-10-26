@@ -388,7 +388,9 @@ pub(crate) fn reach_late_temporary_evaluation(
         //Actual5E3F07/0B assigns both words before the TTL loop.
         *actual = TemporarySourceCache::FRESH;
     }
-    advance_known_temporary_expiry(state);
+    if advance_known_temporary_expiry(state) {
+        crate::active_items::land_jump(state)?;
+    }
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
@@ -443,12 +445,14 @@ pub(crate) fn reach_late_temporary_evaluation(
     Ok(())
 }
 
-fn advance_known_temporary_expiry(state: &mut State) {
+/// Returns whether TEMP282 expired, whose ported 517580 removal
+/// (active_items::land_jump) the caller runs next.
+fn advance_known_temporary_expiry(state: &mut State) -> bool {
     let Some(owner) = state.player_items.as_mut() else {
-        return;
+        return false;
     };
     let Some(history) = &mut owner.query_history else {
-        return;
+        return false;
     };
     //Unrepresented source records may expire AFTER the direct clear above.
     //Their actual config-kind masks bound only the next deferred evaluation;
@@ -472,9 +476,10 @@ fn advance_known_temporary_expiry(state: &mut State) {
         history.note_temporary_writer(&[], mask, 0x5e3ef0);
     }
     if !history.temporary_records {
-        return;
+        return false;
     }
     let mut expired = Vec::new();
+    let mut landed = false;
     for record in &mut owner.temporary_collectibles {
         if !history.temporary_collectible_known(record.item_id) || record.cooldown <= 0 {
             continue;
@@ -495,6 +500,11 @@ fn advance_known_temporary_expiry(state: &mut State) {
         };
         //Actual5E3F4D and5E3F66 after known TTL1→0 erasure.
         history.record_temporary_cache_write(config.cache_flags);
+        if id == 282 && config.kind == 3 {
+            //5177A3..7BA is ported (active_items::land_jump).
+            landed = true;
+            continue;
+        }
         if !matches!(id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
             //The actual CF8 erasure is independent of unimplemented
             //costume/health/audio effects.517580 has no direct E1C/CF8/C08
@@ -507,12 +517,9 @@ fn advance_known_temporary_expiry(state: &mut State) {
                     config.kind, id
                 ),
             );
-            if id == 282 {
-                //5177A3..7BA is the sole direct immediateEvaluate here.
-                history.invalidate_cached_footprint(0x80);
-            }
         }
     }
+    landed
 }
 
 ///The ordinary damage caller has already passed its real zero/dead/BF8

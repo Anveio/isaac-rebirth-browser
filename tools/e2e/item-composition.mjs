@@ -14,6 +14,9 @@ import { captureComposition } from '../foundation/composition-capture.mjs';
 const pocketMode = flag('--pockets');
 const pillUseMode = hasFlag('--pill-use');
 const trinketStartMode = hasFlag('--trinket-start');
+const activeItemsMode = hasFlag('--active-items');
+assert.ok(!activeItemsMode || (pocketMode === 'collection' && !pillUseMode),
+  'Active items use the public collection route with their own reader');
 assert.ok(!trinketStartMode || (!pocketMode && !pillUseMode),
   'Trinket startup has its own reader and cannot share pocket/Pill modes');
 assert.ok(!pillUseMode || pocketMode === 'collection',
@@ -33,13 +36,14 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = trinketStartMode ? 'LOCAL_RECORDED_TRINKET_START_BANK' : pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
   console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
     : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
   process.exit(0);
 }
-const output = outputDirectory(trinketStartMode ? 'trinket-start' : pocketMode ? 'pockets-' + pocketMode : 'item-composition');
+const output = outputDirectory(trinketStartMode ? 'trinket-start' : activeItemsMode ? 'active-items'
+  : pocketMode ? 'pockets-' + pocketMode : 'item-composition');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
 const sourceFiles = [
@@ -64,6 +68,10 @@ if (pocketMode) sourceFiles.push('tools/original/pocket-scenarios.py',
 const filePins = async paths => Object.fromEntries(await Promise.all(paths.map(async path => [path, hash(await readFile(path))])));
 if (pillUseMode) sourceFiles.push('tools/foundation/pill-range-use-state-pair.py',
   'tools/original/pill-range-use-scenarios.py',
+  'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
+  'references/isaac/rebirth/resources/challenges.xml');
+if (activeItemsMode) sourceFiles.push('tools/foundation/active-items-state-pair.py',
+  'tools/original/active-items-scenarios.py',
   'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
   'references/isaac/rebirth/resources/challenges.xml');
 if (trinketStartMode) sourceFiles.push(
@@ -105,10 +113,11 @@ try {
   } else {
     const generated = join(output, 'declared-inputs');
     const result = await child('python3', [join(ROOT, trinketStartMode ? 'tools/original/trinket-start-scenarios.py'
-      : pillUseMode ? 'tools/original/pill-range-use-scenarios.py' : pocketMode
+      : pillUseMode ? 'tools/original/pill-range-use-scenarios.py'
+      : activeItemsMode ? 'tools/original/active-items-scenarios.py' : pocketMode
       ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
       '--output', generated, '--count', flag('--count', trinketStartMode ? '1' : '2'),
-      ...(pocketMode && !pillUseMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
+      ...(pocketMode && !pillUseMode && !activeItemsMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
     report.inputMode = 'fixed cases plus every freshly journaled unfiltered OS projection';
@@ -154,6 +163,8 @@ try {
     assert.equal(Boolean(declaration.pillUse), pillUseMode,
       'Real consumption requires its separate use reader');
     if (pillUseMode) assert.equal(declaration.pillUse.schema, 'source-public-pill-range-use-v1');
+    assert.equal(Boolean(declaration.activeItems), activeItemsMode, 'Active use requires its separate reader');
+    if (activeItemsMode) assert.equal(declaration.activeItems.schema, 'source-public-active-items-v1');
     return { ...declaration, fixture };
   });
   if (trinketStartMode) {
@@ -309,9 +320,9 @@ try {
       } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); }
       for (const [key, tool, args] of [
         ['captureReadback', 'composition-readback.py', ['--directory', directory, ...(wasmNode?['--wasm-node','--wasm-artifact',resolve(wasmNode),'--wasm-sha',wasmSha]:[]), ...(reusedOriginal?['--original-directory',originalDirectory]:[])]],
-        ['comparison', pillUseMode ? 'pill-range-use-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
+        ['comparison', pillUseMode ? 'pill-range-use-state-pair.py' : activeItemsMode ? 'active-items-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
           '--browser', join(portDirectory,wasmNode?'actual-replay-result.json':'browser-evidence.json.gz'),
-          ...(pillUseMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
+          ...(pillUseMode || activeItemsMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
       ]) {
         try {
           result[key] = await child('python3', [join(ROOT, 'tools/foundation', tool),

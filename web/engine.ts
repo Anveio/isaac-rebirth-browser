@@ -202,7 +202,7 @@ export interface ItemPool {
 export type MusicBackendCommand = { type: 'musicBackend'; channel: number; generation: number; event: 'ended' | 'loop' };
 export interface Bomb {
   id: number; variant: number; spawnSeed: number | null; birthGameUpdate: number; friction: number;
-  animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number;
+  animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number; playerContactCountdown?: number;
   shot?: {actorRng: ItemRng; spawnerType: number; spawnerVariant: number; subtype: number; parent: ActorRef | null;
     attackFlags: [number,number]; sourceColor: AttackColor; currentColor: AttackColor; explosionDamage: number;
     gridCollisionClass: number; gridCollided: boolean; shotMarker: boolean; playerContactCountdown: number; ordinal7ec: number | null};
@@ -446,7 +446,7 @@ export interface State {
   keyboard: {bindings: number[][]};
   inputConfigs: InputConfigs;
   controlsMenu: {deviceSelection: number; deviceHeld: number; selectedDevice: number | null; selection: number; column: number; waiting: boolean; nextSaveSequence: number; saveRequests: {sequence: number; configs: InputConfigs}[]; unavailableActions: number[]};
-  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | null; frame: number; playing: boolean; guard: boolean };
+  playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | "Jump" | null; frame: number; playing: boolean; guard: boolean };
 
   gameShake?: {durationCe9fc: number | null; offsetCea00: {x: number; y: number} | null; frontier: string | null} | null;
   camera: {scroll: {x: number; y: number}; lastPlayerPosition: {x: number; y: number}; shakeHistoryKnown?: boolean | null;

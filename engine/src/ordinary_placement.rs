@@ -256,7 +256,7 @@ pub(crate) fn player_update_frontier(
     if owner
         .temporary_collectibles
         .iter()
-        .any(|record| record.cooldown == 1)
+        .any(|record| record.cooldown == 1 && record.item_id != 282)
     {
         return unknown("reached TEMP expiry callback517580");
     }

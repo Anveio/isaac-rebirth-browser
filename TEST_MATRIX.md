@@ -208,6 +208,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `pockets` | Card/Pill procedural Init, held collection and spills, copied presentation and sound requests; fixed and recorded/fresh OS public inputs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets all --count 1` |
 | `pill-range-use` | Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets collection --pill-use --count 1` |
 | `pickup-interactions` | Sandbox Challenge start room: bomb pushing, tear knockback, Jera/cards, Blank Card and The Battery, graded per interaction | [pickup-interactions.mjs](tools/e2e/pickup-interactions.mjs) `--count 1` |
+| `active-items` | Active pedestals in the start room: slot, charge, Space use leaves (How to Jump, books, Blank Card), swap; fixed and OS epochs | [item-composition.mjs](tools/e2e/item-composition.mjs) `--pockets collection --active-items --count 1` |
 | `item-acquisition` | First collectible acquisition | [items.mjs](tools/e2e/items.mjs) `--acquisition --count 2` |
 | `stat-cache` | Player stat cache after acquiring Roid Rage and Speed Ball: stats, motion and tear velocity | [items.mjs](tools/e2e/items.mjs) `--stat-cache --count 2` |
 | `damage-fire-delay` | Sad Onion and Cricket Head damage/fire delay, born tear properties and actual contacts | [items.mjs](tools/e2e/items.mjs) `--damage-fire-delay --count 2` |

@@ -55,6 +55,8 @@ function nativeObservation(observation) {
 }
 
 function portObservation() {
+  // Entity positions as presented this phase (the original observer reads the
+  // live entity Position, which FastUpdate moves between full updates).
   const state = window.game.snapshot();
   const items = state.playerItems;
   const scale = 0.65;
@@ -67,7 +69,7 @@ function portObservation() {
       activeId: items?.activeId ?? 0, activeCharge: items?.activeCharge ?? 0, reserveCharge: items?.reserveCharge ?? 0,
       pockets: items?.heldPockets ? items.heldPockets.slots.map(slot => slot.id) : [0, 0],
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
-    bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.position.x, bomb.motion.position.y] })),
+    bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected)
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
   };
