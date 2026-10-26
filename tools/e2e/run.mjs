@@ -62,6 +62,14 @@ if (unknown.length) {
   console.error(`Unknown suite ${unknown.join(', ')}; known: ${SUITES.map(suite => suite.id).join(', ')}`);
   process.exit(2);
 }
+// Caller flags replace the registry's flag of the same name rather than
+// relying on each driver's parser to prefer the last occurrence. A
+// pass-through flag always takes the next token, which is itself usually a
+// flag for the helper or comparator (`--helper-arg --count`), so that token
+// is neither a name nor left behind when its flag is replaced.
+const PASS_THROUGH = new Set(['--helper-arg', '--comparator-arg']);
+const takesValue = (args, index) => args[index + 1] !== undefined
+  && (PASS_THROUGH.has(args[index]) || !args[index + 1].startsWith('--'));
 // --rerun-failed reruns each failed suite of an earlier run with the replay
 // flags that run recorded, i.e. the same cases; a suite that recorded none
 // (it died before writing its bank) runs fresh.
@@ -114,14 +122,6 @@ if (suiteArgs.includes('--scenarios') && selected.length === 1 && selected[0].en
   }
 }
 
-// Caller flags replace the registry's flag of the same name rather than
-// relying on each driver's parser to prefer the last occurrence. A
-// pass-through flag always takes the next token, which is itself usually a
-// flag for the helper or comparator (`--helper-arg --count`), so that token
-// is neither a name nor left behind when its flag is replaced.
-const PASS_THROUGH = new Set(['--helper-arg', '--comparator-arg']);
-const takesValue = (args, index) => args[index + 1] !== undefined
-  && (PASS_THROUGH.has(args[index]) || !args[index + 1].startsWith('--'));
 function mergeArgs(defaults, overrides, replaced = []) {
   const names = new Set(replaced);
   for (let index = 0; index < overrides.length; index++) {
