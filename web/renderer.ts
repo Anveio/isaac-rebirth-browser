@@ -915,7 +915,13 @@ export class Renderer {
       this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 20, 44 + pickup * 12, pickupFrames[pickup]!);
       this.assets.font(ctx, "pftempestasevencondensed", String(counts[pickup]).padStart(2, "0"), 36, 45 + pickup * 12);
     }
-    if (!state.achievementEligibility) this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle", 24, 84, 5);
+    // HUD5742BD: one icon sits at (24, 84); the difficulty icon and the
+    // seeded icon together sit at (20, 84) and (36, 84).
+    const difficultyIcon = state.difficultyPresentation.hudIcon;
+    const seededIcon = state.achievementEligibility ? null : 5;
+    const icons = [difficultyIcon, seededIcon].filter((frame): frame is number => frame !== null);
+    icons.forEach((frame, index) => this.assets.draw(ctx, "gfx/ui/hudpickups.anm2", "Idle",
+      icons.length === 1 ? 24 : 20 + index * 16, 84, frame));
     this.drawMaps(ctx, state);
   }
 

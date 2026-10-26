@@ -442,9 +442,6 @@ impl Driver {
                 }
             }
             Screen::Character => match e.below(40) {
-                0..=13 if state.difficulty != "normal" && e.chance(3, 4) => {
-                    self.press(e.pick(&["ArrowUp", "ArrowDown"]), 0)
-                }
                 0..=13 => self.press("Enter", 0),
                 14..=19 => self.press(e.pick(&["ArrowLeft", "ArrowRight", "KeyA", "KeyD"]), 0),
                 20..=23 => self.press(e.pick(&["ArrowUp", "ArrowDown", "KeyW", "KeyS"]), 0),

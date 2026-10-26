@@ -21,13 +21,15 @@ pub struct ResourceInputs {
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RunParameters {
-    pub source_r8: u32,
+    /// r8, the Game difficulty, kept on the wire as sourceR8.
+    #[serde(rename = "sourceR8", with = "crate::difficulty::source")]
+    pub difficulty: crate::difficulty::Difficulty,
     pub source_r9: bool,
 }
 
 impl RunParameters {
     pub(crate) const CHALLENGE_MENU: Self = Self {
-        source_r8: 0,
+        difficulty: crate::difficulty::Difficulty::Normal,
         source_r9: true,
     };
 }
@@ -59,7 +61,7 @@ pub(crate) fn sample_initial_curse(
     if profile.achievements.len() < 179 || profile.counters.len() != 95 {
         return Err("curse sampler requires actual Persistent achievement/counter owners".into());
     }
-    let mode_one = parameters.source_r8 == 1;
+    let mode_one = parameters.difficulty == crate::difficulty::Difficulty::Hard;
     let mut threshold = if mode_one { 10 } else { 80 };
     if profile.achievements[4] {
         threshold = if mode_one { 5 } else { 30 };
@@ -96,7 +98,7 @@ pub(crate) fn sample_initial_curse(
         }
     }
     let filtered_mask = definition.apply_curse_filter(selected_mask);
-    //58c089 consumes this even source_r8=0/filter127;58c097 then restores
+    //58c089 consumes this even at normal difficulty/filter127;58c097 then restores
     //PRIMARY pointer before58c0ba Next. No additional localNext is invented.
     let room_adjustment_result = local.bounded(2);
     draws += 1;

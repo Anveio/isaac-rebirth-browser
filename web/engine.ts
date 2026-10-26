@@ -1,4 +1,6 @@
 export type Screen = "title" | "profile" | "main" | "options" | "controls" | "keyboard" | "character" | "challenge" | "seed" | "playing";
+/** Game+10ECD8: the run's difficulty (engine/src/difficulty.rs). */
+export type Difficulty = "normal" | "hard";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
   entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
@@ -375,7 +377,9 @@ export interface State {
   unlockPopups: boolean | null; unlockNotificationsLoading: boolean;
   unlockNotifications: {state: number; currentClip: string | null; frame: number; gfx: string | null; definitionLoaded: boolean} | null;
   music: MusicState;
-  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean; mapOpacity: string; gamma: string}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: string;
+  profile: number; challengeSelection: number | null; challengeUnlocked: boolean[]; challengeId: number; challengeRunParameters: {sourceR8: number; sourceR9: boolean} | null; mainSelection: number; optionsMenu: {selection: number; leftHeld: number; rightHeld: number; verticalHeld: number; nextUnavailableSequence: number; unavailableRequests: {sequence: number; row: number}[]; nextSaveSequence: number; saveRequests: {sequence: number; sfxVolume: string; musicVolume: string; fullscreen: boolean; mapOpacity: string; gamma: string}[]}; fullscreen: {requested: boolean; nextSequence: number; requests: {sequence: number; requested: boolean; origin: 'startup' | 'options'}[]}; characterSelection: number; character: string; difficulty: Difficulty; menuDifficulty: Difficulty;
+  /** engine/src/difficulty.rs rows the renderer draws, from the run's difficulty. */
+  difficultyPresentation: {hudIcon: number | null; pauseBlood: boolean};
   seedText: string; seedValid: boolean; runSeed: string; initialSeed: number; runSeedValue: number; bootEpochSeed: number; bootLifecycle: BootLifecycle;
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
