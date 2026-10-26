@@ -83,7 +83,8 @@ pub struct RunRecord {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RunContext {
     pub character: String,
-    pub difficulty: String,
+    /// Game+10ECD8, saved at 54f294 and restored at 54ed4d.
+    pub difficulty: crate::difficulty::Difficulty,
     pub challenge_id: u32,
     pub player_type: Option<u32>,
     pub source_effect_mode: Option<u32>,
@@ -136,7 +137,7 @@ impl RunContext {
     ) -> Self {
         Self {
             character: state.character.clone(),
-            difficulty: state.difficulty.clone(),
+            difficulty: state.difficulty,
             challenge_id: state.challenge_id,
             player_type: state.weapon_admission.source_player_type,
             source_effect_mode: state
@@ -382,7 +383,6 @@ impl RunRecord {
         let context = &self.context;
         let descriptor = &run.floor.descriptors[run.current_room];
         if context.character != "Isaac"
-            || context.difficulty != "normal"
             || context.challenge_id != 0
             || context.player_type != Some(0)
             || context.source_effect_mode != Some(0)

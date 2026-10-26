@@ -43,6 +43,8 @@ SCENARIOS = [
      'systems': ['menu-navigation', 'room-connectivity', 'locomotion', 'input-determinism']},
     {'id': 'paired-wall-hugger-contact', 'description': 'Recorded #154 run: start-room Wall Huggers crawl into the player before the bomb blast',
      'systems': ['npc-ai', 'entity-collision', 'health-inventory', 'bombs', 'locomotion', 'input-determinism']},
+    {'id': 'paired-hard-run', 'description': 'Character-menu Down selects hard difficulty before Enter; hard run HUD, movement, fire and the hard pause screen',
+     'systems': ['menu-navigation', 'run-introduction', 'locomotion', 'projectile-physics', 'input-determinism']},
     {'id': 'paired-random-run', 'description': 'Fresh OS-random run seed and recorded randomized movement, firing, coasting, pause and bomb actions',
      'systems': ['locomotion', 'projectile-physics', 'bombs', 'menu-navigation', 'input-determinism'],
      'randomized': True},
@@ -134,6 +136,13 @@ def build(identifier, seed):
                 advance(tail, 27, 'random-resumed')
                 key(tail, 'e', True); advance(tail, 1); key(tail, 'e', False)
                 advance(tail, 133, 'random-after-bomb')
+            elif identifier == 'paired-hard-run':
+                key(tail, 'd', True); key(tail, 'Right', True); advance(tail, 30, 'hard-moving-fire')
+                key(tail, 'd', False); key(tail, 'Right', False); advance(tail, 30, 'hard-coasting')
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
+                advance(tail, 40, 'hard-paused')
+                key(tail, 'Escape', True); advance(tail, 1); key(tail, 'Escape', False)
+                advance(tail, 30, 'hard-resumed')
             elif identifier == 'paired-random-run':
                 draw = random.Random(f'paired-random-run:{seed}')
                 for index in range(3):
@@ -151,6 +160,13 @@ def build(identifier, seed):
                 advance(tail, 133, 'random-after-bomb')
             else:
                 raise ValueError('Unknown paired scenario: ' + identifier)
+        if identifier == 'paired-hard-run':
+            # The seeded Character page: Down toggles the difficulty widget
+            # to hard before the Return that starts the run.
+            seeded = next(i for i, a in enumerate(tape) if a.get('label') == 'character-seeded')
+            tape[seeded + 1:seeded + 1] = [{'type': 'key', 'key': 'Down', 'down': True}, {'type': 'step', 'frames': 12},
+                                           {'type': 'key', 'key': 'Down', 'down': False}, {'type': 'step', 'frames': 30},
+                                           {'type': 'capture', 'label': 'character-hard'}]
         start = next(i for i, a in enumerate(tape) if a.get('label') == 'gameplay-start')
         tape = tape[:start + 1] + tail
     # X11 input is consumed on the next released phase. Never compare a DOM
