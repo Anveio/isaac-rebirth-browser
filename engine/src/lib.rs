@@ -502,6 +502,9 @@ impl RunIntroduction {
         }
     }
 }
+fn no_charge_bar_flash() -> i32 {
+    -1
+}
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -893,6 +896,10 @@ pub struct State {
     pub run_introduction: RunIntroduction,
     #[serde(default)]
     pub boss_bar: BossBar,
+    ///HUD+61888 charge-bar flash countdown: FlashChargeBar573290 stores 8,
+    ///HUD::Update572D35 counts it down to -1; BarFull draws when odd or -1.
+    #[serde(default = "no_charge_bar_flash")]
+    pub charge_bar_flash: i32,
     pub pause_menu: PauseMenu,
 }
 
@@ -1371,6 +1378,7 @@ impl Game {
                 bomb_action_was_down: false,
                 run_introduction: RunIntroduction::stage(false),
                 boss_bar: BossBar::default(),
+                charge_bar_flash: -1,
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
@@ -2215,6 +2223,7 @@ impl Game {
         //54FC2B starts the initial stage streak only after the opaque fade.
         self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.player = Player::starting();
@@ -2504,6 +2513,7 @@ impl Game {
         self.state.player_animation = player_animation::PlayerAnimation::default();
         self.state.run_introduction = RunIntroduction::stage(false);
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.pause_menu = PauseMenu::hidden();
         self.state.run_quit = run_quit::RunQuit::fresh();
         self.state.stage_transition = stage_transition::StageTransition::default();
@@ -3942,6 +3952,7 @@ impl Game {
         self.state.stage_transition = stage_transition::StageTransition::default();
         self.state.room_transition = None;
         self.state.boss_bar = BossBar::default();
+        self.state.charge_bar_flash = -1;
         self.state.run_introduction.active = false;
         self.state.game_update_count = 0;
         //Stop54F530 resets the real hold even when the destination is Main.
@@ -5477,6 +5488,9 @@ impl Game {
     /// 572d48 counts the flash down; SetFill 5732a0 restarts it at 8 whenever
     /// the fill drops. No boss hides the bar and forgets the maximum.
     fn update_boss_bar(&mut self) {
+        if self.state.charge_bar_flash >= 0 {
+            self.state.charge_bar_flash -= 1;
+        }
         let bar = &mut self.state.boss_bar;
         if bar.flash >= 0 {
             bar.flash -= 1;

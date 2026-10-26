@@ -99,3 +99,17 @@ the Artifact tool's `files` map to the same artifact URL, labelled with the
 short sha, and attach the side-by-side videos for the build to the playtest
 thread. Keep the previous `manifest.json` to plan the next publish. The
 publish ledger is the private "Isaac playtest log" artifact.
+
+## Sandbox (`sandbox.mjs`)
+
+`npm run playtest:sandbox` serves the production build with a generated
+Challenge 1 "Sandbox": starting items, a starting card or rune and extra Start
+Room spawns, optionally in a 2x2 Start Room (default preset `sandbox-2x2`:
+Blank Card, The Battery, Jera, corner pickups and a Lil Battery). Open the
+printed URL and choose Challenges, Sandbox. `--preset NAME` picks another case
+from `tools/original/pickup-interaction-scenarios.py`; `--out FILE` only writes
+the `{challengesXml, specialRooms}` JSON that the page's `/?sandbox=URL` hook
+loads. The JSON derives from original resources, so keep it local or in
+private artifacts. `side-by-side.mjs --case RUN/pickup-interactions/scenarios.json#CASE`
+records any of these cases next to the original. See
+[pickup-interactions.md](../../docs/pickup-interactions.md).

@@ -329,7 +329,7 @@ impl Definition {
             || !self.achievements.is_empty()
             || !starting_trinkets_owned
             || self.starting_pill != -1
-            || self.starting_card != 0
+            || !(0..=40).contains(&self.starting_card)
             || self.soul_hp != 0
             || self.black_hp != 0
             || !self.can_shoot
@@ -361,8 +361,12 @@ impl Definition {
         );
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            if !(matches!(id, 1 | 4 | 6 | 68 | 114 | 118 | 329 | 304 | 330)
-                || (epic_startup && matches!(id, 2 | 168)))
+            //63 The Battery,115 Ouija Board and286 Blank Card are the
+            //pickup-interaction sandbox's grants (tools/e2e/pickup-interactions.mjs).
+            if !(matches!(
+                id,
+                1 | 4 | 6 | 63 | 68 | 114 | 115 | 118 | 286 | 329 | 304 | 330
+            ) || (epic_startup && matches!(id, 2 | 168)))
             {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
             }
@@ -407,6 +411,19 @@ pub(crate) fn initialize_player(state: &mut State, definition: &Definition) -> R
             .as_mut()
             .ok_or("Challenge ItemPool owner absent")?
             .remove_trinket(id)?;
+    }
+    //startingcard (pocketitems card or rune ID; 0 = none) is held in the
+    //first pocket record, as the original's sandbox capture shows at entry.
+    if definition.starting_card > 0 {
+        let held = state
+            .player_items
+            .as_mut()
+            .and_then(|owner| owner.held_pockets.as_mut())
+            .ok_or("Challenge starting card needs the held pocket owner")?;
+        held.slots[0] = crate::pockets::PocketSlot {
+            id: definition.starting_card as u32,
+            card: true,
+        };
     }
     //52e340 invokes511f10 unconditionally, even when the requested mask is0.
     crate::player_stats::evaluate_cache(state)?;

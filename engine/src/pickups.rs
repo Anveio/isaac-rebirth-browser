@@ -838,6 +838,45 @@ impl Pickup {
         Ok(())
     }
 
+    /// Free active swap 50621D: Morph500A10(5,100,old,keepPrice0) re-Inits
+    /// the touched pedestal in place as the dropped active. Morph clears AB8;
+    /// the caller then stores the dropped active's charge. Position, velocity,
+    /// ABC/ABD and the Alternates overlay frame survive; age restarts at Init.
+    pub(crate) fn morph_swapped_active(
+        &mut self,
+        subtype: u32,
+        charge: i32,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
+    ) -> Result<(), String> {
+        if self.spawn_seed == 0 || !self.position.is_finite() || !self.velocity.is_finite() {
+            return Err("active swap Morph requires actual seed and finite saved vectors".into());
+        }
+        //500A2A..56: the local RNG7 advances the old seed once (no shared MT).
+        let seed = crate::items::Rng::new(self.spawn_seed, [1, 21, 20]).raw();
+        let mut next = Self::spawn(self.id, 100, subtype, self.position, false)?;
+        next.source_spawner = self.source_spawner;
+        next.spawn_seed = seed;
+        next.regular_rng = Some(crate::items::Rng::new(seed, [4, 3, 17]));
+        next.anchor_position = self.anchor_position;
+        next.presented_position = self.presented_position;
+        next.velocity = self.velocity;
+        next.save_byte_abd = self.save_byte_abd;
+        next.morph_links = self.morph_links.clone();
+        next.overlay_frame = self.overlay_frame;
+        next.birth_game_update = game_update;
+        next.charge = charge;
+        //5060F6 marks the dropped active touched before replaying Idle.
+        next.touched = true;
+        next.project();
+        scheduler.reinitialize_in_place(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
+        })?;
+        *self = next;
+        Ok(())
+    }
+
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
     pub fn advance(&mut self, phase: Phase, game_update: u32) {
         if !self.removed

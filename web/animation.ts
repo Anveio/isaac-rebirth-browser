@@ -311,6 +311,17 @@ export class Assets {
       ctx.restore();
     }
   }
+  /** Texture::Render of a whole image's source rect with its top-left at (x, y). */
+  drawImage(ctx: CanvasRenderingContext2D, path: string, x: number, y: number, color: SpriteColor = { tint: [1, 1, 1, 1], offsets: [0, 0, 0] }): void {
+    const image = this.image(path), [r, g, b, a] = color.tint as [number, number, number, number];
+    if (a <= 0) return;
+    const rectangle = [0, 0, image.width, image.height, x, y, image.width, image.height] as const;
+    const backend = ctx as unknown as { drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void };
+    ctx.save(); ctx.globalAlpha *= a;
+    if (backend.drawTintedImage) backend.drawTintedImage(image, [r, g, b, 1], [...color.offsets], ...rectangle);
+    else ctx.drawImage(this.colorImage(path, [r * 255, g * 255, b * 255], color.offsets.map(value => value * 255)), ...rectangle);
+    ctx.restore();
+  }
   font(ctx: CanvasRenderingContext2D, name: string, text: string, x: number, y: number, options: { scale?: number; color?: string; align?: "left" | "center" | "right"; pixelSnap?: boolean; measure?: "advance" | "glyph-bounds" } = {}): void {
     const font = (fontData as unknown as Record<string, Font>)[name]; if (!font) throw new Error(`Missing authored font: ${name}`);
     const scale = options.scale ?? 1; const codes = [...text].map(character => character.codePointAt(0)!);

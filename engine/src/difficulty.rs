@@ -28,7 +28,9 @@ impl Difficulty {
         match value {
             0 => Ok(Self::Normal),
             1 => Ok(Self::Hard),
-            _ => Err(format!("Game difficulty {value} is not a base Rebirth difficulty")),
+            _ => Err(format!(
+                "Game difficulty {value} is not a base Rebirth difficulty"
+            )),
         }
     }
 

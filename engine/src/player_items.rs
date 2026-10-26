@@ -697,9 +697,14 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     }
     let id = pickup.subtype;
     let config = items::definition(id).ok_or("natural collectible config absent")?;
-    if config.kind == 3 && owner.active_id != 0 {
-        // Active swapping also owns Morph/RemoveCollectible callbacks; this
-        // first-acquisition leaf leaves that unsupported contact untouched.
+    //50621D flushes the queue before reading D74, so a still-queued active
+    //is the one that a second active contact drops.
+    let may_swap = config.kind == 3 && (owner.active_id != 0 || !owner.queue_is_empty());
+    let words_owned = crate::active_charges::owns(owner, crate::active_charges::Word::ActiveId)
+        && crate::active_charges::owns(owner, crate::active_charges::Word::Charge);
+    if may_swap && (pickup.shop_price.is_some() || !words_owned) {
+        //A paid swap reaches Morph's SetPrice0 before the paid caller's
+        //debit; that combined shop route is not ported yet.
         return Ok(CollectibleContact::Untouched);
     }
     let (charge, touched) = (pickup.charge, pickup.touched);
@@ -724,6 +729,29 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     pickup.animation = "PlayerPickupSparkle".into();
     pickup.animation_frame = 0.0;
     pickup.animation_playing = true;
+    if may_swap {
+        //50621D: FlushQueueItem, then a held D74 is removed and the touched
+        //pedestal is Morphed into it, keeping the dropped D78 in AB8.
+        flush_queued(state)?;
+        let owner = state.player_items.as_ref().expect("checked Player owner");
+        let old = owner.active_id;
+        if old != 0 {
+            let old_charge = owner.active_charge;
+            remove_collectible(state, old)?;
+            let game_update = state.game_update_count;
+            state.room.pickups[index].morph_swapped_active(
+                old,
+                old_charge,
+                game_update,
+                &mut state.actor_scheduler,
+            )?;
+            //52F310 queues the touched config with the pedestal's prior
+            //AB8/ABC operands; 5060E6 then replays the dropped item's Idle.
+            enqueue(state, id, charge, touched)?;
+            collect_room_sound(state);
+            return Ok(CollectibleContact::Collected);
+        }
+    }
     enqueue(state, id, charge, touched)?;
     let pickup = &mut state.room.pickups[index];
     pickup.subtype = 0;
@@ -746,6 +774,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     }
     pickup.collected = true;
     pickup.can_collect = false;
+    collect_room_sound(state);
+    Ok(CollectibleContact::Collected)
+}
+
+fn collect_room_sound(state: &mut State) {
     let room_type = state
         .room
         .descriptor
@@ -764,7 +797,55 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
             },
         );
     }
-    Ok(CollectibleContact::Collected)
+}
+
+/// Actual RemoveCollectible52AE90 for the normal single Player: one owned
+/// count, the active words when it is the held active (its temporary record
+/// loses one count unless it is Bible33), the costume callback, and the
+/// config cache bits before EvaluateItems.
+pub(crate) fn remove_collectible(state: &mut State, id: u32) -> Result<(), String> {
+    let config = items::definition(id).ok_or("removed collectible config absent")?;
+    let owner = state
+        .player_items
+        .as_mut()
+        .ok_or("RemoveCollectible Player owner absent")?;
+    let count = &mut owner.owned_counts[id as usize];
+    if *count > 0 {
+        *count -= 1;
+    }
+    if owner.active_id == id {
+        owner.active_id = 0;
+        //52AFC8: The Jar290 keeps its own unported branch; every other
+        //active clears D80/D84 and drops one temporary record count.
+        if id != 290 {
+            if id != 33 {
+                if let Some(position) = owner
+                    .temporary_collectibles
+                    .iter()
+                    .position(|effect| effect.item_id == id)
+                {
+                    //5E3FF0 decrements, erases at zero, then runs517580.
+                    let effect = &mut owner.temporary_collectibles[position];
+                    effect.count -= 1;
+                    if effect.count <= 0 {
+                        owner.temporary_collectibles.remove(position);
+                    }
+                    if let Some(history) = &mut owner.query_history {
+                        history.record_temporary_cache_write(config.cache_flags);
+                    }
+                }
+            }
+            owner.active_state_d80 = 0;
+            owner.active_state_d84 = 0;
+        }
+    }
+    if id != 33 && items::collectible_add_may_register_costume(id) {
+        //5102F0/517580 remove a possibly registered costume; the port keeps
+        //registration history only for the closed passive producers.
+        owner.costume_registrations = None;
+    }
+    owner.unevaluated_cache_flags |= config.cache_flags;
+    crate::player_stats::evaluate_cache(state)
 }
 
 /// Successful Collect returns1 and vetoes445710 mass response. Every refused

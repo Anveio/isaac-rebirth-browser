@@ -245,7 +245,10 @@ try {
         equal(state.systemClock.systemCounter % 2, source.systemCounter % 2, 'source phase', presentation);
         equal(state.profiles[state.profile - 1].achievements, source.achievements.map(Boolean), 'fresh eligibility bytes', presentation);
         equal(state.runSeeds, {startSeed: source.runSeeds.startSeed, streamState: source.runSeeds.rngWords[0],
-          initializedFields: source.runSeeds.initializedFields}, 'causal run seed owner', presentation);
+          initializedFields: source.runSeeds.initializedFields,
+          // Seeds+48 (GameA1D8) is serialized once a source setter owns it.
+          ...(state.runSeeds?.sourceEffectMode != null ? {sourceEffectMode: source.runSeeds.effectMode} : {})},
+          'causal run seed owner', presentation);
         const pools = state.itemPools;
         equal(pools.seed, source.poolSeed, 'causal pool initializer', presentation);
         equal(words(pools.rootRng), source.rootRngWords, 'complete root RNG', presentation);
