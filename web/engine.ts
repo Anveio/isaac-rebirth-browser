@@ -202,7 +202,7 @@ export interface ItemPool {
 export type MusicBackendCommand = { type: 'musicBackend'; channel: number; generation: number; event: 'ended' | 'loop' };
 export interface Bomb {
   id: number; variant: number; spawnSeed: number | null; birthGameUpdate: number; friction: number;
-  animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number;
+  animation: string; animationFrame: number; animationPlaying: boolean; x: number; y: number; playerContactCountdown?: number;
   shot?: {actorRng: ItemRng; spawnerType: number; spawnerVariant: number; subtype: number; parent: ActorRef | null;
     attackFlags: [number,number]; sourceColor: AttackColor; currentColor: AttackColor; explosionDamage: number;
     gridCollisionClass: number; gridCollided: boolean; shotMarker: boolean; playerContactCountdown: number; ordinal7ec: number | null};

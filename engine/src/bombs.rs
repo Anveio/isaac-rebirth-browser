@@ -304,6 +304,12 @@ pub struct Bomb {
     pub x: f64,
     pub y: f64,
     pub motion: BombMotion,
+    /// Bomb+7DC Player-contact countdown of planted and converted bombs (a
+    /// shot bomb keeps its own in BombShot). Player509612 placement stores 4,
+    /// a Pickup conversion's Init leaves 0; Bomb456C20 resets a positive
+    /// value to 4 on contact and Full decrements it (pickup-interactions).
+    #[serde(default)]
+    pub player_contact_countdown: u8,
     /// Ordinary50DE10 birth metadata. Legacy planted/conversion histories stay separate.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shot: Option<BombShot>,
@@ -433,6 +439,7 @@ pub(crate) fn admit_dr_fetus(
         x: f64::from(motion.presented_position.x) * WORLD_SCALE + 32.0,
         y: f64::from(motion.presented_position.y) * WORLD_SCALE - 46.0,
         motion,
+        player_contact_countdown: 0,
         shot: Some(shot),
     });
     state.next_bomb = next;
@@ -500,6 +507,7 @@ pub fn place(state: &mut State, phase: Phase) -> Result<(), String> {
         x: f64::from(motion.presented_position.x) * WORLD_SCALE + 32.0,
         y: f64::from(motion.presented_position.y) * WORLD_SCALE - 46.0,
         motion,
+        player_contact_countdown: 4,
         shot: None,
     });
     state.next_bomb = next;
@@ -537,6 +545,7 @@ pub fn admit_conversion(
         x: f64::from(position.x) * WORLD_SCALE + 32.0,
         y: f64::from(position.y) * WORLD_SCALE - 46.0,
         motion,
+        player_contact_countdown: 0,
         shot: None,
     });
     state.next_bomb = next;
@@ -769,8 +778,12 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
     }
     //4575DD..EA follows555300 and the dead/Explode stores. NeverFast.
     if phase == Phase::Update {
-        if let Some(shot) = &mut state.bombs[index].shot {
-            shot.player_contact_countdown = shot.player_contact_countdown.saturating_sub(1);
+        let bomb = &mut state.bombs[index];
+        match &mut bomb.shot {
+            Some(shot) => {
+                shot.player_contact_countdown = shot.player_contact_countdown.saturating_sub(1)
+            }
+            None => bomb.player_contact_countdown = bomb.player_contact_countdown.saturating_sub(1),
         }
     }
     Ok(())
@@ -888,13 +901,16 @@ pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
 }
 
 ///4453A0 calls Player509160 first (Bomb fails444810: returnsfalse), then
-///Bomb456C20 with flagfalse. No new no-shot history is admitted by this hook.
+///Bomb456C20 with flagfalse. Planted, converted and shot bombs share it: a
+///positive Bomb+7DC countdown resets to 4 and vetoes the mass response, so
+///Isaac does not push the bomb he stands on; at zero the bomb takes
+///PlayerV*.4 and the mass response pushes it (pickup-interactions suite).
 pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
     if state.player.dead
         || !state
             .bombs
             .iter()
-            .any(|bomb| bomb.shot.is_some() && bomb.motion.lifetime == BombLifetime::Alive)
+            .any(|bomb| bomb.motion.lifetime == BombLifetime::Alive)
     {
         return Ok(());
     }
@@ -909,9 +925,7 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
         .expect("authored Isaac geometry is valid")
     });
     for index in 0..state.bombs.len() {
-        if state.bombs[index].shot.is_none()
-            || state.bombs[index].motion.lifetime != BombLifetime::Alive
-        {
+        if state.bombs[index].motion.lifetime != BombLifetime::Alive {
             continue;
         }
         let mut player = crate::combat::ContactBody {
@@ -924,25 +938,25 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
         };
         let original = player.position;
         let player_before = player;
-        let mut bomb = contact_body(&state.bombs[index]);
-        let shot = state.bombs[index]
-            .shot
-            .as_mut()
-            .expect("checked shot owner");
-        shot.validate()?;
-        crate::combat::resolve_player_bomb_contact(
-            &mut player,
-            &mut bomb,
-            &mut shot.player_contact_countdown,
-            |shift| collider.blocks_player_shift(&grid, original, shift),
-        )?;
+        let mut body = contact_body(&state.bombs[index]);
+        let bomb = &mut state.bombs[index];
+        let countdown = match &mut bomb.shot {
+            Some(shot) => {
+                shot.validate()?;
+                &mut shot.player_contact_countdown
+            }
+            None => &mut bomb.player_contact_countdown,
+        };
+        crate::combat::resolve_player_bomb_contact(&mut player, &mut body, countdown, |shift| {
+            collider.blocks_player_shift(&grid, original, shift)
+        })?;
         if player != player_before {
             state.player.x = f64::from(player.position.x) * WORLD_SCALE + 32.0;
             state.player.y = f64::from(player.position.y) * WORLD_SCALE - 46.0;
             state.player.vx = f64::from(player.velocity.x) * WORLD_SCALE;
             state.player.vy = f64::from(player.velocity.y) * WORLD_SCALE;
         }
-        commit_contact(&mut state.bombs[index], bomb);
+        commit_contact(&mut state.bombs[index], body);
     }
     Ok(())
 }
