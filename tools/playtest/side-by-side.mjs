@@ -23,6 +23,7 @@ import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
+import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -136,7 +137,14 @@ async function browserFrames(browser, server, caseData, tape, directory) {
     await page.goto(server.url + '/?manual=1');
     await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
-    await page.evaluate(({ initialSeed, bootEpochSeed }) => { window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, audioPreferences: {sfxVolume: 0, musicVolume: 0}, fullscreenPreferences: {fullscreen: false} }); }, caseData);
+    // The same reset the paired harness gives the browser: the run clock starts
+    // where the original's first Title render does (#438), so closed-loop port
+    // keys (stage-exit fights) replay the run they were recorded on.
+    await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
+      window.game.pause();
+      window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 0, musicVolume: 0},
+        fullscreenPreferences: {fullscreen: false}, inputConfigs: {devices: []} });
+    }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
     for (const action of tape) {
       if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
       else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
