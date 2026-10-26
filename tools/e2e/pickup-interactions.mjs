@@ -1,0 +1,314 @@
+// Item and pickup interactions on a sandbox Challenge start room, one boot per
+// case with several interactions per boot where they do not disturb each other.
+// Both games receive the same generated Challenge XML / Start Room catalogue and
+// the same public keys; each interaction is graded on its own labels.
+//
+//   npm run test:e2e -- pickup-interactions                 # fixed + 1 OS boot epoch
+//   npm run test:e2e -- pickup-interactions --case 'sandbox-*'
+//   node tools/e2e/pickup-interactions.mjs --scenarios BANK [--case P] [--production DIST]
+//
+// Cases live in tools/original/pickup-interaction-scenarios.py; the interaction
+// inventory and port status is docs/pickup-interactions.md.
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { mkdir, open, readFile, writeFile, cp } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { chromium } from 'playwright';
+import { ROOT, flag, hasFlag, outputDirectory, selectCases } from './lib/cli.mjs';
+import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
+import { evaluateJson } from './lib/game.mjs';
+import { startProductionServer } from '../foundation/production-server.mjs';
+import { browserLaunchOptions } from '../foundation/browser.mjs';
+import { resetBootElapsed } from '../foundation/verify.mjs';
+import { DECLARED_NATIVE_INTRO } from '../foundation/composition-wasm-public.mjs';
+
+const output = outputDirectory('pickup-interactions');
+const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
+const jobs = Number(flag('--native-jobs', '2'));
+
+async function child(command, args, log) {
+  const file = await open(log, 'w');
+  try {
+    const process = spawn(command, args, { cwd: ROOT, env: { ...globalThis.process.env, LP_NUM_THREADS: '2', ISAAC_ORIGINAL_SHA: ORIGINAL_SHA },
+      stdio: ['ignore', file.fd, file.fd] });
+    return await new Promise((done, reject) => {
+      process.once('error', reject);
+      process.once('close', exitCode => done(exitCode));
+    });
+  } finally { await file.close(); }
+}
+
+// --- Observations normalized to one shape for both games ---------------------
+// World coordinates (native units). Effects (1000), the player and dead
+// entities are excluded; pickups that were collected are gone in both.
+function nativeObservation(observation) {
+  const player = observation.players[0];
+  const live = observation.entities.filter(entity => !entity.dead);
+  return {
+    room: { gridWidth: observation.room.gridWidth, gridHeight: observation.room.gridHeight },
+    player: { position: player.position, inventory: player.inventory, hearts: player.health.slice(0, 2),
+      activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
+      pockets: player.heldPockets.map(slot => slot.id), owned: player.ownedItems, animationGuard: player.animationGuard },
+    bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
+    pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
+  };
+}
+
+function portObservation() {
+  const state = window.game.snapshot();
+  const items = state.playerItems;
+  const scale = 0.65;
+  const owned = id => items?.ownedCounts?.[id] ?? 0;
+  return {
+    room: { gridWidth: state.room.grid?.width ?? null, gridHeight: state.room.grid?.height ?? null },
+    player: { position: [(state.player.x - 32) / scale, (state.player.y + 46) / scale],
+      inventory: { bombs: state.inventory.bombs, keys: state.inventory.keys, coins: state.inventory.coins },
+      hearts: [state.player.maxHp, state.player.hp],
+      activeId: items?.activeId ?? 0, activeCharge: items?.activeCharge ?? 0, reserveCharge: items?.reserveCharge ?? 0,
+      pockets: items?.heldPockets ? items.heldPockets.slots.map(slot => slot.id) : [0, 0],
+      owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
+    bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.position.x, bomb.motion.position.y] })),
+    pickups: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected)
+      .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
+  };
+}
+
+// --- Comparison --------------------------------------------------------------
+const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const TOLERANCE = { player: 2, bomb: 4, pickup: 2 };
+
+function matchPositions(native, port, tolerance) {
+  // Greedy nearest matching within the same identity.
+  const left = [...port];
+  const misses = [];
+  for (const item of native) {
+    let best = -1, bestDistance = Infinity;
+    left.forEach((candidate, index) => {
+      if (candidate.variant !== item.variant || candidate.subtype !== item.subtype) return;
+      const gap = distance(candidate.position, item.position);
+      if (gap < bestDistance) { best = index; bestDistance = gap; }
+    });
+    if (best < 0) misses.push({ native: item, port: null });
+    else {
+      if (bestDistance > tolerance) misses.push({ native: item, port: left[best], distance: bestDistance });
+      left.splice(best, 1);
+    }
+  }
+  return [...misses, ...left.map(item => ({ native: null, port: item }))];
+}
+
+function compareLabel(label, native, port) {
+  const rows = [];
+  const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
+  const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
+  same('room.grid', native.room, port.room);
+  row('player.position', native.player.position, port.player.position, distance(native.player.position, port.player.position) <= TOLERANCE.player);
+  same('player.inventory', native.player.inventory, port.player.inventory);
+  same('player.hearts', native.player.hearts, port.player.hearts);
+  same('player.active', [native.player.activeId, native.player.activeCharge, native.player.reserveCharge],
+    [port.player.activeId, port.player.activeCharge, port.player.reserveCharge]);
+  same('player.pockets', native.player.pockets, port.player.pockets);
+  same('player.owned', native.player.owned, port.player.owned);
+  const bombs = matchPositions(native.bombs.map(bomb => ({ ...bomb, subtype: 0 })), port.bombs.map(bomb => ({ ...bomb, subtype: 0 })), TOLERANCE.bomb);
+  row('bombs', native.bombs, port.bombs, bombs.length === 0);
+  const pickups = matchPositions(native.pickups, port.pickups, TOLERANCE.pickup);
+  row('pickups', native.pickups, port.pickups, pickups.length === 0);
+  return rows;
+}
+
+// Each interaction names the labels it is graded on and a predicate that the
+// ORIGINAL must satisfy there, so a case that no longer exercises its
+// interaction fails as coverage rather than passing vacuously.
+const bombX = observation => observation.bombs[0]?.position[0];
+const pickupCount = observation => observation.pickups.length;
+export const INTERACTIONS = {
+  'bomb-walk-push': { labels: ['place-bomb', 'pause-beside-bomb', 'walk-right-into-bomb', 'keep-pushing', 'after-push'],
+    covered: obs => bombX(obs['after-push']) - bombX(obs['pause-beside-bomb']) > 15 },
+  'bomb-tear-push': { labels: ['step-left-off-bomb', 'shoot-right-at-bomb', 'after-shots'],
+    covered: obs => bombX(obs['after-shots']) - bombX(obs['step-left-off-bomb']) > 20 },
+  'spectral-tear-bomb-push': { labels: ['step-left-off-bomb', 'shoot-right-at-bomb', 'after-shots'],
+    covered: obs => obs['settle'].player.owned[115] === 1 && bombX(obs['after-shots']) - bombX(obs['step-left-off-bomb']) > 20 },
+  'battery-overcharge': { labels: ['settle', 'walk-to-battery', 'after-battery'],
+    covered: obs => obs['after-battery'].player.reserveCharge > 0 },
+  'blank-card-jera': { labels: ['settle-before-active', 'use-active', 'after-active'],
+    covered: obs => pickupCount(obs['after-active']) === 2 * pickupCount(obs['settle-before-active']) && obs['after-active'].player.pockets[0] === 29 },
+  // Q Jera after the Blank Card copy duplicates the duplicates as well.
+  'jera-after-blank-card': { labels: ['use-pocket', 'after-pocket'],
+    covered: obs => obs['after-pocket'].player.pockets[0] === 0 && pickupCount(obs['after-pocket']) === 2 * pickupCount(obs['after-active']) },
+  'jera-pocket': { labels: ['settle', 'use-jera', 'after-jera'],
+    covered: obs => pickupCount(obs['after-jera']) > pickupCount(obs['settle']) && obs['after-jera'].player.pockets[0] === 0 },
+  'card-collect': { labels: ['walk-to-diamonds', 'after-diamonds', 'walk-to-clubs', 'after-clubs'],
+    covered: obs => obs['after-diamonds'].player.pockets[0] === 24 && obs['after-clubs'].player.pockets[0] === 23 },
+  'two-of-diamonds': { labels: ['use-diamonds', 'after-diamonds-use'],
+    covered: obs => obs['after-diamonds-use'].player.inventory.coins !== obs['after-diamonds'].player.inventory.coins },
+  'two-of-clubs': { labels: ['use-clubs', 'after-clubs-use'],
+    covered: obs => obs['after-clubs-use'].player.inventory.bombs === 2 * obs['after-clubs'].player.inventory.bombs },
+  'blank-card-card': { labels: ['settle', 'use-active', 'after-active'],
+    covered: obs => obs['after-active'].player.activeCharge === 0 && obs['after-active'].player.pockets[0] === 23 },
+  'room-2x2': { labels: ['settle'], covered: obs => obs['settle'].room?.gridWidth === 28 },
+  'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
+};
+
+// --- Browser capture -----------------------------------------------------------
+const keyNames = { Return: 'Enter', Tab: 'Tab', Down: 'ArrowDown', Up: 'ArrowUp', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
+
+async function capturePort(browser, server, declaration, base) {
+  const xml = await readFile(resolve(base, declaration.fixture.authoredResourcePath), 'utf8');
+  const stb = await readFile(resolve(base, declaration.fixture.specialRoomsPath));
+  const resources = { challengesXml: xml, specialRooms: Array.from(stb) };
+  const context = await browser.newContext({ viewport: { width: 960, height: 540 } });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(String(error)));
+  const observations = {};
+  try {
+    await page.goto(server.url + '/?manual=1');
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+    assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
+    await page.evaluate(input => { window.game.pause(); window.game.reset(1, input); },
+      { bootEpochSeed: declaration.bootEpochSeed, resources, audioPreferences: { sfxVolume: 0, musicVolume: 0 },
+        fullscreenPreferences: { fullscreen: false }, bootElapsed: resetBootElapsed(DECLARED_NATIVE_INTRO) });
+    const step = count => page.evaluate(count => { window.game.step(count); }, count);
+    const press = async (key, settle) => {
+      await page.keyboard.down(keyNames[key] ?? key); await step(12);
+      await page.keyboard.up(keyNames[key] ?? key); await step(settle);
+    };
+    // The composition-run.py Challenge route: Title to profile, profile to main, Down to
+    // Challenges, Challenge 1, then 300 admission presentations.
+    await step(63);
+    await press('Return', 72); await press('Return', 72);
+    await press('Down', 72); await press('Return', 72); await press('Return', 300);
+    const screen = (await evaluateJson(page, () => window.game.snapshot().screen));
+    assert.equal(screen, 'playing', `Sandbox Challenge did not start (screen ${screen})`);
+    if (declaration.initialPhaseOffset) await step(1);
+    let held = new Set();
+    for (const action of declaration.actions) {
+      const requested = new Set(action.keys);
+      for (const key of [...held].filter(key => !requested.has(key)).sort()) await page.keyboard.up(keyNames[key] ?? key);
+      for (const key of [...requested].filter(key => !held.has(key)).sort()) await page.keyboard.down(keyNames[key] ?? key);
+      await step(action.presentations);
+      observations[action.label] = await evaluateJson(page, portObservation);
+      held = requested;
+    }
+    for (const key of [...held].sort()) await page.keyboard.up(keyNames[key] ?? key);
+  } catch (error) {
+    errors.push(String(error?.message ?? error).split('\n')[0]);
+    const feedback = await page.evaluate(() => JSON.stringify(window.game.feedback().events.slice(-2))).catch(() => null);
+    if (feedback) errors.push('Runtime feedback: ' + feedback.slice(0, 2000));
+  } finally { await context.close(); }
+  return { observations, errors };
+}
+
+// --- Main ----------------------------------------------------------------------
+const report = { schema: 1, suite: 'pickup-interactions', status: 'running', startedUtc: new Date().toISOString(), cases: [], interactions: {} };
+let browser, server;
+try {
+  await assertOriginalBinary();
+  let bankPath = flag('--scenarios');
+  if (!bankPath) {
+    const generated = join(output, 'declared-inputs');
+    const only = process.argv.flatMap((arg, index) => arg === '--only' ? ['--only', process.argv[index + 1]] : []);
+    const exit = await child('python3', [join(ROOT, 'tools/original/pickup-interaction-scenarios.py'), '--output', generated,
+      '--count', flag('--count', '1'), ...only], join(output, 'declaration.log'));
+    assert.equal(exit, 0, 'Case declaration failed; see declaration.log');
+    bankPath = join(generated, 'scenarios.json');
+  }
+  bankPath = resolve(bankPath);
+  const bank = JSON.parse(await readFile(bankPath, 'utf8'));
+  assert.equal(bank.suite, 'pickup-interactions');
+  // Fixture paths are relative to the bank; keep a copy beside this run's
+  // scenarios.json so it replays on its own.
+  const base = dirname(bankPath);
+  if (base !== output) await cp(join(base, 'resources'), join(output, 'resources'), { recursive: true });
+  for (const item of bank.cases) for (const name of item.interactions) assert.ok(INTERACTIONS[name], `Unknown interaction ${name}`);
+  const cases = selectCases(bank.cases, item => item.name);
+  const scenarios = join(output, 'scenarios.json');
+  if (base !== output) await save(scenarios, { ...bank, caseFilter: flag('--case'), cases });
+  const resourceBase = output;
+
+  server = await startProductionServer({ directory: resolve(flag('--production', join(ROOT, 'dist'))) });
+  report.production = server.build;
+  const launch = browserLaunchOptions();
+  browser = await chromium.launch({ ...launch, headless: false, args: [...launch.args, '--no-sandbox'] });
+
+  // Native captures run a few at a time while the browser plays each case.
+  const native = new Map();
+  const queue = [...cases];
+  const workers = Array.from({ length: Math.max(1, jobs) }, async () => {
+    while (queue.length) {
+      const declaration = queue.shift();
+      const directory = join(output, declaration.name);
+      await mkdir(directory, { recursive: true });
+      // Each original gets its own virtual display: two games on one X server
+      // would steal each other's focus and keys.
+      const exit = await child('bash', [join(ROOT, 'tools/original/with-display.sh'), 'python3',
+        join(ROOT, 'tools/original/pickup-interaction-run.py'), '--scenarios', scenarios,
+        '--case', declaration.name, '--output', join(directory, 'original'), '--frame-timeout', flag('--native-frame-timeout', '60')],
+      join(directory, 'original.log'));
+      native.set(declaration.name, exit);
+    }
+  });
+  const nativeDone = Promise.all(workers);
+  const port = new Map();
+  for (const declaration of cases) {
+    const directory = join(output, declaration.name);
+    await mkdir(directory, { recursive: true });
+    const captured = await capturePort(browser, server, declaration, resourceBase);
+    await save(join(directory, 'port.json'), captured);
+    port.set(declaration.name, captured);
+  }
+  await nativeDone;
+
+  for (const declaration of cases) {
+    const directory = join(output, declaration.name);
+    const result = { name: declaration.name, about: declaration.about, errors: [], interactions: {} };
+    report.cases.push(result);
+    let nativeObservations = {};
+    try {
+      assert.equal(native.get(declaration.name), 0, 'Original capture failed; see original.log');
+      const manifest = JSON.parse(await readFile(join(directory, 'original/run/manifest.json'), 'utf8'));
+      for (const entry of manifest.debugObservations ?? []) {
+        if (entry.observation.status === 'pass' && !entry.context.label.includes('-observe-step'))
+          nativeObservations[entry.context.label] = nativeObservation(entry.observation);
+      }
+    } catch (error) { result.errors.push('Original: ' + String(error.message ?? error)); }
+    const captured = port.get(declaration.name);
+    result.errors.push(...captured.errors.map(error => 'Port: ' + error));
+    const rows = [];
+    for (const action of declaration.actions) {
+      const nativeLabel = nativeObservations[action.label], portLabel = captured.observations[action.label];
+      if (!nativeLabel || !portLabel) rows.push({ label: action.label, field: 'observation', native: Boolean(nativeLabel), port: Boolean(portLabel), passed: false });
+      else rows.push(...compareLabel(action.label, nativeLabel, portLabel));
+    }
+    await save(join(directory, 'comparison.json'), { rows, native: nativeObservations, port: captured.observations });
+    for (const name of declaration.interactions) {
+      const spec = INTERACTIONS[name];
+      let covered = false;
+      try { covered = Boolean(spec.covered(nativeObservations)); } catch { covered = false; }
+      const graded = rows.filter(row => spec.labels.includes(row.label));
+      const failed = graded.filter(row => !row.passed);
+      const status = !covered ? 'uncovered' : graded.length && !failed.length ? 'pass' : 'fail';
+      result.interactions[name] = { status, checks: graded.length, failed: failed.length,
+        firstFailures: failed.slice(0, 4).map(row => `${row.label} ${row.field}: original ${JSON.stringify(row.native)} port ${JSON.stringify(row.port)}`) };
+      (report.interactions[name] ??= []).push({ case: declaration.name, status });
+    }
+    result.status = !result.errors.length && Object.values(result.interactions).every(item => item.status === 'pass') ? 'pass' : 'fail';
+    console.log(JSON.stringify({ case: declaration.name, status: result.status,
+      interactions: Object.fromEntries(Object.entries(result.interactions).map(([name, value]) => [name, value.status])), errors: result.errors }));
+  }
+  report.status = report.cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
+} catch (error) {
+  report.error = String(error?.stack ?? error);
+  report.status = 'fail';
+} finally {
+  for (const resource of [browser, server]) if (resource) await resource.close().catch(() => {});
+  report.closedUtc = new Date().toISOString();
+  await save(join(output, 'report.json'), report);
+}
+console.log('Interactions:');
+for (const [name, runs] of Object.entries(report.interactions))
+  console.log(`  ${name.padEnd(26)} ${runs.map(run => `${run.case}=${run.status}`).join(' ')}`);
+if (report.error) console.error(report.error);
+console.log(JSON.stringify({ status: report.status, cases: report.cases.length, output }));
+if (report.status !== 'pass') console.log(`Replay: npm run test:e2e -- pickup-interactions --scenarios ${join(output, 'scenarios.json')}`);
+process.exitCode = report.status === 'pass' ? 0 : 1;

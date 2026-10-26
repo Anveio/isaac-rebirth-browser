@@ -24,6 +24,13 @@ import { chromium } from '@playwright/test';
 import { browserLaunchOptions } from '../foundation/browser.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
+import { DECLARED_NATIVE_INTRO } from '../foundation/composition-wasm-public.mjs';
+
+const sandboxResources = caseData => {
+  const base = resolve(caseData.sandboxBank, '..');
+  return { challengesXml: readFileSync(resolve(base, caseData.fixture.authoredResourcePath), 'utf8'),
+    specialRooms: Array.from(readFileSync(resolve(base, caseData.fixture.specialRoomsPath))) };
+};
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const run = promisify(execFile);
@@ -48,15 +55,18 @@ function loadCases() {
   const picks = repeated('--pick');
   const cases = [];
   const select = (list, label) => {
-    const chosen = picks.length ? list.filter(item => picks.includes(item.scenario?.id)) : list;
+    const chosen = picks.length ? list.filter(item => picks.includes(item.scenario?.id ?? item.name)) : list;
     assert.ok(chosen.length, `No case in ${label} matches ${picks.join(', ') || '(any)'}`);
     cases.push(...chosen);
   };
   for (const spec of repeated('--case')) {
     const [path, id] = spec.split('#');
     const data = JSON.parse(readFileSync(resolve(path), 'utf8'));
-    const list = data.pairedTape ? [data] : data.cases;
-    select(id ? list.filter(item => item.scenario?.id === id) : list, path);
+    // A pickup-interactions bank (tools/e2e/pickup-interactions.mjs) carries
+    // generated sandbox resources beside its scenarios.json.
+    const list = (data.pairedTape ? [data] : data.cases).map(item => item.fixture?.kind === 'sandbox-challenge-start-room'
+      ? { ...item, sandboxBank: resolve(path) } : item);
+    select(id ? list.filter(item => (item.scenario?.id ?? item.name) === id) : list, path);
   }
   const helper = flag('--helper');
   if (helper) {
@@ -100,7 +110,34 @@ function densify(actions, label) {
   return { tape, frames: index };
 }
 
+// A sandbox interaction case: the browser replays the same Challenge-menu
+// route and actions that pickup-interactions.mjs plays; the original replays
+// pickup-interaction-run.py's tape. Footage starts at gameplay.
+function sandboxTapes(caseData) {
+  const press = (key, settle) => [{ type: 'key', key, down: true }, { type: 'step', frames: 12 },
+    { type: 'key', key, down: false }, { type: 'step', frames: settle }];
+  const pairedTape = [{ type: 'step', frames: 63 }, ...press('Return', 72), ...press('Return', 72), ...press('Down', 72),
+    ...press('Return', 72), ...press('Return', 300), { type: 'capture', label: 'gameplay-start' }];
+  if (caseData.initialPhaseOffset) pairedTape.push({ type: 'step', frames: 1 });
+  let held = new Set();
+  for (const action of caseData.actions) {
+    const requested = new Set(action.keys);
+    for (const key of [...held].filter(key => !requested.has(key)).sort()) pairedTape.push({ type: 'key', key, down: false });
+    for (const key of [...requested].filter(key => !held.has(key)).sort()) pairedTape.push({ type: 'key', key, down: true });
+    pairedTape.push({ type: 'step', frames: action.presentations });
+    held = requested;
+  }
+  for (const key of [...held].sort()) pairedTape.push({ type: 'key', key, down: false });
+  const nativeTape = JSON.parse(execFileSync('python3', ['tools/original/pickup-interaction-run.py', '--scenarios', caseData.sandboxBank,
+    '--case', caseData.name, '--print-tape'], { cwd: ROOT, encoding: 'utf8' }));
+  const label = startLabel ?? 'gameplay-start';
+  const browser = densify(pairedTape, label);
+  const native = densify(nativeTape.filter(action => action.type !== 'capture' || action.label === label), label);
+  return { browser: browser.tape, native: native.tape, frames: Math.max(browser.frames, native.frames) };
+}
+
 function tapes(caseData) {
+  if (caseData.sandboxBank) return sandboxTapes(caseData);
   const browser = densify(caseData.pairedTape, startLabel);
   const native = densify(caseData.tape ?? [...(caseData.bootstrap?.sourceOnlyPrelude ?? []), ...caseData.pairedTape],
     startLabel ?? caseData.bootstrap?.boundaryLabel);
@@ -111,6 +148,20 @@ async function nativeFrames(caseData, tape, directory) {
   mkdirSync(directory, { recursive: true });
   const tapePath = join(directory, 'tape.json');
   writeFileSync(tapePath, JSON.stringify(tape));
+  if (caseData.sandboxBank) {
+    try {
+      const result = await run('bash', ['tools/original/with-display.sh', 'python3', 'tools/original/pickup-interaction-run.py',
+        '--scenarios', caseData.sandboxBank, '--case', caseData.name, '--tape', tapePath, '--output', join(directory, 'sandbox'),
+        '--frame-timeout', flag('--native-frame-timeout', '120')], { cwd: ROOT, maxBuffer: 64 * 1024 * 1024 });
+      writeFileSync(join(directory, 'controller-output.txt'), result.stdout + result.stderr);
+      // compose() reads ORIGINAL/frames; the observer's other output stays.
+      execFileSync('mv', [join(directory, 'sandbox', 'run', 'frames'), join(directory, 'frames')]);
+      return { status: 'pass' };
+    } catch (failure) {
+      writeFileSync(join(directory, 'controller-output.txt'), `${failure.stdout || ''}${failure.stderr || ''}${failure.message}`);
+      return { status: 'fail', error: String(failure.message).split('\n')[0] };
+    }
+  }
   const command = ['tools/original/with-display.sh', 'python3', 'tools/original/foundation-clock-run.py',
     '--seed', caseData.seed, '--tape', tapePath, '--frame-timeout', flag('--native-frame-timeout', '120'),
     '--boot-epoch-seed', String(caseData.bootEpochSeed ?? 1700000000), '--output', directory];
@@ -140,11 +191,12 @@ async function browserFrames(browser, server, caseData, tape, directory) {
     // The same reset the paired harness gives the browser: the run clock starts
     // where the original's first Title render does (#438), so closed-loop port
     // keys (stage-exit fights) replay the run they were recorded on.
-    await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed }) => {
+    await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed, resources }) => {
       window.game.pause();
-      window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, audioPreferences: {sfxVolume: 0, musicVolume: 0},
+      window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, resources, audioPreferences: {sfxVolume: 0, musicVolume: 0},
         fullscreenPreferences: {fullscreen: false}, inputConfigs: {devices: []} });
-    }, { ...caseData, bootElapsed: resetBootElapsed(declaredNativeTape(caseData)) });
+    }, { ...caseData, initialSeed: caseData.initialSeed ?? 1, resources: caseData.sandboxBank ? sandboxResources(caseData) : undefined,
+      bootElapsed: caseData.sandboxBank ? resetBootElapsed(DECLARED_NATIVE_INTRO) : resetBootElapsed(declaredNativeTape(caseData)) });
     for (const action of tape) {
       if (action.type === 'step') await page.evaluate(count => { window.game.step(count); }, action.frames);
       else if (action.type === 'key') await page.keyboard[action.down ? 'down' : 'up'](namedKeys[action.key] || action.key);
@@ -169,7 +221,7 @@ async function compose(caseData, directory, frames, title) {
   const video = join(directory, 'side-by-side.mp4');
   const left = join(directory, 'original', 'frames', 'sbs-%06d.png');
   const right = join(directory, 'port', 'sbs-%06d.png');
-  const caption = `${title}  seed ${caseData.seed}`;
+  const caption = caseData.seed ? `${title}  seed ${caseData.seed}` : `${title}  boot epoch ${caseData.bootEpochSeed}`;
   const filter = [
     `[0:v]scale=960:540,tpad=stop_mode=clone:stop=-1[l]`, `[1:v]scale=960:540,tpad=stop_mode=clone:stop=-1[r]`,
     `[l][r]hstack=inputs=2,pad=1920:600:0:60:color=0x111111,${banner('Original Rebirth', 20)},${banner(`Browser port ${sha}`, 980)},`
@@ -214,7 +266,7 @@ if (reelInput) {
   const results = [];
   try {
     for (const caseData of cases) {
-      const id = String(caseData.scenario?.id ?? caseData.seed).replace(/[^A-Za-z0-9_-]/g, '-');
+      const id = String(caseData.scenario?.id ?? caseData.name ?? caseData.seed).replace(/[^A-Za-z0-9_-]/g, '-');
       const directory = join(out, id);
       rmSync(directory, { recursive: true, force: true });
       mkdirSync(directory, { recursive: true });
