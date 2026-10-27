@@ -1996,28 +1996,7 @@ impl Game {
                     5
                 };
         }
-        self.state.minimap.cells = self
-            .state
-            .room_display_flags
-            .iter()
-            .enumerate()
-            .filter(|(_, flags)| **flags & 1 != 0)
-            .map(|(index, _)| {
-                let descriptor = &self.state.floor.descriptors[index];
-                MinimapCell {
-                    x: descriptor.grid_index as i32 % 13 - 6,
-                    y: descriptor.grid_index as i32 / 13 - 6,
-                    visibility: if index == self.state.current_room {
-                        "current"
-                    } else if self.state.visited_rooms.contains(&index) {
-                        "visited"
-                    } else {
-                        "unvisited"
-                    }
-                    .into(),
-                }
-            })
-            .collect();
+        rebuild_minimap_cells(&mut self.state);
     }
 
     fn refresh_stage_effects(&mut self) {
@@ -7636,4 +7615,30 @@ fn tear_grid_hurt(
         }
     }
     Ok(())
+}
+
+/// 5B0F40 redraws the minimap from the descriptor display flags: every room
+/// with bit 1 is drawn as the current, a visited or an unvisited room.
+pub(crate) fn rebuild_minimap_cells(state: &mut State) {
+    state.minimap.cells = state
+        .room_display_flags
+        .iter()
+        .enumerate()
+        .filter(|(_, flags)| **flags & 1 != 0)
+        .map(|(index, _)| {
+            let descriptor = &state.floor.descriptors[index];
+            MinimapCell {
+                x: descriptor.grid_index as i32 % 13 - 6,
+                y: descriptor.grid_index as i32 / 13 - 6,
+                visibility: if index == state.current_room {
+                    "current"
+                } else if state.visited_rooms.contains(&index) {
+                    "visited"
+                } else {
+                    "unvisited"
+                }
+                .into(),
+            }
+        })
+        .collect();
 }
