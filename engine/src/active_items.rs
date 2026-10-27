@@ -805,7 +805,10 @@ fn reroll_pedestals(state: &mut State, id: u32) -> Result<(), String> {
         pickup.save_byte_abd != Some(0)
             || pickup.shop_price.is_some()
             || pickup.spawn_seed == 0
-            || pickup.morph_links.as_ref().is_some_and(|links| !links.known_empty())
+            || pickup
+                .morph_links
+                .as_ref()
+                .is_some_and(|links| !links.known_empty())
     }) {
         unowned_leaf(state, id, 0x52549b);
         return Ok(());
