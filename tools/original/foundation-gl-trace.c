@@ -56,6 +56,7 @@ static unsigned char used_texture[65536];
 struct UniformName{GLuint program;GLint location;char name[128];};
 static struct UniformName uniform_names[256];static unsigned uniform_name_count;
 
+static int render_all(void) { const char *value = getenv("ISAAC_CLOCK_GATE_RENDER_ALL"); return value && *value && strcmp(value, "0"); }
 static void init(void) {
     if (stream) return;
     directory = getenv("ISAAC_GL_TRACE_DIR");
@@ -261,6 +262,13 @@ void glXSwapBuffers(void *display,unsigned long drawable) {
     if(active && stream) { if(snapshot_requested)snapshot_used_textures();else memset(used_texture,0,sizeof(used_texture));struct timespec now;clock_gettime(CLOCK_MONOTONIC,&now);fprintf(stream,"{\"op\":\"frameEnd\",\"frame\":%u,\"monotonicNs\":%llu}\n",frame_number,(unsigned long long)now.tv_sec*1000000000ull+now.tv_nsec);active=0;if(snapshot_requested && getenv("ISAAC_GL_TRACE_STOP_AFTER_FRAME"))raise(SIGSTOP); }
     if(stream && control) {
         FILE *request=fopen(control,"r");
+        /* Under the clock gate, released frames drop default-framebuffer draws
+         * and skip this hook unless every frame draws: an armed frame would
+         * start late and miss draws (foundation-clock-run.py --gl-trace-requests). */
+        if(request && getenv("ISAAC_CLOCK_GATE_SOCKET") && !render_all()) {
+            fprintf(stderr,"gl-trace: snapshot requested while the clock gate drops released frames; pass --gl-trace-requests\n");
+            _exit(96);
+        }
         if(request) { if(fgets(label,sizeof(label),request)){label[strcspn(label,"\r\n")]=0;active=1;snapshot_requested=1;frame_number++;draw_number=0;fprintf(stream,"{\"op\":\"frameStart\",\"frame\":%u,\"label\":\"%s\",\"simulationTick\":null}\n",frame_number,label);}fclose(request);unlink(control); }
         else if(getenv("ISAAC_GL_TRACE_EVERY_FRAME")){active=1;snapshot_requested=0;frame_number++;draw_number=0;fprintf(stream,"{\"op\":\"frameStart\",\"frame\":%u,\"label\":\"every\",\"simulationTick\":null}\n",frame_number);}
     }

@@ -305,7 +305,7 @@ def main():
             environment['ISAAC_STAGE_MASK_POSITION_OBSERVER'] = str(args.position_observer.resolve())
         subprocess.run([str(ROOT / 'tools/original/with-display.sh'), os.sys.executable,
             str(ROOT / 'tools/original/foundation-clock-run.py'), '--seed', args.seed, '--tape', str(tape),
-            '--state-observer', str(Path(__file__).resolve()), '--gl-trace', str(trace),
+            '--state-observer', str(Path(__file__).resolve()), '--gl-trace', str(trace), '--gl-trace-requests',
             '--output', str(output / 'run')], env=environment, check=True)
         report = extract(output / 'run/manifest.json', output / 'targets', args.require_depth_contract)
     print(json.dumps({'status': report['status'], 'sourceManifest': report['sourceManifest'],
