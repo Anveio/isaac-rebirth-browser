@@ -87,7 +87,7 @@ function portObservation() {
         items.itemRngs[252].left, items.itemRngs[252].rightB] : null,
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
-    pickups: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected)
+    pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
     pocketBirths: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected && [70, 300].includes(pickup.variant))
       .map(pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed, pickup.sourceSpawner?.entityType ?? null,
