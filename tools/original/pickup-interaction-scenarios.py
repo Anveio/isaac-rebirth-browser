@@ -153,7 +153,8 @@ CASES = {
         items=[COOKBOOK], card=0, spawns=[],
         actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 50),
                  act('bombs-1', [], 10), act('bombs-2', [], 10), act('bombs-3', [], 10), act('bombs-4', [], 10),
-                 act('after-blasts', [], 100)],
+                 act('after-blasts', [], 100), act('chain-1', [], 10), act('chain-2', [], 10),
+                 act('chain-3', [], 10), act('chain-4', [], 10)],
         interactions=['anarchist-cookbook']),
     # Tammy's Head fires a ring of ten tears.
     'tammys-head': dict(

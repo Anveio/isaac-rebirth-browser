@@ -193,7 +193,7 @@ export const INTERACTIONS = {
   'the-poop': { labels: ['settle', 'use-active', 'after-active', 'walk-off', 'walk-back'],
     covered: obs => obs['settle'].gridPoops.length === 0 && obs['after-active'].gridPoops.length === 1 },
   // Troll Bombs land around the room on every fifth TEMP65 count.
-  'anarchist-cookbook': { labels: ['settle', 'use-active', 'after-active', 'bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'],
+  'anarchist-cookbook': { labels: ['settle', 'use-active', 'after-active', 'bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts', 'chain-1', 'chain-2', 'chain-3', 'chain-4'],
     covered: obs => ['bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'].some(label => obs[label].bombs.filter(bomb => bomb.variant === 3).length >= 3) },
   // A ring of ten tears leaves Isaac at once.
   'tammys-head': { tears: true, labels: ['settle', 'use-active', 'after-active', 'tears-later'],
