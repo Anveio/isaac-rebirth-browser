@@ -31,6 +31,8 @@ from pathlib import Path
 import random
 import subprocess
 import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('stage_exit_boss_routes', Path(__file__).with_name('boss-scenarios.py'))
@@ -55,6 +57,12 @@ ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('c
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
+# Recordings that do not depend on each other (fixtures, and the exit tails
+# of one fixture's fight) run side by side. Each recorder is one
+# single-threaded headless replay of the production WASM with its own server,
+# and records closed-loop on the port's own frame-stepped state, so the
+# schedule changes only wall time. E2E_RECORDER_JOBS bounds the slots.
+RECORDER_SLOTS = threading.BoundedSemaphore(int(os.environ.get('E2E_RECORDER_JOBS') or os.cpu_count() or 1))
 
 
 def retain(path, content):
@@ -64,6 +72,11 @@ def retain(path, content):
 
 
 def record(base, *args, rooms='0', arrival='', production_directory=None):
+    with RECORDER_SLOTS:
+        return record_attempt(base, *args, rooms=rooms, arrival=arrival, production_directory=production_directory)
+
+
+def record_attempt(base, *args, rooms='0', arrival='', production_directory=None):
     RECORDINGS.mkdir(parents=True, exist_ok=True)
     attempt = Path(tempfile.mkdtemp(prefix='attempt-', dir=RECORDINGS))
     parent = os.open(RECORDINGS, os.O_RDONLY | os.O_DIRECTORY)
@@ -341,35 +354,49 @@ def main():
             fixture = {**json.loads((FIXTURES / f'{name}.json').read_text()), 'name': name}
             fixtures[name] = (fixture, *fought(fixture, args.production_directory))
         return fixtures[name]
-    for name in args.contrived:
+    def approach(fixture, base, fights, name, index):
+        # The waypoint comes from an OS-shuffled candidate order: the
+        # recorder takes the first one clear of the port's own solid
+        # cells (authored rocks, its fight's poops) that it can route to,
+        # or takes the trapdoor directly when none is. A retry reshuffles.
+        for _ in range(2):
+            solid = set(fixture.get('originalSolid', []))
+            # Turning at the waypoint carries the player about ten units
+            # past its centre: beside a cell solid in the original alone
+            # (a fight's tail poop), only the original's player touches it
+            # and the shared walk splits (#649). Keep one cell clear.
+            beside = {cell + step for cell in solid for step in (-15, 15, -1, 1)}
+            blocked = AWARD_CELLS | solid | beside | set(near(fixture.get('originalPickups', [])))
+            cells = [c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked]
+            entropy.shuffle(cells)
+            built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241), None,
+                                 args.production_directory, [[40 + cell % 15 * 40, 120 + cell // 15 * 40] for cell in cells])
+            if built is not None or not reason.startswith('port-exit'):
+                break
+        return built, reason
+    def contrived(name):
+        """One fixture's fight, then its contrived and OS-random exit tails,
+        which each replay that fight and so record side by side."""
         fixture, base, fights = load(name)
-        built, reason = case(fixture, base, fights, f'{name}-contrived', False, 0, None, args.production_directory)
-        if built is None:
-            raise ValueError(f'Contrived stage exit {name} failed: {reason}')
-        cases.append(built)
-        for index in range(args.count):
-            # The waypoint comes from an OS-shuffled candidate order: the
-            # recorder takes the first one clear of the port's own solid
-            # cells (authored rocks, its fight's poops) that it can route to,
-            # or takes the trapdoor directly when none is. A retry reshuffles.
-            for _ in range(2):
-                solid = set(fixture.get('originalSolid', []))
-                # Turning at the waypoint carries the player about ten units
-                # past its centre: beside a cell solid in the original alone
-                # (a fight's tail poop), only the original's player touches it
-                # and the shared walk splits (#649). Keep one cell clear.
-                beside = {cell + step for cell in solid for step in (-15, 15, -1, 1)}
-                blocked = AWARD_CELLS | solid | beside | set(near(fixture.get('originalPickups', [])))
-                cells = [c + r * 15 for c in range(1, 14) for r in range(1, 8) if c + r * 15 not in blocked]
-                entropy.shuffle(cells)
-                built, reason = case(fixture, base, fights, f'{name}-random-{index}', True, entropy.randrange(0, 241), None,
-                                     args.production_directory, [[40 + cell % 15 * 40, 120 + cell // 15 * 40] for cell in cells])
-                if built is not None or not reason.startswith('port-exit'):
-                    break
+        with ThreadPoolExecutor(max_workers=1 + args.count) as tails:
+            exact = tails.submit(case, fixture, base, fights, f'{name}-contrived', False, 0, None, args.production_directory)
+            drawn = [tails.submit(approach, fixture, base, fights, name, index) for index in range(args.count)]
+            built, reason = exact.result()
             if built is None:
-                failures.append({'fixture': name, 'error': reason})
-            else:
-                cases.append(built)
+                raise ValueError(f'Contrived stage exit {name} failed: {reason}')
+            results = [built], []
+            for future in drawn:
+                built, reason = future.result()
+                if built is None:
+                    results[1].append({'fixture': name, 'error': reason})
+                else:
+                    results[0].append(built)
+            return results
+    # Fixtures are independent; their cases keep the declared order.
+    with ThreadPoolExecutor(max_workers=max(1, len(args.contrived))) as pool:
+        for built, failed in pool.map(contrived, dict.fromkeys(args.contrived)):
+            cases.extend(built)
+            failures.extend(failed)
     for spec in args.approach:
         name, idle, *point = spec.split(':')
         via = [int(value) for value in point[0].split(',')] if point else None
