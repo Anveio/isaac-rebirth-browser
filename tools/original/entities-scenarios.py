@@ -34,8 +34,8 @@ codec = entity.codec
 
 def specs():
     script = ("import { entitySpecs } from './tools/e2e/entities.mjs';"
-              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss, shop }) =>"
-              " ({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss: Boolean(boss), shop: Boolean(shop) }))));")
+              "console.log(JSON.stringify((await entitySpecs()).map(({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss, shop, hard }) =>"
+              " ({ name, type, variant, shape, roomType, gridType, count, contrived, fight, boss: Boolean(boss), shop: Boolean(shop), hard: Boolean(hard) }))));")
     return json.loads(subprocess.run(['node', '--input-type=module', '-e', script], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
 
 
@@ -65,9 +65,9 @@ def room_cases(room_specs, attempts):
     for spec in room_specs:
         for item in spec['contrived']:
             code, slot = item.split(':')
-            routes.setdefault((code, int(slot), shape(spec)), []).append(spec)
-    for (code, slot, room_shape), named in routes.items():
-        floor = entity.floor(codec.decode_seed(code))
+            routes.setdefault((code, int(slot), shape(spec), spec['hard']), []).append(spec)
+    for (code, slot, room_shape, hard), named in routes.items():
+        floor = entity.floor(codec.decode_seed(code), hard)
         for spec in named:
             if slot not in dict(entity.admitting_slots(floor, identity(spec), room_shape, spec.get('roomType'), spec.get('gridType'))):
                 failures.append({'spec': spec['name'], 'error': f'Contrived {code} slot {slot} does not admit {identity(spec)} in a {room_shape[0]}x{room_shape[1]} room'})
@@ -75,7 +75,7 @@ def room_cases(room_specs, attempts):
         if admitted:
             names = [spec['name'] for spec in admitted]
             cases.append(tagged(entity.case('', code, slot, identity(admitted[0]), {'entropy': 'contrived spec seed'}, False, room_shape,
-                                            fight(admitted)),
+                                            fight(admitted), hard),
                                 names, f"{'+'.join(names)}-contrived-{len(cases)}"))
     # OS-random rooms from one seed stream.
     needed = {spec['name']: spec['count'] for spec in room_specs if spec['count']}

@@ -353,6 +353,11 @@ fn advance_full(
         champion_hooks(npc, random, world, births)?;
         if npc.dead {
             base_kill(npc, random, births);
+            // 4fb640: a non-boss death ends in 4f2d10, which runs the
+            // champion drop 4f27a0 before Remove.
+            if npc.champion.is_some() {
+                births.push(Birth::ChampionDeath);
+            }
             npc.removed = true;
             return Ok(());
         }
@@ -408,6 +413,11 @@ fn advance_full(
             return dying_with_die(npc, friction, random, world, births);
         }
         return dying(npc, friction);
+    }
+    if let Some(champion) = npc.champion.as_ref() {
+        // 4f9f30: a champion's +f74 speed scales the post-AI velocity by
+        // 1 - (1 - friction)(1 - speed) before the base friction step.
+        npc.velocity = npc.velocity * (1.0 - (1.0 - friction) * (1.0 - champion.speed));
     }
     update_sprite(npc)?;
     npc.friction = friction;

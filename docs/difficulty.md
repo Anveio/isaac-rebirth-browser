@@ -29,6 +29,7 @@ claim that the difficulty changes nothing there.
 | Row | Original | Normal | Hard | Consumer |
 | --- | --- | --- | --- | --- |
 | `champion_chance_bonus` | NPC Init 47f5c6/47f725: added to the champion chance (0.05, 0.2 with Champion Belt) | 0.0 | f32 0.15 (66ad1c) | `champions::roll` |
+| `champion_drop_needs_zero_roll` | Champion death drop 4f27a0 (4f2d10 at removal): the NPC's own RNG draws RandomInt(3) at both difficulties (4f27c8); 4f27d8 then gates the color's drop | always drops | drops only on 0 | `champions::death_drops` |
 | `curse_odds` | Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor; n for a fresh profile / achievement 4 / achievement 33 / counter 10 | 80 / 30 / 10 / 5 | 10 / 5 / 3 / 2 | `challenges::sample_curse` (Challenge floors, hard's extra rooms) |
 | `extra_rooms` | Level::Init 58c08e: rooms added to the floor's count, plus the curse stream's RandomInt(2) (58c089) | none | 2 | `floor::generate_normal_basement` |
 | `odd_stage_room_difficulty` | Level::Init 58c114/58c124: normal-room difficulty on odd stages | 1..5 | 5..10 | `floor::difficulty_band` (even stages are 5..10 at both) |
@@ -75,7 +76,7 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 | 5ba8d2 | pause render 5ba830 | Blood layer | row `pause_blood` |
 | 47f5c6, 47f725 | NPC Init 47ec60 | champion chance | row `champion_chance_bonus` |
 | 58bf7d | Level::Init 58be30 | curse odds, room count, room difficulty | rows `curse_odds`, `extra_rooms`, `odd_stage_room_difficulty` |
-| 4f27d8 | champion death drop 4f27a0 | drop odds | gap |
+| 4f27d8 | champion death drop 4f27a0 | drop odds | row `champion_drop_needs_zero_roll` |
 | 5399ed | Slot 539540 | beggar payout threshold | gap |
 | 53c9fa, 53da69, 53ff04 | Slot 53c290 | slot prize odds and counts | gap |
 | 5c87c3 | boss death 5c8430 | boss heart drop | gap |
@@ -87,9 +88,16 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 Each is a difficulty read whose consumer the port does not implement (or
 implements without the rule yet). The values are read from the disassembly.
 
-- **Champion death drop** (4f27d8): a champion's color drop (jump table
-  66e320) needs RandomInt(3) == 0 at hard; normal always drops. The port has
-  no champion drops.
+- **Champion death drop colors** (4f27a0's jump table 66e320): the row
+  covers every color, but the port constructs the drops of colors 0 (red
+  heart 5.10.1), 1 (battery 5.90.0), 2 (pill 5.70.0), 3 (1..3 coins, the
+  count from the shared MT before the gate), 6 (eternal heart 5.10.4), 7
+  (key 5.30.0), 10 (none) and 12 (double heart 5.10.5) only. Colors 4 (three
+  Blue Flies through the player, 508740), 5 (an explosion 554490 with its
+  effects before the gate, then a bomb 5.40.0), 8 (locked chest 5.60.0), 9
+  (red chest 5.360.0), 11 (trinket 5.350.0) and 13 (4f2852) still drop
+  nothing, as do champions of families whose death bypasses the plain base
+  kill (4fb885 and 4fcb3b also reach 4f2d10).
 - **Beggar payout** (5399ed): the payout threshold R2+R4+R4 is raised to at
   least 5 at hard. The port admits no slot payouts.
 - **Slot prizes** (Slot update 53c290): 53c9fa voids a prize when
@@ -119,3 +127,11 @@ it side by side with:
 python3 tools/original/foundation-paired-scenarios.py --scenario paired-hard-run --seed T1PK6Y0W --output DIR/case
 node tools/playtest/side-by-side.mjs --case DIR/case/case.json --out DIR
 ```
+
+The `champion-drop` and `champion-drop-hard` entity specs fight champion
+Horfs to death (an entity spec with `hard: true` starts both games at hard)
+and grade every live pickup's identity and f32 position at each capture.
+With a capture on every fight update, the normal key champion (EHL7N0AV) and
+the hard pill champion (7VFTKQCK, own roll 0) drop at the same update with
+the same variant, subtype, seed and position in both games. The hard red
+champion in 4J3JGA0V (own roll 2) dies in both games without a heart.

@@ -79,6 +79,9 @@ rules! {
     /// NPC Init 47f5c6/47f725: added to the champion chance (0.05, or 0.2
     /// with Champion Belt); hard adds f32 0.15 (66ad1c).
     champion_chance_bonus: f32 = [0.0, 0.15],
+    /// Champion death drop 4f27a0: the NPC's own RNG draws RandomInt(3) at
+    /// both difficulties (4f27c8); hard (4f27d8) drops only when it is 0.
+    champion_drop_needs_zero_roll: bool = [false, true],
     /// Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor, n for
     /// a fresh profile, achievement 4, achievement 33 and counter 10 (each
     /// later one wins).
