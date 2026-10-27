@@ -112,7 +112,16 @@ export function sweepProductionSnapshots() {
 
 function isAlive(pid) {
   if (!Number.isInteger(pid) || pid <= 0) return false;
-  try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+  try { process.kill(pid, 0); } catch (error) { return error.code === 'EPERM'; }
+  if (process.platform === 'linux') {
+    try {
+      const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
+      // The command name may itself contain spaces or parentheses.
+      const commandEnd = stat.lastIndexOf(')');
+      if (stat.startsWith(`${pid} (`) && stat.slice(commandEnd + 1).startsWith(' Z ')) return false;
+    } catch { /* Keep the kill(pid, 0) result when procfs is unavailable. */ }
+  }
+  return true;
 }
 
 // Free bytes on the filesystem holding `path` (statfs; Infinity if unknown).
