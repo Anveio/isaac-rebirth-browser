@@ -231,6 +231,12 @@ def observe(pid, context):
                     item['goldenKey'] = raw[0x18] == 1
                 if context.get('activeItems') is True:
                     item['eternalHearts'] = struct.unpack_from('<i', raw, 4)[0]
+                if context.get('collectibleCounts') is True:
+                    # Player+E1C: the signed owned count of every collectible
+                    # ID0..346 (the cache callbacks 511F10 read these words).
+                    counts = struct.unpack('<347i', read(pointer + 0xe1c, 347 * 4))
+                    item['collectibleCounts'] = {str(index): count for index, count in enumerate(counts) if count}
+                    item['maxFireDelay'] = struct.unpack('<i', read(pointer + 0xc78, 4))[0]
                 item['keyInventory'] = u32(pointer + 0xbcc)
                 item['coinInventory'] = u32(pointer + 0xbd8)
                 item['maxRedHp'] = u32(pointer + 0xbb4)

@@ -183,6 +183,7 @@ Generated from [the suite registry](tools/e2e/suites.mjs). Each suite runs the f
 | `boot-mt` | Boot-time shared MT state at Title, through menu navigation and through seed dialog entry/reopening | [boot-mt.mjs](tools/e2e/boot-mt.mjs) `--count 4` |
 | `controls` | Keyboard menu9/10,24x2 bindings, Back/save, duplicate refusal, Defaults, Escape and actual movement; four fixed plus unfiltered OS | [controls.mjs](tools/e2e/controls.mjs) `--count 1` |
 | `save-continue` | Living Quit/Continue and natural own-storage reload; fixed footprints plus unfiltered OS public seeds | [save-continue.mjs](tools/e2e/save-continue.mjs) `--count 1` |
+| `continue-run` | Exit mid-run and Continue: saved room, NPC respawn, pedestals, items and entry door | [state-pair.mjs](tools/e2e/state-pair.mjs) `--scenario-helper tools/original/continue-run-scenarios.py --helper-arg --count --helper-arg 1 --comparator tools/foundation/continue-run-state-pair.mjs --state-observer tools/original/paired-room-observe.py --native-frame-timeout 120` |
 | `ordinary-run` | No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs | [ordinary-run.mjs](tools/e2e/ordinary-run.mjs) `--ambient-grid --count 4` |
 | `weapons` | Tear cadence, direction and inherited motion | [weapons.mjs](tools/e2e/weapons.mjs) `--count 4` |
 | `tear-lifecycle` | Tear birth, flight and death phases | [weapons.mjs](tools/e2e/weapons.mjs) `--lifecycle --count 4` |
