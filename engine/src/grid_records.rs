@@ -433,8 +433,8 @@ fn admit_boundary_owned(
     // Catalogues 0 (special STB, holding the start room), 1 (Basement) and
     // 3 (Caves) share the shape0 ambient producer; 5cf45b..5cf46d skips only
     // backdrops 11 and 13, which no admitted stage selects.
-    if !shape0_ambient(descriptor.asset_stage) || descriptor.template.shape_index() != 0 {
-        return Err("ambient grid admission requires a fresh Basement or Caves shape0 room".into());
+    if !shape0_ambient(descriptor.asset_stage) || descriptor.template.shape_index() > 3 {
+        return Err("ambient grid admission requires a fresh Basement or Caves room".into());
     }
     let grid = room
         .grid
@@ -535,7 +535,18 @@ fn admit_ambient_shape0(
 ) -> Result<(), String> {
     let seed = (descriptor.decoration_seed & 0x7fff_ffff).wrapping_add(descriptor.index as u32);
     let mut rng = Rng::new(seed, [5, 9, 7]);
-    let attempts = 2 * (rng.bounded(4) + rng.bounded(5));
+    let mut attempts = rng.bounded(4) + rng.bounded(5);
+    //5D0A8E: the 1x2 and 2x1 shapes add Random(9); 5D0A67: the 2x2 shape
+    //adds Random(9) then Random(18). The total is doubled at 5CF4D1.
+    match descriptor.template.shape_index() {
+        1 | 2 => attempts += rng.bounded(9),
+        3 => {
+            let nine = rng.bounded(9);
+            attempts += nine + rng.bounded(18);
+        }
+        _ => {}
+    }
+    let attempts = 2 * attempts;
     let mut attempt = 0;
     while attempt < attempts {
         let index = rng.bounded(grid.cells.len() as u32) as usize;

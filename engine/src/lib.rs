@@ -3462,8 +3462,9 @@ impl Game {
                     .persistent_spawn_cells = Some(persistent_cells.clone());
             }
         }
-        // Doors, walls and shape0 ambient decoration follow the selectors.
-        // Other shapes and backdrops keep their boundary draws unadmitted.
+        // Doors, walls and ambient decoration follow the selectors for every
+        // valid shape (5cf2f4..5cf532). Other backdrops keep their boundary
+        // draws unadmitted.
         if self
             .state
             .room
@@ -3471,7 +3472,7 @@ impl Game {
             .as_ref()
             .is_some_and(|descriptor| {
                 grid_records::shape0_ambient(descriptor.asset_stage)
-                    && descriptor.template.shape_index() == 0
+                    && descriptor.template.shape_index() < 4
                     && descriptor.template.room_type != 16
             })
         {
