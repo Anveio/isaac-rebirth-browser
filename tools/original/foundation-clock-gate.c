@@ -25,7 +25,7 @@
  * degrading silently. Other draw entry points are never dropped, and indexed
  * masks or capabilities make later clears count as partial. Setting
  * ISAAC_CLOCK_GATE_RENDER_ALL=1 draws and presents every frame (diagnosis, and
- * graphics observers that record submitted draws).
+ * graphics observers armed to record default-framebuffer draws).
  *
  * The original asks the X server for its window attributes dozens of times a
  * frame. Within one main-thread frame, with no X event consumed and no window
