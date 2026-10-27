@@ -82,7 +82,10 @@ function compare(source, actual, gameplay) {
       ['velocity', vector(npc.velocity), vector(port.velocity)],
       ['renderOffset', vector(npc.entityRenderOffset), vector(port.dip?.renderOffset)],
       ['statusCountdown', npc.statusCountdown, port.dip?.statusCountdown],
-      ['tint', npc.spriteTint.map(f32), port.dip?.tint.map(f32)], ['offsets', npc.spriteOffsets.map(f32), port.dip?.offsets.map(f32)],
+      // Sprite KColor +2d0. The Dip's init 494ac8 colours its splat (+3cc,
+      // the port's dip.tint/offsets), not its sprite.
+      ['spriteColor', npc.spriteColor.map(f32), port.spriteColor &&
+        [...port.spriteColor.current.tint, ...port.spriteColor.current.colorize, ...port.spriteColor.current.offset].map(f32)],
     ]) check(rows, `Dip${index}.${name}`, expected, observed);
   }
   // Every actual58/43 body remains required; zero category5 count is legal.
