@@ -655,7 +655,15 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 Some(have) => grant_pocket(state, id, card_by_default != have)?,
             };
             if granted.is_none() {
-                unowned_leaf(state, id, if leaf == Leaf::DeckOfCards { 0x524417 } else { 0x5241e4 });
+                unowned_leaf(
+                    state,
+                    id,
+                    if leaf == Leaf::DeckOfCards {
+                        0x524417
+                    } else {
+                        0x5241e4
+                    },
+                );
             }
         }
         Leaf::DeckOfCards | Leaf::MomsBottleOfPills => {}
