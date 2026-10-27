@@ -56,34 +56,31 @@ export class PickupRenderer {
       //callback.533970 changes it only at the next actual Player callback;
       //that birth frame must retain the visible Idle layer at its old pose.
       if (copy.attachedToPlayer && !attachment?.Visible) return;
-      const attached = copy.attachedToPlayer && attachment ? {
-        XPosition: attachment.XPosition, YPosition: attachment.YPosition, Visible: attachment.Visible,
-      } : {};
-      //533970 attaches every copied layer. Supported regular actors use
-      //body0 plus optional glow1; preserve both actual authored channels.
-      const overrides = Object.fromEntries([0, 1].map(id => [id, {
-        ...attached, RedTint, GreenTint, BlueTint,
-      }]));
-      this.assets.draw(ctx, copy.actor, copy.animation, x, y, copy.animationFrame, { overrides });
-      if (copy.overlay) this.assets.draw(ctx, copy.actor, copy.overlay, x, y, copy.overlayFrame, { overrides });
+      //533970 attaches every copied layer: the null position goes to each
+      //LayerState+0x30 offset (added to the keyframe) and its visibility to
+      //the layer's +0x64 flag. Supported regular actors use body0 plus
+      //optional glow1; preserve both actual authored channels.
+      const layerOffset = copy.attachedToPlayer && attachment
+        ? { x: attachment.XPosition, y: attachment.YPosition } : undefined;
+      const overrides = Object.fromEntries([0, 1].map(id => [id, { RedTint, GreenTint, BlueTint }]));
+      this.assets.draw(ctx, copy.actor, copy.animation, x, y, copy.animationFrame, { overrides, layerOffset });
+      if (copy.overlay) this.assets.draw(ctx, copy.actor, copy.overlay, x, y, copy.overlayFrame, { overrides, layerOffset });
       return;
     }
     if (!attachment?.Visible) return;
     if (presentation.pocket) {
       const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
-      const overrides = Object.fromEntries(Array.from({length: 3}, (_, layer) => [layer, {
-        XPosition: attachment.XPosition, YPosition: attachment.YPosition,
-        Visible: attachment.Visible, RedTint, GreenTint, BlueTint,
-      }]));
+      const overrides = Object.fromEntries(Array.from({length: 3}, (_, layer) => [layer, { RedTint, GreenTint, BlueTint }]));
+      const layerOffset = { x: attachment.XPosition, y: attachment.YPosition };
       //The one copied7E0 sprite has a Sparkle main and static named overlay.
       //Native render visits layer0/1/2; keep their order for both pill/rune
       //layer0 and card-front layer2, independently of the Sparkle clock.
       for (let layer = 0; layer < 3; layer++) {
         this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", "Sparkle", x, y, presentation.animationFrame, {
-          layers: [layer], overrides,
+          layers: [layer], overrides, layerOffset,
         });
         this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", presentation.pocket.overlay, x, y, presentation.pocket.overlayFrame, {
-          layers: [layer], overrides,
+          layers: [layer], overrides, layerOffset,
         });
       }
       return;
@@ -91,14 +88,15 @@ export class PickupRenderer {
     const item = catalog.items.find(item => item.id === presentation.itemId && item.kind !== "trinket");
     if (!item?.sprite) return;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
-    // 533970 copies null0 position/visibility into every copied sprite layer;
-    // 5099ca then renders that copied sprite at the Player render anchor.
+    // 533970 adds null0's position to every copied layer's LayerState+0x30
+    // offset and copies its visibility to the layer (+0x64), leaving each
+    // keyframe's own position and visibility (the sparkle's -16,-16 and
+    // hidden first frame) in force; 5099ca then renders that copied sprite
+    // at the Player render anchor.
     this.assets.draw(ctx, "gfx/005.100_collectible.anm2", "PlayerPickupSparkle", x, y, presentation.animationFrame, {
       spritesheets: {1: item.sprite},
-      overrides: Object.fromEntries(Array.from({length: 4}, (_, layer) => [layer, {
-        XPosition: attachment.XPosition, YPosition: attachment.YPosition,
-        Visible: attachment.Visible, RedTint, GreenTint, BlueTint,
-      }])),
+      overrides: Object.fromEntries(Array.from({length: 4}, (_, layer) => [layer, { RedTint, GreenTint, BlueTint }])),
+      layerOffset: { x: attachment.XPosition, y: attachment.YPosition },
     });
   }
 }
