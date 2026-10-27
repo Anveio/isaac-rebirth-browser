@@ -23,7 +23,8 @@ START_ROOM = 80  # 00.special rooms.stb: type1 variant2 'Start Room', 13x7
 
 # Collectibles and cards by base Rebirth id (items.xml / pocketitems.xml).
 BATTERY, OUIJA, BLANK_CARD = 63, 115, 286
-THE_POOP, TAMMY, COOKBOOK, D20, D10 = 36, 38, 65, 166, 285
+THE_POOP, TAMMY, COOKBOOK, D20, D10, D4 = 36, 38, 65, 166, 285, 284
+SAD_ONION, CRICKETS_HEAD, NUMBER_ONE = 1, 4, 6
 JERA, TWO_OF_CLUBS, TWO_OF_DIAMONDS = 29, 23, 24
 
 
@@ -140,6 +141,15 @@ CASES = {
         items=[D10], card=0, spawns=[npc(1, 3, 12), npc(11, 3, 12)],
         actions=[act('settle', [], 51), act('use-active', ['space'], 4), act('after-active', [], 30)],
         interactions=['d10-reroll'], fixed_only=True),
+    # The D4 rerolls every held passive collectible; the D4 itself stays.
+    # A reroll result whose AddCollectible effect is unported (X-Ray Vision,
+    # which the 1700000000 epoch rolls first, or 9 Volt) leaves the charge
+    # words unknown, so this case pins an epoch rolling 15, 180 and 201.
+    'd4': dict(
+        about='The D4 (Space) rerolls Isaac\'s collectibles',
+        items=[D4, SAD_ONION, CRICKETS_HEAD, NUMBER_ONE], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        interactions=['d4-reroll'], fixed_only=True, fixed_epoch=(2173746742, 1)),
     # The Poop leaves a poop under Isaac and farts; he walks off and back.
     'the-poop': dict(
         about='The Poop (Space) spawns a poop grid entity under Isaac',
@@ -262,6 +272,8 @@ def main():
         for suffix, epoch, phase in epochs:
             if spec.get('fixed_only') and suffix != 'fixed':
                 continue
+            if suffix == 'fixed' and 'fixed_epoch' in spec:
+                epoch, phase = spec['fixed_epoch']
             cases.append(dict(
                 name=f'{name}-{suffix}', interaction=name, about=spec['about'],
                 bootEpochSeed=epoch, initialPhaseOffset=phase,

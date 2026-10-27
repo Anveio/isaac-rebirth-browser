@@ -50,7 +50,8 @@ function nativeObservation(observation) {
       activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
       pockets: player.heldPockets.map(slot => slot.id), pocketTags: player.heldPockets.map(slot => slot.tag),
       item252RngWords: player.item252RngWords,
-      owned: player.ownedItems, animationGuard: player.animationGuard },
+      owned: player.ownedItems, animationGuard: player.animationGuard,
+      ownedAll: player.ownedAll ?? null },
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
     pocketBirths: live.filter(entity => entity.type === 5 && [70, 300].includes(entity.variant))
@@ -85,7 +86,8 @@ function portObservation() {
       temporary: items?.temporaryCollectibles ?? null,
       item252RngWords: items?.itemRngs?.[252] ? [items.itemRngs[252].state, items.itemRngs[252].rightA,
         items.itemRngs[252].left, items.itemRngs[252].rightB] : null,
-      owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
+      owned: { 63: owned(63), 115: owned(115), 286: owned(286) },
+      ownedAll: Object.fromEntries((items?.ownedCounts ?? []).flatMap((count, id) => count !== 0 ? [[String(id), count]] : [])) },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
@@ -128,7 +130,7 @@ function matchPositions(native, port, tolerance) {
   return [...misses, ...left.map(item => ({ native: null, port: item }))];
 }
 
-function compareLabel(label, native, port, { tears = false, pocketModifier = false } = {}) {
+function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -145,6 +147,8 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
     same('pickups.pocketSeedSpawnerLinks', native.pocketBirths, port.pocketBirths);
   }
   same('player.owned', native.player.owned, port.player.owned);
+  // Every held collectible count, only where a case's interaction rerolls them.
+  if (owned) same('player.ownedAll', native.player.ownedAll, port.player.ownedAll);
   const bombs = matchPositions(native.bombs.map(bomb => ({ ...bomb, subtype: 0 })), port.bombs.map(bomb => ({ ...bomb, subtype: 0 })), TOLERANCE.bomb);
   row('bombs', native.bombs, port.bombs, bombs.length === 0);
   const pickups = matchPositions(native.pickups, port.pickups, TOLERANCE.pickup);
@@ -226,6 +230,11 @@ export const INTERACTIONS = {
   // Troll Bombs land around the room on every fifth TEMP65 count.
   'anarchist-cookbook': { labels: ['settle', 'use-active', 'after-active', 'bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts', 'chain-1', 'chain-2', 'chain-3', 'chain-4'],
     covered: obs => ['bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'].some(label => obs[label].bombs.filter(bomb => bomb.variant === 3).length >= 3) },
+  // The D4 spends its charge, stays held, and changes the passive collectibles.
+  'd4-reroll': { owned: true, labels: ['settle', 'use-active', 'after-active'],
+    covered: obs => obs['settle'].player.activeCharge > 0 && obs['after-active'].player.activeId === 284
+      && obs['after-active'].player.activeCharge === 0
+      && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll) },
   // A ring of ten tears leaves Isaac at once.
   'tammys-head': { tears: true, labels: ['settle', 'use-active', 'after-active', 'tears-later'],
     covered: obs => obs['use-active'].tears.length >= 10 || obs['after-active'].tears.length >= 10 },
@@ -387,6 +396,7 @@ try {
       else rows.push(...compareLabel(action.label, nativeLabel, portLabel, {
         tears: declaration.interactions.some(name => INTERACTIONS[name].tears),
         pocketModifier: declaration.interactions.includes('blank-card-pocket-conversion'),
+        owned: declaration.interactions.some(name => INTERACTIONS[name].owned),
       }));
     }
     await save(join(directory, 'comparison.json'), { rows, native: nativeObservations, port: captured.observations });

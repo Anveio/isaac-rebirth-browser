@@ -145,6 +145,7 @@ def observe(pid, context):
                     'inventory': {'bombs': i32(player + 0xbd4), 'keys': i32(player + 0xbcc), 'coins': i32(player + 0xbd8)},
                     'ownedItems': {str(index): owned[index] for index in WATCHED_ITEMS},
                     'ownedTotal': sum(value for value in owned if value > 0),
+                    'ownedAll': {str(index): value for index, value in enumerate(owned) if value != 0},
                     'activeId': i32(player + 0xd74), 'activeCharge': i32(player + 0xd78),
                     'activeSubordinateCharge': i32(player + 0xd7c), 'reserveCharge': i32(player + 0xd8c),
                     #Actual item252 child selected at52CF6F..7A, advanced by
