@@ -599,7 +599,6 @@ pipeline, then the bulk import.
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
 | #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
-| #901 | P2 | D4: using it skips the GiantBook dice animation the original plays on frames 43-100 (reroll result identical) | playtest 2026-10-27 `playtest/6474f5d/d4.mp4` |
 
 ## Pocket items
 
@@ -818,6 +817,8 @@ Bugs in a test route or tool rather than in the game.
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
 
 ## Recently fixed
+
+- #901 / [PR904](https://github.com/Anveio/isaac-rebirth-browser/pull/904) restores the D4 GiantBook17 request with delay3. Fresh Original/browser fixed D4 and D10 cases pass all 439 checks: 132 animation, frozen-age and UseItem-pose failures become passes, with no lost passing rows and the D10 control unchanged. The sampled book PNGs were inspected; full-frame pixel parity remains unqualified.
 
 - #892 / [PR893](https://github.com/Anveio/isaac-rebirth-browser/pull/893) restores Epic Fetus target and rocket rendering. Both fixed phases and the recorded OS case render through the actual browser without the former effect30 runtime failure; Original impact and pixel parity remain separate.
 - #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
