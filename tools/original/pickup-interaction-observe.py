@@ -91,6 +91,9 @@ def observe(pid, context):
                     # Bomb+7D4 fuse, +7DC Player-contact countdown (docs/dr-fetus-evidence.md).
                     result['bombFuse'] = struct.unpack_from('<i', more, 0)[0]
                     result['bombPlayerContactCountdown'] = struct.unpack_from('<i', more, 8)[0]
+                if 10 <= result['type'] < 1000:
+                    # Entity+484 HitPoints and +488 MaxHitPoints.
+                    result['hp'], result['maxHp'] = pair(0x484)
                 if result['type'] == 5:
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
@@ -137,6 +140,9 @@ def observe(pid, context):
                 })
                 players.append(item)
             report['players'] = players
+            # The shared MT (audio-observer.py offsets), a diagnostic only.
+            report['sharedMt'] = {'index': u32(0x8e6b64),
+                                  'words': list(struct.unpack('<624Q', read(0x8ed680, 624 * 8)))}
         finally:
             os.close(fd)
     except (OSError, ValueError, TimeoutError, struct.error, StopIteration) as error:
