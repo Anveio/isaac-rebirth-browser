@@ -269,6 +269,8 @@ export interface RoomDescriptor {
 export interface Floor {
   challengeCurse: {initialLocalState: number; finalLocalState: number; threshold: number; thresholdResult: number | null; selectionResult: number | null; selectedMask: number; filteredMask: number; roomAdjustmentResult: number; localDraws: number} | null;
   contract: string; stage: number; stageSeed: number; additionalRooms: number; attempts: number;
+  /** Level+8 curse mask; absent when zero. */
+  curses?: number;
   descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
   primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
   specialWeights: number[]; basementWeights: number[];

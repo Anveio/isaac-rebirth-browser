@@ -32,15 +32,20 @@ claim that the difficulty changes nothing there.
 | `champion_chance_bonus` | NPC Init 47f5c6/47f725: added to the champion chance (0.05, 0.2 with Champion Belt) | 0.0 | f32 0.15 (66ad1c) | `champions::roll` |
 | `champion_drop_needs_zero_roll` | Champion death drop 4f27a0 (4f2d10 at removal): the NPC's own RNG draws RandomInt(3) at both difficulties (4f27c8); 4f27d8 then gates the color's drop | always drops | drops only on 0 | `champions::death_drops` |
 | `clear_heart_max_roll` | Ordinary room-clear award 5c9240: a heart award draws RandomInt(100) on the award RNG (5c9e1c, 5c9f93) and spawns only at or below the limit | no draw | at most 34 | `clear_award::spawn` |
-| `curse_odds` | Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor; n for a fresh profile / achievement 4 / achievement 33 / counter 10 | 80 / 30 / 10 / 5 | 10 / 5 / 3 / 2 | `challenges::sample_curse` (Challenge floors, hard's extra rooms) |
+| `curse_odds` | Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor; n for a fresh profile / achievement 4 / achievement 33 / counter 10 | 80 / 30 / 10 / 5 | 10 / 5 / 3 / 2 | `challenges::sample_curse`, run by `floor::generate_normal_basement` on every floor |
 | `extra_rooms` | Level::Init 58c08e: rooms added to the floor's count, plus the curse stream's RandomInt(2) (58c089) | none | 2 | `floor::generate_normal_basement` |
 | `odd_stage_room_difficulty` | Level::Init 58c114/58c124: normal-room difficulty on odd stages | 1..5 | 5..10 | `floor::difficulty_band` (even stages are 5..10 at both) |
 | `hud_icon` | HUD 5742bd: hudpickups.anm2 frame under the counters | none | frame 4 | `web/renderer.ts` HUD, via `State::difficulty_presentation` |
 | `pause_blood` | Pause render 5ba8d2: pausescreen.anm2 layer 4 (Blood) | not drawn | drawn | `web/presentation.ts` pause |
 
-A curse the hard stream selects has no consumer, as on every ordinary floor
-at either difficulty: hard only raises its odds. Curse of the Labyrinth
-(58c061 multiplies the count by 1.8 before the extra rooms) stays a gap.
+Every floor rolls its curse (58bfe8) on a copy of the primary stream, so the
+roll consumes nothing the generator reads; hard only raises the odds. The
+floor keeps the curse in `Floor::curses` (Level+8). Curse of the Labyrinth
+multiplies the room count by 1.8 (at most 45, 58c061) and Curse of the Lost
+adds four rooms (58c4c0), both before hard's extra rooms. These are source
+generation rules; the [live qualification](levels.md#curse-and-xl-qualification)
+covers selected Normal and Hard first floors. The curse's other consumers
+are listed under Gaps.
 
 The two presentation rows reach the renderer through
 `State::difficulty_presentation`, rebuilt from the run's difficulty on every
@@ -125,6 +130,15 @@ implements without the rule yet). The values are read from the disassembly.
   when one of those owners is unknown, in room type 0x11 (which takes the boss
   branch 5c9740), or for a trinket (5.350) or red chest (5.360) award, which
   have no factory yet.
+- **Curse effects** (Level+8, rolled at both difficulties with the
+  `curse_odds` row): the port draws the curse names (5852f0) under the floor
+  name, hides the hearts under Curse of the Unknown (HUD 5742f0), and runs
+  Curse of the Labyrinth's generation (the XL name, a second boss 589d5c and
+  treasure room 58bae3, one stage more through the trapdoor 585640) and Curse
+  of the Lost's four rooms. It does not implement Curse of Darkness's
+  lighting, Curse of the Lost's map hiding, Curse of the Maze's room swaps,
+  Curse of the Blind's hidden items or Curse of the Cursed's doors, nor
+  586594's curse handling past the roll.
 - **Completion marks** (5c9240's Boss Rush and stage 6/8+ branches: 5c9ca9,
   5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d): a per-character
   Persistent counter at 1 is raised to 2 at hard; 5ca5a2 also unlocks a

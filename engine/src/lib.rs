@@ -1990,7 +1990,7 @@ impl Game {
             self.state.map_settings.opacity,
         ) {
             //5B1240 requests585500 on exactly the tenth held Game Full.
-            self.state.run_introduction = RunIntroduction::stage(true);
+            self.state.run_introduction = stage_transition::show_name(&self.state.floor);
         }
     }
     fn refresh_minimap(&mut self) {
@@ -4897,7 +4897,7 @@ impl Game {
                 //Full's earlier HUD update, before GameAge and actor callbacks.
                 //The positive-to-zero edge is one-shot;593660 input reset is
                 //still represented by completion_callbacks_pending, not cleared.
-                self.state.run_introduction = RunIntroduction::stage(true);
+                self.state.run_introduction = stage_transition::show_name(&self.state.floor);
             }
         }
 
@@ -5226,7 +5226,7 @@ impl Game {
             stage_transition::Step::NextStage => {
                 // SetNextStage585620 -> SetStage585600 -> 5b8340, then
                 // ShowNightmareScene595580(sameStage=false).
-                let next = stage_transition::next_stage(self.state.stage)?;
+                let next = stage_transition::next_stage(&self.state)?;
                 self.state.stage = next;
                 self.state.nightmares.select_normal_basement(next)?;
                 self.state.nightmares.request(false);

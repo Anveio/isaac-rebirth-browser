@@ -96,7 +96,7 @@ def compare(case, generator, catalogs, hard=False):
         'sourceOriginalLogSha256': hashlib.sha256(case['originalLogText'].encode()).hexdigest(),
         'sourceManifest': case.get('sourceManifest'),
         'difficulty': 'hard' if hard else 'normal',
-        'scope': 'complete ordered floor descriptors/grid/seeds/attempts; fresh Isaac without Labyrinth; other curse effects are separate; pre-RoomInit stream continuation'}
+        'scope': 'complete ordered floor descriptors/grid/seeds/attempts; fresh Isaac first-floor generation including Labyrinth; non-generation curse effects are separate; pre-RoomInit stream continuation'}
 
 
 def main():

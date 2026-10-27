@@ -179,7 +179,8 @@ def validate(path):
     text = path.with_name('original.log').read_text()
     actual = source.starting_log_state(text)
     floor_case = {'seed': document['seed'], 'actualLog': actual, 'observation': start['observation']['floor'],
-        'controller': controller, 'growthInput': source.supplied_growth_input(actual['stageSeed'], actual['rooms']),
+        'controller': controller, 'growthInput': source.supplied_growth_input(
+            actual['stageSeed'], actual['rooms'], curse=start['observation']['floor'].get('curseMask', 0)),
         'provenance': {'memoryWritten': False, 'nativeBinarySha256': source.observer.NATIVE_SHA,
                        'originalCheckpoint': {'context': start['context']}}}
     source.validate_case(floor_case, source.authored_catalogs()[0], allow_non_labyrinth_curses=True)

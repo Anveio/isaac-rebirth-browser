@@ -73,17 +73,25 @@ def authored_catalogs():
     return catalogs, source
 
 
-def supplied_growth_input(stage_seed, additional, hard=False):
+def supplied_growth_input(stage_seed, additional, hard=False, curse=0):
     # Recovered caller contract, not fitted offsets: reset's discarded draw,
     # backdrop Random(1), room-count Random(2), generator-constructor Next.
-    # Hard (58c08e) adds 2 + the curse stream's RandomInt(2).
+    # Curse of the Labyrinth (58c061) scales the count by 1.8 (at most 45),
+    # Curse of the Lost (58c4c0) adds 4; hard (58c08e) then adds 2 + the
+    # curse stream's RandomInt(2).
     state, words = stage_seed, []
     for _ in range(4):
         state = rng.next_state(state, rng.PUBLIC_SHIFTS[35])
         words.append(state)
-    if additional - (8 + words[2] % 2) not in ((2, 3) if hard else (0,)):
+    base = 8 + words[2] % 2
+    if curse & 2:
+        base = min(int(base * 1.8), 45)
+    elif curse & 4:
+        base += 4
+    if additional - base not in ((2, 3) if hard else (0,)):
         raise ValueError('Actual Basement room count violates recovered caller prefix')
-    return {'generatorSeed': words[3], 'additionalRooms': additional, 'shapeMask': 15}
+    return {'generatorSeed': words[3], 'additionalRooms': additional, 'shapeMask': 15} \
+        | ({'labyrinth': True} if curse & 2 else {})
 
 
 def starting_log_state(text):
@@ -216,12 +224,10 @@ def validate_case(case, catalogs, *, allow_non_labyrinth_curses=False, hard=Fals
     for value in (actual['altStage'], observation['altStage']):
         integer(value, 0, 0, 'normal alt-stage')
     curse = integer(observation['curseMask'], 0, 127 if allow_non_labyrinth_curses else 0, 'source curse mask')
-    if curse & 2:
-        raise ValueError('Finalized normal floor contract excludes Labyrinth geometry')
     stage_seed = integer(actual.get('stageSeed'), 1, 0xffffffff, 'actual stage seed')
     if stage_seed != codec.initial_stage_seed(actual['seedValue']):
         raise ValueError('Actual stage seed violates independently recovered startup RNG27')
-    if case['growthInput'] != supplied_growth_input(stage_seed, actual.get('rooms'), hard):
+    if case['growthInput'] != supplied_growth_input(stage_seed, actual.get('rooms'), hard, curse):
         raise ValueError('Supplied generator contract disagrees with source caller prefix')
     grid = observation['grid']
     count = integer(observation['descriptorCount'], 1, 128, 'descriptor count')
@@ -324,5 +330,6 @@ def captured_case(path, hard=False):
             'memoryWritten': entry['observation']['memoryWritten'],
             'originalCheckpoint': {'context': entry['context']}},
         'observation': entry['observation'], 'actualLog': actual, 'controller': manifest,
-        'growthInput': supplied_growth_input(actual['stageSeed'], actual['rooms'], hard),
+        'growthInput': supplied_growth_input(actual['stageSeed'], actual['rooms'], hard,
+                                             entry['observation'].get('curseMask', 0)),
         'originalLogText': log}
