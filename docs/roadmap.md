@@ -462,10 +462,18 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 and direct final-shot/shared-MT qualification remain open.
 
 [Bounded NPC Freeze](npc-freeze.md) adds source owners and living plain
-10/12/13/18 Bra application/expiry hooks plus an opt-in `active-items
---npc-freeze` gate. Build and live qualification are **UNRUN**. Boss/champion,
-linked/custom-base actors, frozen death, readmission and Fear remain open;
-the earlier target-free Bra pass does not qualify this new path.
+10/12/13/18 Bra application/expiry hooks after Appear and a proven current470
+owner, plus an opt-in `active-items --npc-freeze` gate. Only Horf12/AttackFly18
+have target-bearing live evidence. Fresh actual Info captures pass fixed1 and
+the first recorded OS case; fixed0/no-Space retain 188/88 AttackFly
+velocity failures. The four-case bank remains **FAIL: 269,019 checks / 276
+failures**. Fresh main A/B loses no common passing rows and recovers 12,405
+common failures; older failed reports remain retained. Current target-free
+Bra/Pad and Browser focus/seed controls remain pending. Frozen death and living
+reached-status
+morph/reentry retain explicit frontiers; saved NPC restoration, boss/champion,
+linked/custom-base actors, negative/repeated application, Fear and complete
+MT/PCM/pixels remain open. The earlier target-free Bra pass keeps its scope.
 
 [PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
 champion creep. Its current-main666-based frozen `35edb299` passes a fresh
