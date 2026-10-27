@@ -217,6 +217,19 @@ pub(crate) enum Leaf {
     HowToJump,
     /// 5235F5: 526DB0 UseCard on a held card, then the Pickup clip.
     BlankCard,
+    /// 523789: max-2 (red clamped), sound157 and 5083B0 six soul halves.
+    GuppysPaw,
+    /// 523690->525850: 508640 one Eternal half, then the Pickup clip.
+    PrayerCard,
+    /// 5226DC: with more than three soul halves, each black half among the
+    /// top four forces the Black-heart Necronomicon, then soul-4, 508540(2)
+    /// and 508230(2).
+    Converter,
+    /// 524407: the item85 RNG draws a Card (5817A0 suits, no runes) for
+    /// 50AF00, or a Pill (581950) for 50AE00 with Little Baggy252.
+    DeckOfCards,
+    /// 5241D4: the item102 RNG draws a Pill, or a Card with Starter Deck251.
+    MomsBottleOfPills,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -273,6 +286,31 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 292,
         book: Some(15),
         leaf: Leaf::SatanicBible,
+    },
+    ActiveUse {
+        id: 133,
+        book: None,
+        leaf: Leaf::GuppysPaw,
+    },
+    ActiveUse {
+        id: 146,
+        book: None,
+        leaf: Leaf::PrayerCard,
+    },
+    ActiveUse {
+        id: 296,
+        book: None,
+        leaf: Leaf::Converter,
+    },
+    ActiveUse {
+        id: 85,
+        book: None,
+        leaf: Leaf::DeckOfCards,
+    },
+    ActiveUse {
+        id: 102,
+        book: None,
+        leaf: Leaf::MomsBottleOfPills,
     },
 ];
 
@@ -578,8 +616,113 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
             play_item_animation(state, id, variant0, true);
         }
+        Leaf::GuppysPaw => {
+            if variant0 && state.player.max_hp > 1 {
+                sound(state, 157);
+                let player = &mut state.player;
+                player.max_hp -= 2;
+                player.hp = player.hp.min(player.max_hp);
+                player_items::add_soul_hearts(player, 6);
+                play_item_animation(state, id, variant0, false);
+            }
+        }
+        Leaf::PrayerCard => {
+            if variant0 {
+                //508640 requests information13 only when a pair completes.
+                if state.player.eternal_hearts.wrapping_add(1) > 1 {
+                    state.information_animation.request_eternal();
+                }
+                player_items::add_eternal_hearts(&mut state.player, 1);
+            }
+            play_item_animation(state, id, variant0, true);
+        }
+        Leaf::DeckOfCards | Leaf::MomsBottleOfPills if variant0 => {
+            let (modifier, card_by_default) = if leaf == Leaf::DeckOfCards {
+                (252, true)
+            } else {
+                (251, false)
+            };
+            let owner = state.player_items.as_ref().expect("checked owner");
+            let have = crate::item_queries::AppearanceQueries::new(
+                owner,
+                state.weapon_cache.primary,
+                state.player.entity_source,
+                None,
+            )
+            .have(modifier);
+            let granted = match have {
+                None => None,
+                Some(have) => grant_pocket(state, id, card_by_default != have)?,
+            };
+            if granted.is_none() {
+                unowned_leaf(state, id, if leaf == Leaf::DeckOfCards { 0x524417 } else { 0x5241e4 });
+            }
+        }
+        Leaf::DeckOfCards | Leaf::MomsBottleOfPills => {}
+        Leaf::Converter => {
+            if variant0 && state.player.soul_hp > 3 {
+                let mut index = state.player.soul_hp;
+                while state.player.soul_hp - 3 <= index {
+                    //508290 IsBlackHeart then 508260 clears its mask bit.
+                    let player = &state.player;
+                    if index > 0
+                        && index <= player.soul_hp
+                        && index & 1 == 1
+                        && player.black_heart_mask >> ((index - 1) >> 1) & 1 == 1
+                    {
+                        state.player.black_heart_mask &= !(1_u32 << ((index >> 1) & 31));
+                        crate::health_damage::use_black_heart(state)?;
+                    }
+                    index -= 1;
+                }
+                state.player.soul_hp -= 4;
+                player_items::add_max_hearts(&mut state.player, 2);
+                player_items::add_red_hearts(&mut state.player, 2);
+                play_item_animation(state, id, variant0, false);
+            }
+        }
     }
     Ok(())
+}
+
+/// The item RNG draw and AddCard/AddPill of a pocket-granting active. None
+/// when the RNG history, achievements or held record is unknown.
+fn grant_pocket(state: &mut State, id: u32, card: bool) -> Result<Option<()>, String> {
+    let Ok(seed) = crate::pickup_world_grants::next_item_seed(state, id) else {
+        return Ok(None);
+    };
+    let pocket = if card {
+        let Some(profile) = state
+            .profiles
+            .get(usize::from(state.profile).wrapping_sub(1))
+        else {
+            return Ok(None);
+        };
+        crate::pockets::PocketSlot {
+            id: crate::pickups::random_card(seed, &profile.achievements, true, false)?,
+            card: true,
+        }
+    } else {
+        //581950 is seed%9+1 and owns no RNG.
+        crate::pockets::PocketSlot {
+            id: seed % 9 + 1,
+            card: false,
+        }
+    };
+    crate::pockets::grant_from_active(state, pocket)
+}
+
+/// A reached leaf operator whose inputs are unknown: its writers are an
+/// explicit frontier rather than an assumed no-op.
+fn unowned_leaf(state: &mut State, id: u32, source_pc: u32) {
+    forget_unported_effect(state);
+    crate::active_charges::note_effect(
+        state,
+        crate::active_charges::EffectFrontier::UseLeaf {
+            active_id: id,
+            source_pc,
+        },
+    );
 }
 
 /// 523489..5235F0. The landing target starts at the room-clamped

@@ -95,7 +95,7 @@ fn prepare_placement(state: &State) -> Result<PlacementPlan, Frontier> {
     Ok(PlacementPlan { position, shared })
 }
 
-fn next_item_seed(state: &mut State, id: u32) -> Result<u32, Frontier> {
+pub(crate) fn next_item_seed(state: &mut State, id: u32) -> Result<u32, Frontier> {
     let owner = state
         .player_items
         .as_mut()

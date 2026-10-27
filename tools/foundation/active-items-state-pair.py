@@ -109,6 +109,9 @@ def native_rows():
                 health=[integer(value) for value in player['health']],
                 position=vector(physical['position']), velocity=vector(physical['velocity']),
                 entityCollisionOff=integer(physical['entityCollisionClass']) == 0,
+                eternal=integer(physical['eternalHearts']),
+                pockets=[[integer(slot['id']), bool(integer(slot['typeTagRaw'])) if slot['id'] else None]
+                         for slot in player['heldPocketRecords']],
                 clip=player['mainSprite']['animation'], frame=f32(player['mainSprite']['animationFrame']),
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
@@ -150,6 +153,9 @@ def browser_rows():
                 position=[f32((player['x'] - 32) / .65), f32((player['y'] + 46) / .65)],
                 velocity=[f32(player['vx'] / .65), f32(player['vy'] / .65)],
                 entityCollisionOff=player.get('entityCollisionOff', False) is True,
+                eternal=integer(player['eternalHearts']),
+                pockets=[[integer(slot['id']), (slot['card'] is True) if slot['id'] else None]
+                         for slot in owner['heldPockets']['slots']],
                 clip=clip, frame=frame,
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
@@ -175,7 +181,7 @@ uses, held, landed = collections.Counter(), set(), 0
 for gp in paired:
     a, b = own[gp], native[gp]
     for field in ('activeId', 'activeCharge', 'temporary', 'health', 'position', 'velocity',
-                  'entityCollisionOff', 'controls', 'pedestals'):
+                  'entityCollisionOff', 'controls', 'pedestals', 'eternal', 'pockets'):
         check(f'Player:{field}', a[field], b[field], gp)
     if b['clip'] in CLIPS or a['clip'] is not None:
         check('main sprite clip', a['clip'], b['clip'], gp)

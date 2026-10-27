@@ -17,7 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 RUN_SEED, SEED_CODE = 12713, 'B91Y6ZEV'
 #Actives whose 522250 leaf is ported (engine/src/active_items.rs USES).
 ACTIVES = {33: 'bible', 34: 'belial', 35: 'necronomicon', 45: 'yum-heart', 58: 'shadows',
-           78: 'revelations', 282: 'how-to-jump', 286: 'blank-card', 292: 'satanic-bible'}
+           78: 'revelations', 282: 'how-to-jump', 286: 'blank-card', 292: 'satanic-bible',
+           85: 'deck-of-cards', 102: 'moms-bottle-of-pills', 133: 'guppys-paw', 146: 'prayer-card',
+           296: 'converter'}
 
 
 def load(name, path):
@@ -73,8 +75,8 @@ def main():
     def fixture(key, pedestals):
         if key in fixtures:
             return fixtures[key]
-        groups = [dict(x=x, y=y, entries=[dict(type=5, variant=100, subtype=item, weight=1.0)])
-                  for item, x, y in pedestals]
+        groups = [dict(x=row[-2], y=row[-1], entries=[dict(type=5, variant=100 if len(row) == 3 else row[0],
+                  subtype=row[0] if len(row) == 3 else row[1], weight=1.0)]) for row in pedestals]
         room['spawns'] = copy.deepcopy(groups)
         path = resources / f'active-{key}-special.stb'
         raw = rooms_codec.encode_bytes(rooms)
@@ -90,7 +92,7 @@ def main():
     cases = []
 
     def declare(name, pedestals, actions, epoch, phase, entropy, uses):
-        key = '-'.join(str(item) for item, _, _ in pedestals)
+        key = '-'.join('.'.join(str(value) for value in row[:-2]) for row in pedestals)
         authored = fixture(key, pedestals)
         cases.append(dict(name=name, publicMenuRoute='seeded-normal', publicRunSeed=RUN_SEED,
             publicSeedCode=SEED_CODE, bootEpochSeed=epoch, initialPhaseOffset=phase,
@@ -109,7 +111,7 @@ def main():
                 replacesOriginalRoomGroups=True, groups=copy.deepcopy(authored['groups']),
                 scope='Public resource/reset transport only; the active reader owns every functional law.'),
             activeItems=dict(schema='source-public-active-items-v1',
-                pedestals=[item for item, _, _ in pedestals], uses=uses,
+                pedestals=[row[0] for row in pedestals if len(row) == 3], uses=uses,
                 required=['ActualActiveSlotAndCharge', 'ActualTemporaryRecords', 'ActualHealth',
                     'ActualPlayerPositionAndVelocity', 'ActualMainSpriteClipFrame', 'ActualEntityCollisionClass'],
                 unknown=['BackendPlayedAudioAndPCM', 'FullFrameBrowserPixels', 'Costumes',
@@ -124,6 +126,16 @@ def main():
         phase = index & 1
         declare(f'{slug}-{item}-fixed-phase{phase}', single(item), idle + acquire() + use('use', [], 24),
                 12713, phase, fixed, [item])
+    #Converter needs more than three soul halves: a black and a soul heart
+    #beside the Player (the black half forces the Black-heart Necronomicon).
+    hearts = [dict(label='black-heart-west', keys=['a'], presentations=6),
+              dict(label='black-heart-released', keys=[], presentations=30),
+              dict(label='soul-heart-east', keys=['d'], presentations=12),
+              dict(label='soul-heart-released', keys=[], presentations=30),
+              dict(label='return-centre', keys=['a'], presentations=6),
+              dict(label='return-released', keys=[], presentations=30)]
+    declare('converter-296-black-soul-phase0', [(296, 6, 5), (10, 6, 5, 6), (10, 3, 7, 6)],
+            idle + hearts + acquire() + use('use', [], 24), 12713, 0, fixed, [296])
     #How to Jump while moving lands ahead of the Player.
     declare('how-to-jump-282-moving-phase0', single(282),
             idle + acquire() + use('use-moving', ['d'], 30), 12713, 0, fixed, [282])

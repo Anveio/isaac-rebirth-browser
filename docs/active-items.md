@@ -178,6 +178,11 @@ First complete run (fresh original and browser, all paired presentations):
   Revelations78, How to Jump282 standing, How to Jump282 moving right,
   Blank Card286 with an empty card slot, Satanic Bible292, and the fresh OS
   How to Jump282 epoch moving left.
+- Also passing: Deck of Cards85 and Mom's Bottle of Pills102 (the pocket
+  grant), Guppy's Paw133, Prayer Card146 and Converter296, both with plain
+  soul hearts and with a black heart in the top four halves. In
+  `active-item-use`, the random pedestal case that rolls Mom's Bottle of
+  Pills now passes too.
 - The swap case (Yum Heart45 first, then How to Jump282 approached from the
   side) passes. An earlier run failed it on the Player body after the Morph
   frame (315 position and 193 velocity mismatches). The cause was a door kick
@@ -219,11 +224,11 @@ other branches stay frontiers, as noted in the table.
 | 78 | Book of Revelations | 6 | 0 | Partial | Book: two soul hearts, giant book. The 585820 call and level flag are a frontier. |
 | 83 | The Nail | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 84 | We Need To Go Deeper! | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 85 | Deck of Cards | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 85 | Deck of Cards | 6 | 0 | Partial | 524407: the item85 RNG draws a card (no runes) and AddCard puts it in the pocket, dropping a held card. With Little Baggy it draws a pill. Unknown RNG history or profile achievements stay a frontier. |
 | 86 | Monstro's Tooth | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 93 | The Gamekid | 6 | 200 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 97 | The Book of Sin | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 102 | Mom's Bottle of Pills | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 102 | Mom's Bottle of Pills | 6 | 0 | Partial | 5241D4: the item102 RNG draws a pill color (seed%9+1) for the pocket. With Starter Deck it draws a card. Unknown RNG history stays a frontier. |
 | 105 | The D6 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 107 | The Pinking Shears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 111 | The Bean | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -232,12 +237,12 @@ other branches stay frontiers, as noted in the table.
 | 126 | Razor Blade | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 127 | Forget Me Now | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 130 | A Pony | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 133 | Guppy's Paw | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 133 | Guppy's Paw | 0 | 0 | Complete | 523789: with more than one heart container, removes one (red health clamped), sound157 and three soul hearts. |
 | 135 | IV Bag | 0 | 15 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 136 | Best Friend | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 137 | Remote Detonator | 0 | 2 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 145 | Guppy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 146 | Prayer Card | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 146 | Prayer Card | 6 | 0 | Complete | 523690: one eternal half heart (a completed pair requests the eternal information animation), then the Pickup clip. |
 | 147 | Notched Axe | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 158 | Crystal Ball | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 160 | Crack the Sky | 4 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -263,7 +268,7 @@ other branches stay frontiers, as noted in the table.
 | 293 | Head of Krampus | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 294 | Butter Bean | 90 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 295 | Magic Fingers | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 296 | Converter | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 296 | Converter | 0 | 0 | Complete | 5226DC: with more than three soul halves, any black half among the top four fires the Black Heart Necronomicon, then four soul halves become one heart container, filled. |
 | 297 | Pandora's Box | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 298 | Unicorn Stump | 1 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 323 | Isaac's Tears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
