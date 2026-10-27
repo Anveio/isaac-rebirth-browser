@@ -20,10 +20,10 @@ composition is [item synergies](item-synergies.md).
 | Kind | Total | Complete | Partial | Missing | Missing but engine refs |
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
-| active | 75 | 7 | 20 | 48 | 7 |
+| active | 75 | 7 | 21 | 47 | 7 |
 | familiar | 55 | 0 | 1 | 54 | 1 |
 | trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 7 | 50 | 346 | 128 |
+| **all** | 403 | 7 | 51 | 345 | 128 |
 
 Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 4 mismatch, 2 untested.
 
@@ -347,7 +347,7 @@ passing live comparison.
 | 186 | Blood Rights | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 192 | Telepathy For Dummies | missing |  |  | 2 (treasure, library) | yes | See [active inventory](active-items.md). |
 | 282 | How to Jump | complete | active-items `how-to-jump-282-fixed-phase1` |  | 2 (treasure, library) |  | See [active inventory](active-items.md). |
-| 283 | D100 | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
+| 283 | D100 | partial | `pickup-interactions`, `d100-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 284 | D4 | partial | `pickup-interactions`, `d4-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 285 | D10 | partial | `pickup-interactions`, `d10-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 286 | Blank Card | partial | active-items `blank-card-286-fixed-phase0` |  | 3 (treasure, shop, secret) |  | See [active inventory](active-items.md). |
