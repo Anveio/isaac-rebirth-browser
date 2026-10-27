@@ -551,10 +551,22 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 .and_then(|owner| owner.held_pockets.as_ref())
                 .map(|held| held.slots[0])
                 .map(|slot| slot.card && slot.id != 0);
+            let held_slot = state
+                .player_items
+                .as_ref()
+                .and_then(|owner| owner.held_pockets.as_ref())
+                .map(|held| held.slots[0]);
             match held_card {
                 Some(false) => {}
-                //526DB0 UseCard: the card effects are not ported, so the
-                //reached call (or an unknown held slot) is a frontier.
+                //523611 UseCard526DB0 with the held card; the card stays held.
+                Some(true)
+                    if variant0
+                        && crate::pockets::use_card_effect(
+                            state,
+                            held_slot.expect("checked held slot"),
+                        )? => {}
+                //Other cards' effects are not ported, so the reached call
+                //(or an unknown held slot) is a frontier.
                 Some(true) | None if variant0 => {
                     forget_unported_effect(state);
                     crate::active_charges::invalidate(

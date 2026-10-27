@@ -317,15 +317,17 @@ fn duplicate_room_pickups(state: &mut State) -> Result<bool, String> {
     Ok(true)
 }
 
-///5282B0's Card arm for 2 of Clubs (23), 2 of Diamonds (24) and Jera (29).
-///52837C stores Player+BE8 (an unowned word, kept as a frontier) and 528399
-///marks persistent 61. UseCard526DB0 calls 50AA80: the card face goes into
-///the copied Sprite+7E0 and 50A5C0 force-plays UseItem. The jump-table arms
-///527DE3/52752F add the current bombs/coins, or 2 when there are none
-///(AddBombs5086F0 clamps to 0..99; AddCoins518AB0); 527641 is Jera above.
-///5283AE then promotes slot1 and clears its ID dword. Returns false, with
-///nothing changed, when Jera's duplicates are not owned here.
-fn use_card(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
+///UseCard526DB0 for 2 of Clubs (23), 2 of Diamonds (24) and Jera (29),
+///shared by the pocket arm below and Blank Card's leaf 523611. 50AA80 puts
+///the card face into the copied Sprite+7E0 and 50A5C0 force-plays UseItem.
+///The jump-table arms 527DE3/52752F add the current bombs/coins, or 2 when
+///there are none (AddBombs5086F0 clamps to 0..99; AddCoins518AB0); 527641
+///is Jera above. Returns false, with nothing changed, for any other card or
+///when Jera's duplicates are not owned here.
+pub(crate) fn use_card_effect(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
+    if !slot.card || !matches!(slot.id, 23 | 24 | 29) {
+        return Ok(false);
+    }
     if slot.id == 29 {
         // Plan the whole room copy first; adopt it only when every source,
         // Init and placement read is owned.
@@ -339,12 +341,6 @@ fn use_card(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
         .player_items
         .as_mut()
         .ok_or("Card use lost its Player owner")?;
-    owner
-        .pill_use_frontiers
-        .get_or_insert_with(Default::default)
-        .player_be8 = true;
-    crate::persistent_effects::mark_collected(state, 61)?;
-    let owner = state.player_items.as_mut().expect("checked Player owner");
     owner.pickup_presentation = Some(player_items::PickupPresentation {
         item_id: slot.id,
         animation_frame: 0.0,
@@ -364,8 +360,27 @@ fn use_card(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
             player_items::add_coins(state, if coins == 0 { 2 } else { coins })?;
         }
         29 => {}
-        _ => return Err("card arm requires Card 23, 24 or 29".into()),
+        _ => unreachable!("checked card"),
     }
+    Ok(true)
+}
+
+///5282B0's Card arm. UseCard (above) runs first; the independent 52837C
+///Player+BE8 store (an unowned word, kept as a frontier) and 528399's
+///persistent 61 mark follow only when it is owned. 5283AE then promotes
+///slot1 and clears its ID dword. False leaves the frontier path to the caller.
+fn use_card(state: &mut State, slot: PocketSlot) -> Result<bool, String> {
+    if !use_card_effect(state, slot)? {
+        return Ok(false);
+    }
+    state
+        .player_items
+        .as_mut()
+        .ok_or("Card use lost its Player owner")?
+        .pill_use_frontiers
+        .get_or_insert_with(Default::default)
+        .player_be8 = true;
+    crate::persistent_effects::mark_collected(state, 61)?;
     let held = state
         .player_items
         .as_mut()
