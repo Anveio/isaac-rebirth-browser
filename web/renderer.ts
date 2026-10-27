@@ -897,6 +897,7 @@ export class Renderer {
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
     this.activeItem(ctx, state);
+    this.pocketItems(ctx, state);
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
@@ -962,6 +963,53 @@ export class Renderer {
     }
     const overlay = [1, 2, 3, 4, 6, 12].includes(maximum) ? `BarOverlay${maximum}` : null;
     if (overlay) this.assets.draw(ctx, bar, overlay, barX, barY);
+  }
+
+  /** HUD::Render 574BA2..5756E9: pocket slot 0 (Player+3044, card tag +3048)
+   * at (W-28,H-18) = (452,252). A card with a CardFronts face (its config
+   * +18 hud) draws that face 3 to the left; runes, faceless cards and pills
+   * draw their ui_cardspills frame. The card name (config +10; the +8
+   * description while Map is held; "???" in seed mode 29, and for a card in
+   * mode 30, which also drops the face) is drawn right-aligned 16 left of the
+   * slot and 10 up, plus the Game+CEA00 shake. Mode 9 rewrites the name
+   * (5759E2), not ported: no text. Pill names need the Game+95B0 identified
+   * byte, which the port does not own, so a pill draws without text outside
+   * mode 29. Slot 1 (+304C/+3050) draws its Small frame at (W-24,H-34). */
+  private pocketItems(ctx: CanvasRenderingContext2D, state: State): void {
+    const held = state.playerItems?.heldPockets;
+    if (!held) return;
+    const sheet = "gfx/ui/ui_cardspills.anm2";
+    const cardFrame = (id: number, small: string): [string, number] =>
+      id <= 22 ? [`Cards${small}`, 0] : id <= 27 ? [`Cards${small}`, 1]
+        : id <= 31 ? [`Runes${small}`, 0] : id <= 35 ? [`Runes${small}`, 1] : [`Cards${small}`, 1];
+    const mode = state.runSeeds?.sourceEffectMode ?? null;
+    const [x, y] = [480 - 28, 270 - 18];
+    const slot = held.slots[0]!;
+    if (slot.id !== 0) {
+      let name: string | null = null;
+      if (!slot.card) {
+        this.assets.draw(ctx, sheet, "Pills", x, y, slot.id - 1);
+        if (mode === 29) name = "???";
+      } else {
+        const card = pickupCatalog.cards.find(entry => entry.id === slot.id);
+        if (card?.hud && mode !== 30) this.assets.draw(ctx, "gfx/ui/ui_cardfronts.anm2", card.hud, x - 3, y, 0);
+        else {
+          const [animation, frame] = cardFrame(slot.id, "");
+          this.assets.draw(ctx, sheet, animation, x, y, frame);
+        }
+        name = mode === 29 || mode === 30 ? "???"
+          : card ? (state.publicActions.held[13] ? card.description : card.name) : null;
+      }
+      if (name && mode !== 9) {
+        const shake = state.gameShake?.offsetCea00 ?? { x: 0, y: 0 };
+        this.assets.font(ctx, "pftempestasevencondensed", name, x - 16 + shake.x, y - 10 + shake.y, { align: "right" });
+      }
+    }
+    const second = held.slots[1]!;
+    if (second.id !== 0) {
+      const [animation, frame] = second.card ? cardFrame(second.id, "Small") : ["PillsSmall", second.id - 1];
+      this.assets.draw(ctx, sheet, animation, 480 - 24, 270 - 34, frame);
+    }
   }
 
   private drawMaps(ctx: CanvasRenderingContext2D, state: State): void {

@@ -50,8 +50,16 @@ base Rebirth, which is what the port targets.
 The active-item key is Space; Q uses the pocket. Using the active slot (HUD,
 charge, use effects) belongs to the active-item work in
 [active-items.md](active-items.md). Blank Card's leaf calls the same UseCard
-as the pocket for the ported cards; the Blank Card + Jera combo is still
-pending on two placement frontiers (see the inventory).
+as the pocket for the ported cards; the Blank Card + Jera combo passes in
+the 1x1 rooms (see the inventory).
+
+The HUD draws the pocket in the bottom right (HUD::Render `574BA2`): a card
+with an authored face (pocketitems.xml `hud`) shows that `ui_cardfronts`
+frame, runes, faceless cards and pills show their `ui_cardspills` frame, and
+the name is printed to the left, or the description while Map is held. A
+second pocket slot shows its small frame above. Pill names are not drawn yet:
+they depend on the identified-pill flags, which the port does not own, and
+the seed effect that rewrites names is not ported either.
 
 ## Inventory
 
