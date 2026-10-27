@@ -20,7 +20,6 @@ python3 tools/foundation/decode-rooms.py --prepare-private-caves  # before raw c
 | Native diagnostic binaries (floor, replay) | [engine/src/bin](engine/src/bin) |
 | Authored content pipeline | [docs/content-pipeline.md](docs/content-pipeline.md) |
 | Level framework (stage nodes, chapters) | [docs/levels.md](docs/levels.md) |
-| Ordinary NPC Freeze and Mom's Bra | [docs/npc-freeze.md](docs/npc-freeze.md) |
 | Difficulty framework (Normal/Hard rules) | [docs/difficulty.md](docs/difficulty.md) |
 | Antithesis DST harness (only unit exception) | [engine/dst](engine/dst), [antithesis](antithesis), [tools/dst](tools/dst), [docs/dst.md](docs/dst.md) |
 | Browser runtime, renderer, audio, WASM bridge | [web/main.ts](web/main.ts), [web/engine.ts](web/engine.ts) |
