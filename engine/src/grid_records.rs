@@ -60,11 +60,14 @@ fn is_false(value: &bool) -> bool {
     !*value
 }
 
-/// Poop.Update569D50 (variant0) in the full grid pass. A broken poop (state
-/// above 3) keeps class0; an intact one is class3 unless Poop+330 is set,
-/// the Player is on the ground (444860) and Length612790(cell - Player) is
-/// below 21: then class0 below 20, and from 20 up the flag clears. Other
-/// variants keep their Init class.
+/// Poop.Update569D50 (variants 0 and 1) in the full grid pass. A broken poop
+/// (state above 3) keeps class0; an intact one is class3 unless Poop+330 is
+/// set, the Player is on the ground (444860) and Length612790(cell - Player)
+/// is below 21: then class0 below 20, and from 20 up the flag clears. An
+/// intact red poop (variant 1, 569ee5) first runs the grid contact helper
+/// 561100: radius 38, one half heart with flags 0x200. Other variants keep
+/// their Init class. PORT GAP: the red poop's colour pulse (569f2e) and its
+/// +320 regrowth countdown are not run.
 pub(crate) fn advance_poops(
     state: &mut crate::State,
     phase: crate::phase::Phase,
@@ -75,17 +78,18 @@ pub(crate) fn advance_poops(
     let Some(descriptor) = state.room.grid.clone() else {
         return Ok(());
     };
+    let cells = descriptor.cells.len();
     let grid = crate::grid::Grid::new(descriptor)?;
-    let player = crate::bombs::player_world(state);
-    let player_class = state.player.grid_collision_class;
-    let Some(cells) = state.room.grid.as_mut().map(|grid| &mut grid.cells) else {
-        return Ok(());
-    };
-    for (index, cell) in cells.iter_mut().enumerate() {
-        let Some(entity) = cell.entity.as_mut() else {
+    for index in 0..cells {
+        let Some(entity) = state
+            .room
+            .grid
+            .as_mut()
+            .and_then(|grid| grid.cells[index].entity.as_mut())
+        else {
             continue;
         };
-        if entity.kind != 14 || entity.variant != 0 {
+        if entity.kind != 14 || entity.variant > 1 {
             continue;
         }
         if entity.state > 3 {
@@ -93,6 +97,19 @@ pub(crate) fn advance_poops(
             continue;
         }
         entity.collision_class = 3;
+        if entity.variant == 1 {
+            crate::grid_hazards::contact(state, index, 38.0, 1, 60, 0x200)?;
+        }
+        let player = crate::bombs::player_world(state);
+        let player_class = state.player.grid_collision_class;
+        let Some(entity) = state
+            .room
+            .grid
+            .as_mut()
+            .and_then(|grid| grid.cells[index].entity.as_mut())
+        else {
+            continue;
+        };
         let Some(owner) = entity.source_owner.as_mut() else {
             continue;
         };
@@ -166,13 +183,16 @@ impl GridEntity {
                 costs.store(index, 1000)?;
             }
             1 => {} // Supported Decoration.Init has no direct path-cost store.
-            14 if self.variant == 0 => {
+            14 if self.variant <= 1 => {
                 // Poop.Init569600: an ordinary unbroken poop blocks (class3)
                 // and stores path cost1500; a broken one (restored from its
-                // record) stores 0 and its Update keeps class0. Its local
-                // RNG5/9/7 then draws the variant0 sheet (569ac0
-                // RandomInt(3)+1) and the cosmetic +314 (56994f RandomInt(2))
-                // whatever the state.
+                // record) stores 0 and its Update keeps class0. A red poop
+                // (variant 1, 569978) comes back whole. Its local RNG5/9/7
+                // then draws the sheet (569ac0/569af0 RandomInt(3)+1) and the
+                // cosmetic +314 (56994f RandomInt(2)) whatever the state.
+                if self.variant == 1 && self.state > 3 {
+                    self.state = 0;
+                }
                 if self.state <= 3 {
                     self.collision_class = 3;
                     costs.store(index, 1500)?;

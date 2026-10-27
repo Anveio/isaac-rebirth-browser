@@ -330,10 +330,12 @@ export class Renderer {
         const crop = { Idle: [0, 0], IdleMedium: [32, 0], ReadyToExplode: [0, 32], Blown: [32, 32] }[sprite.animation]!;
         ctx.drawImage(this.assets.image("gfx/grid/grid_tnt.png"), crop[0]!, crop[1]!, 32, 32, x - 16, y - 16, 32, 32);
         this.drawnGrid.push({ index, kind: 12, animation: sprite.animation, frame: sprite.frame });
-      } else if (entity.kind === 14 && entity.variant === 0 && entity.sourceOwner?.poopSheet) {
-        // Poop.Init569600 picks grid_poop_{1..3} and plays State{state+1}
-        // (State5 once broken); a spawn into a loaded room plays Appear first.
-        const sheet = { 0: `gfx/grid/grid_poop_${entity.sourceOwner.poopSheet}.png`, 1: "gfx/effects/effect_poopspawn.png" };
+      } else if (entity.kind === 14 && entity.variant <= 1 && entity.sourceOwner?.poopSheet) {
+        // Poop.Init569600 picks grid_poop_{1..3} (a red poop's
+        // grid_poop_red_{1..3}) and plays State{state+1} (State5 once
+        // broken); a spawn into a loaded room plays Appear first.
+        const red = entity.variant === 1 ? "red_" : "";
+        const sheet = { 0: `gfx/grid/grid_poop_${red}${entity.sourceOwner.poopSheet}.png`, 1: "gfx/effects/effect_poopspawn.png" };
         const birth = entity.sourceOwner.birthGameUpdate, init = state.room.initializationGameUpdate;
         const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
         const animation = age < 20 ? "Appear" : `State${Math.min(entity.state + 1, 5)}`;
@@ -559,13 +561,10 @@ export class Renderer {
       ctx.save();
       ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
       ctx.scale(npc.dip.flipX ? -1 : 1, 1);
+      // The sprite colour (+2d0); dip.tint/offsets are the splat colour 494ac8
+      // writes for its blood and poop effects.
       this.assets.draw(ctx, "gfx/216.000_dip.anm2", npc.animation, 0, 0, npc.animationClock,
-        { scale, overrides: { 0: {
-          RedTint: npc.dip.tint[0]! * 255, GreenTint: npc.dip.tint[1]! * 255,
-          BlueTint: npc.dip.tint[2]! * 255, AlphaTint: npc.dip.tint[3]! * 255,
-          RedOffset: npc.dip.offsets[0]! * 255, GreenOffset: npc.dip.offsets[1]! * 255,
-          BlueOffset: npc.dip.offsets[2]! * 255,
-        } } });
+        { scale, color });
       ctx.restore();
     } else if (npc.fireplace) {
       this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,

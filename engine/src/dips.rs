@@ -26,6 +26,8 @@ pub struct DipState {
     pub birth_game_update: u32,
     pub current_friction: f32,
     pub flip_x: bool,
+    /// Entity_NPC splat colour +3cc that init 494ac8 writes: tint and offset
+    /// for the Dip's Blood7 and poop effects. The sprite keeps `sprite_color`.
     pub tint: [f32; 4],
     pub offsets: [f32; 3],
     /// Base441d81/441e66 per-spawn owners, not permanent eligibility constants.

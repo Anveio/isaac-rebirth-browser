@@ -189,6 +189,9 @@ pub fn for_room(
                 1500 if !crate::room_spawns::next35(spawn.spawn_seed).is_multiple_of(40) => {
                     Some((14, 0, 0, 3))
                 }
+                // Factory5ceb21: raw1490 is the red poop, kind14 variant1,
+                // with no roll.
+                1490 => Some((14, 1, 0, 3)),
                 _ => None,
             };
             if let Some((kind, variant, state, collision_class)) = admitted {
