@@ -91,9 +91,27 @@ npm run test:e2e -- pocket-actions --scenarios SAVED_BANK --case pocket-actions1
 The entire fixed-plus-OS bank and OS journal are validated before selection;
 `scenarios.json` preserves that whole bank and `selection.json` names the actual
 selected cases. Replay draws no entropy. Missing owners or required branches
-fail. This new suite has no passing live qualification until its actual captures
-and comparisons finish. It makes no private callback-entry claim from final
-values: the two radius0 free-position calls and queue/removal helper invocation
-ordering need separate witnesses. Positive trinkets, capacity2 swaps, the
-GnawedLeaf210 consumer, full sharedMT, pixels and backend audio/PCM remain
-separate scopes.
+fail. The actual three-case bank on WASM `4f033f11` and immutable production
+`fafb9f35` (1,615 files) passes 54,842 functional checks: fixed phase 0 18,272,
+fixed phase 1 18,298 and recorded OS0 18,272, with zero required failures or
+errors. All 12 independent capture-readback checks pass, including actual
+physical inputs, clocks, resources, closed journals and Browser DOM/backend
+owners. Source and protected-input hashes match before and after both runs.
+The first unfiltered OS token `65b00c50d6fe8530` declares boot 1343008869 and
+phase 0. It varies boot/phase on the fixed normal run and authored Card1 room;
+it supplies no random-floor coverage.
+
+Both games observe natural Card1 acquisition, all 120 held increments, a new
+Card1 body and cleared held ID at callback 121, positive AD0, null source,
+release and an empty hold without another body. This result makes no private
+callback-entry claim from final values: the two radius 0 free-position calls
+and queue/removal helper invocation ordering need separate witnesses.
+Positive trinket 350 drop/queue/cache/costume paths, capacity 2 swap live
+qualification, legacy Ctrl/Continue histories, the Gnawed Leaf (210) consumer,
+full sharedMT, pixels and backend audio/PCM remain separate scopes. The
+earlier interrupted baseline capture remains incomplete and supplies no
+game qualification. Separate inherited pocket-collection fixed and first OS
+controls pass 58,797 checks on both main and this candidate, with identical
+138-field check counts per case, normalized Native/Browser values and
+comparison diagnostics. These controls use the same declared inputs; broader
+Controls, legacy Ctrl/Continue and the scopes above remain open.

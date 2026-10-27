@@ -84,7 +84,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Bosses](#bosses) | Partial | Basement families and additional Caves boss source; live scopes remain separate | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools, active slot/swap/charge, 26 active-use rows with scoped branches, supported passives/weapons and Leech | 1 |
-| [Pocket items](#pocket-items) | Partial | Held slots/HUD/Save, collection/spill, Range Down/Up, 2 of Clubs/Diamonds, Jera and identified pill names | 0 |
+| [Pocket items](#pocket-items) | Partial | Held slots/HUD/Save, collection/spill, Ctrl action11 swap/drop source, Range Down/Up, 2 of Clubs/Diamonds, Jera and identified pill names | 0 |
 | [Special rooms and economy](#special-rooms-and-economy) | Partial | Normal Shop stock/prices and scoped paid Bomb witness; other economy frontiers remain | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
@@ -175,15 +175,20 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, Native process reload, Browser OS-process
-restart and remaining remapped action callbacks, including drop and broader R
-contexts. Configurable Map and living normal-Isaac R have separate bounded
+restart and remaining remapped action callbacks and broader R contexts.
+Configurable Map and living normal-Isaac R have separate bounded
 scopes; [living R](living-restart.md) is implemented for normal difficulty and
 Challenge0, with seeded paired evidence and separate seeded/unseeded Browser
 own-storage checks. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: Native own-saved Keyboard process reload; drop (Ctrl), broader R contexts
-and natural R reload; gamepad.
+Ctrl action11 now owns complete-record swaps and the held-callback drop
+threshold. [Bounded live coverage](pockets-e2e.md) admits default physical
+Ctrl with natural Card1 acquisition and empty trinkets; other Ctrl contexts
+remain open.
+
+Next: Native own-saved Keyboard process reload; broader Ctrl and R contexts,
+natural R reload and gamepad.
 
 No open bugs.
 
@@ -580,8 +585,11 @@ canonical counter, requests/evaluates Range, consumes/promotes held slots and
 plays Sad/Happy. PR820/821 add 2 of Clubs, 2 of Diamonds and Jera; PR822 lets
 Blank Card reuse those effects while retaining the held card/rune. PR855 owns
 identified-pill flags and resolved HUD names. The [interaction inventory](pickup-interactions.md)
-records its scoped live routes; pill-name pixels, other effects, drop and the
-complete ceremony remain unqualified or incomplete.
+records its scoped live routes; pill-name pixels, other effects and the
+complete ceremony remain unqualified or incomplete. Ctrl action11 swaps whole
+held records and drops admitted pockets on the 121st held Player callback.
+Only a real released callback establishes the initially unknown 3054 counter;
+positive trinket/queue/cache paths retain explicit frontiers.
 
 Evidence: #586's frozen candidate passes 5,639 Original/public-WASM checks;
 #602 persists `pill-range-use` and passes a 1,409-check retained-Original replay
@@ -595,8 +603,15 @@ complete and eight remain mandatory; DOM/rendering, audible backend
 and PCM equality are unavailable in this Node result. Pocket coverage does
 not qualify basic coin/key/bomb/chest scenarios.
 
-Next: complete the remaining durable cases, 251/252 world/held conversions,
-remaining Battery90 live branches, other equipped effects, broader
+The separate [Ctrl evidence](pockets-e2e.md) covers natural Card1 acquisition,
+tap, 120/121 drop, release and an empty hold on a fixed normal run, with both
+fixed phases and an unfiltered OS boot/phase. Positive trinket helpers,
+capacity 2 swaps, legacy Ctrl/Continue and the other listed scopes stay open.
+
+Next: complete the remaining durable cases, positive trinket drop helpers,
+capacity 2 swap and legacy Ctrl/Continue qualification, the Gnawed Leaf (210)
+consumer, 251/252 world/held conversions, remaining Battery90 live branches,
+other equipped effects, broader
 identification/HUD coverage and complete save/Continue restoration, with real
 callback and audio evidence kept separate.
 
