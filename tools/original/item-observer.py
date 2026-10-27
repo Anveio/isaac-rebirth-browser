@@ -145,6 +145,12 @@ def observe(pid,context):
       players[-1]['heldPocketRecords']=[{'slot':slot,'sourceIdOffset':0x3044+slot*8,
        'id':struct.unpack_from('<i',held,slot*8)[0],'typeTagRaw':held[slot*8+4]}
        for slot in range(2)]
+     if context.get('pocketActions') is True:
+      players[-1]['pocketActions']={'sourceD98':i32(player+0xd98),
+       'heldCallbacks3054':struct.unpack('<I',read(player+0x3054,4))[0],
+       'source30d0':struct.unpack('<I',read(player+0x30d0,4))[0],
+       'trinketSlots':[i32(player+0xe14),i32(player+0xe18)],
+       'queuedConfigKind':i32(queued) if queued else None}
      if context.get('persistentItemInputs',False):
       #Actual raw Player words only. Absent port owners are never inputs;
       #this optional observation performs14 bounded4-byte native reads.

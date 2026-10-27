@@ -11,8 +11,8 @@ import {resetBootElapsed} from './verify.mjs';
 import {DECLARED_NATIVE_INTRO} from './composition-wasm-public.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space'};
-const gameplayKeys = new Set(['Right','Left','Up','Down','w','a','s','d','space','e','q']);
+const keyNames = {Return:'Enter',Tab:'Tab',Down:'ArrowDown',Up:'ArrowUp',Left:'ArrowLeft',Right:'ArrowRight',space:'Space',Control_L:'ControlLeft'};
+const gameplayKeys = new Set(['Right','Left','Up','Down','w','a','s','d','space','e','q','Control_L']);
 const keyCode = key => {
   if (keyNames[key]) return keyNames[key];
   assert.ok(/^[a-z]$/i.test(key),'Undeclared public key '+key);
