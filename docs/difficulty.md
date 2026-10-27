@@ -30,6 +30,7 @@ claim that the difficulty changes nothing there.
 | --- | --- | --- | --- | --- |
 | `champion_chance_bonus` | NPC Init 47f5c6/47f725: added to the champion chance (0.05, 0.2 with Champion Belt) | 0.0 | f32 0.15 (66ad1c) | `champions::roll` |
 | `champion_drop_needs_zero_roll` | Champion death drop 4f27a0 (4f2d10 at removal): the NPC's own RNG draws RandomInt(3) at both difficulties (4f27c8); 4f27d8 then gates the color's drop | always drops | drops only on 0 | `champions::death_drops` |
+| `clear_heart_max_roll` | Ordinary room-clear award 5c9240: a heart award draws RandomInt(100) on the award RNG (5c9e1c, 5c9f93) and spawns only at or below the limit | no draw | at most 34 | `clear_award::spawn` |
 | `curse_odds` | Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor; n for a fresh profile / achievement 4 / achievement 33 / counter 10 | 80 / 30 / 10 / 5 | 10 / 5 / 3 / 2 | `challenges::sample_curse` (Challenge floors, hard's extra rooms) |
 | `extra_rooms` | Level::Init 58c08e: rooms added to the floor's count, plus the curse stream's RandomInt(2) (58c089) | none | 2 | `floor::generate_normal_basement` |
 | `odd_stage_room_difficulty` | Level::Init 58c114/58c124: normal-room difficulty on odd stages | 1..5 | 5..10 | `floor::difficulty_band` (even stages are 5..10 at both) |
@@ -80,7 +81,7 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 | 5399ed | Slot 539540 | beggar payout threshold | gap |
 | 53c9fa, 53da69, 53ff04 | Slot 53c290 | slot prize odds and counts | gap |
 | 5c87c3 | boss death 5c8430 | boss heart drop | gap |
-| 5c9e1c | SpawnClearAward 5c9240, ordinary rooms | heart award odds | gap |
+| 5c9e1c | SpawnClearAward 5c9240, ordinary rooms | heart award odds | row `clear_heart_max_roll` |
 | 5c9ca9, 5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d | SpawnClearAward 5c9240, Boss Rush and final bosses | hard completion marks | gap |
 
 ## Gaps
@@ -107,9 +108,12 @@ implements without the rule yet). The values are read from the disassembly.
   The port admits no slot payouts.
 - **Boss heart** (boss death 5c8430, 5c87c3): Boss and Boss Rush rooms drop a
   heart only at normal. The port's boss callback is pending.
-- **Room-clear heart award** (5c9240, 5c9e1c then 5c9f93): at hard an
-  ordinary room's heart award survives only when RandomInt(100) <= 34. The
-  port has no ordinary room-clear awards.
+- **Ordinary room-clear award** (5c9240, `clear_award`): the port spawns
+  the award from the award RNG, Luck, Lucky Foot, Lucky Toe, the trinkets
+  22/34/36/41/44/45, Guppy's Tail and Contract from Below. It spawns nothing
+  when one of those owners is unknown, in room type 0x11 (which takes the boss
+  branch 5c9740), or for a trinket (5.350) or red chest (5.360) award, which
+  have no factory yet.
 - **Completion marks** (5c9240's Boss Rush and stage 6/8+ branches: 5c9ca9,
   5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d): a per-character
   Persistent counter at 1 is raised to 2 at hard; 5ca5a2 also unlocks a
@@ -135,3 +139,10 @@ With a capture on every fight update, the normal key champion (EHL7N0AV) and
 the hard pill champion (7VFTKQCK, own roll 0) drop at the same update with
 the same variant, subtype, seed and position in both games. The hard red
 champion in 4J3JGA0V (own roll 2) dies in both games without a heart.
+
+The same captures grade the ordinary room-clear award. The normal Horf rooms
+EHL7N0AV (a chest) and 31T4YVZ3 (a bomb) spawn the award at the room centre
+(320, 280) with the original's variant, subtype and seed. The
+`clear-award-hard` spec fights single-Dip rooms at hard: HNXKNQ2T (roll 14)
+and G6MD4K0A (roll 2) spawn the heart at the same seed and position in both
+games, and WPTB6SQK (roll 58) clears with no award in either game.

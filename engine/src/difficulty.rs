@@ -82,6 +82,10 @@ rules! {
     /// Champion death drop 4f27a0: the NPC's own RNG draws RandomInt(3) at
     /// both difficulties (4f27c8); hard (4f27d8) drops only when it is 0.
     champion_drop_needs_zero_roll: bool = [false, true],
+    /// Ordinary room-clear award 5c9240: a heart award draws RandomInt(100)
+    /// on the award RNG at hard (5c9e1c, 5c9f93) and spawns only when the
+    /// roll is at most this.
+    clear_heart_max_roll: Option<u32> = [None, Some(34)],
     /// Level::Init 58bf90..58bfd8: RandomInt(n) == 0 curses the floor, n for
     /// a fresh profile, achievement 4, achievement 33 and counter 10 (each
     /// later one wins).

@@ -27,6 +27,7 @@ pub mod challenges;
 pub mod champions;
 pub mod chests;
 pub mod chub;
+mod clear_award;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
