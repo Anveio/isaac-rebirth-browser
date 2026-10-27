@@ -55,6 +55,12 @@ class FearComparison:
                       if row['actor']['kind'] == 'npc'}
         for actor in base['actors']:
             actual = measured.pop((actor['lifetimeId'], actor['key'][3]))
+            # These existing snapshot owners are independent of Fear's
+            # timer/flag/vector group and remain usable in older journals.
+            actor.update(sequenceId=self.integer(identities[actor['lifetimeId']]),
+                # Npc.gridCollided explicitly omits false, with serde's
+                # default false on absence; this is its snapshot contract.
+                gridContact=self.boolean(actual.get('gridCollided', False)))
             status = actual.get('status')
             try:
                 assert type(status) is dict
@@ -63,11 +69,7 @@ class FearComparison:
                 # the separate narrow vector owner must still be present.
                 assert actual.get('pathfinder') is None and type(vectors) is dict, 'Horf has exactly its narrow embedded owner'
                 actor.update(fearTimer=self.integer(status['fearTimer']), feared=self.boolean(status['feared']),
-                    pathVectors={key:self.vector(vectors[key]) for key in ('target', 'wanderDirection10')},
-                    sequenceId=self.integer(identities[actor['lifetimeId']]),
-                    # Npc.gridCollided explicitly omits false, with serde's
-                    # default false on absence; this is its snapshot contract.
-                    gridContact=self.boolean(actual.get('gridCollided', False)))
+                    pathVectors={key:self.vector(vectors[key]) for key in ('target', 'wanderDirection10')})
             except (KeyError, TypeError, ValueError, AssertionError) as error:
                 actor.update(statusAvailable=False, fearUnavailable=str(error))
                 self.check('Own:fear actual timer/flag/vector owners', str(error), 'complete actual owners', gp)
@@ -137,13 +139,8 @@ class FearComparison:
                 identity, hp = [actor['key'], actor['lifetimeId'], actor.get('sequenceId')], actor['hp']
             check(f'{name}:fear stable target identity', [actor['key'], actor['lifetimeId'], actor.get('sequenceId')], identity, gp)
             check(f'{name}:fear unchanged target HP', actor['hp'], hp, gp)
-            check(f'{name}:fear status owner available', actor['statusAvailable'], gp=gp)
-            if not actor['statusAvailable'] or 'fearTimer' not in actor:
-                unavailable_slots += 1
-                if first is not None and (first_full is None or first_fast is None):
-                    first_boundary_complete = False
-                previous = prior_gp = None
-                continue
+            # Player and pre-Space Horf owners do not depend on the new
+            # Fear group. Keep their actual evidence when Fear is unavailable.
             held |= player['activeId'] == 41 and player['activeCharge'] == 3
             used |= any(row[0] == 41 for row in player['temporary']) and player['activeCharge'] == 0
             before_use = not space or gp < space[0][0]
@@ -152,6 +149,13 @@ class FearComparison:
                 pre_shooter.add(tuple(actor['shooter']))
                 pre_anm.add((actor['animation'], actor['animationClock'], actor['animationPlaying']))
                 pre_shot |= bool(value['horfProjectiles'])
+            check(f'{name}:fear status owner available', actor['statusAvailable'], gp=gp)
+            if not actor['statusAvailable'] or 'fearTimer' not in actor:
+                unavailable_slots += 1
+                if first is not None and (first_full is None or first_fast is None):
+                    first_boundary_complete = False
+                previous = prior_gp = None
+                continue
             actual = callback(name, value, rows[prior_gp]['npcFear'], gp, 'fear') if previous is not None and gp == prior_gp + 1 else None
             if previous is not None:
                 classified = gp == prior_gp + 1 and actual is not None and information_available
