@@ -913,3 +913,10 @@ contract, not a regrade of old captures.
 npm run test:e2e -- options-gamma --no-build --production-directory FROZEN
 npm run test:e2e -- options-gamma --scenarios references/isaac/cases/options-gamma/recorded-fixed-and-1k6qhddf-v1.json --no-build --production-directory FROZEN
 ```
+
+`pocket-actions` uses the existing public composition capture with its separate
+Ctrl11 reader: natural Card1 contact, physical Ctrl tap,120/121 held callbacks,
+release and empty hold in two fixed phases plus the first unfiltered OS boot
+and phase. It retains the complete bank before selection and requires actual
+D98/3054/30D0 and body witnesses. Private helper calls and positive trinkets are
+outside the endpoint grade. See [the route and qualification limits](../../docs/pockets-e2e.md).

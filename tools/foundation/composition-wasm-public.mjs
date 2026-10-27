@@ -112,7 +112,7 @@ const commands=[],checkpoints=[];
 const snapshot=runtime.snapshot;
 async function observe(kind){const state=snapshot();await append({kind,presentation,gameplayPresentation,state});observations++;return state;}
 function command(v){runtime.command(v);commands.push(v);if(v.type==='tick')presentation+=v.count;}
-const names={Return:'Enter',Tab:'Tab',Right:'ArrowRight',Left:'ArrowLeft',Up:'ArrowUp',Down:'ArrowDown',space:'Space'},code=k=>names[k]??'Key'+k.toUpperCase();
+const names={Return:'Enter',Tab:'Tab',Right:'ArrowRight',Left:'ArrowLeft',Up:'ArrowUp',Down:'ArrowDown',space:'Space',Control_L:'ControlLeft'},code=k=>names[k]??'Key'+k.toUpperCase();
 function key(k,down){command({type:'key',code:code(k),down});}
 async function press(k,n,label,dense=false){key(k,true);if(dense){for(let i=0;i<12;i++){command({type:'tick',count:1});await observe('prelude');}}else command({type:'tick',count:12});key(k,false);if(dense){for(let i=0;i<n;i++){command({type:'tick',count:1});await observe('prelude');}}else command({type:'tick',count:n});const s=snapshot();checkpoints.push({label,presentation,screen:s.screen});}
 let failure;

@@ -15,6 +15,9 @@ const pocketMode = flag('--pockets');
 const pillUseMode = hasFlag('--pill-use');
 const trinketStartMode = hasFlag('--trinket-start');
 const activeItemsMode = hasFlag('--active-items');
+const pocketActionsMode = hasFlag('--pocket-actions');
+assert.ok(!pocketActionsMode || (pocketMode === 'collection' && !pillUseMode && !activeItemsMode && !trinketStartMode),
+  'Ctrl actions require their separate public collection reader');
 assert.ok(!activeItemsMode || (pocketMode === 'collection' && !pillUseMode),
   'Active items use the public collection route with their own reader');
 assert.ok(!trinketStartMode || (!pocketMode && !pillUseMode),
@@ -36,13 +39,13 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = trinketStartMode ? 'LOCAL_RECORDED_TRINKET_START_BANK' : pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
   console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
     : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
   process.exit(0);
 }
-const output = outputDirectory(trinketStartMode ? 'trinket-start' : activeItemsMode ? 'active-items'
+const output = outputDirectory(pocketActionsMode ? 'pocket-actions' : trinketStartMode ? 'trinket-start' : activeItemsMode ? 'active-items'
   : pocketMode ? 'pockets-' + pocketMode : 'item-composition');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const save = (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
@@ -79,6 +82,10 @@ if (trinketStartMode) sourceFiles.push(
   'tools/original/trinket-start-events.py', 'tools/original/trinket-start-events.c',
   'tools/original/state-observer.py', 'tools/foundation/trinket-start-state-pair.py',
   'references/isaac/rebirth/resources/challenges.xml');
+if (pocketActionsMode) sourceFiles.push('tools/original/pocket-actions-scenarios.py',
+  'tools/foundation/pocket-actions-state-pair.py',
+  'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
+  'references/isaac/rebirth/resources/challenges.xml');
 if (wasmNode) sourceFiles.push('tools/foundation/composition-wasm-public.mjs');
 const sourcePins = () => filePins(sourceFiles.map(path => join(ROOT, path)));
 
@@ -113,11 +120,12 @@ try {
   } else {
     const generated = join(output, 'declared-inputs');
     const result = await child('python3', [join(ROOT, trinketStartMode ? 'tools/original/trinket-start-scenarios.py'
+      : pocketActionsMode ? 'tools/original/pocket-actions-scenarios.py'
       : pillUseMode ? 'tools/original/pill-range-use-scenarios.py'
       : activeItemsMode ? 'tools/original/active-items-scenarios.py' : pocketMode
       ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
       '--output', generated, '--count', flag('--count', trinketStartMode ? '1' : '2'),
-      ...(pocketMode && !pillUseMode && !activeItemsMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
+      ...(pocketMode && !pillUseMode && !activeItemsMode && !pocketActionsMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
     report.inputMode = 'fixed cases plus every freshly journaled unfiltered OS projection';
@@ -159,6 +167,16 @@ try {
       assert.ok(kind && (pocketMode === 'all' || pocketMode === kind), 'Every declared replay case must match the requested pocket mode');
       assert.equal(Number.isFinite(declaration.sfxVolume), true);
       assert.ok(declaration.sfxVolume >= 0 && declaration.sfxVolume <= 1);
+    }
+    assert.equal(Boolean(declaration.pocketActions), pocketActionsMode, 'Ctrl drops require their separate reader');
+    if (pocketActionsMode) {
+      assert.equal(declaration.pocketActions.schema, 'source-public-pocket-actions11-v1');
+      assert.equal(declaration.pocketActions.cardId, 1);
+      assert.equal(declaration.publicMenuRoute, 'seeded-normal');
+      assert.equal(declaration.publicRunSeed, 12713);
+      assert.equal(declaration.publicSeedCode, 'B91Y6ZEV');
+      assert.deepEqual(fixture.startingItems, []);
+      assert.equal(fixture.challengeConfigurationUsed, false);
     }
     assert.equal(Boolean(declaration.pillUse), pillUseMode,
       'Real consumption requires its separate use reader');
@@ -213,6 +231,50 @@ try {
       assert.equal(cases[2].entropyTokenIndex, 0);
     }
   }
+  if (pocketActionsMode) {
+    assert.equal(bank.suite, 'pocket-actions');
+    assert.ok(cases.length >= 3, 'The whole fixed-plus-OS bank is validated before selection');
+    assert.deepEqual(cases.slice(0, 2).map(item => [item.name, item.bootEpochSeed, item.initialPhaseOffset, item.entropy]),
+      [['pocket-actions11-fixed-phase0', 12713, 0, null], ['pocket-actions11-fixed-phase1', 12713, 1, null]]);
+    const entropyPath = resolve(dirname(bankPath), bank.entropyJournal.path);
+    const entropyBytes = await readFile(entropyPath);
+    assert.equal(hash(entropyBytes), bank.entropyJournal.sha256);
+    const tokens = entropyBytes.toString('utf8').trim().split('\n').map(line => JSON.parse(line));
+    assert.equal(tokens.length, cases.length - 2);
+    for (const [index, item] of cases.slice(2).entries()) {
+      const token = tokens[index];
+      assert.equal(token.index, index);
+      assert.match(token.hex, /^[a-f0-9]{16}$/);
+      const bytes = Buffer.from(token.hex, 'hex');
+      assert.equal(token.bootEpochSeed, bytes.readUInt32LE(0));
+      assert.equal(token.initialPhaseOffset, bytes[4] & 1);
+      assert.equal(item.name, `pocket-actions11-random-${index}`);
+      assert.deepEqual(item.entropy, token);
+      assert.equal(item.bootEpochSeed, bytes.readUInt32LE(0));
+      assert.equal(item.initialPhaseOffset, bytes[4] & 1);
+    }
+    const ctrlActions = [{label:'released-initial-card-appear',keys:[],presentations:96}];
+    for (let number=1;number<=3;number++) ctrlActions.push(
+      {label:`card-acquire-north-${number}`,keys:['w'],presentations:4},
+      {label:`card-acquire-released-${number}`,keys:[],presentations:96});
+    ctrlActions.push(...[
+      ['ctrl-tap',['Control_L'],1], ['ctrl-tap-release',[],2],
+      ['ctrl-hold-120',['Control_L'],120], ['ctrl-hold-121-drop',['Control_L'],1],
+      ['ctrl-drop-release',[],2], ['leave-dropped-card',['s'],12],
+      ['released-away-from-card',[],24], ['ctrl-empty-hold-120',['Control_L'],120],
+      ['ctrl-empty-hold-121',['Control_L'],1], ['ctrl-empty-release',[],2],
+    ].map(([label,keys,presentations])=>({label,keys,presentations})));
+    const groups = [{x:6,y:5,entries:[{type:5,variant:300,subtype:1,weight:1}]}];
+    for (const item of cases) {
+      assert.deepEqual(item.actions, ctrlActions, 'Every recorded case retains the declared public Ctrl route');
+      assert.deepEqual(item.pocketCollection.groups, groups);
+      assert.deepEqual(item.fixture.startRoomSpawnChange.groups, groups);
+      assert.ok(Number.isInteger(item.bootEpochSeed) && item.bootEpochSeed >= 0 && item.bootEpochSeed <= 0xffffffff);
+      assert.ok([0,1].includes(item.initialPhaseOffset));
+    }
+    bank.entropyJournal = {...bank.entropyJournal, path:entropyPath};
+    report.entropyJournal = {path:entropyPath, sha256:hash(entropyBytes)};
+  }
   if (cases.some(item => item.requires?.spoonBender3Functional !== undefined)) {
     for (const item of cases.filter(value => value.requires?.spoonBender3Functional !== undefined)) {
       const spoon = item.requires.spoonBender3Functional;
@@ -232,12 +294,14 @@ try {
     sourceFiles.push('tools/foundation/composition-controlled-knife-satellites.py');
     report.sourceBefore = await sourcePins();
   }
+  const wholeCases = cases;
   cases = selectCases(cases, item => item.name);
   report.caseFilter = flag('--case') ?? bank.caseFilter;
   if (trinketStartMode) report.fullBank = report.caseFilter === undefined && cases.length === 3;
   assert.ok(!reusedOriginal || cases.length === 1, 'A closed Native reuse names exactly one identical selected case');
   const scenarios = join(output, 'scenarios.json');
-  await save(scenarios, { ...bank, caseFilter: report.caseFilter, cases });
+  await save(scenarios, { ...bank, ...(pocketActionsMode ? {} : {caseFilter:report.caseFilter}), cases:pocketActionsMode ? wholeCases : cases });
+  if (pocketActionsMode) await save(join(output, 'selection.json'), {caseFilter:report.caseFilter, cases:cases.map(item => item.name)});
   report.recordedBank = { path: bankPath, sha256: hash(bankBytes), replayPath: scenarios };
   resources = [...new Set(cases.flatMap(item => [item.fixture.authoredResourcePath, item.fixture.specialRoomsPath].filter(Boolean)))];
   report.resourcePinsBefore = await filePins(resources);
@@ -285,7 +349,7 @@ try {
           'Reused independent Original must have the exact same declaration');
         result.original = {exitCode:0,scope:'Reused closed independent Original capture; no new Native process.',directory:originalDirectory};
       } else {
-      if (trinketStartMode && !hasFlag('--prepare-only')) {
+      if ((trinketStartMode || pocketActionsMode) && !hasFlag('--prepare-only')) {
         //Keep the actual evidence-filesystem floor after the server's private
         //production copy; never reduce it to squeeze in another Native leg.
         const space = await statfs(output, {bigint:true});
@@ -320,9 +384,9 @@ try {
       } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); }
       for (const [key, tool, args] of [
         ['captureReadback', 'composition-readback.py', ['--directory', directory, ...(wasmNode?['--wasm-node','--wasm-artifact',resolve(wasmNode),'--wasm-sha',wasmSha]:[]), ...(reusedOriginal?['--original-directory',originalDirectory]:[])]],
-        ['comparison', pillUseMode ? 'pill-range-use-state-pair.py' : activeItemsMode ? 'active-items-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
+        ['comparison', pocketActionsMode ? 'pocket-actions-state-pair.py' : pillUseMode ? 'pill-range-use-state-pair.py' : activeItemsMode ? 'active-items-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),
           '--browser', join(portDirectory,wasmNode?'actual-replay-result.json':'browser-evidence.json.gz'),
-          ...(pillUseMode || activeItemsMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
+          ...(pillUseMode || activeItemsMode || pocketActionsMode?['--capture-readback',join(directory,'capture-readback.json')]:[]), ...(wasmNode?['--wasm-node']:[])]],
       ]) {
         try {
           result[key] = await child('python3', [join(ROOT, 'tools/foundation', tool),

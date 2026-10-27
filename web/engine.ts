@@ -3,6 +3,7 @@ export type Screen = "title" | "profile" | "main" | "options" | "controls" | "ke
 export type Difficulty = "normal" | "hard";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  pocketActions?: {sourceD98: number | null; heldCallbacks3054: number | null; source30d0: number | null; frontier: PocketActionFrontier | null; playerBe8StoreReached: boolean; gnawedLeafFrontier: boolean};
   entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
@@ -16,6 +17,7 @@ export interface Player {
   eye: "negative" | "positive";
   shotsFired: number;
 }
+export type PocketActionFrontier = {kind: "playerVariant" | "inputDevice" | "heldCounter" | "heldRecords" | "capacity" | "trinketRemoval" | "queuedFlush" | "pendingCache" | "missingGrid" | "pocketInit"} | {kind: "placement"; frontier: OrdinaryPlacementFrontier};
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
 export interface Costume229 {
   slots: ({entry: number; layer: number; bodyGroup: boolean} | null)[];
@@ -392,7 +394,7 @@ export interface State {
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     heldPockets?: {slots: {id: number; card: boolean}[];
       frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
-        | {kind: "modifierConversion"; collectibleId: number} | null} | null;
+        | {kind: "modifierConversion"; collectibleId: number} | {kind: "dropAction"} | null} | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     pickupGrantHistory?: PickupGrantHistory | null;
     activeChargeHistory?: ActiveChargeHistory | null;
@@ -447,6 +449,7 @@ export interface State {
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; held: boolean[]; triggered: boolean[]; rawKey: number | null; physicalWasDown: string[] };
   keyboard: {bindings: number[][]};
+  selectedInputDevice?: number;
   inputConfigs: InputConfigs;
   controlsMenu: {deviceSelection: number; deviceHeld: number; selectedDevice: number | null; selection: number; column: number; waiting: boolean; nextSaveSequence: number; saveRequests: {sequence: number; configs: InputConfigs}[]; unavailableActions: number[]};
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | "Jump" | null; frame: number; playing: boolean; guard: boolean };

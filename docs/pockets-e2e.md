@@ -70,3 +70,30 @@ captures and comparisons complete. The AL report retains twelve unavailable entr
 including its then-stale counterpart label; the comparer now verifies and pins
 the independent declaration before retiring that label. Unreached same-v1 AD0
 refresh, browser/DOM/rendering, backend playback and PCM remain unqualified.
+
+`npm run test:e2e -- pocket-actions` adds a separate public Ctrl11 route.
+Two fixed boot phases and the first unfiltered OS boot/phase token use the
+same declared normal run and a locally authored Card1 in the starting room.
+The player walks onto that body before a physical Ctrl tap,120 held callbacks,
+the121st callback, release and a later empty hold. Every presentation retains
+actual Native D98/3054/30D0 records and the Browser's separate owned fields.
+An explicit unowned Browser3054 at GP0 is retained separately before the first
+released Player callback; every GP1 and later counter must be an actual uint32.
+Missing owners fail, including on older runtime artifacts.
+Natural acquisition/retirement, the new dropped body, positive AD0, null source,
+released counter and empty hold are required independently in each game.
+
+```sh
+npm run test:e2e -- pocket-actions --no-build --production FROZEN
+npm run test:e2e -- pocket-actions --scenarios SAVED_BANK --case pocket-actions11-fixed-phase0 --no-build --production FROZEN
+```
+
+The entire fixed-plus-OS bank and OS journal are validated before selection;
+`scenarios.json` preserves that whole bank and `selection.json` names the actual
+selected cases. Replay draws no entropy. Missing owners or required branches
+fail. This new suite has no passing live qualification until its actual captures
+and comparisons finish. It makes no private callback-entry claim from final
+values: the two radius0 free-position calls and queue/removal helper invocation
+ordering need separate witnesses. Positive trinkets, capacity2 swaps, the
+GnawedLeaf210 consumer, full sharedMT, pixels and backend audio/PCM remain
+separate scopes.
