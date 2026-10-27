@@ -54,6 +54,40 @@ This leaf preserves existing active, query and scalar-input ownership; an
 unavailable RNG, held record or placement keeps its own frontier. Starter
 Deck's separate grant/conversion leaf remains incomplete.
 
+### Little Baggy qualification
+
+Frozen source `15700568`, production `b84076fd` / WASM `7a40d67e`, passes
+all 330 strict rows in fresh Original and actual Browser captures: fixed
+epoch `1700000000` plus the first recorded unfiltered OS epoch `53734238`,
+both at phase 0, and the existing Blank Card/Battery controls. Main `93268686`
+production `fafb9f35` passes 292 rows and retains 38 failures. Ordered
+comparison preserves every Native expectation and all 292 earlier passes;
+only the 38 failing Port values change. The two controls retain all 120 row
+values and statuses. Both runs use byte-identical banks, resource bytes and
+declared/runtime input tapes.
+
+Item252 RNG words, converted held pill/tag, world pill seed/position and
+Player spawner/null links match. All 24 sampled shared-MT checkpoints match
+the cursor and words 0, 311 and 623. The ordinary free-pedestal Sound23
+request restores the shared draw before placement. This muted fixture does
+not establish Sound23 backend starts, audible output or PCM equality.
+
+The candidate reaches owned active operands; the conditional unknown-operand
+contract is explicitly not applicable. Baseline's observed unknown-operand
+contract failures remain retained. The two damaged-phase Yum Heart controls
+each retain all passing ordered checks, 83,127 in total, using the same closed
+Native captures. These results cover normal Player1/0, one held card and the
+authored room1 sandbox. Two-slot conversion, Starter Deck251, other grant and
+sound branches, complete shared MT, pixels and broader gameplay remain open.
+Earlier uncovered-route and V2 failures retain their separate scope.
+
+Replay the [same input-only bank](../references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json)
+without drawing replacement epochs:
+
+```sh
+npm run test:e2e -- pickup-interactions --scenarios references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json
+```
+
 ## Blank Card and runes
 
 In base Rebirth, **Blank Card (286, 4 charges) triggers the held rune**: with

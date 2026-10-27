@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "suite": "pickup-interactions",
+  "cases": [
+    {
+      "name": "blank-card-pocket-conversion-fixed",
+      "interaction": "blank-card-pocket-conversion",
+      "about": "Little Baggy converts the held 2 of Clubs before a physical Blank Card use",
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "fixture": {
+        "kind": "sandbox-challenge-start-room",
+        "challengeId": 1,
+        "startingItems": [
+          286
+        ],
+        "startingCard": 23,
+        "startRoomSpawns": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 100,
+                "subtype": 252,
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "startRoomShape": "1x1",
+        "authoredResourcePath": "resources/blank-card-pocket-conversion-challenges.xml",
+        "specialRoomsPath": "resources/blank-card-pocket-conversion-special.stb",
+        "specialRoomsSha256": "0269dbafa88958c3b21547d6bb91db9442e1ecebb62caf58cc0d16fb8d60d9d7"
+      },
+      "actions": [
+        {
+          "label": "settle",
+          "keys": [],
+          "presentations": 30
+        },
+        {
+          "label": "walk-to-baggy",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "release-before-second-pulse",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "walk-to-baggy-second-pulse",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-conversion",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "use-active",
+          "keys": [
+            "space"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-active",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "interactions": [
+        "blank-card-pocket-conversion"
+      ]
+    },
+    {
+      "name": "blank-card-pocket-conversion-random-0",
+      "interaction": "blank-card-pocket-conversion",
+      "about": "Little Baggy converts the held 2 of Clubs before a physical Blank Card use",
+      "bootEpochSeed": 53734238,
+      "initialPhaseOffset": 0,
+      "fixture": {
+        "kind": "sandbox-challenge-start-room",
+        "challengeId": 1,
+        "startingItems": [
+          286
+        ],
+        "startingCard": 23,
+        "startRoomSpawns": [
+          {
+            "x": 6,
+            "y": 5,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 100,
+                "subtype": 252,
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "startRoomShape": "1x1",
+        "authoredResourcePath": "resources/blank-card-pocket-conversion-challenges.xml",
+        "specialRoomsPath": "resources/blank-card-pocket-conversion-special.stb",
+        "specialRoomsSha256": "0269dbafa88958c3b21547d6bb91db9442e1ecebb62caf58cc0d16fb8d60d9d7"
+      },
+      "actions": [
+        {
+          "label": "settle",
+          "keys": [],
+          "presentations": 30
+        },
+        {
+          "label": "walk-to-baggy",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "release-before-second-pulse",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "walk-to-baggy-second-pulse",
+          "keys": [
+            "w"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-conversion",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "use-active",
+          "keys": [
+            "space"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-active",
+          "keys": [],
+          "presentations": 60
+        }
+      ],
+      "interactions": [
+        "blank-card-pocket-conversion"
+      ]
+    },
+    {
+      "name": "blank-card-fixed",
+      "interaction": "blank-card",
+      "about": "Blank Card (Space) mimics a held 2 of Clubs and keeps it; an empty Blank Card takes a Lil Battery",
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "fixture": {
+        "kind": "sandbox-challenge-start-room",
+        "challengeId": 1,
+        "startingItems": [
+          286
+        ],
+        "startingCard": 23,
+        "startRoomSpawns": [
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 90,
+                "subtype": 0,
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "startRoomShape": "1x1",
+        "authoredResourcePath": "resources/blank-card-challenges.xml",
+        "specialRoomsPath": "resources/blank-card-special.stb",
+        "specialRoomsSha256": "87c04149d70d480f17f34fae4c011fa1e37c1e06d0fe232af83aa08720d4a6f5"
+      },
+      "actions": [
+        {
+          "label": "settle",
+          "keys": [],
+          "presentations": 30
+        },
+        {
+          "label": "use-active",
+          "keys": [
+            "space"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-active",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "walk-to-battery",
+          "keys": [
+            "w"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "after-battery",
+          "keys": [],
+          "presentations": 30
+        }
+      ],
+      "interactions": [
+        "blank-card-card",
+        "battery-recharge"
+      ]
+    },
+    {
+      "name": "blank-card-random-0",
+      "interaction": "blank-card",
+      "about": "Blank Card (Space) mimics a held 2 of Clubs and keeps it; an empty Blank Card takes a Lil Battery",
+      "bootEpochSeed": 53734238,
+      "initialPhaseOffset": 0,
+      "fixture": {
+        "kind": "sandbox-challenge-start-room",
+        "challengeId": 1,
+        "startingItems": [
+          286
+        ],
+        "startingCard": 23,
+        "startRoomSpawns": [
+          {
+            "x": 6,
+            "y": 1,
+            "entries": [
+              {
+                "type": 5,
+                "variant": 90,
+                "subtype": 0,
+                "weight": 1
+              }
+            ]
+          }
+        ],
+        "startRoomShape": "1x1",
+        "authoredResourcePath": "resources/blank-card-challenges.xml",
+        "specialRoomsPath": "resources/blank-card-special.stb",
+        "specialRoomsSha256": "87c04149d70d480f17f34fae4c011fa1e37c1e06d0fe232af83aa08720d4a6f5"
+      },
+      "actions": [
+        {
+          "label": "settle",
+          "keys": [],
+          "presentations": 30
+        },
+        {
+          "label": "use-active",
+          "keys": [
+            "space"
+          ],
+          "presentations": 4
+        },
+        {
+          "label": "after-active",
+          "keys": [],
+          "presentations": 100
+        },
+        {
+          "label": "walk-to-battery",
+          "keys": [
+            "w"
+          ],
+          "presentations": 60
+        },
+        {
+          "label": "after-battery",
+          "keys": [],
+          "presentations": 30
+        }
+      ],
+      "interactions": [
+        "blank-card-card",
+        "battery-recharge"
+      ]
+    }
+  ]
+}

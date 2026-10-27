@@ -561,6 +561,10 @@ covering books, health conversions, How to Jump, pocket grants, D6/D20/D10,
 The Poop, Anarchist Cookbook, Tammy's Head and other scoped leaves. The
 [active inventory](active-items.md) distinguishes complete leaves from
 unsupported branches; a registered use row does not complete an item.
+Little Baggy's normal Player grant spawns its world pill and converts held
+cards through item252's RNG. Active use requires owned operands; its
+[bounded conversion and unchanged controls](pickup-interactions.md#little-baggy-qualification)
+retain their artifact scope.
 Supported stat items include Sad
 Onion, Cricket's Head, Speed Ball, Roid Rage, Anti-Gravity, Belt, Libra;
 Leech familiar; Gimpy and Infestation 2 Dip callbacks; the weapon items under
@@ -610,7 +614,8 @@ capacity 2 swaps, legacy Ctrl/Continue and the other listed scopes stay open.
 
 Next: complete the remaining durable cases, positive trinket drop helpers,
 capacity 2 swap and legacy Ctrl/Continue qualification, the Gnawed Leaf (210)
-consumer, 251/252 world/held conversions, remaining Battery90 live branches,
+consumer, Starter Deck251 and two-slot Little Baggy252 qualification,
+remaining Battery90 live branches,
 other equipped effects, broader
 identification/HUD coverage and complete save/Continue restoration, with real
 callback and audio evidence kept separate.
