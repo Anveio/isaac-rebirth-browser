@@ -158,6 +158,51 @@ pub(crate) fn dying(npc: &mut Npc, mut friction: f32) -> Result<(), String> {
     Ok(())
 }
 
+/// Die 445c60: the death sound (44641d, louder with gibs), the gibs, then
+/// the real Blood Splat seed.
+fn die(
+    npc: &mut Npc,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    let gibs = npc.config().gib_amount > 0;
+    world.audio.admit(
+        random,
+        world.system_counter,
+        SoundRequest {
+            id: 30,
+            volume: if gibs { 1.0 } else { 0.8 },
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    crate::gib_counts::burst(npc, random, world)?;
+    let seed = random.next_u32();
+    npc.death_effect_seed = Some(seed);
+    births.push(Birth::Blood(seed));
+    Ok(())
+}
+
+/// `dying` for a boss without a Death clip whose Die was deferred: 4fcb30
+/// runs Die at dying frame 0, right before 4f2d10 removes it.
+fn dying_with_die(
+    npc: &mut Npc,
+    friction: f32,
+    random: &mut Mt19937,
+    world: &mut NpcWorld,
+    births: &mut Vec<Birth>,
+) -> Result<(), String> {
+    if death_clip(npc).is_some() {
+        return Err(format!("{} defers Die but has a death clip", npc.actor));
+    }
+    if npc.state != 16 {
+        die(npc, random, world, births)?;
+    }
+    dying(npc, friction)
+}
+
 /// IsFinished40fba0 for the current clip.
 pub(crate) fn finished(npc: &Npc) -> bool {
     !npc.animation_playing
@@ -231,7 +276,7 @@ pub(crate) fn advance_with(
     ai: Ai,
     appear: bool,
 ) -> Result<(), String> {
-    advance_full(npc, phase, random, world, births, ai, appear, false)
+    advance_full(npc, phase, random, world, births, ai, appear, false, false)
 }
 
 /// `advance` for a family whose AI handles its own death: Entity_NPC::Update
@@ -247,7 +292,21 @@ pub(crate) fn advance_dead_ai(
     births: &mut Vec<Birth>,
     ai: Ai,
 ) -> Result<(), String> {
-    advance_full(npc, phase, random, world, births, ai, true, true)
+    advance_full(npc, phase, random, world, births, ai, true, true, false)
+}
+
+/// `advance_dead_ai` for a boss without a Death clip whose Kill47fc80 skips
+/// Die (4464c0 reads the config boss byte +103d): Die 445c60 (sound, gibs,
+/// blood) runs at dying frame 0 in 4fcb30, right before 4f2d10 removes it.
+pub(crate) fn advance_dead_ai_deferred_die(
+    npc: &mut Npc,
+    phase: Phase,
+    random: &mut Mt19937,
+    world: &mut NpcWorld<'_>,
+    births: &mut Vec<Birth>,
+    ai: Ai,
+) -> Result<(), String> {
+    advance_full(npc, phase, random, world, births, ai, true, true, true)
 }
 
 #[expect(
@@ -263,6 +322,7 @@ fn advance_full(
     ai: Ai,
     appear: bool,
     dead_ai: bool,
+    deferred_die: bool,
 ) -> Result<(), String> {
     if npc.removed {
         return Ok(());
@@ -279,6 +339,9 @@ fn advance_full(
         if npc.boss || npc.kind == 28 {
             if dead_ai && npc.state != 16 {
                 ai(npc, random, world, births, &mut friction)?;
+            }
+            if deferred_die {
+                return dying_with_die(npc, friction, random, world, births);
             }
             return dying(npc, friction);
         }
@@ -341,6 +404,9 @@ fn advance_full(
     if npc.dead && npc.boss {
         // A boss that killed itself in its AI (Larry Jr.'s lone head) enters
         // state16 in the same update's post-AI handling.
+        if deferred_die {
+            return dying_with_die(npc, friction, random, world, births);
+        }
         return dying(npc, friction);
     }
     update_sprite(npc)?;
@@ -358,24 +424,9 @@ fn advance_full(
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;
-        // Die 445c60: the death sound (44641d, louder with gibs), the gibs,
-        // then the real Blood Splat seed.
-        let gibs = npc.config().gib_amount > 0;
-        world.audio.admit(
-            random,
-            world.system_counter,
-            SoundRequest {
-                id: 30,
-                volume: if gibs { 1.0 } else { 0.8 },
-                delay: 2,
-                looping: false,
-                pitch: 1.0,
-            },
-        );
-        crate::gib_counts::burst(npc, random, world)?;
-        let seed = random.next_u32();
-        npc.death_effect_seed = Some(seed);
-        births.push(Birth::Blood(seed));
+        if !(deferred_die && npc.boss) {
+            die(npc, random, world, births)?;
+        }
     }
     if !npc.position.is_finite() || !npc.velocity.is_finite() {
         return Err("NPC source motion overflowed actual world vectors".into());

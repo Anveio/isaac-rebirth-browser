@@ -133,7 +133,10 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
     // 5c9745..5c975f: effective stage adds one under Curse of the Labyrinth.
     // The supported run admits no curses, so it is the numeric stage.
     let stage = state.stage;
-    if !(1..=5).contains(&stage) && stage != 7 {
+    if stage == 6 && depths_boss_award(state)? {
+        return Ok(());
+    }
+    if !(1..=6).contains(&stage) && stage != 7 {
         return Err("boss clear award admits only the trapdoor stages".into());
     }
     // 5c97e4: presentation-specific award branches (Mom, horsemen, ...).
@@ -216,6 +219,59 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
     let spawn_seed = rng.raw();
     crate::pickups::admit_collectible(state, subtype, collectible_position, spawn_seed)?;
     Ok(())
+}
+
+/// 5c99c8 -> 5ca068: stage 6's boss room (Mom). Returns false when a profile
+/// that has already reached the Womb takes the ordinary trapdoor and
+/// collectible path, which this stage shares with stages 1..5.
+///
+/// The first kill (achievement 4 unset, 5ca237) wins the run: 594fe0 updates
+/// the streak counters, 5947f0 requests the ending cutscene 3 with a return
+/// to the menu, then awards 4, 5 and 6. The 5c9a20 tail is left out, as for
+/// every stage: 5be610's per-stage counts and Dark Boy (award 39 when the
+/// last damage stage +10ecdc is at most 4) are not ported.
+fn depths_boss_award(state: &mut State) -> Result<bool, String> {
+    // 5c9773: r14 is set when this is the level's boss room (Level+8190).
+    let boss_room = state
+        .floor
+        .descriptors
+        .iter()
+        .position(|descriptor| descriptor.template.room_type == 5);
+    if boss_room != Some(state.current_room) {
+        return Err("stage 6 award outside the level boss room is not admitted".into());
+    }
+    if state.challenge_id != 0 {
+        // 5c9ac0: a challenge's end stage clears r15 (Big Chest 5.370).
+        return Err("stage 6 challenge boss award is not admitted".into());
+    }
+    if state.room.boss_presentation_index == 0x37 {
+        return Err("special boss clear award is not admitted".into());
+    }
+    if state.difficulty != crate::difficulty::Difficulty::Normal {
+        // 5ca5a2 and the later stage-6 branches read Game+10ECD8 (hard
+        // completion marks, achievements 167..177); none is ported.
+        return Err("stage 6 boss award on hard difficulty is not admitted".into());
+    }
+    let achievements = &state
+        .profiles
+        .get(usize::from(state.profile.saturating_sub(1)))
+        .ok_or("stage 6 boss award requires the active profile")?
+        .achievements;
+    let reached = |id: usize| achievements.get(id).copied().unwrap_or(false);
+    if reached(4) {
+        // 5ca0d0: The Polaroid (57) and The Negative (78) replace the pool
+        // collectible with pick-one items 327/328 (+abd); neither is ported.
+        if reached(57) || reached(78) {
+            return Err("stage 6 Polaroid/Negative award is not admitted".into());
+        }
+        return Ok(false);
+    }
+    crate::persistent_effects::record_win(state)?;
+    state.ending_cutscene = Some(3);
+    for id in [4, 5, 6] {
+        crate::persistent_effects::award(state, id)?;
+    }
+    Ok(true)
 }
 
 fn room_index(width: usize, position: WorldVector) -> usize {

@@ -75,3 +75,5 @@ gfx/227.000_boney.anm2
 gfx/212.000_deathshead.anm2
 gfx/024.000_globin.anm2
 gfx/024.001_gazing globin.anm2
+gfx/045.000_mom.anm2
+gfx/045.010_mom stomp.anm2
