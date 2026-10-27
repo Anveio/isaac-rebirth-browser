@@ -160,8 +160,9 @@ games, and WPTB6SQK (roll 58) clears with no award in either game.
 
 The `stage-exit` suite's boss fixtures carry the boss callback's drops as a
 diagnostic (each game fights with its own keys, so which drops are left
-differs). In E1T36YXW (Monstro, normal) the original's remaining heart
-5.10.1 has seed 1755029133, and the port drops a heart with the same
-variant, subtype and seed. No capture grades the hard row yet: at hard the
+differs). In E1T36YXW (Monstro, normal) both hearts the original drops
+(5.10.3 seed 511906572 and 5.10.1 seed 1755029133) match the port's in
+variant, subtype and seed. The Larry Jr. fixtures still differ (see the gap
+above). No capture grades the hard row yet: at hard the
 callback draws nothing for an ordinary boss, so the row only skips the
 spawn.
