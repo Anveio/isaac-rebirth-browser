@@ -430,6 +430,14 @@ export class Renderer {
       if (!particle.removed && particle.visible)
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
           particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
+    // Effects before the Player in the render array (an explosion born at
+    // his own depth is inserted ahead of him) draw under his sprite.
+    const effectSlot = (effect: State["spriteEffects"][number]) =>
+      order.findIndex(actor => actor.kind === "effect" && actor.id === effect.id);
+    const effectsUnderPlayer = playerSlot < 0 ? [] : state.spriteEffects
+      .filter(effect => !effect.creepEffect && effectSlot(effect) >= 0 && effectSlot(effect) < playerSlot)
+      .sort((a, b) => effectSlot(a) - effectSlot(b));
+    for (const effect of effectsUnderPlayer) this.drawSpriteEffect(ctx, effect);
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
     for (const npc of overPlayer) this.drawNpc(ctx, npc);
@@ -459,57 +467,60 @@ export class Renderer {
     for (const bomb of state.bombs)
       if (bomb.motion.lifetime === "exploding")
         this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-    for (const effect of state.spriteEffects) {
-      // Source31f dead can coexist with31e active until a later Remove.
-      if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) continue;
-      if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 35 || effect.variant === 5) {
-        const sprite = effect.sprite, controller = effect.poopEffect;
-        const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
-          ? controller.particle58.flying.layerRotation
-          : controller && "particle5" in controller && typeof controller.particle5.particle === "object"
-            ? controller.particle5.particle.flying.layerRotation : 0;
-        ctx.save();
-        ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
-          (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
-        ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
-        this.assets.draw(ctx, PARTICLE_ACTORS[effect.variant],
-          sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
-            Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
-            BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
-            RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
-          }} });
-        ctx.restore();
-        continue;
-      }
-      if (effect.flyEffect) {
-        // Duke effects and a dead fly's 1000.3 puff: the smoke draws 40 above
-        // its ground (+458) with its colour multiplying every layer; a dying
-        // tiny fly's Main layer falls onto its shadow (LayerState+0x30).
-        const sprite = effect.sprite;
-        const actor = effect.variant === 1 ? "gfx/1000.001_bomb explosion.anm2"
-          : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2"
-          : effect.variant === 3 ? "gfx/1000.003_fly explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
-        const fall = sprite.layerOffsets?.[0]?.[1];
-        const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
-          [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
-        ctx.save();
-        ctx.translate((effect.presentedPosition.x + effect.renderOffset.x) * 0.65 + 32,
-          (effect.presentedPosition.y + effect.renderOffset.y) * 0.65 - 46);
-        ctx.rotate(sprite.rotation * Math.PI / 180);
-        ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
-        this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame, {
-          layerScales, color: { tint: sprite.tint, offsets: sprite.offsets },
-          ...(fall === undefined ? {} : { overrides: { 0: { YPosition: -16 + fall } } }) });
-        ctx.restore();
-        continue;
-      }
-      this.drawEffect(ctx, effect.variant, effect.sprite,
-        (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
-        (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
-    }
+    for (const effect of state.spriteEffects)
+      if (!effectsUnderPlayer.includes(effect)) this.drawSpriteEffect(ctx, effect);
     ctx.restore();
     this.stage.foreground(state.stageEffects);
     this.drawFxRays(state);
+  }
+
+  private drawSpriteEffect(ctx: CanvasRenderingContext2D, effect: State["spriteEffects"][number]): void {
+    // Source31f dead can coexist with31e active until a later Remove.
+    if (!effect.visible || !effect.active || effect.footprint || effect.creepEffect) return;
+    if (effect.variant === 58 || effect.variant === 43 || effect.variant === 27 || effect.variant === 35 || effect.variant === 5) {
+      const sprite = effect.sprite, controller = effect.poopEffect;
+      const rotation = controller && "particle58" in controller && typeof controller.particle58 === "object"
+        ? controller.particle58.flying.layerRotation
+        : controller && "particle5" in controller && typeof controller.particle5.particle === "object"
+          ? controller.particle5.particle.flying.layerRotation : 0;
+      ctx.save();
+      ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
+        (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+      ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
+      this.assets.draw(ctx, PARTICLE_ACTORS[effect.variant],
+        sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+          Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
+          BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
+          RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
+        }} });
+      ctx.restore();
+      return;
+    }
+    if (effect.flyEffect) {
+      // Duke effects and a dead fly's 1000.3 puff: the smoke draws 40 above
+      // its ground (+458) with its colour multiplying every layer; a dying
+      // tiny fly's Main layer falls onto its shadow (LayerState+0x30).
+      const sprite = effect.sprite;
+      const actor = effect.variant === 1 ? "gfx/1000.001_bomb explosion.anm2"
+        : effect.variant === 2 ? "gfx/1000.002_blood explosion.anm2"
+        : effect.variant === 3 ? "gfx/1000.003_fly explosion.anm2" : "gfx/1000.033_tiny fly.anm2";
+      const fall = sprite.layerOffsets?.[0]?.[1];
+      const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
+        [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
+      ctx.save();
+      ctx.translate((effect.presentedPosition.x + effect.renderOffset.x) * 0.65 + 32,
+        (effect.presentedPosition.y + effect.renderOffset.y) * 0.65 - 46);
+      ctx.rotate(sprite.rotation * Math.PI / 180);
+      ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
+      this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame, {
+        layerScales, color: { tint: sprite.tint, offsets: sprite.offsets },
+        ...(fall === undefined ? {} : { overrides: { 0: { YPosition: -16 + fall } } }) });
+      ctx.restore();
+      return;
+    }
+    this.drawEffect(ctx, effect.variant, effect.sprite,
+      (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
+      (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
   }
 
   /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
