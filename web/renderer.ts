@@ -913,9 +913,7 @@ export class Renderer {
           player.headFrame, { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
     }
   }
-  private hud(ctx: CanvasRenderingContext2D, state: State): void {
-    this.activeItem(ctx, state);
-    this.pocketItems(ctx, state);
+  private hearts(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
@@ -929,6 +927,12 @@ export class Renderer {
     if (state.player.eternalHearts > 0) {
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
+  }
+  private hud(ctx: CanvasRenderingContext2D, state: State): void {
+    this.activeItem(ctx, state);
+    this.pocketItems(ctx, state);
+    // HUD 5742f0: Curse of the Unknown (Level+8 bit 8) skips the hearts.
+    if (!((state.floor.curses ?? 0) & 8)) this.hearts(ctx, state);
     const counts = [state.inventory.coins, state.inventory.bombs, state.inventory.keys];
     // HUD5741F9 selects golden frame3 from actual Player+BD0; count stays BCC.
     const pickupFrames = [0, 2, state.player.goldenKey === true ? 3 : 1];

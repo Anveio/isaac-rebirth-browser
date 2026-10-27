@@ -131,8 +131,7 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         _ => return Err("boss clear award admits only the four boss room shapes".into()),
     };
     // 5c9745..5c975f: effective stage adds one under Curse of the Labyrinth.
-    // The supported run admits no curses, so it is the numeric stage.
-    let stage = state.stage;
+    let stage = state.stage + u32::from(state.floor.labyrinth());
     if stage == 6 && depths_boss_award(state)? {
         return Ok(());
     }
@@ -179,16 +178,42 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         },
     };
     let collectible_index = room_index(width, collectible_position);
-    // 5c97c1 fix_award_pos5c8260 clears the trapdoor cell before its MT draw.
-    clear_award_cell(state, trapdoor_index)?;
+    // 5c9773..5c97aa: only the level's last boss room (Level+8190) takes
+    // the trapdoor; an XL floor's first boss room drops its collectible only.
+    if state.floor.last_boss_room() == Some(state.current_room) {
+        spawn_trapdoor(state, trapdoor_index)?;
+    }
     // Room+8 descriptor+50 seeds the award RNG with shift index 35.
     let mut rng = crate::items::Rng::new(
         state.floor.descriptors[state.current_room].following_seed,
         [5, 9, 7],
     );
+    // 5c9825: GetCollectible5c51e0(Room, rng) then Spawn(5,100,...,rng).
+    let selection_seed = rng.raw();
+    let pools = state
+        .item_pools
+        .as_mut()
+        .ok_or("boss award requires the run item pools")?;
+    let pool = pools.room_pool(5, &mut state.boot_lifecycle.shared);
+    let subtype = pools.collectible(pool, true, selection_seed)?;
+    // 5c9894 fix_award_pos5c8320 clears the collectible cell after selection.
+    clear_award_cell(state, collectible_index)?;
+    let spawn_seed = rng.raw();
+    crate::pickups::admit_collectible(state, subtype, collectible_position, spawn_seed)?;
+    Ok(())
+}
+
+/// 5c97b6..5c97df: the boss award's trapdoor at centre-80y.
+fn spawn_trapdoor(state: &mut State, trapdoor_index: usize) -> Result<(), String> {
+    // 5c97c1 fix_award_pos5c8260 clears the trapdoor cell before its MT draw.
+    clear_award_cell(state, trapdoor_index)?;
     // 5c97c6 Random() -> SpawnGridEntity(index, 17, 0, seed).
     let trapdoor_seed = state.boot_lifecycle.shared.next_u32();
-    let grid = state.room.grid.as_mut().expect("checked grid");
+    let grid = state
+        .room
+        .grid
+        .as_mut()
+        .ok_or("boss trapdoor requires the admitted room grid")?;
     grid.cells[trapdoor_index].entity = Some(crate::grid::GridEntity {
         kind: 17,
         variant: 0,
@@ -206,18 +231,6 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
         frame: 0.0,
         playing: true,
     });
-    // 5c9825: GetCollectible5c51e0(Room, rng) then Spawn(5,100,...,rng).
-    let selection_seed = rng.raw();
-    let pools = state
-        .item_pools
-        .as_mut()
-        .ok_or("boss award requires the run item pools")?;
-    let pool = pools.room_pool(5, &mut state.boot_lifecycle.shared);
-    let subtype = pools.collectible(pool, true, selection_seed)?;
-    // 5c9894 fix_award_pos5c8320 clears the collectible cell after selection.
-    clear_award_cell(state, collectible_index)?;
-    let spawn_seed = rng.raw();
-    crate::pickups::admit_collectible(state, subtype, collectible_position, spawn_seed)?;
     Ok(())
 }
 
@@ -232,12 +245,7 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
 /// last damage stage +10ecdc is at most 4) are not ported.
 fn depths_boss_award(state: &mut State) -> Result<bool, String> {
     // 5c9773: r14 is set when this is the level's boss room (Level+8190).
-    let boss_room = state
-        .floor
-        .descriptors
-        .iter()
-        .position(|descriptor| descriptor.template.room_type == 5);
-    if boss_room != Some(state.current_room) {
+    if state.floor.last_boss_room() != Some(state.current_room) {
         return Err("stage 6 award outside the level boss room is not admitted".into());
     }
     if state.challenge_id != 0 {
@@ -364,13 +372,7 @@ pub(crate) fn advance(state: &mut State) -> Step {
             transition.counter = 0;
             transition.state = 4;
             // 5e394e Level::ShowName585500(false) starts the stage streak.
-            state.run_introduction = crate::RunIntroduction {
-                age: 0,
-                active: true,
-                title: stage_name(state.stage).into(),
-                subtitle: String::new(),
-                stage: true,
-            };
+            state.run_introduction = show_name(&state.floor);
             Step::Done
         }
         _ => Step::Done,
@@ -422,7 +424,7 @@ pub fn fade(transition: &StageTransition) -> f32 {
 /// 2x1 boss room), would halt Level::Init58be30 at the end of the transition:
 /// like an unadmitted doorway, the frontier refuses the entry instead.
 fn next_floor_generates(state: &State) -> bool {
-    next_stage(state.stage)
+    next_stage(state)
         .and_then(|stage| floor_request(state, stage))
         .and_then(crate::floor::generate_normal_basement)
         .is_ok()
@@ -453,14 +455,8 @@ pub(crate) fn floor_request(
 }
 
 /// Level::Init's curse-sampler inputs (Persistent achievements 4/33, counter
-/// 10, Black Candle), read only when the run's rules draw the curse stream.
+/// 10, Black Candle); every ordinary floor rolls its curse.
 pub fn curse_inputs(state: &State) -> Result<crate::challenges::CurseInputs, String> {
-    if crate::difficulty::rules(state.difficulty)
-        .extra_rooms
-        .is_none()
-    {
-        return Ok(crate::challenges::CurseInputs::default());
-    }
     let profile = usize::from(state.profile)
         .checked_sub(1)
         .and_then(|index| state.profiles.get(index))
@@ -474,19 +470,53 @@ pub fn curse_inputs(state: &State) -> Result<crate::challenges::CurseInputs, Str
 }
 
 /// Level::SetNextStage585620 for the admitted ordinary stages: the stage
-/// node's trapdoor edge, admitted only into another node. Alternate stages
-/// need Seeds stage bit0 clear and a Manager unlock byte that a fresh profile
-/// does not own; Curse of the Labyrinth is not admitted.
-pub(crate) fn next_stage(stage: u32) -> Result<u32, String> {
-    crate::levels::trapdoor(stage)
+/// node's trapdoor edge, admitted only into another node, one stage further
+/// from a Curse of the Labyrinth floor. Alternate stages need Seeds stage
+/// bit0 clear and a Manager unlock byte that a fresh profile does not own.
+pub(crate) fn next_stage(state: &State) -> Result<u32, String> {
+    let stage = state.stage;
+    crate::levels::trapdoor(stage, state.floor.labyrinth())
         .ok_or_else(|| format!("stage {stage} has no admitted next-stage generator"))
+}
+
+/// Level::ShowName585500: the stage streak (584e40, " XL" under Curse of
+/// the Labyrinth) over the floor's curse names (5852f0).
+pub(crate) fn show_name(floor: &crate::floor::Floor) -> crate::RunIntroduction {
+    crate::RunIntroduction {
+        age: 0,
+        active: true,
+        title: stage_name(floor.stage, floor.labyrinth()).into(),
+        subtitle: curse_names(floor.curses),
+        stage: true,
+    }
+}
+
+/// 5852f0 appends each set curse's name in this order (strings 675993..).
+fn curse_names(curses: u32) -> String {
+    [
+        (0x40, "Curse of the Blind!"),
+        (0x20, "Curse of the Maze!"),
+        (0x10, "Curse of the Cursed!"),
+        (0x4, "Curse of the Lost!"),
+        (0x8, "Curse of the Unknown!"),
+        (0x1, "Curse of Darkness!"),
+        (0x2, "Curse of the Labyrinth!"),
+    ]
+    .into_iter()
+    .filter(|(bit, _)| curses & bit != 0)
+    .map(|(_, name)| name)
+    .collect()
 }
 
 /// Level::ShowName585500 names from the stage nodes; alternate (Cellar)
 /// stages stay locked on a fresh profile, so SetNextStage585620 never
 /// selects them here.
-fn stage_name(stage: u32) -> &'static str {
-    crate::levels::node(stage).map_or("BASEMENT I", |node| node.name)
+fn stage_name(stage: u32, labyrinth: bool) -> &'static str {
+    crate::levels::node(stage).map_or("BASEMENT I", |node| {
+        node.labyrinth_name
+            .filter(|_| labyrinth)
+            .unwrap_or(node.name)
+    })
 }
 
 /// fix_award_pos5c8260/5c8320: an occupying grid object takes its vtable+30

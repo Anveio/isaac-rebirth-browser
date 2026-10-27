@@ -72,6 +72,9 @@ pub struct StageNode {
     pub stage: u32,
     /// Level::ShowName585500 streak.
     pub name: &'static str,
+    /// The streak under Curse of the Labyrinth (584e87: the " XL" suffix),
+    /// which only odd stages up to 7 roll (58c67b).
+    pub labyrinth_name: Option<&'static str>,
     /// SetNextStage585620's target when the boss trapdoor is taken. The edge
     /// is admitted only when that target is itself a node.
     pub trapdoor: Option<u32>,
@@ -382,6 +385,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 1,
         name: "BASEMENT I",
+        labyrinth_name: Some("BASEMENT XL"),
         trapdoor: Some(2),
         bosses: None,
         contract: crate::floor::CONTRACT,
@@ -389,6 +393,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 2,
         name: "BASEMENT II",
+        labyrinth_name: None,
         trapdoor: Some(3),
         bosses: None,
         contract: "continuing-profile-normal-isaac-basement-II-without-labyrinth-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
@@ -396,6 +401,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 3,
         name: "CAVES I",
+        labyrinth_name: Some("CAVES XL"),
         trapdoor: Some(4),
         bosses: None,
         contract: "continuing-profile-normal-isaac-caves-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
@@ -403,6 +409,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 4,
         name: "CAVES II",
+        labyrinth_name: None,
         trapdoor: Some(5),
         bosses: None,
         contract: "continuing-profile-normal-isaac-caves-II-without-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
@@ -410,6 +417,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 5,
         name: "DEPTHS I",
+        labyrinth_name: Some("DEPTHS XL"),
         trapdoor: Some(6),
         bosses: None,
         contract: "continuing-profile-normal-isaac-depths-I-without-labyrinth-curse-devil-room-or-equipped-modifiers;source-growth-fitting-secret-primary-routing-retry-continuity",
@@ -417,6 +425,7 @@ pub const STAGES: &[StageNode] = &[
     StageNode {
         stage: 6,
         name: "DEPTHS II",
+        labyrinth_name: None,
         // SetNextStage585620 (table 0x675f10[6] = 585780) targets Womb I.
         trapdoor: Some(7),
         bosses: Some(MOM_BOSSES),
@@ -455,8 +464,14 @@ pub fn node(stage: u32) -> Option<&'static StageNode> {
 }
 
 /// The admitted trapdoor target of `stage`.
-pub fn trapdoor(stage: u32) -> Option<u32> {
+pub fn trapdoor(stage: u32, labyrinth: bool) -> Option<u32> {
     node(stage)
         .and_then(|node| node.trapdoor)
+        // 585640: an XL floor's trapdoor skips the stage it merged.
+        .map(|next| {
+            next + u32::from(
+                labyrinth && node(stage).is_some_and(|node| node.labyrinth_name.is_some()),
+            )
+        })
         .filter(|&next| node(next).is_some())
 }
