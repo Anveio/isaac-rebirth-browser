@@ -1433,28 +1433,7 @@ pub(crate) fn add_collectible(
     //persistent inputs. Each selected source Add retains existing Some only;
     //untracked258/reset routes invalidate, never reconstruct history.
     if !(normal_isaac
-        && matches!(
-            id,
-            1 | 2
-                | 3
-                | 4
-                | 6
-                | 14
-                | 27
-                | 28
-                | 52
-                | 68
-                | 114
-                | 118
-                | 143
-                | 152
-                | 168
-                | 169
-                | 229
-                | 304
-                | 329
-                | 330
-        ))
+        && crate::collectible_grants::keeps(id, crate::collectible_grants::MOVE_SPEED))
         && !keep_cupid_move_speed
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_move_speed_history())
@@ -1470,26 +1449,8 @@ pub(crate) fn add_collectible(
     //Actual14's default Add route preserves D34 despite its cached Range
     //effect. Untracked258/reset routes invalidate this existing owner;
     //None never inherits constructor zero through counts or cache evaluation.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 14
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_range
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::RANGE)
+        && !keep_cupid_range
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1504,26 +1465,8 @@ pub(crate) fn add_collectible(
     //These selected Add routes preserve an existing D2C owner. Actual222's
     //default tail is separately closed; untracked240/258/reset routes lose
     //proof. None stays None and is never reconstructed from counts/cache.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 222
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_fire_delay
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::FIRE_DELAY)
+        && !keep_cupid_fire_delay
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1538,26 +1481,8 @@ pub(crate) fn add_collectible(
     // These actual Add routes preserve D30, independently of their cache,
     // getter and caller permissions. Unmapped258 and other routes lose
     // the existing owner; later counts/cache work cannot recreate it.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 12
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_damage
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::DAMAGE)
+        && !keep_cupid_damage
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1572,10 +1497,8 @@ pub(crate) fn add_collectible(
     // These actual Add paths preserve D38. This event proof grants no stat,
     // getter or caller permission; unknown Add258 and other producers
     // invalidate an existing owner rather than deriving one from counts.
-    if !matches!(
-        id,
-        1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
-    ) && !keep_cupid_shot_speed
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::SHOT_SPEED)
+        && !keep_cupid_shot_speed
         && !keep_shot_speed_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1587,7 +1510,7 @@ pub(crate) fn add_collectible(
     //169's default52D0D0..52D170 path preserves this existing owner too,
     //as does a plain active grant: 52D1B0's slot/charge write and the same
     //default tail never write C70.
-    if !matches!(id, 2 | 4 | 152 | 169)
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::AIM_C70)
         && !keep_default_passive_inputs
         && !plain_active_grant
         && !treatment.is_some_and(|proof| proof.preserves_c70_history())
@@ -1626,7 +1549,7 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_epic_fetus_grant_context());
-    if ![1, 4, 6, 114, 118, 329, 304].contains(&id)
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::LUCK)
         && !keep_technology_luck
         && !keep_technology2_luck
         && !keep_soy_luck

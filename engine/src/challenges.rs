@@ -371,7 +371,7 @@ impl Definition {
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
             //36 The Poop,38 Tammy's Head,63 The Battery,65 Anarchist Cookbook,
-            //115 Ouija Board,166 D20,285 D10 and286 Blank Card are the
+            //115 Ouija Board,166 D20,284 D4,285 D10 and286 Blank Card are the
             //pickup-interaction sandbox's grants (tools/e2e/pickup-interactions.mjs).
             if !(matches!(
                 id,
@@ -386,6 +386,7 @@ impl Definition {
                     | 115
                     | 118
                     | 166
+                    | 284
                     | 285
                     | 286
                     | 329
