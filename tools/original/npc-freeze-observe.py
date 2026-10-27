@@ -25,7 +25,7 @@ combat = load('freeze_actual_combat_owners', 'foundation-combat-observe.py')
 
 
 def status_owners(pid, context):
-    report = dict(schema='source-public-npc-freeze-observation-v1', status='pass',
+    report = dict(schema='source-public-npc-freeze-observation-v2', status='pass',
                   memoryWritten=False, executableMappingsRead=False, bytesRead=0, actors=[])
     stopped = False
     try:
@@ -71,6 +71,17 @@ def status_owners(pid, context):
             room = u64(game + 0x8180)
             if not game or not room:
                 raise ValueError('Actual gameplay room required')
+            # Established health-damage observer owners: Game+A1E8 is the
+            # information manager state, +748 its signed caller delay.
+            # GameFast550760 blocks RoomFast for every nonzero state;
+            # Full54fb88 advances580330 and blocks only resulting state2.
+            information = game + 0xa1e8
+            information_state = u32(information)
+            if information_state not in (0, 1, 2):
+                raise ValueError('Unknown actual information manager state')
+            report['informationAnimation'] = dict(
+                state=information_state,
+                delay=struct.unpack('<i', read(information + 0x748, 4))[0])
             manager = room + 0x15d0
             count = u32(manager + 0x74)
             if count > 512:
