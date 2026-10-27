@@ -313,6 +313,14 @@ export const INTERACTIONS = {
     covered: obs => obs['settle'].player.activeCharge > 0 && obs['after-active'].player.activeId === 284
       && obs['after-active'].player.activeCharge === 0
       && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll) },
+  // The D100 spends its charge, stays held, and changes the passives, the
+  // pedestal and the loose pickups.
+  'd100-reroll': { owned: true, labels: ['settle', 'use-active', 'after-active'],
+    covered: obs => obs['settle'].player.activeCharge > 0 && obs['after-active'].player.activeId === 283
+      && obs['after-active'].player.activeCharge === 0
+      && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll)
+      && JSON.stringify(obs['after-active'].pickups.map(p => [p.variant, p.subtype]))
+        !== JSON.stringify(obs['settle'].pickups.map(p => [p.variant, p.subtype])) },
   // A ring of ten tears leaves Isaac at once.
   'tammys-head': { tears: true, labels: ['settle', 'use-active', 'after-active', 'tears-later'],
     covered: obs => obs['use-active'].tears.length >= 10 || obs['after-active'].tears.length >= 10 },
