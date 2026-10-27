@@ -723,7 +723,7 @@ pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
         if !state.room.combat_clear {
             state.room.combat_clear = true;
             // 5d19cb..5d19e9 PlaySound(36 door heavy open, volume1, delay2) before
-            // SpawnClearAward5c9240. Ordinary-room pickup awards remain separate.
+            // SpawnClearAward5c9240.
             state.audio.admit(
                 &mut state.boot_lifecycle.shared,
                 state.system_clock.system_counter - 1,
@@ -735,7 +735,7 @@ pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
                     pitch: 1.0,
                 },
             );
-            crate::stage_transition::spawn_boss_award(state)?;
+            crate::clear_award::spawn(state)?;
             crate::active_charges::room_clear(state)?;
         }
     }

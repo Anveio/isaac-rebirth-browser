@@ -143,6 +143,12 @@ pub fn positions(state: &State) -> Result<Vec<WorldVector>, Frontier> {
     if let Some(frontier) = &coverage.frontier {
         return Err(frontier.clone());
     }
+    represented_positions(state)
+}
+
+///The same scan over the port's own ordinary actors, without the history
+///proof that no unrepresented producer added one the port lacks.
+pub(crate) fn represented_positions(state: &State) -> Result<Vec<WorldVector>, Frontier> {
     let mut positions = Vec::new();
     for actor in state.actor_scheduler.full_phase() {
         let position = match actor.kind {

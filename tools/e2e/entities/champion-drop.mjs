@@ -23,8 +23,8 @@ export default {
   // same update with the same identity, seed and f32 position in both games;
   // color 1 (battery, 31T4YVZ3) drops the same pickup and seed at the same
   // update, at its own champion's position, which the fight's knockback had
-  // already moved apart. Captures after the clear also list the original's
-  // ordinary room-clear award, which the port does not spawn yet.
+  // already moved apart. Captures after the clear also grade the ordinary
+  // room-clear award (SpawnClearAward 5c9240): a chest and a bomb.
   contrived: ['EHL7N0AV:3', '31T4YVZ3:1'],
   count: 0,
   fight: 1800,
