@@ -4,6 +4,8 @@
 Stages the case's Challenge XML and Start Room catalogue over the unchanged
 binary/resources (composition-run.py's resource view), replays the shared
 public Challenge-menu tape and observes entities/Player words at every label.
+A case on the seeded normal menu route (active-items-scenarios.py) replays
+composition-run.py's seeded pocket route instead, as item-composition.mjs does.
 """
 import argparse
 import importlib.util
@@ -40,7 +42,10 @@ def main():
     stb = (base / case['fixture']['specialRoomsPath']).resolve()
     composition = load('interaction_composition_run', ROOT / 'tools/original/composition-run.py')
     clock = load('interaction_clock', ROOT / 'tools/original/foundation-clock-run.py')
-    tape = composition.public_tape(case)
+    if case.get('publicMenuRoute') == 'seeded-normal':
+        tape, route = composition.pocket_tape(case, clock)
+    else:
+        tape, route = composition.public_tape(case), ['--challenge-run']
     if args.print_tape:
         print(json.dumps(tape))
         return 0
@@ -55,7 +60,7 @@ def main():
     tape_path = output / 'declared-tape.json'
     tape_path.write_text(json.dumps(tape) + '\n')
     clock.ROOT = output / 'resource-view'
-    sys.argv = [str(ROOT / 'tools/original/foundation-clock-run.py'), '--challenge-run',
+    sys.argv = [str(ROOT / 'tools/original/foundation-clock-run.py'), *route,
                 '--boot-epoch-seed', str(case['bootEpochSeed']), '--tape', str(tape_path),
                 '--output', str(output / 'run'), '--frame-timeout', args.frame_timeout,
                 '--state-observer', str(ROOT / 'tools/original/pickup-interaction-observe.py')]

@@ -111,5 +111,8 @@ from `tools/original/pickup-interaction-scenarios.py`; `--out FILE` only writes
 the `{challengesXml, specialRooms}` JSON that the page's `/?sandbox=URL` hook
 loads. The JSON derives from original resources, so keep it local or in
 private artifacts. `side-by-side.mjs --case RUN/pickup-interactions/scenarios.json#CASE`
-records any of these cases next to the original. See
+records any of these cases next to the original, and so does
+`--case DIR/scenarios.json#CASE` for an active-items bank
+(`tools/original/active-items-scenarios.py --output DIR --count 0`), whose
+cases type their seed on the normal menu route. See
 [pickup-interactions.md](../../docs/pickup-interactions.md).
