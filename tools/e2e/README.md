@@ -479,7 +479,9 @@ output ([`lib/retention.mjs`](lib/retention.mjs)):
 - **Gzipped:** recorded traces.
 - **Dropped:** frames and other large evidence.
 
-A failing suite keeps everything. State-pair suites (`entities`, `npcs`,
+A failing suite keeps everything, unless free disk is below 12 GB when it
+finishes: then it is slimmed like a passing one, so a long run with many
+failures still grades its later suites. State-pair suites (`entities`, `npcs`,
 `monstro`, …) write each case's browser manifest and trace gzipped
 (`manifest.json.gz`, `trace.json.gz`, losslessly, with raw and archive
 hashes). A case then takes about 120 MB instead of 350 MB, and the comparators
