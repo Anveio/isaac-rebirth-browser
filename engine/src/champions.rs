@@ -11,7 +11,9 @@ pub struct Champion {
     pub color: u32,
     /// Sprite scale (+2c4) multiplier, ×1.15 for every champion.
     pub scale: f32,
-    /// Entity_NPC+f74 speed multiplier written by colors 1, 4 and 7.
+    /// Entity_NPC+f74 speed multiplier written by colors 1, 4 and 7. The
+    /// post-AI velocity scale 4f9f30 reads it (`plain_npc`); PORT GAP: the
+    /// movement helper 4807e0's below-1 branch does not.
     pub speed: f32,
     /// Entity_NPC+f70 / +1044 timers drawn by colors 10 and 9.
     pub timer: Option<u32>,
@@ -125,4 +127,111 @@ pub(crate) fn apply(npc: &mut Npc, color: u32, shared: &mut Mt19937) -> Result<(
     // Champion tail 47f7b2 calls ResetColor with the rolled colour.
     npc.sprite_color = crate::sprite_color::SpriteColor::reset(npc.base_color());
     Ok(())
+}
+
+/// RNG preset 30 at 0x679b80+360: Entity Init 441c80 seeds the NPC's own
+/// RNG (+7c0) from its spawn seed with it.
+const ENTITY_SHIFTS: [u32; 3] = [4, 3, 17];
+
+/// One Spawn550a40(5, variant, subtype) a dying champion makes.
+pub(crate) struct DeathDrop {
+    pub variant: u32,
+    pub subtype: u32,
+    pub spawn_seed: u32,
+    pub position: crate::motion::WorldVector,
+}
+
+/// Entity_NPC 4f27a0, which 4f2d10 runs for a dead champion (+103f) as the
+/// base kill removes it. The NPC's own RNG (+7c0) draws RandomInt(3) at
+/// both difficulties (4f27c8), then the color's jump table 66e320 runs; a
+/// table entry that drops waits on 4f2960, which the difficulty rule gates.
+/// Each drop goes to FindFreeTilePosition 5cd7d0(position, 40) and takes
+/// the next own-RNG value as its seed.
+///
+/// Returns None for a color whose drop the port does not construct yet:
+/// 4 (Blue Flies through the player, 508740), 5 (an explosion 554490 and
+/// its effects before the gate, then a bomb), 8 (locked chest 60), 9 (red
+/// chest 360), 11 (trinket 350) and 13 (4f2852).
+pub(crate) fn death_drops(
+    npc: &Npc,
+    difficulty: crate::difficulty::Difficulty,
+    shared: &mut Mt19937,
+    free_position: impl Fn(crate::motion::WorldVector) -> crate::motion::WorldVector,
+) -> Option<Vec<DeathDrop>> {
+    let champion = npc.champion.as_ref()?;
+    // Only Dips draw their own RNG before death among the admitted families.
+    let mut rng = npc
+        .dip
+        .as_ref()
+        .and_then(|dip| dip.entity_rng)
+        .unwrap_or_else(|| items::Rng::new(npc.spawn_seed, ENTITY_SHIFTS));
+    let roll = rng.bounded(3);
+    let drops = roll == 0 || !crate::difficulty::rules(difficulty).champion_drop_needs_zero_roll;
+    let (count, variant, subtype) = match champion.color {
+        0 => (1, 10, 1),
+        1 => (1, 90, 0),
+        2 => (1, 70, 0),
+        // 4f2a2a draws the shared MT for the count before the gate.
+        3 => (shared.bounded(3) + 1, 20, 0),
+        6 => (1, 10, 4),
+        7 => (1, 30, 0),
+        10 => (0, 0, 0),
+        12 => (1, 10, 5),
+        _ => return None,
+    };
+    if !drops {
+        return Some(Vec::new());
+    }
+    Some(
+        (0..count)
+            .map(|_| DeathDrop {
+                variant,
+                subtype,
+                position: free_position(npc.position),
+                spawn_seed: rng.raw(),
+            })
+            .collect(),
+    )
+}
+
+/// Room::FindFreeTilePosition 5cd7d0: `position` itself when its cell has
+/// grid collision 0, otherwise the centre of the nearest such cell, taking
+/// the first within `radius` in index order.
+pub(crate) fn free_tile_position(
+    grid: &crate::grid::Grid,
+    collision: impl Fn(usize) -> u32,
+    position: crate::motion::WorldVector,
+    radius: f32,
+) -> crate::motion::WorldVector {
+    let source = grid.index(position);
+    // 5c5af0 answers 4 for the -1 of a position outside the grid.
+    if source.map_or(4, &collision) == 0 {
+        return position;
+    }
+    // 6129d0 then 612950: the squared length of centre - position.
+    let squared = |centre: crate::motion::WorldVector| {
+        let (x, y) = (centre.x - position.x, centre.y - position.y);
+        x * x + y * y
+    };
+    let limit = radius * radius;
+    // 5c78b0 of -1 is never reached by a position inside the room.
+    let mut best = source
+        .and_then(|index| grid.position(index))
+        .unwrap_or(position);
+    let mut nearest = 1_000_000.0_f32;
+    for index in 0..grid.descriptor().cells.len() {
+        if Some(index) == source || collision(index) != 0 {
+            continue;
+        }
+        let centre = grid.position(index).expect("indexed cell");
+        let distance = squared(centre);
+        if nearest > distance {
+            best = centre;
+            if limit > distance {
+                break;
+            }
+            nearest = distance;
+        }
+    }
+    best
 }

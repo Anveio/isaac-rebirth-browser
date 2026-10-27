@@ -73,7 +73,16 @@ TRANSITION_SEED = '0EWL B4FT'
 TRANSITION_ESCAPE_FRAMES = {'paired-pause-before-transition': 30, 'paired-pause-transition': 40}
 
 
-def build(identifier, seed):
+def select_hard(tape):
+    """The seeded Character page: Down toggles the difficulty widget to hard
+    before the Return that starts the run."""
+    seeded = next(i for i, a in enumerate(tape) if a.get('label') == 'character-seeded')
+    tape[seeded + 1:seeded + 1] = [{'type': 'key', 'key': 'Down', 'down': True}, {'type': 'step', 'frames': 12},
+                                   {'type': 'key', 'key': 'Down', 'down': False}, {'type': 'step', 'frames': 30},
+                                   {'type': 'capture', 'label': 'character-hard'}]
+
+
+def build(identifier, seed, hard=False):
     if identifier in TRANSITION_ESCAPE_FRAMES:
         seed = TRANSITION_SEED
     if identifier == 'paired-wall-hugger-contact':
@@ -160,13 +169,8 @@ def build(identifier, seed):
                 advance(tail, 133, 'random-after-bomb')
             else:
                 raise ValueError('Unknown paired scenario: ' + identifier)
-        if identifier == 'paired-hard-run':
-            # The seeded Character page: Down toggles the difficulty widget
-            # to hard before the Return that starts the run.
-            seeded = next(i for i, a in enumerate(tape) if a.get('label') == 'character-seeded')
-            tape[seeded + 1:seeded + 1] = [{'type': 'key', 'key': 'Down', 'down': True}, {'type': 'step', 'frames': 12},
-                                           {'type': 'key', 'key': 'Down', 'down': False}, {'type': 'step', 'frames': 30},
-                                           {'type': 'capture', 'label': 'character-hard'}]
+        if hard or identifier == 'paired-hard-run':
+            select_hard(tape)
         start = next(i for i, a in enumerate(tape) if a.get('label') == 'gameplay-start')
         tape = tape[:start + 1] + tail
     # X11 input is consumed on the next released phase. Never compare a DOM

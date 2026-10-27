@@ -51,6 +51,9 @@ struct WithSpawns {
     /// Per descriptor: [type, variant] of authored NPCs (types 10..999) the
     /// port drops on admission.
     unsupported_npcs: Vec<Vec<[u32; 2]>>,
+    /// Per descriptor: [type, variant, color, spawn seed] of authored NPCs
+    /// that roll a champion in a fresh run of the request's difficulty.
+    champions: Vec<Vec<[u32; 4]>>,
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut input = String::new();
@@ -109,12 +112,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .collect()
         })
         .collect();
+    let stage = floor.stage;
+    let champions = spawns
+        .iter()
+        .map(|room| {
+            room.iter()
+                .flat_map(|room| &room.selectors)
+                .filter(|selector| {
+                    selector.category == rebirth_cleanroom::room_spawns::SpawnCategory::Entity
+                })
+                .filter_map(|selector| {
+                    rebirth_cleanroom::discovered_champion_color(selector, stage, request.difficulty)
+                        .map(|color| {
+                            [
+                                u32::from(selector.entity_type),
+                                u32::from(selector.variant),
+                                color,
+                                selector.spawn_seed,
+                            ]
+                        })
+                })
+                .collect()
+        })
+        .collect();
     println!(
         "{}",
         serde_json::to_string(&WithSpawns {
             floor,
             spawns,
-            unsupported_npcs
+            unsupported_npcs,
+            champions
         })?
     );
     Ok(())

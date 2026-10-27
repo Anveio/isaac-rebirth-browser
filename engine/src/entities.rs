@@ -110,6 +110,9 @@ pub(crate) enum Birth {
     Shot(Shot),
     Ember(ParticleBirth),
     Loot(LootBirth),
+    /// 4f2d10 -> 4f27a0 for a dead champion as the base kill removes it:
+    /// its color's drop (`champions::death_drops`).
+    ChampionDeath,
     Laser(crate::lasers::LaserBirth),
     /// Spawn550a40 of an NPC mid-room (no champion roll in a live room).
     Npc(SpawnSelector),
@@ -431,6 +434,29 @@ pub fn supports_npc_selector(selector: &SpawnSelector) -> bool {
         game_update_count: 0,
     };
     matches!(spawn(0, selector, &context), Ok(Some(_)))
+}
+
+/// The champion color a fresh run without Champion Belt rolls for this
+/// authored NPC selector at `stage` (the color decides before any shared
+/// draw). Scenario discovery uses it to find rooms with a champion.
+pub fn discovered_champion_color(
+    selector: &SpawnSelector,
+    stage: u32,
+    difficulty: crate::difficulty::Difficulty,
+) -> Option<u32> {
+    let context = SpawnContext {
+        stage,
+        game_update_count: 0,
+    };
+    let mut npc = spawn(0, selector, &context).ok()??;
+    let mut shared = crate::mt::Mt19937::new(1);
+    let roll = crate::champions::Roll {
+        stage,
+        difficulty,
+        player_items: None,
+    };
+    crate::champions::roll(&mut npc, &mut shared, &roll).ok()?;
+    npc.champion.map(|champion| champion.color)
 }
 
 /// The first family whose constructor admits the authored selector.

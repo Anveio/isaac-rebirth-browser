@@ -11,6 +11,7 @@ through the door, settle, shoot into the room in every direction, and idle.
 import argparse
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -71,7 +72,7 @@ def route(slot, sweep=False):
     return tape
 
 
-def fought(result, code, slot, frames):
+def fought(result, code, slot, frames, hard=False):
     """Replace the shooting tail after `entry-40` with the port's own
     closed-loop fight (boss-route-record.mjs --fight, lib/route.mjs
     fightKeys, leading each foe) until the room clears. Both games
@@ -80,12 +81,15 @@ def fought(result, code, slot, frames):
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'entry-40')
         result[name] = result[name][:end + 1]
-    generated = floor(codec.decode_seed(code))
+    generated = floor(codec.decode_seed(code), hard)
     room = generated['descriptors'][generated['startingDescriptor']]['neighbors'][slot]
+    # E2E_PRODUCTION_DIRECTORY records with a build other than dist/.
+    production = ['--production-directory', os.environ['E2E_PRODUCTION_DIRECTORY']] if os.environ.get('E2E_PRODUCTION_DIRECTORY') else []
     with tempfile.NamedTemporaryFile('w', suffix='.json') as handle:
         json.dump(result, handle); handle.flush()
         recorded = subprocess.run(['node', str(RECORDER), '--case', handle.name, '--rooms', str(room), '--from', 'entry-40',
-                                   '--fight', str(frames), '--lead', '--no-corner', '--arrival', ''], cwd=ROOT, capture_output=True, text=True, timeout=3600)
+                                   '--fight', str(frames), '--lead', '--no-corner', '--arrival', '', *production],
+                              cwd=ROOT, capture_output=True, text=True, timeout=3600)
     lines = recorded.stdout.strip().splitlines()
     port = json.loads(lines[-1]) if lines else {'status': 'fail', 'reason': recorded.stderr.strip()[-2000:]}
     # A fight still raging when the budget runs out, or one the port's player
@@ -127,8 +131,8 @@ def green_creep_contact_tail():
     return tape
 
 
-def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7), fight=0):
-    result = paired.build('paired-bomb-moving-even', code)
+def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7), fight=0, hard=False):
+    result = paired.build('paired-bomb-moving-even', code, hard)
     tail = route(slot, sweep=shape != (13, 7))
     if (not randomized and entity == (10, 1) and code.replace(' ', '') == '0F8NB23G'
             and slot == 2 and shape == (13, 7)):
@@ -138,18 +142,21 @@ def case(identifier, code, slot, entity, provenance, randomized, shape=(13, 7), 
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1] + tail
     if fight:
-        fought(result, code, slot, fight)
+        fought(result, code, slot, fight, hard)
     runner.validate_tape(result['tape'])
     subject = f'entity {entity[0]}.{entity[1]}' if entity[0] is not None else f'a {shape[0]}x{shape[1]} room'
     result['scenario'] = {'id': identifier, 'description': f'Walk into a room admitting {subject}',
                           'systems': ['enemies-bosses', 'entity-collision', 'damage-pipeline', 'room-connectivity'],
                           'randomized': randomized}
     result['entity'] = {'type': entity[0], 'variant': entity[1], 'shape': list(shape), 'slot': slot, 'selection': provenance}
+    if hard:
+        result['entity']['difficulty'] = 'hard'
     return result
 
 
-def floor(run_seed):
-    result = subprocess.run([str(GENERATOR)], input=json.dumps({'stageSeed': codec.initial_stage_seed(run_seed), 'spawns': True}),
+def floor(run_seed, hard=False):
+    request = {'stageSeed': codec.initial_stage_seed(run_seed), 'spawns': True, 'difficulty': 'hard' if hard else 'normal'}
+    result = subprocess.run([str(GENERATOR)], input=json.dumps(request),
                             capture_output=True, text=True, timeout=20, check=True)
     return json.loads(result.stdout)
 

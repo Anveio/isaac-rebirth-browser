@@ -60,7 +60,7 @@ pub mod tear_deaths;
 mod tear_factory;
 mod technology;
 mod technology2;
-pub use entities::{implemented_npc_kinds, supports_npc_selector};
+pub use entities::{discovered_champion_color, implemented_npc_kinds, supports_npc_selector};
 mod contact_candidates;
 mod controlled_knife_homing;
 pub mod controls_menu;
@@ -5831,6 +5831,80 @@ impl Game {
         Ok(())
     }
     /// Admits one NPC callback product at the callback's own return point.
+    /// 4f27a0's drops for the dead champion at `index`: Spawn550a40 of each
+    /// pickup with the champion as spawner, in drop order.
+    fn admit_champion_drops(&mut self, index: usize) -> Result<(), String> {
+        let state = &mut self.state;
+        let descriptor = state
+            .room
+            .grid
+            .clone()
+            .ok_or("champion drop requires the admitted room grid")?;
+        let grid = grid::Grid::new(descriptor)?;
+        let costs = state.room.path_costs.as_ref();
+        // Room 5c5af0: a grid entity's class, else the path cost's.
+        let collision = |cell: usize| match grid.descriptor().cells[cell].entity.as_ref() {
+            Some(entity) => entity.collision_class,
+            None => match costs.map(|costs| costs.get(cell)) {
+                Some(Ok(3000)) => 1,
+                Some(Ok(cost)) if cost >= 1000 => 3,
+                Some(Ok(_)) => 0,
+                _ => grid.collision(cell),
+            },
+        };
+        let npc = &state.room.npcs[index];
+        let spawner = pickups::SourceSpawner {
+            entity_type: npc.kind,
+            variant: npc.variant,
+        };
+        let Some(drops) = champions::death_drops(
+            npc,
+            state.difficulty,
+            &mut state.boot_lifecycle.shared,
+            |position| champions::free_tile_position(&grid, collision, position, 40.0),
+        ) else {
+            // PORT GAP: this color's drop (see `champions::death_drops`).
+            return Ok(());
+        };
+        for drop in drops {
+            let id = state.next_pickup;
+            let mut pickup = if drop.variant == 70 {
+                Pickup::from_pocket_parts(
+                    id,
+                    drop.variant,
+                    drop.subtype,
+                    drop.spawn_seed,
+                    drop.position,
+                    true,
+                    pickups::PocketSubtypeInputs::from_state(state),
+                )?
+                .ok_or("champion pill drop requires its Pickup.Init inputs")?
+            } else {
+                let subtype = pickups::regular_subtype_with_inputs(
+                    drop.variant,
+                    drop.subtype,
+                    drop.spawn_seed,
+                    pickups::RegularSubtypeInputs::from_state(state),
+                )?
+                .ok_or("champion drop requires its Pickup.Init inputs")?;
+                let mut pickup = Pickup::spawn(id, drop.variant, subtype, drop.position, true)?;
+                pickup.initialize_spawn_seed(drop.spawn_seed)?;
+                pickup
+            };
+            pickup.birth_game_update = state.game_update_count;
+            pickup.source_spawner = Some(spawner.clone());
+            state.next_pickup = id.checked_add(1).ok_or("champion drop identity exhausted")?;
+            state.room.pickups.push(pickup);
+            let actor = actors::ActorRef {
+                kind: actors::ActorKind::Pickup,
+                id,
+            };
+            state.room.authored_actor_order.push(actor);
+            state.actor_scheduler.admit(actor)?;
+        }
+        Ok(())
+    }
+
     fn admit_npc_birth(&mut self, index: usize, birth: entities::Birth) -> Result<(), String> {
         let parent = self.state.room.npcs[index].id;
         match birth {
@@ -5850,6 +5924,7 @@ impl Game {
                     id,
                 })
             }
+            entities::Birth::ChampionDeath => self.admit_champion_drops(index),
             entities::Birth::Loot(birth) => {
                 let subtype = fireplaces::loot_subtype(birth.variant, birth.spawn_seed)?;
                 let id = self.state.next_pickup;
