@@ -299,7 +299,7 @@ passing live comparison.
 | 38 | Tammy's Head | partial | `tammys-head` |  | 1 (goldenChest) |  | See [active inventory](active-items.md). |
 | 39 | Mom's Bra | partial | active-items `moms-bra-39-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
 | 40 | Kamikaze! | partial | `kamikaze-40-fixed-phase0` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
-| 41 | Mom's Pad | partial | `moms-pad-41-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
+| 41 | Mom's Pad | partial | active-items `moms-pad-41-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
 | 42 | Bob's Rotten Head | missing |  |  | 2 (treasure, goldenChest) |  | See [active inventory](active-items.md). |
 | 43 | Pills here! | missing |  |  |  |  | See [active inventory](active-items.md). |
 | 44 | Teleport! | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
