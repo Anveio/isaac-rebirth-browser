@@ -99,7 +99,7 @@ def main():
     def declare(name, pedestals, actions, epoch, phase, entropy, uses, npc_freeze=False, freeze_control=False):
         key = '-'.join('.'.join(str(value) for value in row[:-2]) for row in pedestals)
         npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
-                      for x, y, kind in ((11, 1, 12), (1, 1, 18))] if npc_freeze else []
+                      for x, y, kind in ((10, 5, 12), (1, 1, 18))] if npc_freeze else []
         if npc_freeze:
             key += '-npc-freeze12-18'
         authored = fixture(key, pedestals, npc_groups)
@@ -128,7 +128,8 @@ def main():
                 missingWitnessPolicy='FAIL; every mismatch is retained, no injected state or redraw.')))
         if npc_freeze:
             cases[-1]['activeItems']['npcFreeze'] = dict(
-                schema='source-public-npc-freeze-v1', itemId=39, durationInput=220, cappedTimer=120,
+                schema='source-public-npc-freeze-v1', routeVersion=2,
+                itemId=39, durationInput=220, cappedTimer=120,
                 control=freeze_control,
                 targets=[dict(type=12, variant=0, subtype=0), dict(type=18, variant=0, subtype=0)],
                 required=['LiveUnchampionedUnlinkedTargetsPastAppear', 'Held39Charge3AndPhysicalSpace',
@@ -172,9 +173,15 @@ def main():
     #A second active replaces the first and drops it back as a pedestal.
     declare('swap-45-282-phase1', [(45, 6, 5), (282, 5, 6)],
             idle + acquire('first') + acquire('second', 'a', 'west') + use('use', [], 24), 12713, 1, fixed, [282])
-    #Same public acquisition transport, shortened only in this opt-in tape.
-    #Both games must actually acquire charge3 and admit both live targets.
-    freeze_actions = idle + acquire()[:2] + use('freeze-use', [], 300)
+    # A w4 pulse settles22.343 world units from the pedestal, outside the
+    # strict radius22 contact. Eight public input presentations cross it;
+    # the existing released96 then admits the actual Pickup ceremony.
+    # Horf(10,5) is inside its strict200 shooting range of this route.
+    # Both games must still witness acquisition, shooter progress and survival.
+    freeze_actions = idle + [
+        dict(label='freeze-acquire-north-8', keys=['w'], presentations=8),
+        dict(label='freeze-acquire-released-ceremony', keys=[], presentations=96),
+    ] + use('freeze-use', [], 300)
     if args.npc_freeze:
         for phase in (0, 1):
             declare(f'moms-bra-39-npc-freeze-fixed-phase{phase}', single(39), freeze_actions,
