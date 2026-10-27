@@ -59,11 +59,15 @@ class FearComparison:
             try:
                 assert type(status) is dict
                 vectors = actual['pathfinderVectors']
-                assert actual['pathfinder'] is None and type(vectors) is dict, 'Horf has exactly its narrow embedded owner'
+                # Npc.pathfinder explicitly omits None during serialization;
+                # the separate narrow vector owner must still be present.
+                assert actual.get('pathfinder') is None and type(vectors) is dict, 'Horf has exactly its narrow embedded owner'
                 actor.update(fearTimer=self.integer(status['fearTimer']), feared=self.boolean(status['feared']),
                     pathVectors={key:self.vector(vectors[key]) for key in ('target', 'wanderDirection10')},
                     sequenceId=self.integer(identities[actor['lifetimeId']]),
-                    gridContact=self.boolean(actual['gridCollided']))
+                    # Npc.gridCollided explicitly omits false, with serde's
+                    # default false on absence; this is its snapshot contract.
+                    gridContact=self.boolean(actual.get('gridCollided', False)))
             except (KeyError, TypeError, ValueError, AssertionError) as error:
                 actor.update(statusAvailable=False, fearUnavailable=str(error))
                 self.check('Own:fear actual timer/flag/vector owners', str(error), 'complete actual owners', gp)
