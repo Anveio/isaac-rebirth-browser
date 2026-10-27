@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "epic-fixed-phase0",
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 0,
+      "entropy": "fixed"
+    },
+    {
+      "name": "epic-fixed-phase1",
+      "bootEpochSeed": 1700000000,
+      "initialPhaseOffset": 1,
+      "entropy": "fixed"
+    },
+    {
+      "name": "epic-first-os",
+      "bootEpochSeed": 4218436819,
+      "initialPhaseOffset": 1,
+      "entropy": "d33c70fb"
+    }
+  ]
+}

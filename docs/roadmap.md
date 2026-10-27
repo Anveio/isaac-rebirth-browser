@@ -789,6 +789,7 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #892 / [PR893](https://github.com/Anveio/isaac-rebirth-browser/pull/893) restores Epic Fetus target and rocket rendering. Both fixed phases and the recorded OS case render through the actual browser without the former effect30 runtime failure; Original impact and pixel parity remain separate.
 - #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
 - #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
 - #438 / PR660 moves the declared pre-Title elapsed time into the verification reset and uses plain ticks; the shipped app does not call this ingress. Historical [death clock evidence](player-death.md) keeps its timestamped transport, required Original audio-observation failure and pixel reds. The [matrix](../TEST_MATRIX.md) separately retains the clock merge's worse entity rows and lost checkpoint passes.
