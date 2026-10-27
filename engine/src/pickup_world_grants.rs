@@ -267,7 +267,10 @@ fn little_baggy(
     let placement = prepare_placement(state)?;
     state.boot_lifecycle.shared = placement.shared;
     let admission = (|| {
-        let owner = state.player_items.as_ref().ok_or_else(|| input("Player items"))?;
+        let owner = state
+            .player_items
+            .as_ref()
+            .ok_or_else(|| input("Player items"))?;
         //Pill Init reads Have251 before selecting its family. Its actual
         //query owner is required even though the canonical Init takes counts.
         crate::item_queries::AppearanceQueries::new(
@@ -284,7 +287,10 @@ fn little_baggy(
             0,
             world_seed,
             placement.position,
-            crate::pickups::SourceSpawner { entity_type: 1, variant: 0 },
+            crate::pickups::SourceSpawner {
+                entity_type: 1,
+                variant: 0,
+            },
         )
     })();
     let world_result = match admission {
@@ -297,20 +303,28 @@ fn little_baggy(
     };
     //World Init never mutates the Player's held records or item252 RNG.
     //Its unavailable result therefore does not erase a closed held suffix.
-    let slots = state.player_items.as_ref()
+    let slots = state
+        .player_items
+        .as_ref()
         .and_then(|owner| owner.held_pockets.as_ref())
         .filter(|held| held.frontier.is_none())
-        .ok_or_else(|| input("actual held pocket records"))?.slots;
+        .ok_or_else(|| input("actual held pocket records"))?
+        .slots;
     for (index, slot) in slots.into_iter().enumerate() {
         if slot.id == 0 || !slot.card {
             continue;
         }
         let seed = next_item_seed(state, 252)?;
-        let held = state.player_items.as_mut()
+        let held = state
+            .player_items
+            .as_mut()
             .and_then(|owner| owner.held_pockets.as_mut())
             .expect("checked held pocket records");
         //52E135 stores the Pill tag, then581950(seed) is unsigned %9+1.
-        held.slots[index] = crate::pockets::PocketSlot { id: seed % 9 + 1, card: false };
+        held.slots[index] = crate::pockets::PocketSlot {
+            id: seed % 9 + 1,
+            card: false,
+        };
     }
     *local_rng_complete = true;
     world_result

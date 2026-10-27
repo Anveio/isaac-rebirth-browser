@@ -1374,7 +1374,10 @@ pub(crate) fn add_collectible(
     let charge_words_preserved = keep_default_passive_inputs
         || matches!(
             source_effect,
-            Some(PassiveGrantSourceEffect::ItemRngCardSpawn | PassiveGrantSourceEffect::ItemRngPillModifier)
+            Some(
+                PassiveGrantSourceEffect::ItemRngCardSpawn
+                    | PassiveGrantSourceEffect::ItemRngPillModifier
+            )
         )
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
