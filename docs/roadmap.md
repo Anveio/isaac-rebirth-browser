@@ -794,7 +794,6 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
-- #888 / [PR894](https://github.com/Anveio/isaac-rebirth-browser/pull/894) completes the bounded Little Baggy held-card conversion and prevents Blank Card from using the historical card. The fixed/recorded-OS replay passes all 330 rows with 38 gains and no lost passes; broader conversion and audio scopes remain open.
 - #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
 - #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
 - #438 / PR660 moves the declared pre-Title elapsed time into the verification reset and uses plain ticks; the shipped app does not call this ingress. Historical [death clock evidence](player-death.md) keeps its timestamped transport, required Original audio-observation failure and pixel reds. The [matrix](../TEST_MATRIX.md) separately retains the clock merge's worse entity rows and lost checkpoint passes.
@@ -811,5 +810,6 @@ Bugs in a test route or tool rather than in the game.
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
 - #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).
+- #888 / [PR894](https://github.com/Anveio/isaac-rebirth-browser/pull/894) completes the bounded Little Baggy held-card conversion and prevents Blank Card from using the historical card. The fixed/recorded-OS replay passes all 330 rows with 38 gains and no lost passes; broader conversion and audio scopes remain open.
 
 The bounded [Gamma slice](options-gamma.md) implements the f32 callback, percentage, final RGB pass and V4 Back/reload. Fixed plus first-unfiltered OS inputs pass 1,376 functional checks and 26 required percentage regions; full-frame diagnostics remain 10/40 exact. Historical preference versions and shared regression evidence keep their own contracts.
