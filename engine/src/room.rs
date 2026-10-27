@@ -67,6 +67,10 @@ pub struct Room {
     /// from every Door::Init (563b70) until its last frame.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cracked_close_frame: Option<u32>,
+    /// A run's start room with countable enemies: its Init sets no door
+    /// state, and the first Room.Update closes the doors.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub startup_close_pending: bool,
     pub spawns: Option<crate::room_spawns::RoomSpawns>,
     pub grid: Option<crate::grid::GridDescriptor>,
     /// The actual signed Room+e98 owner; absent until its source Init is admitted.
@@ -1217,6 +1221,7 @@ impl Room {
             combat_shut_door_slots: Vec::new(),
             combat_shut_update: None,
             cracked_close_frame: None,
+            startup_close_pending: false,
             spawns: None,
             grid: None,
             path_costs: None,

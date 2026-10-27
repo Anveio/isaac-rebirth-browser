@@ -706,25 +706,26 @@ pub fn admit_room_combat(state: &mut State) {
 /// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
 /// nonpositive total sets descriptor3d; a positive total preserves its flag.
 /// This is separate from the doorway's immediate update/countdown10 tail.
-/// It shuts no door: the first Room.Update's 5c71c0 does, so the doors'
-/// Close (and its SFX35 two updates later) starts at Game+ce9f4 = 1.
+/// It shuts no door. In the original the start room's doors Close on the
+/// first Room.Update (Game+ce9f4 = 1), so their SFX35 and its shared Random
+/// come two updates later (#862: two Boils kept the port 30 draws ahead).
+/// Which Room.Update call issues that Close is not identified, so only this
+/// start-room case is modelled.
 pub(crate) fn initialize_startup_clear(state: &mut State) {
     state.room.combat_clear_countdown = 0;
     if state.room.manager_counts.countable_total() <= 0 {
         state.room.combat_clear = true;
     }
+    state.room.startup_close_pending = !state.room.combat_clear;
 }
 
 pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
+    let startup_close = std::mem::take(&mut state.room.startup_close_pending);
     if state.room.manager_counts.countable_total() > 0 {
         state.room.combat_clear_countdown = 10;
-        //5d14a8 calls 5c71c0, which Closes every open door. With
-        //descriptor3d set it first skips a door near the Player
-        //(5c7214); that branch is not ported, so a clear room keeps
-        //its doors as they are.
-        if !state.room.combat_clear {
+        if startup_close && !state.room.combat_clear {
             change_doors(state, false);
         }
     } else if state.room.combat_clear_countdown > 0 {
