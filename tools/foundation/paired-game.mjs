@@ -368,8 +368,10 @@ export async function browserCapture(browser, server, caseData, directory, archi
     } else {
       // Fresh Main reconstructs Character's transient dialog. Require its
       // actual run-admission witness; final committed run checks stay below.
+      // A declared Exit/Continue route reconstructs Main and resumes the run
+      // with that dialog cleared too; the same witness applies.
       let seedReadback = final;
-      if (final?.screen === 'main') {
+      if (final?.screen === 'main' || (caseData.continueRun && final?.screen === 'playing')) {
         const entries = frames.filter(frame => frame.label === 'gameplay-start');
         assert.equal(entries.length, 1, 'Returned Main requires one actual run-admission seed witness');
         seedReadback = entries[0].state;

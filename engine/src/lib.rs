@@ -1711,7 +1711,7 @@ impl Game {
                     }
                     self.require_profile_document()?;
                     let record = self.current_profile_save()?;
-                    record.admit_initial_room()?;
+                    record.admit_continue()?;
                     //Main5A47B0 decodes the retained saved string for593470;
                     //the later loader independently invokes the Seeds setter.
                     self.state
@@ -2420,7 +2420,7 @@ impl Game {
     fn continue_run(&mut self) -> Result<(), String> {
         self.require_profile_document()?;
         let record = self.current_profile_save()?;
-        record.admit_initial_room()?;
+        let domain = record.admit_continue()?;
         let run = &record.run;
         let context = &record.context;
         // Saved+EF80 owns the formatted string; the internal codec stays compact.
@@ -2566,50 +2566,54 @@ impl Game {
             mt::DescriptorSeeds::construct_lookup_dummy(&mut self.state.boot_lifecycle.shared);
             self.room_lookup_dummy_constructed = true;
         }
-        self.state.room = Room::from_floor_descriptor_with_special(
-            &self.state.floor,
-            self.state.current_room,
-            self.special_room_assets.as_deref().map(Vec::as_slice),
-        )?;
-        self.state.room.initialization_game_update = Some(run.game_update_count);
-        self.state.room.source_tear_slowdown_2494 = Some(0);
-        self.state.room.combat_clear = run.room.combat_clear;
-        ambience::reset_room(&mut self.state);
-        //5CEF3E→5C5B30 reloads backdrop FX on every Room.Init, including
-        //visited descriptors. The distinct5CF618 gate skips first-visit critters.
-        room::load_fx_rays(
-            &mut self.state.room,
-            &mut self.state.boot_lifecycle.shared,
-            self.state.stage,
-            0,
-        );
-        grid_records::restore_records(
-            &mut self.state.room,
-            &mut self.state.boot_lifecycle.shared,
-            &run.grid_records,
-            run.game_update_count,
-        )?;
-        let selectors = self
-            .state
-            .room
-            .spawns
-            .as_ref()
-            .ok_or("saved Room has no selectors")?
-            .selectors
-            .clone();
-        let viewer = bombs::player_world(&self.state);
-        self.admit_room_pickups_owned(
-            &selectors,
-            run.game_update_count,
-            true,
-            viewer,
-            Some(
-                context
-                    .ambient_records
-                    .as_deref()
-                    .ok_or("Continue saved ambient ownership is unknown")?,
-            ),
-        )?;
+        if domain == save_profiles::ContinueDomain::InitialRoom {
+            self.state.room = Room::from_floor_descriptor_with_special(
+                &self.state.floor,
+                self.state.current_room,
+                self.special_room_assets.as_deref().map(Vec::as_slice),
+            )?;
+            self.state.room.initialization_game_update = Some(run.game_update_count);
+            self.state.room.source_tear_slowdown_2494 = Some(0);
+            self.state.room.combat_clear = run.room.combat_clear;
+            ambience::reset_room(&mut self.state);
+            //5CEF3E→5C5B30 reloads backdrop FX on every Room.Init, including
+            //visited descriptors. The distinct5CF618 gate skips first-visit critters.
+            room::load_fx_rays(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                self.state.stage,
+                0,
+            );
+            grid_records::restore_records(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                &run.grid_records,
+                run.game_update_count,
+            )?;
+            let selectors = self
+                .state
+                .room
+                .spawns
+                .as_ref()
+                .ok_or("saved Room has no selectors")?
+                .selectors
+                .clone();
+            let viewer = bombs::player_world(&self.state);
+            self.admit_room_pickups_owned(
+                &selectors,
+                run.game_update_count,
+                true,
+                viewer,
+                Some(
+                    context
+                        .ambient_records
+                        .as_deref()
+                        .ok_or("Continue saved ambient ownership is unknown")?,
+                ),
+            )?;
+        } else {
+            self.restore_continued_room(&record)?;
+        }
         //The Room.Init placement call sees constructor3074=false and returns.
         item_queries::note_room_placement(&mut self.state);
         if let Some(id) = music::stage_track(self.state.stage, false) {
@@ -2622,13 +2626,16 @@ impl Game {
             .expect("loaded Player")
             .unevaluated_cache_flags = u32::MAX;
         player_stats::evaluate_cache(&mut self.state)?;
-        if self
-            .state
-            .player_items
-            .as_ref()
-            .expect("loaded Player")
-            .unevaluated_cache_flags
-            != 0
+        //A visited-room save may hold items whose callbacks remain pending;
+        //the run resumes with them exactly as live play does after a grant.
+        if domain == save_profiles::ContinueDomain::InitialRoom
+            && self
+                .state
+                .player_items
+                .as_ref()
+                .expect("loaded Player")
+                .unevaluated_cache_flags
+                != 0
         {
             return Err("Continue post-load cache has an unresolved actual callback".into());
         }
@@ -2659,6 +2666,127 @@ impl Game {
         //the actual odd System pre-counter advances once at594BF0.
         self.state.system_clock.align_run_start()?;
         self.refresh_minimap();
+        Ok(())
+    }
+
+    ///54ECE0's Level load leaves every descriptor visited, so Room.Init5cecc0
+    ///takes its revisit branch for the saved current room: grid records and
+    ///the persistent records Room.Save5ce2d0 kept (5c57c0 families) return,
+    ///while 5ce6b0 respawns the layout's other entities unless the descriptor
+    ///is cleared (+3d). An uncleared room therefore restarts its fight with
+    ///fresh layout NPCs; nothing saved re-rolls a pedestal or award seed.
+    fn restore_continued_room(&mut self, record: &save_profiles::RunRecord) -> Result<(), String> {
+        let run = &record.run;
+        let mut room = run.room.clone();
+        room.initialization_game_update = Some(run.game_update_count);
+        if let Some(trapdoor) = &mut room.trapdoor {
+            trapdoor.reinitialize();
+        }
+        room.source_tear_slowdown_2494 = Some(0);
+        room.loaded = false;
+        room.initialize_path_costs();
+        room.npcs.clear();
+        room.authored_actor_order
+            .retain(|actor| actor.kind != actors::ActorKind::Npc);
+        room.combat_shut_door_slots.clear();
+        room.combat_shut_update = None;
+        room.combat_clear_countdown = 0;
+        self.state.room = room;
+        ambience::reset_room(&mut self.state);
+        room::load_fx_rays(
+            &mut self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+            self.state.stage,
+            0,
+        );
+        if !self.state.room.combat_clear {
+            let selectors = self
+                .state
+                .room
+                .spawns
+                .as_ref()
+                .ok_or("saved Room has no selectors")?
+                .selectors
+                .clone();
+            let context = entities::SpawnContext {
+                stage: self.state.stage,
+                game_update_count: self.state.game_update_count,
+            };
+            let mut npcs = Vec::new();
+            let mut order = Vec::new();
+            for selector in &selectors {
+                if selector.category != room_spawns::SpawnCategory::Entity {
+                    continue;
+                }
+                let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
+                if let Some(mut npc) = entities::spawn(id, selector, &context)? {
+                    champions::roll(
+                        &mut npc,
+                        &mut self.state.boot_lifecycle.shared,
+                        &champions::Roll {
+                            stage: self.state.stage,
+                            difficulty: self.state.difficulty,
+                            player_items: self.state.player_items.as_ref(),
+                        },
+                    )?;
+                    order.push(actors::ActorRef {
+                        kind: actors::ActorKind::Npc,
+                        id,
+                    });
+                    npcs.push(npc);
+                }
+            }
+            order.append(&mut self.state.room.authored_actor_order);
+            self.state.room.authored_actor_order = order;
+            self.state.room.npcs = npcs;
+        }
+        let room_type = self
+            .state
+            .room
+            .descriptor
+            .as_ref()
+            .map_or(1, |descriptor| descriptor.template.room_type);
+        self.state.room.boss_presentation_index = if room_type == 5 {
+            self.state
+                .room
+                .npcs
+                .iter()
+                .find_map(|npc| content::boss_presentation(npc.kind, npc.variant))
+                .unwrap_or(0)
+        } else {
+            0
+        };
+        //Pickup handles stay unique across every retained room.
+        let next = std::iter::once(&self.state.room)
+            .chain(self.state.persisted_rooms.values())
+            .flat_map(|room| {
+                room.pickups
+                    .iter()
+                    .map(|pickup| pickup.id)
+                    .chain(room.saved_regular_pickups.iter().map(|saved| saved.handle))
+            })
+            .max()
+            .map_or(Ok(1), |id| {
+                id.checked_add(1).ok_or("pickup identity counter exhausted")
+            })?;
+        self.state.next_pickup = next;
+        ordinary_placement::invalidate(&mut self.state, ordinary_placement::Frontier::Restore);
+        pickups::readmit_regular_records(&mut self.state)?;
+        slots::readmit_saved(&mut self.state);
+        self.rebuild_room_actor_schedule()?;
+        critters::restore_saved_records(
+            &mut self.state,
+            record
+                .context
+                .ambient_records
+                .as_deref()
+                .ok_or("Continue saved ambient ownership is unknown")?,
+        )?;
+        crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
+        self.state.room.complete_initialization();
+        self.refresh_room_boss_count();
+        npcs::admit_room_combat(&mut self.state);
+        self.refresh_stage_effects();
         Ok(())
     }
 
@@ -2724,9 +2852,34 @@ impl Game {
     /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
     /// Selector, door and wall constructors follow in fresh admission.
     fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
-        //Other Level entry stores require the actual doorway/save owner;
-        //a previously known initial value must not survive room travel.
-        self.state.saved_room_entry = None;
+        //ChangeRoom58d94d/957 moves Level8188 into818C and58da35 stores the
+        //entered room's door slot back to the previous room in8198 (587070).
+        //819C keeps the Level.Init placement vector. An unknown prior entry
+        //stays unknown rather than borrowing a substitute vector.
+        let previous_grid = self
+            .state
+            .floor
+            .descriptors
+            .get(room_before)
+            .map(|descriptor| descriptor.grid_index);
+        let entered_slot = self
+            .state
+            .room_transition
+            .as_ref()
+            .map(|transition| transition.target_slot);
+        self.state.saved_room_entry = match (
+            self.state.saved_room_entry.take(),
+            previous_grid,
+            entered_slot,
+        ) {
+            (Some(prior), Some(grid), Some(slot)) => Some(save_profiles::RoomEntry {
+                previous_room: i32::try_from(grid)
+                    .map_err(|_| "room grid cell exceeds source range")?,
+                slot: i32::from(slot),
+                position: prior.position,
+            }),
+            _ => None,
+        };
         let left = self
             .state
             .persisted_rooms

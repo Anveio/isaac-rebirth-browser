@@ -2,8 +2,10 @@
 
 The browser stores three origin-local save slots and reconstructs a supported
 initial normal Isaac room through public Pause Quit, Main Continue and a real
-page reload. This is a partial implementation. Complete Native restoration,
-broader shared-MT consumers and later-room/item/actor saves remain open.
+page reload. Continue also resumes any visited stage-1 room (see the #896
+section below). This is a partial implementation: complete Native
+restoration, broader shared-MT consumers, later stages and saved live bombs
+remain open.
 
 The versioned, bounded Save packet contains explicit Player, ItemPool,
 Level/Room/GridRecord and profile owners. It does not replace the running
@@ -36,6 +38,67 @@ paint arrays. Other stain families, room travel, special characters/modes,
 nonzero item callbacks, unsupported grid factories and progression remain explicit unsupported load domains. The packet
 validator and this narrower load admission are separate; a durable packet does
 not by itself establish an implemented Continue caller for every saved state.
+
+## Continue after leaving the initial room (#896)
+
+Game.Save (`54F2C8`) saves the ItemPool (`581ED0`), runs Room.Save (`5CE2D0`)
+on the current room and then saves the whole Level (`58CD90`). The Level save
+holds every descriptor with its seeds, visited and cleared flags, persistent
+spawn set and saved entity records. It also holds the current and previous
+rooms (`Level+8188` and `+818C`) and the entry door slot (`+8198`), followed by
+the Player. Room.Save keeps only the persistent families of `5C57C0`: bombs,
+pickups, slots, shopkeepers, fireplaces and the listed effects. NPCs are not
+saved.
+
+On Continue, the current room takes Room.Init's (`5CECC0`) revisit branch,
+because its descriptor is visited:
+
+- The saved records come back (`5C5860`).
+- `5CE6B0` respawns the layout's other entities unless the room is cleared.
+
+The behaviour below was observed in the original:
+
+- **Room and position.** The run resumes in the same room. Isaac stands
+  40 units inside the entry door. A start room that was never left has no
+  entry door, so a door is drawn at random.
+- **Controls.** They are disabled through the room fade and come back by
+  300 frames after Continue.
+- **Uncleared fights.** Flies that moved before Exit come back on their
+  layout cells at full health. The fight restarts.
+- **No re-rolls.** The pools, their RNGs and every descriptor seed are
+  restored. A treasure pedestal holds the same collectible whether the run
+  was quit before or after entering its room. For example, 3YSTBQPG shows
+  item 71 in both orders.
+
+The port now admits a second Continue domain, `ContinueDomain::VisitedRoom`
+(`RunRecord::admit_continue`). It covers normal Isaac in challenge 0 and seed
+effect mode 0, alive and on any stage-1 room reached so far.
+
+- **Saved state.** ChangeRoom now records the previous room and the entry
+  slot in the saved entry, where it used to clear them.
+- **Restore.** `restore_continued_room` rebuilds the saved current room in
+  the revisit order: it clears the transient NPCs and combat doors, respawns
+  the layout NPCs unless the room is cleared, and readmits the saved pickups,
+  slots and ambient records.
+
+The initial-room domain is unchanged. Bombs that are live at Save are still
+refused.
+
+The `continue-run` suite (`tools/original/continue-run-scenarios.py`) exits
+and continues in both games, with these cases:
+
+- KRAYFRWA, with flies that moved before Exit.
+- 3YSTBQPG, quitting in the treasure room. This case Continues, collects the
+  item, walks back and quits and Continues again in the start room.
+- 3YSTBQPG, quitting before the treasure room was ever entered.
+- One OS-random neighbour room, with a random idle before Exit.
+
+Every gameplay capture compares the room, previous room, exact player
+motion, controls, hearts, consumables, owned collectibles, visited set and
+clear flag. The room's pickups are compared as a multiset. NPCs are compared
+as exact type, variant, subtype, position and HP tuples at 60 frames after
+each Continue, and as identities afterwards, once their AI randomness
+diverges. NPC families the port never constructs stay diagnostics.
 
 ## Current-room regular records at Save
 
@@ -320,6 +383,7 @@ readback, captures, disassembly, copied room resources or storage payload.
 ```sh
 npm run test:e2e -- save-continue --count 1 --no-build --production-directory FROZEN
 npm run test:e2e -- save-continue --scenarios references/isaac/cases/save-continue/recovery-initial-footprints-fixed-dl17.json --no-build --production-directory FROZEN
+npm run test:e2e -- continue-run --no-build
 ```
 
 The default draws a new unfiltered OS case. The recorded bank replays the
