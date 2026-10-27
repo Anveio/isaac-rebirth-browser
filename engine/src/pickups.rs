@@ -1740,11 +1740,15 @@ pub(crate) fn bomb_hit(
             current_actors.contains(&actor) && state.actor_scheduler.sequence_id(actor).is_some();
         let pickup = &mut state.room.pickups[index];
         let bomb_chest = pickup.variant == 51 && pickup.chest.is_some();
+        //A collectible pedestal (mass 3, entity class4, not dead31f even
+        //when emptied) passes 554528..55455C too: the blast kicks it and its
+        //Pickup507170 anchor pull brings it back.
+        let pedestal = pickup.variant == 100;
         //Appear has source entity class0; Collect has dead31f. Admitted
         //ordinary families have ground class5 and positive authored mass≤20.
-        if (!pickup.has_regular_physics() && !bomb_chest)
-            || (!bomb_chest && !pickup.can_collect)
-            || pickup.collected
+        if (!pickup.has_regular_physics() && !bomb_chest && !pedestal)
+            || (!bomb_chest && !pedestal && !pickup.can_collect)
+            || (pickup.collected && !pedestal)
             || pickup.removed
             || pickup.collision_mass == 0.0
         {
