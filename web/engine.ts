@@ -384,8 +384,10 @@ export interface State {
   runSeeds: {startSeed: number; streamState: number; initializedFields: number[]; sourceEffectMode?: number | null} | null;
   acquisitionHistory?: AcquisitionHistory;
   itemPools: {seed: number; rootRng: ItemRng; secondaryRng?: ItemRng | null; pools: ItemPool[];
-    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[];
+    specialFactor: number; removed: boolean[]; selected: boolean[]; roomRoutes: number[]; pillEffects: number[]; pillIdentified?: boolean[] | null;
     trinkets?: {available: boolean[]; count: number; eligible?: boolean[] | null} | null} | null;
+  /** HUD 575FDF held Pill text: the name when identified, "???" when not; absent when unknown. */
+  heldPillName?: string | null;
   playerItems: {initializerSeed: number; managerRng: ItemRng; initializerRng: ItemRng;
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     heldPockets?: {slots: {id: number; card: boolean}[];

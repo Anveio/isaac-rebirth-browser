@@ -810,6 +810,10 @@ pub struct State {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acquisition_history: Option<acquisition_history::AcquisitionHistory>,
     pub item_pools: Option<items::ItemPools>,
+    /// HUD 575FDF's held Pill text after each public command: its name when
+    /// identified, "???" when not, absent when the port does not know.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub held_pill_name: Option<String>,
     #[serde(
         default,
         serialize_with = "pill_effect_history::serialize_player_items",
@@ -1316,6 +1320,7 @@ impl Game {
                 // Game553DB5 ->576AC0 owns the initially empty history.
                 acquisition_history: Some(acquisition_history::AcquisitionHistory::default()),
                 item_pools: None,
+                held_pill_name: None,
                 player_items: None,
                 player_animation: player_animation::PlayerAnimation::default(),
                 public_actions: public_actions::PublicActions::default(),
@@ -1448,6 +1453,7 @@ impl Game {
             self.state.menu_animation_tick = 0;
         }
         self.refresh_stage_effects();
+        self.state.held_pill_name = pockets::held_pill_name(&self.state);
     }
 
     fn apply(&mut self, command: Command) -> Result<(), String> {

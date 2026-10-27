@@ -166,8 +166,13 @@ fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
                 .name,
         ),
     };
-    //528446's identification byte is an independent unimplemented owner.
-    //Do not invent a fresh global store without its foreign-writer history.
+    let color = state
+        .player_items
+        .as_ref()
+        .and_then(|owner| owner.held_pockets.as_ref())
+        .map(|held| held.slots[0].id)
+        .ok_or("resolved Pill slot")?;
+    identify_pill(state, Some(color));
     if let Some(name) = displayed_name {
         state.run_introduction = crate::RunIntroduction::pickup(name, "");
     }
@@ -179,7 +184,7 @@ fn use_range_pill(state: &mut State, effect: u32) -> Result<(), String> {
     frontiers.persistent_counter5 = false;
     frontiers.persistent_use43 = false;
     frontiers.game_time_551dd0 = true;
-    frontiers.identified_color = true;
+    frontiers.identified_color = false;
     frontiers.unresolved_name_mode |= displayed_name.is_none();
     frontiers.range_up_color |= effect == 12;
     //5284A3 increments before529003/528EC7 request the independent cache8.
@@ -448,13 +453,20 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
                 source_pc: 0x5282b0,
             },
         );
+        identify_pill(state, None);
         return Ok(());
     };
-    if held.frontier.is_none() {
+    let identified = if held.frontier.is_none() {
         let slot = held.slots[0];
         if slot.id == 0 {
             return Ok(());
         }
+        Some((!slot.card).then_some(slot.id))
+    } else {
+        None
+    };
+    if held.frontier.is_none() {
+        let slot = held.slots[0];
         held.frontier = Some(if slot.card {
             PocketFrontier::CardEffect { card_id: slot.id }
         } else {
@@ -499,7 +511,60 @@ pub(crate) fn use_pocket(state: &mut State, controls_enabled: bool) -> Result<()
     }
     state.attack_runtime.aim_rotation_c70 = None;
     owner.move_speed_inputs = None;
+    match identified {
+        Some(Some(color)) => identify_pill(state, Some(color)),
+        Some(None) => {}
+        None => identify_pill(state, None),
+    }
     Ok(())
+}
+
+/// 528446 sets the held color's identified byte (Game+95B0) on every
+/// admitted Pill use, before the effect dispatch. `None` is a use whose held
+/// slot is not known, so which color became identified is unknown too.
+fn identify_pill(state: &mut State, color: Option<u32>) {
+    let Some(pools) = state.item_pools.as_mut() else {
+        return;
+    };
+    match color {
+        Some(color) => {
+            if let Some(byte) = pools
+                .pill_identified
+                .as_mut()
+                .and_then(|bytes| bytes.get_mut(color as usize))
+            {
+                *byte = true;
+            }
+        }
+        None => pools.pill_identified = None,
+    }
+}
+
+/// HUD 575FDF: the held Pill's name when its color is identified (the
+/// 581970-resolved effect's config name), "???" when it is not, and None
+/// when either is unknown to the port.
+pub(crate) fn held_pill_name(state: &State) -> Option<String> {
+    let held = state
+        .player_items
+        .as_ref()?
+        .held_pockets
+        .as_ref()
+        .filter(|held| held.frontier.is_none())?;
+    let slot = held.slots[0];
+    if slot.card || slot.id == 0 {
+        return None;
+    }
+    let identified = *state
+        .item_pools
+        .as_ref()?
+        .pill_identified
+        .as_ref()?
+        .get(slot.id as usize)?;
+    if !identified {
+        return Some("???".into());
+    }
+    let effect = crate::pill_effect_history::resolve_held_pill(state)?;
+    Some(crate::pickups::pill_definition(effect)?.name.into())
 }
 
 ///504820→505520 adds the pocket before copying7E0, starting UseItem and
