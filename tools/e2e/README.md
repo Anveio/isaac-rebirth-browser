@@ -51,6 +51,17 @@ Default target-free Bra/Pad controls pass 13,338 checks per build with unchanged
 ordered semantic values; Browser focus/seed passes 2/2.
 See [source scope, results and open qualification](../../docs/npc-freeze.md).
 
+`pickup-interactions --case d4-fixed` retains the existing pinned inventory
+route and adds actual Info/main UseItem/Game age observations through the D4
+GiantBook request, draw interval, completion and idle resumption. Space4 and
+release60 retain their old endpoint labels; extra captures subdivide those
+intervals and a no-input tail witnesses Appear33 stopped/state0. Original PNGs
+and actual Browser `port-LABEL.png` captures support private visual review;
+Native sheet identity is explicitly unobserved and full pixels remain
+diagnostics. The original fixed/OS case distinctions and bank generation are
+unchanged; `--case` filters after validating the bank. See
+[scope and qualification limits](../../docs/pickup-interactions.md#sandbox).
+
 Every suite mixes two kinds of cases:
 
 - **Contrived**: fixed seeds, phases and routes that pin known edge cases and

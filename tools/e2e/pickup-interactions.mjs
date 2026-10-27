@@ -45,12 +45,15 @@ function nativeObservation(observation) {
   const player = observation.players[0];
   const live = observation.entities.filter(entity => !entity.dead);
   return {
+    gameAge: observation.fullGameUpdates,
+    informationAnimation: observation.informationAnimation,
     room: { gridWidth: observation.room.gridWidth, gridHeight: observation.room.gridHeight },
     player: { position: player.position, inventory: player.inventory, hearts: player.health.slice(0, 2),
       activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
       pockets: player.heldPockets.map(slot => slot.id), pocketTags: player.heldPockets.map(slot => slot.tag),
       item252RngWords: player.item252RngWords,
       owned: player.ownedItems, animationGuard: player.animationGuard,
+      mainAnimation: { clip: player.animation, ...player.mainAnimation, guard: player.animationGuard },
       ownedAll: player.ownedAll ?? null },
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
@@ -74,6 +77,11 @@ function portObservation() {
   const scale = 0.65;
   const owned = id => items?.ownedCounts?.[id] ?? 0;
   return {
+    gameAge: state.gameUpdateCount,
+    informationAnimation: { state: state.informationAnimation.state, delay: state.informationAnimation.delay,
+      actor: state.informationAnimation.currentActor, clip: state.informationAnimation.currentClip,
+      frame: state.informationAnimation.frame, playing: state.informationAnimation.playing,
+      definitionLoaded: state.informationAnimation.definitionLoaded },
     room: { gridWidth: state.room.grid?.width ?? null, gridHeight: state.room.grid?.height ?? null },
     player: { position: [(state.player.x - 32) / scale, (state.player.y + 46) / scale],
       inventory: { bombs: state.inventory.bombs, keys: state.inventory.keys, coins: state.inventory.coins },
@@ -86,6 +94,8 @@ function portObservation() {
       temporary: items?.temporaryCollectibles ?? null,
       item252RngWords: items?.itemRngs?.[252] ? [items.itemRngs[252].state, items.itemRngs[252].rightA,
         items.itemRngs[252].left, items.itemRngs[252].rightB] : null,
+      mainAnimation: { clip: state.playerAnimation.current, frame: state.playerAnimation.frame,
+        playing: state.playerAnimation.playing, guard: state.playerAnimation.guard },
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) },
       ownedAll: Object.fromEntries((items?.ownedCounts ?? []).flatMap((count, id) => count !== 0 ? [[String(id), count]] : [])) },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
@@ -130,7 +140,9 @@ function matchPositions(native, port, tolerance) {
   return [...misses, ...left.map(item => ({ native: null, port: item }))];
 }
 
-function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false } = {}) {
+const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
+
+function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -167,7 +179,53 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
     const misses = matchPositions(native.tears.map(tear => ({ ...tear, subtype: 0 })), port.tears.map(tear => ({ ...tear, subtype: 0 })), TOLERANCE.pickup);
     row('tears', native.tears, port.tears, misses.length === 0);
   }
+  if (d4Animation) {
+    same('Game.age', native.gameAge, port.gameAge);
+    for (const field of ['state', 'delay', 'clip', 'frame', 'playing', 'definitionLoaded'])
+      same(`Info.${field}`, native.informationAnimation[field], port.informationAnimation[field]);
+    same('Info.actor', pathIdentity(native.informationAnimation.actor), pathIdentity(port.informationAnimation.actor));
+    // Walking owns the ordinary main clip outside the forced animation owner.
+    // Any actual UseItem on either side still requires all four exact fields.
+    if (native.player.mainAnimation.clip === 'UseItem' || port.player.mainAnimation.clip === 'UseItem')
+      same('player.mainAnimation', native.player.mainAnimation, port.player.mainAnimation);
+  }
   return rows;
+}
+
+const D4_LABELS = ['settle', 'book-request-1', 'book-request-2', 'use-active', 'book-delay', 'book-start',
+  'book-mid-1', 'book-mid-2', 'after-active', ...Array.from({ length: 8 }, (_, i) => `book-finish-${i + 1}`), 'book-resumed'];
+
+function d4LifecycleRows(native, port) {
+  const coverage = observations => {
+    const rows = D4_LABELS.map(label => observations[label]).filter(Boolean);
+    const request = rows.findIndex(row => row.informationAnimation?.state === 1 && row.informationAnimation.delay === 3);
+    const start = rows.findIndex((row, index) => index > request && row.informationAnimation?.state === 2);
+    const complete = rows.findIndex((row, index) => start >= 0 && index > start && row.informationAnimation?.state === 0
+      && row.informationAnimation.clip === 'Appear' && row.informationAnimation.frame === 33 && !row.informationAnimation.playing);
+    const active = rows.filter(row => row.informationAnimation?.state === 2);
+    const pose = row => JSON.stringify(row.player.mainAnimation);
+    return {
+      'actual delayed request': request >= 0,
+      'actual delay countdown': [2, 1].every(delay => rows.some(row => row.informationAnimation?.state === 1 && row.informationAnimation.delay === delay)),
+      'actual ordered request/start/completion': request >= 0 && start > request && complete > start,
+      'actual GiantBook actor/Appear owner': start >= 0 && rows.slice(request, complete < 0 ? undefined : complete + 1)
+        .every(row => pathIdentity(row.informationAnimation?.actor) === 'gfx/ui/giantbook/giantbook.anm2'
+          && row.informationAnimation.clip === 'Appear' && row.informationAnimation.definitionLoaded),
+      'actual playing first frame': active.some(row => row.informationAnimation.frame === 0 && row.informationAnimation.playing),
+      'actual playing middle frame': active.some(row => row.informationAnimation.frame > 0 && row.informationAnimation.frame < 33 && row.informationAnimation.playing),
+      'actual retained stopped last frame': active.some(row => row.informationAnimation.frame === 33 && !row.informationAnimation.playing),
+      'actual frozen Game age and guarded UseItem pose': active.length >= 3 && Number.isInteger(active[0].gameAge)
+        && active.every(row => row.gameAge === active[0].gameAge && row.player.mainAnimation.clip === 'UseItem'
+          && row.player.mainAnimation.guard && row.player.mainAnimation.playing && pose(row) === pose(active[0])),
+      'actual post-book resumption': complete >= 0 && active.length > 0 && rows.some((row, index) => index > complete
+        && row.informationAnimation?.state === 0 && row.gameAge > rows[complete].gameAge
+        && pose(row) !== pose(active[0])),
+    };
+  };
+  const source = coverage(native), browser = coverage(port);
+  return Object.keys(source).map(field => ({ label: 'd4-lifecycle', field,
+    native: { required: true, observed: source[field] }, port: { required: true, observed: browser[field] },
+    passed: source[field] && browser[field] }));
 }
 
 // Each interaction names the labels it is graded on and a predicate that the
@@ -231,7 +289,7 @@ export const INTERACTIONS = {
   'anarchist-cookbook': { labels: ['settle', 'use-active', 'after-active', 'bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts', 'chain-1', 'chain-2', 'chain-3', 'chain-4'],
     covered: obs => ['bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'].some(label => obs[label].bombs.filter(bomb => bomb.variant === 3).length >= 3) },
   // The D4 spends its charge, stays held, and changes the passive collectibles.
-  'd4-reroll': { owned: true, labels: ['settle', 'use-active', 'after-active'],
+  'd4-reroll': { owned: true, labels: [...D4_LABELS, 'd4-lifecycle'],
     covered: obs => obs['settle'].player.activeCharge > 0 && obs['after-active'].player.activeId === 284
       && obs['after-active'].player.activeCharge === 0
       && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll) },
@@ -267,7 +325,7 @@ function activeOwnershipContract(observations) {
 // --- Browser capture -----------------------------------------------------------
 const keyNames = { Return: 'Enter', Tab: 'Tab', Down: 'ArrowDown', Up: 'ArrowUp', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
 
-async function capturePort(browser, server, declaration, base) {
+async function capturePort(browser, server, declaration, base, directory) {
   const xml = await readFile(resolve(base, declaration.fixture.authoredResourcePath), 'utf8');
   const stb = await readFile(resolve(base, declaration.fixture.specialRoomsPath));
   const resources = { challengesXml: xml, specialRooms: Array.from(stb) };
@@ -303,6 +361,10 @@ async function capturePort(browser, server, declaration, base) {
       for (const key of [...requested].filter(key => !held.has(key)).sort()) await page.keyboard.down(keyNames[key] ?? key);
       await step(action.presentations);
       observations[action.label] = await evaluateJson(page, portObservation);
+      // Actual rendered canvas evidence, beside the original's capture PNGs.
+      // Native sheet identity is unobserved; these images need visual review.
+      if (declaration.interactions.includes('d4-reroll'))
+        await page.locator('#game').screenshot({ path: join(directory, `port-${action.label}.png`) });
       held = requested;
     }
     for (const key of [...held].sort()) await page.keyboard.up(keyNames[key] ?? key);
@@ -368,7 +430,7 @@ try {
   for (const declaration of cases) {
     const directory = join(output, declaration.name);
     await mkdir(directory, { recursive: true });
-    const captured = await capturePort(browser, server, declaration, resourceBase);
+    const captured = await capturePort(browser, server, declaration, resourceBase, directory);
     await save(join(directory, 'port.json'), captured);
     port.set(declaration.name, captured);
   }
@@ -397,8 +459,11 @@ try {
         tears: declaration.interactions.some(name => INTERACTIONS[name].tears),
         pocketModifier: declaration.interactions.includes('blank-card-pocket-conversion'),
         owned: declaration.interactions.some(name => INTERACTIONS[name].owned),
+        d4Animation: declaration.interactions.includes('d4-reroll'),
       }));
     }
+    if (declaration.interactions.includes('d4-reroll'))
+      rows.push(...d4LifecycleRows(nativeObservations, captured.observations));
     await save(join(directory, 'comparison.json'), { rows, native: nativeObservations, port: captured.observations });
     for (const name of declaration.interactions) {
       const spec = INTERACTIONS[name];

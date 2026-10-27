@@ -33,6 +33,26 @@ derived from the local original resources and stay in `.cache`.
 starting items and cards ignore achievements (Jera needs achievement 90 to drop
 naturally), so the combos run; pools and natural drops stay fresh-profile.
 
+The `d4-fixed` regression route keeps boot epoch `2173746742`, phase 1 and
+the existing Space4/release60 inputs and reroll checks. Capture subdivisions
+now observe the actual Info state/delay/actor/clip/frame/playing/loaded owners,
+Game age and guarded main UseItem pose in both games. An added no-input tail
+requires delay3, the countdown, state1 → state2 → state0, playing first/middle
+frames, retained stopped Appear33, frozen Game age/UseItem during state2 and
+post-book resumption. `52AE40` requests GiantBook17 with delay3 through
+`5805C0` before Use; D4 now selects that existing shared lifecycle.
+
+Actual Browser canvas PNGs (`port-LABEL.png`) accompany the original's PNG
+captures for private visual review. Native's selected sheet path is not read;
+the observer does not replace it with giantbook XML metadata. Actor/lifecycle
+checks and retained images do not establish complete pixel equality. The
+earlier D4 inventory pass did not grade this animation; the extended live
+comparison and visual result remain unqualified until run against fresh
+Original and the immutable Browser build. Replay the complete newly recorded
+bank with `--scenarios BANK --case d4-fixed`; selection still follows whole-bank
+validation. An older bank without the added capture labels cannot satisfy the
+new lifecycle coverage.
+
 The original admits the 26x14 Start Room record as the run's first room
 (28x16 grid, Isaac enters at world 320,400) and so does the port.
 

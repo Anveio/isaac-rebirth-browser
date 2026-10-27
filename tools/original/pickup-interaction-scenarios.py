@@ -148,7 +148,14 @@ CASES = {
     'd4': dict(
         about='The D4 (Space) rerolls Isaac\'s collectibles',
         items=[D4, SAD_ONION, CRICKETS_HEAD, NUMBER_ONE], card=0, spawns=[],
-        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        # Capture-only subdivisions retain Space4/release60 and their old
+        # endpoint labels. The idle tail witnesses the complete Appear clip.
+        actions=[act('settle', [], 30), act('book-request-1', ['space'], 1),
+                 act('book-request-2', ['space'], 1), act('use-active', ['space'], 2),
+                 act('book-delay', [], 2), act('book-start', [], 2),
+                 act('book-mid-1', [], 16), act('book-mid-2', [], 16), act('after-active', [], 24)]
+                + [act(f'book-finish-{index}', [], 2) for index in range(1, 9)]
+                + [act('book-resumed', [], 40)],
         interactions=['d4-reroll'], fixed_only=True, fixed_epoch=(2173746742, 1)),
     # The Poop leaves a poop under Isaac and farts; he walks off and back.
     'the-poop': dict(
