@@ -184,3 +184,12 @@ retains 719 removed failures and four removed passing conditional sprite
 checks from main's divergent Hit path. Removing those predicates is not a
 claim that the older rows were equal. Exact typed operands, statuses and
 all old reports remain private and preserved.
+
+Final source `30bf569b` passes a fresh build and affected-suite preview with
+the same qualified production/WASM bytes. A fresh post-comparer fixed1
+Original/Browser replay passes all 59,795 checks over 660 paired presentations.
+Its filtered invocation still fails the required fixed Full/Fast cohort check
+because only Fast application was selected; the complete four-case cohort
+and corrected closed-capture regrade remain separate passing evidence. The
+README-only rebase preserves the owner's subsystem-root index and changes
+no runtime, capture or comparer bytes.
