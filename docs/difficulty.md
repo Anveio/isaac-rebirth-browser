@@ -139,3 +139,10 @@ With a capture on every fight update, the normal key champion (EHL7N0AV) and
 the hard pill champion (7VFTKQCK, own roll 0) drop at the same update with
 the same variant, subtype, seed and position in both games. The hard red
 champion in 4J3JGA0V (own roll 2) dies in both games without a heart.
+
+The same captures grade the ordinary room-clear award. The normal Horf rooms
+EHL7N0AV (a chest) and 31T4YVZ3 (a bomb) spawn the award at the room centre
+(320, 280) with the original's variant, subtype and seed. The
+`clear-award-hard` spec fights single-Dip rooms at hard: HNXKNQ2T (roll 14)
+and G6MD4K0A (roll 2) spawn the heart at the same seed and position in both
+games, and WPTB6SQK (roll 58) clears with no award in either game.
