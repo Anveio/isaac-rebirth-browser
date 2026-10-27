@@ -328,6 +328,7 @@ Next: transformations once their items exist.
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
 | #829 | P2 | Isaac's white blast-flash face is missing for 10 frames when a nearby bomb explodes | playtest 2026-10-27 `playtest/04e2421/bomb-spectral-tears.mp4` |
+| #852 | P2 | Kamikaze!: Isaac is hidden under the blast instead of drawn over it with the red damage tint (frames 397-402) | playtest 2026-10-27 `playtest/cfd8570/kamikaze.mp4` |
 
 ## Weapons and tears
 
@@ -543,7 +544,6 @@ actives. Bulk item imports are owned by the user's import workflow.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
-| #837 | P2 | Sandbox Blank Card + Jera: a large grey star covers the held Jera rune after use (placement and count now match) | playtest 2026-10-27 `playtest/c273690/sandbox-blank-card-jera-battery.mp4` |
 
 ## Pocket items
 
