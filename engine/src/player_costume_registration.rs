@@ -36,11 +36,11 @@ pub(crate) fn on_collectible_added(state: &mut State, id: u32) {
     if !items::collectible_add_may_register_costume(id) {
         return;
     }
-    //These actual passive4/152/169/229 registration paths are source-closed. Other
+    //These actual passive4/115/152/169/229 registration paths are source-closed. Other
     //costume producers remain unknown until their event path is implemented.
     //This is an event producer set, never a loadout/controller permission.
     if !normal
-        || !matches!(id, 4 | 152 | 169 | 229)
+        || !matches!(id, 4 | 115 | 152 | 169 | 229)
         || owner.trinket_slots != [0, 0]
         || !owner.temporary_collectibles.is_empty()
         || owner

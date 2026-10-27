@@ -398,6 +398,7 @@ export interface State {
     activeChargeHistory?: ActiveChargeHistory | null;
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
+    costumeRegistrations?: {configurationIds: number[]} | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedConfigKind?: 1 | 2 | 3 | 4 | null; queuedCharge: number; queuedTouched: boolean;
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
