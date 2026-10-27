@@ -1241,6 +1241,7 @@ fn has_default_passive_grant_path(id: u32) -> bool {
 enum PassiveGrantSourceEffect {
     DefaultTail,
     ItemRngCardSpawn,
+    ItemRngPillModifier,
 }
 
 impl PassiveGrantSourceEffect {
@@ -1248,6 +1249,8 @@ impl PassiveGrantSourceEffect {
         //52CF87/52DF20 selects this effect; it is not an inventory role.
         if id == 194 {
             Some(Self::ItemRngCardSpawn)
+        } else if id == 252 {
+            Some(Self::ItemRngPillModifier)
         } else if has_default_passive_grant_path(id) {
             Some(Self::DefaultTail)
         } else {
@@ -1261,11 +1264,16 @@ impl PassiveGrantSourceEffect {
         match self {
             Self::DefaultTail => true,
             Self::ItemRngCardSpawn => true,
+            //52DD33..52DDCB spawns a pill and converts held cards. Neither
+            //the world Init nor the held loop writes these query stores.
+            Self::ItemRngPillModifier => true,
         }
     }
 
     fn preserves_default_inputs(self) -> bool {
-        matches!(self, Self::DefaultTail)
+        //252's world/held operators likewise preserve the scalar and C70
+        //inputs; it is still a separate world-producing effect below.
+        matches!(self, Self::DefaultTail | Self::ItemRngPillModifier)
     }
 
     fn preserves_shot_speed_input(self) -> bool {
@@ -1276,6 +1284,7 @@ impl PassiveGrantSourceEffect {
             //cache do not write D38. Other words and the actual world
             //effect's completion retain their independent frontiers.
             Self::ItemRngCardSpawn => true,
+            Self::ItemRngPillModifier => true,
         }
     }
 }
@@ -1347,7 +1356,7 @@ pub(crate) fn add_collectible(
     let charge_words_preserved = keep_default_passive_inputs
         || matches!(
             source_effect,
-            Some(PassiveGrantSourceEffect::ItemRngCardSpawn)
+            Some(PassiveGrantSourceEffect::ItemRngCardSpawn | PassiveGrantSourceEffect::ItemRngPillModifier)
         )
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
@@ -1372,7 +1381,9 @@ pub(crate) fn add_collectible(
         }
     }
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    crate::pockets::note_modifier_grant(owner, id);
+    if id != 252 {
+        crate::pockets::note_modifier_grant(owner, id);
+    }
     //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,
     //after permanent increment/source unlock checks and before effects.
     //The membership result is captured now, never reconstructed from counts
@@ -1640,6 +1651,8 @@ pub(crate) fn add_collectible(
             && config.cache_flags & (256 | 512) == 0;
     if id == 194 {
         crate::pickup_world_grants::on_card194_added(state);
+    } else if id == 252 {
+        crate::pickup_world_grants::on_little_baggy_added(state);
     } else if !ordinary_no_world_effect {
         crate::ordinary_placement::invalidate(
             state,

@@ -39,12 +39,20 @@ The original admits the 26x14 Start Room record as the run's first room
 The `blank-card-pocket-conversion` case starts with Blank Card and 2 of
 Clubs, walks onto Little Baggy, then presses Space. Native must actually
 convert the held card to a pill and use Blank Card without doubling bombs.
-All strict comparisons remain required, including the currently unported
-conversion. A separate Browser contract reports whether the active operands
+All strict comparisons remain required, including the converted pill's ID,
+the world pickup and the active discharge. A separate Browser contract reports whether the active operands
 were unknown at Space; if so, retained historical words must not create a
 new temporary effect, change inventory or discharge. A future owned
 conversion is graded by the strict Native rows and need not retain a
 frontier. This conditional check does not qualify Little Baggy conversion.
+
+Little Baggy's normal Player grant now runs its `52DD33` source leaf: the
+item252 RNG gives a world-pill seed before the free-position search, then
+each nonempty held card gets a pill color from the next item252 seed. The
+world pickup has the Player's spawner words and empty linked-parent fields.
+This leaf preserves existing active, query and scalar-input ownership; an
+unavailable RNG, held record or placement keeps its own frontier. Starter
+Deck's separate grant/conversion leaf remains incomplete.
 
 ## Blank Card and runes
 

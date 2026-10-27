@@ -49,9 +49,13 @@ function nativeObservation(observation) {
     player: { position: player.position, inventory: player.inventory, hearts: player.health.slice(0, 2),
       activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
       pockets: player.heldPockets.map(slot => slot.id), pocketTags: player.heldPockets.map(slot => slot.tag),
+      item252RngWords: player.item252RngWords,
       owned: player.ownedItems, animationGuard: player.animationGuard },
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
+    pocketBirths: live.filter(entity => entity.type === 5 && [70, 300].includes(entity.variant))
+      .map(entity => [entity.variant, entity.subtype, entity.spawnSeed, entity.spawnerType, entity.spawnerVariant, entity.linksEmpty])
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]),
     npcs: live.filter(entity => entity.type >= 10 && entity.type < 1000)
       .map(entity => ({ type: entity.type, variant: entity.variant, position: entity.position, hp: [entity.hp, entity.maxHp] })),
     gridPoops: observation.gridPoops,
@@ -79,10 +83,17 @@ function portObservation() {
       pocketFrontier: items?.heldPockets?.frontier ?? null,
       activeWordFrontiers: items?.activeChargeHistory?.unowned ?? null,
       temporary: items?.temporaryCollectibles ?? null,
+      item252RngWords: items?.itemRngs?.[252] ? [items.itemRngs[252].state, items.itemRngs[252].rightA,
+        items.itemRngs[252].left, items.itemRngs[252].rightB] : null,
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected)
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
+    pocketBirths: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected && [70, 300].includes(pickup.variant))
+      .map(pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed, pickup.sourceSpawner?.entityType ?? null,
+        pickup.sourceSpawner?.variant ?? null, pickup.morphLinks
+          ? [pickup.morphLinks.parent498, pickup.morphLinks.link4a0, pickup.morphLinks.link4a8].every(link => link === null) : null])
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]),
     npcs: state.room.npcs.filter(npc => !npc.removed && !npc.dead)
       .map(npc => ({ type: npc.kind, variant: npc.variant, position: [npc.position.x, npc.position.y], hp: [npc.hp, npc.maxHp] })),
     tears: state.tears.filter(tear => tear.motion.lifetime === 'alive')
@@ -117,7 +128,7 @@ function matchPositions(native, port, tolerance) {
   return [...misses, ...left.map(item => ({ native: null, port: item }))];
 }
 
-function compareLabel(label, native, port, { tears = false } = {}) {
+function compareLabel(label, native, port, { tears = false, pocketModifier = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -128,6 +139,11 @@ function compareLabel(label, native, port, { tears = false } = {}) {
   same('player.active', [native.player.activeId, native.player.activeCharge, native.player.reserveCharge],
     [port.player.activeId, port.player.activeCharge, port.player.reserveCharge]);
   same('player.pockets', native.player.pockets, port.player.pockets);
+  if (pocketModifier) {
+    same('player.pocketTags', native.player.pocketTags, port.player.pocketTags);
+    same('player.item252RngWords', native.player.item252RngWords, port.player.item252RngWords);
+    same('pickups.pocketSeedSpawnerLinks', native.pocketBirths, port.pocketBirths);
+  }
   same('player.owned', native.player.owned, port.player.owned);
   const bombs = matchPositions(native.bombs.map(bomb => ({ ...bomb, subtype: 0 })), port.bombs.map(bomb => ({ ...bomb, subtype: 0 })), TOLERANCE.bomb);
   row('bombs', native.bombs, port.bombs, bombs.length === 0);
@@ -182,6 +198,10 @@ export const INTERACTIONS = {
   'blank-card-pocket-conversion': { labels: ['settle', 'after-conversion', 'use-active', 'after-active'],
     covered: obs => obs['settle'].player.pockets[0] === 23 && obs['settle'].player.pocketTags[0] === 1
       && obs['after-conversion'].player.pockets[0] > 0 && obs['after-conversion'].player.pocketTags[0] === 0
+      && obs['after-conversion'].player.item252RngWords?.length === 4
+      && obs['after-conversion'].player.item252RngWords[0] !== obs['settle'].player.item252RngWords?.[0]
+      && obs['after-conversion'].pocketBirths.some(pickup => pickup[0] === 70 && pickup[2] > 0
+        && pickup[3] === 1 && pickup[4] === 0 && pickup[5] === true)
       && obs['after-active'].player.activeCharge === 0
       && obs['after-active'].player.inventory.bombs === obs['after-conversion'].player.inventory.bombs,
     portContract: activeOwnershipContract },
@@ -364,7 +384,10 @@ try {
     for (const action of declaration.actions) {
       const nativeLabel = nativeObservations[action.label], portLabel = captured.observations[action.label];
       if (!nativeLabel || !portLabel) rows.push({ label: action.label, field: 'observation', native: Boolean(nativeLabel), port: Boolean(portLabel), passed: false });
-      else rows.push(...compareLabel(action.label, nativeLabel, portLabel, { tears: declaration.interactions.some(name => INTERACTIONS[name].tears) }));
+      else rows.push(...compareLabel(action.label, nativeLabel, portLabel, {
+        tears: declaration.interactions.some(name => INTERACTIONS[name].tears),
+        pocketModifier: declaration.interactions.includes('blank-card-pocket-conversion'),
+      }));
     }
     await save(join(directory, 'comparison.json'), { rows, native: nativeObservations, port: captured.observations });
     for (const name of declaration.interactions) {
