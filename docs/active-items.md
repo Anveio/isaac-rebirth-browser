@@ -209,7 +209,7 @@ other branches stay frontiers, as noted in the table.
 | 35 | The Necronomicon | 6 | 0 | Complete | Book: sound33, giant book, 40 damage to every non-friendly room NPC (shared with the Black Heart path). |
 | 36 | The Poop | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 37 | Mr. Boom | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 38 | Tammy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 38 | Tammy's Head | 1 | 0 | Missing | Not ported yet. `523C05` fires 10 tears in a ring through `5177F0` (with the C08 weapon branches for Brimstone, Technology and the others), then plays the Pickup clip. The tear ring needs the multi-tear producer. Space leaves the charge and records a frontier. |
 | 39 | Mom's Bra | 3 | 220 | Partial | `52A640` requests GiantBook 7 (GiantBookBig, Mom) before the leaf. `523B90` (any variant): every enemy that passes `444810` would get AddFreeze `444970`, which is not ported, so a room with an eligible enemy records a `UseLeaf` frontier and keeps the charge. With no eligible enemy the UseItem animation plays. Passes `moms-bra-39-fixed-phase1`. |
 | 40 | Kamikaze! | 0 | 30 | Partial | `523AFA` (variant 0): `Explode` at the player with radius 60 and damage 40, flags 4 and no line check, then the explosion effect (white) is admitted and updated once on the same frame. No UseItem animation. Passes `kamikaze-40-fixed-phase0`. |
 | 41 | Mom's Pad | 3 | 180 | Partial | `52A640` requests GiantBook 8 (diaper) before the leaf. `5240D8` (variant 0): every enemy that passes `444810` would get AddFear `4450D0`, which is not ported, so a room with an eligible enemy records a `UseLeaf` frontier and keeps the charge. With no eligible enemy the UseItem animation plays. Passes `moms-pad-41-fixed-phase1`. |
@@ -217,13 +217,13 @@ other branches stay frontiers, as noted in the table.
 | 43 | Pills here! | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 44 | Teleport! | 2 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 45 | Yum Heart | 4 | 0 | Complete | Heals two half-hearts, sound157, UseItem. Covered by `active-item-use`. |
-| 47 | Doctor's Remote | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 47 | Doctor's Remote | 2 | 0 | Missing | Not ported yet. The leaf sets D80 = 4 (the targeting mode), discharges through `5295C0` and plays clip `66F529`; the targeting that D80 = 4 starts is not ported. Space leaves the charge and records a frontier. |
 | 49 | Shoop da Whoop! | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 56 | Lemon Mishap | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 56 | Lemon Mishap | 2 | 0 | Missing | Not ported yet. The leaf plays sound 51, spawns the player creep effect 1000.32 and updates it at once, then plays the Pickup clip. The yellow player creep 1000.32 is not ported. Space leaves the charge and records a frontier. |
 | 58 | Book of Shadows | 3 | 300 | Partial | Book: giant book and TEMP58 record. The shield and costume are not ported. |
-| 65 | Anarchist Cookbook | 3 | 35 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 65 | Anarchist Cookbook | 3 | 35 | Missing | Not ported yet. `52A640` requests GiantBook 9 before the leaf, and the leaf itself plays sound 8 and the UseItem clip; the troll bombs come from a separate path that is not traced or ported yet. Space leaves the charge and records a frontier. |
 | 66 | The Hourglass | 2 | 230 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 77 | My Little Unicorn | 6 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 77 | My Little Unicorn | 6 | 180 | Missing | Not ported yet. The default leaf records only the TEMP effect; the unicorn's speed, invulnerability, contact damage and costume come from TEMP77 consumers that are not ported. Space leaves the charge and records a frontier. |
 | 78 | Book of Revelations | 6 | 0 | Partial | Book: two soul hearts, giant book. The 585820 call and level flag are a frontier. |
 | 83 | The Nail | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 84 | We Need To Go Deeper! | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -235,7 +235,7 @@ other branches stay frontiers, as noted in the table.
 | 105 | The D6 | 6 | 0 | Partial | `5253EE`: `582340` clears the item pool's selected bytes, then every live collectible pedestal with an item is rerolled in place by Morph `500A10(5,100,0,keepPrice)`: the old seed advances once (RNG 1,21,20) and Init's local draw selects from the room's pool (pool 14 on backdrop 0x17). Position, velocity, links, ABD and the Alternates frame survive; ABC (touched) is cleared. Passes `d6-105-reroll-phase0`. A pedestal with ABD set (its AC8 is not modeled), a shop price or unknown links records a `UseLeaf` frontier before any reroll. Room.Init (`5CED96`) calls `582340` too, so the port now clears the selected bytes at every Room.Init. |
 | 107 | The Pinking Shears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 111 | The Bean | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 123 | Monster Manual | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 123 | Monster Manual | 3 | 0 | Missing | Not ported yet. `52A640` requests GiantBook 2 before the leaf; `524470` then calls `525604`, which is not traced or ported yet. Space leaves the charge and records a frontier. |
 | 124 | Dead Sea Scrolls | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 126 | Razor Blade | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 127 | Forget Me Now | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
