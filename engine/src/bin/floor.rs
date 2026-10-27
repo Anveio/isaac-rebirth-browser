@@ -122,15 +122,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     selector.category == rebirth_cleanroom::room_spawns::SpawnCategory::Entity
                 })
                 .filter_map(|selector| {
-                    rebirth_cleanroom::discovered_champion_color(selector, stage, request.difficulty)
-                        .map(|color| {
-                            [
-                                u32::from(selector.entity_type),
-                                u32::from(selector.variant),
-                                color,
-                                selector.spawn_seed,
-                            ]
-                        })
+                    rebirth_cleanroom::discovered_champion_color(
+                        selector,
+                        stage,
+                        request.difficulty,
+                    )
+                    .map(|color| {
+                        [
+                            u32::from(selector.entity_type),
+                            u32::from(selector.variant),
+                            color,
+                            selector.spawn_seed,
+                        ]
+                    })
                 })
                 .collect()
         })

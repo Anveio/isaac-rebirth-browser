@@ -5893,7 +5893,9 @@ impl Game {
             };
             pickup.birth_game_update = state.game_update_count;
             pickup.source_spawner = Some(spawner.clone());
-            state.next_pickup = id.checked_add(1).ok_or("champion drop identity exhausted")?;
+            state.next_pickup = id
+                .checked_add(1)
+                .ok_or("champion drop identity exhausted")?;
             state.room.pickups.push(pickup);
             let actor = actors::ActorRef {
                 kind: actors::ActorKind::Pickup,
