@@ -42,8 +42,9 @@ Every floor rolls its curse (58bfe8) on a copy of the primary stream, so the
 roll consumes nothing the generator reads; hard only raises the odds. The
 floor keeps the curse in `Floor::curses` (Level+8). Curse of the Labyrinth
 multiplies the room count by 1.8 (at most 45, 58c061) and Curse of the Lost
-adds four rooms (58c4c0), both before hard's extra rooms, so a cursed hard
-floor generates the same rooms as the original. The curse's other consumers
+adds four rooms (58c4c0), both before hard's extra rooms. These are source
+generation rules; the [live qualification](levels.md#curse-and-xl-qualification)
+covers selected Normal and Hard first floors. The curse's other consumers
 are listed under Gaps.
 
 The two presentation rows reach the renderer through

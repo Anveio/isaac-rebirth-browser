@@ -250,17 +250,23 @@ Floors are data in the [level framework](levels.md): stage nodes carry the
 progression (name, trapdoor edge, contract) and stages.xml chapters carry the
 room set, backdrop, overlay, music and boss chain. New floors are imported by
 filling those tables, not by bespoke code paths.
-Missing: Cellar, Womb and later stage generation, curses (Labyrinth, Lost,
-Darkness, Unknown, Maze, Blind), XL floors.
+Curse source now includes XL room counts, paired boss and treasure rooms,
+last-boss awards and the skipped-stage trapdoor edge; Lost adds four rooms,
+Unknown hides hearts, and floor banners include the curse names. The
+[level record](levels.md#curse-and-xl-qualification) qualifies selected
+Normal and Hard first-floor layouts, including XL. XL fights/descent and
+curse presentation remain unqualified. Missing: Cellar, Womb and later
+stage generation; Darkness lighting, Lost map hiding, Maze room swaps,
+Blind items and Cursed doors.
 
 The [difficulty framework](difficulty.md) now admits typed Normal/Hard run
 state through Save/Continue and Restart, hard floor size/difficulty/champion
-rules, ordinary clear-heart and boss-heart rules. Curse effects, slot payouts
-and hard completion marks remain missing; this source scope does not qualify
-every hard floor or fight against the Original.
+rules, ordinary clear-heart and boss-heart rules. Remaining curse consumers,
+slot payouts and hard completion marks are open; the selected first-floor
+qualification does not cover every Hard floor or fight against the Original.
 
 Next: qualify Depths I and II and Mom against the Original; Cellar
-generation and unlock; curses.
+generation and unlock; remaining curse consumers and XL progression.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
