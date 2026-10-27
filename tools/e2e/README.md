@@ -418,7 +418,8 @@ queue rather than crash Chromium renderers.
 
 Updated runners require Linux `flock` (util-linux). They atomically publish a
 complete PID/start-time record in the existing `slot-N` namespace, so older
-frozen runners recognize active updated runners. Persistent `slot-N.mutex`
+frozen runners recognize active updated runners. Linux owners confirmed as
+zombies are stale even while their PID still exists. Persistent `slot-N.mutex`
 sidecars serialize updated clients; do not remove them while a runner is active.
 
 Quiesce old runners when upgrading concurrent runs. An unmodified old stale-file
