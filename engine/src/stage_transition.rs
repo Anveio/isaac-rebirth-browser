@@ -132,7 +132,11 @@ pub(crate) fn spawn_boss_award(state: &mut State) -> Result<(), String> {
     };
     // 5c9745..5c975f: effective stage adds one under Curse of the Labyrinth.
     let stage = state.stage + u32::from(state.floor.labyrinth());
-    if stage == 6 && depths_boss_award(state)? {
+    // 5c99da: an XL floor's first boss takes the ordinary collectible path.
+    if stage == 6
+        && state.floor.last_boss_room() == Some(state.current_room)
+        && depths_boss_award(state)?
+    {
         return Ok(());
     }
     if !(1..=6).contains(&stage) && stage != 7 {
