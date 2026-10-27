@@ -745,6 +745,11 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
                 game_update,
                 &mut state.actor_scheduler,
             )?;
+            //50631A: a room door within 70 of the Player arms the
+            //pedestal's AD4 door kick for its next full update.
+            if crate::pickups::door_near_player(state).is_some() {
+                state.room.pickups[index].door_kick_ad4 = 1;
+            }
             //52F310 queues the touched config with the pedestal's prior
             //AB8/ABC operands; 5060E6 then replays the dropped item's Idle.
             enqueue(state, id, charge, touched)?;

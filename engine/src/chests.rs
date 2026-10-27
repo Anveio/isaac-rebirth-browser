@@ -831,7 +831,11 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         pickup.presented_position = pickup.position;
         pickup.velocity = pickup.velocity * 0.8;
         pickup.current_friction = pickup.configured_friction * 0.965;
-        pickup.advance(phase, state.game_update_count);
+        pickup.advance(
+            phase,
+            state.game_update_count,
+            crate::motion::WorldVector { x: 0.0, y: 0.0 },
+        );
         pickup.project();
         if pickup.animation == "Appear"
             && pickup.animation_frame == f64::from(crate::pickups::CHEST_DROP_SOUND_FRAME)

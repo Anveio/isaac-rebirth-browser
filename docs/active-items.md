@@ -179,14 +179,14 @@ First complete run (fresh original and browser, all paired presentations):
   Blank Card286 with an empty card slot, Satanic Bible292, and the fresh OS
   How to Jump282 epoch moving left.
 - The swap case (Yum Heart45 first, then How to Jump282 approached from the
-  side) still fails. On all 820 presentations, the active id, charge,
-  temporary records, health, pedestals and clips match, and the dropped
-  Yum Heart pedestal appears in both games. The Player body differs after
-  the Morph frame: 315 position and 193 velocity mismatches. In the original,
-  the newly morphed pedestal (age up to 20) takes the whole pair separation
-  and the Player keeps its velocity. The port splits the separation by mass
-  in `player_items::altar_contact`. That young-pedestal contact response is
-  not ported yet.
+  side) passes. An earlier run failed it on the Player body after the Morph
+  frame (315 position and 193 velocity mismatches). The cause was a door kick
+  in the swap, not the contact response. When a room door is within 70 of
+  the Player, the swap (`50631A`) sets Pickup+AD4 = 1 on the morphed pedestal.
+  On its next update (`5071A9`), the pedestal's anchor pull gains a push of 5
+  away from that door plus 3 away from the Player, and AD4 becomes 2. The
+  update after that re-anchors the pedestal where it stopped (`5075E4`).
+  The port keeps this as `Pickup::door_kick_ad4`.
 - `active-item-use` keeps every Yum Heart field. Its failures are the
   existing ones: two damaged-phase bomb-blast pedestal fields, Flush!291
   and a fresh OS Chocolate Milk69 fire timer.
