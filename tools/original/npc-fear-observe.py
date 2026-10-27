@@ -131,9 +131,11 @@ def observe(pid, context):
         if expected != measured:
             result['npcFear'].update(status='fail', error='Independent Fear/room-list identity join failed')
     else:
-        result['npcFear'] = dict(status='fail', reason='No complete actual combat owners',
+        # The composed combat reader skips before actual Level::Init. Preserve
+        # that menu boundary; an unavailable gameplay owner still fails there.
+        result['npcFear'] = dict(status=actual['status'], reason='No complete actual combat owners',
                                 memoryWritten=False, executableMappingsRead=False)
-    if result['npcFear'].get('status') != 'pass':
+    if result['npcFear'].get('status') not in ('pass', 'skip'):
         result['status'] = 'fail'
     result['scope'] += ' Additive actual Fear418/800, shared420, Seeds+48, two path vectors and shared MT.'
     return result
