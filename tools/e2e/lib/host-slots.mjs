@@ -19,7 +19,17 @@ const OWNER = `${process.pid} ${started(process.pid)}`;
 const alive = owner => {
   const [pid, start] = owner.split(' ');
   if (!(Number(pid) > 0)) return false;
-  try { process.kill(Number(pid), 0); } catch (error) { if (error.code !== 'EPERM') return false; }
+  try {
+    process.kill(Number(pid), 0);
+    if (process.platform === 'linux') {
+      try {
+        const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
+        // The command name may itself contain spaces or parentheses.
+        const commandEnd = stat.lastIndexOf(')');
+        if (stat.startsWith(`${pid} (`) && stat.slice(commandEnd + 1).startsWith(' Z ')) return false;
+      } catch { /* Keep the existing kill and start-time checks without procfs. */ }
+    }
+  } catch (error) { if (error.code !== 'EPERM') return false; }
   return !start || started(pid) === start;
 };
 const sameInode = (a, b) => a.dev === b.dev && a.ino === b.ino;
