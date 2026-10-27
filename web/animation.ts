@@ -122,6 +122,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_009_poof01*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_012_poof04.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_001_batteryeffect.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_bloodgush.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_018_lasereffects.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_brimstoneimpact.png",

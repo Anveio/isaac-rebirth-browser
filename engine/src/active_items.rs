@@ -102,13 +102,8 @@ pub(crate) fn set_charge(state: &mut State, requested: i32) -> Result<(), String
     //clamp their sum to maximum. With max4/reserve1, amount4 produces5.
     owner.reserve_charge = owner.reserve_charge.wrapping_add(overflow);
     //509F14 obtains exactly one world seed after the sound and reserve
-    //write. Effect1000/48 is not Pickup90 and its missing factory/offset/
-    //7F8 controller cannot be replaced with a guessed pickup actor.
-    let _seed = state.boot_lifecycle.shared.next_u32();
-    crate::active_charges::note_effect(
-        state,
-        crate::active_charges::EffectFrontier::BatteryEffect48,
-    );
+    //write, then spawns Effect1000/48 (not Pickup90) at the Player.
+    crate::familiars::admit_battery(state)?;
     Ok(())
 }
 
@@ -164,11 +159,7 @@ fn discharge(state: &mut State) -> Result<(), String> {
                         pitch: 1.0,
                     },
                 );
-                let _seed = state.boot_lifecycle.shared.next_u32();
-                crate::active_charges::note_effect(
-                    state,
-                    crate::active_charges::EffectFrontier::BatteryEffect48,
-                );
+                crate::familiars::admit_battery(state)?;
             }
             None => {
                 crate::active_charges::invalidate(
