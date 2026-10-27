@@ -4925,6 +4925,7 @@ impl Game {
         // Room grid pass5d1378: GridEntity_TrapDoor::Update before entities.
         stage_transition::advance_trapdoor(&mut self.state, phase)?;
         tnt::advance(&mut self.state, phase)?;
+        grid_records::advance_poops(&mut self.state, phase)?;
         let explosion_fence = self.state.explosions.len();
         grid_hazards::advance(&mut self.state, phase)?;
         spider_webs::advance(&mut self.state, phase)?;
@@ -6204,6 +6205,38 @@ impl Game {
             }
         }
     }
+    /// The D10's 524D93 loop: each collected enemy is rolled, its
+    /// replacement spawned at its position and velocity and Updated at once
+    /// (vtable+18), given the old health fraction of its own max health
+    /// (+484 = fraction x +488), and the old enemy removed (vtable+48). An
+    /// unported replacement stops the loop with a frontier recorded.
+    fn d10_reroll(&mut self, id: u32) -> Result<(), String> {
+        let Some(targets) = active_items::d10_targets(&mut self.state, id) else {
+            return Ok(());
+        };
+        for old in targets {
+            let Some(index) = self.state.room.npcs.iter().position(|npc| npc.id == old) else {
+                return Err("D10 target left the room list".into());
+            };
+            let Some(roll) = active_items::d10_roll(&mut self.state, id, index)? else {
+                return Ok(());
+            };
+            self.admit_npc_birth(index, entities::Birth::Npc(roll.selector))?;
+            let new = {
+                let npc = self.state.room.npcs.last_mut().expect("admitted NPC birth");
+                npc.velocity = roll.velocity;
+                npc.id
+            };
+            self.advance_npc(new, phase::Phase::Update)?;
+            if let Some(npc) = self.state.room.npcs.iter_mut().find(|npc| npc.id == new) {
+                npc.hp = roll.fraction * npc.max_hp;
+            }
+            if let Some(npc) = self.state.room.npcs.iter_mut().find(|npc| npc.id == old) {
+                npc.removed = true;
+            }
+        }
+        Ok(())
+    }
     fn admit_enemy_projectile(
         &mut self,
         birth: impl FnOnce(u32) -> enemy_projectiles::EnemyProjectile,
@@ -6621,7 +6654,12 @@ impl Game {
             controls_enabled,
             phase == phase::Phase::Update,
         );
-        active_items::advance(&mut self.state, controls_enabled)?;
+        if let Some(leaf) = active_items::advance(&mut self.state, controls_enabled)? {
+            if leaf.variant0 {
+                self.d10_reroll(leaf.id)?;
+            }
+            active_items::finish_runtime_leaf(&mut self.state, leaf)?;
+        }
         pockets::use_pocket(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {

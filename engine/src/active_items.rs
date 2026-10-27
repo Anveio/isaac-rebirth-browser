@@ -260,6 +260,23 @@ pub(crate) enum Leaf {
     /// other than a pedestal, trophy, bed or big chest is Morphed in place
     /// to a variant the shared Random draws; then UseItem.
     D20,
+    /// 522F87 (variant0 only): every live non-boss room enemy (444800,
+    /// not pending-dead 444950, not 17/33/28/68) is replaced by a random
+    /// enemy from the 670AC0 table (670B80 for a flyer) at its position and
+    /// velocity, with its health fraction; then UseItem. The Runtime owns
+    /// the replacement loop because each new enemy's immediate Update draws
+    /// from the shared Random between rolls (`d10_targets`, `d10_roll`).
+    D10,
+    /// 523D93 (every variant): a poop grid entity under the Player, the
+    /// Game::Fart push and sound37; no item animation.
+    ThePoop,
+    /// 52465E: sound8 and UseItem. GiantBook 9 plays before Use; the Troll
+    /// Bombs come from TEMP65 in 515F40 (`cookbook_tick`).
+    AnarchistCookbook,
+    /// 523C05: a Random float, then (for ordinary tears) ten FireTear5177F0
+    /// shots in a ring at speed 10 from the Player, each 1.355x the scale and
+    /// +25 damage; then the Pickup clip.
+    TammysHead,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -382,6 +399,26 @@ pub(crate) const USES: &[ActiveUse] = &[
         book: None,
         leaf: Leaf::D20,
     },
+    ActiveUse {
+        id: 285,
+        book: Some(18),
+        leaf: Leaf::D10,
+    },
+    ActiveUse {
+        id: 36,
+        book: None,
+        leaf: Leaf::ThePoop,
+    },
+    ActiveUse {
+        id: 65,
+        book: Some(9),
+        leaf: Leaf::AnarchistCookbook,
+    },
+    ActiveUse {
+        id: 38,
+        book: None,
+        leaf: Leaf::TammysHead,
+    },
 ];
 
 pub(crate) fn ported(id: u32) -> Option<&'static ActiveUse> {
@@ -452,7 +489,17 @@ fn play_item_animation(state: &mut State, id: u32, variant0: bool, pickup_clip: 
     }
 }
 
-pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), String> {
+/// A Use whose leaf the Runtime finishes: the D10 replaces enemies and runs
+/// each new enemy's immediate Update before `finish_runtime_leaf`.
+pub(crate) struct RuntimeLeaf {
+    pub id: u32,
+    pub variant0: bool,
+}
+
+pub(crate) fn advance(
+    state: &mut State,
+    controls_enabled: bool,
+) -> Result<Option<RuntimeLeaf>, String> {
     //Only empty active0 and the ported leaves exclude the D30 reset/random
     //and D38 writers in522250. A requested unported active loses this input
     //proof before dispatch; no claim of actual callback execution is made.
@@ -466,14 +513,14 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         forget_unported_effect(state);
     }
     let Some(owner) = state.player_items.as_ref() else {
-        return Ok(());
+        return Ok(None);
     };
     //52a640 reads held/triggered action9 even on the Entity+318 word bit4000
     // fast path (the same little-endian byte+319 bit40 predicate). The
     // ported leaves have no held-use or frame-recharge leaf; an actual new
     // edge is required. Its guards are7d4/7d8, not the bf4 main-animation guard.
     let Some(row) = ported(owner.active_id) else {
-        return Ok(());
+        return Ok(None);
     };
     if !state.public_actions.active_triggered
         || !controls_enabled
@@ -481,12 +528,12 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         || owner.active_state_d80 != 0
         || owner.active_state_d84 != 0
     {
-        return Ok(());
+        return Ok(None);
     }
     let id = row.id;
     let config = items::definition(id).ok_or("ported active ItemConfig absent")?;
     if owner.active_charge != config.max_charges {
-        return Ok(());
+        return Ok(None);
     }
     //52AA00..1A: a live TEMP record of a zero-charge cooldown item refuses
     //the Use (How to Jump while it is still in the air).
@@ -497,7 +544,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
             .iter()
             .any(|record| record.item_id == id)
     {
-        return Ok(());
+        return Ok(None);
     }
     //522349 costume admission is empty for this actual config.5e4140 owns
     // a temporary record before the dispatch leaf; a zero authored cooldown
@@ -558,7 +605,25 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         .player
         .entity_source
         .is_none_or(|source| source.variant == 0);
+    if row.leaf == Leaf::D10 {
+        return Ok(Some(RuntimeLeaf { id, variant0 }));
+    }
     use_leaf(state, row.leaf, id, variant0)?;
+    finish_use(state, id)?;
+    Ok(None)
+}
+
+/// The D10's 524C48 UseItem and the shared 5223C0 tail, after the Runtime
+/// replaced the enemies.
+pub(crate) fn finish_runtime_leaf(state: &mut State, leaf: RuntimeLeaf) -> Result<(), String> {
+    play_item_animation(state, leaf.id, leaf.variant0, false);
+    finish_use(state, leaf.id)
+}
+
+/// 5223C0: D6C |= the config cache flags, Evaluate511F10, the 3076 flag
+/// and 5295C0's discharge.
+fn finish_use(state: &mut State, id: u32) -> Result<(), String> {
+    let config = items::definition(id).ok_or("ported active ItemConfig absent")?;
     let owner = state.player_items.as_mut().expect("checked owner");
     owner.unevaluated_cache_flags |= config.cache_flags;
     let evaluate = owner.unevaluated_cache_flags != 0;
@@ -798,6 +863,16 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             if variant0 {
                 reroll_pickups(state, id)?;
             }
+            play_item_animation(state, id, variant0, false);
+        }
+        Leaf::D10 => return Err("the D10 leaf runs through the Runtime".into()),
+        Leaf::ThePoop => the_poop(state, id)?,
+        Leaf::TammysHead => {
+            tammys_head(state, id, variant0)?;
+            play_item_animation(state, id, variant0, true);
+        }
+        Leaf::AnarchistCookbook => {
+            sound(state, 8);
             play_item_animation(state, id, variant0, false);
         }
         Leaf::Flush => {
@@ -1148,6 +1223,301 @@ fn d20_variant(shared: &mut crate::mt::Mt19937, trinket22: Option<bool>) -> Opti
         return None;
     }
     Some(variant)
+}
+
+/// The Poop (523D93, every variant): Room::GetGridIndex5C6FA0 at the
+/// Player; a cell whose grid entity has a collision class (+3C) or is a
+/// type17 keeps it. Otherwise item36's RNG Next seeds SpawnGridEntity
+/// 5C5070(index, 14, 0) (refused above path cost 900), Game::Fart
+/// 5522D0 pushes the room from the Player with radius 120, and sound37
+/// plays either way. There is no item animation.
+fn the_poop(state: &mut State, id: u32) -> Result<(), String> {
+    let position = crate::bombs::player_world(state);
+    //Poop.Init's 444860 test needs the Player's grid collision class.
+    let Some(player_class) = state.player.grid_collision_class else {
+        unowned_leaf(state, id, 0x523dab);
+        return Ok(());
+    };
+    let Some(descriptor) = state.room.grid.clone() else {
+        unowned_leaf(state, id, 0x523dab);
+        return Ok(());
+    };
+    let grid = crate::grid::Grid::new(descriptor)?;
+    let Some(index) = grid.index(position) else {
+        //5C5070 asserts a nonnegative index; an off-grid Player is not ported.
+        unowned_leaf(state, id, 0x523e11);
+        return Ok(());
+    };
+    let kept = grid.descriptor().cells[index]
+        .entity
+        .as_ref()
+        .is_some_and(|entity| entity.collision_class != 0 || entity.kind == 17);
+    if !kept {
+        let seed = match crate::pickup_world_grants::next_item_seed(state, 36) {
+            Ok(seed) => seed,
+            Err(_) => {
+                unowned_leaf(state, id, 0x523df2);
+                return Ok(());
+            }
+        };
+        let game_frame = state.native_game_frame();
+        let Some(costs) = state.room.path_costs.as_mut() else {
+            unowned_leaf(state, id, 0x523e11);
+            return Ok(());
+        };
+        if let Some(mut poop) = crate::grid::GridEntity::spawn(
+            14,
+            0,
+            seed,
+            &mut state.boot_lifecycle.shared,
+            game_frame,
+            costs,
+            index,
+        )? {
+            //Poop.Init569600: a ground Player (444860) within 20 sets
+            //Poop+330 and leaves the poop class0 until he walks off.
+            let cell = grid.position(index).expect("valid grid center");
+            let (dx, dy) = (position.x - cell.x, position.y - cell.y);
+            if player_class > 3 && dx * dx + dy * dy < 400.0 {
+                poop.collision_class = 0;
+                if let Some(owner) = poop.source_owner.as_mut() {
+                    owner.poop_player_inside = true;
+                }
+            }
+            state.room.grid.as_mut().expect("checked grid").cells[index].entity = Some(poop);
+        }
+        //The Player is the source and stands at the center, so only NPCs move.
+        crate::fatty::fart(state, position, 120.0, u32::MAX);
+    }
+    sound(state, 37);
+    Ok(())
+}
+
+/// 523C05..523CF0, the C08 default branch: base = Random float; for each
+/// i in 0..10 the shot direction is FromAngle6126C0((i/10 + base) x 360)
+/// Resized6128E0 to 10, fired by FireTear5177F0 from Player+448 (plus DC4).
+/// After the factory's immediate Update, SetScale541FF0(1.355 x scale) and
+/// collision damage +25. Brimstone (2), Technology (3), the Knife (4),
+/// Dr. Fetus (5), a non-regular controller, Player variant 1 and the
+/// 5177F0 item branches (69, 154, 182, 309) record a frontier.
+fn tammys_head(state: &mut State, id: u32, variant0: bool) -> Result<(), String> {
+    let base = state.boot_lifecycle.shared.uniform();
+    let plan = match crate::weapon_plan::resolve_current_weapon(state)? {
+        crate::weapon_plan::LiveWeaponResolution::Resolved(plan)
+            if state.weapon_cache.primary == crate::weapon_plan::PrimaryWeaponC08::RegularTears =>
+        {
+            plan.regular
+        }
+        _ => None,
+    };
+    let (Some(plan), Some(dc4), true) = (plan, state.attack_runtime.player_dc4, variant0) else {
+        unowned_leaf(state, id, 0x523c17);
+        return Ok(());
+    };
+    let owner = state.player_items.as_ref().ok_or("checked owner")?;
+    let queries = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
+    if [69, 154, 182, 309]
+        .iter()
+        .any(|&item| queries.have(item) != Some(false))
+    {
+        unowned_leaf(state, id, 0x517816);
+        return Ok(());
+    }
+    let source_variant = crate::item_pipeline::ItemInputs::new(owner)
+        .ok()
+        .and_then(|inputs| {
+            inputs.neutral_regular_tear_variant(
+                state.weapon_admission.source_player_type,
+                state.weapon_cache.primary,
+                plan.flags,
+                queries,
+            )
+        });
+    for index in 0..10 {
+        let degrees = (index as f32 / 10.0 + base) * 360.0;
+        let direction = crate::knives::degree_direction(degrees);
+        let length = (direction.x * direction.x + direction.y * direction.y).sqrt();
+        let velocity = if length > 0.0 {
+            direction * (10.0 / length)
+        } else {
+            direction
+        };
+        let origin = crate::bombs::player_world(state) + dc4;
+        let tear = crate::tear_factory::fire(state, plan, source_variant, origin, velocity)?;
+        let tear = &mut state.tears[tear];
+        let scale = 1.355 * tear.scale;
+        tear.scale = if 0.01 < scale { scale } else { 0.01 };
+        tear.animation_tier = crate::projectiles::regular_animation_tier(tear.scale)?;
+        tear.collision_radius = crate::projectiles::collision_radius(tear.scale, 8.0)?;
+        tear.collision_damage += 25.0;
+    }
+    Ok(())
+}
+
+/// 515F40..515F85 -> 516C90: while TEMP65 (Anarchist Cookbook, cooldown
+/// 35) is held, a count that is a multiple of five spawns a Troll Bomb 4.3
+/// with the Player as spawner at Room::GetRandomPosition5C83A0: the room
+/// rectangle's center, FindFreePosition5C7F30 with radius Random-float x the
+/// longer side and mode 0. Its seed is drawn after the position. 509380's
+/// bomb flags (items 125, 140, 209, 220 and 256) must be known absent.
+pub(crate) fn cookbook_tick(state: &mut State) -> Result<(), String> {
+    let Some(owner) = state.player_items.as_ref() else {
+        return Ok(());
+    };
+    let Some(record) = owner
+        .temporary_collectibles
+        .iter()
+        .find(|record| record.item_id == 65)
+    else {
+        return Ok(());
+    };
+    if record.cooldown % 5 != 0 {
+        return Ok(());
+    }
+    let queries = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
+    if [125, 140, 209, 220, 256]
+        .iter()
+        .any(|&item| queries.have(item) != Some(false))
+    {
+        unowned_leaf(state, 65, 0x516d12);
+        return Ok(());
+    }
+    let (Some(descriptor), Some(costs)) = (state.room.grid.clone(), state.room.path_costs.clone())
+    else {
+        unowned_leaf(state, 65, 0x516ca6);
+        return Ok(());
+    };
+    let Ok(occupied) = crate::ordinary_placement::positions(state) else {
+        unowned_leaf(state, 65, 0x516ca6);
+        return Ok(());
+    };
+    let grid = crate::grid::Grid::new(descriptor)?;
+    let (low, high) = crate::critters::room_rect(state);
+    let size = crate::motion::WorldVector {
+        x: high.x - low.x,
+        y: high.y - low.y,
+    };
+    let shared = &mut state.boot_lifecycle.shared;
+    //5C83D7: maxss(size.y, size.x) scales the Random float.
+    let radius = shared.uniform() * if size.y > size.x { size.y } else { size.x };
+    let center = crate::motion::WorldVector {
+        x: low.x + size.x * 0.5,
+        y: low.y + size.y * 0.5,
+    };
+    let position =
+        crate::roundworm::find_free_position(center, radius, shared, &grid, &costs, &occupied)?;
+    let seed = shared.next_u32();
+    crate::bombs::admit_conversion(state, 3, seed, position)
+}
+
+/// 670AC0: the D10's 45 ground replacements.
+const D10_ENEMIES: [u32; 45] = [
+    10, 11, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 34, 35, 38, 39, 40,
+    41, 55, 56, 57, 58, 59, 60, 61, 77, 80, 85, 86, 87, 88, 91, 94, 205, 206, 207, 208, 217,
+];
+/// 670B80: the 15 replacements of an enemy that flies (444860).
+const D10_FLYERS: [u32; 15] = [13, 14, 18, 25, 26, 29, 34, 38, 55, 56, 58, 59, 80, 86, 91];
+
+/// One D10 replacement: Spawn550A40(type, 0, old position, old velocity,
+/// no spawner, subtype0, seed), then its health fraction.
+pub(crate) struct D10Roll {
+    pub selector: crate::room_spawns::SpawnSelector,
+    pub velocity: crate::motion::WorldVector,
+    pub fraction: f32,
+}
+
+/// 522F8F..52309F, in Room+1638 order: 444800 (types10..999), not
+/// 444950 (pending damage378 above HP484), not Poop17, Fire33, Chub28 or
+/// 68, not dead (31F), and 49B890: not Gemini's cord 79.20, 228.10,
+/// 216.10, a parented 260.10, or a boss (+103D). None (after recording a
+/// frontier) when a candidate's damage owner is not finite.
+pub(crate) fn d10_targets(state: &mut State, id: u32) -> Option<Vec<u32>> {
+    let mut targets = Vec::new();
+    for npc in &state.room.npcs {
+        if npc.removed || !(10..=999).contains(&npc.kind) {
+            continue;
+        }
+        let pending = npc.damage.pending_damage();
+        if !pending.is_finite() || !npc.hp.is_finite() {
+            unowned_leaf(state, id, 0x523003);
+            return None;
+        }
+        if pending > npc.hp || matches!(npc.kind, 17 | 33 | 28 | 68) || npc.dead {
+            continue;
+        }
+        let excluded = matches!((npc.kind, npc.variant), (79, 20) | (228, 10) | (216, 10))
+            || (npc.kind, npc.variant) == (260, 10) && npc.parent.is_some();
+        if excluded || npc.boss {
+            continue;
+        }
+        targets.push(npc.id);
+    }
+    Some(targets)
+}
+
+/// 524DC0..524E76 for the enemy at `index`: the clamped health fraction
+/// (1 without max health), Random(45) from 670AC0, Random(15) from 670B80
+/// for a flyer (grid collision class 0..3), then the spawn seed. None
+/// (after recording a frontier) when the drawn type has no ported family.
+pub(crate) fn d10_roll(
+    state: &mut State,
+    id: u32,
+    index: usize,
+) -> Result<Option<D10Roll>, String> {
+    let npc = &state.room.npcs[index];
+    let fraction = if npc.max_hp > 0.0 {
+        //42EFC0: maxss(0, f) then minss(1, ..), with SSE operand order.
+        let value = npc.hp / npc.max_hp;
+        let low = if 0.0 > value { 0.0 } else { value };
+        if 1.0 < low {
+            1.0
+        } else {
+            low
+        }
+    } else {
+        1.0
+    };
+    let (position, velocity, flyer) = (npc.position, npc.velocity, npc.grid_collision_class <= 3);
+    let shared = &mut state.boot_lifecycle.shared;
+    let mut kind = D10_ENEMIES[shared.bounded(45) as usize];
+    if flyer {
+        kind = D10_FLYERS[shared.bounded(15) as usize];
+    }
+    let seed = shared.next_u32();
+    let selector = crate::room_spawns::SpawnSelector {
+        group_index: 0,
+        grid_index: 0,
+        category: crate::room_spawns::SpawnCategory::Entity,
+        entity_type: kind as u16,
+        variant: 0,
+        subtype: 0,
+        position,
+        group_seed: seed,
+        spawn_seed: seed,
+    };
+    let context = crate::entities::SpawnContext {
+        stage: state.stage,
+        game_update_count: state.game_update_count,
+    };
+    if crate::entities::spawn(0, &selector, &context)?.is_none() {
+        unowned_leaf(state, id, 0x524e76);
+        return Ok(None);
+    }
+    Ok(Some(D10Roll {
+        selector,
+        velocity,
+        fraction,
+    }))
 }
 
 /// The D20 (5238AB). Every outcome is drawn on a copy of the shared MT and

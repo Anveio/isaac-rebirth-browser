@@ -91,6 +91,9 @@ def observe(pid, context):
                     # Bomb+7D4 fuse, +7DC Player-contact countdown (docs/dr-fetus-evidence.md).
                     result['bombFuse'] = struct.unpack_from('<i', more, 0)[0]
                     result['bombPlayerContactCountdown'] = struct.unpack_from('<i', more, 8)[0]
+                if 10 <= result['type'] < 1000:
+                    # Entity+484 HitPoints and +488 MaxHitPoints.
+                    result['hp'], result['maxHp'] = pair(0x484)
                 if result['type'] == 5:
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
@@ -105,6 +108,17 @@ def observe(pid, context):
             if not 1 <= width <= 28 or not 1 <= height <= 16:
                 raise ValueError('Unexpected room grid shape')
             report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height}
+            # Room+30 GridEntity* by grid index: poop (type +8 == 14) cells
+            # with their variant (+C) and collision class (+3C).
+            cells = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, 8 * width * height))
+            poops = []
+            for index, pointer in enumerate(cells):
+                if pointer:
+                    grid = read(pointer, 0x40)
+                    kind, variant = struct.unpack_from('<II', grid, 0x8)
+                    if kind == 14:
+                        poops.append([index, variant, struct.unpack_from('<I', grid, 0x3c)[0]])
+            report['gridPoops'] = poops
             manager = room + 0x15d0
             count = u32(manager + 0x74)
             if count > 512:
@@ -137,6 +151,9 @@ def observe(pid, context):
                 })
                 players.append(item)
             report['players'] = players
+            # The shared MT (audio-observer.py offsets), a diagnostic only.
+            report['sharedMt'] = {'index': u32(0x8e6b64),
+                                  'words': list(struct.unpack('<624Q', read(0x8ed680, 624 * 8)))}
         finally:
             os.close(fd)
     except (OSError, ValueError, TimeoutError, struct.error, StopIteration) as error:
