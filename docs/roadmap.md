@@ -72,7 +72,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Boot, menus and pause](#boot-menus-and-pause) | Partial | Title, profile, main, character, seed and Challenge pages with page pans; pause | 3 |
 | [Input](#input) | Partial | Keyboard only | 0 |
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
-| [Floor generation](#floor-generation) | Partial | Normal Basement I/II, Caves I/II and Depths I/II source; live Depths qualification open | 0 |
+| [Floor generation](#floor-generation) | Partial | Basement I/II, Caves I/II and Depths I/II source with Normal/Hard rules; live Depths qualification open | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
 | [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor source through Depths I into Depths II; Mom is port-only (no live comparison) and her clear ends the run at the menu without the cutscene; Caves I/II arrival evidence retains its artifact scope | 4 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
@@ -83,8 +83,8 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Enemies](#enemies) | Partial | Ordinary NPC families, now including Hopper/Trite and Flaming Hopper source | 3 |
 | [Bosses](#bosses) | Partial | Basement families and additional Caves boss source; live scopes remain separate | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
-| [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools complete; about two dozen items with behaviour | 1 |
-| [Pocket items](#pocket-items) | Partial | Card/Pill Init, held slots/HUD, collection/spill, held Save and Range Down/Up use | 0 |
+| [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools, active slot/swap/charge, 26 active-use rows with scoped branches, supported passives/weapons and Leech | 1 |
+| [Pocket items](#pocket-items) | Partial | Held slots/HUD/Save, collection/spill, Range Down/Up, 2 of Clubs/Diamonds, Jera and identified pill names | 0 |
 | [Special rooms and economy](#special-rooms-and-economy) | Partial | Normal Shop stock/prices and scoped paid Bomb witness; other economy frontiers remain | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
@@ -145,7 +145,7 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
-| #647 | P2 | Options page draws no Filter or Pop-ups values (Map Opacity and Gamma fixed by #661/#666) | playtest 2026-10-18 `playtest/6606044/options-tour-side-by-side.mp4` |
+| #647 | P2 | PR803 adds Filter and Pop-ups value rendering; live confirmation remains open (Map Opacity and Gamma fixed by #661/#666) | playtest 2026-10-18 `playtest/6606044/options-tour-side-by-side.mp4` |
 | #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
@@ -200,6 +200,9 @@ does not establish special-seed effects or later placement behavior.
 Missing: special seeds, and many shared-MT consumers, so the port's
 MT stream drifts from the original during play. Every missing consumer is a
 P2 bug here even when its caller lives in another subsystem.
+PR882 adds spectral tears' per-Update Random(4) draw, including the factory's
+immediate Update; unsupported grid-Hurt branches remain explicit frontiers.
+This source correction does not establish complete shared-MT alignment.
 
 Next: investigate the first divergent source consumer on each retained route
 (#162), preserving already matched draw prefixes.
@@ -244,6 +247,12 @@ room set, backdrop, overlay, music and boss chain. New floors are imported by
 filling those tables, not by bespoke code paths.
 Missing: Cellar, Womb and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
+
+The [difficulty framework](difficulty.md) now admits typed Normal/Hard run
+state through Save/Continue and Restart, hard floor size/difficulty/champion
+rules, ordinary clear-heart and boss-heart rules. Curse effects, slot payouts
+and hard completion marks remain missing; this source scope does not qualify
+every hard floor or fight against the Original.
 
 Next: qualify Depths I and II and Mom against the Original; Cellar
 generation and unlock; curses.
@@ -303,7 +312,7 @@ Next: coordinate later-stage admission with the level workstream (#413).
 | #413 | P1 | Source descent reaches Depths I (#780) and Depths II, whose live layout/arrival comparisons remain open; Mom's live comparison, Womb and later steps, Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
-| #735 | P2 | The stage-transition nightmare omits the floor progress bar (finished floors, Isaac head, clock, skull) above the spotlight | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
+| #735 | P2 | PR805 adds the nightmare floor progress bar; live confirmation of the reported transition remains open | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
 
 ## Player
 
@@ -347,7 +356,7 @@ Next: remaining Chapter 1 pool weapons.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #191 | P2 | Port spawns a regular tear one presentation early after an item pickup | e2e stat-cache |
-| #875 | P3 | Tammy's Head: splashes of downward tears are drawn about 15px too low (frames 41-52) | playtest 2026-10-27 `playtest/08d8168/tammys-head.mp4` |
+| #875 | P3 | PR881 copies tear height into the poof render offset; live confirmation of Tammy's Head's downward splashes remains open (frames 41-52) | playtest 2026-10-27 `playtest/08d8168/tammys-head.mp4` |
 
 ## Bombs
 
@@ -355,7 +364,8 @@ Rebirth scope: placement, fuse, blast, damage, craters, bomb items and
 variants (Troll, Mega, Bobby, Butt, ...).
 
 Port: placement, fuse, motion, blast damage to player, NPCs and grid, Troll
-and Mega Troll conversion. Ordinary class5 Full ground response now follows
+and Mega Troll conversion. PR815/816 add Player/tear pushes and PR880 adds
+blast impulses to other live bombs. Ordinary class5 Full ground response now follows
 entity contacts and both phases clamp to actual Room bounds; [scoped #349
 evidence](system-map.md#ordinary-bomb-late-grid-response-349) retains unresolved
 center/near-wall NPC timing. A [bounded ordinary-Bomb child comparison](bomb-evidence.md#bomb-and-bomb-rock-effect-children-source-follow-up)
@@ -369,7 +379,7 @@ Bomb contact bugs are under *Collision and physics*.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #874 | P2 | Anarchist Cookbook: a Troll Bomb's blast barely moves neighbouring Troll Bombs, where the original throws them (from frame 229) | playtest 2026-10-27 `playtest/08d8168/anarchist-cookbook.mp4` |
+| #874 | P2 | PR880 adds blast impulses to other live bombs; live confirmation of Anarchist Cookbook's neighbouring Troll Bombs remains open (from frame 229) | playtest 2026-10-27 `playtest/08d8168/anarchist-cookbook.mp4` |
 
 ## Collision and physics
 
@@ -417,7 +427,7 @@ current-main qualification is inferred.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #485 | P2 | Retained tinted-rock/troll-bomb regressions remain red; the issue also retains separate Dip phase failures | e2e rock-blast, dips |
-| #507 | P2 | Wide/double rooms lack the original's ambient decoration admission and associated draws | e2e entities |
+| #507 | P2 | PR842 adds wide/double boundary and ambient decoration draws; the sandbox-2x2 route is documented, while the retained entities comparison still needs confirmation | e2e entities; pickup-interactions.md |
 
 ## Enemies
 
@@ -541,7 +551,13 @@ Rebirth scope: 213 passives, 75 actives, 55 familiars, 60 trinkets, 15 pools,
 pedestals, rerolls, charge.
 
 Port: complete pool configuration and selection; pedestal admission and
-acquisition; active charge and use for Yum Heart; stat items such as Sad
+acquisition and PR878's blast response for pedestals; active slot, swap,
+charge/reserve and a shared 26-row use table
+covering books, health conversions, How to Jump, pocket grants, D6/D20/D10,
+The Poop, Anarchist Cookbook, Tammy's Head and other scoped leaves. The
+[active inventory](active-items.md) distinguishes complete leaves from
+unsupported branches; a registered use row does not complete an item.
+Supported stat items include Sad
 Onion, Cricket's Head, Speed Ball, Roid Rage, Anti-Gravity, Belt, Libra;
 Leech familiar; Gimpy and Infestation 2 Dip callbacks; the weapon items under
 *Weapons and tears*. Missing: most items, trinkets, most familiars and
@@ -562,7 +578,11 @@ consumers, two held records and HUD, collection/refused-contact response,
 capacity spill and held-pocket Save. The canonical Magic 8 Ball Card world
 producer and Range Down/Up Pill use are implemented. The latter updates the
 canonical counter, requests/evaluates Range, consumes/promotes held slots and
-plays Sad/Happy; other effects and the complete ceremony remain incomplete.
+plays Sad/Happy. PR820/821 add 2 of Clubs, 2 of Diamonds and Jera; PR822 lets
+Blank Card reuse those effects while retaining the held card/rune. PR855 owns
+identified-pill flags and resolved HUD names. The [interaction inventory](pickup-interactions.md)
+records its scoped live routes; pill-name pixels, other effects, drop and the
+complete ceremony remain unqualified or incomplete.
 
 Evidence: #586's frozen candidate passes 5,639 Original/public-WASM checks;
 #602 persists `pill-range-use` and passes a 1,409-check retained-Original replay
@@ -577,8 +597,8 @@ and PCM equality are unavailable in this Node result. Pocket coverage does
 not qualify basic coin/key/bomb/chest scenarios.
 
 Next: complete the remaining durable cases, 251/252 world/held conversions,
-remaining Battery90 live branches and charge effects, actual equipped
-effects/identification and complete save/Continue restoration, with real
+remaining Battery90 live branches, other equipped effects, broader
+identification/HUD coverage and complete save/Continue restoration, with real
 callback and audio evidence kept separate.
 
 No open bugs.
@@ -632,15 +652,17 @@ Rebirth scope: ANM2 sprites, backdrops, lighting and shadows, effects,
 camera, HUD, minimap, giantbook, nightmares, cutscenes.
 
 Port: ANM2 playback, backdrops and decoration, GPU light and shadow masks,
-camera for large rooms, HUD for health and inventory, minimap, screen shake.
-Missing: cutscenes, giantbook, nightmares, many effects; whole-frame pixel
-parity is a diagnostic only.
+camera for large rooms, HUD for health, inventory and pockets, minimap,
+screen shake, supported GiantBook information animations and stage-transition
+nightmares, including PR805's floor progress bar. Missing: cutscenes,
+unsupported GiantBook actors/callers and many effects; whole-frame pixel
+parity is a diagnostic only. Source admission does not close retained visual bugs.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #173 | P2 | Laser beam render geometry is approximated | issue |
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
-| #670 | P3 | Enemy spawn smoke puffs draw light tan and opaque; the original's are dark grey and see-through | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
+| #670 | P3 | PR802 multiplies the appear poof's sprite colour into its keyframes; live confirmation of the reported smoke colour/opacity remains open | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
