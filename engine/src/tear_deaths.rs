@@ -11,6 +11,8 @@ pub(crate) struct Death {
     pub height: f32,
     /// Tear+7e4 scale from the cached tear parameters.
     pub scale: f32,
+    /// Tear+458 PositionOffset y (its height offset), copied to the poof.
+    pub render_offset_y: f32,
 }
 
 pub(crate) fn emit(state: &mut State, death: Death) -> Result<(), String> {
@@ -42,6 +44,17 @@ pub(crate) fn emit(state: &mut State, death: Death) -> Result<(), String> {
     // Init 458b9c draws Random(4) for 12/13/0x4f/0x50 into its rotation 0x814.
     let seed = state.boot_lifecycle.shared.next_u32();
     let poof = critters::admit_plain(state, variant, seed, death.position)?;
+    // 54390c..54391a: the poof takes the tear's +458 PositionOffset, so a
+    // tear dying in the air splashes where it was drawn, not on its shadow.
+    state
+        .sprite_effects
+        .iter_mut()
+        .find(|effect| effect.id == poof)
+        .ok_or("tear poof was not admitted")?
+        .render_offset = WorldVector {
+        x: 0.0,
+        y: death.render_offset_y,
+    };
     let _init_rotation = state.boot_lifecycle.shared.bounded(4) as f32 * 90.0;
     // 543940: except for the small 0x4f/0x50 poofs, sprite scale is 0.8 *
     // tear scale and sprite rotation 0x2cc is a second Random(4) * 90.

@@ -520,9 +520,10 @@ export class Renderer {
       ctx.restore();
       return;
     }
+    // Entity render 442300: the sprite sits at position + PositionOffset (+458).
     this.drawEffect(ctx, effect.variant, effect.sprite,
-      (effect.presentedPosition.x + effect.sprite.offset.x) * 0.65 + 32,
-      (effect.presentedPosition.y + effect.sprite.offset.y) * 0.65 - 46);
+      (effect.presentedPosition.x + effect.renderOffset.x + effect.sprite.offset.x) * 0.65 + 32,
+      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46);
   }
 
   /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
