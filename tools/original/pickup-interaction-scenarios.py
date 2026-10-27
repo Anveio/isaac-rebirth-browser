@@ -169,6 +169,15 @@ CASES = {
         actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 100),
                  act('walk-to-battery', ['w'], 60), act('after-battery', [], 30)],
         interactions=['blank-card-card', 'battery-recharge']),
+    'blank-card-pocket-conversion': dict(
+        about='Little Baggy converts the held 2 of Clubs before a physical Blank Card use',
+        items=[BLANK_CARD], card=TWO_OF_CLUBS, spawns=[pickup(6, 5, 100, 252)],
+        actions=[act('settle', [], 30), act('walk-to-baggy', ['w'], 4),
+                 act('release-before-second-pulse', [], 100),
+                 act('walk-to-baggy-second-pulse', ['w'], 4),
+                 act('after-conversion', [], 100), act('use-active', ['space'], 4),
+                 act('after-active', [], 60)],
+        interactions=['blank-card-pocket-conversion']),
 }
 
 

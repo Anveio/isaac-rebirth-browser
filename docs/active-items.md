@@ -152,8 +152,14 @@ live-TEMP refusal for zero-charge cooldown items), the book request
 record, the leaf, the `5223C0` cache/Evaluate/3076 tail and `5295C0`
 discharge. An active without a row keeps its charge, and its use is recorded
 as an explicit unported-effect frontier. A row's unported operator (Bible on
-Mom/Satan, Revelations' `585820`, Blank Card with a held card) records a
+Mom/Satan, Revelations' `585820`, Blank Card with an unsupported card) records a
 `UseLeaf` frontier instead of being treated as equal.
+
+Dispatch requires owned active ID and charge operands before its ordinary
+guards run; Blank Card also requires an owned held-pocket operand. Little
+Baggy's [bounded conversion replay](pickup-interactions.md#little-baggy-qualification)
+qualifies the owned pill path and preserves the damaged-phase Yum Heart
+controls. It does not add a live candidate unknown-operand refusal witness.
 
 How to Jump (`523481`) clamps `position + velocity*60` into the room, then
 steps back toward the Player by 10 units while the target is on a
@@ -261,7 +267,7 @@ other branches stay frontiers, as noted in the table.
 | 283 | D100 | 6 | 0 | Missing | Not ported yet. `523453` (variant 0) -> `5255BA` nests three Uses through `522250` (no animation, nested flag 1): the D4 284, the D6 105 and the D20 166. Then UseItem. It waits on the D4. Space leaves the charge and records a frontier. |
 | 284 | D4 | 6 | 0 | Missing | Not ported yet. `523099`: clears costumes (`508C60`) and the stat bonuses D28..D3C, and clears the active slot (D74) unless the nested-use flag is set. Then every owned collectible 1..346 except 10, 81, 238, 239, 258, 327 and 328 is removed through `576B40` and the acquisition history, and replaced by a random one; actives under the nested flag take `524A90`. The replacements can be any item, which falls outside the mapped grant frontier. Space leaves the charge and records a frontier. |
 | 285 | D10 | 1 | 0 | Partial | `522F87` (variant 0), GiantBook 18: every room enemy that is type 10..999, not pending-dead (`444950`), not Poop 17, Fire 33, Chub 28 or 68, not dead and not a boss (`49B890`, which also skips 79.20, 228.10, 216.10 and a parented 260.10) is collected in room order. Each is then replaced in turn: its health fraction (clamped, 1 without max health), `Random(45)` from the `670AC0` table, or `Random(15)` from `670B80` for a flyer (grid collision class 0..3), a shared seed, Spawn at its position and velocity, the new enemy's immediate Update, its HP set to the fraction of its own max HP, and the old enemy removed. Then UseItem. Passes `pickup-interactions` `d10-fixed` (two Horfs become a Mulligan and a Maggot). A drawn type with no ported family records a frontier and stops the loop, which is most rolls today (16 of the 45 ground types and 4 of the 15 flyers are ported). |
-| 286 | Blank Card | 4 | 0 | Partial | Runs only with an empty card slot (UseItem "Pickup"). Holding a card is a frontier: card effects are not ported. |
+| 286 | Blank Card | 4 | 0 | Partial | Empty/pill slots play Pickup; 2 of Clubs, 2 of Diamonds and Jera call the supported pocket effect and retain the card/rune. Other cards remain frontiers. Requires owned active and pocket operands. See [interaction scope](pickup-interactions.md). |
 | 287 | Book of Secrets | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 288 | Box of Spiders | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 289 | Red Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |

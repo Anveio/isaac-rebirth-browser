@@ -36,6 +36,69 @@ naturally), so the combos run; pools and natural drops stay fresh-profile.
 The original admits the 26x14 Start Room record as the run's first room
 (28x16 grid, Isaac enters at world 320,400) and so does the port.
 
+The `blank-card-pocket-conversion` case starts with Blank Card and 2 of
+Clubs, walks onto Little Baggy, then presses Space. Native must actually
+convert the held card to a pill and use Blank Card without doubling bombs.
+All strict comparisons remain required, including the converted pill's ID,
+the world pickup and the active discharge. A separate Browser contract reports whether the active operands
+were unknown at Space; if so, retained historical words must not create a
+new temporary effect, change inventory or discharge. A future owned
+conversion is graded by the strict Native rows and need not retain a
+frontier. This conditional check does not qualify Little Baggy conversion.
+
+Little Baggy's normal Player grant now runs its `52DD33` source leaf: the
+item252 RNG gives a world-pill seed before the free-position search, then
+each nonempty held card gets a pill color from the next item252 seed. The
+world pickup has the Player's spawner words and empty linked-parent fields.
+This leaf preserves existing active, query and scalar-input ownership; an
+unavailable RNG, held record or placement keeps its own frontier. Starter
+Deck's separate grant/conversion leaf remains incomplete.
+
+### Little Baggy qualification
+
+Frozen source `15700568`, production `b84076fd` / WASM `7a40d67e`, passes
+all 330 strict rows in fresh Original and actual Browser captures: fixed
+epoch `1700000000` plus the first recorded unfiltered OS epoch `53734238`,
+both at phase 0, and the existing Blank Card/Battery controls. Main `93268686`
+production `fafb9f35` passes 292 rows and retains 38 failures. Ordered
+comparison preserves every Native expectation and all 292 earlier passes;
+only the 38 failing Port values change. The two controls retain all 120 row
+values and statuses. Both runs use byte-identical banks, resource bytes and
+declared/runtime input tapes.
+
+Item252 RNG words, converted held pill/tag, world pill seed/position and
+Player spawner/null links match. All 24 sampled shared-MT checkpoints match
+the cursor and words 0, 311 and 623. The ordinary free-pedestal Sound23
+request restores the shared draw before placement. This muted fixture does
+not establish Sound23 backend starts, audible output or PCM equality.
+
+The candidate reaches owned active operands; the conditional unknown-operand
+contract is explicitly not applicable. Baseline's observed unknown-operand
+contract failures remain retained. The two damaged-phase Yum Heart controls
+each retain all passing ordered checks, 83,127 in total, using the same closed
+Native captures. These results cover normal Player1/0, one held card and the
+authored room1 sandbox. Two-slot conversion, Starter Deck251, other grant and
+sound branches, complete shared MT, pixels and broader gameplay remain open.
+Earlier uncovered-route and V2 failures retain their separate scope.
+
+After rebase and formatting, frozen `3a75ef1e` (production `2e63bc64` /
+WASM `1dbb85c1`) passes a fresh build, focused browser runtime 2/2 and the
+same four-case fresh Original/Browser replay. All 330 comparison rows and
+complete normalized Port observations are byte-identical to `15700568`, as
+are the public bank, input tapes and resources. The Yum Heart comparison
+above keeps its separate qualified-artifact scope.
+
+Replay the [same input-only bank](../references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json)
+without drawing replacement epochs. First reconstruct its private fixture
+bytes from the local base resources in a new output directory, then replace
+the generated fixed-only bank with the retained inputs:
+
+```sh
+python3 tools/original/pickup-interaction-scenarios.py --count 0 --only blank-card-pocket-conversion --only blank-card --output .cache/baggy-replay
+cp references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json .cache/baggy-replay/scenarios.json
+npm run test:e2e -- pickup-interactions --scenarios .cache/baggy-replay/scenarios.json
+```
+
 ## Blank Card and runes
 
 In base Rebirth, **Blank Card (286, 4 charges) triggers the held rune**: with

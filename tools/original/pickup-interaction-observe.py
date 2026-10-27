@@ -97,6 +97,10 @@ def observe(pid, context):
                 if result['type'] == 5:
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
+                    result['spawnSeed'] = struct.unpack_from('<I', raw, 0x7d0)[0]
+                    result['spawnerType'], result['spawnerVariant'] = struct.unpack_from('<II', raw, 0x1c)
+                    result['linksEmpty'] = all(struct.unpack_from('<Q', raw, offset)[0] == 0
+                                               for offset in (0x498, 0x4a0, 0x4a8))
                 return result
 
             game = u64(0x8ecd30)
@@ -143,6 +147,9 @@ def observe(pid, context):
                     'ownedTotal': sum(value for value in owned if value > 0),
                     'activeId': i32(player + 0xd74), 'activeCharge': i32(player + 0xd78),
                     'activeSubordinateCharge': i32(player + 0xd7c), 'reserveCharge': i32(player + 0xd8c),
+                    #Actual item252 child selected at52CF6F..7A, advanced by
+                    #the world prefix52DD39 and each held conversion52E13D.
+                    'item252RngWords': list(struct.unpack('<4I', read(player + 0x1424 + 252 * 16, 16))),
                     'controlsEnabled': read(player + 0x7d4, 1)[0] == 1, 'inputCooldown': i32(player + 0x7d8),
                     'animationGuard': read(player + 0xbf4, 1)[0] == 1,
                     'animation': clip_name(u64(player + 0x28 + 0x18)),

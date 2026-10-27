@@ -182,15 +182,20 @@ fn commit_admission(state: &mut State, plan: AdmissionPlan) {
     state.actor_scheduler = plan.scheduler;
 }
 
-fn remember_unowned(state: &mut State, id: u32, frontier: Frontier, local_rng_complete: bool) {
+fn remember_unowned(
+    state: &mut State,
+    id: u32,
+    frontier: Frontier,
+    local_rng_complete: bool,
+    world_complete: bool,
+) {
     if let Some(history) = state
         .player_items
         .as_mut()
         .and_then(|owner| owner.pickup_grant_history.as_mut())
     {
-        //Before the two unconditional local calls are implemented, their
-        //canonical RNG can no longer be read as a completed source state.
-        //After both calls, a later GetCard/Init gap does not erase them.
+        //An unclosed local suffix makes the canonical final state unknown.
+        //A later world Init gap does not erase completed local RNG calls.
         if !local_rng_complete {
             history
                 .item_rng_frontiers
@@ -202,10 +207,12 @@ fn remember_unowned(state: &mut State, id: u32, frontier: Frontier, local_rng_co
             frontier,
         });
     }
-    crate::ordinary_placement::invalidate(
-        state,
-        crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id },
-    );
+    if !world_complete {
+        crate::ordinary_placement::invalidate(
+            state,
+            crate::ordinary_placement::Frontier::CollectibleEffects { collectible_id: id },
+        );
+    }
 }
 
 /// Source52DF3F searches first. The two local Next calls are52DF50/52DF5B;
@@ -232,20 +239,114 @@ fn card194(state: &mut State, local_rng_complete: &mut bool) -> Result<(), Front
     Ok(())
 }
 
-/// This first small consumer closes194. The251/252 consumers use the same
-/// placement/admission operators in the follow-up, with their literal reverse
-/// prefix order (first local seed, then shared search) and subsequent held loop.
+///194's search precedes its local draws;252 below has the reverse prefix.
+///251's world Card and held-Pill conversion remain a separate consumer.
 pub(crate) fn on_card194_added(state: &mut State) {
     match state.player.entity_source {
         Some(source) if source.entity_type == 1 && source.variant != 0 => return,
         Some(source) if source.entity_type == 1 => {}
         _ => {
-            remember_unowned(state, 194, input("Player entity source"), false);
+            remember_unowned(state, 194, input("Player entity source"), false, false);
             return;
         }
     }
     let mut local_rng_complete = false;
     if let Err(frontier) = card194(state, &mut local_rng_complete) {
-        remember_unowned(state, 194, frontier, local_rng_complete);
+        remember_unowned(state, 194, frontier, local_rng_complete, false);
+    }
+}
+
+///52DD33..52DDCB: Next252, free position, world Pill with a Player spawner,
+///then52E132 converts each nonempty held Card with the next item252 seed.
+fn little_baggy(
+    state: &mut State,
+    local_rng_complete: &mut bool,
+    world_complete: &mut bool,
+) -> Result<(), Frontier> {
+    let world_seed = next_item_seed(state, 252)?;
+    let placement = prepare_placement(state)?;
+    state.boot_lifecycle.shared = placement.shared;
+    let admission = (|| {
+        let owner = state
+            .player_items
+            .as_ref()
+            .ok_or_else(|| input("Player items"))?;
+        //Pill Init reads Have251 before selecting its family. Its actual
+        //query owner is required even though the canonical Init takes counts.
+        crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .have(251)
+        .ok_or_else(|| input("Pill Init Have251"))?;
+        prepare_admission(
+            state,
+            70,
+            0,
+            world_seed,
+            placement.position,
+            crate::pickups::SourceSpawner {
+                entity_type: 1,
+                variant: 0,
+            },
+        )
+    })();
+    let world_result = match admission {
+        Ok(plan) => {
+            commit_admission(state, plan);
+            *world_complete = true;
+            Ok(())
+        }
+        Err(frontier) => Err(frontier),
+    };
+    //World Init never mutates the Player's held records or item252 RNG.
+    //Its unavailable result therefore does not erase a closed held suffix.
+    let slots = state
+        .player_items
+        .as_ref()
+        .and_then(|owner| owner.held_pockets.as_ref())
+        .filter(|held| held.frontier.is_none())
+        .ok_or_else(|| input("actual held pocket records"))?
+        .slots;
+    for (index, slot) in slots.into_iter().enumerate() {
+        if slot.id == 0 || !slot.card {
+            continue;
+        }
+        let seed = next_item_seed(state, 252)?;
+        let held = state
+            .player_items
+            .as_mut()
+            .and_then(|owner| owner.held_pockets.as_mut())
+            .expect("checked held pocket records");
+        //52E135 stores the Pill tag, then581950(seed) is unsigned %9+1.
+        held.slots[index] = crate::pockets::PocketSlot {
+            id: seed % 9 + 1,
+            card: false,
+        };
+    }
+    *local_rng_complete = true;
+    world_result
+}
+
+pub(crate) fn on_little_baggy_added(state: &mut State) {
+    match state.player.entity_source {
+        Some(source) if source.entity_type == 1 && source.variant != 0 => return,
+        Some(source) if source.entity_type == 1 => {}
+        _ => {
+            if let Some(owner) = state.player_items.as_mut() {
+                crate::pockets::note_modifier_grant(owner, 252);
+            }
+            remember_unowned(state, 252, input("Player entity source"), false, false);
+            return;
+        }
+    }
+    let (mut local_rng_complete, mut world_complete) = (false, false);
+    if let Err(frontier) = little_baggy(state, &mut local_rng_complete, &mut world_complete) {
+        if let Some(owner) = state.player_items.as_mut() {
+            crate::pockets::note_modifier_grant(owner, 252);
+        }
+        remember_unowned(state, 252, frontier, local_rng_complete, world_complete);
     }
 }
