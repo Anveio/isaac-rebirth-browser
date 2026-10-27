@@ -974,9 +974,9 @@ export class Renderer {
    * description while Map is held; "???" in seed mode 29, and for a card in
    * mode 30, which also drops the face) is drawn right-aligned 16 left of the
    * slot and 10 up, plus the Game+CEA00 shake. Mode 9 rewrites the name
-   * (5759E2), not ported: no text. Pill names need the Game+95B0 identified
-   * byte, which the port does not own, so a pill draws without text outside
-   * mode 29. Slot 1 (+304C/+3050) draws its Small frame at (W-24,H-34). */
+   * (5759E2), not ported: no text. A pill draws the engine's heldPillName:
+   * its effect name once Game+95B0 marks the color identified, "???"
+   * before that, and no text when the port does not know. Slot 1 (+304C/+3050) draws its Small frame at (W-24,H-34). */
   private pocketItems(ctx: CanvasRenderingContext2D, state: State): void {
     const held = state.playerItems?.heldPockets;
     if (!held) return;
@@ -991,7 +991,7 @@ export class Renderer {
       let name: string | null = null;
       if (!slot.card) {
         this.assets.draw(ctx, sheet, "Pills", x, y, slot.id - 1);
-        if (mode === 29) name = "???";
+        name = mode === 29 ? "???" : state.heldPillName ?? null;
       } else {
         const card = pickupCatalog.cards.find(entry => entry.id === slot.id);
         if (card?.hud && mode !== 30) this.assets.draw(ctx, "gfx/ui/ui_cardfronts.anm2", card.hud, x - 3, y, 0);
