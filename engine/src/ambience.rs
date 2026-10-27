@@ -38,7 +38,12 @@ pub struct Ambience {
 }
 
 /// Room.Init 5c4a00 zeroes both volumes; playing loops keep playing.
+/// Room.Init calls ItemPool 582340 just before it (5CED96), which clears
+/// the selected-collectible bytes; every Room.Init site runs both here.
 pub(crate) fn reset_room(state: &mut State) {
+    if let Some(pools) = state.item_pools.as_mut() {
+        pools.reset_selected();
+    }
     state.ambience.fire.volume = 0.0;
     state.ambience.swarm.volume = 0.0;
 }

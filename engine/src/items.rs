@@ -361,6 +361,12 @@ impl ItemPools {
         Ok(restored)
     }
 
+    /// 582340 clears ItemPool+60B, the 347 per-collectible selected bytes.
+    /// Room.Init (5CED96) and the D6 (525404) call it.
+    pub(crate) fn reset_selected(&mut self) {
+        self.selected.fill(false);
+    }
+
     pub fn room_pool(&self, room_type: u32, shared: &mut crate::mt::Mt19937) -> i32 {
         if room_type == 3 {
             shared.bounded(16) as i32

@@ -848,6 +848,51 @@ impl Pickup {
         Ok(())
     }
 
+    /// The D6 reroll Morph500A10(5,100,0,keepPrice1) of a free pedestal:
+    /// the caller derives `seed` (500A2A..56 advances the old seed once) and
+    /// selects `subtype` with Init's 4FF6B8 local draw. Morph restores the
+    /// 498 links, ABC/ABD/AC8 and replays the Alternates overlay at its
+    /// saved frame (500ADD..B35, 500C4B); AB8 is the config charge for an
+    /// active (500D50).
+    pub(crate) fn morph_rerolled(
+        &mut self,
+        seed: u32,
+        subtype: u32,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
+    ) -> Result<(), String> {
+        if !self.position.is_finite() || !self.velocity.is_finite() {
+            return Err("reroll Morph requires finite saved vectors".into());
+        }
+        let config = crate::items::definition(subtype).ok_or("Morph collectible config absent")?;
+        let mut next = Self::spawn(self.id, 100, subtype, self.position, false)?;
+        next.source_spawner = self.source_spawner;
+        next.spawn_seed = seed;
+        next.regular_rng = Some(crate::items::Rng::new(seed, [4, 3, 17]));
+        next.anchor_position = self.anchor_position;
+        next.presented_position = self.presented_position;
+        next.velocity = self.velocity;
+        next.touched = self.touched;
+        next.save_byte_abd = self.save_byte_abd;
+        next.morph_links = self.morph_links.clone();
+        if self.overlay.as_deref() == Some("Alternates") {
+            next.overlay_frame = self.overlay_frame;
+        }
+        next.birth_game_update = game_update;
+        next.charge = if config.kind == 3 {
+            config.max_charges
+        } else {
+            0
+        };
+        next.project();
+        scheduler.reinitialize_in_place(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
+        })?;
+        *self = next;
+        Ok(())
+    }
+
     /// Free active swap 50621D: Morph500A10(5,100,old,keepPrice0) re-Inits
     /// the touched pedestal in place as the dropped active. Morph clears AB8;
     /// the caller then stores the dropped active's charge. Position, velocity,
