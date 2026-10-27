@@ -474,7 +474,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor owns exactly its shape's footprint at its origin | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: neighbor links are reciprocal edge adjacencies | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor is reachable from the starting room | [floor.rs](engine/dst/src/units/floor.rs) |
-| Always | floor: exactly one boss, super secret, shop and treasure room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: one boss, super secret, shop and treasure room, two bosses and treasure rooms under Curse of the Labyrinth | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: normal rooms stay within the stage's difficulty band | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: an even floor's boss comes from the retained family without rewriting it | [floor.rs](engine/dst/src/units/floor.rs) |
 | Sometimes | floor: a secret room is placed | [floor.rs](engine/dst/src/units/floor.rs) |

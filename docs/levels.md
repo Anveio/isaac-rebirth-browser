@@ -4,9 +4,11 @@ A floor is data. `engine/src/levels.rs` holds two tables, and every
 stage-dependent consumer reads them instead of matching on stage numbers:
 
 - **Stage nodes** (`STAGES`, keyed by Level stage) are the progression state
-  machine: the ShowName streak, the trapdoor edge (SetNextStage585620's
-  target), the generated floor's contract and, where 584240 treats that
-  stage alone differently, its own boss chain (Depths II runs only Mom's).
+  machine: the ShowName streak (and its " XL" form under Curse of the
+  Labyrinth, which only odd stages up to 7 roll), the trapdoor edge
+  (SetNextStage585620's target), the generated floor's contract and, where
+  584240 treats that stage alone differently, its own boss chain (Depths II
+  runs only Mom's).
   A stage without a node has no generator, so no run start or trapdoor
   reaches it. A trapdoor edge is admitted only into another node, so an
   edge may name a stage that has no node yet.
@@ -35,6 +37,13 @@ field is imported with evidence.
 | `music::stage_track` | chapter music (normal and alternate) |
 | `stage_transition` | node name and trapdoor edge |
 | `nightmares::select_normal_basement` | node admission |
+
+Curse of the Labyrinth is a node and floor rule, not per-floor code: the
+floor scales its room count, places a second boss room (589d5c: 584240 for
+the next stage, fitted beside the first boss room) and a second treasure
+room (58bae3), and the boss trapdoor sits only in the last boss room. The
+trapdoor edge of a node with an XL name skips one stage (585640), and the
+boss award reads the stage one past the Level's (5c9740).
 
 Floor generation itself (`floor.rs`) is the source Level::Init port. Its
 stage-number conditions (room count, difficulty band, special-room odds,

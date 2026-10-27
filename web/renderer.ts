@@ -850,9 +850,20 @@ export class Renderer {
       x + border, y + height - border, width - border * 2, border);
     gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
     const rotation = { up: 0, left: -Math.PI / 2, right: Math.PI / 2, down: Math.PI };
+    const shut = state.room.combatShutUpdate;
     for (const connection of appearance.doors) {
       ctx.save(); ctx.translate(connection.x, connection.y); ctx.rotate(rotation[connection.side]);
-      this.assets.draw(ctx, connection.asset, connection.state, 0, 0, 0,
+      // A combat close plays the door's Close clip (565000): one frame per
+      // full update, one ahead of the shut update, held at frame 0 (panels
+      // hidden, so the door still looks open) while the inbound transition
+      // freezes the grid, and closed from frame 10.
+      let clip = connection.state, frame = 0;
+      if (clip === "Closed" && shut !== undefined && shut !== null
+        && state.room.combatShutDoorSlots.includes(connection.slot)) {
+        const age = state.gameUpdateCount - shut;
+        if (age < 10) { clip = "Close"; frame = Math.max(0, age + 1); }
+      }
+      this.assets.draw(ctx, connection.asset, clip, 0, 0, frame,
         connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {});
       // Door.LoadGraphics5629c0 overlays door_17_bardoor on barred variant4;
       // AnimState563b70 holds its Idle while closed. The Vanish fade on
@@ -914,9 +925,7 @@ export class Renderer {
           player.headFrame, { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
     }
   }
-  private hud(ctx: CanvasRenderingContext2D, state: State): void {
-    this.activeItem(ctx, state);
-    this.pocketItems(ctx, state);
+  private hearts(ctx: CanvasRenderingContext2D, state: State): void {
     for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
       const remaining = state.player.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
@@ -930,6 +939,12 @@ export class Renderer {
     if (state.player.eternalHearts > 0) {
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
+  }
+  private hud(ctx: CanvasRenderingContext2D, state: State): void {
+    this.activeItem(ctx, state);
+    this.pocketItems(ctx, state);
+    // HUD 5742f0: Curse of the Unknown (Level+8 bit 8) skips the hearts.
+    if (!((state.floor.curses ?? 0) & 8)) this.hearts(ctx, state);
     const counts = [state.inventory.coins, state.inventory.bombs, state.inventory.keys];
     // HUD5741F9 selects golden frame3 from actual Player+BD0; count stays BCC.
     const pickupFrames = [0, 2, state.player.goldenKey === true ? 3 : 1];

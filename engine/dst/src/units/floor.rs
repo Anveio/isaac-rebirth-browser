@@ -284,7 +284,10 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
         json!({ "request": details(), "reached": reached.len(), "descriptors": count })
     );
 
-    // 58c260 retries until boss, super secret, shop and treasure all fit.
+    // 58c260 retries until boss, super secret, shop and treasure all fit;
+    // Curse of the Labyrinth adds a second boss (589d5c) and treasure room
+    // (58bae3).
+    let doubled = if floor.labyrinth() { 2 } else { 1 };
     let rooms_of = |kind: u32| {
         floor
             .descriptors
@@ -299,8 +302,9 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
         (4, rooms_of(4)),
     ];
     props::always!(
-        mandatory.iter().all(|(_, rooms)| *rooms == 1),
-        "floor: exactly one boss, super secret, shop and treasure room",
+        mandatory.iter().all(|(kind, rooms)| *rooms
+            == if matches!(kind, 5 | 4) { doubled } else { 1 }),
+        "floor: one boss, super secret, shop and treasure room, two bosses and treasure rooms under Curse of the Labyrinth",
         json!({ "request": details(), "counts": mandatory })
     );
 
@@ -363,6 +367,18 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
         Difficulty::Normal => (0, 0),
         Difficulty::Hard => (2, 3),
     };
+    // 58c061: Labyrinth scales the base by 1.8 (at most 45); otherwise Lost
+    // (58c4c0) adds four rooms. Hard's extra rooms come after.
+    let cursed = |base: u32| {
+        if floor.labyrinth() {
+            ((f64::from(base) * 1.8) as u32).min(45)
+        } else if floor.curses & floor::LOST != 0 {
+            base + 4
+        } else {
+            base
+        }
+    };
+    let base = request.stage * 10 / 3 + 5;
     let reports = &floor.attempt_reports;
     let continuous = reports.windows(2).all(|pair| {
         pair[0].final_generator_state == pair[1].initial_generator_state
@@ -375,11 +391,11 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
             && reports.last().is_some_and(|last| last.outcome == "placed")
             && continuous
             // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2
-            // 11..12, plus hard's extra rooms.
-            && (request.stage * 10 / 3 + 5 + extra_low..=request.stage * 10 / 3 + 6 + extra_high)
+            // 11..12, then the curse adjustment and hard's extra rooms.
+            && (cursed(base) + extra_low..=cursed(base + 1) + extra_high)
                 .contains(&u32::from(floor.additional_rooms)),
         "floor: attempts are bounded, contiguous and end with a placement",
-        json!({ "request": details(), "attempts": floor.attempts, "additionalRooms": floor.additional_rooms })
+        json!({ "request": details(), "attempts": floor.attempts, "additionalRooms": floor.additional_rooms, "curses": floor.curses })
     );
     props::sometimes!(floor.attempts > 1, "floor: a generation retry is exercised");
 
