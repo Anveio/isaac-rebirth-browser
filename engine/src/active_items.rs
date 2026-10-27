@@ -256,6 +256,10 @@ pub(crate) enum Leaf {
     /// random card or (without trinket22) a soul heart at a free spot near
     /// the Player; then the Pickup clip.
     CrystalBall,
+    /// 5238AB (variant0 only): outside shops, every live pickup (455680 5)
+    /// other than a pedestal, trophy, bed or big chest is Morphed in place
+    /// to a variant the shared Random draws; then UseItem.
+    D20,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -372,6 +376,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 158,
         book: None,
         leaf: Leaf::CrystalBall,
+    },
+    ActiveUse {
+        id: 166,
+        book: None,
+        leaf: Leaf::D20,
     },
 ];
 
@@ -785,6 +794,12 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
             play_item_animation(state, id, variant0, false);
         }
+        Leaf::D20 => {
+            if variant0 {
+                reroll_pickups(state, id)?;
+            }
+            play_item_animation(state, id, variant0, false);
+        }
         Leaf::Flush => {
             //522A80 walks Room+1638, skipping Poop245 and Chub28 before
             //444810 and Mom's Hand213 after it. Fire33 sets bit10 in its
@@ -1097,6 +1112,149 @@ fn reroll_pedestals(state: &mut State, id: u32) -> Result<(), String> {
         )?;
         //52545E clears ABC after the Morph restored it.
         pickup.touched = false;
+    }
+    Ok(())
+}
+
+/// 5238AB..523A0F, one draw sequence on the shared Random (42E8A0, MT %).
+/// `None` is the trinket22 heart branch, which needs the Player's RNG at
+/// +2B34.
+fn d20_variant(shared: &mut crate::mt::Mt19937, trinket22: Option<bool>) -> Option<u32> {
+    let mut variant = (shared.bounded(6) * 5 + 5) * 2;
+    if variant == 60 {
+        //5247D2: Random(2) == 0 turns a locked chest into a heart.
+        if shared.bounded(2) == 0 {
+            variant = 10;
+        }
+    } else if variant == 50 && shared.bounded(3) == 0 {
+        //5247EB: Random(3) == 0 turns a chest into a coin.
+        variant = 20;
+    }
+    if shared.bounded(10) == 0 {
+        variant = if shared.bounded(2) == 0 { 30 } else { 40 };
+    }
+    if shared.bounded(15) == 0 {
+        variant = 300;
+    }
+    if shared.bounded(15) == 0 {
+        variant = 70;
+    }
+    if shared.bounded(20) == 0 {
+        return Some(350);
+    }
+    //5247A3: with trinket22 a heart rerolls unless the Player RNG's
+    //RandomInt(5) is 0. Without it the heart stands.
+    if variant == 10 && trinket22 != Some(false) {
+        return None;
+    }
+    Some(variant)
+}
+
+/// The D20 (5238AB). Every outcome is drawn on a copy of the shared MT and
+/// each new pickup built first, so an unported branch records a frontier
+/// before anything changes.
+fn reroll_pickups(state: &mut State, id: u32) -> Result<(), String> {
+    //Room+10 type2 (a shop) first restocks through 5CDC70, not ported.
+    if state
+        .room
+        .descriptor
+        .as_ref()
+        .is_none_or(|descriptor| descriptor.template.room_type == 2)
+    {
+        unowned_leaf(state, id, 0x5238c5);
+        return Ok(());
+    }
+    let mut targets = Vec::new();
+    for (index, pickup) in state.room.pickups.iter().enumerate() {
+        if pickup.removed {
+            continue;
+        }
+        //31F (dead) skips the entry; a pickup mid-collection is not modeled
+        //by that word, so it stays unadmitted.
+        if pickup.collected {
+            unowned_leaf(state, id, 0x523949);
+            return Ok(());
+        }
+        if pickup.variant == 100 {
+            //52487C reprices a priced pedestal; a free one is skipped.
+            if pickup.shop_price.is_some() {
+                unowned_leaf(state, id, 0x52488c);
+                return Ok(());
+            }
+            continue;
+        }
+        //5080C0 excludes the trophy, the bed and the big chest.
+        if matches!(pickup.variant, 340 | 370 | 380) {
+            continue;
+        }
+        //52484C Morphs a priced pickup into a shop item (variant150).
+        if pickup.shop_price.is_some()
+            || pickup.spawn_seed == 0
+            || pickup
+                .morph_links
+                .as_ref()
+                .is_some_and(|links| !links.known_empty())
+        {
+            unowned_leaf(state, id, 0x523984);
+            return Ok(());
+        }
+        targets.push(index);
+    }
+    let trinket22 = has_trinket(state, 22);
+    let mut shared = state.boot_lifecycle.shared.clone();
+    let mut morphs = Vec::with_capacity(targets.len());
+    for index in targets {
+        let Some(variant) = d20_variant(&mut shared, trinket22) else {
+            unowned_leaf(state, id, 0x5247b8);
+            return Ok(());
+        };
+        let old = &state.room.pickups[index];
+        //500A2A..56 advances the old seed once for the new Init.
+        let seed = items::Rng::new(old.spawn_seed, [1, 21, 20]).raw();
+        let next = match variant {
+            70 | 300 => crate::Pickup::from_pocket_parts(
+                old.id,
+                variant,
+                0,
+                seed,
+                old.position,
+                false,
+                crate::pickups::PocketSubtypeInputs::from_state(state),
+            )?,
+            //Trinket Init (350) is not ported.
+            350 => None,
+            _ => {
+                let selector = crate::room_spawns::SpawnSelector {
+                    group_index: 0,
+                    grid_index: 0,
+                    category: crate::room_spawns::SpawnCategory::Entity,
+                    entity_type: 5,
+                    variant: variant as u16,
+                    subtype: 0,
+                    position: old.position,
+                    group_seed: 0,
+                    spawn_seed: seed,
+                };
+                match variant {
+                    50 => crate::chests::from_source_selector(old.id, &selector, false, state)?,
+                    60 => crate::chests::from_locked_selector(old.id, &selector, false, state)?,
+                    _ => crate::Pickup::from_source_selector(old.id, &selector, false, state)?,
+                }
+            }
+        };
+        let Some(next) = next else {
+            unowned_leaf(state, id, 0x523929);
+            return Ok(());
+        };
+        morphs.push((index, next));
+    }
+    state.boot_lifecycle.shared = shared;
+    for (index, next) in morphs {
+        state.room.pickups[index].morph_into(
+            next,
+            state.game_update_count,
+            &mut state.actor_scheduler,
+        )?;
     }
     Ok(())
 }

@@ -148,6 +148,12 @@ export const INTERACTIONS = {
   'blank-card-card': { labels: ['settle', 'use-active', 'after-active'],
     covered: obs => obs['after-active'].player.activeCharge === 0 && obs['after-active'].player.pockets[0] === 23 },
   'room-2x2': { labels: ['settle'], covered: obs => obs['settle'].room?.gridWidth === 28 },
+  // Every free pickup keeps its place and at least one changes kind.
+  'd20-reroll': { labels: ['settle', 'use-active', 'after-active'],
+    covered: obs => obs['after-active'].player.activeCharge === 0
+      && pickupCount(obs['after-active']) === pickupCount(obs['settle'])
+      && JSON.stringify(obs['after-active'].pickups.map(p => [p.variant, p.subtype]))
+        !== JSON.stringify(obs['settle'].pickups.map(p => [p.variant, p.subtype])) },
   'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
 };
 

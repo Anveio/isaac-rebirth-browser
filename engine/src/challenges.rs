@@ -370,11 +370,11 @@ impl Definition {
         );
         for &id in &self.starting_items {
             items::definition(id).ok_or("Challenge starting collectible config absent")?;
-            //63 The Battery,115 Ouija Board and286 Blank Card are the
+            //63 The Battery,115 Ouija Board,166 D20 and286 Blank Card are the
             //pickup-interaction sandbox's grants (tools/e2e/pickup-interactions.mjs).
             if !(matches!(
                 id,
-                1 | 4 | 6 | 63 | 68 | 114 | 115 | 118 | 286 | 329 | 304 | 330
+                1 | 4 | 6 | 63 | 68 | 114 | 115 | 118 | 166 | 286 | 329 | 304 | 330
             ) || (epic_startup && matches!(id, 2 | 168)))
             {
                 return Err("Challenge starting grant outside the mapped item frontier".into());
