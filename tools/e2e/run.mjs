@@ -82,9 +82,14 @@ if (rerun) {
   if (!from || !existsSync(join(from, 'report.json'))) { console.error(`--rerun-failed: no run report at ${from ?? runs}`); process.exit(2); }
   const previous = JSON.parse(readFileSync(join(from, 'report.json'), 'utf8'));
   const failed = previous.suites.filter(suite => suite.status !== 'pass');
+  // Replay paths are relative to the checkout that recorded them; a run from
+  // another worktree (a main baseline beside a PR's run) keeps its own cases.
+  const origin = resolve(from, '../../..');
+  const rebase = arg => origin !== ROOT && arg.split(',').every(path => path.startsWith('.cache/'))
+    ? arg.split(',').map(path => resolve(origin, path)).join(',') : arg;
   for (const suite of failed) {
     ids.push(suite.id);
-    const replay = suite.replayArgs ?? suite.replay?.split(' ').slice(5) ?? [];
+    const replay = (suite.replayArgs ?? suite.replay?.split(' ').slice(5) ?? []).map(rebase);
     replays.set(suite.id, mergeReplayArgs(suite.id, suite.suiteArgs ?? previous.suiteArgs ?? [], replay));
   }
   if (!list) console.log(`--rerun-failed: ${failed.length} failed suites of ${relative(ROOT, from)}: ${ids.join(' ') || 'none'}`);
