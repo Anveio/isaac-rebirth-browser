@@ -839,18 +839,15 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 crate::explosion_effects::advance(state, crate::phase::Phase::Update, effect)?;
             }
         }
-        Leaf::MomsBra | Leaf::MomsPad => {
-            //Neither freeze444970 nor fear4450D0 is ported, so a room with
-            //an eligible enemy records a frontier; otherwise only the
-            //UseItem tail runs.
-            let walks = variant0 || matches!(leaf, Leaf::MomsBra);
-            if walks && vulnerable_npc(state, &[]) {
-                let pc = if matches!(leaf, Leaf::MomsBra) {
-                    0x523bfe
-                } else {
-                    0x52414e
-                };
-                unowned_leaf(state, id, pc);
+        Leaf::MomsBra => {
+            moms_bra(state, id)?;
+            play_item_animation(state, id, variant0, false);
+        }
+        Leaf::MomsPad => {
+            // Fear4450d0 has its own AI/pathfinder effects. Its source
+            // leaf reads config39's220, not this item's cooldown180.
+            if variant0 && vulnerable_npc(state, &[]) {
+                unowned_leaf(state, id, 0x52414e);
             }
             play_item_animation(state, id, variant0, false);
         }
@@ -1135,12 +1132,56 @@ fn vulnerable_npc(state: &State, skip: &[u32]) -> bool {
                     collision_class: npc.entity_collision_class,
                     raw_494: npc.raw_494,
                     dead: npc.dead,
-                    entity_flags: crate::entities::family(npc.kind)
-                        .map(|family| (family.entity_flags)(npc)),
+                    entity_flags: crate::entities::family(npc.kind).map(|_| npc.entity_flags()),
                 },
             )
             .unwrap_or(true)
     })
+}
+
+/// 523b90 walks Room+1638 in order, with no Player-variant gate. Keep a
+/// mixed/unknown target walk wholly behind the existing UseLeaf frontier;
+/// no supported target receives a partial freeze before that refusal.
+fn moms_bra(state: &mut State, id: u32) -> Result<(), String> {
+    let duration = items::definition(39)
+        .ok_or("Mom's Bra ItemConfig absent")?
+        .cooldown;
+    let mut targets = Vec::new();
+    for (index, npc) in state.room.npcs.iter().enumerate() {
+        if npc.removed {
+            continue;
+        }
+        let flags = crate::entities::family(npc.kind).map(|_| npc.entity_flags());
+        let eligible = crate::target_eligibility::eligible_target(
+            crate::target_eligibility::TargetEligibility {
+                kind: npc.kind,
+                collision_class: npc.entity_collision_class,
+                raw_494: npc.raw_494,
+                dead: npc.dead,
+                entity_flags: flags,
+            },
+        );
+        match eligible {
+            Ok(false) => {}
+            Ok(true)
+                if crate::npc_status::can_add_freeze(
+                    npc,
+                    flags.expect("eligible target has its flag owner"),
+                    duration,
+                ) =>
+            {
+                targets.push((index, flags.expect("checked flag owner")));
+            }
+            Ok(true) | Err(_) => {
+                unowned_leaf(state, id, 0x523bfe);
+                return Ok(());
+            }
+        }
+    }
+    for (index, flags) in targets {
+        crate::npc_status::add_freeze(&mut state.room.npcs[index], flags, duration);
+    }
+    Ok(())
 }
 
 /// 525404..5254B1. Only a free pedestal (ABD 0, no price) is ported: the

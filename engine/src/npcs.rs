@@ -72,6 +72,9 @@ pub struct Npc {
     /// Sprite colour (+2d0) and its timed stack; the renderer draws it.
     #[serde(default)]
     pub sprite_color: crate::sprite_color::SpriteColor,
+    /// Entity::Init441c80 clears status timers and flags on a fresh actor.
+    #[serde(default)]
+    pub status: crate::npc_status::NpcStatus,
     /// SplatColor +3cc: Entity::Init 441c80 resets it to white. Base-kill
     /// branches colour their effects with it (the fly family's 1000.3 at
     /// 4fb11e). Dingle's 4ada20 tint is still held in its own state.
@@ -917,6 +920,7 @@ impl Npc {
     /// concrete subclasses preserve their own later flag writes.
     pub(crate) fn entity_flags(&self) -> u32 {
         crate::entities::family(self.kind).map_or(4, |family| (family.entity_flags)(self))
+            | self.status.flags()
     }
 
     pub fn from_selector(
@@ -987,6 +991,7 @@ impl Npc {
             shooter: None,
             champion: None,
             sprite_color: crate::sprite_color::SpriteColor::default(),
+            status: crate::npc_status::NpcStatus::default(),
             splat_color: crate::sprite_color::Color::WHITE,
             flip_x: false,
             pathfinder: None,
