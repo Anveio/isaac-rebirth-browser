@@ -57,7 +57,10 @@ pub(crate) fn fire(
         motion: projectiles::TearMotion::spawn(origin, velocity, plan.parameters, final_uniform)?,
     };
     tear.project();
+    let id = tear.id;
     state.tears.push(tear);
+    // The factory's immediate Full Update takes the spectral Random(4) too.
+    crate::spectral_tear_update(state, id)?;
     state.actor_scheduler.admit(actors::ActorRef {
         kind: actors::ActorKind::Tear,
         id: state.next_tear,

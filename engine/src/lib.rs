@@ -5369,6 +5369,9 @@ impl Game {
                 {
                     return controlled_tear::advance(&mut self.state, phase, actor.id);
                 }
+                if phase == phase::Phase::Update && !newborn {
+                    spectral_tear_update(&mut self.state, actor.id)?;
+                }
                 // 542F70..5430A5 consumes the prior Full grid contact and
                 // calls Hurt before Base447190 integrates this tear. Poof
                 // and removal remain at the next Full dead-entry callback.
@@ -7645,6 +7648,43 @@ pub extern "C" fn public_keys_len() -> usize {
 /// 5430a5: the alive callback marks a grid death and immediately hurts the
 /// cell under its pre-integration position or the four adjacent probes.
 /// Poof and removal belong to the next Full callback's dead-entry branch.
+/// 542710 -> 543218: a live spectral (flag bit0) tear's Update clears its
+/// grid class and draws Random(4). On 0, 544A2E hurts the grid cell under
+/// the tear with strength 1 (Room5CBB30); the 542030 follow-up for a cell
+/// whose entity is in state 3 only acts with flag 0x40.
+pub(crate) fn spectral_tear_update(state: &mut State, id: u32) -> Result<(), String> {
+    let Some(tear) = state.tears.iter().find(|tear| {
+        tear.id == id
+            && tear.motion.lifetime == projectiles::Lifetime::Alive
+            && tear.attack_flags.0 & 1 != 0
+    }) else {
+        return Ok(());
+    };
+    let (position, flags) = (tear.motion.position, tear.attack_flags.0);
+    if state.boot_lifecycle.shared.bounded(4) != 0 {
+        return Ok(());
+    }
+    let Some(descriptor) = state.room.grid.clone() else {
+        return Ok(());
+    };
+    let Some(index) = grid::Grid::new(descriptor)?.index(position) else {
+        return Ok(());
+    };
+    attack_grid::callback_at_index(state, index, 1)?.record_frontier(state, "spectralTearGrid");
+    let occupied = state
+        .room
+        .grid
+        .as_ref()
+        .and_then(|grid| grid.cells.get(index))
+        .is_some_and(|cell| cell.entity.is_some());
+    if occupied && flags & 0x40 != 0 {
+        state
+            .weapon_admission
+            .record_unadmitted(state.weapon_cache.primary, "spectralTear542030");
+    }
+    Ok(())
+}
+
 fn tear_grid_hurt(
     state: &mut State,
     position: motion::WorldVector,
