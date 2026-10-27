@@ -906,6 +906,11 @@ export class Renderer {
     } else {
       this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
         { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
+      //A registered Ouija Board (costumes2 115) adds its one head layer over
+      //Isaac's head, playing the same Head clip and frame.
+      if (state.playerItems?.costumeRegistrations?.configurationIds.includes(115))
+        this.assets.draw(ctx, "gfx/characters/115_ouija board.anm2", `Head${directionName(player.facing)}`, x, y,
+          player.headFrame, { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
     }
   }
   private hud(ctx: CanvasRenderingContext2D, state: State): void {
