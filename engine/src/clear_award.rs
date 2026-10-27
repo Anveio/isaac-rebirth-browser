@@ -78,7 +78,15 @@ pub(crate) fn spawn(state: &mut State) -> Result<(), String> {
         state.boot_lifecycle.shared = shared;
         let seed = rng.raw();
         // 5c9ea4: a repeated award reuses the first spawn's resolved subtype.
-        match admit(state, variant, subtype, seed, position)? {
+        match admit(
+            state,
+            variant,
+            subtype,
+            seed,
+            position,
+            WorldVector { x: 0.0, y: 0.0 },
+            None,
+        )? {
             Some(resolved) => subtype = resolved,
             None => return Ok(()),
         }
@@ -223,15 +231,18 @@ fn replace(rng: &mut Rng, inputs: &Inputs, variant: u32) -> u32 {
     variant
 }
 
-/// Game.Spawn550a40(5, variant, subtype, position, zero velocity, no spawner,
-/// seed) through the room-spawn factories. Returns the resolved subtype, or
-/// None when the port has no factory for the pickup (PORT GAP).
-fn admit(
+/// Game.Spawn550a40(5, variant, subtype, position, velocity, spawner, seed)
+/// through the room-spawn factories; Spawn writes the velocity after Init.
+/// Returns the resolved subtype, or None when the port has no factory for the
+/// pickup (PORT GAP).
+pub(crate) fn admit(
     state: &mut State,
     variant: u32,
     subtype: u32,
     seed: u32,
     position: WorldVector,
+    velocity: WorldVector,
+    spawner: Option<crate::pickups::SourceSpawner>,
 ) -> Result<Option<u32>, String> {
     let id = state.next_pickup;
     let selector = SpawnSelector {
@@ -266,6 +277,8 @@ fn admit(
         return Ok(None);
     };
     pickup.birth_game_update = state.game_update_count;
+    pickup.velocity = velocity;
+    pickup.source_spawner = spawner;
     let resolved = pickup.subtype;
     state.next_pickup = id.checked_add(1).ok_or("clear award identity exhausted")?;
     state.room.pickups.push(pickup);

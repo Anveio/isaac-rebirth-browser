@@ -1,3 +1,5 @@
+import { pickupFields } from './champion-drop.mjs';
+
 export default {
   type: 49, variant: 0,
   about: 'Gluttony miniboss rooms: entry, pathfinder walk, FatAttack burst, laser, damage, death and room clear',
@@ -13,4 +15,7 @@ export default {
     ['pathStuck', native.npcPathStuck, actor.pathfinder?.stuck],
     ['flipX', native.spriteFlipX, actor.flipX ?? false],
   ],
+  // The boss callback's drops (5c8430) and the clear award are graded as
+  // live pickups at every capture.
+  roomFields: pickupFields,
 };
