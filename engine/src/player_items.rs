@@ -753,7 +753,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
             //52F310 queues the touched config with the pedestal's prior
             //AB8/ABC operands; 5060E6 then replays the dropped item's Idle.
             enqueue(state, id, charge, touched)?;
-            collect_room_sound(state);
+            collect_room_sound(state, index);
             return Ok(CollectibleContact::Collected);
         }
     }
@@ -779,22 +779,40 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     }
     pickup.collected = true;
     pickup.can_collect = false;
-    collect_room_sound(state);
+    collect_room_sound(state, index);
     Ok(CollectibleContact::Collected)
 }
 
-fn collect_room_sound(state: &mut State) {
+fn collect_room_sound(state: &mut State, index: usize) {
     let room_type = state
         .room
         .descriptor
         .as_ref()
         .map(|room| room.template.room_type);
-    if matches!(room_type, Some(4 | 12)) {
+    let sound = if matches!(room_type, Some(4 | 12)) {
+        Some(128)
+    } else if room_type == Some(1)
+        && state.room.pickups.get(index).is_some_and(|pickup| {
+            pickup.variant == 100
+                && pickup.subtype == 0
+                && !pickup.removed
+                && pickup.shop_price.is_none()
+        })
+    {
+        //504B5D calls504480 after505F1A cleared the free pedestal's
+        //subtype. The ordinary room1 branch504616..62A requests23 at
+        //volume0.5, delay2, pitch1. Its admitted sample draw precedes
+        //the queued grant's later world placement, even when muted.
+        Some(23)
+    } else {
+        None
+    };
+    if let Some(id) = sound {
         state.audio.admit(
             &mut state.boot_lifecycle.shared,
             state.system_clock.system_counter - 1,
             crate::audio::SoundRequest {
-                id: 128,
+                id,
                 volume: 0.5,
                 delay: 2,
                 looping: false,
