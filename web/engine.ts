@@ -295,6 +295,7 @@ export interface Room {
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
+    baseFriction: number; friction: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
     state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean; spriteScale?: number; overlay?: { animation: string; frame: number; clock: number; playing: boolean }; wallCreep?: { rotation: number; flipY: boolean }; mom?: { part: number; rotation: number };
     damage: {pendingDamage: number; pendingFlags: number};
@@ -303,6 +304,9 @@ export interface Room {
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
     spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
+    status: {currentFriction: number | null; freezeTimer: number; applicationLockout: number; frozen: boolean; baseUpdateAdmitted: boolean;
+      frontier: "frozenDeath445c60" | "unsupportedActor" | null};
+    parent?: number; child?: number;
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;

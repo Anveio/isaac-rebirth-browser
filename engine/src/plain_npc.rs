@@ -327,11 +327,42 @@ fn advance_full(
     if npc.removed {
         return Ok(());
     }
+    if let Some(frontier) = npc.status.frontier {
+        return Err(crate::npc_status::refuse(npc, frontier));
+    }
+    if npc.status.base_update_admitted && !crate::npc_status::plain_shape(npc) {
+        return Err(crate::npc_status::refuse(
+            npc,
+            crate::npc_status::Frontier::UnsupportedActor,
+        ));
+    }
     if phase != Phase::Update {
-        npc.presented_position = npc.position + npc.velocity * 0.5;
+        npc.presented_position = if npc.status.base_update_admitted {
+            // Inherited Fast4446a0 has no frozen check: multiply by the
+            // stored current friction first, then divide each f32 by2.
+            let delta = npc.velocity * npc.friction;
+            npc.position
+                + WorldVector {
+                    x: delta.x / 2.0,
+                    y: delta.y / 2.0,
+                }
+        } else {
+            npc.position + npc.velocity * 0.5
+        };
         return Ok(());
     }
-    let mut friction = npc.base_friction;
+    let frozen = npc.status.frozen;
+    if frozen && !crate::npc_status::living_plain(npc) {
+        return Err(crate::npc_status::refuse(
+            npc,
+            crate::npc_status::Frontier::UnsupportedActor,
+        ));
+    }
+    let mut friction = if npc.status.base_update_admitted {
+        npc.friction
+    } else {
+        npc.base_friction
+    };
     let mut revived = false;
     if npc.dead {
         // 4fb640: type 28 enters the dying state 16 even for its non-boss
@@ -402,7 +433,7 @@ fn advance_full(
             ai(npc, random, world, births, &mut friction)?;
             champion_hooks(npc, random, world, births)?;
         }
-    } else if !revived {
+    } else if !revived && !frozen {
         ai(npc, random, world, births, &mut friction)?;
         champion_hooks(npc, random, world, births)?;
     }
@@ -419,21 +450,56 @@ fn advance_full(
         // 1 - (1 - friction)(1 - speed) before the base friction step.
         npc.velocity = npc.velocity * (1.0 - (1.0 - friction) * (1.0 - champion.speed));
     }
-    update_sprite(npc)?;
-    npc.friction = friction;
+    if frozen {
+        // 4f991e skips ordinary AI; 4f9ad9 reduces current friction.
+        // BaseUpdate447190 still integrates motion and drains damage.
+        friction *= 0.01;
+    } else {
+        update_sprite(npc)?;
+    }
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
+    // Source BaseUpdate resets +470 from base+46c on every mapped Full.
+    // Track that owner separately until Bra admits the corrected motion
+    // path; never-frozen actors keep their existing Npc.friction behavior.
+    npc.status.current_friction = Some(npc.base_friction);
+    npc.friction = if npc.status.base_update_admitted {
+        // 4471ee restores +470 from base+46c after the integration.
+        npc.base_friction
+    } else {
+        friction
+    };
+    if npc.status.base_update_admitted {
+        // Timer1 still suppressed AI/ANM above; colour then status expire
+        // before this callback drains pending damage (447446..447729).
+        let base = npc.base_color();
+        npc.sprite_color.tick(phase, base);
+        npc.status.advance();
+    }
     if npc.invincible {
         // BaseUpdate447729: an invincible actor (+494) discards its queue.
         npc.damage.clear();
     }
     let mut health = npc.health();
     let applied = npc.damage.advance(&mut health, phase)?;
-    npc.advance_sprite_color(phase, &applied);
+    if npc.status.base_update_admitted {
+        let base = npc.base_color();
+        npc.sprite_color.admit_hits(phase, &applied, base);
+    } else {
+        npc.advance_sprite_color(phase, &applied);
+    }
     npc.hp = health.hp;
     if npc.hp < 0.0 {
         npc.dead = true;
+        if npc.status.freeze_timer > 0 {
+            // Kill4464c0 sets dead before Die445c60 chooses its ice path.
+            // Sound137/gibs/RNG are unclosed; never run ordinary Die here.
+            return Err(crate::npc_status::refuse(
+                npc,
+                crate::npc_status::Frontier::FrozenDeath445c60,
+            ));
+        }
         if !(deferred_die && npc.boss) {
             die(npc, random, world, births)?;
         }

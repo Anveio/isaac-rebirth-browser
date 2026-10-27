@@ -15,6 +15,8 @@ const pocketMode = flag('--pockets');
 const pillUseMode = hasFlag('--pill-use');
 const trinketStartMode = hasFlag('--trinket-start');
 const activeItemsMode = hasFlag('--active-items');
+const npcFreezeMode = hasFlag('--npc-freeze');
+assert.ok(!npcFreezeMode || activeItemsMode, 'NPC freeze requires --active-items');
 const pocketActionsMode = hasFlag('--pocket-actions');
 assert.ok(!pocketActionsMode || (pocketMode === 'collection' && !pillUseMode && !activeItemsMode && !trinketStartMode),
   'Ctrl actions require their separate public collection reader');
@@ -39,7 +41,7 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = trinketStartMode ? 'LOCAL_RECORDED_TRINKET_START_BANK' : pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items [--npc-freeze] | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
   console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
     : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
@@ -77,6 +79,7 @@ if (activeItemsMode) sourceFiles.push('tools/foundation/active-items-state-pair.
   'tools/original/active-items-scenarios.py',
   'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
   'references/isaac/rebirth/resources/challenges.xml');
+if (npcFreezeMode) sourceFiles.push('tools/original/npc-freeze-observe.py');
 if (trinketStartMode) sourceFiles.push(
   'tools/original/trinket-start-scenarios.py', 'tools/original/trinket-start-observe.py',
   'tools/original/trinket-start-events.py', 'tools/original/trinket-start-events.c',
@@ -125,6 +128,7 @@ try {
       : activeItemsMode ? 'tools/original/active-items-scenarios.py' : pocketMode
       ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
       '--output', generated, '--count', flag('--count', trinketStartMode ? '1' : '2'),
+      ...(npcFreezeMode ? ['--npc-freeze'] : []),
       ...(pocketMode && !pillUseMode && !activeItemsMode && !pocketActionsMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
@@ -183,8 +187,32 @@ try {
     if (pillUseMode) assert.equal(declaration.pillUse.schema, 'source-public-pill-range-use-v1');
     assert.equal(Boolean(declaration.activeItems), activeItemsMode, 'Active use requires its separate reader');
     if (activeItemsMode) assert.equal(declaration.activeItems.schema, 'source-public-active-items-v1');
+    assert.ok(!declaration.activeItems?.npcFreeze || npcFreezeMode,
+      'Target-bearing freeze cases require --npc-freeze and its independent observer');
+    if (declaration.activeItems?.npcFreeze) {
+      assert.equal(declaration.activeItems.npcFreeze.schema, 'source-public-npc-freeze-v1');
+      assert.equal(declaration.publicMenuRoute, 'seeded-normal');
+      assert.equal(fixture.challengeConfigurationUsed, false);
+      assert.deepEqual(declaration.activeItems.uses, declaration.activeItems.npcFreeze.control ? [] : [39]);
+      assert.deepEqual(declaration.activeItems.npcFreeze.targets,
+        [{type:12,variant:0,subtype:0},{type:18,variant:0,subtype:0}]);
+    }
     return { ...declaration, fixture };
   });
+  if (npcFreezeMode && !bank.caseFilter) {
+    const declared = cases.filter(item => item.activeItems?.npcFreeze);
+    for (const phase of [0, 1]) assert.ok(declared.some(item => !item.activeItems.npcFreeze.control
+      && item.name === `moms-bra-39-npc-freeze-fixed-phase${phase}` && item.initialPhaseOffset === phase));
+    assert.ok(declared.some(item => item.activeItems.npcFreeze.control
+      && item.name === 'moms-bra-39-npc-freeze-no-space-control-phase0'));
+    assert.ok(declared.some(item => !item.activeItems.npcFreeze.control && typeof item.entropy === 'object'),
+      'Freeze bank retains its first unfiltered OS draw');
+    for (const item of declared.filter(value => typeof value.entropy === 'object')) {
+      assert.match(item.entropy.rawHex, /^[a-f0-9]{8}$/);
+      assert.equal(item.bootEpochSeed, Buffer.from(item.entropy.rawHex, 'hex').readUInt32LE(0));
+      assert.equal(item.initialPhaseOffset, (item.bootEpochSeed >>> 31) & 1);
+    }
+  }
   if (trinketStartMode) {
     assert.equal(bank.suite, 'trinket-start');
     const journalPath = resolve(dirname(bankPath), bank.entropyJournal.path);
@@ -339,7 +367,7 @@ try {
     const originalDirectory = reusedOriginal ? resolve(reusedOriginal) : join(directory, 'original');
     try {
       if (reusedOriginal) {
-        if (trinketStartMode) {
+        if (trinketStartMode || declaration.activeItems?.npcFreeze) {
           const captureReport = JSON.parse(await readFile(join(dirname(dirname(originalDirectory)), 'report.json'), 'utf8'));
           assert.deepEqual(captureReport.sourceBefore, report.sourceBefore, 'Reused Native observer/protocol Source must match exactly');
           assert.deepEqual(captureReport.sourceAfter, captureReport.sourceBefore, 'Reused Native Source closure must be unchanged');
@@ -363,7 +391,8 @@ try {
       if (pocketMode) args.push('--pockets', declaration.pocketInit ? 'init' : 'collection');
       if (hasFlag('--prepare-only')) args.push('--prepare-only');
       else args.push('--archive-evidence', ...(pocketMode ? ['--journal-codec', 'zstd'] : []), '--observe-every-step', '--state-observer',
-        join(ROOT, trinketStartMode ? 'tools/original/trinket-start-observe.py'
+        join(ROOT, declaration.activeItems?.npcFreeze ? 'tools/original/npc-freeze-observe.py'
+          : trinketStartMode ? 'tools/original/trinket-start-observe.py'
           : pocketMode ? 'tools/original/pocket-collection-observe.py'
           : 'tools/original/composition-observe.py'), '--frame-timeout', flag('--native-frame-timeout', '60'),
         ...(trinketStartMode ? ['--trinket-start-events'] : []));

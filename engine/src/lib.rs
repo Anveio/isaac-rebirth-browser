@@ -128,6 +128,7 @@ pub mod mt;
 pub mod mulligans;
 pub mod music;
 pub mod nightmares;
+pub mod npc_status;
 pub mod npcs;
 pub mod options_menu;
 pub mod ordinary_placement;

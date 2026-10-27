@@ -21,6 +21,36 @@ Each suite runs the fresh original game and the immutable production build with
 the same public inputs (keys, text, ticks, seeds) and compares what each game
 observably does. Native observations never enter WASM.
 
+The existing `active-items` suite has an opt-in bounded NPC Freeze extension:
+
+```sh
+npm run test:e2e -- active-items --npc-freeze --no-build --production FROZEN
+npm run test:e2e -- active-items --npc-freeze --scenarios SAVED_BANK --no-build --production FROZEN
+```
+
+It retains the default bank and adds fixed phases0/1, the first unfiltered
+recorded OS boot/phase and a no-Space control for one ordinary Horf12 plus
+AttackFly18 fixture. Only declared `activeItems.npcFreeze` cases select the
+additive read-only Native observer. A replay validates the retained whole bank
+before filtering and draws no entropy. Gaper10/Fly13 source admission is not
+live coverage from this fixture.
+
+Each game must independently witness held39/charge3, physical use/discharge,
+living stable targets, pre-use movement and Horf shooter progression, positive
+application, callback-specific Full/Fast motion, timed color, expiry and resumed
+AI. The source current470 grade requires the actual separate Browser status
+owner; legacy AI-scaled `Npc.friction` is diagnostic before admission. Callback
+classification requires actual System/Full counters and the actual information
+manager gate. Missing owners remain required unavailable failures; counter
+parity alone cannot establish an admitted RoomFast. Fresh actual Info captures
+on source `3c11e2cf` pass fixed1 and the first recorded OS case; fixed0 and
+no-Space retain 188 and 88 AttackFly velocity failures. The four-case bank
+remains FAIL at 269,019 checks / 276 failures. Earlier reports stay failed,
+including their unavailable Native Info checks and withdrawn old Fast passes.
+Default target-free Bra/Pad controls pass 13,338 checks per build with unchanged
+ordered semantic values; Browser focus/seed passes 2/2.
+See [source scope, results and open qualification](../../docs/npc-freeze.md).
+
 Every suite mixes two kinds of cases:
 
 - **Contrived**: fixed seeds, phases and routes that pin known edge cases and
