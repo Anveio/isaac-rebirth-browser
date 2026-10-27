@@ -917,6 +917,11 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
 ///The achievement2 attempt remains unavailable for eligible high balances;
 ///the Shop caller checks that boundary before any purchase mutation.
 pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), String> {
+    add_coins(state, -price)
+}
+
+///AddCoins518AB0 for any signed delta (Shop debit, 2 of Diamonds credit).
+pub(crate) fn add_coins(state: &mut State, delta: i32) -> Result<(), String> {
     let owner = state
         .player_items
         .as_ref()
@@ -929,7 +934,7 @@ pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), Stri
     )
     .have(109)
     .ok_or("AddCoins Have109 history unavailable")?;
-    state.inventory.coins = add_inventory(state.inventory.coins, -price);
+    state.inventory.coins = add_inventory(state.inventory.coins, delta);
     if money_power {
         state
             .player_items
@@ -1542,9 +1547,12 @@ pub(crate) fn add_collectible(
     //Only actual2/4/152/169 Add paths have a closed neutral C70 lifetime here.
     //Keep an existing owner for those grants; other producers invalidate it.
     //Neither current counts nor a cache evaluation can recreate this word.
-    //169's default52D0D0..52D170 path preserves this existing owner too.
+    //169's default52D0D0..52D170 path preserves this existing owner too,
+    //as does a plain active grant: 52D1B0's slot/charge write and the same
+    //default tail never write C70.
     if !matches!(id, 2 | 4 | 152 | 169)
         && !keep_default_passive_inputs
+        && !plain_active_grant
         && !treatment.is_some_and(|proof| proof.preserves_c70_history())
     {
         state.attack_runtime.aim_rotation_c70 = None;
@@ -1617,8 +1625,12 @@ pub(crate) fn add_collectible(
     }
     //This is the actual reached default CFG effect, not an ID/loadout
     //whitelist. It never heals a prior missing producer history.
+    //A plain active grant reaches the same 52CF87 default and 52D0D0 tail
+    //after 52D1B0's slot/charge write (509E10, D80/D7C/3076/30D4 only);
+    //neither the slot write nor the 181/130 cache OR spawns anything.
     let ordinary_no_world_effect =
-        matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
+        (matches!(source_effect, Some(PassiveGrantSourceEffect::DefaultTail))
+            || plain_active_grant)
             && config.inventory.iter().all(|amount| *amount == 0)
             && config.cache_flags & (256 | 512) == 0;
     if id == 194 {

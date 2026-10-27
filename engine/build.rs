@@ -311,6 +311,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 15, "gfx/1000.015_poof01.anm2"),
         (1000, 17, "gfx/1000.017_poof04.anm2"),
         (1000, 42, "gfx/1000.042_blood gush.anm2"),
+        (1000, 48, "gfx/1000.048_battery.anm2"),
         (1000, 49, "gfx/1000.049_heart.anm2"),
         (1000, 58, "gfx/1000.058_poop particle.anm2"),
         (1000, 5, "gfx/1000.005_blood particle.anm2"),

@@ -4,6 +4,7 @@ gfx/1000.015_poof01.anm2
 gfx/1000.017_poof04.anm2
 gfx/1000.042_blood gush.anm2
 gfx/1000.049_heart.anm2
+gfx/1000.048_battery.anm2
 gfx/1000.007_blood splat.anm2
 gfx/1000.058_poop particle.anm2
 gfx/1000.005_blood particle.anm2

@@ -327,6 +327,7 @@ Next: transformations once their items exist.
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
+| #829 | P2 | Isaac's white blast-flash face is missing for 10 frames when a nearby bomb explodes | playtest 2026-10-27 `playtest/04e2421/bomb-spectral-tears.mp4` |
 
 ## Weapons and tears
 
@@ -542,6 +543,7 @@ actives. Bulk item imports are owned by the user's import workflow.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
+| #827 | P1 | Blank Card holding Jera does nothing in the sandbox combo; blocked on CollectibleEffects{286} placement and BatteryEffect48 | playtest 2026-10-27 `playtest/04e2421/sandbox-blank-card-jera-battery.mp4` |
 
 ## Pocket items
 
@@ -572,7 +574,9 @@ remaining Battery90 live branches and charge effects, actual equipped
 effects/identification and complete save/Continue restoration, with real
 callback and audio evidence kept separate.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #826 | P1 | Held card or rune is not drawn in the bottom-right pocket HUD (triage? HUD in Rendering) | playtest 2026-10-27 `playtest/04e2421/sandbox-blank-card-jera-battery.mp4` |
 
 ## Special rooms and economy
 
@@ -635,6 +639,7 @@ parity is a diagnostic only.
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
+| #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; held-item pose and challenge HUD icon missing | playtest 2026-10-27 `playtest/04e2421/sandbox-blank-card-jera-battery.mp4` |
 
 ## Audio
 

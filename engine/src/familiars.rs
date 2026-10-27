@@ -322,6 +322,27 @@ pub fn admit_poof(
     .admit(subtype, seed, position, velocity, spawner)
 }
 
+/// Battery overcharge 509F14/50A443/52967B: one shared seed, then
+/// Spawn550a40 of 1000.48 at the Player's +448 with zero velocity, subtype0
+/// and a NULL spawner (Init draws nothing for 48). The caller then sets the
+/// sprite offset +2BC to (0,-24) and Effect+7F8 to 1. Its update is the
+/// one-shot 45ABE3 leaf: play the default clip, then Remove.
+pub(crate) fn admit_battery(state: &mut State) -> Result<u32, String> {
+    let seed = state.boot_lifecycle.shared.next_u32();
+    let position = crate::bombs::player_world(state);
+    let id = state.next_effect;
+    state.next_effect = id.checked_add(1).ok_or("effect handle exhausted")?;
+    let mut effect = crate::fly_effects::base(id, 48, seed, position, state.game_update_count);
+    effect.sprite.offset = WorldVector { x: 0.0, y: -24.0 };
+    effect.raw_7f8 = 1.0;
+    state.sprite_effects.push(effect);
+    state.actor_scheduler.admit(ActorRef {
+        kind: ActorKind::Effect,
+        id,
+    })?;
+    Ok(id)
+}
+
 /// The source NPC callback admits appearance effects before BaseUpdate moves
 /// its body or drains damage. Borrow only the actual factory owners so that
 /// admission occurs at that call site, while the NPC is still being updated.

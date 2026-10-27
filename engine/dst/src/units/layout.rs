@@ -22,7 +22,7 @@ pub fn run(case: &mut Case) {
     for _ in 0..(case.steps / 4).max(64) {
         let request = request(e);
         let valid = request.generator_seed != 0
-            && (1..=20).contains(&request.additional_rooms)
+            && (1..=48).contains(&request.additional_rooms)
             && request.shape_mask != 0
             && request.shape_mask & !15 == 0;
         let generated = layout::generate(request);
@@ -66,8 +66,8 @@ fn request(e: &mut Entropy) -> GrowthRequest {
     let generator_seed = if e.chance(1, 32) { 0 } else { e.nonzero_u32() };
     let additional_rooms = match e.below(16) {
         0 => 0,
-        1 => 21 + e.below(235) as u8,
-        _ => e.range(1, 20) as u8,
+        1 => 49 + e.below(207) as u8,
+        _ => e.range(1, 48) as u8,
     };
     let shape_mask = match e.below(16) {
         0 => 0,

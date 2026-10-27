@@ -26,6 +26,7 @@ import { startProductionServer } from '../foundation/production-server.mjs';
 import { declaredNativeTape, resetBootElapsed } from '../foundation/verify.mjs';
 import { DECLARED_NATIVE_INTRO } from '../foundation/composition-wasm-public.mjs';
 
+const SANDBOX_FIXTURES = new Set(['sandbox-challenge-start-room', 'source-authored-start-room-STB-on-public-seeded-normal-run']);
 const sandboxResources = caseData => {
   const base = resolve(caseData.sandboxBank, '..');
   return { challengesXml: readFileSync(resolve(base, caseData.fixture.authoredResourcePath), 'utf8'),
@@ -62,9 +63,10 @@ function loadCases() {
   for (const spec of repeated('--case')) {
     const [path, id] = spec.split('#');
     const data = JSON.parse(readFileSync(resolve(path), 'utf8'));
-    // A pickup-interactions bank (tools/e2e/pickup-interactions.mjs) carries
-    // generated sandbox resources beside its scenarios.json.
-    const list = (data.pairedTape ? [data] : data.cases).map(item => item.fixture?.kind === 'sandbox-challenge-start-room'
+    // A pickup-interactions or active-items bank (pickup-interactions.mjs,
+    // item-composition.mjs --active-items) carries generated Challenge XML and
+    // Start Room resources beside its scenarios.json.
+    const list = (data.pairedTape ? [data] : data.cases).map(item => SANDBOX_FIXTURES.has(item.fixture?.kind)
       ? { ...item, sandboxBank: resolve(path) } : item);
     select(id ? list.filter(item => (item.scenario?.id ?? item.name) === id) : list, path);
   }
@@ -110,14 +112,18 @@ function densify(actions, label) {
   return { tape, frames: index };
 }
 
-// A sandbox interaction case: the browser replays the same Challenge-menu
-// route and actions that pickup-interactions.mjs plays; the original replays
+// A sandbox interaction case: the browser replays the same menu route and
+// actions that composition-capture.mjs plays (the Challenge menu, or a seed
+// typed on the normal route for active-items cases); the original replays
 // pickup-interaction-run.py's tape. Footage starts at gameplay.
 function sandboxTapes(caseData) {
   const press = (key, settle) => [{ type: 'key', key, down: true }, { type: 'step', frames: 12 },
     { type: 'key', key, down: false }, { type: 'step', frames: settle }];
-  const pairedTape = [{ type: 'step', frames: 63 }, ...press('Return', 72), ...press('Return', 72), ...press('Down', 72),
-    ...press('Return', 72), ...press('Return', 300), { type: 'capture', label: 'gameplay-start' }];
+  const route = caseData.publicMenuRoute === 'seeded-normal'
+    ? [...press('Return', 72), ...press('Tab', 108), ...[...caseData.publicSeedCode].flatMap(text => press(text, 6)), ...press('Return', 72)]
+    : [...press('Down', 72), ...press('Return', 72)];
+  const pairedTape = [{ type: 'step', frames: 63 }, ...press('Return', 72), ...press('Return', 72), ...route,
+    ...press('Return', 300), { type: 'capture', label: 'gameplay-start' }];
   if (caseData.initialPhaseOffset) pairedTape.push({ type: 'step', frames: 1 });
   let held = new Set();
   for (const action of caseData.actions) {
@@ -221,7 +227,8 @@ async function compose(caseData, directory, frames, title) {
   const video = join(directory, 'side-by-side.mp4');
   const left = join(directory, 'original', 'frames', 'sbs-%06d.png');
   const right = join(directory, 'port', 'sbs-%06d.png');
-  const caption = caseData.seed ? `${title}  seed ${caseData.seed}` : `${title}  boot epoch ${caseData.bootEpochSeed}`;
+  const seed = caseData.seed ?? caseData.publicSeedCode;
+  const caption = seed ? `${title}  seed ${seed}` : `${title}  boot epoch ${caseData.bootEpochSeed}`;
   const filter = [
     `[0:v]scale=960:540,tpad=stop_mode=clone:stop=-1[l]`, `[1:v]scale=960:540,tpad=stop_mode=clone:stop=-1[r]`,
     `[l][r]hstack=inputs=2,pad=1920:600:0:60:color=0x111111,${banner('Original Rebirth', 20)},${banner(`Browser port ${sha}`, 980)},`
@@ -272,13 +279,13 @@ if (reelInput) {
       mkdirSync(directory, { recursive: true });
       writeFileSync(join(directory, 'case.json'), JSON.stringify(caseData) + '\n');
       const plan = tapes(caseData);
-      console.log(`${id}: ${plan.frames} frame pairs, seed ${caseData.seed}`);
+      console.log(`${id}: ${plan.frames} frame pairs, seed ${caseData.seed ?? caseData.publicSeedCode}`);
       const [native, port] = await Promise.all([
         nativeFrames(caseData, plan.native, join(directory, 'original')),
         browserFrames(browser, server, caseData, plan.browser, join(directory, 'port')),
       ]);
       const counted = side => existsSync(side) ? readdirSync(side).filter(name => name.startsWith('sbs-')).length : 0;
-      const result = { id, seed: caseData.seed, frames: plan.frames, native, port,
+      const result = { id, seed: caseData.seed ?? caseData.publicSeedCode, frames: plan.frames, native, port,
         nativeFrames: counted(join(directory, 'original', 'frames')), portFrames: counted(join(directory, 'port')) };
       if (result.nativeFrames && result.portFrames) result.video = await compose(caseData, directory, plan.frames, flag('--title', id));
       if (!keepFrames) {

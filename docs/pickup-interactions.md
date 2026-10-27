@@ -49,8 +49,17 @@ base Rebirth, which is what the port targets.
 
 The active-item key is Space; Q uses the pocket. Using the active slot (HUD,
 charge, use effects) belongs to the active-item work in
-[active-items.md](active-items.md); the Blank Card rows below stay red until
-that slot and its use table land.
+[active-items.md](active-items.md). Blank Card's leaf calls the same UseCard
+as the pocket for the ported cards; the Blank Card + Jera combo passes in
+the 1x1 rooms (see the inventory).
+
+The HUD draws the pocket in the bottom right (HUD::Render `574BA2`): a card
+with an authored face (pocketitems.xml `hud`) shows that `ui_cardfronts`
+frame, runes, faceless cards and pills show their `ui_cardspills` frame, and
+the name is printed to the left, or the description while Map is held. A
+second pocket slot shows its small frame above. Pill names are not drawn yet:
+they depend on the identified-pill flags, which the port does not own, and
+the seed effect that rewrites names is not ported either.
 
 ## Inventory
 
@@ -62,12 +71,12 @@ the behavior is ported or only some rows pass), **Missing** (not ported).
 | Walk into a placed bomb | A planted bomb starts with Bomb+7DC Player-contact countdown 4, reset to 4 while Isaac overlaps it, so Isaac does not push the bomb he stands on. Once he has been off it, walking into it adds 0.4 x Player velocity and runs the mass response: the bomb slides away (320 to about 390 world units in the case). | Complete: planted bombs carry the countdown (4 at placement, 0 for Troll/Megatroll conversions) and every live bomb runs the Player/Bomb contact; the bomb's presented position matches the original on every presentation of the push, fixed and OS-random. | `bomb-walk-push` |
 | Tears hit a placed bomb | Ordinary tears knock a planted bomb along the shot (about 2.3 world units per update from a stream of tears). Tear callback 545E80's type 4 arm: the tear dies on the bomb, moves by 0.8 of the bomb's velocity, and the mass response pushes the bomb. A tear moving away from the bomb at most 2 updates after its birth passes through it, and so does any tear on a Dr. Fetus shot bomb. | Complete for plain tears: the bomb's position matches on every label, fixed and OS-random. Tears with other flags (piercing and so on) take other arms of the callback and still ignore bombs. | `bomb-tear-push` |
 | Spectral tears (Ouija Board) hit a bomb | Spectral tears knock the bomb exactly like ordinary tears: 444810 is false for a bomb, so the spectral bit never applies there. There are no spectral bombs in Rebirth. | Complete for the bomb contact (spectral bit admitted on the same path). Ouija's pass-over-rocks behavior is not in this suite. | `spectral-tear-bomb-push` |
-| Jera (rune 29) from the pocket | Q duplicates every pickup in the room (cards included) into a free cell next to it, plays the Jera giant-book animation, which freezes Isaac for about 100 presentations, and empties the pocket. | Missing: card and rune effects are an unknown-effect frontier; the pocket stays full. | `jera-pocket` |
-| 2 of Diamonds / 2 of Clubs | Doubles coins / bombs (0 coins becomes 2). Collecting a card while one is held drops the old card. | Missing (effects). Card collection itself is ported. | `two-of-diamonds`, `two-of-clubs`, `card-collect` |
-| Blank Card with a card | Space applies the held card's effect (2 of Clubs: 1 to 2 bombs), discharges 4 to 0 and keeps the card. | Missing (active slot/use work). | `blank-card-card` |
-| Blank Card with a rune | See above: Jera duplicates, charge or reserve spent, rune kept. | Missing (active slot/use work). | `blank-card-jera`, `jera-after-blank-card` |
+| Jera (rune 29) from the pocket | Q duplicates every pickup in the room (cards included) into a free cell next to it, plays the Jera giant-book animation, which freezes Isaac for about 100 presentations, and empties the pocket. UseCard's arm 527641 copies the room's pickups in manager order. It skips collectibles, trinkets, chests, 340/370/380 and Jera itself. Each copy uses FindFreePosition (radius 40, mode 0) and Game.Spawn with the source's subtype and spawn seed and a Player spawner, then GiantBook 21 plays. | Complete: copy positions, pocket and freeze match, fixed and OS-random. A room holding a copyable family the port can't spawn this way (anything but hearts, coins, keys, bombs, pills, batteries and cards), or with no placement readset, keeps the old frontier path, and Jera stays held. | `jera-pocket` |
+| 2 of Diamonds / 2 of Clubs | Doubles coins / bombs, or gives 2 when there are none (UseCard 526DB0 jump-table arms 52752F and 527DE3). The card face goes into the held-item sprite, Isaac plays UseItem and slot 1 is promoted. Collecting a card while one is held drops the old card. | Complete for both effects, collection included, in the `two-cards` and `cards` cases, fixed and OS-random. | `two-of-diamonds`, `two-of-clubs`, `card-collect` |
+| Blank Card with a card | Space applies the held card's effect (2 of Clubs: 1 to 2 bombs), discharges 4 to 0 and keeps the card. Leaf 523611 calls UseCard 526DB0 with the held card, then plays Pickup. | Complete for the ported cards (2 of Clubs, 2 of Diamonds, Jera), fixed and OS-random. Other cards stay a use frontier. | `blank-card-card` |
+| Blank Card with a rune | See above: Jera duplicates, charge or reserve spent, rune kept. | Partial: passes in the 1x1 `sandbox` and `blank-card-rune` cases, fixed and OS-random. The Blank Card grant keeps ordinary placement and C70 owned (a plain active grant takes the default dispatch), and the Lil Battery overcharge spawns the real effect 1000.48. The `sandbox-2x2` case still fails on the copy positions: the 2x2 Start Room's ambient critters (1000.21/68) are placed differently from the first label, so the shared RNG is already off when Jera picks its free cells. | `blank-card-jera`, `jera-after-blank-card` (cases `sandbox`, `sandbox-2x2`, `blank-card-rune`) |
 | The Battery + Lil Battery at full charge | With The Battery, a full Blank Card takes a Lil Battery as reserve charge 4 (Player+D8C). | Complete: passes in the 1x1 and 2x2 sandbox cases, fixed and OS-random. | `battery-overcharge` |
-| Lil Battery on an empty active | Recharges the active to full and is collected. | Missing: the port fails with `batteryActiveId` when collecting it after a Blank Card use. | `battery-recharge` |
+| Lil Battery on an empty active | Recharges the active to full and is collected. | Complete after a Blank Card use (the earlier `batteryActiveId` failure came from the Blank Card frontier), fixed and OS-random. | `battery-recharge` |
 | 2x2 Start Room | The original accepts a 26x14 Start Room record. | Complete for entry and room shape. | `room-2x2` |
 
 Not yet in the suite: a Lil Battery left on the floor at full charge without The Battery, bomb/bomb pushes between planted bombs, explosion

@@ -5,6 +5,8 @@
 use crate::entropy::Entropy;
 use crate::harness::{self, Case};
 use crate::props;
+use rebirth_cleanroom::challenges::CurseInputs;
+use rebirth_cleanroom::difficulty::Difficulty;
 use rebirth_cleanroom::floor::{self, Floor, NormalBasementRequest};
 use rebirth_cleanroom::layout::{GRID_CELLS, GRID_WIDTH};
 use rebirth_cleanroom::room_assets::RoomAsset;
@@ -23,15 +25,8 @@ const READ_FLAGS: [u64; 4] = [0x100, 64, 16, 0x100000];
 pub fn run(case: &mut Case) {
     let e = &mut *case.entropy;
     let catalogues = [room_assets::special(), room_assets::basement()];
-    let fresh = |stage_seed| NormalBasementRequest {
-        stage: 1,
-        stage_seed,
-        game_flags: 0,
-        red_hp: 6,
-        max_red_hp: 6,
-        soul_hp: 0,
-        coins: 0,
-    };
+    let fresh =
+        |stage_seed| floor::first_floor(stage_seed, Difficulty::Normal, CurseInputs::default());
     // Only requests no stage generator can serve are pinned: a later stage
     // may be admitted once the port generates it.
     let stage = *e.pick(&[0, u32::MAX]);
@@ -71,7 +66,9 @@ pub fn run(case: &mut Case) {
             "floor: the first-floor entry is the normal generator with fresh run inputs",
             json!({ "stageSeed": stage_seed })
         );
-        let Some(first) = generate(fresh(stage_seed)) else {
+        let difficulty = *e.pick(&[Difficulty::Normal, Difficulty::Hard]);
+        let curse = curse_inputs(e);
+        let Some(first) = generate(floor::first_floor(stage_seed, difficulty, curse)) else {
             continue;
         };
         swaps(e, &first, &catalogues);
@@ -103,6 +100,30 @@ fn continuing(e: &mut Entropy, first: &Floor) -> NormalBasementRequest {
         max_red_hp,
         soul_hp: e.range(0, 24) as i32,
         coins: e.range(0, 99),
+        difficulty: first.difficulty,
+        curse: curse_inputs(e),
+    }
+}
+
+/// Level::Init 58c114/58c124: normal rooms of difficulty 1..5 on a normal
+/// run's odd stages and 5..10 on every other stage. Modelled here rather
+/// than read from `floor::difficulty_band`, so a changed rules row fails.
+fn difficulty_band(stage: u32, difficulty: Difficulty) -> std::ops::RangeInclusive<u8> {
+    if stage % 2 == 1 && difficulty == Difficulty::Normal {
+        1..=5
+    } else {
+        5..=10
+    }
+}
+
+/// Persistent achievements 4/33, counter 10 and Black Candle, each of which
+/// changes the curse odds that hard's extra rooms draw from.
+fn curse_inputs(e: &mut Entropy) -> CurseInputs {
+    CurseInputs {
+        achievement_4: e.chance(1, 4),
+        achievement_33: e.chance(1, 4),
+        counter_10: e.chance(1, 4),
+        black_candle: e.chance(1, 8),
     }
 }
 
@@ -115,6 +136,7 @@ fn describe(request: &NormalBasementRequest) -> serde_json::Value {
         "maxRedHp": request.max_red_hp,
         "soulHp": request.soul_hp,
         "coins": request.coins,
+        "difficulty": request.difficulty,
     })
 }
 
@@ -282,9 +304,8 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
         json!({ "request": details(), "counts": mandatory })
     );
 
-    // 58c100..58c130: normal rooms draw from difficulty 1..5 on stage 1 and
-    // 5..10 on stage 2; the starting room is chosen separately.
-    let band = if request.stage == 1 { 1..=5 } else { 5..=10 };
+    // 58c100..58c130: the starting room is chosen separately.
+    let band = difficulty_band(request.stage, request.difficulty);
     props::always!(
         floor
             .descriptors
@@ -336,6 +357,12 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
     );
 
     // Retries continue generator, primary and weight state.
+    // Level::Init 58c08e: hard adds 2 rooms plus the curse stream's
+    // RandomInt(2) (58c089).
+    let (extra_low, extra_high) = match request.difficulty {
+        Difficulty::Normal => (0, 0),
+        Difficulty::Hard => (2, 3),
+    };
     let reports = &floor.attempt_reports;
     let continuous = reports.windows(2).all(|pair| {
         pair[0].final_generator_state == pair[1].initial_generator_state
@@ -347,8 +374,9 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
             && reports.len() == floor.attempts as usize
             && reports.last().is_some_and(|last| last.outcome == "placed")
             && continuous
-            // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2 11..12.
-            && (request.stage * 10 / 3 + 5..=request.stage * 10 / 3 + 6)
+            // min(20, stage*10/3 + 5 + bounded35(2)): stage 1 8..9, stage 2
+            // 11..12, plus hard's extra rooms.
+            && (request.stage * 10 / 3 + 5 + extra_low..=request.stage * 10 / 3 + 6 + extra_high)
                 .contains(&u32::from(floor.additional_rooms)),
         "floor: attempts are bounded, contiguous and end with a placement",
         json!({ "request": details(), "attempts": floor.attempts, "additionalRooms": floor.additional_rooms })
@@ -375,7 +403,7 @@ fn swaps(e: &mut Entropy, floor: &Floor, catalogues: &[Vec<RoomAsset>; 2]) {
             continue;
         };
         let template = &descriptor.template;
-        let difficulty = if floor.stage == 1 { 1..=5 } else { 5..=10 };
+        let difficulty = difficulty_band(floor.stage, floor.difficulty);
         let compatible: Vec<usize> = catalogue
             .iter()
             .enumerate()

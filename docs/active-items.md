@@ -132,8 +132,17 @@ HUD draws the held item sprite at (22,12) and the authored charge bar at
 
 Charges fill on room clear (`50A2B0`, including the AAA Battery trinket
 step). Overflow above the maximum goes to the Battery63 reserve D8C, and a
-discharge refills from the reserve (with the 9 Volt step). The Battery's
-Effect48 presentation remains a recorded frontier.
+discharge refills from the reserve (with the 9 Volt step). Each of these
+battery steps (overflow `509F14`, AAA `50A443`, 9 Volt `52967B`) draws one
+shared seed and spawns Effect 1000.48 at the Player with sprite offset
+(0,-24) and Effect+7F8 = 1; it plays its 8-frame Battery clip and is
+removed (the one-shot `45ABE3` update). Only the branches whose item query
+is unknown still record `BatteryEffect48`.
+
+A plain active grant (Isaac, empty active slot, D80 = 0) reaches the same
+`52CF87` default dispatch and `52D0D0` tail as a default passive after
+`52D1B0`'s slot and charge write, so it keeps ordinary placement and the
+C70 aim counter owned instead of invalidating them.
 
 Space use runs through one table, `active_items::USES`: one row per active
 with its GiantBook id and its `522250` leaf. Every row shares the same Use
