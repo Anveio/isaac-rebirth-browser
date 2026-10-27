@@ -486,7 +486,8 @@ read either form. At start, the runner slims every suite of the
 runner-created run directories under `.cache/e2e` (`run-*` and any `--output`
 there) older than the newest `--keep-runs` runs (default 3). Below 12 GB of
 free disk it slims every older run. It also removes `/tmp/isaac-production-*`
-snapshots whose process is gone.
+snapshots whose process is gone. On Linux, a confirmed zombie owner also counts
+as gone.
 
 Pass `--keep-evidence` to retain everything, for example to inspect frames of
 a passing suite.
