@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, open, readFile, statfs, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { chromium } from 'playwright';
+import { gunzipSync } from 'node:zlib';
 import { ROOT, flag, hasFlag, outputDirectory, selectCases } from './lib/cli.mjs';
 import { ORIGINAL_SHA, assertOriginalBinary } from './lib/original.mjs';
 import { startProductionServer } from '../foundation/production-server.mjs';
@@ -17,6 +18,8 @@ const trinketStartMode = hasFlag('--trinket-start');
 const activeItemsMode = hasFlag('--active-items');
 const npcFreezeMode = hasFlag('--npc-freeze');
 assert.ok(!npcFreezeMode || activeItemsMode, 'NPC freeze requires --active-items');
+const npcFearMode = hasFlag('--npc-fear');
+assert.ok(!npcFearMode || activeItemsMode, 'NPC fear requires --active-items');
 const pocketActionsMode = hasFlag('--pocket-actions');
 assert.ok(!pocketActionsMode || (pocketMode === 'collection' && !pillUseMode && !activeItemsMode && !trinketStartMode),
   'Ctrl actions require their separate public collection reader');
@@ -41,7 +44,7 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = trinketStartMode ? 'LOCAL_RECORDED_TRINKET_START_BANK' : pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items [--npc-freeze] | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items [--npc-freeze] [--npc-fear] | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
   console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
     : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
@@ -80,6 +83,8 @@ if (activeItemsMode) sourceFiles.push('tools/foundation/active-items-state-pair.
   'references/isaac/rebirth/resources/rooms/00.special rooms.stb',
   'references/isaac/rebirth/resources/challenges.xml');
 if (npcFreezeMode) sourceFiles.push('tools/original/npc-freeze-observe.py');
+if (npcFearMode) sourceFiles.push(...(npcFreezeMode ? [] : ['tools/original/npc-freeze-observe.py']),
+  'tools/original/npc-fear-observe.py', 'tools/foundation/npc-fear-state.py');
 if (trinketStartMode) sourceFiles.push(
   'tools/original/trinket-start-scenarios.py', 'tools/original/trinket-start-observe.py',
   'tools/original/trinket-start-events.py', 'tools/original/trinket-start-events.c',
@@ -129,6 +134,7 @@ try {
       ? 'tools/original/pocket-scenarios.py' : 'tools/original/composition-scenarios.py'),
       '--output', generated, '--count', flag('--count', trinketStartMode ? '1' : '2'),
       ...(npcFreezeMode ? ['--npc-freeze'] : []),
+      ...(npcFearMode ? ['--npc-fear'] : []),
       ...(pocketMode && !pillUseMode && !activeItemsMode && !pocketActionsMode ? ['--mode', pocketMode] : [])], join(output, 'declaration.log'));
     assert.equal(result.exitCode, 0, 'Case declaration failed; its log and any recorded entropy remain retained');
     bankPath = join(generated, 'scenarios.json');
@@ -197,6 +203,35 @@ try {
       assert.deepEqual(declaration.activeItems.npcFreeze.targets,
         [{type:12,variant:0,subtype:0},{type:18,variant:0,subtype:0}]);
     }
+    assert.ok(!declaration.activeItems?.npcFear || npcFearMode,
+      'Target-bearing fear cases require --npc-fear and its independent observer');
+    if (declaration.activeItems?.npcFear) {
+      const fear = declaration.activeItems.npcFear;
+      assert.ok(!declaration.activeItems.npcFreeze, 'Each status declaration has its own target recipe');
+      assert.equal(fear.schema, 'source-public-npc-fear-v1');
+      assert.equal(fear.routeVersion, 1);
+      assert.equal(fear.itemId, 41);
+      assert.equal(fear.durationInput, 220);
+      assert.equal(fear.cappedTimer, 120);
+      assert.equal(fear.sourceEffectMode, 0);
+      assert.equal(declaration.publicMenuRoute, 'seeded-normal');
+      assert.equal(fixture.challengeConfigurationUsed, false);
+      assert.deepEqual(declaration.activeItems.uses, fear.control ? [] : [41]);
+      assert.deepEqual(fear.targets, [{type:12,variant:0,subtype:0}]);
+      assert.deepEqual(fixture.startRoomSpawnChange.groups, [
+        {x:6,y:5,entries:[{type:5,variant:100,subtype:41,weight:1}]},
+        {x:10,y:5,entries:[{type:12,variant:0,subtype:0,weight:1}]},
+      ]);
+      const actions = [
+        {label:'released-initial-appear-idle',keys:[],presentations:96},
+        {label:'fear-acquire-north-8',keys:['w'],presentations:8},
+        {label:'fear-acquire-released-ceremony',keys:[],presentations:96},
+        {label:'fear-use-space',keys:fear.control ? [] : ['space'],presentations:2},
+        {label:'fear-use-after',keys:[],presentations:360},
+        {label:'fear-use-released',keys:[],presentations:96},
+      ];
+      assert.deepEqual(declaration.actions, actions, 'Fear retains its predeclared physical route');
+    }
     return { ...declaration, fixture };
   });
   if (npcFreezeMode && !bank.caseFilter) {
@@ -212,6 +247,37 @@ try {
       assert.equal(item.bootEpochSeed, Buffer.from(item.entropy.rawHex, 'hex').readUInt32LE(0));
       assert.equal(item.initialPhaseOffset, (item.bootEpochSeed >>> 31) & 1);
     }
+  }
+  if (npcFearMode && !bank.caseFilter) {
+    const declared = cases.filter(item => item.activeItems?.npcFear);
+    assert.equal(declared.length, 4, 'Fear retains exactly two fixed phases, control and first OS projection');
+    for (const phase of [0, 1]) assert.ok(declared.some(item => !item.activeItems.npcFear.control
+      && item.name === `moms-pad-41-npc-fear-fixed-phase${phase}`
+      && item.bootEpochSeed === 1700000000 && item.initialPhaseOffset === phase));
+    assert.ok(declared.some(item => item.activeItems.npcFear.control
+      && item.name === 'moms-pad-41-npc-fear-no-space-control-phase0'
+      && item.bootEpochSeed === 1700000000 && item.initialPhaseOffset === 0));
+    const random = declared.filter(item => typeof item.entropy === 'object');
+    assert.equal(random.length, 1, 'Fear keeps only the first unfiltered OS projection');
+    const item = random[0];
+    assert.equal(item.name, 'moms-pad-41-npc-fear-fresh-os-epoch');
+    assert.match(item.entropy.rawHex, /^[a-f0-9]{8}$/);
+    assert.equal(item.bootEpochSeed, Buffer.from(item.entropy.rawHex, 'hex').readUInt32LE(0));
+    assert.equal(item.initialPhaseOffset, (item.bootEpochSeed >>> 31) & 1);
+    const firstDraw = cases.find(value => value.name === 'how-to-jump-282-fresh-os-epoch');
+    assert.deepEqual(item.entropy, firstDraw?.entropy, 'Fear uses the existing producer\'s first draw without selection');
+  }
+  if (npcFearMode) {
+    const journal = bank.npcFearEntropyJournal;
+    assert.match(journal?.sha256 ?? '', /^[a-f0-9]{64}$/);
+    const path = resolve(dirname(bankPath), journal.path);
+    const bytes = await readFile(path);
+    assert.equal(hash(bytes), journal.sha256, 'Fear producer journal identity');
+    const first = JSON.parse(bytes.toString('utf8').split('\n')[0]);
+    for (const item of cases.filter(value => value.activeItems?.npcFear && typeof value.entropy === 'object')) {
+      assert.deepEqual(item.entropy, first, 'Fear is bound to the retained first producer entropy record');
+    }
+    bank.npcFearEntropyJournal = report.npcFearEntropyJournal = {path, sha256:hash(bytes)};
   }
   if (trinketStartMode) {
     assert.equal(bank.suite, 'trinket-start');
@@ -367,7 +433,7 @@ try {
     const originalDirectory = reusedOriginal ? resolve(reusedOriginal) : join(directory, 'original');
     try {
       if (reusedOriginal) {
-        if (trinketStartMode || declaration.activeItems?.npcFreeze) {
+        if (trinketStartMode || declaration.activeItems?.npcFreeze || declaration.activeItems?.npcFear) {
           const captureReport = JSON.parse(await readFile(join(dirname(dirname(originalDirectory)), 'report.json'), 'utf8'));
           assert.deepEqual(captureReport.sourceBefore, report.sourceBefore, 'Reused Native observer/protocol Source must match exactly');
           assert.deepEqual(captureReport.sourceAfter, captureReport.sourceBefore, 'Reused Native Source closure must be unchanged');
@@ -391,7 +457,8 @@ try {
       if (pocketMode) args.push('--pockets', declaration.pocketInit ? 'init' : 'collection');
       if (hasFlag('--prepare-only')) args.push('--prepare-only');
       else args.push('--archive-evidence', ...(pocketMode ? ['--journal-codec', 'zstd'] : []), '--observe-every-step', '--state-observer',
-        join(ROOT, declaration.activeItems?.npcFreeze ? 'tools/original/npc-freeze-observe.py'
+        join(ROOT, declaration.activeItems?.npcFear ? 'tools/original/npc-fear-observe.py'
+          : declaration.activeItems?.npcFreeze ? 'tools/original/npc-freeze-observe.py'
           : trinketStartMode ? 'tools/original/trinket-start-observe.py'
           : pocketMode ? 'tools/original/pocket-collection-observe.py'
           : 'tools/original/composition-observe.py'), '--frame-timeout', flag('--native-frame-timeout', '60'),
@@ -432,6 +499,12 @@ try {
             '--output', join(directory, 'trinket-start-comparison.json.gz')], join(directory, 'trinket-start-comparison.log'));
         } catch (error) { result.errors.push('trinketStartup: ' + String(error)); }
       }
+      if (declaration.activeItems?.npcFear) {
+        try {
+          const comparison = JSON.parse(gunzipSync(await readFile(join(directory, 'comparison.json.gz'))));
+          result.npcFearWitnesses = comparison.npcFearWitnesses;
+        } catch (error) { result.errors.push('Fear witnesses: ' + String(error)); }
+      }
     }
     result.status = hasFlag('--prepare-only')
       ? result.original?.exitCode === 0 && !result.errors.length ? 'prepared-not-executed' : 'fail'
@@ -446,6 +519,14 @@ try {
   const expectedStatus = hasFlag('--prepare-only') ? 'prepared-not-executed' : 'pass';
   report.status = report.allDeclaredCasesRetained
     && report.cases.every(item => item.status === expectedStatus) ? expectedStatus : 'fail';
+  if (npcFearMode && !hasFlag('--prepare-only')) {
+    const fixed = report.cases.filter(item => /^moms-pad-41-npc-fear-fixed-phase[01]$/.test(item.name));
+    report.npcFearFixedApplicationCoverage = Object.fromEntries(['Native', 'Own'].map(game => {
+      const phases = fixed.map(item => item.npcFearWitnesses?.[game]?.applicationPhase ?? null);
+      return [game, {phases, status:phases.includes('Full') && phases.includes('Fast') ? 'pass' : 'fail'}];
+    }));
+    if (Object.values(report.npcFearFixedApplicationCoverage).some(value => value.status !== 'pass')) report.status = 'fail';
+  }
 } catch (error) { report.error = String(error); report.status = 'fail'; }
 finally {
   for (const [name, resource] of [['browser', browser], ['server', server]]) {
@@ -459,6 +540,10 @@ finally {
       assert.ok(report.sourceBeforeEqualsEnd, 'Source changed during the attempt');
       if (report.entropyJournal) {
         assert.equal(hash(await readFile(report.entropyJournal.path)), report.entropyJournal.sha256, 'First-OS declaration unchanged');
+      }
+      if (report.npcFearEntropyJournal) {
+        assert.equal(hash(await readFile(report.npcFearEntropyJournal.path)), report.npcFearEntropyJournal.sha256,
+          'Fear first-OS producer journal unchanged');
       }
       if (report.resourcePinsBefore) {
         report.resourcePinsAfter = await filePins(resources);

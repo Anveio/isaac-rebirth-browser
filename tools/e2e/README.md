@@ -970,3 +970,24 @@ release and empty hold in two fixed phases plus the first unfiltered OS boot
 and phase. It retains the complete bank before selection and requires actual
 D98/3054/30D0 and body witnesses. Private helper calls and positive trinkets are
 outside the endpoint grade. See [the route and qualification limits](../../docs/pockets-e2e.md).
+
+`active-items --npc-fear` adds a Horf-only Mom's Pad fixture to the unchanged
+default bank and optional Freeze cases. It declares fixed phases0/1, the first
+unfiltered recorded OS boot/phase and a no-Space control before either game.
+The canonical capture requires independent418/800/420, sourceEffectMode0,
+two embedded vectors, color/shooter/ANM and admitted Full/Fast/expiry owners.
+Across the two fixed cases, actual application must cover Full and Fast in
+each game; missing coverage stays failed.
+
+The closed four-case cohort on capture source `df45d140`, runtime `c41649d3`,
+production `e4200f15` / WASM `ce1f4dad` (1,617 files), passes all 229,936
+required checks across 2,638 paired presentations. Native and actual Browser
+each witness Full application in fixed0 and Fast application in fixed1; the
+first unfiltered OS raw `bd71efd6` supplies epoch `3606016445`, phase1.
+Required owner availability and callback classification pass. All checked
+scalar fields and full shared-MT snapshots match. The initial bootstrap-owner
+failure and the corrected single-case invocation's missing fixed-cohort
+coverage remain failed reports. Gaper live fleeing, a nonzero-vector reset
+write, Horf angle-call attribution, complete MT, full pixels and PCM remain
+unqualified. Item41 remains Partial.
+[Route, exact captures and evidence limits](../../docs/npc-fear.md).

@@ -111,7 +111,14 @@ fn ai(
         0.6
     };
     let target = world.player;
-    pathfinder::find_grid_path(npc, random, world, target, speed, 900, friction)?;
+    if npc.status.feared {
+        // 4E9810 gets the actual uncharmed Player target, calls EvadeTarget
+        // without chase-speed/marker inputs, then multiplies current +470.
+        pathfinder::evade_target(npc, random, world, target, friction)?;
+        *friction *= 0.7;
+    } else {
+        pathfinder::find_grid_path(npc, random, world, target, speed, 900, friction)?;
+    }
     let direct = npc.pathfinder.as_ref().is_some_and(|path| path.direct);
     // 4e95a8: bounded(3) on every update with pf.direct.
     if direct && random.bounded(3) == 0 {

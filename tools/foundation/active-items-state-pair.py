@@ -33,6 +33,10 @@ CLIPS = {'UseItem', 'Pickup', 'Jump', 'Hit', 'Sad', 'Happy'}
 freeze_contract = contract.get('npcFreeze')
 if freeze_contract is not None:
     assert freeze_contract['schema'] == 'source-public-npc-freeze-v1'
+fear_contract = contract.get('npcFear')
+if fear_contract is not None:
+    assert fear_contract['schema'] == 'source-public-npc-fear-v1'
+    assert freeze_contract is None
 
 
 def artifact_value(value):
@@ -134,6 +138,8 @@ def native_rows():
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
             if freeze_contract is not None:
                 row['npcFreeze'] = native_freeze(observation)
+            if fear_contract is not None:
+                row['npcFear'] = fear.native(native_freeze(observation), observation)
             yield integer(context['presentedFrame']) - gameplay_start, row
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
     assert gameplay_start is not None
@@ -181,6 +187,9 @@ def browser_rows():
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
             if freeze_contract is not None:
                 row['npcFreeze'] = browser_freeze(state, integer(value['gameplayPresentation']))
+            if fear_contract is not None:
+                gp = integer(value['gameplayPresentation'])
+                row['npcFear'] = fear.browser(browser_freeze(state, gp, 'fear'), state, gp)
             yield integer(value['gameplayPresentation']), row
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
 
@@ -239,7 +248,7 @@ def native_freeze(observation):
     return result
 
 
-def browser_freeze(state, gp):
+def browser_freeze(state, gp, label='freeze'):
     result = dict(fullUpdates=integer(state['gameUpdateCount']),
                   systemCounter=integer(state['systemClock']['systemCounter']),
                   informationAnimation=information_animation(state.get('informationAnimation'), 'informationAnimation'), actors=[])
@@ -281,8 +290,8 @@ def browser_freeze(state, gp):
                 for row in actor['spriteColor']['stack']],
             ai=[integer(actor['frameAge'])],
             shooter=[integer(shooter['cooldown']), integer(shooter['delay'])] if shooter is not None else None))
-        check('Own:freeze actual status owner available', status_available, gp=gp)
-        check('Own:freeze status frontier closed', frontier, None, gp)
+        check(f'Own:{label} actual status owner available', status_available, gp=gp)
+        check(f'Own:{label} status frontier closed', frontier, None, gp)
     return result
 
 
@@ -292,11 +301,11 @@ def target_map(value):
     return actors
 
 
-def freeze_callback(name, value, before, gp):
+def freeze_callback(name, value, before, gp, label='freeze'):
     full_delta = value['fullUpdates'] - before['fullUpdates']
     system_delta = value['systemCounter'] - before['systemCounter']
-    check(f'{name}:freeze consecutive system phase clock', system_delta, 1, gp)
-    check(f'{name}:freeze full phase clock bound', full_delta in (0, 1), gp=gp)
+    check(f'{name}:{label} consecutive system phase clock', system_delta, 1, gp)
+    check(f'{name}:{label} full phase clock bound', full_delta in (0, 1), gp=gp)
     if system_delta != 1:
         return None
     # The post-System counter is odd after a scheduled Full, even after Fast.
@@ -304,9 +313,9 @@ def freeze_callback(name, value, before, gp):
     scheduled_full = value['systemCounter'] % 2 == 1
     information, prior_information = value['informationAnimation'], before['informationAnimation']
     if full_delta == 1:
-        check(f'{name}:freeze admitted Full matches System phase', scheduled_full, gp=gp)
+        check(f'{name}:{label} admitted Full matches System phase', scheduled_full, gp=gp)
         if 'unavailable' not in information:
-            check(f'{name}:freeze admitted Full information gate', information['state'] != 2, gp=gp)
+            check(f'{name}:{label} admitted Full information gate', information['state'] != 2, gp=gp)
             if information['state'] == 2:
                 return None
         return 'Full' if scheduled_full else None
@@ -315,14 +324,14 @@ def freeze_callback(name, value, before, gp):
     if scheduled_full:
         if 'unavailable' in information:
             return None
-        check(f'{name}:freeze held Full counter has actual information gate', information['state'], 2, gp)
+        check(f'{name}:{label} held Full counter has actual information gate', information['state'], 2, gp)
         return 'BlockedFull' if information['state'] == 2 else None
     # Fast tests the entry manager. An admitted callback can itself request
     # Bra's book and leave state1, so the resulting state alone is insufficient.
     if 'unavailable' in prior_information:
         return None
     if prior_information['state'] != 0:
-        check(f'{name}:freeze blocked Fast information manager held', information, prior_information, gp)
+        check(f'{name}:{label} blocked Fast information manager held', information, prior_information, gp)
         return 'BlockedFast' if information == prior_information else None
     return 'Fast'
 
@@ -530,6 +539,12 @@ def freeze_witnesses(name, rows):
                 informationBlockedSlots=dict(blocked_slots))
 
 
+fear = None
+if fear_contract is not None:
+    spec = importlib.util.spec_from_file_location('active_fear_live_comparer', Path(__file__).with_name('npc-fear-state.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    fear = module.FearComparison(case, check, integer, boolean, f32, vector)
 readback = json.loads(args.capture_readback.read_text())
 check('actual complete capture readback passes', readback['status'], 'pass')
 native_case_path = args.original.parent / 'case.json'
@@ -586,6 +601,11 @@ for gp in paired:
                     check('Horf freeze shooter owners', own_targets[key]['shooter'], native_targets[key]['shooter'], gp)
         except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
             check('actual paired NPC freeze owners', repr(error), 'complete typed independent owners', gp)
+    if fear is not None:
+        try:
+            fear.paired(a['npcFear'], b['npcFear'], gp)
+        except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
+            check('actual paired NPC fear owners', repr(error), 'complete typed independent owners', gp)
     held.add(b['activeId'])
     for row in b['temporary']:
         uses[row[0]] += 1
@@ -596,19 +616,27 @@ for item in contract['uses']:
 if 282 in contract['uses']:
     check('actual Native How to Jump airborne presentations', landed > 0)
 freeze_observations = {}
+fear_observations = {}
 if freeze_contract is not None:
     for name, rows in (('Native', native), ('Own', own)):
         try:
             freeze_observations[name] = freeze_witnesses(name, rows)
         except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
             check(f'actual {name} freeze source witnesses', repr(error), 'complete typed independent witnesses')
+if fear is not None:
+    for name, rows in (('Native', native), ('Own', own)):
+        try:
+            fear_observations[name] = fear.witnesses(name, rows, freeze_callback)
+        except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
+            check(f'actual {name} fear source witnesses', repr(error), 'complete typed independent witnesses')
 after = {str(path): digest(path) for path in inputs}
 check('all input archives before equal end', after, before)
 result = dict(schema=1, status='fail' if failures else 'pass', case=case['name'],
     checks=sum(counts.values()), failures=sum(failures.values()),
     nativePresentations=len(native), ownPresentations=len(own), pairedPresentations=len(paired),
     checksPerField=dict(counts), failedPerField=dict(failures), examples=examples,
-    unavailable=contract['unknown'] + (freeze_contract['unknown'] if freeze_contract else []), inputsBefore=before, inputsAfter=after,
+    unavailable=contract['unknown'] + (freeze_contract['unknown'] if freeze_contract else [])
+        + (fear_contract['unknown'] if fear_contract else []), inputsBefore=before, inputsAfter=after,
     scope='Per-presentation start-room active slot, charge, temporary records, health, Player body, '
           'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.'
           + (' Additive independent bounded living NPC freeze state/motion/colour and actual phase-clock witnesses; '
@@ -623,6 +651,9 @@ if freeze_contract is not None:
     result['npcFreezeObservationLimits'] = [
         'JSON serialization can erase negative zero; erased velocity sign bits are unobservable, not verified equal.',
         'Missing information manager owners leave RoomFast/blocked callback classification unavailable.']
+if fear is not None:
+    result['npcFearWitnesses'] = fear_observations
+    result['scope'] += ' Additive independent first-use Horf Fear418/800, color, shooter, ANM, vector and phase laws; Gaper live remains unqualified.'
 raw = (json.dumps(result, indent=2, allow_nan=False) + '\n').encode()
 args.output.write_bytes(gzip.compress(raw, mtime=0) if args.output.suffix == '.gz' else raw)
 print(json.dumps(dict(status=result['status'], checks=result['checks'], failures=result['failures'])))

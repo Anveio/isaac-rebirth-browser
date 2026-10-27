@@ -472,8 +472,19 @@ common failures; older failed reports remain retained. Current target-free
 Bra/Pad controls pass 13,338 unchanged semantic checks per build; Browser focus/seed passes 2/2. Frozen death and living
 reached-status
 morph/reentry retain explicit frontiers; saved NPC restoration, boss/champion,
-linked/custom-base actors, negative/repeated application, Fear and complete
+linked/custom-base actors, negative/repeated application, other statuses and complete
 MT/PCM/pixels remain open. The earlier target-free Bra pass keeps its scope.
+
+[Bounded Horf Fear](npc-fear.md) adds independent418/800/shared420, purple
+color, continued AI/ANM with held shooter, two embedded vectors and source
+Full/Fast expiry for Mom's Pad. The Horf-only fixed0/1, first recorded OS and
+no-Space cohort passes 229,936 checks with actual Full/Fast application in
+both games. Corrected main A/B has 6,471 common failure recoveries and zero
+common pass losses; earlier comparer and gameplay failures remain retained.
+Separate target-free Bra/Pad and Freeze fixed1 controls pass 84,760/0.
+Gaper admission is source-only; moving-NPC fleeing, nonzero-vector reset,
+other families, repeated/mixed/boss/linked applications, Save/Continue and
+complete MT/audio/pixels remain open. Item41 remains Partial.
 
 [PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
 champion creep. Its current-main666-based frozen `35edb299` passes a fresh
