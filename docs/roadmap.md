@@ -585,6 +585,7 @@ pipeline, then the bulk import.
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
 | #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
+| #901 | P2 | D4: using it skips the GiantBook dice animation the original plays on frames 43-100 (reroll result identical) | playtest 2026-10-27 `playtest/6474f5d/d4.mp4` |
 
 ## Pocket items
 
