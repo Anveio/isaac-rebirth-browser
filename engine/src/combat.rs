@@ -221,6 +221,28 @@ pub fn resolve_tear_npc_contact(
     )
 }
 
+/// A regular tear reaching a planted or converted Bomb. Tear545E80's type4
+/// arm falls through to the 546318 death path, which advances the tear by
+/// 0.8 of the Bomb velocity (54638A) and returns false; Bomb456C20 with flag
+/// false returns false for a tear, so the generic mass response pushes the
+/// bomb. The caller owns the dot/age gate, the shot-bomb veto and the death.
+pub fn resolve_tear_bomb_contact(
+    tear: &mut ContactBody,
+    bomb: &mut ContactBody,
+) -> Result<ContactResolution, String> {
+    if tear.entity_type != 2 || bomb.entity_type != 4 {
+        return Err("tear/bomb response requires Tear2 and Bomb4 bodies".into());
+    }
+    resolve_contact(
+        tear,
+        bomb,
+        |_| false,
+        |tear, bomb| {
+            tear.position = tear.position + bomb.velocity * 0.8;
+        },
+    )
+}
+
 /// Pairs of NPCs with a registered family have no callback veto.
 /// The caller admits Fireplace's NPC-only queued damage alongside this response.
 /// The first body may instead be a regular Bomb; its callback

@@ -257,6 +257,14 @@ pub struct Player {
     pub flying: Option<bool>,
     #[serde(default)]
     pub grid_collision_class: Option<u32>,
+    /// Entity+344 cleared by How to Jump's 524A80 until its TEMP282 removal
+    /// 5177AD restores class4: no entity pair collision in between.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub entity_collision_off: bool,
+    /// Entity+440 written by How to Jump (5235C6/524A61) and read by the
+    /// TEMP282 interpolation at 5322BA; no other Player owner is ported.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jump_target: Option<motion::WorldVector>,
     /// Entity+408/+470/+490 slowing state written by spider webs.
     #[serde(default, skip_serializing_if = "spider_webs::Slowing::is_constructed")]
     pub slowing: spider_webs::Slowing,
@@ -327,6 +335,8 @@ impl Player {
             transformation_counts: None,
             flying: None,
             grid_collision_class: None,
+            entity_collision_off: false,
+            jump_target: None,
             slowing: spider_webs::Slowing::default(),
             eye: projectiles::Eye::Positive,
             shots_fired: 0,
@@ -4995,11 +5005,15 @@ impl Game {
                         tear.motion,
                         tear.collision_radius,
                         tear.collision_damage,
+                        tear.birth_game_update,
+                        // Bomb contact admits plain and spectral (bit0) tears:
+                        // 444810 is false for type4, so bit0 is inert there.
+                        tear.attack_flags.0 & !1 == 0,
                     )
                 })
                 .collect();
             let partitioned_contacts = polyphemus_contact::contacts_all(&mut self.state)?;
-            for (id, mut motion, radius, damage) in tears {
+            for (id, mut motion, radius, damage, birth, plain) in tears {
                 if self.state.tears.iter().any(|tear| {
                     tear.id == id
                         && tear.controlled.is_none()
@@ -5019,7 +5033,9 @@ impl Game {
                     controlled_tear::contacts_actor(&mut self.state, id)?;
                     continue;
                 }
-                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some() {
+                if npcs::tear_hit(&mut self.state, &mut motion, radius, id, damage)?.is_some()
+                    || (plain && bombs::tear_hit(&mut self.state, &mut motion, radius, id, birth)?)
+                {
                     if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == id) {
                         motion.lifetime = projectiles::Lifetime::Dying;
                         tear.motion = motion;
@@ -6027,6 +6043,7 @@ impl Game {
                         | player_animation::Clip::Happy
                         | player_animation::Clip::Trapdoor
                         | player_animation::Clip::Appear
+                        | player_animation::Clip::Jump
                 )
             ) && self.state.player_animation.is_finished(None)
             {
@@ -6543,6 +6560,9 @@ impl Game {
         //531E44 reaches deferred CF8 evaluation only on the full path,
         //before531E6F copied-item animation and the later queued grant.
         item_queries::reach_late_temporary_evaluation(&mut self.state, phase)?;
+        //532247: the TEMP282 jump follows the full tick (and runs alone on
+        //interpolation updates).
+        active_items::advance_jump(&mut self.state, phase);
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);

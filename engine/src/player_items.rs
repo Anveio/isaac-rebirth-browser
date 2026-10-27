@@ -858,7 +858,11 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
     //4453e7..4453fe vetoes a dead body independently of the collection
     //callback. A living Player's collection/queue guard still permits the
     //retained free class4 altar's physical response after504820 returns0.
-    if state.player.dead || pickup.variant != 100 || pickup.removed {
+    if state.player.dead
+        || state.player.entity_collision_off
+        || pickup.variant != 100
+        || pickup.removed
+    {
         return Ok(());
     }
     let lattice = grid::Grid::new(
@@ -913,6 +917,11 @@ pub(crate) fn altar_contact(state: &mut State, index: usize) -> Result<(), Strin
 ///The achievement2 attempt remains unavailable for eligible high balances;
 ///the Shop caller checks that boundary before any purchase mutation.
 pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), String> {
+    add_coins(state, -price)
+}
+
+///AddCoins518AB0 for any signed delta (Shop debit, 2 of Diamonds credit).
+pub(crate) fn add_coins(state: &mut State, delta: i32) -> Result<(), String> {
     let owner = state
         .player_items
         .as_ref()
@@ -925,7 +934,7 @@ pub(crate) fn debit_shop_coins(state: &mut State, price: i32) -> Result<(), Stri
     )
     .have(109)
     .ok_or("AddCoins Have109 history unavailable")?;
-    state.inventory.coins = add_inventory(state.inventory.coins, -price);
+    state.inventory.coins = add_inventory(state.inventory.coins, delta);
     if money_power {
         state
             .player_items

@@ -323,6 +323,10 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
 }
 
 pub fn player_contacts(state: &mut State) -> Result<(), String> {
+    //Entity+344 class0 (How to Jump in the air) has no pair collision.
+    if state.player.entity_collision_off {
+        return Ok(());
+    }
     let grid = Grid::new(
         state
             .room

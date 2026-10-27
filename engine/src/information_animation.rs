@@ -1,5 +1,7 @@
-//! Actual GiantBook5805c0/580330 lifecycle for the Eternal NewStage and Black-heart callbacks.
-//! Other configured books and Heal-event callers retain their own admission.
+//! Actual GiantBook5805c0/580330 lifecycle for the Eternal NewStage and Black-heart callbacks
+//! and the active-item books 52A640 requests before its Use. Every authored
+//! giantbook.xml entry whose actor is extracted is drawable; the others
+//! (GiantBookBig, WhoreOfBabylon, Sleep) and Heal-event callers stay unadmitted.
 use serde::{Deserialize, Serialize};
 
 pub struct Definition {
@@ -64,6 +66,17 @@ impl InformationAnimation {
         self.request(&BLACK_HEART_DEFINITION);
     }
 
+    /// 52A640's per-active 5805c0(id, 3) before Use522250. None when the
+    /// authored entry's actor is not extracted; the caller keeps that gap.
+    pub fn request_authored(&mut self, id: u32, delay: i32) -> bool {
+        let Some((_, definition)) = DEFINITIONS.iter().find(|(entry, _)| *entry == id) else {
+            return false;
+        };
+        self.request(definition);
+        self.delay = delay;
+        true
+    }
+
     fn request(&mut self, definition: &Definition) {
         self.current_actor = Some(definition.actor.into());
         self.current_clip = Some(definition.clip.into());
@@ -90,11 +103,13 @@ impl InformationAnimation {
             2 => {}
             _ => return Err("unadmitted information animation state".into()),
         }
-        let definition = [&ETERNAL_DEFINITION, &BLACK_HEART_DEFINITION]
-            .into_iter()
+        let definition = DEFINITIONS
+            .iter()
+            .map(|(_, definition)| definition)
             .find(|definition| {
                 self.current_actor.as_deref() == Some(definition.actor)
                     && self.current_clip.as_deref() == Some(definition.clip)
+                    && self.spritesheet.as_deref() == Some(definition.spritesheet)
             })
             .filter(|_| self.definition_loaded)
             .ok_or("information callback requires its owned authored definition")?;
