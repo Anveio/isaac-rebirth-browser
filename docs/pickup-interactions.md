@@ -82,10 +82,14 @@ sound branches, complete shared MT, pixels and broader gameplay remain open.
 Earlier uncovered-route and V2 failures retain their separate scope.
 
 Replay the [same input-only bank](../references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json)
-without drawing replacement epochs:
+without drawing replacement epochs. First reconstruct its private fixture
+bytes from the local base resources in a new output directory, then replace
+the generated fixed-only bank with the retained inputs:
 
 ```sh
-npm run test:e2e -- pickup-interactions --scenarios references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json
+python3 tools/original/pickup-interaction-scenarios.py --count 0 --only blank-card-pocket-conversion --only blank-card --output .cache/baggy-replay
+cp references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json .cache/baggy-replay/scenarios.json
+npm run test:e2e -- pickup-interactions --scenarios .cache/baggy-replay/scenarios.json
 ```
 
 ## Blank Card and runes
