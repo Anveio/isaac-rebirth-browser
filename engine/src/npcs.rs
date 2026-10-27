@@ -706,13 +706,12 @@ pub fn admit_room_combat(state: &mut State) {
 /// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
 /// nonpositive total sets descriptor3d; a positive total preserves its flag.
 /// This is separate from the doorway's immediate update/countdown10 tail.
+/// It shuts no door: the first Room.Update's 5c71c0 does, so the doors'
+/// Close (and its SFX35 two updates later) starts at Game+ce9f4 = 1.
 pub(crate) fn initialize_startup_clear(state: &mut State) {
     state.room.combat_clear_countdown = 0;
     if state.room.manager_counts.countable_total() <= 0 {
         state.room.combat_clear = true;
-    }
-    if !state.room.combat_clear {
-        change_doors(state, false);
     }
 }
 
@@ -721,6 +720,13 @@ pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
     // It is independent of HP, visible actor count and current boss_count2490.
     if state.room.manager_counts.countable_total() > 0 {
         state.room.combat_clear_countdown = 10;
+        //5d14a8 calls 5c71c0, which Closes every open door. With
+        //descriptor3d set it first skips a door near the Player
+        //(5c7214); that branch is not ported, so a clear room keeps
+        //its doors as they are.
+        if !state.room.combat_clear {
+            change_doors(state, false);
+        }
     } else if state.room.combat_clear_countdown > 0 {
         state.room.combat_clear_countdown -= 1;
     } else {
