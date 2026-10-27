@@ -603,7 +603,9 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
   nativeFrameTimeout = 60, originalObserver = 'tools/original/foundation-paired-observer.py',
   stateComparator = scopedState, captureControlsOwners = false, movementComparator, archiveBrowserEvidence = false, archiveNativeEvidence = false, captureBrowserAudio = false, captureAudioOwners = false,
   originalSfxVolume, originalMusicVolume, filterCases = false, publicClockSchedule = false, mtDraws = process.argv.includes('--mt-draws') || process.env.E2E_MT_DRAWS === '1',
-  glTrace = process.argv.includes('--gl-trace'), saveContinue = false, controlsOwnReload = false }) {
+  glTrace = process.argv.includes('--gl-trace'), saveContinue = false, controlsOwnReload = false, concurrentCaptures = false }) {
+  assert.ok(!concurrentCaptures || (!captureBrowserAudio && !captureAudioOwners && !saveContinue && !reuseOriginalDirectory),
+    'Concurrent captures exclude audio, Save/Continue and reused Original evidence');
   assert.equal(typeof controlsOwnReload, 'boolean');
   assert.ok(!controlsOwnReload || (captureControlsOwners && !saveContinue), 'Own Keyboard reload is a separate Controls opt-in');
   assert.ok(Number.isFinite(nativeFrameTimeout) && nativeFrameTimeout > 0 && nativeFrameTimeout <= 300,
@@ -652,7 +654,8 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
       const disk = statfsSync(output);
       assert.ok(Number(disk.bavail) * Number(disk.bsize) > 4 * 1024 ** 3, 'Fresh Native Controls requires4GiB free after the immutable production snapshot');
     }
-    report.captureSchedule = 'sequential independent Original then Browser, one Chromium lifetime per case';
+    report.captureSchedule = concurrentCaptures ? 'concurrent independent Original and Browser, one Chromium lifetime per case'
+      : 'sequential independent Original then Browser, one Chromium lifetime per case';
     report.status = 'running';
     let definitions = selected.map(id => ({ id, seed: 'T1PK6Y0W' }));
     for (let index = 0; index < randomCount; index++) definitions.push({ id: 'paired-random-run', seed: replaySeeds[index] });
@@ -699,27 +702,39 @@ export async function runPairedGate({ output, selected, randomCount = 2, replayS
           assert.ok(freeBytes >= requiredBytes, 'Save Native reserve must hold after the production snapshot');
         }
         // Both independent captures are still attempted after a rejection.
-        // Original settles before Chromium starts; each Browser closes before
-        // the next Original. Both use declared inputs; comparison laws stay unchanged.
-        const [nativeResult] = await Promise.allSettled([
+        // Both use declared inputs; comparison laws stay unchanged. By default
+        // the Original settles before Chromium starts and each Browser closes
+        // before the next Original. Concurrent captures run them side by side:
+        // each game keeps its own clock (the gate's virtual clock on its own
+        // Xvfb, the paused page's explicit steps), so host load changes neither
+        // tape. A real-time audio hold keeps the sequential schedule.
+        const captureOriginal = async () => (await Promise.allSettled([
           nativeCapture(caseData, join(directory, 'original'), nativeFrameTimeout, originalObserver, archiveNativeEvidence, originalSfxVolume, mtDraws, glTraceLibrary, true, Boolean(reuseOriginalDirectory), publicClockPlan, audioOwnerTrace, false, originalMusicVolume),
-        ]);
+        ]))[0];
+        const captureBrowser = async () => {
+          try {
+            browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
+            report.browserGraphics = await inspectBrowserGraphics(browser);
+            return (await Promise.allSettled([
+              browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
+                server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners, saveContinue, controlsOwnReload),
+            ]))[0];
+          } catch (error) {
+            return { status: 'rejected', reason: error };
+          } finally {
+            if (browser) await browser.close();
+            browser = undefined;
+          }
+        };
+        let nativeResult, browserResult;
+        if (concurrentCaptures && !caseData.tape.some(action => action.type === 'audioHold'))
+          [nativeResult, browserResult] = await Promise.all([captureOriginal(), captureBrowser()]);
+        else {
+          nativeResult = await captureOriginal();
+          browserResult = await captureBrowser();
+        }
         native = nativeResult.status === 'fulfilled' ? nativeResult.value
           : {status: 'fail', error: String(nativeResult.reason), directory: join(directory, 'original')};
-        let browserResult;
-        try {
-          browser = await chromium.launch({ ...browserLaunchOptions(), headless: false });
-          report.browserGraphics = await inspectBrowserGraphics(browser);
-          [browserResult] = await Promise.allSettled([
-            browserCapture(captureAudioOwners ? audioObservedBrowser(browser, api => save(join(directory, 'browser', 'api.json'), api)) : browser,
-              server, caseData, join(directory, 'browser'), archiveBrowserEvidence, captureBrowserAudio, mtDraws, publicClockPlan, audioPreferences, captureControlsOwners, saveContinue, controlsOwnReload),
-          ]);
-        } catch (error) {
-          browserResult = { status: 'rejected', reason: error };
-        } finally {
-          if (browser) await browser.close();
-          browser = undefined;
-        }
         candidate = browserResult.status === 'fulfilled' ? browserResult.value
           : {status: 'fail', failures: [String(browserResult.reason)], frames: []};
         if (native.deferredEvidence) native = await native.deferredEvidence();

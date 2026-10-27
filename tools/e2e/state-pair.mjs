@@ -53,7 +53,8 @@ const paired = tapes.length ? await runPairedGate({ output: resolve(output, 'pai
   reuseOriginalDirectory: flag('--reuse-original'),
   nativeFrameTimeout: Number(flag('--native-frame-timeout', '60')),
   archiveNativeEvidence: outerArgv.includes('--archive-native-evidence'),
-  archiveBrowserEvidence: true })
+  archiveBrowserEvidence: true,
+  concurrentCaptures: outerArgv.includes('--concurrent-captures') })
   : { status: 'fail', cases: [] };
 
 // Cases whose port keys were recorded closed-loop (stage-exit fights) only
