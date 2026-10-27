@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 RUN_SEED, SEED_CODE = 12713, 'B91Y6ZEV'
 #Actives whose 522250 leaf is ported (engine/src/active_items.rs USES).
+#The dice have their own multi-pedestal cases below.
 ACTIVES = {33: 'bible', 34: 'belial', 35: 'necronomicon', 45: 'yum-heart', 58: 'shadows',
            78: 'revelations', 282: 'how-to-jump', 286: 'blank-card', 292: 'satanic-bible',
            85: 'deck-of-cards', 102: 'moms-bottle-of-pills', 133: 'guppys-paw', 146: 'prayer-card',
@@ -139,6 +140,9 @@ def main():
     #How to Jump while moving lands ahead of the Player.
     declare('how-to-jump-282-moving-phase0', single(282),
             idle + acquire() + use('use-moving', ['d'], 30), 12713, 0, fixed, [282])
+    #The D6 rerolls the other live pedestal in place (its own is empty).
+    declare('d6-105-reroll-phase0', [(105, 6, 5), (1, 2, 1)],
+            idle + acquire() + use('use', [], 24), 12713, 0, fixed, [105])
     #A second active replaces the first and drops it back as a pedestal.
     declare('swap-45-282-phase1', [(45, 6, 5), (282, 5, 6)],
             idle + acquire('first') + acquire('second', 'a', 'west') + use('use', [], 24), 12713, 1, fixed, [282])

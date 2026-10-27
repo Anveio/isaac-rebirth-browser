@@ -234,6 +234,10 @@ pub(crate) enum Leaf {
     /// and Mom's Hand213 is removed and replaced by a Poop245 with the
     /// shared seed and a brown colorize; then UseItem.
     Flush,
+    /// 5253EE: 582340 clears the selected bytes, then every live
+    /// collectible pedestal (455680 5/100) with an item is rerolled in place
+    /// by Morph500A10(5,100,0,keepPrice1) and its ABC cleared.
+    D6,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -320,6 +324,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 291,
         book: None,
         leaf: Leaf::Flush,
+    },
+    ActiveUse {
+        id: 105,
+        book: None,
+        leaf: Leaf::D6,
     },
 ];
 
@@ -676,6 +685,12 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
         }
         Leaf::DeckOfCards | Leaf::MomsBottleOfPills => {}
+        Leaf::D6 => {
+            if variant0 {
+                reroll_pedestals(state, id)?;
+            }
+            play_item_animation(state, id, variant0, false);
+        }
         Leaf::Flush => {
             //522A80 walks Room+1638, skipping Poop245 and Chub28 before
             //444810 (types10..999, collision class, 494, dead, Entity318
@@ -759,6 +774,68 @@ fn grant_pocket(state: &mut State, id: u32, card: bool) -> Result<Option<()>, St
 
 /// A reached leaf operator whose inputs are unknown: its writers are an
 /// explicit frontier rather than an assumed no-op.
+/// 525404..5254B1. Only a free pedestal (ABD 0, no price) is ported: the
+/// ABD-set test reads AC8, and keepPrice with a nonzero AC0 redraws the
+/// price (500C90); both stay a `UseLeaf` frontier, checked before any
+/// pedestal changes.
+fn reroll_pedestals(state: &mut State, id: u32) -> Result<(), String> {
+    let Some(room_type) = state
+        .room
+        .descriptor
+        .as_ref()
+        .map(|descriptor| descriptor.template.room_type)
+    else {
+        unowned_leaf(state, id, 0x525404);
+        return Ok(());
+    };
+    let Some(pools) = state.item_pools.as_mut() else {
+        unowned_leaf(state, id, 0x525404);
+        return Ok(());
+    };
+    pools.reset_selected();
+    //31F (dead) pedestals are skipped; an empty pedestal (subtype 0) too.
+    let targets: Vec<usize> = (0..state.room.pickups.len())
+        .filter(|index| {
+            let pickup = &state.room.pickups[*index];
+            !pickup.removed && pickup.variant == 100 && pickup.subtype != 0
+        })
+        .collect();
+    if targets.iter().any(|index| {
+        let pickup = &state.room.pickups[*index];
+        pickup.save_byte_abd != Some(0)
+            || pickup.shop_price.is_some()
+            || pickup.spawn_seed == 0
+            || pickup.morph_links.as_ref().is_some_and(|links| !links.known_empty())
+    }) {
+        unowned_leaf(state, id, 0x52549b);
+        return Ok(());
+    }
+    //5C51E0: backdrop 0x17 selects pool14 by room type; 581310 then maps it.
+    let pool_room = if state.room.appearance.backdrop_id == 0x17 {
+        14
+    } else {
+        room_type
+    };
+    for index in targets {
+        //500A2A..56 advances the old seed once; Init 4FF6B8 then draws the
+        //new seed's local RNG35 for 5C51E0's 581590(pool, decrease).
+        let seed = items::Rng::new(state.room.pickups[index].spawn_seed, [1, 21, 20]).raw();
+        let pools = state.item_pools.as_mut().expect("checked pools");
+        let pool = pools.room_pool(pool_room, &mut state.boot_lifecycle.shared);
+        let subtype = pools.collectible(pool, true, crate::room_spawns::next35(seed))?;
+        let pickup = &mut state.room.pickups[index];
+        pickup.morph_rerolled(
+            seed,
+            subtype,
+            state.game_update_count,
+            &mut state.actor_scheduler,
+        )?;
+        //52545E clears ABC after the Morph restored it.
+        pickup.touched = false;
+    }
+    Ok(())
+}
+
 fn unowned_leaf(state: &mut State, id: u32, source_pc: u32) {
     forget_unported_effect(state);
     crate::active_charges::note_effect(
