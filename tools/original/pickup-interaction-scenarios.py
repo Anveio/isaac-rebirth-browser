@@ -99,6 +99,14 @@ CASES = {
                  act('walk-to-clubs', ['w'], 30), act('after-clubs', [], 80),
                  act('use-clubs', ['q'], 4), act('after-clubs-use', [], 100)],
         interactions=['jera-pocket', 'card-collect', 'two-of-diamonds', 'two-of-clubs']),
+    # Blank Card + Jera without The Battery's overcharge in front of it.
+    'blank-card-rune': dict(
+        about='Blank Card (Space) copies the held Jera rune and keeps it; Q then uses Jera on the copies',
+        items=[BLANK_CARD], card=JERA, spawns=CORNER_PICKUPS,
+        actions=[act('settle', [], 10), act('settle-before-active', [], 20),
+                 act('use-active', ['space'], 4), act('after-active', [], 120),
+                 act('use-pocket', ['q'], 4), act('after-pocket', [], 120)],
+        interactions=['blank-card-jera', 'jera-after-blank-card']),
     # The two cards on their own, so they grade without Jera in front of them.
     'two-cards': dict(
         about='2 of Diamonds from the starting pocket (0 coins becomes 2), then a collected 2 of Clubs doubles the bomb',
