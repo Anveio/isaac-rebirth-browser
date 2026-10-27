@@ -228,7 +228,8 @@ fn tail(npc: &mut Npc, state: &mut MomState, friction: &mut f32) {
 /// 45) are zeroed; the stomp never hurts the body.
 fn zero_own_hits(npc: &mut Npc) {
     if npc.damage.pending_damage() > 0.0 {
-        npc.damage.zero_events(|event| event.source.entity_type == 45);
+        npc.damage
+            .zero_events(|event| event.source.entity_type == 45);
     }
 }
 
@@ -559,9 +560,7 @@ fn decide(
     if random.bounded(50) != 0 && (count > 5 || random.bounded(4) != 0) {
         return Ok(());
     }
-    if state.cooldown > 0
-        || foot_state(world, parent_id)?.cooldown != 0
-        || room_frame(world)? <= 60
+    if state.cooldown > 0 || foot_state(world, parent_id)?.cooldown != 0 || room_frame(world)? <= 60
     {
         return Ok(());
     }
