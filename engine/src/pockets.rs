@@ -244,8 +244,12 @@ fn duplicate_room_pickups(state: &mut State) -> Result<bool, String> {
         let Some(pickup) = state.room.pickups.iter().find(|pickup| pickup.id == source) else {
             return Ok(false);
         };
-        let (variant, subtype, anchor, seed) =
-            (pickup.variant, pickup.subtype, pickup.position, pickup.spawn_seed);
+        let (variant, subtype, anchor, seed) = (
+            pickup.variant,
+            pickup.subtype,
+            pickup.position,
+            pickup.spawn_seed,
+        );
         if matches!(variant, 100 | 350 | 340 | 370 | 380 | 50 | 51 | 60 | 360)
             || (variant, subtype) == (300, 29)
         {
@@ -258,8 +262,14 @@ fn duplicate_room_pickups(state: &mut State) -> Result<bool, String> {
             return Ok(false);
         };
         let mut shared = state.boot_lifecycle.shared.clone();
-        let position =
-            crate::roundworm::find_free_position(anchor, 40.0, &mut shared, &grid, &costs, &occupied)?;
+        let position = crate::roundworm::find_free_position(
+            anchor,
+            40.0,
+            &mut shared,
+            &grid,
+            &costs,
+            &occupied,
+        )?;
         state.boot_lifecycle.shared = shared;
         let handle = state.next_pickup;
         let copy = if matches!(variant, 70 | 300) {
