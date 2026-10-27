@@ -461,6 +461,12 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
 
+[Bounded NPC Freeze](npc-freeze.md) adds source owners and living plain
+10/12/13/18 Bra application/expiry hooks plus an opt-in `active-items
+--npc-freeze` gate. Build and live qualification are **UNRUN**. Boss/champion,
+linked/custom-base actors, frozen death, readmission and Fear remain open;
+the earlier target-free Bra pass does not qualify this new path.
+
 [PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
 champion creep. Its current-main666-based frozen `35edb299` passes a fresh
 Original/Browser fixed route: 173,135 entity fields, 419 paired checkpoints and

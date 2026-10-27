@@ -49,6 +49,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--count', type=int, default=1)
+    parser.add_argument('--npc-freeze', action='store_true',
+        help='Add target-bearing Mom\'s Bra fixed phases and the same first unfiltered OS draw')
     args = parser.parse_args()
     if not 0 <= args.count <= 64:
         parser.error('Fresh unfiltered OS count must be0..64')
@@ -74,11 +76,12 @@ def main():
     xml.write_bytes(xml_path.read_bytes())
     fixtures = {}
 
-    def fixture(key, pedestals):
+    def fixture(key, pedestals, npc_groups=()):
         if key in fixtures:
             return fixtures[key]
         groups = [dict(x=row[-2], y=row[-1], entries=[dict(type=5, variant=100 if len(row) == 3 else row[0],
                   subtype=row[0] if len(row) == 3 else row[1], weight=1.0)]) for row in pedestals]
+        groups.extend(copy.deepcopy(npc_groups))
         room['spawns'] = copy.deepcopy(groups)
         path = resources / f'active-{key}-special.stb'
         raw = rooms_codec.encode_bytes(rooms)
@@ -93,9 +96,13 @@ def main():
     idle = [dict(label='released-initial-appear-idle', keys=[], presentations=96)]
     cases = []
 
-    def declare(name, pedestals, actions, epoch, phase, entropy, uses):
+    def declare(name, pedestals, actions, epoch, phase, entropy, uses, npc_freeze=False, freeze_control=False):
         key = '-'.join('.'.join(str(value) for value in row[:-2]) for row in pedestals)
-        authored = fixture(key, pedestals)
+        npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
+                      for x, y, kind in ((11, 1, 12), (1, 1, 18))] if npc_freeze else []
+        if npc_freeze:
+            key += '-npc-freeze12-18'
+        authored = fixture(key, pedestals, npc_groups)
         cases.append(dict(name=name, publicMenuRoute='seeded-normal', publicRunSeed=RUN_SEED,
             publicSeedCode=SEED_CODE, bootEpochSeed=epoch, initialPhaseOffset=phase,
             entropy=entropy, sfxVolume=1,
@@ -119,6 +126,23 @@ def main():
                 unknown=['BackendPlayedAudioAndPCM', 'FullFrameBrowserPixels', 'Costumes',
                     'PrivateCallbackOrdering'],
                 missingWitnessPolicy='FAIL; every mismatch is retained, no injected state or redraw.')))
+        if npc_freeze:
+            cases[-1]['activeItems']['npcFreeze'] = dict(
+                schema='source-public-npc-freeze-v1', itemId=39, durationInput=220, cappedTimer=120,
+                control=freeze_control,
+                targets=[dict(type=12, variant=0, subtype=0), dict(type=18, variant=0, subtype=0)],
+                required=['LiveUnchampionedUnlinkedTargetsPastAppear', 'Held39Charge3AndPhysicalSpace',
+                    'MovingTargetBeforeUse', 'HorfShooterProgressBeforeUse', 'UnchangedIdentityCountAndHp',
+                    'FullAndFast120To119Boundary', 'EveryTimerDecrementAndFastHold',
+                    'FrozenAiAndSpriteHold', 'ReducedFullMotionAndExactFastPreview',
+                    'Timer1To0ColorAndFlagBoundary', 'NextFullResume'],
+                unknown=['FrozenDeathAndSfx137', 'BossLockout', 'LinkedPropagation',
+                    'NegativeDurationAndReapplication', 'RoomOrContinueReadmission', 'FullFramePixels'])
+            if freeze_control:
+                cases[-1]['activeItems']['npcFreeze']['required'] = [
+                    'SameActualLiveTargetsWithoutSpace', 'Held39Charge3', 'NoTEMP39OrDischarge',
+                    'ZeroFreezeTimerAndFlag', 'OrdinaryBaseOwnerRetained',
+                    'MovingTargetAndHorfShooterProgress']
 
     single = lambda item: [(item, 6, 5)]
     fixed = 'Fixed declared public input'
@@ -147,6 +171,18 @@ def main():
     #A second active replaces the first and drops it back as a pedestal.
     declare('swap-45-282-phase1', [(45, 6, 5), (282, 5, 6)],
             idle + acquire('first') + acquire('second', 'a', 'west') + use('use', [], 24), 12713, 1, fixed, [282])
+    #Same public acquisition transport, shortened only in this opt-in tape.
+    #Both games must actually acquire charge3 and admit both live targets.
+    freeze_actions = idle + acquire()[:2] + use('freeze-use', [], 300)
+    if args.npc_freeze:
+        for phase in (0, 1):
+            declare(f'moms-bra-39-npc-freeze-fixed-phase{phase}', single(39), freeze_actions,
+                    12713, phase, fixed, [39], npc_freeze=True)
+        control_actions = copy.deepcopy(freeze_actions)
+        for action in control_actions:
+            action['keys'] = [key for key in action['keys'] if key != 'space']
+        declare('moms-bra-39-npc-freeze-no-space-control-phase0', single(39), control_actions,
+                12713, 0, fixed, [], npc_freeze=True, freeze_control=True)
     with (output / 'os-entropy.jsonl').open('x') as journal:
         for index in range(args.count):
             raw = os.urandom(4)
@@ -160,6 +196,9 @@ def main():
             declare(f'how-to-jump-282-fresh-os-epoch{suffix}', single(282),
                     idle + acquire() + use('use-moving', ['a'], 30), epoch, choice['initialPhaseOffset'],
                     choice, [282])
+            if args.npc_freeze:
+                declare(f'moms-bra-39-npc-freeze-fresh-os-epoch{suffix}', single(39), freeze_actions,
+                        epoch, choice['initialPhaseOffset'], choice, [39], npc_freeze=True)
     result = dict(schema=1, suite='active-items', cases=cases,
         source='Declared free active pedestals in the base start room of public seeded run 12713/B91Y6ZEV, '
             'walked onto and used with public Space. Fresh OS epochs are journaled before either game runs.')
