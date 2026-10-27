@@ -126,6 +126,7 @@ def main():
     parser.add_argument('--sfx-volume', type=float, default=0, help='Owned public SFXVolume option, 0..1; admission still occurs when muted')
     parser.add_argument('--music-volume', type=float, default=0, help='Owned public MusicVolume option, 0..1')
     parser.add_argument('--trace-every-frame', action='store_true', help='Request graphics observer continuous draw/presentation tracing')
+    parser.add_argument('--gl-trace-requests', action='store_true', help='The state observer arms graphics snapshot frames through gl-trace/request; every released frame then draws')
     parser.add_argument('--render-all', action='store_true', help='Draw and present every released frame (gate ISAAC_CLOCK_GATE_RENDER_ALL=1); implied by --gl-trace')
     parser.add_argument('--width', type=int, default=960, help='Original supported window width; larger values aid public subpixel diagnostics')
     parser.add_argument('--height', type=int, default=540, help='Original supported window height')
@@ -315,14 +316,19 @@ def main():
         env['LD_PRELOAD'] = str(gate) + ' ' + str(args.gl_trace.resolve()) + (' ' + os.environ['LD_PRELOAD'] if os.environ.get('LD_PRELOAD') else '')
         env['ISAAC_GL_TRACE_DIR'] = str(graphics_trace)
         env['ISAAC_GL_TRACE_CONTROL'] = str(graphics_trace / 'request')
-        # The graphics observer records submitted draws, so every released
-        # frame must still draw them (see foundation-clock-gate.c).
-        env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
+        # Unarmed, the observer records only room-cache draws into framebuffer
+        # objects and texture uploads, which a released frame still runs. An
+        # armed frame (every frame, or one an observer requests) records its
+        # default-framebuffer draws, so every released frame must still draw
+        # them (see foundation-clock-gate.c); without that the 12k-frame stage
+        # tapes software-render every frame at about a third of the speed.
+        if args.trace_every_frame or args.gl_trace_requests:
+            env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
         env.pop('ISAAC_GL_TRACE_STOP_AFTER_FRAME', None)
         if args.trace_every_frame:
             env['ISAAC_GL_TRACE_EVERY_FRAME'] = '1'
-    elif args.trace_every_frame:
-        raise SystemExit('--trace-every-frame requires --gl-trace')
+    elif args.trace_every_frame or args.gl_trace_requests:
+        raise SystemExit('--trace-every-frame and --gl-trace-requests require --gl-trace')
     if args.render_all:
         env['ISAAC_CLOCK_GATE_RENDER_ALL'] = '1'
     if args.audio_trace:

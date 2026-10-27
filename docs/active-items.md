@@ -232,7 +232,7 @@ other branches stay frontiers, as noted in the table.
 | 93 | The Gamekid | 6 | 200 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 97 | The Book of Sin | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 102 | Mom's Bottle of Pills | 6 | 0 | Partial | 5241D4: the item102 RNG draws a pill color (seed%9+1) for the pocket. With Starter Deck it draws a card. Unknown RNG history stays a frontier. |
-| 105 | The D6 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 105 | The D6 | 6 | 0 | Partial | `5253EE`: `582340` clears the item pool's selected bytes, then every live collectible pedestal with an item is rerolled in place by Morph `500A10(5,100,0,keepPrice)`: the old seed advances once (RNG 1,21,20) and Init's local draw selects from the room's pool (pool 14 on backdrop 0x17). Position, velocity, links, ABD and the Alternates frame survive; ABC (touched) is cleared. Passes `d6-105-reroll-phase0`. A pedestal with ABD set (its AC8 is not modeled), a shop price or unknown links records a `UseLeaf` frontier before any reroll. Room.Init (`5CED96`) calls `582340` too, so the port now clears the selected bytes at every Room.Init. |
 | 107 | The Pinking Shears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 111 | The Bean | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 123 | Monster Manual | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -250,7 +250,7 @@ other branches stay frontiers, as noted in the table.
 | 158 | Crystal Ball | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 160 | Crack the Sky | 4 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 164 | The Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 166 | D20 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 166 | D20 | 6 | 0 | Missing | Not ported yet. `5238AB` Morphs every pickup in place to a random variant (`Random(6)` picks hearts to chests, then card, pill and trinket overrides); shops, pedestals, priced pickups and the chest and heart variants take their own branches. Space leaves the charge and records a frontier. |
 | 171 | Spider Butt | 2 | 120 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 175 | Dad's Key | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 177 | Portable Slot | 0 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -258,9 +258,9 @@ other branches stay frontiers, as noted in the table.
 | 186 | Blood Rights | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 192 | Telepathy For Dummies | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 282 | How to Jump | 0 | 14 | Complete | Landing search (5c7e50/5c7080), TEMP282 interpolation, no grid/entity collision while airborne, Jump clip, 517798 landing. |
-| 283 | D100 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 284 | D4 | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 285 | D10 | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 283 | D100 | 6 | 0 | Missing | Not ported yet (`523453`). Space leaves the charge and records a frontier. |
+| 284 | D4 | 6 | 0 | Missing | Not ported yet (`523099`). Space leaves the charge and records a frontier. |
+| 285 | D10 | 1 | 0 | Missing | Not ported yet (`522F87`). Space leaves the charge and records a frontier. |
 | 286 | Blank Card | 4 | 0 | Partial | Runs only with an empty card slot (UseItem "Pickup"). Holding a card is a frontier: card effects are not ported. |
 | 287 | Book of Secrets | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 288 | Box of Spiders | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |

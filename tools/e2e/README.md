@@ -527,7 +527,13 @@ comparator then grades the port's walls with
 [`wall-quads.mjs`](../foundation/wall-quads.mjs): every room the port entered
 must equal one of the original's 44-quad wall cache draws (patch source rects,
 destinations and flips), in entry order. It is off by default and enabled per
-suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it.
+suite in [`suites.mjs`](suites.mjs); `stage-exit` grades it. The cache draws
+target framebuffer objects, so the clock gate still drops released frames'
+default-framebuffer draws under the observer, and the trace costs no render
+time. Only an observer armed to record whole frames (`--trace-every-frame`,
+or a state observer that writes `gl-trace/request` and passes
+`--gl-trace-requests`) makes every frame draw; a request without that flag
+exits 96.
 
 ### Route recorder
 

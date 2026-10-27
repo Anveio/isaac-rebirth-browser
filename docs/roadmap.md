@@ -543,7 +543,7 @@ actives. Bulk item imports are owned by the user's import workflow.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
-| #837 | P2 | Sandbox Blank Card + Jera: duplicated pickups land in different places and one fewer; extra grey star on use | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
+| #837 | P2 | Sandbox Blank Card + Jera: a large grey star covers the held Jera rune after use (placement and count now match) | playtest 2026-10-27 `playtest/c273690/sandbox-blank-card-jera-battery.mp4` |
 
 ## Pocket items
 
