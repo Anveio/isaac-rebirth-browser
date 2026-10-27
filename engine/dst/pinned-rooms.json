@@ -111,5 +111,21 @@
     "reaches": [
       "champion:11 on stage 5"
     ]
+  },
+  {
+    "name": "coverage-mom-kill",
+    "code": "7WEVL3X9",
+    "stage": 6,
+    "room": 0,
+    "template": [
+      5,
+      1062
+    ],
+    "seed": 1220311709128585829,
+    "reaches": [
+      "npc:45",
+      "removed:45",
+      "cleared:5 on stage 6"
+    ]
   }
 ]

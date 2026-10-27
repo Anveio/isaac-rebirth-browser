@@ -102,6 +102,8 @@ pub struct Npc {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mega_maw: Option<crate::mega_maw::MegaMawState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mom: Option<crate::mom::MomState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wall_creep: Option<crate::wall_creep::WallCreepState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub squirt: Option<crate::squirt::SquirtState>,
@@ -996,6 +998,7 @@ impl Npc {
             chub: None,
             gurdy_jr: None,
             mega_maw: None,
+            mom: None,
             wall_creep: None,
             squirt: None,
             wall_hugger: None,

@@ -74,7 +74,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Seeds, RNG and shared MT](#seeds-rng-and-shared-mt) | Partial | Seed codec, run/stage/item streams and shared MT owner; consumer alignment incomplete | 6 |
 | [Floor generation](#floor-generation) | Partial | Normal Basement I/II, Caves I/II and Depths I/II source; live Depths qualification open | 0 |
 | [Rooms, doors and transitions](#rooms-doors-and-transitions) | Partial | Four base rectangle sizes; eight ordinary/special room types and admitted bosses | 3 |
-| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor source through Depths I into Depths II; Mom is not ported; Caves I/II arrival evidence retains its artifact scope | 4 |
+| [Stage progression](#stage-progression) | Partial | Boss clear award and trapdoor source through Depths I into Depths II; Mom is port-only (no live comparison) and her clear ends the run at the menu without the cutscene; Caves I/II arrival evidence retains its artifact scope | 4 |
 | [Player](#player) | Partial | Normal Isaac movement, stats cache, health, death | 3 |
 | [Weapons and tears](#weapons-and-tears) | Partial | Tears plus a set of weapon items and synergies | 1 |
 | [Bombs](#bombs) | Partial | Placement, fuse, blast, Troll/Mega conversion | 0 |
@@ -232,7 +232,12 @@ and secret/shop surprise-miniboss rules, with Depths backdrop, door and render
 geometry. Depths I layout and descent have no live Original comparison.
 Depths II (stage 6) is imported as data: its node runs 584240's Mom-only
 chain (one primary word, then Mom 1060). Neither Depths floor has a live
-Original comparison, and Mom's boss room is refused at its door.
+Original comparison. Mom (45.0/45.10) is ported from ai 4d3960: her room
+loses its doors, the foot stomps and the door parts open eyes, reach in
+and summon. Her first clear on a profile without achievement 4 takes
+5ca068's ending path (counters, awards 4-6, run deleted, menu) without the
+cutscene; later clears take the stage 1-5 trapdoor, which names the
+unimported Womb I and stays refused.
 Floors are data in the [level framework](levels.md): stage nodes carry the
 progression (name, trapdoor edge, contract) and stages.xml chapters carry the
 room set, backdrop, overlay, music and boss chain. New floors are imported by
@@ -240,7 +245,7 @@ filling those tables, not by bespoke code paths.
 Missing: Cellar, Womb and later stage generation, curses (Labyrinth, Lost,
 Darkness, Unknown, Maze, Blind), XL floors.
 
-Next: qualify Depths I and II against the Original; Mom (45); Cellar
+Next: qualify Depths I and II and Mom against the Original; Cellar
 generation and unlock; curses.
 
 No open bugs.
@@ -283,14 +288,16 @@ seeds now generate Caves I; Double Trouble and selected-wall catalogue
 qualification remain separate. PR780 adds source admission from Caves II
 into Depths I; no fixture takes that exit yet and no live Depths I Original
 comparison is claimed. Depths I's trapdoor now descends into Depths II,
-whose Mom boss room is refused at its door, so no run leaves Depths II.
-Missing: Mom, Womb and later steps, alternate stages and endings.
+where Mom's clear ends the run at the menu (ending 3 is not played) or,
+on a profile with achievement 4, opens a trapdoor to the unimported Womb I.
+Missing: the ending cutscene, Womb and later steps, alternate stages and
+endings.
 
 Next: coordinate later-stage admission with the level workstream (#413).
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #413 | P1 | Source descent reaches Depths I (#780) and Depths II, whose live layout/arrival comparisons remain open; Mom, Womb and later steps, Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
+| #413 | P1 | Source descent reaches Depths I (#780) and Depths II, whose live layout/arrival comparisons remain open; Mom's live comparison, Womb and later steps, Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
 | #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
 | #735 | P2 | The stage-transition nightmare omits the floor progress bar (finished floors, Isaac head, clock, skull) above the spotlight | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |

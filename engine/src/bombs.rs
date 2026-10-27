@@ -1112,6 +1112,27 @@ pub(crate) fn explode_with_copied_source(
     )
 }
 
+/// Game554490 with the line check off and DamageFlags4 (Mom's stomp 4d4864).
+/// The caller owns the >=100 shake draw that precedes the blast.
+pub(crate) fn explode_unchecked(
+    state: &mut State,
+    position: WorldVector,
+    radius: f32,
+    damage: f32,
+    source: crate::combat::DamageSource,
+) -> Result<(), String> {
+    explode_with_kind(
+        state,
+        position,
+        radius,
+        damage,
+        source,
+        None,
+        crate::combat::DamageKind::Bomb,
+        false,
+    )
+}
+
 /// TNT's caller has no source Entity and disables554490's line-check input.
 pub(crate) fn explode_tnt(state: &mut State, position: WorldVector) -> Result<(), String> {
     explode_with_kind(

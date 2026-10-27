@@ -182,3 +182,47 @@ pub(crate) fn add_counter(
     )?;
     apply(state, mutation)
 }
+
+/// Persistent::Award 5bd5e0 on the active profile.
+pub(crate) fn award(state: &mut crate::State, id: u32) -> Result<(), String> {
+    let catalog = state
+        .persistent_catalog
+        .0
+        .as_ref()
+        .cloned()
+        .ok_or("Persistent Challenge catalogue owner is unknown")?;
+    let profile = state
+        .profiles
+        .get(usize::from(state.profile - 1))
+        .ok_or("Persistent profile slot is absent")?;
+    let mutation = crate::persistent::prepare_award(
+        profile,
+        &profile.collected_history,
+        state
+            .persistent_runtime
+            .ok_or("Persistent live dirty/inhibit history is unknown")?,
+        &catalog,
+        id,
+    )?;
+    apply(state, mutation)
+}
+
+/// 594fe0, a won run: loss streak 94 back to 0, win streak 21 up one, and
+/// the best streak 22 raised to it (an unsigned compare).
+pub(crate) fn record_win(state: &mut crate::State) -> Result<(), String> {
+    let counter = |state: &crate::State, index: usize| -> Result<i32, String> {
+        state
+            .profiles
+            .get(usize::from(state.profile - 1))
+            .and_then(|profile| profile.counters.get(index).copied())
+            .ok_or_else(|| format!("Persistent counter {index} is absent"))
+    };
+    let losses = counter(state, 94)?;
+    add_counter(state, 94, losses.wrapping_neg())?;
+    add_counter(state, 21, 1)?;
+    let (wins, best) = (counter(state, 21)?, counter(state, 22)?);
+    if wins as u32 > best as u32 {
+        add_counter(state, 22, wins.wrapping_sub(best))?;
+    }
+    Ok(())
+}

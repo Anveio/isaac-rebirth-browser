@@ -565,7 +565,9 @@ export class Renderer {
       ctx.save();
       ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
       // Wall Creep: sprite rotation +2cc onto its wall, and +2fd on a side wall.
-      if (npc.wallCreep) ctx.rotate(npc.wallCreep.rotation * Math.PI / 180);
+      // Mom's door parts turn +2cc to face the room from their doorway.
+      const rotation = npc.wallCreep?.rotation ?? npc.mom?.rotation ?? 0;
+      if (rotation) ctx.rotate(rotation * Math.PI / 180);
       ctx.scale(npc.flipX ? -1 : 1, npc.wallCreep?.flipY ? -1 : 1);
       this.assets.draw(ctx, npc.actor, npc.animation, 0, 0, npc.animationClock, { scale, color });
       // ANM2 overlay slot (Gemini's head) draws over the main clip.
