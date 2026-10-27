@@ -58,6 +58,11 @@ def integer(value):
     return value
 
 
+def boolean(value):
+    assert type(value) is bool, 'Actual boolean owner required'
+    return value
+
+
 def f32(value):
     assert type(value) in (int, float) and math.isfinite(value), 'Actual finite numeric owner required'
     return struct.unpack('<f', struct.pack('<f', value))[0]
@@ -175,7 +180,7 @@ def browser_rows():
                 clip=clip, frame=frame,
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
             if freeze_contract is not None:
-                row['npcFreeze'] = browser_freeze(state)
+                row['npcFreeze'] = browser_freeze(state, integer(value['gameplayPresentation']))
             yield integer(value['gameplayPresentation']), row
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
 
@@ -218,17 +223,32 @@ def native_freeze(observation):
                 duration=integer(row['duration']), remaining=integer(row['remaining'])) for row in actual['timedColors']],
             ai=[integer(actor['npcStateFrame']), integer(actor['npcFrameAge'])],
             shooter=[integer(actor['npcProjectileCooldown']), integer(actor['npcProjectileDelay'])],
-            preview=actual['preview']))
+            preview=actual['preview'], statusAvailable=True))
     assert not measured, 'Every independent Native freeze actor must join the actual room list'
     return result
 
 
-def browser_freeze(state):
+def browser_freeze(state, gp):
     result = dict(fullUpdates=integer(state['gameUpdateCount']),
                   systemCounter=integer(state['systemClock']['systemCounter']), actors=[])
     for actor in state['room']['npcs']:
-        status = actor['status']
-        assert status['frontier'] is None, 'Actual Browser status frontier remains unclosed'
+        status = actor.get('status')
+        # Older artifacts have no status owner. Preserve their actual body
+        # and base fields; missing status words must fail as unavailable,
+        # never become zero/false or stop the entire actual journal read.
+        status_values = {}
+        for field, decode in (
+                ('currentFriction', lambda value: None if value is None else f32(value)),
+                ('freezeTimer', integer), ('baseUpdateAdmitted', boolean),
+                ('frozen', boolean), ('applicationLockout', integer)):
+            try:
+                assert type(status) is dict and field in status, 'Missing status owner'
+                status_values[field] = decode(status[field])
+            except (KeyError, TypeError, ValueError, AssertionError) as error:
+                status_values[field] = dict(unavailable=f'Npc.status.{field}', reason=str(error))
+        frontier = (status.get('frontier', dict(unavailable='Npc.status.frontier'))
+                    if type(status) is dict else dict(unavailable='Npc.status.frontier'))
+        status_available = frontier is None and not any(type(value) is dict for value in status_values.values())
         shooter = actor.get('shooter')
         result['actors'].append(dict(
             key=[integer(actor[key]) for key in ('kind', 'variant', 'subtype', 'spawnSeed')],
@@ -236,10 +256,7 @@ def browser_freeze(state):
             presentedPosition=vector(actor['presentedPosition']), velocity=vector(actor['velocity']),
             hp=f32(actor['hp']), maxHp=f32(actor['maxHp']), baseFriction=f32(actor['baseFriction']),
             friction=f32(actor['friction']),
-            currentFriction=f32(status['currentFriction']) if status['currentFriction'] is not None else None,
-            freezeTimer=integer(status['freezeTimer']),
-            baseUpdateAdmitted=status['baseUpdateAdmitted'],
-            frozen=status['frozen'], applicationLockout=integer(status['applicationLockout']),
+            **status_values, statusAvailable=status_available,
             state=integer(actor['state']), frameAge=integer(actor['frameAge']),
             animation=actor['animation'], animationClock=f32(actor['animationClock']),
             animationPlaying=actor['animationPlaying'], visible=actor['visible'], dead=actor['dead'],
@@ -252,6 +269,8 @@ def browser_freeze(state):
                 for row in actor['spriteColor']['stack']],
             ai=[integer(actor['frameAge'])],
             shooter=[integer(shooter['cooldown']), integer(shooter['delay'])] if shooter is not None else None))
+        check('Own:freeze actual status owner available', status_available, gp=gp)
+        check('Own:freeze status frontier closed', frontier, None, gp)
     return result
 
 
@@ -269,6 +288,7 @@ def freeze_witnesses(name, rows):
     full_steps, fast_steps, boundary, resumed, post_fast = set(), set(), set(), set(), set()
     release_full_seen = set()
     application_phase, first_full_gp, first_fast_gp = None, None, None
+    unavailable_status_presentations = 0
     control = freeze_contract['control']
     previous = None
     prior_gp = None
@@ -298,6 +318,17 @@ def freeze_witnesses(name, rows):
         check(f'{name}:freeze unchanged target HP', now_hp, health, gp)
         held |= player['activeId'] == 39 and player['activeCharge'] == 3
         used |= any(row[0] == 39 for row in player['temporary']) and player['activeCharge'] == 0
+        if not all(actor['statusAvailable'] for actor in actors.values()):
+            unavailable_status_presentations += 1
+            # Movement/shooter observations before the declared first Space
+            # remain usable without asserting any missing status value.
+            if not space_windows or gp < space_windows[0][0]:
+                moved.update(key for key, actor in actors.items() if key[0] == 18 and any(actor['velocity']))
+                preuse_shooter.add(tuple(actors[(12, 0, 0)]['shooter']))
+            if control:
+                check(f'{name}:freeze control no TEMP39 or discharge', not any(row[0] == 39 for row in player['temporary']) and (player['activeId'] != 39 or player['activeCharge'] == 3), gp=gp)
+            previous, prior_gp = None, gp
+            continue
         active = any(actor['frozen'] for actor in actors.values())
         if control:
             check(f'{name}:freeze control has no positive timer', [actor['freezeTimer'] for actor in actors.values()], [0] * len(actors), gp)
@@ -305,7 +336,7 @@ def freeze_witnesses(name, rows):
             check(f'{name}:freeze control no TEMP39 or discharge', not any(row[0] == 39 for row in player['temporary']) and (player['activeId'] != 39 or player['activeCharge'] == 3), gp=gp)
             if name == 'Own':
                 check('Own:freeze control retains ordinary Base owner', [actor['baseUpdateAdmitted'] for actor in actors.values()], [False] * len(actors), gp)
-        if first is None and not active:
+        if first is None and not active and (not space_windows or gp < space_windows[0][0]):
             moved.update(key for key, actor in actors.items() if key[0] == 18 and any(actor['velocity']))
             preuse_shooter.add(tuple(actors[(12, 0, 0)]['shooter']))
         if active and first is None:
@@ -403,7 +434,8 @@ def freeze_witnesses(name, rows):
         check(f'{name}:freeze control observed complete target tape', roster is not None and max(rows, default=0) > 500)
         check(f'{name}:freeze control observed moving actor', (18, 0, 0) in moved)
         check(f'{name}:freeze control observed Horf shooter progression', len(preuse_shooter) > 1)
-        return dict(control=True, applicationPhase=None, applicationPresentation=None)
+        return dict(control=True, applicationPhase=None, applicationPresentation=None,
+                    unavailableStatusPresentations=unavailable_status_presentations)
     check(f'{name}:freeze actual use and discharge', used)
     check(f'{name}:freeze moving target before use', (18, 0, 0) in moved)
     check(f'{name}:freeze Horf shooter progresses before use', len(preuse_shooter) > 1)
@@ -418,7 +450,8 @@ def freeze_witnesses(name, rows):
     check(f'{name}:freeze postexpiry Fast witnessed for each target', post_fast, expected)
     check(f'{name}:freeze complete expiry margin', first is not None and max(rows, default=0) > first + 260 and last_frozen is not None and max(rows) > last_frozen + 20)
     return dict(control=False, applicationPhase=application_phase, applicationPresentation=first,
-                firstFullPresentation=first_full_gp, firstFastPresentation=first_fast_gp)
+                firstFullPresentation=first_full_gp, firstFastPresentation=first_fast_gp,
+                unavailableStatusPresentations=unavailable_status_presentations)
 
 
 readback = json.loads(args.capture_readback.read_text())
