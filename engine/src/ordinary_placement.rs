@@ -262,13 +262,14 @@ pub(crate) fn player_update_frontier(
     if owner
         .temporary_collectibles
         .iter()
-        .any(|record| record.cooldown == 1 && record.item_id != 282)
+        .any(|record| record.cooldown == 1 && !matches!(record.item_id, 65 | 282))
     {
         return unknown("reached TEMP expiry callback517580");
     }
     //515F40's selected source domain. This is an operator readset, not an
     //inventory restriction; unrelated actual permanent/TEMP entries are fine.
-    for id in [0, 65, 160, 77, 299, 93, 298, 214, 326] {
+    //TEMP65 (Anarchist Cookbook) is ported: active_items::cookbook_tick.
+    for id in [0, 160, 77, 299, 93, 298, 214, 326] {
         if owner
             .temporary_collectibles
             .iter()

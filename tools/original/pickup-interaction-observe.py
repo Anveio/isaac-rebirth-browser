@@ -108,6 +108,17 @@ def observe(pid, context):
             if not 1 <= width <= 28 or not 1 <= height <= 16:
                 raise ValueError('Unexpected room grid shape')
             report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height}
+            # Room+30 GridEntity* by grid index: poop (type +8 == 14) cells
+            # with their variant (+C) and collision class (+3C).
+            cells = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, 8 * width * height))
+            poops = []
+            for index, pointer in enumerate(cells):
+                if pointer:
+                    grid = read(pointer, 0x40)
+                    kind, variant = struct.unpack_from('<II', grid, 0x8)
+                    if kind == 14:
+                        poops.append([index, variant, struct.unpack_from('<I', grid, 0x3c)[0]])
+            report['gridPoops'] = poops
             manager = room + 0x15d0
             count = u32(manager + 0x74)
             if count > 512:

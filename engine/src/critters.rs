@@ -244,7 +244,7 @@ fn add_velocity(effect: &mut SpriteEffect, impulse: WorldVector) {
 }
 
 /// Room+1c..28: the authored interior rectangle in world units.
-fn room_rect(state: &State) -> (WorldVector, WorldVector) {
+pub(crate) fn room_rect(state: &State) -> (WorldVector, WorldVector) {
     let (width, height) = state
         .room
         .descriptor
