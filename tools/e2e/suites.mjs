@@ -76,7 +76,7 @@ export const SUITES = [
     '--helper-arg', '--contrived', '--helper-arg', 'Y9QL8QZM-larry-active',
     '--helper-arg', '--contrived', '--helper-arg', 'EV9BP18Q-descent', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
-    '--native-frame-timeout', '120', '--gl-trace'],
+    '--native-frame-timeout', '120', '--gl-trace', '--concurrent-captures'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II and Caves I arrivals'),
   // The three-floor descent (Basement I, II and Caves I's Mega Fatty, each with
   // each game's own keys) runs about three times stage-exit's per-case frames,
@@ -84,7 +84,7 @@ export const SUITES = [
   suite('stage-descent', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
     '--helper-arg', '--contrived', '--helper-arg', 'EV9BP18Q-caves2', '--helper-arg', '--count', '--helper-arg', '1',
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
-    '--native-frame-timeout', '120', '--gl-trace'],
+    '--native-frame-timeout', '120', '--gl-trace', '--concurrent-captures'],
     'Three-floor descent through Basement I, Basement II and Caves I bosses, then the Caves II arrival'),
   // The starting bomb damages a cracked doorway into a bedroom (18/19) and
   // scatters wood particles; the door stays shut (bedroom-door-scenarios.py).
