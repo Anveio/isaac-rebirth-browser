@@ -36,6 +36,16 @@ naturally), so the combos run; pools and natural drops stay fresh-profile.
 The original admits the 26x14 Start Room record as the run's first room
 (28x16 grid, Isaac enters at world 320,400) and so does the port.
 
+The `blank-card-pocket-conversion` case starts with Blank Card and 2 of
+Clubs, walks onto Little Baggy, then presses Space. Native must actually
+convert the held card to a pill and use Blank Card without doubling bombs.
+All strict comparisons remain required, including the currently unported
+conversion. A separate Browser contract reports whether the active operands
+were unknown at Space; if so, retained historical words must not create a
+new temporary effect, change inventory or discharge. A future owned
+conversion is graded by the strict Native rows and need not retain a
+frontier. This conditional check does not qualify Little Baggy conversion.
+
 ## Blank Card and runes
 
 In base Rebirth, **Blank Card (286, 4 charges) triggers the held rune**: with

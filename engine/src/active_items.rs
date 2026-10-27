@@ -515,6 +515,14 @@ pub(crate) fn advance(
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(None);
     };
+    //Before_advance retains the last values when a reached writer loses
+    //D74/D78 ownership. Those historical words cannot select a new Use
+    //body or establish its full-charge guard; keep their typed frontier.
+    if !crate::active_charges::owns(owner, crate::active_charges::Word::ActiveId)
+        || !crate::active_charges::owns(owner, crate::active_charges::Word::Charge)
+    {
+        return Ok(None);
+    }
     //52a640 reads held/triggered action9 even on the Entity+318 word bit4000
     // fast path (the same little-endian byte+319 bit40 predicate). The
     // ported leaves have no held-use or frame-recharge leaf; an actual new
@@ -709,17 +717,13 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
         }
         Leaf::BlankCard => {
-            let held_card = state
-                .player_items
-                .as_ref()
-                .and_then(|owner| owner.held_pockets.as_ref())
-                .map(|held| held.slots[0])
-                .map(|slot| slot.card && slot.id != 0);
             let held_slot = state
                 .player_items
                 .as_ref()
                 .and_then(|owner| owner.held_pockets.as_ref())
+                .filter(|held| held.frontier.is_none())
                 .map(|held| held.slots[0]);
+            let held_card = held_slot.map(|slot| slot.card && slot.id != 0);
             match held_card {
                 Some(false) => {}
                 //523611 UseCard526DB0 with the held card; the card stays held.

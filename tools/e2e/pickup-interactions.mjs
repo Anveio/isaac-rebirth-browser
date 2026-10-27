@@ -48,7 +48,8 @@ function nativeObservation(observation) {
     room: { gridWidth: observation.room.gridWidth, gridHeight: observation.room.gridHeight },
     player: { position: player.position, inventory: player.inventory, hearts: player.health.slice(0, 2),
       activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
-      pockets: player.heldPockets.map(slot => slot.id), owned: player.ownedItems, animationGuard: player.animationGuard },
+      pockets: player.heldPockets.map(slot => slot.id), pocketTags: player.heldPockets.map(slot => slot.tag),
+      owned: player.ownedItems, animationGuard: player.animationGuard },
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
     npcs: live.filter(entity => entity.type >= 10 && entity.type < 1000)
@@ -74,6 +75,10 @@ function portObservation() {
       hearts: [state.player.maxHp, state.player.hp],
       activeId: items?.activeId ?? 0, activeCharge: items?.activeCharge ?? 0, reserveCharge: items?.reserveCharge ?? 0,
       pockets: items?.heldPockets ? items.heldPockets.slots.map(slot => slot.id) : [0, 0],
+      pocketTags: items?.heldPockets?.slots.map(slot => Number(slot.card)) ?? null,
+      pocketFrontier: items?.heldPockets?.frontier ?? null,
+      activeWordFrontiers: items?.activeChargeHistory?.unowned ?? null,
+      temporary: items?.temporaryCollectibles ?? null,
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) } },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected)
@@ -174,6 +179,12 @@ export const INTERACTIONS = {
     covered: obs => obs['after-clubs-use'].player.inventory.bombs === 2 * obs['after-clubs'].player.inventory.bombs },
   'blank-card-card': { labels: ['settle', 'use-active', 'after-active'],
     covered: obs => obs['after-active'].player.activeCharge === 0 && obs['after-active'].player.pockets[0] === 23 },
+  'blank-card-pocket-conversion': { labels: ['settle', 'after-conversion', 'use-active', 'after-active'],
+    covered: obs => obs['settle'].player.pockets[0] === 23 && obs['settle'].player.pocketTags[0] === 1
+      && obs['after-conversion'].player.pockets[0] > 0 && obs['after-conversion'].player.pocketTags[0] === 0
+      && obs['after-active'].player.activeCharge === 0
+      && obs['after-active'].player.inventory.bombs === obs['after-conversion'].player.inventory.bombs,
+    portContract: activeOwnershipContract },
   'room-2x2': { labels: ['settle'], covered: obs => obs['settle'].room?.gridWidth === 28 },
   // Every free pickup keeps its place and at least one changes kind.
   'd20-reroll': { labels: ['settle', 'use-active', 'after-active'],
@@ -200,6 +211,29 @@ export const INTERACTIONS = {
     covered: obs => obs['use-active'].tears.length >= 10 || obs['after-active'].tears.length >= 10 },
   'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
 };
+
+// This is a conditional runtime ownership contract, separate from the strict
+// Native comparisons above. A future owned conversion still needs those rows;
+// it does not have to retain today's unimplemented-conversion frontier.
+function activeOwnershipContract(observations) {
+  const before = observations['after-conversion']?.player;
+  const after = observations['after-active']?.player;
+  if (!before || !after) return { status: 'fail', unknownOwnershipObserved: false,
+    rows: [{ field: 'active-ownership-observations', passed: false }] };
+  const frontier = before.activeWordFrontiers;
+  const unknown = frontier === null || Object.hasOwn(frontier, 'activeId') || Object.hasOwn(frontier, 'charge');
+  if (!unknown) return { status: 'not-applicable', unknownOwnershipObserved: false, rows: [],
+    scope: 'Active ID and charge are owned; the strict Native rows grade the conversion and use.' };
+  const rows = [
+    ['active-unknown.inventory', before.inventory, after.inventory],
+    ['active-unknown.temporary', before.temporary, after.temporary],
+    ['active-unknown.charge', before.activeCharge, after.activeCharge],
+    ['active-unknown.frontier', before.activeWordFrontiers, after.activeWordFrontiers],
+  ].map(([field, expected, actual]) => ({ field, expected, actual,
+    passed: JSON.stringify(expected) === JSON.stringify(actual) }));
+  return { status: rows.every(row => row.passed) ? 'pass' : 'fail', unknownOwnershipObserved: true, rows,
+    scope: 'Observed unknown active operands at the physical Space request; no historical active body may run. This does not qualify Little Baggy conversion.' };
+}
 
 // --- Browser capture -----------------------------------------------------------
 const keyNames = { Return: 'Enter', Tab: 'Tab', Down: 'ArrowDown', Up: 'ArrowUp', Left: 'ArrowLeft', Right: 'ArrowRight', space: 'Space' };
@@ -339,9 +373,11 @@ try {
       try { covered = Boolean(spec.covered(nativeObservations)); } catch { covered = false; }
       const graded = rows.filter(row => spec.labels.includes(row.label));
       const failed = graded.filter(row => !row.passed);
-      const status = !covered ? 'uncovered' : graded.length && !failed.length ? 'pass' : 'fail';
+      const portContract = spec.portContract?.(captured.observations);
+      const status = !covered ? 'uncovered' : graded.length && !failed.length && portContract?.status !== 'fail' ? 'pass' : 'fail';
       result.interactions[name] = { status, checks: graded.length, failed: failed.length,
-        firstFailures: failed.slice(0, 4).map(row => `${row.label} ${row.field}: original ${JSON.stringify(row.native)} port ${JSON.stringify(row.port)}`) };
+        firstFailures: failed.slice(0, 4).map(row => `${row.label} ${row.field}: original ${JSON.stringify(row.native)} port ${JSON.stringify(row.port)}`),
+        ...(portContract ? { portContract } : {}) };
       (report.interactions[name] ??= []).push({ case: declaration.name, status });
     }
     result.status = !result.errors.length && Object.values(result.interactions).every(item => item.status === 'pass') ? 'pass' : 'fail';
