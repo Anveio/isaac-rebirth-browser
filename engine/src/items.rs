@@ -208,6 +208,10 @@ pub struct ItemPools {
     pub selected: Vec<bool>,
     pub room_routes: [i32; 23],
     pub pill_effects: [i32; 10],
+    /// ItemPool+0x9E0 (Game+95B0): one identified byte per pill color, set
+    /// by 528446 on every admitted pill use. Missing legacy data is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pill_identified: Option<[bool; 10]>,
     ///Missing legacy data or an unrepresented GetTrinket callback is unknown.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub trinkets: Option<TrinketPool>,
@@ -291,6 +295,7 @@ impl ItemPools {
                 -1, -1, 1, -1, 0, 2, -1, 5, -1, -1, 12, 0, 6, -1, 3, 4, 0, 0, 0, 0, 8, 0, 1,
             ],
             pill_effects,
+            pill_identified: Some([false; 10]),
             trinkets,
         })
     }

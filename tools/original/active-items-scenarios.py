@@ -20,7 +20,8 @@ RUN_SEED, SEED_CODE = 12713, 'B91Y6ZEV'
 ACTIVES = {33: 'bible', 34: 'belial', 35: 'necronomicon', 45: 'yum-heart', 58: 'shadows',
            78: 'revelations', 282: 'how-to-jump', 286: 'blank-card', 292: 'satanic-bible',
            85: 'deck-of-cards', 102: 'moms-bottle-of-pills', 133: 'guppys-paw', 146: 'prayer-card',
-           296: 'converter', 291: 'flush'}
+           296: 'converter', 291: 'flush', 39: 'moms-bra', 40: 'kamikaze',
+           41: 'moms-pad', 97: 'book-of-sin', 158: 'crystal-ball'}
 
 
 def load(name, path):

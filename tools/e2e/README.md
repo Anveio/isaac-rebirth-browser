@@ -535,6 +535,16 @@ or a state observer that writes `gl-trace/request` and passes
 `--gl-trace-requests`) makes every frame draw; a request without that flag
 exits 96.
 
+### Concurrent captures
+
+A paired case captures the original, then the browser. State-pair suites that
+pass `--concurrent-captures` run the two side by side: the original keeps the
+clock gate's virtual clock on its own Xvfb and the paused page advances only
+by explicit steps, so host load changes neither tape, only wall time. Cases
+with real-time audio holds stay sequential, and the gate refuses the flag with
+audio capture, Save/Continue or a reused original. `stage-exit` and
+`stage-descent` opt in.
+
 ### Route recorder
 
 Scenario helpers that need the port's own closed-loop keys (stage-exit and
