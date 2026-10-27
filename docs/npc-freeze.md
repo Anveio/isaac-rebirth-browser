@@ -42,8 +42,12 @@ when its timer becomes0. It does not mean the actor remains frozen. Actors
 never successfully frozen retain their existing update path. That ordinary
 path currently stores pre-reset friction and predicts `P + V/2`; correcting
 all ordinary actors is separate work requiring its own regression evidence.
-The first reached Fast/full callback uses the actor's actual stored friction;
-application does not fabricate a corrected pre-application value.
+`status.currentFriction` separately records the source470 reset after each
+mapped common Full, without changing ordinary motion. It starts unavailable;
+Bra admission requires this proof and a living actor past Appear. Successful
+application transfers the proven source owner into the admitted path before
+the first Fast/full callback. The old AI-scaled field is never promoted as
+Native current470. Morph and room restoration invalidate the prior proof.
 
 Frozen death remains unresolved. Static source confirms damage stores HP
 before Kill4464C0 sets dead31F, then Die445C60 tests positive400 before its
@@ -58,7 +62,13 @@ source's selected linked types. Neither branch is admitted here. Clear-status
 4452E0 is not assumed at generic death or room transition. Morph, room
 exit/reentry, Save/Continue status carry/reset, frozen damage/death effects,
 boss/champion/linked behavior, other statuses and complete MT/RGBA remain open.
-The admitted Continue domain still refuses saved NPC bodies.
+The admitted Continue domain still refuses saved NPC bodies. A reached-freeze
+actor's morph explicitly refuses, including after expiry. Ordinary room exit
+keeps its existing path; an attempted return that would restore a living
+reached-freeze actor refuses before either room or saved body changes. Dead
+or removed actors do not trigger that readmission guard. This does not infer
+whether Native saves, clears or carries status. Exit/revisit qualification
+remains UNRUN.
 
 Mom's Pad is separate: Fear4450D0 uses418/flag0x800 and resets two pathfinder
 vectors. Its variant0 leaf reads **config39's220**, although item41's own
@@ -86,8 +96,12 @@ Each game must independently witness held39/charge3, physical use/discharge,
 live stable target identities/HP, a moving target and Horf shooter progression
 before use, positive application, full-only countdown, AI/ANM suppression,
 reduced full integration, exact Fast prediction, timer1-to0, resumed full AI
-and post-expiry Fast. The no-Space control must keep statuses clear and make
-no temporary39/use/discharge. The long post-use tape retains expiry margin.
+and post-expiry Fast. The initial application separately grades either the
+actual Fast120 physical/velocity hold and preview, or Full119 reduced
+integration/AI/ANM hold, then requires the first Full and Fast callbacks.
+Only each game's observed application phase is recorded. The no-Space control
+must keep statuses clear and make no temporary39/use/discharge. The long
+post-use tape retains expiry margin.
 The comparer uses the actual game full-counter change; direct per-NPC callback
 entry instrumentation is not added. Grid correction, skipped callbacks and
 any missing mandatory witness remain failures, never inferred equality.

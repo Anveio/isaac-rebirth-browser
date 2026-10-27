@@ -11,9 +11,13 @@ pub enum Frontier {
     UnsupportedActor,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NpcStatus {
+    /// Source Entity+470 after an observed mapped BaseUpdate reset. The
+    /// legacy Npc.friction field stores AI-scaled friction before admission.
+    /// None does not license substituting an assumed base friction.
+    pub current_friction: Option<f32>,
     /// Signed Entity+400, independent of the timed colour stack.
     pub freeze_timer: i32,
     /// Signed Entity+420, shared by status applications (not a freeze cooldown).
@@ -78,7 +82,9 @@ pub(crate) fn can_add_freeze(npc: &Npc, flags: u32, duration: i32) -> bool {
     if npc.parent.is_some() || npc.child.is_some() {
         return false;
     }
-    flags & 1 != 0 || npc.status.application_lockout > 0 || living_plain(npc)
+    flags & 1 != 0
+        || npc.status.application_lockout > 0
+        || (living_plain(npc) && npc.status.current_friction.is_some())
 }
 
 /// AddFreeze444970 after the complete room walk has passed preflight.
@@ -95,6 +101,13 @@ pub(crate) fn add_freeze(npc: &mut Npc, flags: u32, duration: i32) {
     };
     npc.status.frozen = true;
     npc.status.base_update_admitted = true;
+    // The prior mapped Full proved +470's reset value independently of
+    // legacy Npc.friction. AddFreeze itself does not change Native friction;
+    // this transfers that proven owner before the first reached Full/Fast.
+    npc.friction = npc
+        .status
+        .current_friction
+        .expect("complete freeze preflight requires source current friction");
     // 42f510 multiplies integer40 by the stored binary32 1/255.
     let color = Color::tinted([0.22, 0.22, 0.22, 1.0], 40.0 * (1.0 / 255.0));
     let base = npc.base_color();

@@ -304,7 +304,7 @@ export interface Room {
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
     spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
-    status: {freezeTimer: number; applicationLockout: number; frozen: boolean; baseUpdateAdmitted: boolean;
+    status: {currentFriction: number | null; freezeTimer: number; applicationLockout: number; frozen: boolean; baseUpdateAdmitted: boolean;
       frontier: "frozenDeath445c60" | "unsupportedActor" | null};
     parent?: number; child?: number;
     shooter?: {cooldown: number; delay: number};

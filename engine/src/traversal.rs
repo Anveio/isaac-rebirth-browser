@@ -303,6 +303,25 @@ pub(crate) fn advance_transition(
         crate::combat::advance_player_immunity(state);
         return Ok(true);
     }
+    // Room.Save/Load status packing is unclosed. Refuse only readmission
+    // of a living reached-freeze actor, before changing either room or its
+    // stored body. Ordinary exits and unrelated saved rooms keep their path.
+    if let Some(npc) = state
+        .persisted_rooms
+        .get(&transition.target_room)
+        .and_then(|room| {
+            room.npcs
+                .iter()
+                .find(|npc| !npc.dead && !npc.removed && npc.status.base_update_admitted)
+        })
+    {
+        let error = format!(
+            "NPC {} freeze source frontier: Room.Save/Load status readmission",
+            npc.id
+        );
+        state.room_transition = Some(transition);
+        return Err(error);
+    }
     // 5ddf20 tests the Player's bf4 (50a5b0) before an ordinary style0
     // departure. A guarded extra animation is released (5de3a3) before the
     // Player's Update (5ddf87), so ordinary walking presentation owns the
@@ -330,7 +349,14 @@ pub(crate) fn advance_transition(
     state.knife_query_partition = None;
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
-        Some(room) => room,
+        Some(mut room) => {
+            // Even a never-frozen actor's prior Full470 proof must not cross
+            // the unclosed restore. A new mapped Full can establish it again.
+            for npc in &mut room.npcs {
+                npc.status.current_friction = None;
+            }
+            room
+        }
         // Room.Init's pit linking (5cf550) follows its grid construction in
         // admit_room_pickups.
         None => {

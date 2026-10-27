@@ -862,12 +862,21 @@ impl Npc {
         default_animation: &str,
         shared: &mut Mt19937,
     ) -> Result<(), String> {
+        if self.status.base_update_admitted {
+            return Err(crate::npc_status::refuse(
+                self,
+                crate::npc_status::Frontier::UnsupportedActor,
+            ));
+        }
         let config = content::entity(kind, variant);
         if config.stage_hp != 0.0 {
             return Err(format!(
                 "morph target {kind}.{variant} needs the stage HP formula"
             ));
         }
+        // Morph47f500 has its own friction/status reload rules. A previous
+        // Full's current470 proof cannot cross that unclosed boundary.
+        self.status.current_friction = None;
         self.kind = kind;
         self.variant = variant;
         self.subtype = 0;

@@ -204,7 +204,8 @@ def native_freeze(observation):
             lifetimeId=integer(actor['sequenceId']), position=vector(actual['physicalPosition']),
             presentedPosition=vector(actor['position']), velocity=vector(actor['velocity']),
             hp=f32(actor['hp']), maxHp=f32(actor['maxHp']), baseFriction=f32(actual['baseFriction']),
-            friction=f32(actor['friction']), freezeTimer=integer(actor['statusCountdown']),
+            friction=f32(actor['friction']), currentFriction=f32(actor['friction']),
+            freezeTimer=integer(actor['statusCountdown']),
             immune=bool(flags & 1), frozen=bool(flags & 0x20), applicationLockout=integer(actual['applicationLockout']),
             state=integer(actor['npcState']), frameAge=integer(actor['npcFrameAge']),
             animation=actor['animation'], animationClock=f32(actor['animationFrame']),
@@ -234,7 +235,9 @@ def browser_freeze(state):
             lifetimeId=integer(actor['id']), position=vector(actor['position']),
             presentedPosition=vector(actor['presentedPosition']), velocity=vector(actor['velocity']),
             hp=f32(actor['hp']), maxHp=f32(actor['maxHp']), baseFriction=f32(actor['baseFriction']),
-            friction=f32(actor['friction']), freezeTimer=integer(status['freezeTimer']),
+            friction=f32(actor['friction']),
+            currentFriction=f32(status['currentFriction']) if status['currentFriction'] is not None else None,
+            freezeTimer=integer(status['freezeTimer']),
             baseUpdateAdmitted=status['baseUpdateAdmitted'],
             frozen=status['frozen'], applicationLockout=integer(status['applicationLockout']),
             state=integer(actor['state']), frameAge=integer(actor['frameAge']),
@@ -265,6 +268,7 @@ def freeze_witnesses(name, rows):
     moved, held, used = set(), False, False
     full_steps, fast_steps, boundary, resumed, post_fast = set(), set(), set(), set(), set()
     release_full_seen = set()
+    application_phase, first_full_gp, first_fast_gp = None, None, None
     control = freeze_contract['control']
     previous = None
     prior_gp = None
@@ -280,7 +284,7 @@ def freeze_witnesses(name, rows):
         value = player['npcFreeze']
         actors = target_map(value)
         #The initial room admission may precede its actual spawned actors.
-        if set(actors) != expected and first is None:
+        if set(actors) != expected and roster is None:
             previous, prior_gp = None, gp
             continue
         check(f'{name}:freeze exact target roster', set(actors), expected, gp)
@@ -316,14 +320,45 @@ def freeze_witnesses(name, rows):
                     check(f'{name}:freeze target past Appear before use', actor['state'] != 1 and actor['visible'] and not actor['dead'], gp=gp)
                     check(f'{name}:freeze ordinary unlinked living target', not actor['boss'] and not actor['champion'] and actor['parentNull'] and actor['childNull'] and not actor['raw494'] and actor['hp'] > 0, gp=gp)
                 full = value['fullUpdates'] != rows[prior_gp]['npcFreeze']['fullUpdates']
+                application_phase = 'Full' if full else 'Fast'
+                if full:
+                    first_full_gp = gp
+                else:
+                    first_fast_gp = gp
+                for key, actor in actors.items():
+                    before = previous[key]
+                    source_friction = f32(before['currentFriction'])
+                    check(f'{name}:freeze application source current470 owner', source_friction, before['baseFriction'], gp)
+                    check(f'{name}:freeze application current470 equals base46c', actor['currentFriction'], actor['baseFriction'], gp)
+                    check(f'{name}:freeze application transfers current470', actor['friction'], actor['currentFriction'], gp)
+                    check(f'{name}:freeze application suppresses AI', [actor['state'], actor['ai'], actor['shooter']], [before['state'], before['ai'], before['shooter']], gp)
+                    check(f'{name}:freeze application suppresses sprite', [actor['animation'], actor['animationClock'], actor['animationPlaying']], [before['animation'], before['animationClock'], before['animationPlaying']], gp)
+                    if full:
+                        reduced = f32(source_friction * f32(.01))
+                        velocity = [f32(word * reduced) for word in before['velocity']]
+                        check(f'{name}:freeze first Full application velocity', actor['velocity'], velocity, gp)
+                        check(f'{name}:freeze first Full application integrates position', actor['position'], [f32(p + v) for p, v in zip(before['position'], velocity)], gp)
+                        check(f'{name}:freeze first Full application presents physical position', actor['presentedPosition'], actor['position'], gp)
+                    else:
+                        check(f'{name}:freeze immediate Fast application holds physical position', actor['position'], before['position'], gp)
+                        check(f'{name}:freeze immediate Fast application holds velocity', actor['velocity'], before['velocity'], gp)
+                        preview = [f32(p + f32(f32(v * source_friction) / f32(2))) for p, v in zip(actor['position'], actor['velocity'])]
+                        check(f'{name}:freeze immediate Fast application uses current470', actor['presentedPosition'], preview, gp)
                 check(f'{name}:freeze first timer120/119 follows actual phase',
                       [actor['freezeTimer'] for actor in actors.values()], [119 if full else 120] * len(actors), gp)
         if active:
             last_frozen = gp
             for actor in actors.values():
+                check(f'{name}:freeze live current470 remains base46c', actor['currentFriction'], actor['baseFriction'], gp)
+                check(f'{name}:freeze live friction follows source current470', actor['friction'], actor['currentFriction'], gp)
                 check(f'{name}:freeze actual timed colour entry', any(row['priority'] == 255 and row['color'] == freeze_color and row['remaining'] == actor['freezeTimer'] for row in actor['colorStack']), gp=gp)
         if previous is not None and prior_gp is not None and gp == prior_gp + 1:
             full = value['fullUpdates'] != rows[prior_gp]['npcFreeze']['fullUpdates']
+            if first is not None:
+                if full and first_full_gp is None:
+                    first_full_gp = gp
+                elif not full and first_fast_gp is None:
+                    first_fast_gp = gp
             check(f'{name}:freeze consecutive system phase clock', value['systemCounter'] - rows[prior_gp]['npcFreeze']['systemCounter'], 1, gp)
             check(f'{name}:freeze full phase clock bound', value['fullUpdates'] - rows[prior_gp]['npcFreeze']['fullUpdates'] in (0, 1), gp=gp)
             for key, actor in actors.items():
@@ -335,7 +370,7 @@ def freeze_witnesses(name, rows):
                     check(f'{name}:freeze sprite held', [actor['animation'], actor['animationClock'], actor['animationPlaying']], [before['animation'], before['animationClock'], before['animationPlaying']], gp)
                     if full:
                         full_steps.add(key)
-                        reduced = f32(f32(before['friction']) * f32(.01))
+                        reduced = f32(f32(before['currentFriction']) * f32(.01))
                         velocity = [f32(word * reduced) for word in before['velocity']]
                         check(f'{name}:freeze reduced Full velocity', actor['velocity'], velocity, gp)
                         check(f'{name}:freeze integrated Full position', actor['position'], [f32(p + v) for p, v in zip(before['position'], velocity)], gp)
@@ -368,17 +403,22 @@ def freeze_witnesses(name, rows):
         check(f'{name}:freeze control observed complete target tape', roster is not None and max(rows, default=0) > 500)
         check(f'{name}:freeze control observed moving actor', (18, 0, 0) in moved)
         check(f'{name}:freeze control observed Horf shooter progression', len(preuse_shooter) > 1)
-        return
+        return dict(control=True, applicationPhase=None, applicationPresentation=None)
     check(f'{name}:freeze actual use and discharge', used)
     check(f'{name}:freeze moving target before use', (18, 0, 0) in moved)
     check(f'{name}:freeze Horf shooter progresses before use', len(preuse_shooter) > 1)
     check(f'{name}:freeze actual positive application', first is not None)
+    check(f'{name}:freeze actual first application phase retained', application_phase in ('Full', 'Fast'))
+    check(f'{name}:freeze first Full boundary immediately witnessed', first is not None and first_full_gp in (first, first + 1))
+    check(f'{name}:freeze first Fast boundary immediately witnessed', first is not None and first_fast_gp in (first, first + 1))
     check(f'{name}:freeze Full witnessed for each target', full_steps, expected)
     check(f'{name}:freeze Fast witnessed for each target', fast_steps, expected)
     check(f'{name}:freeze timer1-to0 witnessed for each target', boundary, expected)
     check(f'{name}:freeze next-full resume witnessed for each target', resumed, expected)
     check(f'{name}:freeze postexpiry Fast witnessed for each target', post_fast, expected)
     check(f'{name}:freeze complete expiry margin', first is not None and max(rows, default=0) > first + 260 and last_frozen is not None and max(rows) > last_frozen + 20)
+    return dict(control=False, applicationPhase=application_phase, applicationPresentation=first,
+                firstFullPresentation=first_full_gp, firstFastPresentation=first_fast_gp)
 
 
 readback = json.loads(args.capture_readback.read_text())
@@ -412,7 +452,7 @@ for gp in paired:
             check('NPC freeze paired target families', set(own_targets), set(native_targets), gp)
             for key in sorted(set(native_targets) & set(own_targets)):
                 for field in ('key', 'position', 'presentedPosition', 'velocity', 'hp', 'maxHp',
-                    'baseFriction', 'friction', 'freezeTimer', 'frozen', 'applicationLockout', 'state',
+                    'baseFriction', 'friction', 'currentFriction', 'freezeTimer', 'frozen', 'applicationLockout', 'state',
                     'frameAge', 'animation', 'animationClock', 'animationPlaying', 'visible', 'dead',
                     'raw494', 'boss', 'champion', 'parentNull', 'childNull', 'entityCollisionClass',
                     'spriteColor', 'colorStack'):
@@ -430,10 +470,11 @@ for item in contract['uses']:
     check(f'actual Native active {item} use record', uses[item] > 0)
 if 282 in contract['uses']:
     check('actual Native How to Jump airborne presentations', landed > 0)
+freeze_observations = {}
 if freeze_contract is not None:
     for name, rows in (('Native', native), ('Own', own)):
         try:
-            freeze_witnesses(name, rows)
+            freeze_observations[name] = freeze_witnesses(name, rows)
         except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
             check(f'actual {name} freeze source witnesses', repr(error), 'complete typed independent witnesses')
 after = {str(path): digest(path) for path in inputs}
@@ -447,6 +488,8 @@ result = dict(schema=1, status='fail' if failures else 'pass', case=case['name']
           'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.'
           + (' Additive independent bounded living NPC freeze state/motion/colour and actual phase-clock witnesses; '
              'the no-Space control retains ordinary NPC behavior. Frozen death, bosses, links and readmission remain open.' if freeze_contract else ''))
+if freeze_contract is not None:
+    result['npcFreezeWitnesses'] = freeze_observations
 raw = (json.dumps(result, indent=2, allow_nan=False) + '\n').encode()
 args.output.write_bytes(gzip.compress(raw, mtime=0) if args.output.suffix == '.gz' else raw)
 print(json.dumps(dict(status=result['status'], checks=result['checks'], failures=result['failures'])))

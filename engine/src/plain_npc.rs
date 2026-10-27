@@ -460,6 +460,10 @@ fn advance_full(
     npc.velocity = npc.velocity * friction;
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
+    // Source BaseUpdate resets +470 from base+46c on every mapped Full.
+    // Track that owner separately until Bra admits the corrected motion
+    // path; never-frozen actors keep their existing Npc.friction behavior.
+    npc.status.current_friction = Some(npc.base_friction);
     npc.friction = if npc.status.base_update_admitted {
         // 4471ee restores +470 from base+46c after the integration.
         npc.base_friction
