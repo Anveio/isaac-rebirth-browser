@@ -970,3 +970,12 @@ release and empty hold in two fixed phases plus the first unfiltered OS boot
 and phase. It retains the complete bank before selection and requires actual
 D98/3054/30D0 and body witnesses. Private helper calls and positive trinkets are
 outside the endpoint grade. See [the route and qualification limits](../../docs/pockets-e2e.md).
+
+`active-items --npc-fear` adds a Horf-only Mom's Pad fixture to the unchanged
+default bank and optional Freeze cases. It declares fixed phases0/1, the first
+unfiltered recorded OS boot/phase and a no-Space control before either game.
+The canonical capture requires independent418/800/420, sourceEffectMode0,
+two embedded vectors, color/shooter/ANM and admitted Full/Fast/expiry owners.
+Both fixed cases must actually cover Full and Fast application in each game;
+missing coverage stays failed. Gaper live fleeing and a nonzero-vector reset
+remain unqualified. [Route, replay and evidence limits](../../docs/npc-fear.md).
