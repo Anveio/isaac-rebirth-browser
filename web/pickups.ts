@@ -72,17 +72,16 @@ export class PickupRenderer {
       const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
       const overrides = Object.fromEntries(Array.from({length: 3}, (_, layer) => [layer, { RedTint, GreenTint, BlueTint }]));
       const layerOffset = { x: attachment.XPosition, y: attachment.YPosition };
-      //The one copied7E0 sprite has a Sparkle main and static named overlay.
-      //Native render visits layer0/1/2; keep their order for both pill/rune
-      //layer0 and card-front layer2, independently of the Sparkle clock.
-      for (let layer = 0; layer < 3; layer++) {
-        this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", "Sparkle", x, y, presentation.animationFrame, {
-          layers: [layer], overrides, layerOffset,
-        });
-        this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", presentation.pocket.overlay, x, y, presentation.pocket.overlayFrame, {
-          layers: [layer], overrides, layerOffset,
-        });
-      }
+      //The one copied7E0 sprite has a Sparkle main and a static named
+      //overlay. The whole main animation renders first and the overlay on
+      //top of it, so the StarFlash (Sparkle layer1) shows only around the
+      //edges of the pill, rune or card face, as in the original footage.
+      this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", "Sparkle", x, y, presentation.animationFrame, {
+        overrides, layerOffset,
+      });
+      this.assets.draw(ctx, "gfx/ui/ui_cardspills.anm2", presentation.pocket.overlay, x, y, presentation.pocket.overlayFrame, {
+        overrides, layerOffset,
+      });
       return;
     }
     const item = catalog.items.find(item => item.id === presentation.itemId && item.kind !== "trinket");
