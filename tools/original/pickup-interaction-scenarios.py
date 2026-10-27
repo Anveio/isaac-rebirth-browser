@@ -23,7 +23,7 @@ START_ROOM = 80  # 00.special rooms.stb: type1 variant2 'Start Room', 13x7
 
 # Collectibles and cards by base Rebirth id (items.xml / pocketitems.xml).
 BATTERY, OUIJA, BLANK_CARD = 63, 115, 286
-D20 = 166
+D20, D10 = 166, 285
 JERA, TWO_OF_CLUBS, TWO_OF_DIAMONDS = 29, 23, 24
 
 
@@ -33,6 +33,10 @@ def pickup(x, y, variant, subtype):
 
 DOORS_2X2 = [dict(x=x, y=y, enabled=True) for x, y in
              ((-1, 3), (-1, 10), (6, -1), (19, -1), (26, 3), (26, 10), (6, 14), (19, 14))]
+
+
+def npc(x, y, entity_type, variant=0):
+    return dict(x=x, y=y, entries=[dict(type=entity_type, variant=variant, subtype=0, weight=1.0)])
 
 
 def card(x, y, subtype):
@@ -126,6 +130,16 @@ CASES = {
         # An OS epoch often rolls a trinket (350) or a troll bomb, whose
         # loose pickups the port does not own yet; the fixed epoch avoids both.
         fixed_only=True),
+    # The D10 replaces each enemy with a random one at its place and health
+    # fraction; the replacement's first Update runs at once. Two Horfs (one
+    # a champion) keep the shared MT in step; after 51 presentations the
+    # fixed epoch rolls a Mulligan and a Maggot, both ported. Most other
+    # rolls (and so OS epochs) reach an unported enemy, a frontier.
+    'd10': dict(
+        about='The D10 (Space) rerolls the room enemies in place',
+        items=[D10], card=0, spawns=[npc(1, 3, 12), npc(11, 3, 12)],
+        actions=[act('settle', [], 51), act('use-active', ['space'], 4), act('after-active', [], 30)],
+        interactions=['d10-reroll'], fixed_only=True),
     'blank-card': dict(
         about='Blank Card (Space) mimics a held 2 of Clubs and keeps it; an empty Blank Card takes a Lil Battery',
         items=[BLANK_CARD], card=TWO_OF_CLUBS, spawns=[pickup(6, 1, 90, 0)],

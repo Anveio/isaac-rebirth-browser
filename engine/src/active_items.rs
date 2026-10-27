@@ -260,6 +260,13 @@ pub(crate) enum Leaf {
     /// other than a pedestal, trophy, bed or big chest is Morphed in place
     /// to a variant the shared Random draws; then UseItem.
     D20,
+    /// 522F87 (variant0 only): every live non-boss room enemy (444800,
+    /// not pending-dead 444950, not 17/33/28/68) is replaced by a random
+    /// enemy from the 670AC0 table (670B80 for a flyer) at its position and
+    /// velocity, with its health fraction; then UseItem. The Runtime owns
+    /// the replacement loop because each new enemy's immediate Update draws
+    /// from the shared Random between rolls (`d10_targets`, `d10_roll`).
+    D10,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -382,6 +389,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         book: None,
         leaf: Leaf::D20,
     },
+    ActiveUse {
+        id: 285,
+        book: Some(18),
+        leaf: Leaf::D10,
+    },
 ];
 
 pub(crate) fn ported(id: u32) -> Option<&'static ActiveUse> {
@@ -452,7 +464,17 @@ fn play_item_animation(state: &mut State, id: u32, variant0: bool, pickup_clip: 
     }
 }
 
-pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), String> {
+/// A Use whose leaf the Runtime finishes: the D10 replaces enemies and runs
+/// each new enemy's immediate Update before `finish_runtime_leaf`.
+pub(crate) struct RuntimeLeaf {
+    pub id: u32,
+    pub variant0: bool,
+}
+
+pub(crate) fn advance(
+    state: &mut State,
+    controls_enabled: bool,
+) -> Result<Option<RuntimeLeaf>, String> {
     //Only empty active0 and the ported leaves exclude the D30 reset/random
     //and D38 writers in522250. A requested unported active loses this input
     //proof before dispatch; no claim of actual callback execution is made.
@@ -466,14 +488,14 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         forget_unported_effect(state);
     }
     let Some(owner) = state.player_items.as_ref() else {
-        return Ok(());
+        return Ok(None);
     };
     //52a640 reads held/triggered action9 even on the Entity+318 word bit4000
     // fast path (the same little-endian byte+319 bit40 predicate). The
     // ported leaves have no held-use or frame-recharge leaf; an actual new
     // edge is required. Its guards are7d4/7d8, not the bf4 main-animation guard.
     let Some(row) = ported(owner.active_id) else {
-        return Ok(());
+        return Ok(None);
     };
     if !state.public_actions.active_triggered
         || !controls_enabled
@@ -481,12 +503,12 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         || owner.active_state_d80 != 0
         || owner.active_state_d84 != 0
     {
-        return Ok(());
+        return Ok(None);
     }
     let id = row.id;
     let config = items::definition(id).ok_or("ported active ItemConfig absent")?;
     if owner.active_charge != config.max_charges {
-        return Ok(());
+        return Ok(None);
     }
     //52AA00..1A: a live TEMP record of a zero-charge cooldown item refuses
     //the Use (How to Jump while it is still in the air).
@@ -497,7 +519,7 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
             .iter()
             .any(|record| record.item_id == id)
     {
-        return Ok(());
+        return Ok(None);
     }
     //522349 costume admission is empty for this actual config.5e4140 owns
     // a temporary record before the dispatch leaf; a zero authored cooldown
@@ -558,7 +580,25 @@ pub(crate) fn advance(state: &mut State, controls_enabled: bool) -> Result<(), S
         .player
         .entity_source
         .is_none_or(|source| source.variant == 0);
+    if row.leaf == Leaf::D10 {
+        return Ok(Some(RuntimeLeaf { id, variant0 }));
+    }
     use_leaf(state, row.leaf, id, variant0)?;
+    finish_use(state, id)?;
+    Ok(None)
+}
+
+/// The D10's 524C48 UseItem and the shared 5223C0 tail, after the Runtime
+/// replaced the enemies.
+pub(crate) fn finish_runtime_leaf(state: &mut State, leaf: RuntimeLeaf) -> Result<(), String> {
+    play_item_animation(state, leaf.id, leaf.variant0, false);
+    finish_use(state, leaf.id)
+}
+
+/// 5223C0: D6C |= the config cache flags, Evaluate511F10, the 3076 flag
+/// and 5295C0's discharge.
+fn finish_use(state: &mut State, id: u32) -> Result<(), String> {
+    let config = items::definition(id).ok_or("ported active ItemConfig absent")?;
     let owner = state.player_items.as_mut().expect("checked owner");
     owner.unevaluated_cache_flags |= config.cache_flags;
     let evaluate = owner.unevaluated_cache_flags != 0;
@@ -800,6 +840,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
             play_item_animation(state, id, variant0, false);
         }
+        Leaf::D10 => return Err("the D10 leaf runs through the Runtime".into()),
         Leaf::Flush => {
             //522A80 walks Room+1638, skipping Poop245 and Chub28 before
             //444810 and Mom's Hand213 after it. Fire33 sets bit10 in its
@@ -1148,6 +1189,100 @@ fn d20_variant(shared: &mut crate::mt::Mt19937, trinket22: Option<bool>) -> Opti
         return None;
     }
     Some(variant)
+}
+
+/// 670AC0: the D10's 45 ground replacements.
+const D10_ENEMIES: [u32; 45] = [
+    10, 11, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 34, 35, 38, 39, 40,
+    41, 55, 56, 57, 58, 59, 60, 61, 77, 80, 85, 86, 87, 88, 91, 94, 205, 206, 207, 208, 217,
+];
+/// 670B80: the 15 replacements of an enemy that flies (444860).
+const D10_FLYERS: [u32; 15] = [13, 14, 18, 25, 26, 29, 34, 38, 55, 56, 58, 59, 80, 86, 91];
+
+/// One D10 replacement: Spawn550A40(type, 0, old position, old velocity,
+/// no spawner, subtype0, seed), then its health fraction.
+pub(crate) struct D10Roll {
+    pub selector: crate::room_spawns::SpawnSelector,
+    pub velocity: crate::motion::WorldVector,
+    pub fraction: f32,
+}
+
+/// 522F8F..52309F, in Room+1638 order: 444800 (types10..999), not
+/// 444950 (pending damage378 above HP484), not Poop17, Fire33, Chub28 or
+/// 68, not dead (31F), and 49B890: not Gemini's cord 79.20, 228.10,
+/// 216.10, a parented 260.10, or a boss (+103D). None (after recording a
+/// frontier) when a candidate's damage owner is not finite.
+pub(crate) fn d10_targets(state: &mut State, id: u32) -> Option<Vec<u32>> {
+    let mut targets = Vec::new();
+    for npc in &state.room.npcs {
+        if npc.removed || !(10..=999).contains(&npc.kind) {
+            continue;
+        }
+        let pending = npc.damage.pending_damage();
+        if !pending.is_finite() || !npc.hp.is_finite() {
+            unowned_leaf(state, id, 0x523003);
+            return None;
+        }
+        if pending > npc.hp || matches!(npc.kind, 17 | 33 | 28 | 68) || npc.dead {
+            continue;
+        }
+        let excluded = matches!(
+            (npc.kind, npc.variant),
+            (79, 20) | (228, 10) | (216, 10)
+        ) || (npc.kind, npc.variant) == (260, 10) && npc.parent.is_some();
+        if excluded || npc.boss {
+            continue;
+        }
+        targets.push(npc.id);
+    }
+    Some(targets)
+}
+
+/// 524DC0..524E76 for the enemy at `index`: the clamped health fraction
+/// (1 without max health), Random(45) from 670AC0, Random(15) from 670B80
+/// for a flyer (grid collision class 0..3), then the spawn seed. None
+/// (after recording a frontier) when the drawn type has no ported family.
+pub(crate) fn d10_roll(state: &mut State, id: u32, index: usize) -> Result<Option<D10Roll>, String> {
+    let npc = &state.room.npcs[index];
+    let fraction = if npc.max_hp > 0.0 {
+        //42EFC0: maxss(0, f) then minss(1, ..), with SSE operand order.
+        let value = npc.hp / npc.max_hp;
+        let low = if 0.0 > value { 0.0 } else { value };
+        if 1.0 < low { 1.0 } else { low }
+    } else {
+        1.0
+    };
+    let (position, velocity, flyer) = (npc.position, npc.velocity, npc.grid_collision_class <= 3);
+    let shared = &mut state.boot_lifecycle.shared;
+    let mut kind = D10_ENEMIES[shared.bounded(45) as usize];
+    if flyer {
+        kind = D10_FLYERS[shared.bounded(15) as usize];
+    }
+    let seed = shared.next_u32();
+    let selector = crate::room_spawns::SpawnSelector {
+        group_index: 0,
+        grid_index: 0,
+        category: crate::room_spawns::SpawnCategory::Entity,
+        entity_type: kind as u16,
+        variant: 0,
+        subtype: 0,
+        position,
+        group_seed: seed,
+        spawn_seed: seed,
+    };
+    let context = crate::entities::SpawnContext {
+        stage: state.stage,
+        game_update_count: state.game_update_count,
+    };
+    if crate::entities::spawn(0, &selector, &context)?.is_none() {
+        unowned_leaf(state, id, 0x524e76);
+        return Ok(None);
+    }
+    Ok(Some(D10Roll {
+        selector,
+        velocity,
+        fraction,
+    }))
 }
 
 /// The D20 (5238AB). Every outcome is drawn on a copy of the shared MT and
