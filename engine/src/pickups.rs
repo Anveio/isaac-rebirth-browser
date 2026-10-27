@@ -497,6 +497,15 @@ pub struct Pickup {
     pub shop_price: Option<crate::shop::Price>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub morph_links: Option<MorphLinks>,
+    /// Pickup+AD4 door kick: the free active swap (50631A) sets 1 when a
+    /// room door is within 70 of the Player; the next full update (5071A9)
+    /// adds the kick and sets 2; the one after (5075E4) re-anchors and clears.
+    #[serde(default, skip_serializing_if = "is_zero_u8")]
+    pub door_kick_ad4: u8,
+}
+
+fn is_zero_u8(value: &u8) -> bool {
+    *value == 0
 }
 
 ///Game550ACD..ADA copies these words only for a nonnull spawner.
@@ -790,6 +799,7 @@ impl Pickup {
             chest: None,
             shop_price: None,
             morph_links: None,
+            door_kick_ad4: 0,
         })
     }
 
@@ -878,7 +888,7 @@ impl Pickup {
     }
 
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
-    pub fn advance(&mut self, phase: Phase, game_update: u32) {
+    pub fn advance(&mut self, phase: Phase, game_update: u32, door_kick: WorldVector) {
         if !self.removed
             && (self.variant == 100 || self.has_regular_physics())
             && phase == Phase::Interpolate
@@ -899,6 +909,11 @@ impl Pickup {
         {
             self.anchor_position = self.position;
         }
+        //506FAA/5075E4: the update after a door kick re-anchors in place.
+        if self.door_kick_ad4 == 2 {
+            self.anchor_position = self.position;
+            self.door_kick_ad4 = 0;
+        }
         if self.variant == 100
             || self
                 .shop_price
@@ -909,10 +924,16 @@ impl Pickup {
             // Pickup507170 assigns anchor-position before Base447190 applies
             // current friction to velocity and moves. Base restores configured
             // friction, then507029 multiplies it by the actual source .965.
-            self.velocity = WorldVector {
+            let mut pull = WorldVector {
                 x: self.anchor_position.x - self.position.x,
                 y: self.anchor_position.y - self.position.y,
-            } * self.current_friction;
+            };
+            //5071A9..507316 adds the caller's door kick once, then AD4=2.
+            if self.door_kick_ad4 == 1 {
+                pull = pull + door_kick;
+                self.door_kick_ad4 = 2;
+            }
+            self.velocity = pull * self.current_friction;
             self.position = self.position + self.velocity;
             self.presented_position = self.position;
             self.current_friction = self.configured_friction * 0.965;
@@ -1304,6 +1325,55 @@ fn drop_sound(state: &mut crate::State, index: usize) {
     }
 }
 
+/// The 6128e0 resize: `v*(n/|v|)`, a zero vector unchanged.
+fn resized(vector: WorldVector, length: f32) -> WorldVector {
+    let current = (vector.x * vector.x + vector.y * vector.y).sqrt();
+    if current > 0.0 {
+        vector * (length / current)
+    } else {
+        vector
+    }
+}
+
+/// The first room door slot (Room+E30, 561070 grid position) whose squared
+/// distance to the Player (+448) is under 4900 (`66C1E4`).
+pub(crate) fn door_near_player(state: &crate::State) -> Option<WorldVector> {
+    let player = crate::bombs::player_world(state);
+    let mut doors: Vec<_> = state.room.appearance.doors.iter().collect();
+    doors.sort_by_key(|door| door.slot);
+    doors
+        .into_iter()
+        .map(|door| door.world_position)
+        .find(|door| {
+            let (dx, dy) = (door.x - player.x, door.y - player.y);
+            dx * dx + dy * dy < 4900.0
+        })
+}
+
+/// 5071A9..50730A: for the first door near the Player, the pedestal is
+/// pushed 5 away from the door plus 3 away from the Player; no door, no kick.
+fn door_kick(state: &crate::State, position: WorldVector) -> WorldVector {
+    let Some(door) = door_near_player(state) else {
+        return WorldVector { x: 0.0, y: 0.0 };
+    };
+    let player = crate::bombs::player_world(state);
+    let away_door = resized(
+        WorldVector {
+            x: position.x - door.x,
+            y: position.y - door.y,
+        },
+        5.0,
+    );
+    let away_player = resized(
+        WorldVector {
+            x: position.x - player.x,
+            y: position.y - player.y,
+        },
+        3.0,
+    );
+    away_player + away_door
+}
+
 /// Full Pickup Update owns motion/friction; the manager owns its later grid
 /// pass. Fast4446a0 predicts and resolves its own ground preview directly.
 pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> Result<(), String> {
@@ -1318,7 +1388,12 @@ pub(crate) fn advance_actor(state: &mut crate::State, phase: Phase, id: u32) -> 
     if state.room.pickups[index].variant == 350 {
         return Err("loose350 callbacks are outside the admitted grant-only slice".into());
     }
-    state.room.pickups[index].advance(phase, state.game_update_count);
+    let door_kick = if state.room.pickups[index].door_kick_ad4 == 1 {
+        door_kick(state, state.room.pickups[index].position)
+    } else {
+        WorldVector { x: 0.0, y: 0.0 }
+    };
+    state.room.pickups[index].advance(phase, state.game_update_count, door_kick);
     if phase == Phase::Update {
         drop_sound(state, index);
     }
