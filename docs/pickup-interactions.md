@@ -81,6 +81,13 @@ authored room1 sandbox. Two-slot conversion, Starter Deck251, other grant and
 sound branches, complete shared MT, pixels and broader gameplay remain open.
 Earlier uncovered-route and V2 failures retain their separate scope.
 
+After rebase and formatting, frozen `3a75ef1e` (production `2e63bc64` /
+WASM `1dbb85c1`) passes a fresh build, focused browser runtime 2/2 and the
+same four-case fresh Original/Browser replay. All 330 comparison rows and
+complete normalized Port observations are byte-identical to `15700568`, as
+are the public bank, input tapes and resources. The Yum Heart comparison
+above keeps its separate qualified-artifact scope.
+
 Replay the [same input-only bank](../references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json)
 without drawing replacement epochs. First reconstruct its private fixture
 bytes from the local base resources in a new output directory, then replace
