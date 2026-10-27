@@ -248,7 +248,9 @@ Darkness, Unknown, Maze, Blind), XL floors.
 Next: qualify Depths I and II and Mom against the Original; Cellar
 generation and unlock; curses.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #863 | P2 | Hard run WPTB6SQK: next floor rolls no curse where the original shows Curse of the Unknown (hearts hidden) | playtest 2026-10-27 `playtest/bc70726/clear-award-none.mp4` |
 
 ## Rooms, doors and transitions
 
@@ -270,6 +272,7 @@ Next: complete supported-room reentry; devil/angel door after a boss.
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
 | #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
+| #865 | P2 | Entering an enemy room, the port draws the entry and spiked doors open where the original shows them shut | playtest 2026-10-27 `playtest/bc70726/clear-award-heart.mp4` |
 
 ## Stage progression
 
@@ -328,7 +331,7 @@ Next: transformations once their items exist.
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
 | #829 | P2 | Isaac's white blast-flash face is missing for 10 frames when a nearby bomb explodes | playtest 2026-10-27 `playtest/04e2421/bomb-spectral-tears.mp4` |
-| #852 | P2 | Kamikaze!: Isaac is hidden under the blast instead of drawn over it with the red damage tint (frames 397-402) | playtest 2026-10-27 `playtest/cfd8570/kamikaze.mp4` |
+| #852 | P2 | Kamikaze!: 2 explosion frames (399-400) still differ after #857 | playtest 2026-10-27 `playtest/bc70726/kamikaze.mp4` |
 
 ## Weapons and tears
 
@@ -544,6 +547,7 @@ actives. Bulk item imports are owned by the user's import workflow.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
+| #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
 
 ## Pocket items
 
