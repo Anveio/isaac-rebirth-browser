@@ -47,7 +47,8 @@ on source `3c11e2cf` pass fixed1 and the first recorded OS case; fixed0 and
 no-Space retain 188 and 88 AttackFly velocity failures. The four-case bank
 remains FAIL at 269,019 checks / 276 failures. Earlier reports stay failed,
 including their unavailable Native Info checks and withdrawn old Fast passes.
-Default target-free Bra/Pad and Browser focus/seed controls remain pending.
+Default target-free Bra/Pad controls pass 13,338 checks per build with unchanged
+ordered semantic values; Browser focus/seed passes 2/2.
 See [source scope, results and open qualification](../../docs/npc-freeze.md).
 
 Every suite mixes two kinds of cases:

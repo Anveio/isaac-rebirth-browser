@@ -469,7 +469,7 @@ the first recorded OS case; fixed0/no-Space retain 188/88 AttackFly
 velocity failures. The four-case bank remains **FAIL: 269,019 checks / 276
 failures**. Fresh main A/B loses no common passing rows and recovers 12,405
 common failures; older failed reports remain retained. Current target-free
-Bra/Pad and Browser focus/seed controls remain pending. Frozen death and living
+Bra/Pad controls pass 13,338 unchanged semantic checks per build; Browser focus/seed passes 2/2. Frozen death and living
 reached-status
 morph/reentry retain explicit frontiers; saved NPC restoration, boss/champion,
 linked/custom-base actors, negative/repeated application, Fear and complete

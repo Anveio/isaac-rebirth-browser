@@ -191,12 +191,17 @@ waive or replace either older failed report.
 
 ## Open qualification
 
-Current main/candidate target-free Bra39/Pad41 controls and Browser focus/seed
-checks are **pending**. Two default invocations omitted the `--npc-freeze`
-extension needed by the retained whole bank and failed during setup with zero
-cases; those failures are retained separately. The corrected four-case runs
-above use the same recorded bank. Earlier target-free item evidence retains
-its original artifact scope.
+The corrected target-free Bra39 and Pad41 controls pass on both current-main
+and candidate artifacts: 6,686 and 6,652 checks respectively, or 13,338 per
+build. All ordered semantic values, types and verdicts match. Exactly 13,336
+whole rows are identical; the two passing archive path/hash dictionaries keep
+their actual differences. Browser focus lifecycle and physical seed-entry
+release also pass 2/2 on the candidate.
+
+Two earlier default invocations omitted the `--npc-freeze` extension needed
+by the retained whole bank and failed during setup with zero cases. Those
+failures remain separate; the corrected captures replay the same bank.
+Earlier target-free item evidence keeps its original artifact scope.
 
 The complete Freeze gate remains unaccepted. Frozen death, living
 reached-status morph/reentry and saved-body restoration retain the frontiers above.
