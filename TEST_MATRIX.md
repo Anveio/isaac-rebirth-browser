@@ -285,6 +285,7 @@ Actual browser cases below are discovered from the executable browser scenario s
 
 | Executable browser case | Source |
 | --- | --- |
+| Epic Fetus renders its publicly spawned target and falling rockets | [epic-fetus-render.spec.ts](tools/tests/epic-fetus-render.spec.ts) |
 | authored stage banner matches the original text region and leaves gameplay enabled | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
 | pause composes original paper, actual seed and stats while freezing the run | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
 | original GPU shadow and light masks match all complete native targets for independent seeds and movement | [presentation.spec.ts](tools/tests/presentation.spec.ts) |
