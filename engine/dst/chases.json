@@ -226,8 +226,8 @@
   },
   {
     "out": "coverage-save-reload.json",
-    "from": null,
     "steps": 2000,
+    "extend": 0,
     "final_extend": 300,
     "stages": [
       [
