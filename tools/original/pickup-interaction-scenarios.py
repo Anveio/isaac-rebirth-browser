@@ -23,6 +23,7 @@ START_ROOM = 80  # 00.special rooms.stb: type1 variant2 'Start Room', 13x7
 
 # Collectibles and cards by base Rebirth id (items.xml / pocketitems.xml).
 BATTERY, OUIJA, BLANK_CARD = 63, 115, 286
+D20 = 166
 JERA, TWO_OF_CLUBS, TWO_OF_DIAMONDS = 29, 23, 24
 
 
@@ -116,6 +117,15 @@ CASES = {
                  act('walk-to-clubs', ['w'], 30), act('after-clubs', [], 80),
                  act('use-clubs', ['q'], 4), act('after-clubs-use', [], 60)],
         interactions=['two-of-diamonds', 'two-of-clubs']),
+    # The D20 rerolls every free pickup in place on the shared Random.
+    'd20': dict(
+        about='The D20 (Space) rerolls the room pickups in place',
+        items=[D20], card=0, spawns=CORNER_PICKUPS + [pickup(3, 3, 10, 1), pickup(9, 3, 10, 2), pickup(6, 1, 40, 1)],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        interactions=['d20-reroll'],
+        # An OS epoch often rolls a trinket (350) or a troll bomb, whose
+        # loose pickups the port does not own yet; the fixed epoch avoids both.
+        fixed_only=True),
     'blank-card': dict(
         about='Blank Card (Space) mimics a held 2 of Clubs and keeps it; an empty Blank Card takes a Lil Battery',
         items=[BLANK_CARD], card=TWO_OF_CLUBS, spawns=[pickup(6, 1, 90, 0)],
@@ -204,6 +214,8 @@ def main():
         stb_file = resources / f'{name}-special.stb'
         stb_file.write_bytes(stb)
         for suffix, epoch, phase in epochs:
+            if spec.get('fixed_only') and suffix != 'fixed':
+                continue
             cases.append(dict(
                 name=f'{name}-{suffix}', interaction=name, about=spec['about'],
                 bootEpochSeed=epoch, initialPhaseOffset=phase,
