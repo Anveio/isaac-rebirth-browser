@@ -192,9 +192,12 @@ First complete run (fresh original and browser, all paired presentations):
   away from that door plus 3 away from the Player, and AD4 becomes 2. The
   update after that re-anchors the pedestal where it stopped (`5075E4`).
   The port keeps this as `Pickup::door_kick_ad4`.
+- Flush!291 passes its fixed case, and the recorded `active-item-use`
+  route that acquires it in a room of fires now passes too (Fire33 sets
+  Entity318 bit 0x10, so `444810` skips it and nothing is flushed).
 - `active-item-use` keeps every Yum Heart field. Its failures are the
-  existing ones: two damaged-phase bomb-blast pedestal fields, Flush!291
-  and a fresh OS Chocolate Milk69 fire timer.
+  existing ones: two damaged-phase bomb-blast pedestal fields and fresh OS
+  passive fire-timer cases (Chocolate Milk69, Cursed Eye316).
 
 The passing cases cover each row's exercised path only. The Partial rows'
 other branches stay frontiers, as noted in the table.
@@ -263,7 +266,7 @@ other branches stay frontiers, as noted in the table.
 | 288 | Box of Spiders | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 289 | Red Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 290 | The Jar | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 291 | Flush! | 6 | 0 | Missing | Exercised by a natural `active-item-use` route, which stays red. |
+| 291 | Flush! | 6 | 0 | Partial | `522A4E` walks Room+1638, skips Poop245 and Chub28, requires `444810` (types 10..999, collision class, 494, dead, Entity318 bit 0x10), skips Mom's Hand213 and requires a non-boss NPC (`49B890`). Rooms with no such NPC (empty rooms, rooms of fires) are complete: only the UseItem tail runs. A candidate would be removed and replaced by a brown Poop245; Poop245's factory and AI (`48CFE0`) are not ported, so that path records a `UseLeaf` frontier, as does an NPC whose Entity318 owner is unknown. |
 | 292 | Satanic Bible | 6 | 0 | Complete | Two black hearts; no animation. |
 | 293 | Head of Krampus | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 294 | Butter Bean | 90 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |

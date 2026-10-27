@@ -230,6 +230,10 @@ pub(crate) enum Leaf {
     DeckOfCards,
     /// 5241D4: the item102 RNG draws a Pill, or a Card with Starter Deck251.
     MomsBottleOfPills,
+    /// 522A4E: every vulnerable non-boss room NPC except Poop245, Chub28
+    /// and Mom's Hand213 is removed and replaced by a Poop245 with the
+    /// shared seed and a brown colorize; then UseItem.
+    Flush,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -311,6 +315,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 102,
         book: None,
         leaf: Leaf::MomsBottleOfPills,
+    },
+    ActiveUse {
+        id: 291,
+        book: None,
+        leaf: Leaf::Flush,
     },
 ];
 
@@ -655,10 +664,46 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 Some(have) => grant_pocket(state, id, card_by_default != have)?,
             };
             if granted.is_none() {
-                unowned_leaf(state, id, if leaf == Leaf::DeckOfCards { 0x524417 } else { 0x5241e4 });
+                unowned_leaf(
+                    state,
+                    id,
+                    if leaf == Leaf::DeckOfCards {
+                        0x524417
+                    } else {
+                        0x5241e4
+                    },
+                );
             }
         }
         Leaf::DeckOfCards | Leaf::MomsBottleOfPills => {}
+        Leaf::Flush => {
+            //522A80 walks Room+1638, skipping Poop245 and Chub28 before
+            //444810 (types10..999, collision class, 494, dead, Entity318
+            //bit10) and Mom's Hand213 after it. Fire33 sets bit10 in its
+            //initializer, so a room of fires spawns nothing. Any remaining
+            //candidate would become Poop245, whose factory and AI48CFE0 are
+            //not ported, so it stays a frontier; so does an NPC whose
+            //Entity318 owner is unknown.
+            let candidate = state.room.npcs.iter().any(|npc| {
+                !npc.removed
+                    && !matches!(npc.kind, 245 | 28 | 213)
+                    && crate::target_eligibility::eligible_target(
+                        crate::target_eligibility::TargetEligibility {
+                            kind: npc.kind,
+                            collision_class: npc.entity_collision_class,
+                            raw_494: npc.raw_494,
+                            dead: npc.dead,
+                            entity_flags: crate::entities::family(npc.kind)
+                                .map(|family| (family.entity_flags)(npc)),
+                        },
+                    )
+                    .unwrap_or(true)
+            });
+            if variant0 && candidate {
+                unowned_leaf(state, id, 0x522b42);
+            }
+            play_item_animation(state, id, variant0, false);
+        }
         Leaf::Converter => {
             if variant0 && state.player.soul_hp > 3 {
                 let mut index = state.player.soul_hp;
