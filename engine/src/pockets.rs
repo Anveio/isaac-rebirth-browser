@@ -110,11 +110,7 @@ pub(crate) fn capacity(state: &State) -> Option<usize> {
     if queries.have(251)? {
         Some(2)
     } else {
-        Some(if queries.have(252)? {
-            2
-        } else {
-            1
-        })
+        Some(if queries.have(252)? { 2 } else { 1 })
     }
 }
 
