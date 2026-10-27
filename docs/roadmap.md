@@ -356,7 +356,6 @@ Next: remaining Chapter 1 pool weapons.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #191 | P2 | Port spawns a regular tear one presentation early after an item pickup | e2e stat-cache |
-| #875 | P3 | PR881 copies tear height into the poof render offset; live confirmation of Tammy's Head's downward splashes remains open (frames 41-52) | playtest 2026-10-27 `playtest/08d8168/tammys-head.mp4` |
 
 ## Bombs
 
@@ -379,7 +378,7 @@ Bomb contact bugs are under *Collision and physics*.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #874 | P2 | PR880 adds blast impulses to other live bombs; live confirmation of Anarchist Cookbook's neighbouring Troll Bombs remains open (from frame 229) | playtest 2026-10-27 `playtest/08d8168/anarchist-cookbook.mp4` |
+| #886 | P3 | Anarchist Cookbook: when the last Troll Bomb explodes on Isaac, the port drops his heart 6 frames early and draws the bomb over him (frames 279-285) | playtest 2026-10-27 `playtest/f6552ff/anarchist-cookbook.mp4` |
 
 ## Collision and physics
 
@@ -667,7 +666,7 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
-| #876 | P3 | Explosion cloud shows a different animation frame for a few frames (Kamikaze! 399-400, spectral bomb 141-148) | playtest 2026-10-27 `playtest/08d8168/kamikaze.mp4` |
+| #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 
 ## Audio
 
