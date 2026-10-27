@@ -210,9 +210,9 @@ other branches stay frontiers, as noted in the table.
 | 36 | The Poop | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 37 | Mr. Boom | 2 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 38 | Tammy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 39 | Mom's Bra | 3 | 220 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 40 | Kamikaze! | 0 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 41 | Mom's Pad | 3 | 180 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 39 | Mom's Bra | 3 | 220 | Partial | `52A640` requests GiantBook 7 (GiantBookBig, Mom) before the leaf. `523B90` (any variant): every enemy that passes `444810` would get AddFreeze `444970`, which is not ported, so a room with an eligible enemy records a `UseLeaf` frontier and keeps the charge. With no eligible enemy the UseItem animation plays. Passes `moms-bra-39-fixed-phase1`. |
+| 40 | Kamikaze! | 0 | 30 | Partial | `523AFA` (variant 0): `Explode` at the player with radius 60 and damage 40, flags 4 and no line check, then the explosion effect (white) is admitted and updated once on the same frame. No UseItem animation. Passes `kamikaze-40-fixed-phase0`. |
+| 41 | Mom's Pad | 3 | 180 | Partial | `52A640` requests GiantBook 8 (diaper) before the leaf. `5240D8` (variant 0): every enemy that passes `444810` would get AddFear `4450D0`, which is not ported, so a room with an eligible enemy records a `UseLeaf` frontier and keeps the charge. With no eligible enemy the UseItem animation plays. Passes `moms-pad-41-fixed-phase1`. |
 | 42 | Bob's Rotten Head | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 43 | Pills here! | 0 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 44 | Teleport! | 2 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -230,7 +230,7 @@ other branches stay frontiers, as noted in the table.
 | 85 | Deck of Cards | 6 | 0 | Partial | 524407: the item85 RNG draws a card (no runes) and AddCard puts it in the pocket, dropping a held card. With Little Baggy it draws a pill. Unknown RNG history or profile achievements stay a frontier. |
 | 86 | Monstro's Tooth | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 93 | The Gamekid | 6 | 200 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 97 | The Book of Sin | 4 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 97 | The Book of Sin | 4 | 0 | Partial | `525BBF` (variant 0): `Random(9)` picks from table `6705A8` (heart, soul heart, black heart, bomb, key, pill, card, coin, chest), FindFreePosition near the player (40), then a null-spawner pickup is spawned with a fresh seed and the UseItem animation plays. Holding trinket 22 records a frontier. Passes `book-of-sin-97-fixed-phase0`. |
 | 102 | Mom's Bottle of Pills | 6 | 0 | Partial | 5241D4: the item102 RNG draws a pill color (seed%9+1) for the pocket. With Starter Deck it draws a card. Unknown RNG history stays a frontier. |
 | 105 | The D6 | 6 | 0 | Partial | `5253EE`: `582340` clears the item pool's selected bytes, then every live collectible pedestal with an item is rerolled in place by Morph `500A10(5,100,0,keepPrice)`: the old seed advances once (RNG 1,21,20) and Init's local draw selects from the room's pool (pool 14 on backdrop 0x17). Position, velocity, links, ABD and the Alternates frame survive; ABC (touched) is cleared. Passes `d6-105-reroll-phase0`. A pedestal with ABD set (its AC8 is not modeled), a shop price or unknown links records a `UseLeaf` frontier before any reroll. Room.Init (`5CED96`) calls `582340` too, so the port now clears the selected bytes at every Room.Init. |
 | 107 | The Pinking Shears | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
@@ -247,7 +247,7 @@ other branches stay frontiers, as noted in the table.
 | 145 | Guppy's Head | 1 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 146 | Prayer Card | 6 | 0 | Complete | 523690: one eternal half heart (a completed pair requests the eternal information animation), then the Pickup clip. |
 | 147 | Notched Axe | 3 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
-| 158 | Crystal Ball | 6 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
+| 158 | Crystal Ball | 6 | 0 | Partial | `5257C2` (variant 0): `585C60` reveals every room except type 8 (display flags `|= 5`, Level+81B0 `|= 0x400`) and the minimap is rebuilt. Then `Random(2)` spawns a card (5.300.0) or a soul heart (5.10.3) at a free position near the player, and the Pickup animation plays. Holding trinket 22 records a frontier. Passes `crystal-ball-158-fixed-phase0`. |
 | 160 | Crack the Sky | 4 | 30 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 164 | The Candle | 110 | 0 | Missing | Pickup, slot, charge and HUD only. Space leaves the charge and records a frontier. |
 | 166 | D20 | 6 | 0 | Missing | Not ported yet. `5238AB` Morphs every pickup in place to a random variant (`Random(6)` picks hearts to chests, then card, pill and trinket overrides); shops, pedestals, priced pickups and the chest and heart variants take their own branches. Space leaves the charge and records a frontier. |

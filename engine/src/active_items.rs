@@ -238,6 +238,24 @@ pub(crate) enum Leaf {
     /// collectible pedestal (455680 5/100) with an item is rerolled in place
     /// by Morph500A10(5,100,0,keepPrice1) and its ABC cleared.
     D6,
+    /// 523AFA: Game554490 at the Player with no source, line check off,
+    /// DamageFlags4, damage40 and radius60, then Spawn1000.1 with the shared
+    /// seed and its immediate Update. It returns to 5223C0 with no UseItem.
+    Kamikaze,
+    /// 523B90: every 444810 enemy gets AddFreeze444970 for the ItemConfig39
+    /// +48 duration; then UseItem.
+    MomsBra,
+    /// 5240D8 (variant0 only): every 444810 enemy gets AddFear4450D0 for the
+    /// same duration; then UseItem.
+    MomsPad,
+    /// 525BBF (variant0 only): Random(9), FindFreePosition5C7F30 near the
+    /// Player, the trinket22 check, then one null-spawner pickup from the
+    /// 6705A8 table with the shared seed; then UseItem.
+    BookOfSin,
+    /// 5257C2 (variant0 only): map reveal585C60, then Random(2) picks a
+    /// random card or (without trinket22) a soul heart at a free spot near
+    /// the Player; then the Pickup clip.
+    CrystalBall,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -329,6 +347,31 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 105,
         book: None,
         leaf: Leaf::D6,
+    },
+    ActiveUse {
+        id: 40,
+        book: None,
+        leaf: Leaf::Kamikaze,
+    },
+    ActiveUse {
+        id: 39,
+        book: Some(7),
+        leaf: Leaf::MomsBra,
+    },
+    ActiveUse {
+        id: 41,
+        book: Some(8),
+        leaf: Leaf::MomsPad,
+    },
+    ActiveUse {
+        id: 97,
+        book: None,
+        leaf: Leaf::BookOfSin,
+    },
+    ActiveUse {
+        id: 158,
+        book: None,
+        leaf: Leaf::CrystalBall,
     },
 ];
 
@@ -685,6 +728,57 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
         }
         Leaf::DeckOfCards | Leaf::MomsBottleOfPills => {}
+        Leaf::Kamikaze => {
+            if variant0 {
+                let position = crate::bombs::player_world(state);
+                crate::bombs::explode_unchecked(
+                    state,
+                    position,
+                    60.0,
+                    40.0,
+                    crate::combat::DamageSource {
+                        id: 0,
+                        entity_type: 0,
+                    },
+                )?;
+                //The blast only changes Player velocity; Spawn reads +448.
+                let seed = state.boot_lifecycle.shared.next_u32();
+                let effect = crate::explosion_effects::admit_explosion(
+                    state,
+                    seed,
+                    position,
+                    crate::attack_color::AttackColor::WHITE,
+                )?;
+                crate::explosion_effects::advance(state, crate::phase::Phase::Update, effect)?;
+            }
+        }
+        Leaf::MomsBra | Leaf::MomsPad => {
+            //Neither freeze444970 nor fear4450D0 is ported, so a room with
+            //an eligible enemy records a frontier; otherwise only the
+            //UseItem tail runs.
+            let walks = variant0 || matches!(leaf, Leaf::MomsBra);
+            if walks && vulnerable_npc(state, &[]) {
+                let pc = if matches!(leaf, Leaf::MomsBra) {
+                    0x523bfe
+                } else {
+                    0x52414e
+                };
+                unowned_leaf(state, id, pc);
+            }
+            play_item_animation(state, id, variant0, false);
+        }
+        Leaf::BookOfSin => {
+            if variant0 {
+                book_of_sin(state, id)?;
+            }
+            play_item_animation(state, id, variant0, false);
+        }
+        Leaf::CrystalBall => {
+            if variant0 {
+                crystal_ball(state, id)?;
+            }
+            play_item_animation(state, id, variant0, true);
+        }
         Leaf::D6 => {
             if variant0 {
                 reroll_pedestals(state, id)?;
@@ -693,27 +787,11 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
         }
         Leaf::Flush => {
             //522A80 walks Room+1638, skipping Poop245 and Chub28 before
-            //444810 (types10..999, collision class, 494, dead, Entity318
-            //bit10) and Mom's Hand213 after it. Fire33 sets bit10 in its
+            //444810 and Mom's Hand213 after it. Fire33 sets bit10 in its
             //initializer, so a room of fires spawns nothing. Any remaining
             //candidate would become Poop245, whose factory and AI48CFE0 are
-            //not ported, so it stays a frontier; so does an NPC whose
-            //Entity318 owner is unknown.
-            let candidate = state.room.npcs.iter().any(|npc| {
-                !npc.removed
-                    && !matches!(npc.kind, 245 | 28 | 213)
-                    && crate::target_eligibility::eligible_target(
-                        crate::target_eligibility::TargetEligibility {
-                            kind: npc.kind,
-                            collision_class: npc.entity_collision_class,
-                            raw_494: npc.raw_494,
-                            dead: npc.dead,
-                            entity_flags: crate::entities::family(npc.kind)
-                                .map(|family| (family.entity_flags)(npc)),
-                        },
-                    )
-                    .unwrap_or(true)
-            });
+            //not ported, so it stays a frontier.
+            let candidate = vulnerable_npc(state, &[245, 28, 213]);
             if variant0 && candidate {
                 unowned_leaf(state, id, 0x522b42);
             }
@@ -774,6 +852,190 @@ fn grant_pocket(state: &mut State, id: u32, card: bool) -> Result<Option<()>, St
 
 /// A reached leaf operator whose inputs are unknown: its writers are an
 /// explicit frontier rather than an assumed no-op.
+/// HasTrinket508FE0 through the Player's appearance queries; None when the
+/// held-trinket history is not owned.
+fn has_trinket(state: &State, trinket: u32) -> Option<bool> {
+    let owner = state.player_items.as_ref()?;
+    crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    )
+    .has_trinket(trinket)
+}
+
+/// FindFreePosition5C7F30(Player+448, 40, 0). None (after recording a
+/// frontier) when the room grid, path costs or occupied positions are not
+/// owned.
+fn free_position(
+    state: &mut State,
+    id: u32,
+    source_pc: u32,
+) -> Result<Option<crate::motion::WorldVector>, String> {
+    let (Some(grid), Some(costs)) = (state.room.grid.clone(), state.room.path_costs.clone()) else {
+        unowned_leaf(state, id, source_pc);
+        return Ok(None);
+    };
+    let Ok(occupied) = crate::ordinary_placement::positions(state) else {
+        unowned_leaf(state, id, source_pc);
+        return Ok(None);
+    };
+    let grid = crate::grid::Grid::new(grid)?;
+    let anchor = crate::bombs::player_world(state);
+    crate::roundworm::find_free_position(
+        anchor,
+        40.0,
+        &mut state.boot_lifecycle.shared,
+        &grid,
+        &costs,
+        &occupied,
+    )
+    .map(Some)
+}
+
+/// Game.Spawn550A40(5, variant, position, zero velocity, null spawner,
+/// subtype, seed) and the pickup's Init. Records a frontier instead when an
+/// Init input is not owned.
+fn spawn_free_pickup(
+    state: &mut State,
+    id: u32,
+    source_pc: u32,
+    variant: u32,
+    subtype: u32,
+    seed: u32,
+    position: crate::motion::WorldVector,
+) -> Result<(), String> {
+    let handle = state.next_pickup;
+    let pickup = if matches!(variant, 70 | 300) {
+        crate::Pickup::from_pocket_parts(
+            handle,
+            variant,
+            subtype,
+            seed,
+            position,
+            true,
+            crate::pickups::PocketSubtypeInputs::from_state(state),
+        )?
+    } else {
+        let selector = crate::room_spawns::SpawnSelector {
+            group_index: 0,
+            grid_index: 0,
+            category: crate::room_spawns::SpawnCategory::Entity,
+            entity_type: 5,
+            variant: variant as u16,
+            subtype: subtype as u16,
+            position,
+            group_seed: 0,
+            spawn_seed: seed,
+        };
+        crate::Pickup::from_source_selector(handle, &selector, true, state)?
+    };
+    let Some(mut pickup) = pickup else {
+        unowned_leaf(state, id, source_pc);
+        return Ok(());
+    };
+    pickup.birth_game_update = state.game_update_count;
+    //Base441EE8 gives a null-spawner birth zero spawner words.
+    pickup.source_spawner = Some(crate::pickups::SourceSpawner {
+        entity_type: 0,
+        variant: 0,
+    });
+    pickup.morph_links = Some(crate::pickups::MorphLinks {
+        parent498: None,
+        link4a0: None,
+        link4a8: None,
+    });
+    state.next_pickup = handle
+        .checked_add(1)
+        .ok_or("active pickup identity exhausted")?;
+    state.room.pickups.push(pickup);
+    let actor = crate::actors::ActorRef {
+        kind: crate::actors::ActorKind::Pickup,
+        id: handle,
+    };
+    state.room.authored_actor_order.push(actor);
+    state.actor_scheduler.admit(actor)
+}
+
+/// 525BBF..: Random(9) is drawn before the free spot; Daemon's Tail22 with
+/// its 5C2DD0 roll (525CE5) is not ported. The table 6705A8 maps the roll
+/// to red, soul and black hearts, a bomb, a key, a random pill, card, coin
+/// and a Lil' Battery.
+fn book_of_sin(state: &mut State, id: u32) -> Result<(), String> {
+    let roll = state.boot_lifecycle.shared.bounded(9);
+    let Some(position) = free_position(state, id, 0x525bea)? else {
+        return Ok(());
+    };
+    if has_trinket(state, 22) != Some(false) {
+        unowned_leaf(state, id, 0x525c00);
+        return Ok(());
+    }
+    let (variant, subtype) = match roll {
+        0 => (10, 1),
+        1 => (10, 3),
+        2 => (10, 6),
+        3 => (40, 1),
+        4 => (30, 1),
+        5 => (70, 0),
+        6 => (300, 0),
+        7 => (20, 0),
+        _ => (90, 0),
+    };
+    let seed = state.boot_lifecycle.shared.next_u32();
+    spawn_free_pickup(state, id, 0x5264fd, variant, subtype, seed, position)
+}
+
+/// 5257C2: 585C60 reveals every room but the type8 super secret room
+/// (display flags |= 5) and sets Level+81B0 bit 0x400; 5B0F40 redraws the
+/// minimap. Random(2) == 0 then spawns a random card (seed before the free
+/// spot); otherwise 525F90 checks trinket22 and spawns a soul heart.
+fn crystal_ball(state: &mut State, id: u32) -> Result<(), String> {
+    for index in 0..state.floor.descriptors.len() {
+        if state.floor.descriptors[index].template.room_type != 8 {
+            state.room_display_flags[index] |= 5;
+        }
+    }
+    state.level_progress.flags |= 0x400;
+    crate::rebuild_minimap_cells(state);
+    let (variant, subtype, pc) = if state.boot_lifecycle.shared.bounded(2) == 0 {
+        (300, 0, 0x525841)
+    } else {
+        if has_trinket(state, 22) != Some(false) {
+            unowned_leaf(state, id, 0x525f98);
+            return Ok(());
+        }
+        (10, 3, 0x526006)
+    };
+    let seed = state.boot_lifecycle.shared.next_u32();
+    let Some(position) = free_position(state, id, pc)? else {
+        return Ok(());
+    };
+    spawn_free_pickup(state, id, pc, variant, subtype, seed, position)
+}
+
+/// Whether Room+1638 holds an NPC that passes 444810 (types10..999,
+/// collision class, 494, dead, Entity318 bit10), apart from `skip` types.
+/// An NPC whose Entity318 owner is unknown counts, so the caller records a
+/// frontier rather than assuming it was skipped.
+fn vulnerable_npc(state: &State, skip: &[u32]) -> bool {
+    state.room.npcs.iter().any(|npc| {
+        !npc.removed
+            && !skip.contains(&npc.kind)
+            && crate::target_eligibility::eligible_target(
+                crate::target_eligibility::TargetEligibility {
+                    kind: npc.kind,
+                    collision_class: npc.entity_collision_class,
+                    raw_494: npc.raw_494,
+                    dead: npc.dead,
+                    entity_flags: crate::entities::family(npc.kind)
+                        .map(|family| (family.entity_flags)(npc)),
+                },
+            )
+            .unwrap_or(true)
+    })
+}
+
 /// 525404..5254B1. Only a free pedestal (ABD 0, no price) is ported: the
 /// ABD-set test reads AC8, and keepPrice with a nonzero AC0 redraws the
 /// price (500C90); both stay a `UseLeaf` frontier, checked before any
