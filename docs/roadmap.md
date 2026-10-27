@@ -330,8 +330,6 @@ Next: transformations once their items exist.
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
-| #829 | P2 | Isaac's white blast-flash face is missing for 10 frames when a nearby bomb explodes | playtest 2026-10-27 `playtest/04e2421/bomb-spectral-tears.mp4` |
-| #852 | P2 | Kamikaze!: 2 explosion frames (399-400) still differ after #857 | playtest 2026-10-27 `playtest/bc70726/kamikaze.mp4` |
 
 ## Weapons and tears
 
@@ -349,6 +347,7 @@ Next: remaining Chapter 1 pool weapons.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #191 | P2 | Port spawns a regular tear one presentation early after an item pickup | e2e stat-cache |
+| #875 | P3 | Tammy's Head: splashes of downward tears are drawn about 15px too low (frames 41-52) | playtest 2026-10-27 `playtest/08d8168/tammys-head.mp4` |
 
 ## Bombs
 
@@ -366,7 +365,11 @@ failures. Strict RGBA remains14/36; crater18 records/paint and Dr/Troll/rock/TNT
 caller qualification remain open. Missing: bomb-modifying items, complete crater qualification, Bomb Bum
 and other variants.
 
-No open bugs. Bomb contact bugs are under *Collision and physics*.
+Bomb contact bugs are under *Collision and physics*.
+
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #874 | P2 | Anarchist Cookbook: a Troll Bomb's blast barely moves neighbouring Troll Bombs, where the original throws them (from frame 229) | playtest 2026-10-27 `playtest/08d8168/anarchist-cookbook.mp4` |
 
 ## Collision and physics
 
@@ -642,6 +645,7 @@ parity is a diagnostic only.
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
+| #876 | P3 | Explosion cloud shows a different animation frame for a few frames (Kamikaze! 399-400, spectral bomb 141-148) | playtest 2026-10-27 `playtest/08d8168/kamikaze.mp4` |
 
 ## Audio
 
