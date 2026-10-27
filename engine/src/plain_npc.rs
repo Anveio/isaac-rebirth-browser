@@ -338,7 +338,7 @@ fn advance_full(
     }
     if phase != Phase::Update {
         npc.presented_position = if npc.status.base_update_admitted {
-            // Inherited Fast4446a0 has no frozen check: multiply by the
+            // Inherited Fast4446a0 has no Freeze/Fear check: multiply by the
             // stored current friction first, then divide each f32 by2.
             let delta = npc.velocity * npc.friction;
             npc.position
@@ -461,8 +461,8 @@ fn advance_full(
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
     // Source BaseUpdate resets +470 from base+46c on every mapped Full.
-    // Track that owner separately until Bra admits the corrected motion
-    // path; never-frozen actors keep their existing Npc.friction behavior.
+    // Track that owner separately until Bra/Pad admits the corrected motion
+    // path; unreached actors keep their existing Npc.friction behavior.
     npc.status.current_friction = Some(npc.base_friction);
     npc.friction = if npc.status.base_update_admitted {
         // 4471ee restores +470 from base+46c after the integration.
@@ -471,8 +471,8 @@ fn advance_full(
         friction
     };
     if npc.status.base_update_admitted {
-        // Timer1 still suppressed AI/ANM above; colour then status expire
-        // before this callback drains pending damage (447446..447729).
+        // Timer1 still affected this callback's AI (and ANM for Freeze).
+        // Colour then status expire before pending damage (447446..447729).
         let base = npc.base_color();
         npc.sprite_color.tick(phase, base);
         npc.status.advance();
@@ -616,6 +616,11 @@ pub(crate) fn try_shoot_player(
     births: &mut Vec<Birth>,
     shot: ShotParameters,
 ) -> Result<bool, String> {
+    // TryShootPlayer 4BA45A refuses mask A00 before target lookup, OnFrame7
+    // and either shooter timer. The caller's AI, RNG and ANM still run.
+    if npc.entity_flags() & 0xa00 != 0 {
+        return Ok(false);
+    }
     let aimed = world.player + world.player_velocity * shot.lead;
     let delta = WorldVector {
         x: aimed.x - npc.position.x,
