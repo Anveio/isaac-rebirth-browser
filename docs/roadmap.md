@@ -569,7 +569,11 @@ Supported stat items include Sad
 Onion, Cricket's Head, Speed Ball, Roid Rage, Anti-Gravity, Belt, Libra;
 Leech familiar; Gimpy and Infestation 2 Dip callbacks; the weapon items under
 *Weapons and tears*. Missing: most items, trinkets, most familiars and
-actives. Bulk item imports are owned by the user's import workflow.
+actives. [docs/items.md](items.md) tracks every collectible, familiar and
+trinket plus per-mechanism synergy parity, generated from the game's item data
+(`npm run items:update`). Item and synergy imports are a tracked workstream:
+coverage tracker, synergy design, data-driven passive framework, synergy case
+pipeline, then the bulk import.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
