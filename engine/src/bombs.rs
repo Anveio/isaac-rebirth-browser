@@ -1189,6 +1189,7 @@ fn explode_with_kind(
         &clear,
     )?;
     crate::pickups::bomb_hit(state, position, radius, damage, kind.flags(), &clear)?;
+    blast_push_bombs(state, position, radius, source, &clear)?;
     crate::fly_effects::bomb_hit(state, position, radius, clear);
     let player_velocity = if clear(player_world(state)) {
         isaac_blast_velocity(
@@ -1215,6 +1216,56 @@ fn explode_with_kind(
     }
     crate::critters::blast(state, position, radius, &clear);
     crate::rock_blast::destroy(state, position, radius)
+}
+
+/// 554490's actor circle on the other live bombs (type 4, size 16, mass 6).
+/// The exploding bomb itself (the source, 55451F) is skipped. A bomb within
+/// blast radius + 16 with a clear line takes velocity*0.5 plus the radial
+/// impulse min(radius - distance, 15) (55461F..5547A5; mass 6 takes no mass
+/// scaling). Base TakeDamage446CF0 does nothing more to a bomb, so it keeps
+/// its own fuse.
+fn blast_push_bombs(
+    state: &mut State,
+    center: WorldVector,
+    blast_radius: f32,
+    source: crate::combat::DamageSource,
+    line_clear: &dyn Fn(WorldVector) -> bool,
+) -> Result<(), String> {
+    for bomb in &mut state.bombs {
+        if bomb.motion.lifetime != BombLifetime::Alive
+            || (source.entity_type == 4 && source.id == bomb.id)
+        {
+            continue;
+        }
+        let delta = WorldVector {
+            x: bomb.motion.position.x - center.x,
+            y: bomb.motion.position.y - center.y,
+        };
+        let squared = delta.x * delta.x + delta.y * delta.y;
+        let radius = blast_radius + 16.0;
+        if !squared.is_finite() {
+            return Err("bomb blast geometry overflowed".into());
+        }
+        if squared >= radius * radius || !line_clear(bomb.motion.position) {
+            continue;
+        }
+        //554625 skips the impulse at exact zero distance.
+        if squared == 0.0 {
+            continue;
+        }
+        let distance = squared.sqrt();
+        let impulse = (radius - distance).min(15.0);
+        //612B30 divides each component before 612A70 scales by the impulse.
+        let radial = WorldVector {
+            x: delta.x / distance,
+            y: delta.y / distance,
+        } * impulse;
+        bomb.motion.velocity = bomb.motion.velocity * 0.5 + radial;
+        if !bomb.motion.velocity.is_finite() {
+            return Err("bomb blast velocity overflowed".into());
+        }
+    }
+    Ok(())
 }
 
 ///Selected neutral50DE10 actor history. A type4 slot alone admits no restore.
