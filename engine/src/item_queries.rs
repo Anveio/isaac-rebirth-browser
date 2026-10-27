@@ -391,6 +391,8 @@ pub(crate) fn reach_late_temporary_evaluation(
     if advance_known_temporary_expiry(state) {
         crate::active_items::land_jump(state)?;
     }
+    //515F40 opens with TEMP65 (Anarchist Cookbook).
+    crate::active_items::cookbook_tick(state)?;
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
@@ -505,7 +507,8 @@ fn advance_known_temporary_expiry(state: &mut State) -> bool {
             landed = true;
             continue;
         }
-        if !matches!(id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
+        //TEMP65's 517580 callback is likewise only the (empty) costume removal.
+        if !matches!(id, 35 | 45 | 65) || config.kind != 3 || config.cache_flags != 0 {
             //The actual CF8 erasure is independent of unimplemented
             //costume/health/audio effects.517580 has no direct E1C/CF8/C08
             //store. Keep its frontier without erasing unrelated output

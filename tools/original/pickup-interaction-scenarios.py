@@ -23,7 +23,7 @@ START_ROOM = 80  # 00.special rooms.stb: type1 variant2 'Start Room', 13x7
 
 # Collectibles and cards by base Rebirth id (items.xml / pocketitems.xml).
 BATTERY, OUIJA, BLANK_CARD = 63, 115, 286
-D20, D10 = 166, 285
+THE_POOP, TAMMY, COOKBOOK, D20, D10 = 36, 38, 65, 166, 285
 JERA, TWO_OF_CLUBS, TWO_OF_DIAMONDS = 29, 23, 24
 
 
@@ -140,6 +140,28 @@ CASES = {
         items=[D10], card=0, spawns=[npc(1, 3, 12), npc(11, 3, 12)],
         actions=[act('settle', [], 51), act('use-active', ['space'], 4), act('after-active', [], 30)],
         interactions=['d10-reroll'], fixed_only=True),
+    # The Poop leaves a poop under Isaac and farts; he walks off and back.
+    'the-poop': dict(
+        about='The Poop (Space) spawns a poop grid entity under Isaac',
+        items=[THE_POOP], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 30),
+                 act('walk-off', ['d'], 20), act('walk-back', ['a'], 30)],
+        interactions=['the-poop']),
+    # The Anarchist Cookbook drops Troll Bombs around the room.
+    'anarchist-cookbook': dict(
+        about='The Anarchist Cookbook (Space) spawns Troll Bombs at random free spots',
+        items=[COOKBOOK], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 50),
+                 act('bombs-1', [], 10), act('bombs-2', [], 10), act('bombs-3', [], 10), act('bombs-4', [], 10),
+                 act('after-blasts', [], 100)],
+        interactions=['anarchist-cookbook']),
+    # Tammy's Head fires a ring of ten tears.
+    'tammys-head': dict(
+        about="Tammy's Head (Space) fires a ring of ten tears",
+        items=[TAMMY], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 2), act('after-active', [], 4),
+                 act('tears-later', [], 10)],
+        interactions=['tammys-head']),
     'blank-card': dict(
         about='Blank Card (Space) mimics a held 2 of Clubs and keeps it; an empty Blank Card takes a Lil Battery',
         items=[BLANK_CARD], card=TWO_OF_CLUBS, spawns=[pickup(6, 1, 90, 0)],

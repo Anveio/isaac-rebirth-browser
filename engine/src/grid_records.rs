@@ -15,6 +15,10 @@ pub struct GridOwner {
     /// Poop.Init569600 variant0 sheet: grid_poop_{RandomInt(3)+1}.png.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub poop_sheet: Option<u32>,
+    /// Poop+330: Init569600 sets it when a ground Player stands within 20 of
+    /// the cell, which leaves the new poop passable until he walks off.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub poop_player_inside: bool,
     /// TNT.Init owns the signed fuse and its separately loaded Sprite.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tnt: Option<crate::tnt::Controller>,
@@ -52,6 +56,68 @@ impl GridRecord {
     }
 }
 
+fn is_false(value: &bool) -> bool {
+    !*value
+}
+
+/// Poop.Update569D50 (variant0) in the full grid pass. A broken poop (state
+/// above 3) keeps class0; an intact one is class3 unless Poop+330 is set,
+/// the Player is on the ground (444860) and Length612790(cell - Player) is
+/// below 21: then class0 below 20, and from 20 up the flag clears. Other
+/// variants keep their Init class.
+pub(crate) fn advance_poops(
+    state: &mut crate::State,
+    phase: crate::phase::Phase,
+) -> Result<(), String> {
+    if !phase.updates_nonplayers() {
+        return Ok(());
+    }
+    let Some(descriptor) = state.room.grid.clone() else {
+        return Ok(());
+    };
+    let grid = crate::grid::Grid::new(descriptor)?;
+    let player = crate::bombs::player_world(state);
+    let player_class = state.player.grid_collision_class;
+    let Some(cells) = state.room.grid.as_mut().map(|grid| &mut grid.cells) else {
+        return Ok(());
+    };
+    for (index, cell) in cells.iter_mut().enumerate() {
+        let Some(entity) = cell.entity.as_mut() else {
+            continue;
+        };
+        if entity.kind != 14 || entity.variant != 0 {
+            continue;
+        }
+        if entity.state > 3 {
+            entity.collision_class = 0;
+            continue;
+        }
+        entity.collision_class = 3;
+        let Some(owner) = entity.source_owner.as_mut() else {
+            continue;
+        };
+        if !owner.poop_player_inside {
+            continue;
+        }
+        let center = grid.position(index).ok_or("poop cell has no centre")?;
+        let (dx, dy) = (center.x - player.x, center.y - player.y);
+        let distance = (dx * dx + dy * dy).sqrt();
+        if distance >= 21.0 {
+            continue;
+        }
+        let class = player_class.ok_or("Poop Update requires the Player grid collision class")?;
+        if class <= 3 {
+            continue;
+        }
+        if distance < 20.0 {
+            entity.collision_class = 0;
+        } else {
+            owner.poop_player_inside = false;
+        }
+    }
+    Ok(())
+}
+
 impl GridEntity {
     /// Base560ff0 stores two real raw words and constructs RNG5/9/7 without a
     /// shared draw. Primary stays in the actual object's existing spawn field.
@@ -67,6 +133,7 @@ impl GridEntity {
             birth_game_update: None,
             local_rng: Rng::new(0xaa17_414f, [5, 9, 7]),
             poop_sheet: None,
+            poop_player_inside: false,
             tnt: None,
         });
         Ok(())

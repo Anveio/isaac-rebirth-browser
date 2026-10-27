@@ -53,6 +53,8 @@ function nativeObservation(observation) {
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
     npcs: live.filter(entity => entity.type >= 10 && entity.type < 1000)
       .map(entity => ({ type: entity.type, variant: entity.variant, position: entity.position, hp: [entity.hp, entity.maxHp] })),
+    gridPoops: observation.gridPoops,
+    tears: live.filter(entity => entity.type === 2).map(entity => ({ variant: entity.variant, position: entity.position })),
     // Diagnostic only (not graded): the shared MT index and three words.
     sharedMt: observation.sharedMt ? [observation.sharedMt.index, ...[0, 311, 623].map(i => observation.sharedMt.words[i])] : null,
   };
@@ -78,6 +80,10 @@ function portObservation() {
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
     npcs: state.room.npcs.filter(npc => !npc.removed && !npc.dead)
       .map(npc => ({ type: npc.kind, variant: npc.variant, position: [npc.position.x, npc.position.y], hp: [npc.hp, npc.maxHp] })),
+    tears: state.tears.filter(tear => tear.motion.lifetime === 'alive')
+      .map(tear => ({ variant: tear.sourceVariant ?? 0, position: [tear.motion.presentedPosition.x, tear.motion.presentedPosition.y] })),
+    gridPoops: (state.room.grid?.cells ?? []).flatMap((cell, index) => cell.entity?.kind === 14
+      ? [[index, cell.entity.variant, cell.entity.collisionClass]] : []),
     sharedMt: [state.bootLifecycle.shared.index, ...[0, 311, 623].map(i => state.bootLifecycle.shared.words[i])],
   };
 }
@@ -106,7 +112,7 @@ function matchPositions(native, port, tolerance) {
   return [...misses, ...left.map(item => ({ native: null, port: item }))];
 }
 
-function compareLabel(label, native, port) {
+function compareLabel(label, native, port, { tears = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -129,6 +135,13 @@ function compareLabel(label, native, port) {
   row('npcs', native.npcs, port.npcs, npcs.length === 0);
   const health = list => list.map(npc => [npc.type, npc.variant, ...npc.hp.map(Math.fround)]).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
   same('npcs.hp', health(native.npcs), health(port.npcs));
+  // Poop grid entities by cell: [index, variant, collision class].
+  same('grid.poops', native.gridPoops, port.gridPoops);
+  // Player tears, only where a case's interaction is about them.
+  if (tears) {
+    const misses = matchPositions(native.tears.map(tear => ({ ...tear, subtype: 0 })), port.tears.map(tear => ({ ...tear, subtype: 0 })), TOLERANCE.pickup);
+    row('tears', native.tears, port.tears, misses.length === 0);
+  }
   return rows;
 }
 
@@ -175,6 +188,16 @@ export const INTERACTIONS = {
       && obs['settle'].npcs.length > 0 && obs['after-active'].npcs.length === obs['settle'].npcs.length
       && JSON.stringify(obs['after-active'].npcs.map(n => n.type).sort())
         !== JSON.stringify(obs['settle'].npcs.map(n => n.type).sort()) },
+  // A poop appears under Isaac (passable while he stands on it), then
+  // blocks him once he has walked off and back.
+  'the-poop': { labels: ['settle', 'use-active', 'after-active', 'walk-off', 'walk-back'],
+    covered: obs => obs['settle'].gridPoops.length === 0 && obs['after-active'].gridPoops.length === 1 },
+  // Troll Bombs land around the room on every fifth TEMP65 count.
+  'anarchist-cookbook': { labels: ['settle', 'use-active', 'after-active', 'bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'],
+    covered: obs => ['bombs-1', 'bombs-2', 'bombs-3', 'bombs-4', 'after-blasts'].some(label => obs[label].bombs.filter(bomb => bomb.variant === 3).length >= 3) },
+  // A ring of ten tears leaves Isaac at once.
+  'tammys-head': { tears: true, labels: ['settle', 'use-active', 'after-active', 'tears-later'],
+    covered: obs => obs['use-active'].tears.length >= 10 || obs['after-active'].tears.length >= 10 },
   'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
 };
 
@@ -307,7 +330,7 @@ try {
     for (const action of declaration.actions) {
       const nativeLabel = nativeObservations[action.label], portLabel = captured.observations[action.label];
       if (!nativeLabel || !portLabel) rows.push({ label: action.label, field: 'observation', native: Boolean(nativeLabel), port: Boolean(portLabel), passed: false });
-      else rows.push(...compareLabel(action.label, nativeLabel, portLabel));
+      else rows.push(...compareLabel(action.label, nativeLabel, portLabel, { tears: declaration.interactions.some(name => INTERACTIONS[name].tears) }));
     }
     await save(join(directory, 'comparison.json'), { rows, native: nativeObservations, port: captured.observations });
     for (const name of declaration.interactions) {
