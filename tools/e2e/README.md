@@ -62,6 +62,15 @@ diagnostics. The original fixed/OS case distinctions and bank generation are
 unchanged; `--case` filters after validating the bank. See
 [scope and qualification limits](../../docs/pickup-interactions.md#sandbox).
 
+Fresh Original/actual Browser on source `9bd10245`, production `2baa76e9`,
+passes 403/403 D4 checks plus the unchanged 36/36 D10 control. The extended
+grader retains main's 132 D4 failures, preserves every Native expectation and
+all 271 preceding D4 passes, and gains 132 passes with zero losses. This is
+the declared bank of two fixed cases; its unused recorded OS draw supplies no
+OS execution evidence. Private mid-book PNG review confirms a visible book
+on both sides; sheet identity and full-frame equality remain unqualified.
+See [the exact artifact and replay scope](../../docs/pickup-interactions.md#d4-giantbook-qualification).
+
 Every suite mixes two kinds of cases:
 
 - **Contrived**: fixed seeds, phases and routes that pin known edge cases and
