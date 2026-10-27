@@ -70,3 +70,48 @@ captures and comparisons complete. The AL report retains twelve unavailable entr
 including its then-stale counterpart label; the comparer now verifies and pins
 the independent declaration before retiring that label. Unreached same-v1 AD0
 refresh, browser/DOM/rendering, backend playback and PCM remain unqualified.
+
+`npm run test:e2e -- pocket-actions` adds a separate public Ctrl11 route.
+Two fixed boot phases and the first unfiltered OS boot/phase token use the
+same declared normal run and a locally authored Card1 in the starting room.
+The player walks onto that body before a physical Ctrl tap,120 held callbacks,
+the121st callback, release and a later empty hold. Every presentation retains
+actual Native D98/3054/30D0 records and the Browser's separate owned fields.
+An explicit unowned Browser3054 at GP0 is retained separately before the first
+released Player callback; every GP1 and later counter must be an actual uint32.
+Missing owners fail, including on older runtime artifacts.
+Natural acquisition/retirement, the new dropped body, positive AD0, null source,
+released counter and empty hold are required independently in each game.
+
+```sh
+npm run test:e2e -- pocket-actions --no-build --production FROZEN
+npm run test:e2e -- pocket-actions --scenarios SAVED_BANK --case pocket-actions11-fixed-phase0 --no-build --production FROZEN
+```
+
+The entire fixed-plus-OS bank and OS journal are validated before selection;
+`scenarios.json` preserves that whole bank and `selection.json` names the actual
+selected cases. Replay draws no entropy. Missing owners or required branches
+fail. The actual three-case bank on WASM `4f033f11` and immutable production
+`fafb9f35` (1,615 files) passes 54,842 functional checks: fixed phase 0 18,272,
+fixed phase 1 18,298 and recorded OS0 18,272, with zero required failures or
+errors. All 12 independent capture-readback checks pass, including actual
+physical inputs, clocks, resources, closed journals and Browser DOM/backend
+owners. Source and protected-input hashes match before and after both runs.
+The first unfiltered OS token `65b00c50d6fe8530` declares boot 1343008869 and
+phase 0. It varies boot/phase on the fixed normal run and authored Card1 room;
+it supplies no random-floor coverage.
+
+Both games observe natural Card1 acquisition, all 120 held increments, a new
+Card1 body and cleared held ID at callback 121, positive AD0, null source,
+release and an empty hold without another body. This result makes no private
+callback-entry claim from final values: the two radius 0 free-position calls
+and queue/removal helper invocation ordering need separate witnesses.
+Positive trinket 350 drop/queue/cache/costume paths, capacity 2 swap live
+qualification, legacy Ctrl/Continue histories, the Gnawed Leaf (210) consumer,
+full sharedMT, pixels and backend audio/PCM remain separate scopes. The
+earlier interrupted baseline capture remains incomplete and supplies no
+game qualification. Separate inherited pocket-collection fixed and first OS
+controls pass 58,797 checks on both main and this candidate, with identical
+138-field check counts per case, normalized Native/Browser values and
+comparison diagnostics. These controls use the same declared inputs; broader
+Controls, legacy Ctrl/Continue and the scopes above remain open.

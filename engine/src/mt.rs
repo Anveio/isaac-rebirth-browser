@@ -70,6 +70,38 @@ pub fn take_draws() -> Vec<Draw> {
     })
 }
 
+///A speculative cloned-world plan owns no actual shared draws until it
+///commits. Retain the existing diagnostic prefix on every outcome; discard
+///only this plan's newly logged suffix when its world is not committed.
+pub(crate) struct DrawLogTransaction {
+    prefix: Option<usize>,
+    committed: bool,
+}
+impl DrawLogTransaction {
+    pub(crate) fn begin() -> Self {
+        Self {
+            prefix: DRAW_LOG.with(|log| log.borrow().as_ref().map(Vec::len)),
+            committed: false,
+        }
+    }
+    pub(crate) fn commit(mut self) {
+        self.committed = true;
+    }
+}
+impl Drop for DrawLogTransaction {
+    fn drop(&mut self) {
+        if !self.committed {
+            if let Some(prefix) = self.prefix {
+                DRAW_LOG.with(|log| {
+                    if let Some(log) = log.borrow_mut().as_mut() {
+                        log.truncate(prefix);
+                    }
+                });
+            }
+        }
+    }
+}
+
 /// Records the game update count that subsequent logged draws belong to.
 pub fn note_update(counter: u32) {
     DRAW_COUNTER.with(|cell| cell.set(counter));

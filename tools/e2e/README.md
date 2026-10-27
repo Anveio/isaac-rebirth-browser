@@ -21,6 +21,56 @@ Each suite runs the fresh original game and the immutable production build with
 the same public inputs (keys, text, ticks, seeds) and compares what each game
 observably does. Native observations never enter WASM.
 
+The existing `active-items` suite has an opt-in bounded NPC Freeze extension:
+
+```sh
+npm run test:e2e -- active-items --npc-freeze --no-build --production FROZEN
+npm run test:e2e -- active-items --npc-freeze --scenarios SAVED_BANK --no-build --production FROZEN
+```
+
+It retains the default bank and adds fixed phases0/1, the first unfiltered
+recorded OS boot/phase and a no-Space control for one ordinary Horf12 plus
+AttackFly18 fixture. Only declared `activeItems.npcFreeze` cases select the
+additive read-only Native observer. A replay validates the retained whole bank
+before filtering and draws no entropy. Gaper10/Fly13 source admission is not
+live coverage from this fixture.
+
+Each game must independently witness held39/charge3, physical use/discharge,
+living stable targets, pre-use movement and Horf shooter progression, positive
+application, callback-specific Full/Fast motion, timed color, expiry and resumed
+AI. The source current470 grade requires the actual separate Browser status
+owner; legacy AI-scaled `Npc.friction` is diagnostic before admission. Callback
+classification requires actual System/Full counters and the actual information
+manager gate. Missing owners remain required unavailable failures; counter
+parity alone cannot establish an admitted RoomFast. Fresh actual Info captures
+on source `3c11e2cf` pass fixed1 and the first recorded OS case; fixed0 and
+no-Space retain 188 and 88 AttackFly velocity failures. The four-case bank
+remains FAIL at 269,019 checks / 276 failures. Earlier reports stay failed,
+including their unavailable Native Info checks and withdrawn old Fast passes.
+Default target-free Bra/Pad controls pass 13,338 checks per build with unchanged
+ordered semantic values; Browser focus/seed passes 2/2.
+See [source scope, results and open qualification](../../docs/npc-freeze.md).
+
+`pickup-interactions --case d4-fixed` retains the existing pinned inventory
+route and adds actual Info/main UseItem/Game age observations through the D4
+GiantBook request, draw interval, completion and idle resumption. Space4 and
+release60 retain their old endpoint labels; extra captures subdivide those
+intervals and a no-input tail witnesses Appear33 stopped/state0. Original PNGs
+and actual Browser `port-LABEL.png` captures support private visual review;
+Native sheet identity is explicitly unobserved and full pixels remain
+diagnostics. The original fixed/OS case distinctions and bank generation are
+unchanged; `--case` filters after validating the bank. See
+[scope and qualification limits](../../docs/pickup-interactions.md#sandbox).
+
+Fresh Original/actual Browser on source `9bd10245`, production `2baa76e9`,
+passes 403/403 D4 checks plus the unchanged 36/36 D10 control. The extended
+grader retains main's 132 D4 failures, preserves every Native expectation and
+all 271 preceding D4 passes, and gains 132 passes with zero losses. This is
+the declared bank of two fixed cases; its unused recorded OS draw supplies no
+OS execution evidence. Private mid-book PNG review confirms a visible book
+on both sides; sheet identity and full-frame equality remain unqualified.
+See [the exact artifact and replay scope](../../docs/pickup-interactions.md#d4-giantbook-qualification).
+
 Every suite mixes two kinds of cases:
 
 - **Contrived**: fixed seeds, phases and routes that pin known edge cases and
@@ -915,3 +965,10 @@ contract, not a regrade of old captures.
 npm run test:e2e -- options-gamma --no-build --production-directory FROZEN
 npm run test:e2e -- options-gamma --scenarios references/isaac/cases/options-gamma/recorded-fixed-and-1k6qhddf-v1.json --no-build --production-directory FROZEN
 ```
+
+`pocket-actions` uses the existing public composition capture with its separate
+Ctrl11 reader: natural Card1 contact, physical Ctrl tap,120/121 held callbacks,
+release and empty hold in two fixed phases plus the first unfiltered OS boot
+and phase. It retains the complete bank before selection and requires actual
+D98/3054/30D0 and body witnesses. Private helper calls and positive trinkets are
+outside the endpoint grade. See [the route and qualification limits](../../docs/pockets-e2e.md).

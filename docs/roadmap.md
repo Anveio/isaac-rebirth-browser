@@ -84,7 +84,7 @@ Counts include unresolved evidence and confirmation work on still-open issues.
 | [Bosses](#bosses) | Partial | Basement families and additional Caves boss source; live scopes remain separate | 2 |
 | [Pickups and chests](#pickups-and-chests) | Partial | Coins, keys, bombs, hearts and supported chest families | 3 |
 | [Items, pools and familiars](#items-pools-and-familiars) | Partial | Pools, active slot/swap/charge, 26 active-use rows with scoped branches, supported passives/weapons and Leech | 1 |
-| [Pocket items](#pocket-items) | Partial | Held slots/HUD/Save, collection/spill, Range Down/Up, 2 of Clubs/Diamonds, Jera and identified pill names | 0 |
+| [Pocket items](#pocket-items) | Partial | Held slots/HUD/Save, collection/spill, Ctrl action11 swap/drop source, Range Down/Up, 2 of Clubs/Diamonds, Jera and identified pill names | 0 |
 | [Special rooms and economy](#special-rooms-and-economy) | Partial | Normal Shop stock/prices and scoped paid Bomb witness; other economy frontiers remain | 0 |
 | [Characters](#characters) | Partial | Normal Isaac only | 0 |
 | [Rendering, animation and camera](#rendering-animation-and-camera) | Partial | ANM2, backdrops, lighting masks, camera, HUD | 4 |
@@ -175,15 +175,20 @@ Browser PNG files match main0ad, and Options verdicts remain unchanged despite
 independent diagnostic verifies unchanged staged entries, Source and inputs.
 Both that failure and the RGBA/history failures remain preserved.
 Missing: controllers, mouse, Native process reload, Browser OS-process
-restart and remaining remapped action callbacks, including drop and broader R
-contexts. Configurable Map and living normal-Isaac R have separate bounded
+restart and remaining remapped action callbacks and broader R contexts.
+Configurable Map and living normal-Isaac R have separate bounded
 scopes; [living R](living-restart.md) is implemented for normal difficulty and
 Challenge0, with seeded paired evidence and separate seeded/unseeded Browser
 own-storage checks. Strict pixels and history caps remain red;
 see [Controls scope](controls-keyboard.md).
 
-Next: Native own-saved Keyboard process reload; drop (Ctrl), broader R contexts
-and natural R reload; gamepad.
+Ctrl action11 now owns complete-record swaps and the held-callback drop
+threshold. [Bounded live coverage](pockets-e2e.md) admits default physical
+Ctrl with natural Card1 acquisition and empty trinkets; other Ctrl contexts
+remain open.
+
+Next: Native own-saved Keyboard process reload; broader Ctrl and R contexts,
+natural R reload and gamepad.
 
 No open bugs.
 
@@ -245,17 +250,23 @@ Floors are data in the [level framework](levels.md): stage nodes carry the
 progression (name, trapdoor edge, contract) and stages.xml chapters carry the
 room set, backdrop, overlay, music and boss chain. New floors are imported by
 filling those tables, not by bespoke code paths.
-Missing: Cellar, Womb and later stage generation, curses (Labyrinth, Lost,
-Darkness, Unknown, Maze, Blind), XL floors.
+Curse source now includes XL room counts, paired boss and treasure rooms,
+last-boss awards and the skipped-stage trapdoor edge; Lost adds four rooms,
+Unknown hides hearts, and floor banners include the curse names. The
+[level record](levels.md#curse-and-xl-qualification) qualifies selected
+Normal and Hard first-floor layouts, including XL. XL fights/descent and
+curse presentation remain unqualified. Missing: Cellar, Womb and later
+stage generation; Darkness lighting, Lost map hiding, Maze room swaps,
+Blind items and Cursed doors.
 
 The [difficulty framework](difficulty.md) now admits typed Normal/Hard run
 state through Save/Continue and Restart, hard floor size/difficulty/champion
-rules, ordinary clear-heart and boss-heart rules. Curse effects, slot payouts
-and hard completion marks remain missing; this source scope does not qualify
-every hard floor or fight against the Original.
+rules, ordinary clear-heart and boss-heart rules. Remaining curse consumers,
+slot payouts and hard completion marks are open; the selected first-floor
+qualification does not cover every Hard floor or fight against the Original.
 
 Next: qualify Depths I and II and Mom against the Original; Cellar
-generation and unlock; curses.
+generation and unlock; remaining curse consumers and XL progression.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
@@ -450,6 +461,20 @@ Horf's final dead Full update now runs its AI before retirement. Scoped
 77,793 passing enemy rows; default base-kill effects, complete status handling
 and direct final-shot/shared-MT qualification remain open.
 
+[Bounded NPC Freeze](npc-freeze.md) adds source owners and living plain
+10/12/13/18 Bra application/expiry hooks after Appear and a proven current470
+owner, plus an opt-in `active-items --npc-freeze` gate. Only Horf12/AttackFly18
+have target-bearing live evidence. Fresh actual Info captures pass fixed1 and
+the first recorded OS case; fixed0/no-Space retain 188/88 AttackFly
+velocity failures. The four-case bank remains **FAIL: 269,019 checks / 276
+failures**. Fresh main A/B loses no common passing rows and recovers 12,405
+common failures; older failed reports remain retained. Current target-free
+Bra/Pad controls pass 13,338 unchanged semantic checks per build; Browser focus/seed passes 2/2. Frozen death and living
+reached-status
+morph/reentry retain explicit frontiers; saved NPC restoration, boss/champion,
+linked/custom-base actors, negative/repeated application, Fear and complete
+MT/PCM/pixels remain open. The earlier target-free Bra pass keeps its scope.
+
 [PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
 champion creep. Its current-main666-based frozen `35edb299` passes a fresh
 Original/Browser fixed route: 173,135 entity fields, 419 paired checkpoints and
@@ -556,11 +581,19 @@ covering books, health conversions, How to Jump, pocket grants, D6/D20/D10,
 The Poop, Anarchist Cookbook, Tammy's Head and other scoped leaves. The
 [active inventory](active-items.md) distinguishes complete leaves from
 unsupported branches; a registered use row does not complete an item.
+Little Baggy's normal Player grant spawns its world pill and converts held
+cards through item252's RNG. Active use requires owned operands; its
+[bounded conversion and unchanged controls](pickup-interactions.md#little-baggy-qualification)
+retain their artifact scope.
 Supported stat items include Sad
 Onion, Cricket's Head, Speed Ball, Roid Rage, Anti-Gravity, Belt, Libra;
 Leech familiar; Gimpy and Infestation 2 Dip callbacks; the weapon items under
 *Weapons and tears*. Missing: most items, trinkets, most familiars and
-actives. Bulk item imports are owned by the user's import workflow.
+actives. [docs/items.md](items.md) tracks every collectible, familiar and
+trinket plus per-mechanism synergy parity, generated from the game's item data
+(`npm run items:update`). Item and synergy imports are a tracked workstream:
+coverage tracker, synergy design, data-driven passive framework, synergy case
+pipeline, then the bulk import.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
@@ -580,8 +613,11 @@ canonical counter, requests/evaluates Range, consumes/promotes held slots and
 plays Sad/Happy. PR820/821 add 2 of Clubs, 2 of Diamonds and Jera; PR822 lets
 Blank Card reuse those effects while retaining the held card/rune. PR855 owns
 identified-pill flags and resolved HUD names. The [interaction inventory](pickup-interactions.md)
-records its scoped live routes; pill-name pixels, other effects, drop and the
-complete ceremony remain unqualified or incomplete.
+records its scoped live routes; pill-name pixels, other effects and the
+complete ceremony remain unqualified or incomplete. Ctrl action11 swaps whole
+held records and drops admitted pockets on the 121st held Player callback.
+Only a real released callback establishes the initially unknown 3054 counter;
+positive trinket/queue/cache paths retain explicit frontiers.
 
 Evidence: #586's frozen candidate passes 5,639 Original/public-WASM checks;
 #602 persists `pill-range-use` and passes a 1,409-check retained-Original replay
@@ -595,8 +631,16 @@ complete and eight remain mandatory; DOM/rendering, audible backend
 and PCM equality are unavailable in this Node result. Pocket coverage does
 not qualify basic coin/key/bomb/chest scenarios.
 
-Next: complete the remaining durable cases, 251/252 world/held conversions,
-remaining Battery90 live branches, other equipped effects, broader
+The separate [Ctrl evidence](pockets-e2e.md) covers natural Card1 acquisition,
+tap, 120/121 drop, release and an empty hold on a fixed normal run, with both
+fixed phases and an unfiltered OS boot/phase. Positive trinket helpers,
+capacity 2 swaps, legacy Ctrl/Continue and the other listed scopes stay open.
+
+Next: complete the remaining durable cases, positive trinket drop helpers,
+capacity 2 swap and legacy Ctrl/Continue qualification, the Gnawed Leaf (210)
+consumer, Starter Deck251 and two-slot Little Baggy252 qualification,
+remaining Battery90 live branches,
+other equipped effects, broader
 identification/HUD coverage and complete save/Continue restoration, with real
 callback and audio evidence kept separate.
 
@@ -774,6 +818,9 @@ Bugs in a test route or tool rather than in the game.
 
 ## Recently fixed
 
+- #901 / [PR904](https://github.com/Anveio/isaac-rebirth-browser/pull/904) restores the D4 GiantBook17 request with delay3. Fresh Original/browser fixed D4 and D10 cases pass all 439 checks: 132 animation, frozen-age and UseItem-pose failures become passes, with no lost passing rows and the D10 control unchanged. The sampled book PNGs were inspected; full-frame pixel parity remains unqualified.
+
+- #892 / [PR893](https://github.com/Anveio/isaac-rebirth-browser/pull/893) restores Epic Fetus target and rocket rendering. Both fixed phases and the recorded OS case render through the actual browser without the former effect30 runtime failure; Original impact and pixel parity remain separate.
 - #650 draws the controls only in the first floor's start room; playtest 2026-10-17 `playtest/78cacac/` shows Basement II's start room plain after Monstro, matching the original (#449 closed).
 - #629 draws Isaac and NPCs in the original's depth order, with blocking `render.npcsOverPlayer` checks in the entities suite; playtest 2026-10-17 `playtest/de63a72/` shows the Duke covering Isaac.
 - #438 / PR660 moves the declared pre-Title elapsed time into the verification reset and uses plain ticks; the shipped app does not call this ingress. Historical [death clock evidence](player-death.md) keeps its timestamped transport, required Original audio-observation failure and pixel reds. The [matrix](../TEST_MATRIX.md) separately retains the clock merge's worse entity rows and lost checkpoint passes.
@@ -790,5 +837,6 @@ Bugs in a test route or tool rather than in the game.
 - #385 destroys a poop occupying the boss clear award cell; playtest 2026-10-16 killed Larry Jr. on WMAJ8HGV without a freeze (#383 closed).
 - #473 selects each boss's authored VS splash and names; footage of four bosses matches (#448 closed).
 - #551 admits authored poop, bomb rocks and TNT; playtest 2026-10-16 `playtest/b2f08ac/` shows Dingle's and the Gusher room's poops (#447 closed).
+- #888 / [PR894](https://github.com/Anveio/isaac-rebirth-browser/pull/894) completes the bounded Little Baggy held-card conversion and prevents Blank Card from using the historical card. The fixed/recorded-OS replay passes all 330 rows with 38 gains and no lost passes; broader conversion and audio scopes remain open.
 
 The bounded [Gamma slice](options-gamma.md) implements the f32 callback, percentage, final RGB pass and V4 Back/reload. Fixed plus first-unfiltered OS inputs pass 1,376 functional checks and 26 required percentage regions; full-frame diagnostics remain 10/40 exact. Historical preference versions and shared regression evidence keep their own contracts.

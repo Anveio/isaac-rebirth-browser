@@ -18,6 +18,9 @@ pub struct GrowthRequest {
     pub additional_rooms: u8,
     /// Bits 0..3 are authored 1x1, 1x2, 2x1 and 2x2 availability.
     pub shape_mask: u8,
+    /// Curse of the Labyrinth (Level+8 bit 2), stored at generator+0x310.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub labyrinth: bool,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -130,7 +133,9 @@ impl Builder {
             .count()
     }
 
-    fn candidates(&mut self, parent: &GeneratedRoom, all_shapes: bool) -> Vec<GeneratedRoom> {
+    /// 5907c0: the rooms that could grow from `parent`, each with the parent
+    /// slot (0..7) its connector sits in.
+    fn candidates(&mut self, parent: &GeneratedRoom, all_shapes: bool) -> Vec<(GeneratedRoom, u8)> {
         let Cell { x, y } = parent.origin;
         let nominal = [
             (x - 1, y),
@@ -161,7 +166,7 @@ impl Builder {
                 distance: parent.distance + 1,
             };
             if self.shape_mask & 1 != 0 {
-                candidates.push(candidate(nx, ny, 1, 1));
+                candidates.push((candidate(nx, ny, 1, 1), slot as u8));
             }
             let dx = if direction == 0 { -1 } else { 0 };
             let dy = if direction == 1 { -1 } else { 0 };
@@ -197,7 +202,7 @@ impl Builder {
                 if self.shape_mask & (1 << shape) != 0
                     && self.fits(Cell { x: ax, y: ay }, width, height)
                 {
-                    candidates.push(candidate(ax, ay, width, height));
+                    candidates.push((candidate(ax, ay, width, height), slot as u8));
                 }
             }
         }
@@ -234,7 +239,7 @@ impl Builder {
         // 5918c0 scans creation order without shuffle, child-count or queue draws.
         for index in 0..self.rooms.len() {
             let parent = self.rooms[index].clone();
-            for candidate in self.candidates(&parent, true) {
+            for (candidate, _) in self.candidates(&parent, true) {
                 if self.fits(candidate.origin, candidate.width, candidate.height)
                     && self.neighbours(candidate.connector) <= 1
                 {
@@ -301,9 +306,14 @@ pub fn generate(input: GrowthRequest) -> Result<Growth, String> {
         };
         let mut selected = 0;
         loops += 1;
-        for candidate in candidates {
-            if !builder.fits(candidate.origin, candidate.width, candidate.height)
-                || builder.neighbours(candidate.connector) > 1
+        for (candidate, _) in candidates {
+            if !builder.fits(candidate.origin, candidate.width, candidate.height) {
+                continue;
+            }
+            // 5913ee: under Curse of the Labyrinth a candidate touching more
+            // than one room is still taken on RandomInt(10) == 0.
+            if builder.neighbours(candidate.connector) > 1
+                && !(input.labyrinth && builder.rng.random(10) == 0)
             {
                 continue;
             }
@@ -344,5 +354,47 @@ pub fn generate(input: GrowthRequest) -> Result<Growth, String> {
         rng_draws: builder.rng.draws,
         final_rng_state: builder.rng.state,
         growth_queue_exhausted: exhausted,
+    })
+}
+
+/// 591cc0..591dc9: under Curse of the Labyrinth, once the first boss room
+/// is fitted its generator grows one more room from it for the second boss.
+/// The candidates (5907c0, all shapes gated) are shuffled (5923d0) on the
+/// generator's RNG35; the first that fits, touches only the boss room and
+/// sits in a slot the boss template has a door for is the new room, with
+/// index `rooms.len()`. Its dead-end flag (+0x64) is set but the dead-end
+/// list is not rebuilt, so no later special room fits it.
+pub fn labyrinth_boss_neighbor(
+    rooms: &[GeneratedRoom],
+    grid: &[i32],
+    shape_mask: u8,
+    rng_state: &mut u32,
+    parent: usize,
+    door_mask: u64,
+) -> Option<GeneratedRoom> {
+    let mut builder = Builder {
+        rng: Rng35 {
+            state: *rng_state,
+            draws: 0,
+        },
+        shape_mask,
+        rooms: rooms.to_vec(),
+        grid: grid.try_into().ok()?,
+        end_flags: vec![false; rooms.len()],
+    };
+    let mut candidates = builder.candidates(&rooms[parent], false);
+    for index in (1..candidates.len()).rev() {
+        let other = builder.rng.random((index + 1) as u32) as usize;
+        candidates.swap(index, other);
+    }
+    *rng_state = builder.rng.state;
+    candidates.into_iter().find_map(|(mut room, slot)| {
+        (builder.fits(room.origin, room.width, room.height)
+            && builder.neighbours(room.connector) <= 1
+            && door_mask & (1 << slot) != 0)
+            .then(|| {
+                room.index = rooms.len();
+                room
+            })
     })
 }

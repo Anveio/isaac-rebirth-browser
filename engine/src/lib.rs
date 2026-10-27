@@ -29,6 +29,7 @@ pub mod champions;
 pub mod chests;
 pub mod chub;
 mod clear_award;
+mod collectible_grants;
 pub mod combat;
 mod content;
 mod controlled_brimstone;
@@ -127,6 +128,7 @@ pub mod mt;
 pub mod mulligans;
 pub mod music;
 pub mod nightmares;
+pub mod npc_status;
 pub mod npcs;
 pub mod options_menu;
 pub mod ordinary_placement;
@@ -148,6 +150,7 @@ mod player_footprints;
 pub mod player_items;
 pub mod player_save;
 pub mod player_stats;
+pub mod pocket_actions;
 pub mod pockets;
 mod polyphemus_contact;
 pub mod poop_effects;
@@ -217,6 +220,9 @@ pub enum Direction {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Player {
+    ///Actual52F000 input/counter ownership; omitted legacy histories stay unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pocket_actions: Option<pocket_actions::History>,
     ///None is legacy/unowned Entity source history, never a neutral default.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity_source: Option<PlayerEntitySource>,
@@ -312,6 +318,7 @@ impl Player {
 
     fn starting() -> Self {
         Self {
+            pocket_actions: None,
             entity_source: None,
             initialized_3074: false,
             can_shoot: true,
@@ -754,6 +761,10 @@ pub struct State {
     pub controls_menu: controls_menu::ControlsMenu,
     #[serde(default)]
     pub keyboard: keyboard::Keyboard,
+    ///System5984D1's active device ID, independent of Menu9's UI selection.
+    ///The admitted connected device is actual Keyboard62B527 ID0 only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub selected_input_device: Option<i32>,
     #[serde(default)]
     pub input_configs: keyboard::InputConfigs,
     #[serde(default)]
@@ -1288,6 +1299,7 @@ impl Game {
                 main_selection: 0,
                 options_menu: options_menu::OptionsMenu::default(),
                 controls_menu: controls_menu::ControlsMenu::default(),
+                selected_input_device: Some(0),
                 keyboard: input_configs.keyboard(),
                 input_configs,
                 map_settings: map.unwrap_or_default(),
@@ -1979,7 +1991,7 @@ impl Game {
             self.state.map_settings.opacity,
         ) {
             //5B1240 requests585500 on exactly the tenth held Game Full.
-            self.state.run_introduction = RunIntroduction::stage(true);
+            self.state.run_introduction = stage_transition::show_name(&self.state.floor);
         }
     }
     fn refresh_minimap(&mut self) {
@@ -2233,6 +2245,11 @@ impl Game {
         self.state.player = Player::starting();
         //Actual fresh Manager.Init→Player.Init; title/old restores stay None.
         self.state.player.entity_source = Some(PlayerEntitySource::fresh_isaac());
+        //51996A copies the actual System selected device into normal PlayerD98.
+        //No3054 constructor write is inferred from this fresh keyboard route.
+        self.state.player.pocket_actions = Some(pocket_actions::History::fresh(
+            self.state.selected_input_device,
+        ));
         // Player.Init5194B4 clears BD0 before starting resources are assigned.
         self.state.player.golden_key = Some(false);
         // 519767/519771 initialize the two transformation history counters.
@@ -4217,6 +4234,11 @@ impl Game {
             self.state
                 .public_actions
                 .advance(&self.state.pressed, &self.state.keyboard);
+            if self.state.screen != Screen::Playing && self.state.public_actions.raw_key.is_some() {
+                //593B60 polls the connected Keyboard, whose62B527 ID0 is
+                //copied to System2EFAC by593BBC before normal Player Init.
+                self.state.selected_input_device = Some(0);
+            }
             let notification_dispatch = !self.state.unlock_notifications_loading
                 && self
                     .state
@@ -4476,7 +4498,7 @@ impl Game {
             if !self.living_restart_admitted() && self.state.public_actions.triggered[16] {
                 self.state.controls_menu.unavailable_actions.push(16);
             }
-            for action in [11, 12, 17, 18] {
+            for action in [12, 17, 18] {
                 if self.state.public_actions.triggered[action] {
                     self.state.controls_menu.unavailable_actions.push(action);
                 }
@@ -4876,7 +4898,7 @@ impl Game {
                 //Full's earlier HUD update, before GameAge and actor callbacks.
                 //The positive-to-zero edge is one-shot;593660 input reset is
                 //still represented by completion_callbacks_pending, not cleared.
-                self.state.run_introduction = RunIntroduction::stage(true);
+                self.state.run_introduction = stage_transition::show_name(&self.state.floor);
             }
         }
 
@@ -5205,7 +5227,7 @@ impl Game {
             stage_transition::Step::NextStage => {
                 // SetNextStage585620 -> SetStage585600 -> 5b8340, then
                 // ShowNightmareScene595580(sameStage=false).
-                let next = stage_transition::next_stage(self.state.stage)?;
+                let next = stage_transition::next_stage(&self.state)?;
                 self.state.stage = next;
                 self.state.nightmares.select_normal_basement(next)?;
                 self.state.nightmares.request(false);
@@ -6312,6 +6334,10 @@ impl Game {
         player_items::advance_presentation(&mut self.state, phase);
         player_costume229::begin_full(&mut self.state, phase);
         spider_webs::begin_player_update(&mut self.state, phase)?;
+        //4471C0..E3 applies470 friction then P+=V before5318EE's action11.
+        //Capture that post-Base position before later controls/grid response.
+        let pocket_action_anchor =
+            bombs::player_world(&self.state) + bombs::player_velocity(&self.state);
         let had_game_over = self.state.player_death.game_over.is_some();
         if player_death::advance(&mut self.state, phase)? {
             if !had_game_over && self.state.player_death.game_over.is_some() {
@@ -6798,6 +6824,7 @@ impl Game {
         if let Some(aim) = shooting_aim_db4 {
             self.state.attack_runtime.shooting_aim_db4 = Some(aim);
         }
+        pocket_actions::advance(&mut self.state, pocket_action_anchor)?;
         if phase == phase::Phase::Update {
             player_footprints::advance(&mut self.state, footprint_velocity)?;
         }

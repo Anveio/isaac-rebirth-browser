@@ -3,6 +3,7 @@ export type Screen = "title" | "profile" | "main" | "options" | "controls" | "ke
 export type Difficulty = "normal" | "hard";
 export type Direction = "left" | "right" | "up" | "down";
 export interface Player {
+  pocketActions?: {sourceD98: number | null; heldCallbacks3054: number | null; source30d0: number | null; frontier: PocketActionFrontier | null; playerBe8StoreReached: boolean; gnawedLeafFrontier: boolean};
   entitySource?: { entityType: number; variant: number; spawnerType: number; spawnerVariant: number };
   canShoot: boolean; initialized3074: boolean;
   visible: boolean; inputCooldown: number; dead: boolean;
@@ -16,6 +17,7 @@ export interface Player {
   eye: "negative" | "positive";
   shotsFired: number;
 }
+export type PocketActionFrontier = {kind: "playerVariant" | "inputDevice" | "heldCounter" | "heldRecords" | "capacity" | "trinketRemoval" | "queuedFlush" | "pendingCache" | "missingGrid" | "pocketInit"} | {kind: "placement"; frontier: OrdinaryPlacementFrontier};
 export interface AttackColor { tint: [number,number,number,number]; sourceMiddle: [number,number,number,number]; offsets: [number,number,number]; }
 export interface Costume229 {
   slots: ({entry: number; layer: number; bodyGroup: boolean} | null)[];
@@ -267,6 +269,8 @@ export interface RoomDescriptor {
 export interface Floor {
   challengeCurse: {initialLocalState: number; finalLocalState: number; threshold: number; thresholdResult: number | null; selectionResult: number | null; selectedMask: number; filteredMask: number; roomAdjustmentResult: number; localDraws: number} | null;
   contract: string; stage: number; stageSeed: number; additionalRooms: number; attempts: number;
+  /** Level+8 curse mask; absent when zero. */
+  curses?: number;
   descriptors: RoomDescriptor[]; grid: number[]; startingDescriptor: number;
   primaryState: number; primaryDraws: number; generatorState: number; gameFlags: number;
   specialWeights: number[]; basementWeights: number[];
@@ -291,6 +295,7 @@ export interface Room {
   npcs: { id: number; kind: number; variant: number; subtype: number; spawnSeed: number;
     position: {x: number; y: number}; presentedPosition: {x: number; y: number}; velocity: {x: number; y: number};
     hp: number; maxHp: number; collisionRadius: number; collisionMass: number; collisionDamage: number;
+    baseFriction: number; friction: number;
     gridCollisionClass: number; entityCollisionClass: number; canShutDoors: boolean; boss: boolean;
     state: number; frameAge: number; animationFrame: number; animation: string; animationClock: number; animationPlaying: boolean; visible: boolean; savedInitializedState: number; shadowSize: number; dead: boolean; removed: boolean; raw494: boolean; spriteScale?: number; overlay?: { animation: string; frame: number; clock: number; playing: boolean }; wallCreep?: { rotation: number; flipY: boolean }; mom?: { part: number; rotation: number };
     damage: {pendingDamage: number; pendingFlags: number};
@@ -299,6 +304,9 @@ export interface Room {
     actor?: string;
     champion?: {color: number; scale: number; speed: number; timer: number | null};
     spriteColor: {current: SpriteColorValue; stack: {priority: number; color: SpriteColorValue; duration: number; remaining: number}[]};
+    status: {currentFriction: number | null; freezeTimer: number; applicationLockout: number; frozen: boolean; baseUpdateAdmitted: boolean;
+      frontier: "frozenDeath445c60" | "unsupportedActor" | null};
+    parent?: number; child?: number;
     shooter?: {cooldown: number; delay: number};
     flipX?: boolean;
     dip: {entityFlags: number; birthGameUpdate: number; currentFriction: number; flipX: boolean;
@@ -392,7 +400,7 @@ export interface State {
     itemRngs: ItemRng[]; trinketRngs: ItemRng[]; pocketRngs: ItemRng[]; entitySpawnSeed: number;
     heldPockets?: {slots: {id: number; card: boolean}[];
       frontier: {kind: "cardEffect"; cardId: number} | {kind: "pillEffect"; pillColor: number}
-        | {kind: "modifierConversion"; collectibleId: number} | null} | null;
+        | {kind: "modifierConversion"; collectibleId: number} | {kind: "dropAction"} | null} | null;
     ordinaryProducerHistory?: {frontier: OrdinaryPlacementFrontier | null} | null;
     pickupGrantHistory?: PickupGrantHistory | null;
     activeChargeHistory?: ActiveChargeHistory | null;
@@ -447,6 +455,7 @@ export interface State {
   player: Player; room: Room; stageEffects: StageEffects; inventory: { coins: number; bombs: number; keys: number };
   publicActions: { menuConfirm: boolean; menuBack: boolean; activePressed: boolean; activeTriggered: boolean; pocketPressed: boolean; pocketTriggered: boolean; held: boolean[]; triggered: boolean[]; rawKey: number | null; physicalWasDown: string[] };
   keyboard: {bindings: number[][]};
+  selectedInputDevice?: number;
   inputConfigs: InputConfigs;
   controlsMenu: {deviceSelection: number; deviceHeld: number; selectedDevice: number | null; selection: number; column: number; waiting: boolean; nextSaveSequence: number; saveRequests: {sequence: number; configs: InputConfigs}[]; unavailableActions: number[]};
   playerAnimation: { current: "Trapdoor" | "Appear" | "Death" | "UseItem" | "Hit" | "Sad" | "Happy" | "Jump" | null; frame: number; playing: boolean; guard: boolean };

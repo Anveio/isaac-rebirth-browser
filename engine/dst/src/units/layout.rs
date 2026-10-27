@@ -78,6 +78,8 @@ fn request(e: &mut Entropy) -> GrowthRequest {
         generator_seed,
         additional_rooms,
         shape_mask,
+        // Curse of the Labyrinth also admits rooms touching two others.
+        labyrinth: e.chance(1, 4),
     }
 }
 

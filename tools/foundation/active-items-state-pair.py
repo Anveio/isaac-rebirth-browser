@@ -30,6 +30,19 @@ counts, failures = collections.Counter(), collections.Counter()
 examples = []
 #Clips the port names; ordinary walk/head clips are outside this reader.
 CLIPS = {'UseItem', 'Pickup', 'Jump', 'Hit', 'Sad', 'Happy'}
+freeze_contract = contract.get('npcFreeze')
+if freeze_contract is not None:
+    assert freeze_contract['schema'] == 'source-public-npc-freeze-v1'
+
+
+def artifact_value(value):
+    if isinstance(value, dict):
+        return {str(key): artifact_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [artifact_value(item) for item in value]
+    if isinstance(value, set):
+        return [artifact_value(item) for item in sorted(value)]
+    return value
 
 
 def check(field, actual, expected=True, gp=None):
@@ -37,11 +50,16 @@ def check(field, actual, expected=True, gp=None):
     if type(actual) is not type(expected) or actual != expected:
         failures[field] += 1
         if len(examples) < 120:
-            examples.append(dict(field=field, gameplayPresentation=gp, actual=actual, expected=expected))
+            examples.append(dict(field=field, gameplayPresentation=gp, actual=artifact_value(actual), expected=artifact_value(expected)))
 
 
 def integer(value):
     assert type(value) is int, 'Actual integer owner required'
+    return value
+
+
+def boolean(value):
+    assert type(value) is bool, 'Actual boolean owner required'
     return value
 
 
@@ -102,7 +120,7 @@ def native_rows():
             player, physical = items['players'][0], world['players'][0]
             pedestals = sorted(integer(actor['subtype']) for actor in world['entities']
                                if actor['type'] == 5 and actor['variant'] == 100 and not actor['removed'])
-            yield integer(context['presentedFrame']) - gameplay_start, dict(
+            row = dict(
                 activeId=integer(player['activeId']), activeCharge=integer(player['activeCharge']),
                 temporary=[[integer(row['itemId']), integer(row['count']), integer(row['cooldown'])]
                            for row in player['temporaryCollectibles']],
@@ -114,6 +132,9 @@ def native_rows():
                          for slot in player['heldPocketRecords']],
                 clip=player['mainSprite']['animation'], frame=f32(player['mainSprite']['animationFrame']),
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
+            if freeze_contract is not None:
+                row['npcFreeze'] = native_freeze(observation)
+            yield integer(context['presentedFrame']) - gameplay_start, row
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
     assert gameplay_start is not None
 
@@ -144,7 +165,7 @@ def browser_rows():
                 clip, frame = 'Pickup', owner['pickupAnimationFrame']
             pedestals = sorted(integer(actor['subtype']) for actor in state['room']['pickups']
                                if actor['variant'] == 100 and not actor['removed'])
-            yield integer(value['gameplayPresentation']), dict(
+            row = dict(
                 activeId=integer(owner['activeId']), activeCharge=integer(owner['activeCharge']),
                 temporary=[[integer(row['itemId']), integer(row['count']), integer(row['cooldown'])]
                            for row in owner['temporaryCollectibles']],
@@ -158,7 +179,355 @@ def browser_rows():
                          for slot in owner['heldPockets']['slots']],
                 clip=clip, frame=frame,
                 controls=player['controlsEnabled'] is True, pedestals=pedestals)
+            if freeze_contract is not None:
+                row['npcFreeze'] = browser_freeze(state, integer(value['gameplayPresentation']))
+            yield integer(value['gameplayPresentation']), row
     assert (records, raw_bytes, raw_hash.hexdigest()) == (metadata['records'], metadata['rawBytes'], metadata['rawSha256'])
+
+
+
+def color(value):
+    assert type(value) is dict, 'Actual SpriteColor owner required'
+    result = [f32(word) for field in ('tint', 'colorize', 'offset') for word in value[field]]
+    assert len(result) == 11
+    return result
+
+
+def information_animation(value, owner):
+    try:
+        assert type(value) is dict, 'Actual information manager required'
+        state = integer(value['state'])
+        assert state in (0, 1, 2), 'Unknown actual information manager state'
+        return dict(state=state, delay=integer(value['delay']))
+    except (KeyError, TypeError, ValueError, AssertionError) as error:
+        return dict(unavailable=owner, reason=str(error))
+
+
+def native_freeze(observation):
+    extra, combat = observation['npcFreeze'], observation['combat']
+    assert extra['status'] == combat['status'] == 'pass', 'Complete independent Native freeze owners required'
+    measured = {(integer(row['sequenceId']), integer(row['spawnSeed'])): row for row in extra['actors']}
+    result = dict(fullUpdates=integer(combat['nativePhase']['fullGameUpdates']),
+                  systemCounter=integer(combat['nativePhase']['systemIterations']),
+                  informationAnimation=information_animation(extra.get('informationAnimation'), 'Game+A1E8'), actors=[])
+    for actor in combat['entities']:
+        if not 10 <= actor['type'] <= 999:
+            continue
+        actual = measured.pop((integer(actor['sequenceId']), integer(actor['spawnSeed'])))
+        flags = integer(actor['entityFlags'])
+        result['actors'].append(dict(
+            key=[integer(actor[key]) for key in ('type', 'variant', 'subtype', 'spawnSeed')],
+            lifetimeId=integer(actor['sequenceId']), position=vector(actual['physicalPosition']),
+            presentedPosition=vector(actor['position']), velocity=vector(actor['velocity']),
+            hp=f32(actor['hp']), maxHp=f32(actor['maxHp']), baseFriction=f32(actual['baseFriction']),
+            friction=f32(actor['friction']), currentFriction=f32(actor['friction']),
+            freezeTimer=integer(actor['statusCountdown']),
+            immune=bool(flags & 1), frozen=bool(flags & 0x20), applicationLockout=integer(actual['applicationLockout']),
+            state=integer(actor['npcState']), frameAge=integer(actor['npcFrameAge']),
+            animation=actor['animation'], animationClock=f32(actor['animationFrame']),
+            animationPlaying=actor['animationPlaying'], visible=actor['visible'], dead=actor['removed'],
+            raw494=actual['raw494'], boss=actor['boss'], champion=actor['npcChampion'],
+            parentNull=actual['parentNull'], childNull=actual['childNull'],
+            entityCollisionClass=integer(actor['entityCollisionClass']), eligibleFlag=not bool(flags & 0x10),
+            spriteColor=[f32(word) for word in actor['spriteColor']],
+            colorStack=[dict(priority=integer(row['priority']), color=[f32(word) for word in row['color']],
+                duration=integer(row['duration']), remaining=integer(row['remaining'])) for row in actual['timedColors']],
+            ai=[integer(actor['npcStateFrame']), integer(actor['npcFrameAge'])],
+            shooter=[integer(actor['npcProjectileCooldown']), integer(actor['npcProjectileDelay'])],
+            preview=actual['preview'], statusAvailable=True))
+    assert not measured, 'Every independent Native freeze actor must join the actual room list'
+    return result
+
+
+def browser_freeze(state, gp):
+    result = dict(fullUpdates=integer(state['gameUpdateCount']),
+                  systemCounter=integer(state['systemClock']['systemCounter']),
+                  informationAnimation=information_animation(state.get('informationAnimation'), 'informationAnimation'), actors=[])
+    for actor in state['room']['npcs']:
+        status = actor.get('status')
+        # Older artifacts have no status owner. Preserve their actual body
+        # and base fields; missing status words must fail as unavailable,
+        # never become zero/false or stop the entire actual journal read.
+        status_values = {}
+        for field, decode in (
+                ('currentFriction', f32),
+                ('freezeTimer', integer), ('baseUpdateAdmitted', boolean),
+                ('frozen', boolean), ('applicationLockout', integer)):
+            try:
+                assert type(status) is dict and field in status, 'Missing status owner'
+                status_values[field] = decode(status[field])
+            except (KeyError, TypeError, ValueError, AssertionError) as error:
+                status_values[field] = dict(unavailable=f'Npc.status.{field}', reason=str(error))
+        frontier = (status.get('frontier', dict(unavailable='Npc.status.frontier'))
+                    if type(status) is dict else dict(unavailable='Npc.status.frontier'))
+        status_available = frontier is None and not any(type(value) is dict for value in status_values.values())
+        shooter = actor.get('shooter')
+        result['actors'].append(dict(
+            key=[integer(actor[key]) for key in ('kind', 'variant', 'subtype', 'spawnSeed')],
+            lifetimeId=integer(actor['id']), position=vector(actor['position']),
+            presentedPosition=vector(actor['presentedPosition']), velocity=vector(actor['velocity']),
+            hp=f32(actor['hp']), maxHp=f32(actor['maxHp']), baseFriction=f32(actor['baseFriction']),
+            friction=f32(actor['friction']),
+            **status_values, statusAvailable=status_available,
+            state=integer(actor['state']), frameAge=integer(actor['frameAge']),
+            animation=actor['animation'], animationClock=f32(actor['animationClock']),
+            animationPlaying=actor['animationPlaying'], visible=actor['visible'], dead=actor['dead'],
+            raw494=actor['raw494'], boss=actor['boss'], champion=actor.get('champion') is not None,
+            parentNull=actor.get('parent') is None, childNull=actor.get('child') is None,
+            entityCollisionClass=integer(actor['entityCollisionClass']),
+            spriteColor=color(actor['spriteColor']['current']),
+            colorStack=[dict(priority=integer(row['priority']), color=color(row['color']),
+                duration=integer(row['duration']), remaining=integer(row['remaining']))
+                for row in actor['spriteColor']['stack']],
+            ai=[integer(actor['frameAge'])],
+            shooter=[integer(shooter['cooldown']), integer(shooter['delay'])] if shooter is not None else None))
+        check('Own:freeze actual status owner available', status_available, gp=gp)
+        check('Own:freeze status frontier closed', frontier, None, gp)
+    return result
+
+
+def target_map(value):
+    actors = {tuple(actor['key'][:3]): actor for actor in value['actors']}
+    assert len(actors) == len(value['actors']), 'Actual unique target family identities required'
+    return actors
+
+
+def freeze_callback(name, value, before, gp):
+    full_delta = value['fullUpdates'] - before['fullUpdates']
+    system_delta = value['systemCounter'] - before['systemCounter']
+    check(f'{name}:freeze consecutive system phase clock', system_delta, 1, gp)
+    check(f'{name}:freeze full phase clock bound', full_delta in (0, 1), gp=gp)
+    if system_delta != 1:
+        return None
+    # The post-System counter is odd after a scheduled Full, even after Fast.
+    # Game's full counter advances only when RoomFull is actually admitted.
+    scheduled_full = value['systemCounter'] % 2 == 1
+    information, prior_information = value['informationAnimation'], before['informationAnimation']
+    if full_delta == 1:
+        check(f'{name}:freeze admitted Full matches System phase', scheduled_full, gp=gp)
+        if 'unavailable' not in information:
+            check(f'{name}:freeze admitted Full information gate', information['state'] != 2, gp=gp)
+            if information['state'] == 2:
+                return None
+        return 'Full' if scheduled_full else None
+    if full_delta != 0:
+        return None
+    if scheduled_full:
+        if 'unavailable' in information:
+            return None
+        check(f'{name}:freeze held Full counter has actual information gate', information['state'], 2, gp)
+        return 'BlockedFull' if information['state'] == 2 else None
+    # Fast tests the entry manager. An admitted callback can itself request
+    # Bra's book and leave state1, so the resulting state alone is insufficient.
+    if 'unavailable' in prior_information:
+        return None
+    if prior_information['state'] != 0:
+        check(f'{name}:freeze blocked Fast information manager held', information, prior_information, gp)
+        return 'BlockedFast' if information == prior_information else None
+    return 'Fast'
+
+
+def freeze_witnesses(name, rows):
+    """Independent source-law and anti-vacuity checks in each actual game."""
+    expected = {(row['type'], row['variant'], row['subtype']) for row in freeze_contract['targets']}
+    roster, identities, health, first, last_frozen = None, None, None, None, None
+    moved, held, used = set(), False, False
+    full_steps, fast_steps, boundary, resumed, post_fast = set(), set(), set(), set(), set()
+    release_full_seen = set()
+    application_phase, first_full_gp, first_fast_gp = None, None, None
+    first_fast_path_complete = True
+    unavailable_status_presentations = 0
+    unavailable_information_presentations = 0
+    blocked_slots = collections.Counter()
+    control = freeze_contract['control']
+    previous = None
+    prior_gp = None
+    preuse_shooter = set()
+    space_windows, cursor = [], 0
+    for action in case['actions']:
+        if 'space' in action['keys']:
+            space_windows.append((cursor, cursor + action['presentations'] + 1))
+        cursor += action['presentations']
+    freeze_color = [f32(.22)] * 3 + [f32(1)] + [f32(0)] * 4 + [f32(f32(40) * f32(1 / 255))] * 3
+    for gp in sorted(rows):
+        player = rows[gp]
+        value = player['npcFreeze']
+        information_available = 'unavailable' not in value['informationAnimation']
+        check(f'{name}:freeze actual information manager available', information_available, gp=gp)
+        unavailable_information_presentations += int(not information_available)
+        actors = target_map(value)
+        #The initial room admission may precede its actual spawned actors.
+        if set(actors) != expected and roster is None:
+            previous, prior_gp = None, gp
+            continue
+        check(f'{name}:freeze exact target roster', set(actors), expected, gp)
+        if set(actors) != expected:
+            if first is not None and first_fast_gp is None:
+                first_fast_path_complete = False
+            continue
+        now_ids = {key: actor['lifetimeId'] for key, actor in actors.items()}
+        now_hp = {key: actor['hp'] for key, actor in actors.items()}
+        if roster is None:
+            roster, identities, health = set(actors), now_ids, now_hp
+        check(f'{name}:freeze stable actor lifetimes', now_ids, identities, gp)
+        check(f'{name}:freeze unchanged target HP', now_hp, health, gp)
+        held |= player['activeId'] == 39 and player['activeCharge'] == 3
+        used |= any(row[0] == 39 for row in player['temporary']) and player['activeCharge'] == 0
+        if not all(actor['statusAvailable'] for actor in actors.values()):
+            unavailable_status_presentations += 1
+            if first is not None and first_fast_gp is None:
+                first_fast_path_complete = False
+            # Movement/shooter observations before the declared first Space
+            # remain usable without asserting any missing status value.
+            if not space_windows or gp < space_windows[0][0]:
+                moved.update(key for key, actor in actors.items() if key[0] == 18 and any(actor['velocity']))
+                preuse_shooter.add(tuple(actors[(12, 0, 0)]['shooter']))
+            if control:
+                check(f'{name}:freeze control no TEMP39 or discharge', not any(row[0] == 39 for row in player['temporary']) and (player['activeId'] != 39 or player['activeCharge'] == 3), gp=gp)
+            previous, prior_gp = None, gp
+            continue
+        callback = None
+        if previous is not None and prior_gp is not None and gp == prior_gp + 1:
+            callback = freeze_callback(name, value, rows[prior_gp]['npcFreeze'], gp)
+            if callback in ('BlockedFull', 'BlockedFast'):
+                blocked_slots[callback] += 1
+                for key, actor in actors.items():
+                    before = previous[key]
+                    for field in ('position', 'presentedPosition', 'velocity', 'friction', 'currentFriction',
+                                  'freezeTimer', 'frozen', 'applicationLockout', 'state', 'ai', 'shooter',
+                                  'animation', 'animationClock', 'animationPlaying', 'spriteColor', 'colorStack'):
+                        check(f'{name}:freeze information-blocked {field} held', actor[field], before[field], gp)
+        active = any(actor['frozen'] for actor in actors.values())
+        if control:
+            check(f'{name}:freeze control has no positive timer', [actor['freezeTimer'] for actor in actors.values()], [0] * len(actors), gp)
+            check(f'{name}:freeze control has no frozen flag', active, False, gp)
+            check(f'{name}:freeze control no TEMP39 or discharge', not any(row[0] == 39 for row in player['temporary']) and (player['activeId'] != 39 or player['activeCharge'] == 3), gp=gp)
+            if name == 'Own':
+                check('Own:freeze control retains ordinary Base owner', [actor['baseUpdateAdmitted'] for actor in actors.values()], [False] * len(actors), gp)
+        if first is None and not active and (not space_windows or gp < space_windows[0][0]):
+            moved.update(key for key, actor in actors.items() if key[0] == 18 and any(actor['velocity']))
+            preuse_shooter.add(tuple(actors[(12, 0, 0)]['shooter']))
+        if active and first is None:
+            first = gp
+            check(f'{name}:freeze application has prior actual targets', previous is not None, gp=gp)
+            check(f'{name}:freeze actual application joins physical Space tape', any(start <= gp <= end for start, end in space_windows), gp=gp)
+            if previous is not None:
+                check(f'{name}:freeze held39 charge3 immediately before application', rows[prior_gp]['activeId'] == 39 and rows[prior_gp]['activeCharge'] == 3, gp=gp)
+                for key, actor in previous.items():
+                    if name == 'Native':
+                        check('Native:freeze actual target passes flags immunity eligibility', actor['eligibleFlag'] and not actor['immune'] and actor['entityCollisionClass'] not in (0, 1), gp=gp)
+                    check(f'{name}:freeze target past Appear before use', actor['state'] != 1 and actor['visible'] and not actor['dead'], gp=gp)
+                    check(f'{name}:freeze ordinary unlinked living target', not actor['boss'] and not actor['champion'] and actor['parentNull'] and actor['childNull'] and not actor['raw494'] and actor['hp'] > 0, gp=gp)
+                application_phase = callback
+                check(f'{name}:freeze application has admitted room callback', callback in ('Full', 'Fast'), gp=gp)
+                if callback == 'Full':
+                    first_full_gp = gp
+                elif callback == 'Fast':
+                    first_fast_gp = gp
+                for key, actor in actors.items():
+                    before = previous[key]
+                    source_friction = f32(before['currentFriction'])
+                    check(f'{name}:freeze application source current470 owner', source_friction, before['baseFriction'], gp)
+                    check(f'{name}:freeze application current470 equals base46c', actor['currentFriction'], actor['baseFriction'], gp)
+                    check(f'{name}:freeze application transfers current470', actor['friction'], actor['currentFriction'], gp)
+                    check(f'{name}:freeze application suppresses AI', [actor['state'], actor['ai'], actor['shooter']], [before['state'], before['ai'], before['shooter']], gp)
+                    check(f'{name}:freeze application suppresses sprite', [actor['animation'], actor['animationClock'], actor['animationPlaying']], [before['animation'], before['animationClock'], before['animationPlaying']], gp)
+                    if callback == 'Full':
+                        reduced = f32(source_friction * f32(.01))
+                        velocity = [f32(word * reduced) for word in before['velocity']]
+                        check(f'{name}:freeze first Full application velocity', actor['velocity'], velocity, gp)
+                        check(f'{name}:freeze first Full application integrates position', actor['position'], [f32(p + v) for p, v in zip(before['position'], velocity)], gp)
+                        check(f'{name}:freeze first Full application presents physical position', actor['presentedPosition'], actor['position'], gp)
+                    elif callback == 'Fast':
+                        check(f'{name}:freeze immediate Fast application holds physical position', actor['position'], before['position'], gp)
+                        check(f'{name}:freeze immediate Fast application holds velocity', actor['velocity'], before['velocity'], gp)
+                        preview = [f32(p + f32(f32(v * source_friction) / f32(2))) for p, v in zip(actor['position'], actor['velocity'])]
+                        check(f'{name}:freeze immediate Fast application uses current470', actor['presentedPosition'], preview, gp)
+                if callback in ('Full', 'Fast'):
+                    check(f'{name}:freeze first timer120/119 follows actual phase',
+                          [actor['freezeTimer'] for actor in actors.values()], [119 if callback == 'Full' else 120] * len(actors), gp)
+        if first is not None and first_fast_gp is None and callback is None:
+            first_fast_path_complete = False
+        if first is not None and name == 'Own':
+            check('Own:freeze reached Base owner retained', [actor['baseUpdateAdmitted'] for actor in actors.values()], [True] * len(actors), gp)
+        if active:
+            last_frozen = gp
+            for actor in actors.values():
+                check(f'{name}:freeze live current470 remains base46c', actor['currentFriction'], actor['baseFriction'], gp)
+                check(f'{name}:freeze live friction follows source current470', actor['friction'], actor['currentFriction'], gp)
+                check(f'{name}:freeze actual timed colour entry', any(row['priority'] == 255 and row['color'] == freeze_color and row['remaining'] == actor['freezeTimer'] for row in actor['colorStack']), gp=gp)
+        if previous is not None and prior_gp is not None and gp == prior_gp + 1:
+            full = value['fullUpdates'] - rows[prior_gp]['npcFreeze']['fullUpdates'] == 1
+            if first is not None:
+                if callback == 'Full' and first_full_gp is None:
+                    first_full_gp = gp
+                elif callback == 'Fast' and first_fast_gp is None:
+                    first_fast_gp = gp
+            for key, actor in actors.items():
+                before = previous[key]
+                if before['freezeTimer'] > 0:
+                    check(f'{name}:freeze countdown follows full callbacks', actor['freezeTimer'], max(0, before['freezeTimer'] - int(full)), gp)
+                    check(f'{name}:freeze flag follows timer', actor['frozen'], actor['freezeTimer'] > 0, gp)
+                    check(f'{name}:freeze AI held', [actor['state'], actor['ai'], actor['shooter']], [before['state'], before['ai'], before['shooter']], gp)
+                    check(f'{name}:freeze sprite held', [actor['animation'], actor['animationClock'], actor['animationPlaying']], [before['animation'], before['animationClock'], before['animationPlaying']], gp)
+                    if callback == 'Full':
+                        full_steps.add(key)
+                        reduced = f32(f32(before['currentFriction']) * f32(.01))
+                        velocity = [f32(word * reduced) for word in before['velocity']]
+                        check(f'{name}:freeze reduced Full velocity', actor['velocity'], velocity, gp)
+                        check(f'{name}:freeze integrated Full position', actor['position'], [f32(p + v) for p, v in zip(before['position'], velocity)], gp)
+                        check(f'{name}:freeze current friction reset', actor['friction'], actor['baseFriction'], gp)
+                    elif callback == 'Fast':
+                        fast_steps.add(key)
+                        preview = [f32(p + f32(f32(v * actor['friction']) / f32(2))) for p, v in zip(actor['position'], actor['velocity'])]
+                        check(f'{name}:freeze Fast prediction', actor['presentedPosition'], preview, gp)
+                        check(f'{name}:freeze Fast physical hold', actor['position'], before['position'], gp)
+                    if before['freezeTimer'] == 1 and actor['freezeTimer'] == 0:
+                        boundary.add(key)
+                        check(f'{name}:freeze expiry removes timed blue entry', not any(row['priority'] == 255 for row in actor['colorStack']), gp=gp)
+                elif first is not None and actor['freezeTimer'] == 0:
+                    if callback == 'Full':
+                        progressed = actor['animationClock'] != before['animationClock'] or actor['shooter'] != before['shooter'] or actor['velocity'] != before['velocity'] or actor['ai'] != before['ai']
+                        if key not in release_full_seen:
+                            check(f'{name}:freeze first eligible Full resumes AI or sprite', progressed, gp=gp)
+                            release_full_seen.add(key)
+                            if progressed:
+                                resumed.add(key)
+                        check(f'{name}:freeze postexpiry Full friction reset', actor['friction'], actor['baseFriction'], gp)
+                    elif callback == 'Fast':
+                        post_fast.add(key)
+                        preview = [f32(p + f32(f32(v * actor['friction']) / f32(2))) for p, v in zip(actor['position'], actor['velocity'])]
+                        check(f'{name}:freeze postexpiry Fast prediction', actor['presentedPosition'], preview, gp)
+                        check(f'{name}:freeze postexpiry Fast physical hold', actor['position'], before['position'], gp)
+        previous, prior_gp = actors, gp
+    check(f'{name}:freeze actual held39 full charge3', held)
+    if control:
+        check(f'{name}:freeze control observed complete target tape', roster is not None and max(rows, default=0) > 500)
+        check(f'{name}:freeze control observed moving actor', (18, 0, 0) in moved)
+        check(f'{name}:freeze control observed Horf shooter progression', len(preuse_shooter) > 1)
+        return dict(control=True, applicationPhase=None, applicationPresentation=None,
+                    unavailableStatusPresentations=unavailable_status_presentations,
+                    unavailableInformationPresentations=unavailable_information_presentations,
+                    informationBlockedSlots=dict(blocked_slots))
+    check(f'{name}:freeze actual use and discharge', used)
+    check(f'{name}:freeze moving target before use', (18, 0, 0) in moved)
+    check(f'{name}:freeze Horf shooter progresses before use', len(preuse_shooter) > 1)
+    check(f'{name}:freeze actual positive application', first is not None)
+    check(f'{name}:freeze actual first application phase retained', application_phase in ('Full', 'Fast'))
+    check(f'{name}:freeze first Full boundary immediately witnessed', first is not None and first_full_gp in (first, first + 1))
+    check(f'{name}:freeze first eligible Fast callback witnessed', first is not None and first_fast_gp is not None and first_fast_path_complete)
+    check(f'{name}:freeze Full witnessed for each target', full_steps, expected)
+    check(f'{name}:freeze Fast witnessed for each target', fast_steps, expected)
+    check(f'{name}:freeze timer1-to0 witnessed for each target', boundary, expected)
+    check(f'{name}:freeze next-full resume witnessed for each target', resumed, expected)
+    check(f'{name}:freeze postexpiry Fast witnessed for each target', post_fast, expected)
+    check(f'{name}:freeze complete expiry margin', first is not None and max(rows, default=0) > first + 260 and last_frozen is not None and max(rows) > last_frozen + 20)
+    return dict(control=False, applicationPhase=application_phase, applicationPresentation=first,
+                firstFullPresentation=first_full_gp, firstFastPresentation=first_fast_gp,
+                firstFastPathComplete=first_fast_path_complete,
+                unavailableStatusPresentations=unavailable_status_presentations,
+                unavailableInformationPresentations=unavailable_information_presentations,
+                informationBlockedSlots=dict(blocked_slots))
 
 
 readback = json.loads(args.capture_readback.read_text())
@@ -175,6 +544,7 @@ for name, reader, rows in (('Native', native_rows, native), ('Own', browser_rows
     except (KeyError, TypeError, ValueError, AssertionError, IndexError, OSError) as error:
         check(f'actual {name} journal readback', repr(error), 'complete typed journal')
 paired = sorted(set(native) & set(own))
+raw_friction_diagnostics = {}
 total = sum(action['presentations'] for action in case['actions'])
 check('paired presentations cover the declared tape', bool(paired) and paired[-1] >= total - 4)
 uses, held, landed = collections.Counter(), set(), 0
@@ -186,6 +556,36 @@ for gp in paired:
     if b['clip'] in CLIPS or a['clip'] is not None:
         check('main sprite clip', a['clip'], b['clip'], gp)
         check('main sprite frame', f32(a['frame']) if a['frame'] is not None else None, b['frame'], gp)
+    if freeze_contract is not None:
+        try:
+            native_targets, own_targets = target_map(b['npcFreeze']), target_map(a['npcFreeze'])
+            check('NPC freeze paired target families', set(own_targets), set(native_targets), gp)
+            for key in sorted(set(native_targets) & set(own_targets)):
+                for field in ('key', 'position', 'presentedPosition', 'velocity', 'hp', 'maxHp',
+                    'baseFriction', 'currentFriction', 'freezeTimer', 'frozen', 'applicationLockout', 'state',
+                    'frameAge', 'animation', 'animationClock', 'animationPlaying', 'visible', 'dead',
+                    'raw494', 'boss', 'champion', 'parentNull', 'childNull', 'entityCollisionClass',
+                    'spriteColor', 'colorStack'):
+                    check(f'NPC{key}:freeze {field}', own_targets[key][field], native_targets[key][field], gp)
+                actor, reference = own_targets[key], native_targets[key]
+                admitted = actor['baseUpdateAdmitted']
+                owner = 'admitted' if admitted is True else 'ordinary' if admitted is False else 'unavailable'
+                diagnostic = raw_friction_diagnostics.setdefault(str(key), {})
+                words = diagnostic.setdefault(owner, dict(observations=0, differences=0, examples=[]))
+                words['observations'] += 1
+                if actor['friction'] != reference['friction']:
+                    words['differences'] += 1
+                    if len(words['examples']) < 8:
+                        words['examples'].append(dict(gameplayPresentation=gp, ownRaw=actor['friction'], native470=reference['friction']))
+                # Before admission Npc.friction retains the AI's pre-reset word,
+                # while Native +470 has already reset from +46c. Only the
+                # explicit status.currentFriction owner maps that Native word.
+                if admitted is True:
+                    check(f'NPC{key}:freeze friction', actor['friction'], reference['friction'], gp)
+                if key[0] == 12:
+                    check('Horf freeze shooter owners', own_targets[key]['shooter'], native_targets[key]['shooter'], gp)
+        except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
+            check('actual paired NPC freeze owners', repr(error), 'complete typed independent owners', gp)
     held.add(b['activeId'])
     for row in b['temporary']:
         uses[row[0]] += 1
@@ -195,15 +595,34 @@ for item in contract['uses']:
     check(f'actual Native active {item} use record', uses[item] > 0)
 if 282 in contract['uses']:
     check('actual Native How to Jump airborne presentations', landed > 0)
+freeze_observations = {}
+if freeze_contract is not None:
+    for name, rows in (('Native', native), ('Own', own)):
+        try:
+            freeze_observations[name] = freeze_witnesses(name, rows)
+        except (KeyError, TypeError, ValueError, AssertionError, IndexError) as error:
+            check(f'actual {name} freeze source witnesses', repr(error), 'complete typed independent witnesses')
 after = {str(path): digest(path) for path in inputs}
 check('all input archives before equal end', after, before)
 result = dict(schema=1, status='fail' if failures else 'pass', case=case['name'],
     checks=sum(counts.values()), failures=sum(failures.values()),
     nativePresentations=len(native), ownPresentations=len(own), pairedPresentations=len(paired),
     checksPerField=dict(counts), failedPerField=dict(failures), examples=examples,
-    unavailable=contract['unknown'], inputsBefore=before, inputsAfter=after,
+    unavailable=contract['unknown'] + (freeze_contract['unknown'] if freeze_contract else []), inputsBefore=before, inputsAfter=after,
     scope='Per-presentation start-room active slot, charge, temporary records, health, Player body, '
-          'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.')
+          'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.'
+          + (' Additive independent bounded living NPC freeze state/motion/colour and actual phase-clock witnesses; '
+             'the no-Space control retains ordinary NPC behavior. Frozen death, bosses, links and readmission remain open.' if freeze_contract else ''))
+if freeze_contract is not None:
+    result['npcFreezeWitnesses'] = freeze_observations
+    result['npcFreezeRawFrictionDiagnostics'] = dict(
+        scope='Raw Npc.friction versus Native +470; ordinary AI pre-reset differences are diagnostic. '
+              'Paired source current470 uses only actual Npc.status.currentFriction, without fallback; '
+              'admitted raw transfer/reset comparisons remain blocking.',
+        actors=raw_friction_diagnostics)
+    result['npcFreezeObservationLimits'] = [
+        'JSON serialization can erase negative zero; erased velocity sign bits are unobservable, not verified equal.',
+        'Missing information manager owners leave RoomFast/blocked callback classification unavailable.']
 raw = (json.dumps(result, indent=2, allow_nan=False) + '\n').encode()
 args.output.write_bytes(gzip.compress(raw, mtime=0) if args.output.suffix == '.gz' else raw)
 print(json.dumps(dict(status=result['status'], checks=result['checks'], failures=result['failures'])))

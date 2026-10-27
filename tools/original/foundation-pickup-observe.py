@@ -109,6 +109,10 @@ def observe(pid, context):
                     result['localRngWords'] = list(struct.unpack_from('<4I', raw, 0x7c0))
                     if context.get('pickupResourceSound') is True:
                         result['pickupManagerMember'] = True
+                    if context.get('pocketActions') is True:
+                        result['pocketSpawnSource'] = {'entityType':struct.unpack_from('<I',raw,0x1c)[0],
+                            'variant':struct.unpack_from('<I',raw,0x20)[0],
+                            'parentPointerIsNull':struct.unpack_from('<Q',raw,0x498)[0] == 0}
                     if context.get('activeItems') is True:
                         # Entity+440 is the pedestal anchor 507170 springs to.
                         result['pickupAnchor'] = pair(0x440)

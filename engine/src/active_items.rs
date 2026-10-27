@@ -277,6 +277,10 @@ pub(crate) enum Leaf {
     /// shots in a ring at speed 10 from the Player, each 1.355x the scale and
     /// +25 damage; then the Pickup clip.
     TammysHead,
+    /// 523099 (every variant): clear costumes and the D28..D3C stat inputs,
+    /// then reroll every owned passive collectible through the item284 RNG
+    /// and its pool, and Add the new ones (`reroll_owned`).
+    D4,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -419,6 +423,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         book: None,
         leaf: Leaf::TammysHead,
     },
+    ActiveUse {
+        id: 284,
+        book: Some(17),
+        leaf: Leaf::D4,
+    },
 ];
 
 pub(crate) fn ported(id: u32) -> Option<&'static ActiveUse> {
@@ -515,6 +524,14 @@ pub(crate) fn advance(
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(None);
     };
+    //Before_advance retains the last values when a reached writer loses
+    //D74/D78 ownership. Those historical words cannot select a new Use
+    //body or establish its full-charge guard; keep their typed frontier.
+    if !crate::active_charges::owns(owner, crate::active_charges::Word::ActiveId)
+        || !crate::active_charges::owns(owner, crate::active_charges::Word::Charge)
+    {
+        return Ok(None);
+    }
     //52a640 reads held/triggered action9 even on the Entity+318 word bit4000
     // fast path (the same little-endian byte+319 bit40 predicate). The
     // ported leaves have no held-use or frame-recharge leaf; an actual new
@@ -709,17 +726,13 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             }
         }
         Leaf::BlankCard => {
-            let held_card = state
-                .player_items
-                .as_ref()
-                .and_then(|owner| owner.held_pockets.as_ref())
-                .map(|held| held.slots[0])
-                .map(|slot| slot.card && slot.id != 0);
             let held_slot = state
                 .player_items
                 .as_ref()
                 .and_then(|owner| owner.held_pockets.as_ref())
+                .filter(|held| held.frontier.is_none())
                 .map(|held| held.slots[0]);
+            let held_card = held_slot.map(|slot| slot.card && slot.id != 0);
             match held_card {
                 Some(false) => {}
                 //523611 UseCard526DB0 with the held card; the card stays held.
@@ -826,18 +839,15 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 crate::explosion_effects::advance(state, crate::phase::Phase::Update, effect)?;
             }
         }
-        Leaf::MomsBra | Leaf::MomsPad => {
-            //Neither freeze444970 nor fear4450D0 is ported, so a room with
-            //an eligible enemy records a frontier; otherwise only the
-            //UseItem tail runs.
-            let walks = variant0 || matches!(leaf, Leaf::MomsBra);
-            if walks && vulnerable_npc(state, &[]) {
-                let pc = if matches!(leaf, Leaf::MomsBra) {
-                    0x523bfe
-                } else {
-                    0x52414e
-                };
-                unowned_leaf(state, id, pc);
+        Leaf::MomsBra => {
+            moms_bra(state, id)?;
+            play_item_animation(state, id, variant0, false);
+        }
+        Leaf::MomsPad => {
+            // Fear4450d0 has its own AI/pathfinder effects. Its source
+            // leaf reads config39's220, not this item's cooldown180.
+            if variant0 && vulnerable_npc(state, &[]) {
+                unowned_leaf(state, id, 0x52414e);
             }
             play_item_animation(state, id, variant0, false);
         }
@@ -866,6 +876,10 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             play_item_animation(state, id, variant0, false);
         }
         Leaf::D10 => return Err("the D10 leaf runs through the Runtime".into()),
+        Leaf::D4 => {
+            reroll_owned(state, id, variant0)?;
+            play_item_animation(state, id, variant0, false);
+        }
         Leaf::ThePoop => the_poop(state, id)?,
         Leaf::TammysHead => {
             tammys_head(state, id, variant0)?;
@@ -1118,12 +1132,56 @@ fn vulnerable_npc(state: &State, skip: &[u32]) -> bool {
                     collision_class: npc.entity_collision_class,
                     raw_494: npc.raw_494,
                     dead: npc.dead,
-                    entity_flags: crate::entities::family(npc.kind)
-                        .map(|family| (family.entity_flags)(npc)),
+                    entity_flags: crate::entities::family(npc.kind).map(|_| npc.entity_flags()),
                 },
             )
             .unwrap_or(true)
     })
+}
+
+/// 523b90 walks Room+1638 in order, with no Player-variant gate. Keep a
+/// mixed/unknown target walk wholly behind the existing UseLeaf frontier;
+/// no supported target receives a partial freeze before that refusal.
+fn moms_bra(state: &mut State, id: u32) -> Result<(), String> {
+    let duration = items::definition(39)
+        .ok_or("Mom's Bra ItemConfig absent")?
+        .cooldown;
+    let mut targets = Vec::new();
+    for (index, npc) in state.room.npcs.iter().enumerate() {
+        if npc.removed {
+            continue;
+        }
+        let flags = crate::entities::family(npc.kind).map(|_| npc.entity_flags());
+        let eligible = crate::target_eligibility::eligible_target(
+            crate::target_eligibility::TargetEligibility {
+                kind: npc.kind,
+                collision_class: npc.entity_collision_class,
+                raw_494: npc.raw_494,
+                dead: npc.dead,
+                entity_flags: flags,
+            },
+        );
+        match eligible {
+            Ok(false) => {}
+            Ok(true)
+                if crate::npc_status::can_add_freeze(
+                    npc,
+                    flags.expect("eligible target has its flag owner"),
+                    duration,
+                ) =>
+            {
+                targets.push((index, flags.expect("checked flag owner")));
+            }
+            Ok(true) | Err(_) => {
+                unowned_leaf(state, id, 0x523bfe);
+                return Ok(());
+            }
+        }
+    }
+    for (index, flags) in targets {
+        crate::npc_status::add_freeze(&mut state.room.npcs[index], flags, duration);
+    }
+    Ok(())
 }
 
 /// 525404..5254B1. Only a free pedestal (ABD 0, no price) is ported: the
@@ -1627,6 +1685,147 @@ fn reroll_pickups(state: &mut State, id: u32) -> Result<(), String> {
         )?;
     }
     Ok(())
+}
+
+/// Collectibles 523150..52318B never rerolls: 81, 10, 238/239, 327/328,
+/// and 258 (whose own branch follows the loop).
+const D4_KEPT: [usize; 7] = [10, 81, 238, 239, 258, 327, 328];
+
+/// The D4's 523099 body for a direct (not nested) Use.
+///
+/// 508C60 empties the costume registrations and 511540 reloads the
+/// Player's own costume; D28..D3C become 0, the C18 weapon actor is
+/// removed and D80 becomes 0. A direct Use sets [rsp+64], so D74 (the
+/// active slot) stays and an owned active (ItemConfig kind 3, the D4
+/// itself included) only has its costume registered again (524A90 to
+/// 511060); the native D4 case keeps the D4 held. The D100's nested Use
+/// (522250 with its own [rsp+64]) is not ported.
+/// Then for each other owned collectible 1..346 (except `D4_KEPT`), each
+/// count takes up to three
+/// item284 RNG seeds into GetCollectible581590 (pool of its first
+/// acquisition record, no weight decrease) until the result is not an
+/// active; that count is removed and the result kept. A collectible with
+/// counts left is costume-registered again (511060). Missing No (258),
+/// Mom's Purse (139) and Starter Deck/Little Baggy (251/252) have their own
+/// branches. With Player variant 0 each result is granted by
+/// AddCollectible52CC90(id, 0, 1) and leaves the pools (581750). The tail
+/// re-adds transformation costumes (511D90/511B90), requests every cache
+/// flag (D6C = -1) and runs Evaluate511F10.
+///
+/// The reroll itself is any collectible: each grant goes through
+/// `add_collectible`, whose `collectible_grants` rows keep or forget the
+/// persistent inputs. Branches without a port owner stay a `UseLeaf`
+/// frontier, checked before anything changes.
+fn reroll_owned(state: &mut State, id: u32, variant0: bool) -> Result<(), String> {
+    let owner = state.player_items.as_ref().expect("checked owner");
+    let owned = |item: usize| owner.owned_counts.get(item).is_some_and(|count| *count > 0);
+    let item_rng_owned = owner
+        .pickup_grant_history
+        .as_ref()
+        .is_some_and(|history| !history.item_rng_frontiers.contains_key(&284));
+    //Variant0 is the only Add branch; 258/139/251/252 and the costume
+    //layer owners 68/118/229 have unported writers; C18 needs its Remove.
+    if !variant0
+        || !item_rng_owned
+        || state.item_pools.is_none()
+        || state.attack_runtime.persistent.is_some()
+        || [68, 118, 139, 229, 251, 252, 258].into_iter().any(owned)
+        || state
+            .player
+            .transformation_counts
+            .is_none_or(|counts| counts.iter().any(|count| *count >= 3))
+    {
+        unowned_leaf(state, id, 0x523099);
+        return Ok(());
+    }
+    let owner = state.player_items.as_mut().expect("checked owner");
+    //508C60 empties AC0..AC8; 511540's base costume is not a collectible
+    //registration. Unknown histories stay unknown.
+    if let Some(history) = &mut owner.costume_registrations {
+        history.configuration_ids.clear();
+    }
+    if let Some(inputs) = &mut owner.move_speed_inputs {
+        inputs.source_d28 = 0;
+    }
+    if let Some(inputs) = &mut owner.fire_delay_inputs {
+        inputs.source_d2c = 0;
+    }
+    if let Some(inputs) = &mut owner.damage_inputs {
+        inputs.source_d30 = 0;
+    }
+    if let Some(inputs) = &mut owner.range_inputs {
+        inputs.source_d34 = 0;
+    }
+    if let Some(inputs) = &mut owner.shot_speed_inputs {
+        inputs.source_d38 = 0;
+    }
+    if let Some(inputs) = &mut owner.luck_inputs {
+        inputs.source_d3c = 0;
+    }
+    owner.active_state_d80 = 0;
+    let mut granted = Vec::new();
+    for item in 1..=346_usize {
+        if D4_KEPT.contains(&item) {
+            continue;
+        }
+        let owner = state.player_items.as_ref().expect("checked owner");
+        let count = owner.owned_counts.get(item).copied().unwrap_or(0);
+        if count <= 0 {
+            continue;
+        }
+        let kind = items::definition(item as u32)
+            .ok_or("D4 owned ItemConfig absent")?
+            .kind;
+        if kind == 3 {
+            //524A90: 511060 only.
+            if items::collectible_add_may_register_costume(item as u32) {
+                let owner = state.player_items.as_mut().expect("checked owner");
+                owner.costume_registrations = None;
+            }
+            continue;
+        }
+        //576B40/8BA8: the first record's +488 pool word. Without retained
+        //metadata, ItemPool+488 is only ever written 0 (54EE90 Init) and
+        //restored from that, and a missing record also reads pool 0.
+        let pool = state
+            .acquisition_history
+            .as_ref()
+            .and_then(|history| history.first_records.get(&(item as i32)).copied().flatten())
+            .map_or(0, |metadata| metadata.source_pool_word_488 as i32);
+        for _ in 0..count {
+            for _ in 0..3 {
+                let seed = crate::pickup_world_grants::next_item_seed(state, 284)
+                    .map_err(|_| "D4 item284 RNG lost its owner mid-reroll")?;
+                let new = state
+                    .item_pools
+                    .as_mut()
+                    .expect("checked pools")
+                    .collectible(pool, false, seed)?;
+                let config = items::definition(new).ok_or("D4 result ItemConfig absent")?;
+                if config.kind != 3 {
+                    granted.push(new);
+                    let owner = state.player_items.as_mut().expect("checked owner");
+                    owner.owned_counts[item] -= 1;
+                    break;
+                }
+            }
+        }
+        let owner = state.player_items.as_mut().expect("checked owner");
+        //511060 registers the kept collectible's costume again.
+        if owner.owned_counts[item] > 0 && items::collectible_add_may_register_costume(item as u32)
+        {
+            owner.costume_registrations = None;
+        }
+    }
+    for new in granted {
+        player_items::add_collectible(state, new, 0, true)?;
+        state.item_pools.as_mut().expect("checked pools").removed[new as usize] = true;
+    }
+    //524B36: no transformation is at 3 (checked above), so 511B90 is not
+    //reached. D6C = -1 requests every cache callback.
+    let owner = state.player_items.as_mut().expect("checked owner");
+    owner.unevaluated_cache_flags = u32::MAX;
+    crate::player_stats::evaluate_cache(state)
 }
 
 fn unowned_leaf(state: &mut State, id: u32, source_pc: u32) {

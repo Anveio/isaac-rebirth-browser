@@ -33,8 +33,126 @@ derived from the local original resources and stay in `.cache`.
 starting items and cards ignore achievements (Jera needs achievement 90 to drop
 naturally), so the combos run; pools and natural drops stay fresh-profile.
 
+The `d4-fixed` regression route keeps boot epoch `2173746742`, phase 1 and
+the existing Space4/release60 inputs and reroll checks. Capture subdivisions
+now observe the actual Info state/delay/actor/clip/frame/playing/loaded owners,
+Game age and guarded main UseItem pose in both games. An added no-input tail
+requires delay3, the countdown, state1 → state2 → state0, playing first/middle
+frames, retained stopped Appear33, frozen Game age/UseItem during state2 and
+post-book resumption. `52AE40` sets ESI to 17, `52AE45` sets EDX to 3 and `52AE51`
+calls `5805C0` before Use; D4 now selects that existing shared lifecycle.
+
+Actual Browser canvas PNGs (`port-LABEL.png`) accompany the original's PNG
+captures for private visual review. Native's selected sheet path is not read;
+the observer does not replace it with giantbook XML metadata. Actor/lifecycle
+checks and retained images do not establish complete pixel equality. The
+earlier D4 inventory pass did not grade this animation. The fixed-case
+qualification below adds actual lifecycle evidence. Replay a newly declared
+bank with `--scenarios BANK --case d4-fixed`; selection still follows whole-bank
+validation. An older bank without the added capture labels cannot satisfy the
+new lifecycle coverage.
+
 The original admits the 26x14 Start Room record as the run's first room
 (28x16 grid, Isaac enters at world 320,400) and so does the port.
+
+The `blank-card-pocket-conversion` case starts with Blank Card and 2 of
+Clubs, walks onto Little Baggy, then presses Space. Native must actually
+convert the held card to a pill and use Blank Card without doubling bombs.
+All strict comparisons remain required, including the converted pill's ID,
+the world pickup and the active discharge. A separate Browser contract reports whether the active operands
+were unknown at Space; if so, retained historical words must not create a
+new temporary effect, change inventory or discharge. A future owned
+conversion is graded by the strict Native rows and need not retain a
+frontier. This conditional check does not qualify Little Baggy conversion.
+
+Little Baggy's normal Player grant now runs its `52DD33` source leaf: the
+item252 RNG gives a world-pill seed before the free-position search, then
+each nonempty held card gets a pill color from the next item252 seed. The
+world pickup has the Player's spawner words and empty linked-parent fields.
+This leaf preserves existing active, query and scalar-input ownership; an
+unavailable RNG, held record or placement keeps its own frontier. Starter
+Deck's separate grant/conversion leaf remains incomplete.
+
+### Little Baggy qualification
+
+Frozen source `15700568`, production `b84076fd` / WASM `7a40d67e`, passes
+all 330 strict rows in fresh Original and actual Browser captures: fixed
+epoch `1700000000` plus the first recorded unfiltered OS epoch `53734238`,
+both at phase 0, and the existing Blank Card/Battery controls. Main `93268686`
+production `fafb9f35` passes 292 rows and retains 38 failures. Ordered
+comparison preserves every Native expectation and all 292 earlier passes;
+only the 38 failing Port values change. The two controls retain all 120 row
+values and statuses. Both runs use byte-identical banks, resource bytes and
+declared/runtime input tapes.
+
+Item252 RNG words, converted held pill/tag, world pill seed/position and
+Player spawner/null links match. All 24 sampled shared-MT checkpoints match
+the cursor and words 0, 311 and 623. The ordinary free-pedestal Sound23
+request restores the shared draw before placement. This muted fixture does
+not establish Sound23 backend starts, audible output or PCM equality.
+
+The candidate reaches owned active operands; the conditional unknown-operand
+contract is explicitly not applicable. Baseline's observed unknown-operand
+contract failures remain retained. The two damaged-phase Yum Heart controls
+each retain all passing ordered checks, 83,127 in total, using the same closed
+Native captures. These results cover normal Player1/0, one held card and the
+authored room1 sandbox. Two-slot conversion, Starter Deck251, other grant and
+sound branches, complete shared MT, pixels and broader gameplay remain open.
+Earlier uncovered-route and V2 failures retain their separate scope.
+
+After rebase and formatting, frozen `3a75ef1e` (production `2e63bc64` /
+WASM `1dbb85c1`) passes a fresh build, focused browser runtime 2/2 and the
+same four-case fresh Original/Browser replay. All 330 comparison rows and
+complete normalized Port observations are byte-identical to `15700568`, as
+are the public bank, input tapes and resources. The Yum Heart comparison
+above keeps its separate qualified-artifact scope.
+
+Replay the [same input-only bank](../references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json)
+without drawing replacement epochs. First reconstruct its private fixture
+bytes from the local base resources in a new output directory, then replace
+the generated fixed-only bank with the retained inputs:
+
+```sh
+python3 tools/original/pickup-interaction-scenarios.py --count 0 --only blank-card-pocket-conversion --only blank-card --output .cache/baggy-replay
+cp references/isaac/cases/pickup-interactions/recorded-baggy-fixed-epoch53734238-v1.json .cache/baggy-replay/scenarios.json
+npm run test:e2e -- pickup-interactions --scenarios .cache/baggy-replay/scenarios.json
+```
+
+### D4 GiantBook qualification
+
+Frozen source `9bd10245`, production `2baa76e9` / WASM `6513ff9b` (1,617
+files), passes all 439 checks in fresh Original and actual Browser captures:
+403 for `d4-fixed` and 36 for the `d10-fixed` control. The same extended
+observer/grader on main production `df93f788` passes 271 D4 checks and fails
+132. Ordered row comparison preserves every label, field and Native value,
+all 271 earlier D4 passes and every D10 row value and verdict: 132 gains,
+zero lost passes. The 132 baseline failures remain retained.
+
+The declared two-case bank has SHA256
+`0fa44baa5aca424831342a27d2ccdfa05b12088f55b8681da969eaae8aca390c`.
+D4 uses boot epoch `2173746742`, phase 1; D10 uses `1700000000`, phase 0.
+The recorded OS draw `79f74cc2` is unused because both cases are fixed-only;
+this run supplies no OS-case execution evidence. The existing reroll rows,
+Space4/release60 endpoints and declared inputs remain required.
+
+Actual Info observations witness delay3 → 2 → 1, state1 → 2 → 0, playing
+Appear0/1/9/17/29 and completion at 33. A later state2 sample retains the
+stopped Appear33 before idle resumes. During state2, Game age stays 59 and
+the guarded main UseItem pose stays at frame 2; afterward age60/UseItem3 and
+eventual age82/unguarded WalkDown establish resumption. Both sides must
+independently supply these witnesses. Native's actual actor path is observed;
+its selected sheet path remains unobserved. Private review of both
+`book-mid-1` PNGs confirms a visible book on each side. Full-frame pixel
+equality, sheet identity, complete shared MT/audio and broader D4 inventories
+remain unqualified; item284 stays Partial with its existing grant frontiers.
+
+Reconstruct the same fixed inputs and private fixtures from local base
+resources, then run the existing suite against an immutable build:
+
+```sh
+python3 tools/original/pickup-interaction-scenarios.py --count 0 --only d4 --only d10 --output .cache/d4-book-replay
+npm run test:e2e -- pickup-interactions --scenarios .cache/d4-book-replay/scenarios.json --case d4-fixed,d10-fixed --no-build --production FROZEN_BUILD
+```
 
 ## Blank Card and runes
 
@@ -80,6 +198,7 @@ the behavior is ported or only some rows pass), **Missing** (not ported).
 | 2x2 Start Room | The original accepts a 26x14 Start Room record. Room.Init admits doors, the boundary walls and the ambient decoration (`5cf2f4..5cf532`) for every shape; the decoration's attempt count adds Random(9) for 1x2 and 2x1 rooms and Random(9) + Random(18) for 2x2 rooms (`5D0A8E`, `5D0A67`). | Complete for entry, room shape, the boundary/decoration draws and the ambient critters that follow them. | `room-2x2` |
 | The D20 (Space) | Every live room pickup (pedestals, trophies, beds and big chests excepted) is Morphed in place to a new variant drawn on the shared Random, keeping its position and velocity; the new Init draws from the old spawn seed advanced once. Leaf 5238AB, then UseItem. | Partial: passes in the fixed epoch of the `d20` case. OS epochs often roll a trinket or a troll bomb, and trinket Init is not ported, so those cases (and shops, priced pickups, pickups mid-collection) record a frontier before anything changes. | `d20-reroll` (case `d20`, fixed only) |
 | The D10 (Space) | Every non-boss room enemy is replaced by a random enemy (670AC0, or 670B80 for a flyer) at its position and velocity, with the old health fraction of its own max HP; each replacement runs its first Update at once, so the next roll follows its draws. Leaf 522F87, then UseItem. | Partial: passes in the fixed epoch of the `d10` case, where two Horfs become a Mulligan and a Maggot. A roll that names an unported enemy records a frontier. Enemies are now graded in every case (type, variant, position, HP and max HP). | `d10-reroll` (case `d10`, fixed only) |
+| The D4 (Space) | GiantBook17 is requested with delay3 before every held passive collectible is rerolled through the item 284 RNG and granted in its place; the D4 stays held and discharges. Leaf 523099, then UseItem. | Partial: the pinned epoch of the `d4` case passes 403 checks for rerolls (Sad Onion, Cricket's Head and Number One become 15, 180 and 201), actual book lifecycle and guarded pose/resumption. A result whose Add effect is unported leaves the charge unknown, a frontier. The case grades every held collectible count (`player.ownedAll`); [bounded qualification](#d4-giantbook-qualification). | `d4-reroll` (case `d4`, pinned epoch only) |
 | The Poop (Space) | A poop grid entity (14.0) appears under Isaac, seeded by the item 36 RNG, and Game::Fart pushes the room from him (radius 120). Poop.Init leaves it passable (Poop+330) while a ground Isaac stands within 20. Poop.Update `569D50` makes it solid (class 3) once he is 20 or more away, so walking back into it is blocked. Leaf 523D93 plays sound 37 and no animation. | Complete for the spawn, the passable-then-solid collision and the blocked walk back, fixed and OS-random. | `the-poop` |
 | Anarchist Cookbook (Space) | GiantBook 9, sound 8 and UseItem. Then the TEMP65 record (cooldown 35) spawns a Troll Bomb every 5 updates (six in all) at Room::GetRandomPosition: FindFreePosition from the room centre with radius Random x the longer room side. | Complete: the six bomb positions match, fixed and OS-random. The `509380` bomb-flag items (125, 140, 209, 220, 256) record a frontier. | `anarchist-cookbook` |
 | Tammy's Head (Space) | Ten tears in a ring from a Random base angle at speed 10, each 1.355x the tear scale and +25 damage, then the Pickup clip. Leaf 523C05. | Complete for ordinary tears: every tear's position matches on every label, fixed and OS-random. Other weapons and the `5177F0` item branches record a frontier. | `tammys-head` |

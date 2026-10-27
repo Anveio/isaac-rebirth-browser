@@ -35,6 +35,7 @@ impl PocketSlot {
     deny_unknown_fields
 )]
 pub enum PocketFrontier {
+    DropAction,
     CardEffect { card_id: u32 },
     PillEffect { pill_color: u32 },
     ModifierConversion { collectible_id: u32 },
@@ -97,16 +98,19 @@ impl PocketPresentation {
     }
 }
 
-fn capacity(owner: &player_items::PlayerItems) -> Option<usize> {
+pub(crate) fn capacity(state: &State) -> Option<usize> {
+    let owner = state.player_items.as_ref()?;
+    let queries = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
     //50ADC0 short-circuits: Have251 true skips the Have252 operand.
-    if *owner.owned_counts.get(251)? > 0 {
+    if queries.have(251)? {
         Some(2)
     } else {
-        Some(if *owner.owned_counts.get(252)? > 0 {
-            2
-        } else {
-            1
-        })
+        Some(if queries.have(252)? { 2 } else { 1 })
     }
 }
 
@@ -652,7 +656,7 @@ pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
     {
         return Ok(false);
     }
-    let Some(capacity) = capacity(owner) else {
+    let Some(capacity) = capacity(state) else {
         return Ok(false);
     };
     let slot = PocketSlot {
@@ -779,7 +783,7 @@ pub(crate) fn grant_from_active(state: &mut State, slot: PocketSlot) -> Result<O
     {
         return Ok(None);
     }
-    let Some(capacity) = capacity(owner) else {
+    let Some(capacity) = capacity(state) else {
         return Ok(None);
     };
     add_slot(state, capacity, slot)?;

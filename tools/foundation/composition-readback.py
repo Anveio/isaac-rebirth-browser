@@ -347,7 +347,7 @@ def declared_port_commands(preboot=False):
     commands = ([{'type': 'audioVolume', 'sfx_volume': case['sfxVolume']}] if pocket and not preboot else [])
     commands.append({'type': 'tick', 'count': 63})
     key_codes = {'Return': 'Enter', 'Tab': 'Tab', 'Down': 'ArrowDown', 'Up': 'ArrowUp', 'Left': 'ArrowLeft',
-                 'Right': 'ArrowRight', 'space': 'Space'}
+                 'Right': 'ArrowRight', 'space': 'Space', 'Control_L': 'ControlLeft'}
     dom_keys = []
     def browser_press(key, settle=72):
         code = key_codes[key]

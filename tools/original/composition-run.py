@@ -80,7 +80,7 @@ def public_tape(case):
         if set(action) != {'label', 'keys', 'presentations'} or not isinstance(action['keys'], list):
             raise ValueError('Actions must declare a label, public keys and presentation count')
         keys = set(action['keys'])
-        if len(keys) != len(action['keys']) or not keys <= {'Right', 'Left', 'Up', 'Down', 'w', 'a', 's', 'd', 'space', 'e', 'q'}:
+        if len(keys) != len(action['keys']) or not keys <= {'Right', 'Left', 'Up', 'Down', 'w', 'a', 's', 'd', 'space', 'e', 'q', 'Control_L'}:
             raise ValueError('Fixture action uses undeclared or duplicate gameplay keys')
         count = action['presentations']
         if type(count) is not int or not 1 <= count <= 400:
@@ -333,6 +333,8 @@ def main():
         context['compositionSourceFields'] = source_fields
         if args.pockets:
             context['heldPocketRecords'] = True
+            if case.get('pocketActions') is not None:
+                context['pocketActions'] = True
             if pill_use is not None:
                 context['pillRangeUse'] = True
                 context['persistentItemInputs'] = True

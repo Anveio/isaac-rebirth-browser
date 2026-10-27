@@ -68,14 +68,22 @@ def observe(pid, context):
             def u32(address): return struct.unpack('<I', read(address, 4))[0]
             def i32(address): return struct.unpack('<i', read(address, 4))[0]
 
-            def clip_name(pointer):
+            def text(pointer):
                 if not pointer:
                     return None
-                text = u64(pointer)
-                count = u64(text - 24)
+                count = u64(pointer - 24)
                 if count > 128:
                     raise ValueError('Unexpected animation name length')
-                return read(text, count).decode('ascii')
+                return read(pointer, count).decode('ascii') if count else None
+
+            def clip_name(pointer):
+                return text(u64(pointer)) if pointer else None
+
+            def sprite_frame(address):
+                frame, playing = struct.unpack('<fB', read(address + 0x120, 5))
+                if playing not in (0, 1):
+                    raise ValueError('Unexpected sprite playing byte')
+                return {'frame': frame, 'playing': bool(playing)}
 
             def entity(address):
                 raw = read(address, 0x7d4)
@@ -97,11 +105,28 @@ def observe(pid, context):
                 if result['type'] == 5:
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
+                    result['spawnSeed'] = struct.unpack_from('<I', raw, 0x7d0)[0]
+                    result['spawnerType'], result['spawnerVariant'] = struct.unpack_from('<II', raw, 0x1c)
+                    result['linksEmpty'] = all(struct.unpack_from('<Q', raw, offset)[0] == 0
+                                               for offset in (0x498, 0x4a0, 0x4a8))
                 return result
 
             game = u64(0x8ecd30)
             system = u64(0x8ed560)
             report['fullGameUpdates'] = u32(game + 0xce9f4)
+            # Same bounded actual Info owner as health-damage-observe.py.
+            # The selected sheet is not read: PNG captures retain its drawn
+            # appearance without substituting XML metadata for native state.
+            info = game + 0xa1e8
+            sprite = info + 8
+            loaded = read(sprite + 0x2dd, 1)[0]
+            state = u32(info)
+            if state not in (0, 1, 2) or loaded not in (0, 1):
+                raise ValueError('Unknown actual information owner state')
+            report['informationAnimation'] = {
+                'state': state, 'delay': i32(info + 0x748),
+                'actor': clip_name(sprite), 'clip': clip_name(u64(sprite + 0x18)),
+                'definitionLoaded': bool(loaded), **sprite_frame(sprite)}
             room = u64(game + 0x8180)
             raw = read(room, 0x30)
             width, height = struct.unpack_from('<II', raw, 0x14)
@@ -141,11 +166,16 @@ def observe(pid, context):
                     'inventory': {'bombs': i32(player + 0xbd4), 'keys': i32(player + 0xbcc), 'coins': i32(player + 0xbd8)},
                     'ownedItems': {str(index): owned[index] for index in WATCHED_ITEMS},
                     'ownedTotal': sum(value for value in owned if value > 0),
+                    'ownedAll': {str(index): value for index, value in enumerate(owned) if value != 0},
                     'activeId': i32(player + 0xd74), 'activeCharge': i32(player + 0xd78),
                     'activeSubordinateCharge': i32(player + 0xd7c), 'reserveCharge': i32(player + 0xd8c),
+                    #Actual item252 child selected at52CF6F..7A, advanced by
+                    #the world prefix52DD39 and each held conversion52E13D.
+                    'item252RngWords': list(struct.unpack('<4I', read(player + 0x1424 + 252 * 16, 16))),
                     'controlsEnabled': read(player + 0x7d4, 1)[0] == 1, 'inputCooldown': i32(player + 0x7d8),
                     'animationGuard': read(player + 0xbf4, 1)[0] == 1,
                     'animation': clip_name(u64(player + 0x28 + 0x18)),
+                    'mainAnimation': sprite_frame(player + 0x28),
                     'heldPockets': [{'id': struct.unpack_from('<i', held, slot * 8)[0], 'tag': held[slot * 8 + 4]}
                                     for slot in range(2)],
                 })

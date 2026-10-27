@@ -83,6 +83,10 @@ pub struct Floor {
     ///None keeps the existing ordinary floor's unimplemented curse owner
     ///explicit. Challenge uses the actual local sampler and filtered mask.
     pub challenge_curse: Option<crate::challenges::CurseSample>,
+    /// Level+8, the floor's curse mask (58bfe8..58c058): 1 Darkness, 2
+    /// Labyrinth, 4 Lost, 8 Unknown, 0x10 Cursed, 0x20 Maze, 0x40 Blind.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub curses: u32,
     pub additional_rooms: u8,
     pub attempts: u32,
     pub descriptors: Vec<Descriptor>,
@@ -186,6 +190,8 @@ struct Fitting {
     grid: Vec<i32>,
     ends: Vec<usize>,
     original_non_ends: Vec<usize>,
+    /// Curse of the Labyrinth: the boss fit's runway check (58fb71).
+    labyrinth: bool,
 }
 impl Fitting {
     fn new(growth: Growth) -> Self {
@@ -208,6 +214,7 @@ impl Fitting {
             grid: growth.grid,
             ends,
             original_non_ends,
+            labyrinth: growth.input.labyrinth,
         }
     }
     fn fit_small(&mut self, mask: u64, boss: bool) -> Option<usize> {
@@ -223,12 +230,75 @@ impl Fitting {
     fn fit(&mut self, mask: u64, dims: (i32, i32), boss: bool) -> Result<Option<usize>, String> {
         for position in 0..self.ends.len() {
             let index = self.ends[position];
-            let room = self.rooms[index].clone();
-            if boss && room.distance <= 1 {
+            if boss && self.rooms[index].distance <= 1 {
                 continue;
             }
-            let Some(direction) = room.direction else {
+            // 58fb71: under Curse of the Labyrinth the boss dead end also
+            // needs a free runway for the second boss room.
+            if boss && self.labyrinth && !self.labyrinth_runway(index) {
                 continue;
+            }
+            if self.fit_room(index, mask, dims)? {
+                self.ends.remove(position);
+                return Ok(Some(index));
+            }
+        }
+        Ok(None)
+    }
+    /// 58fb89..58fc7a: the three cells past the dead end's connector, in its
+    /// growth direction, lie on the grid, hold no other room and touch none.
+    fn labyrinth_runway(&self, index: usize) -> bool {
+        const STEPS: [(i32, i32); 4] = [(-1, 0), (0, -1), (1, 0), (0, 1)];
+        let room = &self.rooms[index];
+        let Some(direction) = room.direction else {
+            return false;
+        };
+        let (dx, dy) = STEPS[usize::from(direction % 4)];
+        let foreign = |cell: Cell| {
+            cell_index(cell).is_some_and(|at| self.grid[at] >= 0 && self.grid[at] != index as i32)
+        };
+        (1..=3).all(|step| {
+            let cell = Cell {
+                x: room.connector.x + dx * step,
+                y: room.connector.y + dy * step,
+            };
+            cell_index(cell).is_some()
+                && !foreign(cell)
+                && STEPS.iter().all(|(nx, ny)| {
+                    !foreign(Cell {
+                        x: cell.x + nx,
+                        y: cell.y + ny,
+                    })
+                })
+        })
+    }
+    /// 591d71: the second boss room joins the generator like a grown room.
+    fn insert(&mut self, room: GeneratedRoom) -> usize {
+        let index = self.rooms.len();
+        for row in 0..room.height {
+            for column in 0..room.width {
+                if let Some(cell) = cell_index(Cell {
+                    x: room.origin.x + column,
+                    y: room.origin.y + row,
+                }) {
+                    self.grid[cell] = index as i32;
+                }
+            }
+        }
+        self.rooms.push(room);
+        index
+    }
+    /// 58f480: one of the candidates around the room's connector fits. A
+    /// candidate must have the template's cell dims (8ed500) and its
+    /// required door, cover only free cells or the room's own, and touch at
+    /// most one other room (per slot, each slot's door in the template
+    /// mask). The room takes the candidate's rectangle; a failed fit changes
+    /// nothing.
+    fn fit_room(&mut self, index: usize, mask: u64, dims: (i32, i32)) -> Result<bool, String> {
+        {
+            let room = self.rooms[index].clone();
+            let Some(direction) = room.direction else {
+                return Ok(false);
             };
             let opposite = (direction + 2) % 4;
             let Cell { x, y } = room.connector;
@@ -343,11 +413,10 @@ impl Fitting {
                     }
                 }
                 self.rooms[index] = candidate;
-                self.ends.remove(position);
-                return Ok(Some(index));
+                return Ok(true);
             }
         }
-        Ok(None)
+        Ok(false)
     }
     fn restore_rejected(&mut self, index: Option<usize>) {
         if let Some(index) = index {
@@ -472,6 +541,29 @@ fn select(
         picker.catalog()[selected.catalog_index].clone(),
     ))
 }
+fn is_zero(value: &u32) -> bool {
+    *value == 0
+}
+
+/// Level+8 curse bits with a consumer in the port.
+pub const LABYRINTH: u32 = 2;
+pub const LOST: u32 = 4;
+pub const UNKNOWN: u32 = 8;
+
+impl Floor {
+    /// Level+8190: the level's last boss room, the second one under Curse
+    /// of the Labyrinth; the descriptor that takes the trapdoor (5c9788).
+    pub fn last_boss_room(&self) -> Option<usize> {
+        self.descriptors
+            .iter()
+            .rposition(|descriptor| descriptor.template.room_type == 5)
+    }
+
+    pub fn labyrinth(&self) -> bool {
+        self.curses & LABYRINTH != 0
+    }
+}
+
 fn is_normal(difficulty: &Difficulty) -> bool {
     *difficulty == Difficulty::Normal
 }
@@ -487,14 +579,29 @@ pub fn difficulty_band(stage: u32, difficulty: Difficulty) -> (u8, u8) {
 }
 
 /// Boss variant base 584240 for a fresh profile (every achievement byte zero,
-/// no devil room visited), run from the stage's draw chain.
-fn boss(primary: &mut Primary, flags: &mut u64, stage: u32) -> Result<u32, String> {
+/// no devil room visited), run from `stage`'s draw chain. The Level's own
+/// stage (`level_stage`, Level+0 at 5842c7) decides whether the family draw
+/// happens; Curse of the Labyrinth asks for the next stage's boss.
+fn boss(
+    primary: &mut Primary,
+    flags: &mut u64,
+    stage: u32,
+    level_stage: u32,
+) -> Result<u32, String> {
     let steps = crate::levels::bosses(stage)
         .ok_or("boss selection requires the stage's imported boss chain")?;
     let odd = stage % 2 == 1;
-    // Odd floors draw R2 and save the family flag; even floors read it.
+    // The chapter family (flag 0x100000) is drawn on odd Levels up to stage
+    // 8 (Level+0 at 5842c7) and read elsewhere; the closing family (flag 16)
+    // is drawn on odd `stage` (584b2f). The variant follows `stage` either
+    // way (tables 675e80/675ec8, 584a05).
     let family = |flags: &mut u64, flag: u64, primary: &mut Primary| {
-        if odd {
+        let draws = if flag == 0x100000 {
+            level_stage % 2 == 1 && level_stage <= 8
+        } else {
+            odd
+        };
+        if draws {
             let set = primary.random(2) == 1;
             if set {
                 *flags |= flag;
@@ -601,6 +708,31 @@ struct AttemptParameters {
     request: NormalBasementRequest,
     count: u8,
     shape_mask: u8,
+    /// Level+8 bit 2, Curse of the Labyrinth.
+    labyrinth: bool,
+}
+
+/// 589854: boss variant bases 3500..3999 span 50 variants, 4000..4999 one,
+/// others ten.
+fn boss_variants(minimum: u32) -> (u32, u32) {
+    let span = match minimum {
+        3500..=3999 => 49,
+        4000..=4999 => 0,
+        _ => 9,
+    };
+    (minimum, minimum + span)
+}
+
+/// 591b80 fits a boss room by its shape's cell dims (8ed500); Double
+/// Trouble's rooms are 26x7 or 13x14.
+fn boss_dims(template: &AuthoredTemplate) -> Result<(i32, i32), String> {
+    match template.shape_index() {
+        0 => Ok((1, 1)),
+        1 => Ok((1, 2)),
+        2 => Ok((2, 1)),
+        3 => Ok((2, 2)),
+        _ => Err("boss template has no 8ed500 cell dims".into()),
+    }
 }
 
 fn attempt(
@@ -615,39 +747,44 @@ fn attempt(
         request,
         count,
         shape_mask,
+        labyrinth,
     } = parameters;
     let growth = layout::generate(GrowthRequest {
         generator_seed: *generator_state,
         additional_rooms: count,
         shape_mask,
+        labyrinth,
     })?;
     *generator_state = growth.final_rng_state;
-    if growth.dead_end_indices.len() < 5 + usize::from(request.stage != 1) {
+    // 58c09f..58c0b6: five dead ends, six past stage 1, one more under
+    // Curse of the Labyrinth.
+    if growth.dead_end_indices.len() < 5 + usize::from(request.stage != 1) + usize::from(labyrinth)
+    {
         return Ok(None);
     }
     let mut fitting = Fitting::new(growth);
     let mut descriptors = Vec::new();
-    let minimum = boss(primary, flags, request.stage)?;
+    let minimum = boss(primary, flags, request.stage, request.stage)?;
     let boss_seed = primary.next();
-    // 589854: bases 3500..3999 span 50 variants, 4000..4999 one, others ten.
-    let maximum = minimum
-        + match minimum {
-            3500..=3999 => 49,
-            4000..=4999 => 0,
-            _ => 9,
-        };
-    let selected = select(special, boss_seed, 5, (minimum, maximum), 4, 0, 10)?;
-    // 591b80 fits the boss room by its shape's cell dims (8ed500); Double
-    // Trouble's rooms are 26x7 or 13x14.
-    let dims = match selected.1.shape_index() {
-        0 => (1, 1),
-        1 => (1, 2),
-        2 => (2, 1),
-        3 => (2, 2),
-        _ => return Err("boss template has no 8ed500 cell dims".into()),
-    };
+    let selected = select(special, boss_seed, 5, boss_variants(minimum), 4, 0, 10)?;
+    let dims = boss_dims(&selected.1)?;
     let Some(index) = fitting.fit(selected.1.door_mask, dims, true)? else {
         return Ok(None);
+    };
+    // 591cc0: under Curse of the Labyrinth the first boss room grows the
+    // second boss room's cell from the generator's own RNG.
+    let second_boss = if labyrinth {
+        layout::labyrinth_boss_neighbor(
+            &fitting.rooms,
+            &fitting.grid,
+            shape_mask,
+            generator_state,
+            index,
+            selected.1.door_mask,
+        )
+        .map(|room| fitting.insert(room))
+    } else {
+        None
     };
     record(
         &mut descriptors,
@@ -658,6 +795,32 @@ fn attempt(
         selected.1,
         boss_seed,
     );
+    if labyrinth {
+        // 589d5c..589e32: the next stage's boss takes the second boss room
+        // (the level's last, Level+8190); the primary stream is then reset
+        // to its state before that boss's selection.
+        let saved = primary.state;
+        let minimum = boss(primary, flags, request.stage + 1, request.stage)?;
+        let seed = primary.next();
+        let selected = select(special, seed, 5, boss_variants(minimum), 4, 0, 10)?;
+        let dims = boss_dims(&selected.1)?;
+        let Some(index) = second_boss else {
+            return Ok(None);
+        };
+        if !fitting.fit_room(index, selected.1.door_mask, dims)? {
+            return Ok(None);
+        }
+        record(
+            &mut descriptors,
+            &fitting,
+            index,
+            0,
+            selected.0,
+            selected.1,
+            seed,
+        );
+        primary.state = saved;
+    }
     let super_seed = primary.next();
     let selected = select(special, super_seed, 8, (0, u32::MAX), 4, 0, 10)?;
     let Some(index) = fitting.fit_small(selected.1.door_mask, false) else {
@@ -694,6 +857,26 @@ fn attempt(
             selected.1,
             seed,
         );
+        if kind == 4 && labyrinth {
+            // 589f46 -> 58bae3: a second treasure room, its seed drawn from
+            // the primary stream, which is then reset.
+            let saved = primary.state;
+            let seed = primary.next();
+            let selected = select(special, seed, 4, (0, u32::MAX), 4, 0, 10)?;
+            let Some(index) = fitting.fit_small(selected.1.door_mask, false) else {
+                return Ok(None);
+            };
+            record(
+                &mut descriptors,
+                &fitting,
+                index,
+                0,
+                selected.0,
+                selected.1,
+                seed,
+            );
+            primary.state = saved;
+        }
     }
     let mut dice = primary.random(50) == 0;
     if !dice {
@@ -1147,23 +1330,34 @@ fn generate_normal_basement_inner(
     if challenge_curse.is_some_and(|sample| sample.filtered_mask != 0) {
         return Err("Challenge floor requires unimplemented nonzero curse consumers".into());
     }
-    // 58c08e: the extra rooms take the curse stream's last RandomInt(2). The
-    // curse it may select has no consumer at any difficulty (Labyrinth's
-    // 58c061 count change included), as on every ordinary floor.
+    // 58bfe8..58c058: an ordinary floor rolls its curse on a copy of the
+    // primary stream at both difficulties; the odds are the difficulty's
+    // `curse_odds` row.
+    let sample = challenge_curse.unwrap_or_else(|| {
+        crate::challenges::sample_curse(
+            primary.state,
+            request.stage as i32,
+            request.difficulty,
+            request.curse,
+            |mask| mask,
+        )
+    });
+    let curses = sample.filtered_mask;
+    let labyrinth = curses & LABYRINTH != 0;
+    // 58c061: Curse of the Labyrinth scales the count by f64 1.8 (676188),
+    // at most 45; otherwise Curse of the Lost (58c4c0) adds four rooms.
+    let count = if labyrinth {
+        ((f64::from(count) * 1.8) as u32).min(45)
+    } else if curses & LOST != 0 {
+        count + 4
+    } else {
+        count
+    };
+    // 58c08e: hard's extra rooms take the curse stream's last RandomInt(2).
     let count = count
         + crate::difficulty::rules(request.difficulty)
             .extra_rooms
-            .map_or(0, |rooms| {
-                rooms
-                    + crate::challenges::sample_curse(
-                        primary.state,
-                        request.stage as i32,
-                        request.difficulty,
-                        request.curse,
-                        |mask| mask,
-                    )
-                    .room_adjustment_result
-            });
+            .map_or(0, |rooms| rooms + sample.room_adjustment_result);
     let count = u8::try_from(count).map_err(|_| "floor room count exceeds the generator")?;
     let mut generator_state = primary.next(); // Constructor, once per floor.
     let mut flags = request.game_flags;
@@ -1181,6 +1375,7 @@ fn generate_normal_basement_inner(
                 request,
                 count,
                 shape_mask,
+                labyrinth,
             },
         )?;
         reports.push(AttemptReport {
@@ -1204,6 +1399,7 @@ fn generate_normal_basement_inner(
                 stage_seed,
                 difficulty: request.difficulty,
                 challenge_curse,
+                curses,
                 additional_rooms: count,
                 attempts: attempt_number,
                 descriptors,

@@ -73,7 +73,13 @@ impl SpriteColor {
     }
 
     /// SetColor 446f00 with a positive duration and no fade.
-    fn set(&mut self, color: Color, duration: i32, priority: i32) {
+    pub(crate) fn set(&mut self, color: Color, duration: i32, priority: i32, base: Color) {
+        // SetColor446f00's nonpositive branch updates the reset colour and
+        // invokes ResetColor; it never inserts a timed entry.
+        if duration <= 0 {
+            self.current = base;
+            return;
+        }
         let at = self
             .stack
             .iter()
@@ -94,6 +100,12 @@ impl SpriteColor {
     /// One BaseUpdate: count the stack down, then flash once per hit the
     /// damage drain applied without killing (4478b4: HP >= 0 continues Hit).
     pub fn advance(&mut self, phase: Phase, applied: &[AppliedDamage], base: Color) {
+        self.tick(phase, base);
+        self.admit_hits(phase, applied, base);
+    }
+
+    /// BaseUpdate colour countdown, before status timers and damage.
+    pub(crate) fn tick(&mut self, phase: Phase, base: Color) {
         if !phase.updates_nonplayers() {
             return;
         }
@@ -105,6 +117,13 @@ impl SpriteColor {
         if self.stack.len() != before {
             self.current = self.stack.first().map_or(base, |entry| entry.color);
         }
+    }
+
+    /// Damage flashes are inserted after the colour/status countdown.
+    pub(crate) fn admit_hits(&mut self, phase: Phase, applied: &[AppliedDamage], base: Color) {
+        if !phase.updates_nonplayers() {
+            return;
+        }
         for hit in applied.iter().filter(|hit| !hit.lethal) {
             // d = (trunc(amount + 0.5) + 2) / 3, clamped to 1..=6 (4478c0).
             let duration = match (hit.event.amount + 0.5) as i32 + 2 {
@@ -112,7 +131,7 @@ impl SpriteColor {
                 value if value / 3 <= 0 => 1,
                 value => value / 3,
             };
-            self.set(FLASH, duration, 0);
+            self.set(FLASH, duration, 0, base);
         }
     }
 }

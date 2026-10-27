@@ -120,6 +120,8 @@ export const SUITES = [
     'Card/Pill Init and random IDs through procedural source groups', { alias: 'pockets' }),
   suite('pocket-collection', e2e('item-composition'), ['--pockets', 'collection', '--count', '1'],
     'Card/Pill held records, two capacity spills, presentation and sound requests', { alias: 'pockets' }),
+  suite('pocket-actions', e2e('item-composition'), ['--pockets', 'collection', '--pocket-actions', '--count', '1'],
+    'Natural Card1 acquisition, physical Ctrl tap,120/121 drop and release/empty hold; fixed phases and first OS boot/phase'),
   suite('pill-range-use', e2e('item-composition'), ['--pockets', 'collection', '--pill-use', '--count', '1'],
     'Range Down/Up Pill acquisition, Q consumption, canonical counters, cached Range and response clips; fixed and unfiltered OS epochs'),
   suite('pickup-interactions', e2e('pickup-interactions'), ['--count', '1'],
@@ -196,7 +198,7 @@ export const GROUPS = {
   // The three-floor Caves II descent runs about 45 minutes per case (README).
   'stage-long': ['stage-descent'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening', 'pickup-interactions'],
-  items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pill-range-use', 'active-items', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
+  items: ['items', 'item-composition', 'trinket-start', 'common-sku', 'pockets', 'pocket-actions', 'pill-range-use', 'active-items', 'item-acquisition', 'stat-cache', 'damage-fire-delay',
     'active-item-use', 'familiars', 'pickup-interactions'],
   combat: ['weapons', 'tear-lifecycle', 'rock-blast', 'tnt', 'health-damage', 'player-death', 'blood-start', 'fireplaces'],
   monsters: ['npcs', 'roundworms', 'monstro', 'dips', 'entities', 'footprint-admission'],

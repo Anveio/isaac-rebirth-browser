@@ -753,7 +753,7 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
             //52F310 queues the touched config with the pedestal's prior
             //AB8/ABC operands; 5060E6 then replays the dropped item's Idle.
             enqueue(state, id, charge, touched)?;
-            collect_room_sound(state);
+            collect_room_sound(state, index);
             return Ok(CollectibleContact::Collected);
         }
     }
@@ -779,22 +779,40 @@ pub(crate) fn collect(state: &mut State, index: usize) -> Result<CollectibleCont
     }
     pickup.collected = true;
     pickup.can_collect = false;
-    collect_room_sound(state);
+    collect_room_sound(state, index);
     Ok(CollectibleContact::Collected)
 }
 
-fn collect_room_sound(state: &mut State) {
+fn collect_room_sound(state: &mut State, index: usize) {
     let room_type = state
         .room
         .descriptor
         .as_ref()
         .map(|room| room.template.room_type);
-    if matches!(room_type, Some(4 | 12)) {
+    let sound = if matches!(room_type, Some(4 | 12)) {
+        Some(128)
+    } else if room_type == Some(1)
+        && state.room.pickups.get(index).is_some_and(|pickup| {
+            pickup.variant == 100
+                && pickup.subtype == 0
+                && !pickup.removed
+                && pickup.shop_price.is_none()
+        })
+    {
+        //504B5D calls504480 after505F1A cleared the free pedestal's
+        //subtype. The ordinary room1 branch504616..62A requests23 at
+        //volume0.5, delay2, pitch1. Its admitted sample draw precedes
+        //the queued grant's later world placement, even when muted.
+        Some(23)
+    } else {
+        None
+    };
+    if let Some(id) = sound {
         state.audio.admit(
             &mut state.boot_lifecycle.shared,
             state.system_clock.system_counter - 1,
             crate::audio::SoundRequest {
-                id: 128,
+                id,
                 volume: 0.5,
                 delay: 2,
                 looping: false,
@@ -1241,6 +1259,7 @@ fn has_default_passive_grant_path(id: u32) -> bool {
 enum PassiveGrantSourceEffect {
     DefaultTail,
     ItemRngCardSpawn,
+    ItemRngPillModifier,
 }
 
 impl PassiveGrantSourceEffect {
@@ -1248,6 +1267,8 @@ impl PassiveGrantSourceEffect {
         //52CF87/52DF20 selects this effect; it is not an inventory role.
         if id == 194 {
             Some(Self::ItemRngCardSpawn)
+        } else if id == 252 {
+            Some(Self::ItemRngPillModifier)
         } else if has_default_passive_grant_path(id) {
             Some(Self::DefaultTail)
         } else {
@@ -1261,11 +1282,16 @@ impl PassiveGrantSourceEffect {
         match self {
             Self::DefaultTail => true,
             Self::ItemRngCardSpawn => true,
+            //52DD33..52DDCB spawns a pill and converts held cards. Neither
+            //the world Init nor the held loop writes these query stores.
+            Self::ItemRngPillModifier => true,
         }
     }
 
     fn preserves_default_inputs(self) -> bool {
-        matches!(self, Self::DefaultTail)
+        //252's world/held operators likewise preserve the scalar and C70
+        //inputs; it is still a separate world-producing effect below.
+        matches!(self, Self::DefaultTail | Self::ItemRngPillModifier)
     }
 
     fn preserves_shot_speed_input(self) -> bool {
@@ -1276,6 +1302,7 @@ impl PassiveGrantSourceEffect {
             //cache do not write D38. Other words and the actual world
             //effect's completion retain their independent frontiers.
             Self::ItemRngCardSpawn => true,
+            Self::ItemRngPillModifier => true,
         }
     }
 }
@@ -1347,7 +1374,10 @@ pub(crate) fn add_collectible(
     let charge_words_preserved = keep_default_passive_inputs
         || matches!(
             source_effect,
-            Some(PassiveGrantSourceEffect::ItemRngCardSpawn)
+            Some(
+                PassiveGrantSourceEffect::ItemRngCardSpawn
+                    | PassiveGrantSourceEffect::ItemRngPillModifier
+            )
         )
         || plain_active_grant
         || (normal_isaac && normal_entity && treatment.is_some());
@@ -1372,7 +1402,9 @@ pub(crate) fn add_collectible(
         }
     }
     owner.owned_counts[id as usize] = owner.owned_counts[id as usize].wrapping_add(1);
-    crate::pockets::note_modifier_grant(owner, id);
+    if id != 252 {
+        crate::pockets::note_modifier_grant(owner, id);
+    }
     //52CEA2..52CEFD: the actual variant0 Add inserts into Game8BA0,
     //after permanent increment/source unlock checks and before effects.
     //The membership result is captured now, never reconstructed from counts
@@ -1401,28 +1433,7 @@ pub(crate) fn add_collectible(
     //persistent inputs. Each selected source Add retains existing Some only;
     //untracked258/reset routes invalidate, never reconstruct history.
     if !(normal_isaac
-        && matches!(
-            id,
-            1 | 2
-                | 3
-                | 4
-                | 6
-                | 14
-                | 27
-                | 28
-                | 52
-                | 68
-                | 114
-                | 118
-                | 143
-                | 152
-                | 168
-                | 169
-                | 229
-                | 304
-                | 329
-                | 330
-        ))
+        && crate::collectible_grants::keeps(id, crate::collectible_grants::MOVE_SPEED))
         && !keep_cupid_move_speed
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_move_speed_history())
@@ -1438,26 +1449,8 @@ pub(crate) fn add_collectible(
     //Actual14's default Add route preserves D34 despite its cached Range
     //effect. Untracked258/reset routes invalidate this existing owner;
     //None never inherits constructor zero through counts or cache evaluation.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 14
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_range
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::RANGE)
+        && !keep_cupid_range
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1472,26 +1465,8 @@ pub(crate) fn add_collectible(
     //These selected Add routes preserve an existing D2C owner. Actual222's
     //default tail is separately closed; untracked240/258/reset routes lose
     //proof. None stays None and is never reconstructed from counts/cache.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 222
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_fire_delay
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::FIRE_DELAY)
+        && !keep_cupid_fire_delay
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1506,26 +1481,8 @@ pub(crate) fn add_collectible(
     // These actual Add routes preserve D30, independently of their cache,
     // getter and caller permissions. Unmapped258 and other routes lose
     // the existing owner; later counts/cache work cannot recreate it.
-    if !matches!(
-        id,
-        1 | 2
-            | 3
-            | 4
-            | 6
-            | 12
-            | 52
-            | 68
-            | 114
-            | 118
-            | 143
-            | 152
-            | 168
-            | 169
-            | 229
-            | 304
-            | 329
-            | 330
-    ) && !keep_cupid_damage
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::DAMAGE)
+        && !keep_cupid_damage
         && !keep_default_passive_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1540,10 +1497,8 @@ pub(crate) fn add_collectible(
     // These actual Add paths preserve D38. This event proof grants no stat,
     // getter or caller permission; unknown Add258 and other producers
     // invalidate an existing owner rather than deriving one from counts.
-    if !matches!(
-        id,
-        1 | 2 | 3 | 4 | 6 | 52 | 68 | 114 | 118 | 143 | 152 | 168 | 169 | 229 | 304 | 329 | 330
-    ) && !keep_cupid_shot_speed
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::SHOT_SPEED)
+        && !keep_cupid_shot_speed
         && !keep_shot_speed_inputs
         && !treatment.is_some_and(|proof| proof.preserves_normal_inputs())
     {
@@ -1555,7 +1510,7 @@ pub(crate) fn add_collectible(
     //169's default52D0D0..52D170 path preserves this existing owner too,
     //as does a plain active grant: 52D1B0's slot/charge write and the same
     //default tail never write C70.
-    if !matches!(id, 2 | 4 | 152 | 169)
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::AIM_C70)
         && !keep_default_passive_inputs
         && !plain_active_grant
         && !treatment.is_some_and(|proof| proof.preserves_c70_history())
@@ -1594,7 +1549,7 @@ pub(crate) fn add_collectible(
         && normal_isaac
         && crate::item_pipeline::ItemInputs::new(owner)
             .is_ok_and(|inputs| inputs.admits_epic_fetus_grant_context());
-    if ![1, 4, 6, 114, 118, 329, 304].contains(&id)
+    if !crate::collectible_grants::keeps(id, crate::collectible_grants::LUCK)
         && !keep_technology_luck
         && !keep_technology2_luck
         && !keep_soy_luck
@@ -1640,6 +1595,8 @@ pub(crate) fn add_collectible(
             && config.cache_flags & (256 | 512) == 0;
     if id == 194 {
         crate::pickup_world_grants::on_card194_added(state);
+    } else if id == 252 {
+        crate::pickup_world_grants::on_little_baggy_added(state);
     } else if !ordinary_no_world_effect {
         crate::ordinary_placement::invalidate(
             state,
