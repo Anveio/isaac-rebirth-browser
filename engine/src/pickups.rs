@@ -932,6 +932,38 @@ impl Pickup {
         Ok(())
     }
 
+    /// A free Morph500A10(5, variant, 0, keepPrice1) into a pickup the caller
+    /// built by the new variant's Init from the advanced seed (500A2A..56).
+    /// Morph keeps the handle, position, velocity, ABC/ABD, the spawner and
+    /// the weak links; age restarts at the new Init.
+    pub(crate) fn morph_into(
+        &mut self,
+        mut next: Pickup,
+        game_update: u32,
+        scheduler: &mut crate::actors::Scheduler,
+    ) -> Result<(), String> {
+        if !self.position.is_finite() || !self.velocity.is_finite() {
+            return Err("Morph requires finite saved vectors".into());
+        }
+        next.id = self.id;
+        next.source_spawner = self.source_spawner;
+        next.position = self.position;
+        next.anchor_position = self.anchor_position;
+        next.presented_position = self.presented_position;
+        next.velocity = self.velocity;
+        next.touched = self.touched;
+        next.save_byte_abd = self.save_byte_abd;
+        next.morph_links = self.morph_links.clone();
+        next.birth_game_update = game_update;
+        next.project();
+        scheduler.reinitialize_in_place(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Pickup,
+            id: self.id,
+        })?;
+        *self = next;
+        Ok(())
+    }
+
     /// Base ANM2 playback is admitted only on full nonplayer update phases.
     pub fn advance(&mut self, phase: Phase, game_update: u32, door_kick: WorldVector) {
         if !self.removed
