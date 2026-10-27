@@ -1226,10 +1226,8 @@ pub(crate) fn d10_targets(state: &mut State, id: u32) -> Option<Vec<u32>> {
         if pending > npc.hp || matches!(npc.kind, 17 | 33 | 28 | 68) || npc.dead {
             continue;
         }
-        let excluded = matches!(
-            (npc.kind, npc.variant),
-            (79, 20) | (228, 10) | (216, 10)
-        ) || (npc.kind, npc.variant) == (260, 10) && npc.parent.is_some();
+        let excluded = matches!((npc.kind, npc.variant), (79, 20) | (228, 10) | (216, 10))
+            || (npc.kind, npc.variant) == (260, 10) && npc.parent.is_some();
         if excluded || npc.boss {
             continue;
         }
@@ -1242,13 +1240,21 @@ pub(crate) fn d10_targets(state: &mut State, id: u32) -> Option<Vec<u32>> {
 /// (1 without max health), Random(45) from 670AC0, Random(15) from 670B80
 /// for a flyer (grid collision class 0..3), then the spawn seed. None
 /// (after recording a frontier) when the drawn type has no ported family.
-pub(crate) fn d10_roll(state: &mut State, id: u32, index: usize) -> Result<Option<D10Roll>, String> {
+pub(crate) fn d10_roll(
+    state: &mut State,
+    id: u32,
+    index: usize,
+) -> Result<Option<D10Roll>, String> {
     let npc = &state.room.npcs[index];
     let fraction = if npc.max_hp > 0.0 {
         //42EFC0: maxss(0, f) then minss(1, ..), with SSE operand order.
         let value = npc.hp / npc.max_hp;
         let low = if 0.0 > value { 0.0 } else { value };
-        if 1.0 < low { 1.0 } else { low }
+        if 1.0 < low {
+            1.0
+        } else {
+            low
+        }
     } else {
         1.0
     };
