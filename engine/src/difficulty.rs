@@ -76,6 +76,9 @@ macro_rules! rules {
 }
 
 rules! {
+    /// Boss death 5c8430: the last boss of a boss (5) or Boss Rush (0x11)
+    /// room drops its hearts only at normal (5c87c3).
+    boss_heart: bool = [true, false],
     /// NPC Init 47f5c6/47f725: added to the champion chance (0.05, or 0.2
     /// with Champion Belt); hard adds f32 0.15 (66ad1c).
     champion_chance_bonus: f32 = [0.0, 0.15],

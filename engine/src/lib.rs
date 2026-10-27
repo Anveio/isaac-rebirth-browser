@@ -21,6 +21,7 @@ pub mod blood_effects;
 pub mod boil;
 pub mod bombs;
 pub mod boss_death;
+mod boss_reward;
 mod brimstone;
 pub mod camera;
 pub mod challenges;
@@ -5660,6 +5661,7 @@ impl Game {
                 .initialization_game_update
                 .map(|initial| game_counter.wrapping_sub(initial) as i32)
         };
+        let callback_ran = self.state.room.npcs[index].boss_callback_pending;
         let mut births = Vec::new();
         let (before, rest) = self.state.room.npcs.split_at_mut(index);
         let (npc, after) = rest.split_first_mut().expect("indexed NPC");
@@ -5703,6 +5705,10 @@ impl Game {
         )?;
         for birth in births {
             self.admit_npc_birth(index, birth)?;
+        }
+        // 4f2d10 runs the boss callback 5c8430 as it removes a dead boss.
+        if !callback_ran && self.state.room.npcs[index].boss_callback_pending {
+            boss_reward::trigger(&mut self.state, index)?;
         }
         Ok(())
     }
@@ -6184,6 +6190,10 @@ impl Game {
                 let npc = entities::spawn(id, &selector, &context)?
                     .ok_or("NPC birth requires a registered family")?;
                 let (countable, boss) = (npc.can_shut_doors, npc.boss);
+                // 47eebe: a boss's Init adds it to the room's boss count.
+                if boss {
+                    self.state.room.boss_count = self.state.room.boss_count.wrapping_add(1);
+                }
                 self.state.room.npcs.push(npc);
                 self.state.actor_scheduler.admit(actors::ActorRef {
                     kind: actors::ActorKind::Npc,

@@ -252,7 +252,7 @@ fn fire(
 }
 
 /// 42e8d0: one MT.float turned into a unit vector.
-fn direction(random: &mut Mt19937) -> WorldVector {
+pub(crate) fn direction(random: &mut Mt19937) -> WorldVector {
     let angle = (f64::from(random.uniform()) * std::f64::consts::PI * 2.0) as f32;
     WorldVector {
         x: crate::fmath::cos(angle),

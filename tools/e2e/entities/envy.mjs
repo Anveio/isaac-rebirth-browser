@@ -1,3 +1,5 @@
+import { pickupFields } from './champion-drop.mjs';
+
 export default {
   type: 51, variant: 0,
   about: 'Envy miniboss rooms (6.2050): wall-bouncing heads at constant speed and the split into smaller heads on each death',
@@ -11,4 +13,7 @@ export default {
   // room state and identities, not as a marker).
   fight: 9000,
   required: ['admission'],
+  // The boss callback's drops (5c8430) and the clear award are graded as
+  // live pickups at every capture.
+  roomFields: pickupFields,
 };

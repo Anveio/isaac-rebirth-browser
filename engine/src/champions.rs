@@ -141,6 +141,15 @@ pub(crate) struct DeathDrop {
     pub position: crate::motion::WorldVector,
 }
 
+/// The NPC's own RNG (Entity+7c0) as its death reads it. Only Dips draw it
+/// before death among the admitted families.
+pub(crate) fn entity_rng(npc: &Npc) -> items::Rng {
+    npc.dip
+        .as_ref()
+        .and_then(|dip| dip.entity_rng)
+        .unwrap_or_else(|| items::Rng::new(npc.spawn_seed, ENTITY_SHIFTS))
+}
+
 /// Entity_NPC 4f27a0, which 4f2d10 runs for a dead champion (+103f) as the
 /// base kill removes it. The NPC's own RNG (+7c0) draws RandomInt(3) at
 /// both difficulties (4f27c8), then the color's jump table 66e320 runs; a
@@ -159,12 +168,7 @@ pub(crate) fn death_drops(
     free_position: impl Fn(crate::motion::WorldVector) -> crate::motion::WorldVector,
 ) -> Option<Vec<DeathDrop>> {
     let champion = npc.champion.as_ref()?;
-    // Only Dips draw their own RNG before death among the admitted families.
-    let mut rng = npc
-        .dip
-        .as_ref()
-        .and_then(|dip| dip.entity_rng)
-        .unwrap_or_else(|| items::Rng::new(npc.spawn_seed, ENTITY_SHIFTS));
+    let mut rng = entity_rng(npc);
     let roll = rng.bounded(3);
     let drops = roll == 0 || !crate::difficulty::rules(difficulty).champion_drop_needs_zero_roll;
     let (count, variant, subtype) = match champion.color {

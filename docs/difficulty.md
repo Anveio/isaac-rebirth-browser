@@ -28,6 +28,7 @@ claim that the difficulty changes nothing there.
 
 | Row | Original | Normal | Hard | Consumer |
 | --- | --- | --- | --- | --- |
+| `boss_heart` | Boss death 5c8430: when the last boss of a boss (5) or Boss Rush (0x11) room dies, 5c87c3 spawns its heart (and a second without achievement 33) | drops | none | `boss_reward::trigger` |
 | `champion_chance_bonus` | NPC Init 47f5c6/47f725: added to the champion chance (0.05, 0.2 with Champion Belt) | 0.0 | f32 0.15 (66ad1c) | `champions::roll` |
 | `champion_drop_needs_zero_roll` | Champion death drop 4f27a0 (4f2d10 at removal): the NPC's own RNG draws RandomInt(3) at both difficulties (4f27c8); 4f27d8 then gates the color's drop | always drops | drops only on 0 | `champions::death_drops` |
 | `clear_heart_max_roll` | Ordinary room-clear award 5c9240: a heart award draws RandomInt(100) on the award RNG (5c9e1c, 5c9f93) and spawns only at or below the limit | no draw | at most 34 | `clear_award::spawn` |
@@ -80,7 +81,7 @@ Game+10ECD8 (the Game pointer is the global at 0x8ecd30).
 | 4f27d8 | champion death drop 4f27a0 | drop odds | row `champion_drop_needs_zero_roll` |
 | 5399ed | Slot 539540 | beggar payout threshold | gap |
 | 53c9fa, 53da69, 53ff04 | Slot 53c290 | slot prize odds and counts | gap |
-| 5c87c3 | boss death 5c8430 | boss heart drop | gap |
+| 5c87c3 | boss death 5c8430 | boss heart drop | row `boss_heart` |
 | 5c9e1c | SpawnClearAward 5c9240, ordinary rooms | heart award odds | row `clear_heart_max_roll` |
 | 5c9ca9, 5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d | SpawnClearAward 5c9240, Boss Rush and final bosses | hard completion marks | gap |
 
@@ -106,8 +107,18 @@ implements without the rule yet). The values are read from the disassembly.
   normal (times 0.46 with Lucky Foot); 53ff04 draws a payout count from
   RandomInt(2) at hard and RandomInt(3) at normal (at least 1, +1 with PHD).
   The port admits no slot payouts.
-- **Boss heart** (boss death 5c8430, 5c87c3): Boss and Boss Rush rooms drop a
-  heart only at normal. The port's boss callback is pending.
+- **Boss death callback** (5c8430, `boss_reward`): the row `boss_heart`
+  covers the two hearts of a boss or Boss Rush room. The port runs the
+  callback when the room's last boss dies: the sins' collectible or pickups
+  (tables 67a7a0 and 67a768) and the ordinary boss's hearts, with Daemon's
+  Tail and achievement 33. It refuses with an error for Krampus (81.1),
+  Ultra Pride (46.2, 5c89e8), a boss champion (subtype != 0) and an angel
+  room (type 15, Uriel and Gabriel), and it skips the drop when a trinket
+  owner is unknown. It does not write the kill records 5bed50 and 5bec80
+  (achievements 86 and 22) or the stats calls 5b2c20 and 5b3190. Larry's AI
+  492df0 draws Larry's own RNG at 49a8d6 (a 1000.15 effect, then a soul heart
+  when bounded(4) is 0) on a path the port does not run, so a Larry fight
+  that reaches it moves the drop seeds.
 - **Ordinary room-clear award** (5c9240, `clear_award`): the port spawns
   the award from the award RNG, Luck, Lucky Foot, Lucky Toe, the trinkets
   22/34/36/41/44/45, Guppy's Tail and Contract from Below. It spawns nothing
@@ -146,3 +157,11 @@ EHL7N0AV (a chest) and 31T4YVZ3 (a bomb) spawn the award at the room centre
 `clear-award-hard` spec fights single-Dip rooms at hard: HNXKNQ2T (roll 14)
 and G6MD4K0A (roll 2) spawn the heart at the same seed and position in both
 games, and WPTB6SQK (roll 58) clears with no award in either game.
+
+The `stage-exit` suite's boss fixtures carry the boss callback's drops as a
+diagnostic (each game fights with its own keys, so which drops are left
+differs). In E1T36YXW (Monstro, normal) the original's remaining heart
+5.10.1 has seed 1755029133, and the port drops a heart with the same
+variant, subtype and seed. No capture grades the hard row yet: at hard the
+callback draws nothing for an ordinary boss, so the row only skips the
+spawn.

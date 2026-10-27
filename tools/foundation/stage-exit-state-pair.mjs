@@ -93,6 +93,15 @@ for (const label of labels) {
   const actualPedestals = state.room.pickups.filter(pickup => pickup.variant === 100 && !pickup.removed)
     .map(pickup => [pickup.subtype, [pickup.position.x, pickup.position.y]]);
   check(label, 'pedestals', pedestals, actualPedestals);
+  // The boss callback's drops (5c8430). Each game fights with its own keys,
+  // so which drops are still on the floor, and a multi-segment boss's last
+  // segment, differ; the seeds follow the boss's own RNG. A diagnostic.
+  const drops = rows => rows.sort((a, b) => a[2] - b[2]);
+  diagnostic(label, 'drops',
+    drops(source.entities.filter(entity => entity.type === 5 && entity.variant !== 100 && !entity.removed)
+      .map(entity => [entity.variant, entity.subtype, entity.spawnSeed])),
+    drops(state.room.pickups.filter(pickup => pickup.variant !== 100 && !pickup.removed && !pickup.collected)
+      .map(pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed])));
 }
 // The next floor's generation reads the departing Player's health and coins
 // (floor.rs): full health admits the Challenge and Sacrifice rooms, a half

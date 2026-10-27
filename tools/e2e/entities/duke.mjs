@@ -1,3 +1,5 @@
+import { pickupFields } from './champion-drop.mjs';
+
 export default {
   type: 67, variant: 0,
   boss: true,
@@ -12,4 +14,7 @@ export default {
   fields: (native, actor) => [
     ['stateFrame', native.npcStateFrame, actor.deathFrame ?? 0],
   ],
+  // The boss callback's drops (5c8430) and the clear award are graded as
+  // live pickups at every capture.
+  roomFields: pickupFields,
 };
