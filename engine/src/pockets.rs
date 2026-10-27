@@ -580,17 +580,16 @@ pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
     if owner.pickup_animation_guard {
         return Ok(false);
     }
-    let Some(held) = owner
+    if owner
         .held_pockets
         .as_ref()
-        .filter(|held| held.frontier.is_none())
-    else {
+        .is_none_or(|held| held.frontier.is_some())
+    {
         return Ok(false);
-    };
+    }
     let Some(capacity) = capacity(owner) else {
         return Ok(false);
     };
-    let slots = held.slots;
     let slot = PocketSlot {
         id: pickup.subtype,
         card: pickup.variant == 300,
@@ -598,6 +597,61 @@ pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
     if !matches!((slot.card, slot.id), (true, 1..=40) | (false, 1..=9)) {
         return Ok(false);
     }
+    add_slot(state, capacity, slot)?;
+    let owner = state.player_items.as_mut().expect("checked Player owner");
+    owner.pickup_presentation = Some(player_items::PickupPresentation {
+        item_id: slot.id,
+        animation_frame: 0.0,
+        animation_playing: true,
+        pocket: Some(PocketPresentation::for_slot(slot)),
+        regular: None,
+    });
+    crate::player_animation::force_play(state, crate::player_animation::Clip::UseItem);
+    if slot.card && state.challenge_id != 9 {
+        let (name, description) = if state.challenge_id == 30 {
+            ("???", "")
+        } else {
+            let config = crate::pickups::card_definition(slot.id).ok_or("card config absent")?;
+            (config.name, config.description)
+        };
+        state.run_introduction = crate::RunIntroduction::pickup(name, description);
+    }
+    Ok(true)
+}
+
+///445710 captures the overlap before the two callbacks, then reads current
+///masses/velocities after an AL0 result. The owned refusal branches above
+///leave positions/radii unchanged; AD0 and successful collection veto it.
+///Use the same normal Player/grid geometry and kernel as chests/empty altars.
+pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
+    //4453A0 vetoes callbacks for the actual dead31F Player before AD0.
+    if state.player.dead {
+        return Ok(());
+    }
+    let player_position = crate::bombs::player_world(state);
+    let pickup_position = state.room.pickups[index].position;
+    let pickup_radius = state.room.pickups[index].collision_radius;
+    if collect(state, index)? != PlayerContactDecision::AllowPhysicalResponse {
+        return Ok(());
+    }
+    crate::pickups::player_physical_response(
+        state,
+        index,
+        player_position,
+        pickup_position,
+        pickup_radius,
+    )
+}
+
+///50AE00/50AF00 AddPill/AddCard: a full record spills slot0 as a world
+///pickup (one shared seed), then the new record takes slot0.
+fn add_slot(state: &mut State, capacity: usize, slot: PocketSlot) -> Result<(), String> {
+    let slots = state
+        .player_items
+        .as_ref()
+        .and_then(|owner| owner.held_pockets.as_ref())
+        .ok_or("checked pocket owner")?
+        .slots;
     let spill = slots[0].id != 0 && slots[capacity - 1].id != 0;
     if spill {
         //50AE90/50AF90: exactly one shared seed before overwriting slot0;
@@ -643,6 +697,27 @@ pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
         held.slots[1] = held.slots[0];
     }
     held.slots[0] = slot;
+    Ok(())
+}
+
+/// An active's direct AddPill/AddCard (Mom's Bottle of Pills, Deck of Cards)
+/// and its 50A8A0/50AA80 presentation with the Pickup clip. None leaves the
+/// held record untouched when its owner or capacity is unknown.
+pub(crate) fn grant_from_active(state: &mut State, slot: PocketSlot) -> Result<Option<()>, String> {
+    let Some(owner) = state.player_items.as_ref() else {
+        return Ok(None);
+    };
+    if owner
+        .held_pockets
+        .as_ref()
+        .is_none_or(|held| held.frontier.is_some())
+    {
+        return Ok(None);
+    }
+    let Some(capacity) = capacity(owner) else {
+        return Ok(None);
+    };
+    add_slot(state, capacity, slot)?;
     let owner = state.player_items.as_mut().expect("checked Player owner");
     owner.pickup_presentation = Some(player_items::PickupPresentation {
         item_id: slot.id,
@@ -651,39 +726,6 @@ pub(crate) fn grant(state: &mut State, index: usize) -> Result<bool, String> {
         pocket: Some(PocketPresentation::for_slot(slot)),
         regular: None,
     });
-    crate::player_animation::force_play(state, crate::player_animation::Clip::UseItem);
-    if slot.card && state.challenge_id != 9 {
-        let (name, description) = if state.challenge_id == 30 {
-            ("???", "")
-        } else {
-            let config = crate::pickups::card_definition(slot.id).ok_or("card config absent")?;
-            (config.name, config.description)
-        };
-        state.run_introduction = crate::RunIntroduction::pickup(name, description);
-    }
-    Ok(true)
-}
-
-///445710 captures the overlap before the two callbacks, then reads current
-///masses/velocities after an AL0 result. The owned refusal branches above
-///leave positions/radii unchanged; AD0 and successful collection veto it.
-///Use the same normal Player/grid geometry and kernel as chests/empty altars.
-pub(crate) fn player_contact(state: &mut State, index: usize) -> Result<(), String> {
-    //4453A0 vetoes callbacks for the actual dead31F Player before AD0.
-    if state.player.dead {
-        return Ok(());
-    }
-    let player_position = crate::bombs::player_world(state);
-    let pickup_position = state.room.pickups[index].position;
-    let pickup_radius = state.room.pickups[index].collision_radius;
-    if collect(state, index)? != PlayerContactDecision::AllowPhysicalResponse {
-        return Ok(());
-    }
-    crate::pickups::player_physical_response(
-        state,
-        index,
-        player_position,
-        pickup_position,
-        pickup_radius,
-    )
+    crate::player_animation::force_pickup(state);
+    Ok(Some(()))
 }

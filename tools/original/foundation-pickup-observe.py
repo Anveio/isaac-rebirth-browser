@@ -109,6 +109,9 @@ def observe(pid, context):
                     result['localRngWords'] = list(struct.unpack_from('<4I', raw, 0x7c0))
                     if context.get('pickupResourceSound') is True:
                         result['pickupManagerMember'] = True
+                    if context.get('activeItems') is True:
+                        # Entity+440 is the pedestal anchor 507170 springs to.
+                        result['pickupAnchor'] = pair(0x440)
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
                     result['collectionDelay'] = struct.unpack_from('<i', more, 0xc)[0]
@@ -222,6 +225,8 @@ def observe(pid, context):
                         raise ValueError('Actual PlayerBD0 boolean representation unavailable')
                     item['goldenKeyBd0Byte'] = raw[0x18]
                     item['goldenKey'] = raw[0x18] == 1
+                if context.get('activeItems') is True:
+                    item['eternalHearts'] = struct.unpack_from('<i', raw, 4)[0]
                 item['keyInventory'] = u32(pointer + 0xbcc)
                 item['coinInventory'] = u32(pointer + 0xbd8)
                 item['maxRedHp'] = u32(pointer + 0xbb4)

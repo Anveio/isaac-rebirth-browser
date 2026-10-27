@@ -337,6 +337,8 @@ def main():
                 context['pillRangeUse'] = True
                 context['persistentItemInputs'] = True
             context['pickupResourceSound'] = True
+            if case.get('activeItems') is not None:
+                context['activeItems'] = True
         return old_observation(observer, pid, context)
     clock.checked_observation = source_observation
     try:

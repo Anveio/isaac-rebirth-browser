@@ -80,7 +80,7 @@ pub(crate) fn finish_admitted(state: &mut State) {
 /// Normal35 is costume-free and cache0; its zero-cooldown temporary record
 /// persists. The shared authored book host freezes room callbacks, so queued
 /// target damage waits for that host to resume the actual NPC full callback.
-fn use_black_heart(state: &mut State) -> Result<(), String> {
+pub(crate) fn use_black_heart(state: &mut State) -> Result<(), String> {
     state.information_animation.request_black_heart();
     let config = items::definition(35).ok_or("Black-heart ItemConfig35 absent")?;
     state
