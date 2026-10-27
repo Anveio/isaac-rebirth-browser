@@ -121,9 +121,32 @@ export function renderItems() {
   const totalReferenced = rows.filter(row => row.status === 'missing' && row.referenced).length;
   summary.push(`| **all** | ${rows.length} | ${count(rows, 'complete')} | ${count(rows, 'partial')} | ${count(rows, 'missing')} | ${totalReferenced} |`);
 
+  // Ids the original reads per mechanism, from tools/original/item-xrefs.py.
+  const xrefs = JSON.parse(readFileSync(join(root, 'references/isaac/foundation/items/item-xrefs.json'), 'utf8'));
+  const originalReads = mechanism => {
+    const collectibles = new Set();
+    const trinkets = new Set();
+    const sources = [];
+    if (mechanism.block) {
+      const block = xrefs.evaluateItems.blocks[mechanism.block];
+      if (!block) throw new Error(`mechanism ${mechanism.id}: unknown 511F10 block ${mechanism.block}`);
+      sources.push(block);
+    }
+    for (const address of mechanism.functions ?? []) {
+      const found = xrefs.functions.find(entry => entry.function === address);
+      if (!found) throw new Error(`mechanism ${mechanism.id}: no item reads at ${address}`);
+      sources.push(found);
+    }
+    for (const source of sources) {
+      source.collectibles.forEach(id => collectibles.add(id));
+      source.trinkets.forEach(id => trinkets.add(id));
+    }
+    if (!sources.length) return '';
+    return `${collectibles.size}${trinkets.size ? ` + ${trinkets.size} trinket${trinkets.size > 1 ? 's' : ''}` : ''}`;
+  };
   const mechanisms = curated.mechanisms.map(mechanism => {
     if (!STATUSES.includes(mechanism.status)) throw new Error(`mechanism ${mechanism.id}: unknown status`);
-    return `| \`${mechanism.id}\` | ${cell(mechanism.name)} | ${cell(mechanism.original)} | ${mechanism.status} | ${cell(mechanism.case)} | ${issueLink(mechanism.issue)} | ${cell(mechanism.note)} |`;
+    return `| \`${mechanism.id}\` | ${cell(mechanism.name)} | ${cell(mechanism.original)} | ${originalReads(mechanism)} | ${mechanism.status} | ${cell(mechanism.case)} | ${issueLink(mechanism.issue)} | ${cell(mechanism.note)} |`;
   });
   const byId = new Map(rows.filter(row => row.kind !== 'trinket').map(row => [row.id, row]));
   const sets = curated.sets.map(set => {
@@ -158,8 +181,8 @@ yet; **complete** means every behaviour is ported and the named live
 original-vs-port case passes. A failing or unrun comparison is never complete.
 *Engine refs* marks an id the engine passes to a collectible or trinket query
 (a formula read or a recorded frontier); it is a lead, not evidence.
-*Pool weight* sums the item's weight over every pool it appears in. The design
-for porting composition will live in \`docs/item-synergies.md\`.
+*Pool weight* sums the item's weight over every pool it appears in. The design for porting
+composition is [item synergies](item-synergies.md).
 
 ## Summary
 
@@ -173,10 +196,13 @@ Synergy mechanisms: ${mechanismCounts}. Tested item sets: ${setCounts}.
 
 Synergies come from the original's composition rules, so parity is tracked per
 mechanism first. A mechanism is complete only when it runs for every
-inventory, matching the original in live cases.
+inventory, matching the original in live cases. *Original reads* counts the
+item ids the original's code for that mechanism queries
+([item-xrefs.json](../references/isaac/foundation/items/item-xrefs.json), from
+\`tools/original/item-xrefs.py\`); every one must become a port term or branch.
 
-| Mechanism | Name | Original | Status | Live case | Issue | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
+| Mechanism | Name | Original | Original reads | Status | Live case | Issue | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 ${mechanisms.join('\n')}
 
 ## Tested item sets

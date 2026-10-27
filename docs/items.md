@@ -12,8 +12,8 @@ yet; **complete** means every behaviour is ported and the named live
 original-vs-port case passes. A failing or unrun comparison is never complete.
 *Engine refs* marks an id the engine passes to a collectible or trinket query
 (a formula read or a recorded frontier); it is a lead, not evidence.
-*Pool weight* sums the item's weight over every pool it appears in. The design
-for porting composition will live in `docs/item-synergies.md`.
+*Pool weight* sums the item's weight over every pool it appears in. The design for porting
+composition is [item synergies](item-synergies.md).
 
 ## Summary
 
@@ -31,28 +31,31 @@ Synergy mechanisms: 0 complete, 14 partial, 4 missing. Tested item sets: 0 match
 
 Synergies come from the original's composition rules, so parity is tracked per
 mechanism first. A mechanism is complete only when it runs for every
-inventory, matching the original in live cases.
+inventory, matching the original in live cases. *Original reads* counts the
+item ids the original's code for that mechanism queries
+([item-xrefs.json](../references/isaac/foundation/items/item-xrefs.json), from
+`tools/original/item-xrefs.py`); every one must become a port term or branch.
 
-| Mechanism | Name | Original | Status | Live case | Issue | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| `cache-dispatch` | Cache dispatch order | 511F10: Weapon 0x100, FireDelay 2, ShotSpeed 4, Damage 1, Range 8, Speed 0x10, TearFlags 0x20, Color 0x40, Flight 0x80, Familiars 0x200, Luck 0x400 | partial | stat-cache, damage-fire-delay |  | Order ported (item_pipeline CacheStage::ORDER). |
-| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate | missing |  | #895 | Port stages resolve only for listed item sets; an unlisted item leaves the requested bits pending. |
-| `stat-damage` | Damage stage | Damage callback (DamagePlan) | partial | damage-fire-delay |  | Reads many items; readset-limited. |
-| `stat-fire-delay` | Fire delay stage | 511F10 bit 2 | partial | damage-fire-delay |  | Operators for 1, 6, 2/169, 222, 330 only. |
-| `stat-shot-speed` | Shot speed stage | 511F68..512126 | partial | stat-cache |  | Full item formula; trinket 27 frontier. |
-| `stat-range` | Range stage | Range callback (RangeReadPlan) | partial | stat-cache, pill-range-use |  |  |
-| `stat-speed` | Move speed stage | bit 0x10 | partial | stat-cache |  |  |
-| `stat-luck` | Luck stage | 513C80 | partial |  |  |  |
-| `tear-flags` | Tear flag accumulation | bit 0x20 | partial |  |  | Spectral, piercing and a few flags; homing source-only. |
-| `tear-color` | Tear color | bit 0x40 | partial |  |  |  |
-| `flight` | Flight | bit 0x80 | partial |  |  | TEMP33 (The Bible) only. |
-| `weapon-select` | Weapon type selection and precedence | C08 primary weapon writer (resolve_primary) | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
-| `tear-fire` | Tear fire hooks | FireTear 5177F0, caller 519FC0 | partial | weapons, tear-lifecycle |  |  |
-| `familiar-cache` | Familiar and orbital composition | Familiars 0x200 callback | partial | familiars |  | Leech only; no orbitals. |
-| `costumes` | Costumes | Add-collectible costume registration | missing |  |  |  |
-| `transformations` | Transformations | 52D0D0 transformation tail | missing |  |  |  |
-| `death-callbacks` | Enemy death item callbacks | 47FD22 and peers | partial | dips |  | Gimpy and Infestation 2 on Dips. |
-| `trinket-effects` | Trinket effects | Held trinket queries | missing | trinket-start |  |  |
+| Mechanism | Name | Original | Original reads | Status | Live case | Issue | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `cache-dispatch` | Cache dispatch order | 511F10: Weapon 0x100, FireDelay 2, ShotSpeed 4, Damage 1, Range 8, Speed 0x10, TearFlags 0x20, Color 0x40, Flight 0x80, Familiars 0x200, Luck 0x400 |  | partial | stat-cache, damage-fire-delay |  | Order ported (item_pipeline CacheStage::ORDER). |
+| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate |  | missing |  | #895 | Port stages resolve only for listed item sets; an unlisted item leaves the requested bits pending and resolve_live_weapon refuses regular tears (Odd Mushroom 120). See item-synergies.md. |
+| `stat-damage` | Damage stage | 511F10 block 0x1 at 5134B0 | 44 + 1 trinket | partial | damage-fire-delay |  | Reads many items; readset-limited. |
+| `stat-fire-delay` | Fire delay stage | 511F10 block 0x2 at 5122D3 | 29 + 2 trinkets | partial | damage-fire-delay |  | Operators for 1, 6, 2/169, 222, 330 only. |
+| `stat-shot-speed` | Shot speed stage | 511F10 block 0x4 at 511F68 | 15 + 1 trinket | partial | stat-cache |  | Full item formula; trinket 27 frontier. |
+| `stat-range` | Range stage | 511F10 block 0x8 at 5127C8 | 23 + 1 trinket | partial | stat-cache, pill-range-use |  |  |
+| `stat-speed` | Move speed stage | 511F10 block 0x10 at 512C48 | 29 + 1 trinket | partial | stat-cache |  |  |
+| `stat-luck` | Luck stage | 511F10 block 0x400 at 513C80 | 3 + 1 trinket | partial |  |  |  |
+| `tear-flags` | Tear flag accumulation | 511F10 block 0x20 at 5130CA | 25 + 5 trinkets | partial |  |  | Spectral, piercing and a few flags; homing source-only. |
+| `tear-color` | Tear color | 511F10 block 0x40 at 513355 | 19 | partial |  |  |  |
+| `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
+| `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
+| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  |  |
+| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. |
+| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  |  |
+| `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
+| `death-callbacks` | Enemy death item callbacks | 47FD22 and peers |  | partial | dips |  | Gimpy and Infestation 2 on Dips. |
+| `trinket-effects` | Trinket effects | Held trinket queries |  | missing | trinket-start |  |  |
 
 ## Tested item sets
 
