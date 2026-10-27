@@ -391,7 +391,30 @@ pub(crate) fn floor_request(
         max_red_hp: state.player.max_hp,
         soul_hp: state.player.soul_hp,
         coins: state.inventory.coins,
+        difficulty: state.difficulty,
+        curse: curse_inputs(state)?,
     })
+}
+
+/// Level::Init's curse-sampler inputs (Persistent achievements 4/33, counter
+/// 10, Black Candle), read only when the run's rules draw the curse stream.
+pub fn curse_inputs(state: &State) -> Result<crate::challenges::CurseInputs, String> {
+    if crate::difficulty::rules(state.difficulty)
+        .extra_rooms
+        .is_none()
+    {
+        return Ok(crate::challenges::CurseInputs::default());
+    }
+    let profile = usize::from(state.profile)
+        .checked_sub(1)
+        .and_then(|index| state.profiles.get(index))
+        .ok_or("Level curse odds require the run's profile")?;
+    let items = state
+        .player_items
+        .as_ref()
+        .ok_or("Level requires actual Player item owner")?;
+    let black_candle = crate::item_pipeline::ItemInputs::new(items)?.positive_owned_count(260);
+    crate::challenges::CurseInputs::from_profile(profile, black_candle)
 }
 
 /// Level::SetNextStage585620 for the admitted ordinary stages: the stage

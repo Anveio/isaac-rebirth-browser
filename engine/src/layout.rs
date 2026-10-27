@@ -250,8 +250,10 @@ pub fn generate(input: GrowthRequest) -> Result<Growth, String> {
     if input.generator_seed == 0 {
         return Err("a nonzero independently supplied generator seed is required".into());
     }
-    if !(1..=20).contains(&input.additional_rooms) {
-        return Err("additional room count must be within the recovered 1..20 range".into());
+    // Level::Init passes at most 20 (58bf57), 45 under Labyrinth (58c079),
+    // plus hard's 2 + RandomInt(2) (58c08e).
+    if !(1..=48).contains(&input.additional_rooms) {
+        return Err("additional room count must be within Level::Init's 1..48 range".into());
     }
     if input.shape_mask == 0 || input.shape_mask & !15 != 0 {
         return Err("shape availability must be a nonempty four-bit mask".into());
