@@ -483,7 +483,7 @@ pub(crate) fn room_clear(state: &mut State) -> Result<(), String> {
 }
 
 fn room_clear_charge(state: &mut State) -> Result<(), String> {
-    use crate::active_charges::{EffectFrontier, Frontier, Word};
+    use crate::active_charges::{Frontier, Word};
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
     };
@@ -550,8 +550,7 @@ fn room_clear_charge(state: &mut State) -> Result<(), String> {
                             pitch: 1.0,
                         },
                     );
-                    let _seed = state.boot_lifecycle.shared.next_u32();
-                    crate::active_charges::note_effect(state, EffectFrontier::BatteryEffect48);
+                    crate::familiars::admit_battery(state)?;
                 }
                 None => {
                     //This actual conditional target is unresolved. Retain

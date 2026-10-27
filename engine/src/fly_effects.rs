@@ -54,7 +54,13 @@ pub(crate) struct Probe<'a> {
     pub fires: &'a [(WorldVector, f32)],
 }
 
-fn base(id: u32, config: u32, seed: u32, position: WorldVector, game_update: u32) -> SpriteEffect {
+pub(crate) fn base(
+    id: u32,
+    config: u32,
+    seed: u32,
+    position: WorldVector,
+    game_update: u32,
+) -> SpriteEffect {
     let definition = definition(1000, config).expect("authored effect config");
     SpriteEffect {
         id,
