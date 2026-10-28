@@ -1749,7 +1749,7 @@ fn reroll_pickups(state: &mut State, id: u32) -> Result<(), String> {
                 0,
                 seed,
                 old.position,
-                false,
+                true,
                 crate::pickups::PocketSubtypeInputs::from_state(state),
             )?,
             //Trinket Init (350) is not ported.
@@ -1766,10 +1766,11 @@ fn reroll_pickups(state: &mut State, id: u32) -> Result<(), String> {
                     group_seed: 0,
                     spawn_seed: seed,
                 };
+                //Morph's Init runs mid-room, so the new pickup plays Appear.
                 match variant {
-                    50 => crate::chests::from_source_selector(old.id, &selector, false, state)?,
-                    60 => crate::chests::from_locked_selector(old.id, &selector, false, state)?,
-                    _ => crate::Pickup::from_source_selector(old.id, &selector, false, state)?,
+                    50 => crate::chests::from_source_selector(old.id, &selector, true, state)?,
+                    60 => crate::chests::from_locked_selector(old.id, &selector, true, state)?,
+                    _ => crate::Pickup::from_source_selector(old.id, &selector, true, state)?,
                 }
             }
         };

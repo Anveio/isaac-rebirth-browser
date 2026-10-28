@@ -60,7 +60,8 @@ function nativeObservation(observation) {
       primaryWeapon: player.primaryWeapon, tearFlags: player.tearFlags } : null,
     familiars: live.filter(entity => entity.type === 3).map(entity => entity.variant).sort((a, b) => a - b),
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
-    pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
+    pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position,
+      animation: entity.animation ?? null })),
     pocketBirths: live.filter(entity => entity.type === 5 && [70, 300].includes(entity.variant))
       .map(entity => [entity.variant, entity.subtype, entity.spawnSeed, entity.spawnerType, entity.spawnerVariant, entity.linksEmpty])
       .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]),
@@ -111,7 +112,8 @@ function portObservation() {
     familiars: state.familiars.filter(familiar => !familiar.removed).map(familiar => familiar.variant).sort((a, b) => a - b),
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
-      .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
+      .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y],
+        animation: pickup.animation })),
     pocketBirths: state.room.pickups.filter(pickup => !pickup.removed && !pickup.collected && [70, 300].includes(pickup.variant))
       .map(pickup => [pickup.variant, pickup.subtype, pickup.spawnSeed, pickup.sourceSpawner?.entityType ?? null,
         pickup.sourceSpawner?.variant ?? null, pickup.morphLinks
@@ -153,7 +155,8 @@ function matchPositions(native, port, tolerance) {
 
 const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
 
-function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false, stats = false } = {}) {
+function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false, stats = false,
+  pickupAnimations = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -176,6 +179,13 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
   row('bombs', native.bombs, port.bombs, bombs.length === 0);
   const pickups = matchPositions(native.pickups, port.pickups, TOLERANCE.pickup);
   row('pickups', native.pickups, port.pickups, pickups.length === 0);
+  // Each pickup's main clip, where a case's interaction re-inits pickups
+  // (a Morph plays Appear).
+  if (pickupAnimations) {
+    const clips = list => list.map(pickup => [pickup.variant, pickup.subtype, pickup.animation])
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || String(a[2]).localeCompare(String(b[2])));
+    same('pickups.animation', clips(native.pickups), clips(port.pickups));
+  }
   // Enemies by type and variant, positions within the pickup tolerance, and
   // each one's [HP, max HP] in f32.
   const npcs = matchPositions(native.npcs.map(npc => ({ ...npc, variant: npc.type, subtype: npc.variant })),
@@ -289,7 +299,7 @@ export const INTERACTIONS = {
     portContract: activeOwnershipContract },
   'room-2x2': { labels: ['settle'], covered: obs => obs['settle'].room?.gridWidth === 28 },
   // Every free pickup keeps its place and at least one changes kind.
-  'd20-reroll': { labels: ['settle', 'use-active', 'after-active'],
+  'd20-reroll': { pickupAnimations: true, labels: ['settle', 'use-active', 'reroll-appear', 'after-active'],
     covered: obs => obs['after-active'].player.activeCharge === 0
       && pickupCount(obs['after-active']) === pickupCount(obs['settle'])
       && JSON.stringify(obs['after-active'].pickups.map(p => [p.variant, p.subtype]))
@@ -315,7 +325,7 @@ export const INTERACTIONS = {
       && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll) },
   // The D100 spends its charge, stays held, and changes the passives, the
   // pedestal and the loose pickups.
-  'd100-reroll': { owned: true, labels: ['settle', 'use-active', 'after-active'],
+  'd100-reroll': { owned: true, pickupAnimations: true, labels: ['settle', 'use-active', 'reroll-appear', 'after-active'],
     covered: obs => obs['settle'].player.activeCharge > 0 && obs['after-active'].player.activeId === 283
       && obs['after-active'].player.activeCharge === 0
       && JSON.stringify(obs['after-active'].player.ownedAll) !== JSON.stringify(obs['settle'].player.ownedAll)
@@ -499,6 +509,7 @@ try {
         pocketModifier: declaration.interactions.includes('blank-card-pocket-conversion'),
         owned: declaration.interactions.some(name => INTERACTIONS[name].owned),
         d4Animation: declaration.interactions.includes('d4-reroll'),
+        pickupAnimations: declaration.interactions.some(name => INTERACTIONS[name].pickupAnimations),
       }));
     }
     if (declaration.interactions.includes('d4-reroll'))
