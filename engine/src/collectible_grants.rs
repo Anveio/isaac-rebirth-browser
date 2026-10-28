@@ -1,64 +1,68 @@
 //! Collectible grant rows for AddCollectible 52CC90, one row per collectible
-//! like `active_items::USES`. A row names the persistent Player input words
-//! that the collectible's Add path is proven to leave alone. Any collectible
-//! can still be granted (pedestals, Challenge starts, D4/D100 rerolls); a
-//! collectible without a row reaches an unported Add effect, so every
-//! persistent input word below loses its owner and becomes unknown.
+//! like `active_items::USES`. Any collectible can be granted (pedestals,
+//! Challenge starts, D4/D100 rerolls).
+//!
+//! `tools/original/item-xrefs.py` resolves 52CC90's id tests for every
+//! collectible and lists the Player fields each reachable path writes
+//! (`addCollectible` in references/isaac/foundation/items/item-xrefs.json).
+//! Only 240 (Experimental Treatment) and 258 (Missing No.) write the
+//! persistent stat input words D28..D3C. No other Add path writes them, C70,
+//! D40/D58, 13BC/13C0 or the pill-effect words 1388+, and the callees that
+//! only one collectible reaches write none of them (checked one call deep).
+//! The active charge words are written only for config kind 3 (52D19B). So
+//! every other collectible keeps every word, and a row here names only a
+//! collectible whose Add path writes some.
 //!
 //! The stat outputs themselves come from the cache Evaluate511F10 callbacks
 //! over owned counts, so a row only covers the Add event, not the stats.
 
 /// Player+D28/D44/13BC/13C0, the MoveSpeed inputs.
-pub(crate) const MOVE_SPEED: u8 = 1;
+pub(crate) const MOVE_SPEED: u16 = 1;
 /// Player+D34, the Range input.
-pub(crate) const RANGE: u8 = 2;
+pub(crate) const RANGE: u16 = 2;
 /// Player+D2C, the FireDelay input.
-pub(crate) const FIRE_DELAY: u8 = 4;
+pub(crate) const FIRE_DELAY: u16 = 4;
 /// Player+D30, the Damage input.
-pub(crate) const DAMAGE: u8 = 8;
+pub(crate) const DAMAGE: u16 = 8;
 /// Player+D38, the ShotSpeed input.
-pub(crate) const SHOT_SPEED: u8 = 16;
+pub(crate) const SHOT_SPEED: u16 = 16;
 /// The attack aim rotation C70.
-pub(crate) const AIM_C70: u8 = 32;
+pub(crate) const AIM_C70: u16 = 32;
 /// The Luck inputs D3C/D40/D58.
-pub(crate) const LUCK: u8 = 64;
+pub(crate) const LUCK: u16 = 64;
+/// The pill-effect counter words 1388+ and the count/record query stores.
+pub(crate) const QUERY_STORES: u16 = 128;
+/// The active charge words D74/D7C/D80/D8C. 52CC90 writes them only on its
+/// config kind 3 (active) path at 52D19B, so a passive Add keeps them.
+pub(crate) const ACTIVE_CHARGES: u16 = 256;
 
-const STATS: u8 = MOVE_SPEED | RANGE | FIRE_DELAY | DAMAGE | SHOT_SPEED;
+const ALL: u16 = MOVE_SPEED
+    | RANGE
+    | FIRE_DELAY
+    | DAMAGE
+    | SHOT_SPEED
+    | AIM_C70
+    | LUCK
+    | QUERY_STORES
+    | ACTIVE_CHARGES;
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct GrantRow {
     pub id: u32,
-    /// The input words this Add path keeps.
-    pub keeps: u8,
+    /// The input words this Add path writes; every other word is kept.
+    pub writes: u16,
 }
 
-const fn row(id: u32, keeps: u8) -> GrantRow {
-    GrantRow { id, keeps }
+const fn row(id: u32, writes: u16) -> GrantRow {
+    GrantRow { id, writes }
 }
 
 pub(crate) const ROWS: &[GrantRow] = &[
-    row(1, STATS | LUCK),           // The Sad Onion
-    row(2, STATS | AIM_C70),        // The Inner Eye
-    row(3, STATS),                  // Spoon Bender
-    row(4, STATS | AIM_C70 | LUCK), // Cricket's Head
-    row(6, STATS | LUCK),           // Number One
-    row(12, DAMAGE),                // Magic Mushroom
-    row(14, MOVE_SPEED | RANGE),    // Roid Rage
-    row(27, MOVE_SPEED),            // Wooden Spoon
-    row(28, MOVE_SPEED),            // The Belt
-    row(52, STATS),                 // Dr. Fetus
-    row(68, STATS),                 // Technology
-    row(114, STATS | LUCK),         // Mom's Knife
-    row(118, STATS | LUCK),         // Brimstone
-    row(143, STATS),                // Speed Ball
-    row(152, STATS | AIM_C70),      // Technology 2
-    row(168, STATS),                // Epic Fetus
-    row(169, STATS | AIM_C70),      // Polyphemus
-    row(222, FIRE_DELAY),           // Anti-Gravity
-    row(229, STATS),                // Monstro's Lung
-    row(304, STATS | LUCK),         // Libra
-    row(329, STATS | LUCK),         // The Ludovico Technique
-    row(330, STATS),                // Soy Milk
+    // 52CC90 writes D28..D3C inline; experimental_treatment owns which of
+    // its histories survive.
+    row(240, ALL), // Experimental Treatment
+    // Its Use of the D4 (522250) rewrites D28..D3C and every count.
+    row(258, ALL), // Missing No.
 ];
 
 pub(crate) fn row_for(id: u32) -> Option<&'static GrantRow> {
@@ -66,6 +70,6 @@ pub(crate) fn row_for(id: u32) -> Option<&'static GrantRow> {
 }
 
 /// Whether the Add path of `id` keeps the given input word.
-pub(crate) fn keeps(id: u32, word: u8) -> bool {
-    row_for(id).is_some_and(|row| row.keeps & word != 0)
+pub(crate) fn keeps(id: u32, word: u16) -> bool {
+    row_for(id).is_none_or(|row| row.writes & word == 0)
 }
