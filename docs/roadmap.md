@@ -608,7 +608,7 @@ pipeline, then the bulk import.
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
 | #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
-| #948 | P2 | Magic Mushroom: the port draws the cap costume during the Hurt pose where the original shows the plain head (set [1,4,12] frames 155-208) | playtest 2026-10-28 `playtest/3cb8cef/set-sad-onion-crickets-head-magic-mushroom.mp4` |
+| #948 | P2 | Item-set fights vs Gaper: a tear born touching the Gaper (set-120 update 84) resolves contact with different velocities, so later hits land one update early; tracked with #946 | playtest 2026-10-28 `playtest/f6043b7/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 | #949 | P2 | D100: rerolled pickups stay at their spawn points in the port but scatter in the original; the chest draws a floor shadow (69/156 frames) | playtest 2026-10-28 `playtest/3cb8cef/d100.mp4` |
 
 ## Pocket items
@@ -722,7 +722,6 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
-| #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
 | #937 | P3 | Kamikaze!: from frame 413 the original draws Isaac charred and blinking after the blast; the port draws him plain | playtest 2026-10-28 kamikaze |
 | #939 | P3 | Explosion sprite drawn about one screen pixel right of and below the original (Anarchist Cookbook frames 280-285) | playtest 2026-10-28 `playtest/3cb8cef/anarchist-cookbook.mp4` |
 
@@ -839,7 +838,6 @@ Bugs in a test route or tool rather than in the game.
 | #196 | P3 | blood-start contrived route never reaches the boss in the original; regenerate it | e2e blood-start |
 | #220 | P3 | health-damage black-heart route never acquires the Black Heart in the original; regenerate it | e2e health-damage |
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
-| #941 | P3 | Sandbox item-set runs: the port lacks the original's achievements-disabled HUD icon; the sandbox grant must set the same run flag | playtest 2026-10-28 `playtest/dddd23a/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 
 ## Recently fixed
 
