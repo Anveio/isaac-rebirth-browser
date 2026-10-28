@@ -60,7 +60,7 @@ fn is_false(value: &bool) -> bool {
     !*value
 }
 
-/// Poop.Update569D50 (variants 0 and 1) in the full grid pass. A broken poop
+/// Poop.Update569D50 (variants 0 to 2) in the full grid pass. A broken poop
 /// (state above 3) keeps class0; an intact one is class3 unless Poop+330 is
 /// set, the Player is on the ground (444860) and Length612790(cell - Player)
 /// is below 21: then class0 below 20, and from 20 up the flag clears. An
@@ -89,7 +89,7 @@ pub(crate) fn advance_poops(
         else {
             continue;
         };
-        if entity.kind != 14 || entity.variant > 1 {
+        if entity.kind != 14 || entity.variant > 2 {
             continue;
         }
         if entity.state > 3 {
@@ -135,7 +135,30 @@ pub(crate) fn advance_poops(
     Ok(())
 }
 
+/// The Eternal Fly96.0 an intact corn poop's Init spawns (see `corn_fly`).
+pub struct CornFly {
+    pub position: crate::motion::WorldVector,
+    pub seed: u32,
+}
+
 impl GridEntity {
+    /// Poop.Init569600 5699c8..569bcc: an intact (state <= 3) corn poop
+    /// (variant2) spawns an Eternal Fly96.0 with a Random() seed at its cell
+    /// centre (561070), no spawner, and writes the fly's state0 (+f50).
+    fn corn_fly(&self, index: usize, width: usize, shared: &mut Mt19937) -> Option<CornFly> {
+        if self.kind != 14 || self.variant != 2 || self.state > 3 {
+            return None;
+        }
+        let seed = shared.next_u32();
+        Some(CornFly {
+            position: crate::motion::WorldVector {
+                x: 40.0 + (index % width) as f32 * 40.0,
+                y: 120.0 + (index / width) as f32 * 40.0,
+            },
+            seed,
+        })
+    }
+
     /// Base560ff0 stores two real raw words and constructs RNG5/9/7 without a
     /// shared draw. Primary stays in the actual object's existing spawn field.
     fn construct_owner(&mut self, shared: &mut Mt19937) -> Result<(), String> {
@@ -183,13 +206,15 @@ impl GridEntity {
                 costs.store(index, 1000)?;
             }
             1 => {} // Supported Decoration.Init has no direct path-cost store.
-            14 if self.variant <= 1 => {
+            14 if self.variant <= 2 => {
                 // Poop.Init569600: an ordinary unbroken poop blocks (class3)
                 // and stores path cost1500; a broken one (restored from its
                 // record) stores 0 and its Update keeps class0. A red poop
                 // (variant 1, 569978) comes back whole. Its local RNG5/9/7
-                // then draws the sheet (569ac0/569af0 RandomInt(3)+1) and the
+                // then draws the sheet (569ac0/569af0 RandomInt(3)+1; the
+                // corn poop's 569b20 has one sheet and no draw) and the
                 // cosmetic +314 (56994f RandomInt(2)) whatever the state.
+                // An intact corn poop's Eternal Fly is `corn_fly`.
                 if self.variant == 1 && self.state > 3 {
                     self.state = 0;
                 }
@@ -205,7 +230,7 @@ impl GridEntity {
                     .as_mut()
                     .ok_or("Poop Init requires its constructor")?;
                 owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
-                owner.poop_sheet = Some(owner.local_rng.bounded(3) + 1);
+                owner.poop_sheet = (self.variant <= 1).then(|| owner.local_rng.bounded(3) + 1);
                 owner.local_rng.bounded(2);
             }
             // Web.Init571c70 keeps class0 and stores no path cost.
@@ -349,6 +374,11 @@ pub fn restore_records(
             source_owner: None,
         };
         entity.init_record(shared, record, game_update, costs, index)?;
+        if entity.kind == 14 && entity.variant == 2 && entity.state <= 3 {
+            return Err(
+                "saved record replay has no NPC owner for a corn poop's Eternal Fly".into(),
+            );
+        }
         grid.cells[index].entity = Some(entity);
     }
     Ok(())
@@ -375,7 +405,11 @@ pub fn admit_fresh(room: &mut Room, shared: &mut Mt19937, game_update: u32) -> R
         .selectors
         .clone();
     for selector in &selectors {
-        admit_selector(room, shared, selector, game_update)?;
+        if admit_selector(room, shared, selector, game_update)?.is_some() {
+            return Err(
+                "a grid-only Room.Init has no NPC owner for a corn poop's Eternal Fly".into(),
+            );
+        }
     }
     admit_boundary(room, shared, game_update, false)
 }
@@ -388,11 +422,11 @@ pub fn admit_selector(
     shared: &mut Mt19937,
     selector: &crate::room_spawns::SpawnSelector,
     game_update: u32,
-) -> Result<(), String> {
+) -> Result<Option<CornFly>, String> {
     if selector.category != crate::room_spawns::SpawnCategory::Grid
         || !constructs_grid_object(selector.entity_type)
     {
-        return Ok(());
+        return Ok(None);
     }
     //5CEA7F/84 maps raw1900 to GridRock3. Its backdrop1/ordinary-Room
     //Init has no entity descendants; Room14/15's reached effect producers
@@ -423,7 +457,7 @@ pub fn admit_selector(
         .as_ref()
         .is_some_and(|entity| entity.source_owner.is_some())
     {
-        return Ok(());
+        return Ok(None);
     }
     if selector.entity_type == 0 {
         // Source5ce858/5ce8b0 maps raw0 to GridDecoration1 and keeps variant.
@@ -438,7 +472,7 @@ pub fn admit_selector(
         entity.construct_owner(shared)?;
         entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
         cell.entity = Some(entity);
-        return Ok(());
+        return Ok(None);
     }
     match cell.entity.as_mut() {
         Some(entity) if entity.kind == 3 && entity.state == 1 && ordinary_block => {
@@ -446,11 +480,14 @@ pub fn admit_selector(
             //overwrites primary from the authored group seed. The old
             //unowned fallback already consumed exactly these two words.
             entity.construct_owner(shared)?;
-            entity.init_seed(selector.spawn_seed, game_update, costs, index)
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
+            Ok(None)
         }
         Some(entity) if matches!(entity.kind, 2 | 5 | 6 | 8 | 12 | 14) => {
             entity.construct_owner(shared)?;
-            entity.init_seed(selector.spawn_seed, game_update, costs, index)
+            entity.init_seed(selector.spawn_seed, game_update, costs, index)?;
+            let width = usize::from(grid.width);
+            Ok(entity.corn_fly(index, width, shared))
         }
         Some(entity) if entity.kind == 10 => {
             // Web.Init571c70 (state0) draws the shared MT for its Swaying
@@ -461,7 +498,7 @@ pub fn admit_selector(
             shared.bounded(4);
             shared.bounded(2);
             shared.bounded(4);
-            Ok(())
+            Ok(None)
         }
         _ => {
             // Tinted rocks, poop, blocks, pits and other GridBase objects
@@ -475,7 +512,7 @@ pub fn admit_selector(
             }
             let _primary = shared.next_u32();
             let _secondary = shared.next_u32();
-            Ok(())
+            Ok(None)
         }
     }
 }

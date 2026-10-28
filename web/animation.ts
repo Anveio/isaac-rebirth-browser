@@ -102,6 +102,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/grid_spikes.png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_red_[123].png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_poop_corn.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/fx_ray*.png",
   "../references/isaac/rebirth/resources/gfx/grid/props_01_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/props_03_caves.png",

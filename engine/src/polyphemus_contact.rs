@@ -205,8 +205,9 @@ fn contacts_pair(state: &mut State, id: u32, target_id: u32) -> Result<(), Strin
     }
     let npc = &state.room.npcs[receiver];
     //4453E7..4453FE tests actual31F on both actors; class4/4 is admitted
-    //by4453B6..445490. HP does not decide callback eligibility.
-    if npc.dead || npc.removed || npc.entity_collision_class != 4 {
+    //by4453B6..445490, and class2 meets a tear at 445478. HP does not
+    //decide callback eligibility.
+    if npc.dead || npc.removed || !matches!(npc.entity_collision_class, 2 | 4) {
         return Ok(());
     }
     //445710's strict circle check uses CURRENT radius and P after any

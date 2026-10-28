@@ -373,10 +373,12 @@ pub(crate) fn advance(
         ai(npc, random, world)?;
     }
     if npc.dead {
-        //4fc0a3: family AI has finished; factory gets physicalP+458, V0,
-        //NULL spawner and no initial Update. The captured old tail stays fixed.
+        //4fc0a3: family AI has finished; factory gets V0, NULL spawner and
+        //no initial Update. Its position is the actor's +448 plus the base
+        //kill's centre of the current layer-0 keyframe (4fa9b1..4faa49).
         let seed = random.next_u32();
-        let position = npc.position + npc.dip.as_ref().unwrap().render_offset;
+        let [x, y] = content::main_layer_centre(CONFIG.actor, &npc.animation, npc.animation_frame);
+        let position = npc.position + WorldVector { x, y };
         poop_effects::Admission {
             game_update_count: world.effects.game_update_count,
             next_effect: world.effects.next_effect,
@@ -392,14 +394,25 @@ pub(crate) fn advance(
     npc.position = npc.position + npc.velocity;
     npc.presented_position = npc.position;
     dip.current_friction = npc.base_friction;
+    //447446: the colour stack counts down before the damage drain.
+    let base = npc.base_color();
+    npc.sprite_color.tick(phase, base);
     //44773a skips remaining records once the actual death byte is set. All
     //ordered flags currently represented by DamageKind use ordinary HP<0.
     for index in 0..npc.damage.events().len() {
-        let amount = npc.damage.events()[index].amount;
+        let event = npc.damage.events()[index];
         if !npc.dead && npc.max_hp > 0.0 {
-            npc.hp -= amount;
+            npc.hp -= event.amount;
             if npc.hp < 0.0 {
                 die(npc, random, world, births)?;
+            } else {
+                //4478b4: a surviving hit flashes (SetColor 4478c0).
+                let hit = crate::combat::AppliedDamage {
+                    event,
+                    hp_after: npc.hp,
+                    lethal: false,
+                };
+                npc.sprite_color.admit_hits(phase, &[hit], base);
             }
         }
     }

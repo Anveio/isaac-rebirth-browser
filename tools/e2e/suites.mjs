@@ -158,7 +158,7 @@ export const SUITES = [
   suite('monstro', statePair, ['--scenario-helper', helper('monstro-scenarios.py'), '--comparator',
     'tools/foundation/monstro-state-pair.mjs', '--native-frame-timeout', '120'],
     'Level2 Fly route into Monstro: admission, AI, projectiles and scene cleanup'),
-  suite('dips', e2e('dips'), ['--count', '2'], 'Dip admission, AI, poop explosions and death callbacks', { replay: false }),
+  suite('dips', e2e('dips'), ['--count', '2'], 'Dip admission, AI, poop explosions and death callbacks'),
   suite('blood-start', e2e('blood-start'), [], 'Blood effect start-up and background admission', { replay: false }),
   suite('health-damage', e2e('health-damage'), ['--count', '2'],
     'Red/Soul/Black health damage, Hit and Black-heart callbacks', { replay: '--scenario-file' }),

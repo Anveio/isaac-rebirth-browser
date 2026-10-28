@@ -592,8 +592,11 @@ fn explosion_update(
     let first = *frame_target == 0;
     if first {
         // 4609e1: exact separate B2/B2/B3 before current-frame handling.
-        effect.sprite.flip_x = shared.bounded(2) == 0;
-        effect.sprite.flip_y = shared.bounded(2) == 0;
+        // The flips go to every layer's +22/+23 (410860), not the sprite's
+        // own FlipX/FlipY; 1000.043 has the single layer 0.
+        let flip_x = shared.bounded(2) == 0;
+        let flip_y = shared.bounded(2) == 0;
+        effect.sprite.layer_flips.insert(0, [flip_x, flip_y]);
         *frame_target = shared.bounded(3) as i32 + 6;
     }
     let frame = effect.sprite.frame.floor() as i32;

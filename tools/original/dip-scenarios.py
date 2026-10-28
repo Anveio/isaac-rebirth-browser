@@ -58,6 +58,11 @@ def main():
     # Draw once before fixture construction or grading. No eligibility reroll.
     vectors = [paired.runner.codec.random_vector() for _ in range(args.count)]
     cases = [build(f'dip-cellar-phase{phase}', 'B9119QA3', phase, True) for phase in (0, 1)]
+    # The Basement room below 6GFP B240's start draws a corn poop (raw1500's
+    # second Int(40)) whose Init spawns an invincible Eternal Fly96 (#966).
+    corn = build('corn-poop-eternal-fly', '6GFP B240', 1, False)
+    corn['scenario']['randomized'] = False
+    cases.append(corn)
     cases += [build(f'dip-unfiltered-{n}', vector['code'], n % 2, False) for n, vector in enumerate(vectors)]
     print(json.dumps({'schema': 1, 'entropy': 'OS secrets; unfiltered and recorded before grading', 'randomVectors': vectors, 'cases': cases}))
 

@@ -694,7 +694,7 @@ pub(crate) fn contacts_actor(state: &mut State, id: u32) -> Result<(), String> {
         .room
         .npcs
         .iter()
-        .filter(|npc| !npc.dead && !npc.removed && npc.entity_collision_class == 4)
+        .filter(|npc| !npc.dead && !npc.removed && matches!(npc.entity_collision_class, 2 | 4))
         .map(|npc| (npc.id, npc.kind, npc.position, npc.collision_radius))
         .collect();
     for (id, position, radius) in candidates {

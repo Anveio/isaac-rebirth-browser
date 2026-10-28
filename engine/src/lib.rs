@@ -54,6 +54,7 @@ mod effects;
 pub mod enemy_projectiles;
 mod entities;
 mod epic_fetus;
+pub mod eternal_fly;
 mod experimental_treatment;
 mod explosion_effects;
 pub mod game_shake;
@@ -3562,19 +3563,32 @@ impl Game {
                 return Err("persistent spawn cell depends on an unadmitted factory".into());
             }
             let before_entities = order.len();
-            // Room.Init5cecc0 constructs grid objects in the same selector pass.
-            grid_records::admit_selector(
-                &mut self.state.room,
-                &mut self.state.boot_lifecycle.shared,
-                selector,
-                self.state.game_update_count,
-            )?;
-            ordinary_placement::remember_room_frontier(&mut self.state);
-            let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             let context = entities::SpawnContext {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
+            // Room.Init5cecc0 constructs grid objects in the same selector pass.
+            // A corn poop's Init spawns its Eternal Fly (champion="0") there.
+            if let Some(fly) = grid_records::admit_selector(
+                &mut self.state.room,
+                &mut self.state.boot_lifecycle.shared,
+                selector,
+                self.state.game_update_count,
+            )? {
+                let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
+                npcs.push(eternal_fly::from_corn_poop(id, &fly, &context)?);
+                let actor = actors::ActorRef {
+                    kind: actors::ActorKind::Npc,
+                    id,
+                };
+                ordinary_placement::invalidate(
+                    &mut self.state,
+                    ordinary_placement::Frontier::ActorEffects { actor },
+                );
+                order.push(actor);
+            }
+            ordinary_placement::remember_room_frontier(&mut self.state);
+            let id = u32::try_from(npcs.len()).map_err(|_| "NPC identity exhausted")?;
             if let Some(mut npc) = entities::spawn(id, selector, &context)? {
                 //Registered AI is not a proof of its producer footprint.
                 ordinary_placement::invalidate(

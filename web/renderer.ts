@@ -17,6 +17,10 @@ const PARTICLE_ACTORS: Record<number, string> = {
   5: "gfx/1000.005_blood particle.anm2", 27: "gfx/1000.027_wood particle.anm2", 43: "gfx/1000.043_poop explosion.anm2",
   35: "gfx/1000.035_tooth particle.anm2", 58: "gfx/1000.058_poop particle.anm2",
 };
+// Layer 0's scale with its own flips (LayerState +22/+23), which the Poop
+// Explosion sets instead of the sprite's FlipX/FlipY.
+const layerScale = (sprite: { scale: { x: number; y: number }; layerFlips: Record<string, [boolean, boolean]> }) =>
+  [sprite.scale.x * (sprite.layerFlips[0]?.[0] ? -1 : 1), sprite.scale.y * (sprite.layerFlips[0]?.[1] ? -1 : 1)] as const;
 // Rock Init 56ed00 / Render 56bf80: an intact (state 1) rock-family grid
 // entity sets frame variant of its type's grid_rock.anm2 animation.
 // Minimap room-type icons from the jump table at 0x678748; challenge rooms
@@ -333,12 +337,13 @@ export class Renderer {
         const crop = { Idle: [0, 0], IdleMedium: [32, 0], ReadyToExplode: [0, 32], Blown: [32, 32] }[sprite.animation]!;
         ctx.drawImage(this.assets.image("gfx/grid/grid_tnt.png"), crop[0]!, crop[1]!, 32, 32, x - 16, y - 16, 32, 32);
         this.drawnGrid.push({ index, kind: 12, animation: sprite.animation, frame: sprite.frame });
-      } else if (entity.kind === 14 && entity.variant <= 1 && entity.sourceOwner?.poopSheet) {
+      } else if (entity.kind === 14 && entity.sourceOwner && (entity.variant === 2 || entity.sourceOwner.poopSheet)) {
         // Poop.Init569600 picks grid_poop_{1..3} (a red poop's
-        // grid_poop_red_{1..3}) and plays State{state+1} (State5 once
-        // broken); a spawn into a loaded room plays Appear first.
-        const red = entity.variant === 1 ? "red_" : "";
-        const sheet = { 0: `gfx/grid/grid_poop_${red}${entity.sourceOwner.poopSheet}.png`, 1: "gfx/effects/effect_poopspawn.png" };
+        // grid_poop_red_{1..3}, a corn poop's single grid_poop_corn) and
+        // plays State{state+1} (State5 once broken); a spawn into a loaded
+        // room plays Appear first.
+        const name = entity.variant === 2 ? "corn" : `${entity.variant === 1 ? "red_" : ""}${entity.sourceOwner.poopSheet}`;
+        const sheet = { 0: `gfx/grid/grid_poop_${name}.png`, 1: "gfx/effects/effect_poopspawn.png" };
         const birth = entity.sourceOwner.birthGameUpdate, init = state.room.initializationGameUpdate;
         const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
         const animation = age < 20 ? "Appear" : `State${Math.min(entity.state + 1, 5)}`;
@@ -513,7 +518,7 @@ export class Renderer {
         (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
       ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
       this.assets.draw(ctx, PARTICLE_ACTORS[effect.variant],
-        sprite.animation, 0, 0, sprite.frame, { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: {0: {
+        sprite.animation, 0, 0, sprite.frame, { layerScales: {0: layerScale(sprite)}, overrides: {0: {
           Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
           BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
           RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
@@ -840,7 +845,7 @@ export class Renderer {
         ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
         const actor = PARTICLE_ACTORS[stain.variant];
         this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-          { layerScales: {0: [sprite.scale.x, sprite.scale.y]}, overrides: { 0: {
+          { layerScales: {0: layerScale(sprite)}, overrides: { 0: {
             ...(stain.layerRotation === null ? {} : {Rotation: stain.layerRotation}),
             RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
             BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,

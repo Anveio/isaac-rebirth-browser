@@ -78,3 +78,4 @@ gfx/024.001_gazing globin.anm2
 gfx/045.000_mom.anm2
 gfx/045.010_mom stomp.anm2
 gfx/222.000_ring fly.anm2
+gfx/096.000_eternal fly.anm2

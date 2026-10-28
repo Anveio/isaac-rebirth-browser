@@ -17,8 +17,11 @@ const option = (name, fallback) => {
 const output = resolve(option('--output', `.cache/e2e/dips/${Date.now()}-${process.pid}`));
 mkdirSync(output, {recursive: true});
 const save = (path, value) => writeFileSync(path, JSON.stringify(value, null, 2) + '\n');
-const scenarios = JSON.parse(execFileSync('python3', ['tools/original/dip-scenarios.py', '--count', option('--count', '2')],
-  {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
+// `--scenarios PATH` replays a recorded scenarios.json without drawing entropy.
+const recorded = option('--scenarios');
+const scenarios = recorded ? JSON.parse(readFileSync(recorded, 'utf8'))
+  : JSON.parse(execFileSync('python3', ['tools/original/dip-scenarios.py', '--count', option('--count', '2')],
+    {encoding: 'utf8', maxBuffer: 8 * 1024 * 1024}));
 scenarios.cases = selectCases(scenarios.cases, scenario => scenario.scenario.id);
 if (flag('--case')) scenarios.caseFilter = flag('--case');
 save(resolve(output, 'scenarios.json'), scenarios);
