@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { runPairedGate } from '../foundation/paired-game.mjs';
 import { flag, outputDirectory, selectCases, writeJson } from './lib/cli.mjs';
 
@@ -39,9 +40,18 @@ const helperEnv = { ...process.env, ...(outerArgv.includes('--browser-recorder')
 const scenarios = replayCases ? { schema: 1, cases: replayCases.split(',').map(readJson) }
   : recorded ? readJson(recorded)
   : JSON.parse(execFileSync('python3', [helper, ...helperArgs], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, env: helperEnv }));
+// Continue's route owner validates every declaration before selection can
+// hide a malformed case. Retain the whole input bank and its selected scope.
+const continueRun = resolve(comparator) === fileURLToPath(new URL('../foundation/continue-run-state-pair.mjs', import.meta.url));
+const bankValidation = continueRun
+  ? (await import('../foundation/continue-run-state-pair.mjs')).validateContinueRunScenarios(scenarios, { allowSubset: Boolean(replayCases) })
+  : undefined;
+if (continueRun) writeJson(resolve(output, 'generated-scenarios.json'), scenarios);
 scenarios.cases = selectCases(scenarios.cases, item => item.scenario.id);
 if (flag('--case')) scenarios.caseFilter = flag('--case');
 writeJson(resolve(output, 'scenarios.json'), scenarios);
+if (continueRun) writeJson(resolve(output, 'selection.json'), { schema: 1, caseFilter: scenarios.caseFilter,
+  bankValidation, cases: scenarios.cases.map(item => item.scenario.id) });
 const tapes = scenarios.cases.map((item, index) => writeJson(resolve(output, `replay-${index}.json`), item));
 
 // Browser manifests and traces are gzipped losslessly as they are written
@@ -89,6 +99,7 @@ const cases = scenarios.cases.map((scenario, index) => {
     status: child.status === 0 && !child.signal && report.status === 'pass' && divergence?.status !== 'fail' ? 'pass' : 'fail',
     checks: report.checks?.length || 0, failures: failed(report.checks),
     diagnostics: report.diagnostics?.length || 0, diagnosticFailures: failed(report.diagnostics),
+    ...(continueRun && { scope: report.scope }),
     error: (divergence?.status === 'fail' ? divergence.error : undefined) || report.error || child.error?.message || (child.status ? child.stderr.trim().split('\n').at(-1) : undefined),
     report: target, staleRecording: stale(scenario),
   };
@@ -98,7 +109,8 @@ const cases = scenarios.cases.map((scenario, index) => {
 // discovery); they fail the suite without hiding the cases that did build.
 const helperFailures = scenarios.failures ?? [];
 const status = paired.status === 'pass' && !helperFailures.length && cases.every(item => item.status === 'pass') ? 'pass' : 'fail';
-writeJson(resolve(output, 'report.json'), { schema: 1, status, caseFilter: scenarios.caseFilter, pairedStatus: paired.status, helperFailures, cases });
+writeJson(resolve(output, 'report.json'), { schema: 1, status, caseFilter: scenarios.caseFilter, pairedStatus: paired.status, helperFailures,
+  ...(continueRun && { bankValidation, selection: resolve(output, 'selection.json') }), cases });
 for (const item of cases) console.log(`${item.status}: ${item.id} (${item.failures}/${item.checks} checks failed)${item.error ? ` ${item.error}` : ''}`);
 for (const failure of helperFailures) console.log(`fail: ${JSON.stringify(failure)}`);
 for (const item of cases.filter(item => item.staleRecording)) console.log(`warning: ${item.id} replays port keys recorded on build ${item.staleRecording.recordedBuild.slice(0, 12)} against build ${build.slice(0, 12)}; its result does not compare the two builds — rerun without --scenarios`);
