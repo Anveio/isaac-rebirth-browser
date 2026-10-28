@@ -519,7 +519,13 @@ differential no longer cover that death. The pinned room
 `coverage-mom-kill` (7WEVL3X9, Depths II room 0, template 5.1062) holds
 `npc:45`, `removed:45` and the stage-6 boss clear: it plays Mom's door
 removal, foot, door parts and death, then her clear's ending back to the
-menu. A
+menu. No
+tape met the boss-scene key properties on main after #935 (the corpus
+reached boss rooms but pressed no key during a Scene), until the glibc
+sinf/cosf port moved `coverage-57bc69b90c89086c` into one by luck.
+`coverage-boss-scene-key` now holds them on purpose: its recipe branches
+from a boss room entry, and 32 of 32 branches pressed a key during the
+Scene. A
 recipe whose tape does not exist yet chases from a fresh boot, so a new
 scenario needs only its recipe. The miniboss clear had been a harvested tape
 with no recipe, which a menu change sent into Options before any run; its
