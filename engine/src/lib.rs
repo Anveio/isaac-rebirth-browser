@@ -2920,16 +2920,22 @@ impl Game {
         boot_level_grid: &mut mt::DescriptorSeeds,
         transition: &mut traversal::RoomTransition,
     ) -> Result<(), String> {
+        // Level::ChangeRoom saves the level's current room (Level+8190), the
+        // one advance_transition has just persisted. The transition's
+        // from_room names the door the player enters through, which equals
+        // it on every door walk but not on a direct entry (the DST rooms
+        // unit's), so the save reads the current room.
+        let leaving = state.current_room;
         let left = state
             .persisted_rooms
-            .get(&transition.from_room)
+            .get(&leaving)
             .ok_or("room change requires the persisted room it left")?;
         room_lights::present_room(left, &mut state.boot_lifecycle.shared);
         saved_game::save_grid_cells(
             boot_level_grid,
             &mut state.boot_lifecycle.shared,
             left,
-            transition.from_room,
+            leaving,
         )?;
         maze::change_room(state, boot_level_grid, transition)
     }
