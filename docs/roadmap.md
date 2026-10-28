@@ -190,7 +190,9 @@ remain open.
 Next: Native own-saved Keyboard process reload; broader Ctrl and R contexts,
 natural R reload and gamepad.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #915 | P1 | Short key taps (Escape, bombs, items) are lost when the browser runs below 60 ticks/s; self-playtest pause check fails at ~38 ticks/s | playtest 2026-10-28 self-playtest ea9b183 seed SGZL8K4G |
 
 ## Seeds, RNG and shared MT
 
@@ -268,9 +270,7 @@ qualification does not cover every Hard floor or fight against the Original.
 Next: qualify Depths I and II and Mom against the Original; Cellar
 generation and unlock; remaining curse consumers and XL progression.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #863 | P2 | Hard run WPTB6SQK: next floor rolls no curse where the original shows Curse of the Unknown (hearts hidden) | playtest 2026-10-27 `playtest/bc70726/clear-award-none.mp4` |
+No open bugs.
 
 ## Rooms, doors and transitions
 
@@ -292,7 +292,6 @@ Next: complete supported-room reentry; devil/angel door after a boss.
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
 | #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
-| #865 | P2 | Entering an enemy room, the port draws the entry and spiked doors open where the original shows them shut | playtest 2026-10-27 `playtest/bc70726/clear-award-heart.mp4` |
 
 ## Stage progression
 
