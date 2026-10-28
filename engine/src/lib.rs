@@ -6924,7 +6924,6 @@ impl Game {
         } else {
             0
         };
-        combat::advance_player_immunity(&mut self.state);
         let bomb_admitted = self.state.bomb_placement_cooldown.advance(phase);
         // Shooting inherits the velocity entering this phase, before input acceleration.
         let inherited_velocity = (self.state.player.vx, self.state.player.vy);
@@ -6971,6 +6970,10 @@ impl Game {
             }
             active_items::finish_runtime_leaf(&mut self.state, leaf)?;
         }
+        // Player.Update reaches the active use (52A640 at 5318D6) before
+        // its bf8 decrement (531E87): a Kamikaze blast's countdown is
+        // already one lower when the update ends (#937).
+        combat::advance_player_immunity(&mut self.state);
         pockets::use_pocket(&mut self.state, controls_enabled)?;
         let player = &mut self.state.player;
         if dx != 0 || dy != 0 {

@@ -132,6 +132,7 @@ def native_rows():
                 position=vector(physical['position']), velocity=vector(physical['velocity']),
                 entityCollisionOff=integer(physical['entityCollisionClass']) == 0,
                 eternal=integer(physical['eternalHearts']),
+                immunity=integer(physical['damageCountdown']),
                 pockets=[[integer(slot['id']), bool(integer(slot['typeTagRaw'])) if slot['id'] else None]
                          for slot in player['heldPocketRecords']],
                 clip=player['mainSprite']['animation'], frame=f32(player['mainSprite']['animationFrame']),
@@ -181,6 +182,7 @@ def browser_rows():
                 velocity=[f32(player['vx'] / .65), f32(player['vy'] / .65)],
                 entityCollisionOff=player.get('entityCollisionOff', False) is True,
                 eternal=integer(player['eternalHearts']),
+                immunity=integer(state['damageCooldown']),
                 pockets=[[integer(slot['id']), (slot['card'] is True) if slot['id'] else None]
                          for slot in owner['heldPockets']['slots']],
                 clip=clip, frame=frame,
@@ -566,7 +568,7 @@ uses, held, landed = collections.Counter(), set(), 0
 for gp in paired:
     a, b = own[gp], native[gp]
     for field in ('activeId', 'activeCharge', 'temporary', 'health', 'position', 'velocity',
-                  'entityCollisionOff', 'controls', 'pedestals', 'eternal', 'pockets'):
+                  'entityCollisionOff', 'controls', 'pedestals', 'eternal', 'pockets', 'immunity'):
         check(f'Player:{field}', a[field], b[field], gp)
     if b['clip'] in CLIPS or a['clip'] is not None:
         check('main sprite clip', a['clip'], b['clip'], gp)
@@ -637,7 +639,7 @@ result = dict(schema=1, status='fail' if failures else 'pass', case=case['name']
     checksPerField=dict(counts), failedPerField=dict(failures), examples=examples,
     unavailable=contract['unknown'] + (freeze_contract['unknown'] if freeze_contract else [])
         + (fear_contract['unknown'] if fear_contract else []), inputsBefore=before, inputsAfter=after,
-    scope='Per-presentation start-room active slot, charge, temporary records, health, Player body, '
+    scope='Per-presentation start-room active slot, charge, temporary records, health, damage countdown, Player body, '
           'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.'
           + (' Additive independent bounded living NPC freeze state/motion/colour and actual phase-clock witnesses; '
              'the no-Space control retains ordinary NPC behavior. Frozen death, bosses, links and readmission remain open.' if freeze_contract else ''))
