@@ -136,7 +136,12 @@ implements without the rule yet). The values are read from the disassembly.
   Curse of the Labyrinth's generation (the XL name, a second boss 589d5c and
   treasure room 58bae3, one stage more through the trapdoor 585640) and Curse
   of the Lost's four rooms. It does not implement Curse of Darkness's
-  lighting, Curse of the Lost's map hiding, Curse of the Maze's room swaps,
+  lighting, Curse of the Lost's map hiding, Curse of the Maze's room swaps
+  (Level::ChangeRoom 58d95d: on every change between two valid rooms the
+  original draws RandomInt(10) on the shared MT, then RandomInt(5) when the
+  first is nonzero, and a zero takes the swap at 58dc90 or 58dbf0; the port
+  draws neither, so the shared MT drifts at a Maze floor's first room change,
+  as in hard EK3SH68W's Dip fight),
   Curse of the Blind's hidden items or Curse of the Cursed's doors, nor
   586594's curse handling past the roll.
 - **Completion marks** (5c9240's Boss Rush and stage 6/8+ branches: 5c9ca9,
@@ -157,6 +162,14 @@ python3 tools/original/foundation-paired-scenarios.py --scenario paired-hard-run
 node tools/playtest/side-by-side.mjs --case DIR/case/case.json --out DIR
 ```
 
+The curse roll is graded as part of the floor: `foundation-floor-verify.py`
+(the `floor` suite's capture) compares the original's Level+8 with the
+port's `Floor::curses`, and the `floor` suite also checks the live browser's.
+`foundation-floor-verify.py --capture --hard` starts each original at hard. Hard
+WPTB6SQK (Curse of the Unknown, 8), EK3SH68W (Curse of the Maze, 32),
+0JLB1WMP (Curse of the Labyrinth, 2) and two OS-random floors without a curse
+match the original's descriptors, grid, attempts and curse mask.
+
 The `champion-drop` and `champion-drop-hard` entity specs fight champion
 Horfs to death (an entity spec with `hard: true` starts both games at hard)
 and grade every live pickup's identity and f32 position at each capture.
@@ -170,7 +183,9 @@ EHL7N0AV (a chest) and 31T4YVZ3 (a bomb) spawn the award at the room centre
 (320, 280) with the original's variant, subtype and seed. The
 `clear-award-hard` spec fights single-Dip rooms at hard: HNXKNQ2T (roll 14)
 and G6MD4K0A (roll 2) spawn the heart at the same seed and position in both
-games, and WPTB6SQK (roll 58) clears with no award in either game.
+games, and WPTB6SQK (roll 58) clears with no award in either game. The
+Dip room at slot 2 of 0JLB1WMP's hard Labyrinth floor matches in every
+graded field as well.
 
 The `stage-exit` suite's boss fixtures carry the boss callback's drops as a
 diagnostic (each game fights with its own keys, so which drops are left
@@ -179,4 +194,11 @@ differs). In E1T36YXW (Monstro, normal) both hearts the original drops
 variant, subtype and seed. The Larry Jr. fixtures still differ (see the gap
 above). No capture grades the hard row yet: at hard the
 callback draws nothing for an ordinary boss, so the row only skips the
-spawn.
+spawn. `boss-scenarios.py --hard` (an entity spec with `boss: true` and
+`hard: true`) routes into hard boss rooms, and the original validates the
+routes, but no open-loop fight tried kills the boss in either game: Monstro
+in TNPNSRPX (whose route crosses red fireplaces, 1410, which the port does
+not admit, so the shared RNG drifts before the fight) and Gurglings in
+V9X18LNY (sweep and churn) and 41FNCL0Y (churn). Grading the row needs a
+fight the original wins on its own keys, as the `stage-exit` fixtures'
+`originalFight` does at normal.

@@ -7,6 +7,7 @@
 //! steers the same decisions further.
 use crate::entropy::Entropy;
 use rebirth_cleanroom::bombs::player_world;
+use rebirth_cleanroom::difficulty::Difficulty;
 use rebirth_cleanroom::grid::Grid;
 use rebirth_cleanroom::input::{self, PUBLIC_KEYS};
 use rebirth_cleanroom::motion::WorldVector;
@@ -89,7 +90,7 @@ pub struct Driver {
     travel: Option<Travel>,
     /// The engine's doorway admission per descriptor, for the floor it was
     /// computed on (boss and miniboss checks decode authored room assets).
-    admitted: Option<((u32, u32), Vec<bool>)>,
+    admitted: Option<(FloorKey, Vec<bool>)>,
     /// Pickups the player reached without collecting (a full-health heart,
     /// say), by room and id, with how often; they stop being targets.
     touched: BTreeMap<(usize, u32), u32>,
@@ -986,7 +987,14 @@ impl Driver {
     /// Doorway admission for every descriptor of the current floor, asked of
     /// the engine's own rule so routes follow it as rooms are admitted.
     fn admitted(&mut self, state: &State) -> &[bool] {
-        let floor = (state.floor.stage, state.floor.stage_seed);
+        // A new run on the same seed at the other difficulty, or as a
+        // challenge, generates another floor under the same stage seed.
+        let floor = (
+            state.floor.stage,
+            state.floor.stage_seed,
+            state.difficulty,
+            state.floor.descriptors.len(),
+        );
         if self.admitted.as_ref().map(|(key, _)| *key) != Some(floor) {
             let admitted = state
                 .floor
@@ -1067,6 +1075,9 @@ fn threat(state: &State, player: WorldVector) -> Option<WorldVector> {
         .min_by(|a, b| a.1.total_cmp(&b.1))
         .map(|(point, _)| point)
 }
+
+/// The floor an admission vector was computed on.
+type FloorKey = (u32, u32, Difficulty, usize);
 
 /// The neighbour of the current room that starts a shortest path through
 /// admitted rooms to the nearest room satisfying `goal`.
