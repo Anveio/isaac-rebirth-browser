@@ -51,8 +51,8 @@ item ids the original's code for that mechanism queries
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
 | `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090's regular variant resolves when its whole readset is absent; any item it reads leaves the variant unknown. |
-| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. |
-| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  |  |
+| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
+| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  | Every costume actor in costumes2.xml (223 rows) is imported at build time by `npm run assets:items` into ignored web/generated/item-assets, with its sheets in the sprite pack; registration (52CC90) and drawing are not ported. |
 | `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
 | `death-callbacks` | Enemy death item callbacks | 47FD22 and peers |  | partial | dips |  | Gimpy and Infestation 2 on Dips. |
 | `trinket-effects` | Trinket effects | Held trinket queries |  | missing | trinket-start |  |  |

@@ -234,7 +234,7 @@ export interface Pickup {
   velocity: {x: number; y: number}; configuredFriction: number; currentFriction: number; collisionMass: number;
 }
 export interface SpriteColorValue { tint: number[]; colorize: number[]; offset: number[]; }
-export interface RunIntroduction { age: number; active: boolean; title: string; subtitle?: string; stage: boolean; }
+export interface RunIntroduction { age: number; active: boolean; title: string; subtitle?: string; stage: boolean; paper?: boolean; }
 export interface BossBar { fill: number | null; flash: number; maximum: number; }
 export interface PauseMenu {
   phase: "hidden" | "appearing" | "idle" | "disappearing";
@@ -517,6 +517,16 @@ interface Exports extends WebAssembly.Exports {
   error_ptr: () => number; error_len: () => number; public_keys_ptr: () => number; public_keys_len: () => number;
   mt_draws_enable: (enabled: number) => void; mt_draws_ptr: () => number;
 }
+/** Present only in a `debug-sandbox` cargo build (npm run dev:sandbox). */
+interface DebugSandboxExports {
+  debug_sandbox_slots: () => number; debug_sandbox_clear: () => number;
+  debug_sandbox_place: (subtype: number, slot: number) => number;
+  debug_sandbox_enemy: (entityType: number, variant: number) => number;
+}
+/** The port-only debug sandbox floor's engine controls (web/debug-sandbox.ts). */
+export interface DebugSandbox {
+  slots(): number; clear(): void; place(collectible: number, slot: number): void; enemy(entityType: number, variant: number): void;
+}
 /** One shared-MT draw from the opt-in diagnostic log (e2e `--mt-draws`). */
 export interface MtDraw { counter: number; index: number; kind: "B" | "U" | "R"; site: string; }
 /** An actual atomic run-confirmation refusal, not a failed simulation Tick. */
@@ -716,6 +726,19 @@ export class Engine {
   /** Per-tick state. Background stains are append-only within a room, so the
    * engine elides them from this snapshot and only new ones cross the
    * boundary; each snapshot still carries the room's complete list. */
+  /** Null unless the WASM was built with the `debug-sandbox` cargo feature. */
+  debugSandbox(): DebugSandbox | null {
+    if (!__DEBUG_SANDBOX__) return null;
+    const { debug_sandbox_slots: slots, debug_sandbox_clear: clear, debug_sandbox_place: place, debug_sandbox_enemy: enemy } =
+      this.wasm as unknown as Partial<DebugSandboxExports>;
+    if (!slots || !clear || !place || !enemy) return null;
+    const check = (result: number) => { if (result !== 0) throw new Error(this.read(this.wasm.error_ptr(), this.wasm.error_len())); };
+    return {
+      slots: () => slots(), clear: () => check(clear()),
+      place: (collectible, slot) => check(place(collectible, slot)),
+      enemy: (entityType, variant) => check(enemy(entityType, variant)),
+    };
+  }
   snapshot(): State {
     const state = JSON.parse(this.read(this.wasm.frame_snapshot_ptr(), this.wasm.snapshot_len())) as State | null;
     if (state === null) return state as unknown as State;

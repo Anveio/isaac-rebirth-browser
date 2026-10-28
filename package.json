@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
+    "dev:sandbox": "npm run predev && DEBUG_SANDBOX=1 bash tools/build-wasm.sh && DEBUG_SANDBOX=1 vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "npm run build:wasm && vite build",
     "playtest:bundle": "node tools/playtest/bundle.mjs",
     "playtest:self": "node tools/playtest/playtest.mjs",
@@ -16,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "test:browser": "bash tools/original/with-display.sh node node_modules/@playwright/test/cli.js test",
     "check": "npm run check:build && npm run test:e2e",
-    "check:build": "npm run assets:check && npm run test:policy && npm run matrix:check && npm run items:check && npm run typecheck && npm run build",
+    "check:build": "npm run assets:check && npm run test:policy && npm run matrix:check && npm run items:check && npm run typecheck && npm run build && npm run bundle:check",
+    "bundle:check": "node tools/foundation/check-bundle.mjs",
     "assets:check": "python3 tools/check-assets.py",
     "assets:rooms": "python3 tools/foundation/decode-rooms.py --all-base",
     "build:wasm": "bash tools/build-wasm.sh",
@@ -39,10 +41,11 @@
     "affected:map": "node tools/e2e/affected.mjs --update-map",
     "case:keep": "node tools/e2e/keep-case.mjs",
     "assets:minimap": "python3 tools/foundation/prepare-minimap.py",
+    "assets:items": "python3 tools/foundation/import-item-assets.py",
     "assets:sprites": "node tools/foundation/sprite-pack.mjs --write",
-    "predev": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
-    "pretypecheck": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
-    "prebuild": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
+    "predev": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:items && npm run assets:sprites",
+    "pretypecheck": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:items && npm run assets:sprites",
+    "prebuild": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:items && npm run assets:sprites",
     "assets:unlock-notifications": "python3 tools/foundation/prepare-unlock-notifications.py"
   },
   "devDependencies": {

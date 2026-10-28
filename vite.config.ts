@@ -45,6 +45,9 @@ function originalMusic(): Plugin {
 
 export default defineConfig({
   plugins: [originalMusic()],
+  // The port-only debug sandbox floor (web/debug-sandbox.ts) exists only in
+  // npm run dev:sandbox; every other build folds it away (npm run bundle:check).
+  define: { __DEBUG_SANDBOX__: JSON.stringify(process.env.DEBUG_SANDBOX === "1") },
   root: fileURLToPath(new URL("./web", import.meta.url)),
   build: {
     outDir: fileURLToPath(new URL("./dist", import.meta.url)),

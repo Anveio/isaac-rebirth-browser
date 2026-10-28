@@ -14,7 +14,9 @@ export class RunPresentation {
   introduction(ctx: CanvasRenderingContext2D, state: State): void {
     if (!state.runIntroduction.active) return;
     const tick = Math.floor(state.runIntroduction.age / 2);
-    this.assets.draw(ctx, STREAK, "Text", 240, 48, tick, { layers: [0] });
+    // ShowItemText 5733ee shows layer 1 (the curse paper) only for a curse line.
+    const paper = state.runIntroduction.paper === true;
+    this.assets.draw(ctx, STREAK, "Text", 240, 48, tick, { layers: paper ? [0, 1] : [0] });
     const frame = this.assets.layerFrame(STREAK, "Text", 0, tick);
     if (!frame?.Visible) return;
     // HUD::Render 574EA8 draws the 256x128 text target into a rectangle whose
@@ -27,8 +29,10 @@ export class RunPresentation {
     ctx.globalAlpha *= frame.AlphaTint;
     this.assets.font(ctx, "upheaval", state.runIntroduction.title, 0, 0, { align: "center", pixelSnap: true });
     const subtitle = state.runIntroduction.subtitle;
-    //571F68 loads PFTempestaSevenCondensed into HUD+300 for the second line.
-    if (subtitle) this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 18, { align: "center", pixelSnap: true });
+    //571F68 loads PFTempestaSevenCondensed into HUD+300 for the second line,
+    //and TeamMeatFont10 into HUD+403B0 for the black (FF000000) curse line.
+    if (subtitle && paper) this.assets.font(ctx, "teammeatfont10", subtitle, 0, 28, { align: "center", color: "#000000", pixelSnap: true });
+    else if (subtitle) this.assets.font(ctx, "pftempestasevencondensed", subtitle, 0, 18, { align: "center", pixelSnap: true });
     ctx.restore();
   }
 

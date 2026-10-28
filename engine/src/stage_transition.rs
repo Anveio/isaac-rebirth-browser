@@ -492,6 +492,7 @@ pub(crate) fn show_name(floor: &crate::floor::Floor) -> crate::RunIntroduction {
         title: stage_name(floor.stage, floor.labyrinth()).into(),
         subtitle: curse_names(floor.curses),
         stage: true,
+        paper: floor.curses != 0,
     }
 }
 

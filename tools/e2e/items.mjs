@@ -284,9 +284,10 @@ try {
             for (const field of ['shotSpeed', 'damage', 'tearHeight', 'tearFallingSpeed', 'tearFallingAcceleration', 'moveSpeed'])
               equal(f32(state.playerStats[field]), nativePlayer.cachedStats[field], `cached ${field}`, presentation);
             if (statCache) {
-              // Retain this comparison; native +31f death and port pool membership
-              // are distinct owners pending typed observation.
-              const actualTears = state.tears.filter(tear => tear.motion.lifetime !== 'removed');
+              // Live tears on both sides: the native reader's `removed` is the
+              // +31f death byte, which damage-fire-delay grades equal to the
+              // port's dying lifetime, so a dying port tear is not live here.
+              const actualTears = state.tears.filter(tear => tear.motion.lifetime === 'alive');
               const nativeTears = source.world.entities.filter(entity => entity.type === 2 && !entity.removed);
               equal(actualTears.length, nativeTears.length, 'actual regular tear cardinality', presentation);
               for (let index = 0; index < Math.min(actualTears.length, nativeTears.length); index++)

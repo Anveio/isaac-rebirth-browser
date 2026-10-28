@@ -132,18 +132,21 @@ implements without the rule yet). The values are read from the disassembly.
   have no factory yet.
 - **Curse effects** (Level+8, rolled at both difficulties with the
   `curse_odds` row): the port draws the curse names (5852f0) under the floor
-  name, hides the hearts under Curse of the Unknown (HUD 5742f0), and runs
+  name on the streak's paper layer in black TeamMeatFont10 (ShowItemText
+  5733ee), hides the hearts under Curse of the Unknown (HUD 5742f0), and runs
   Curse of the Labyrinth's generation (the XL name, a second boss 589d5c and
   treasure room 58bae3, one stage more through the trapdoor 585640) and Curse
-  of the Lost's four rooms. It does not implement Curse of Darkness's
-  lighting, Curse of the Lost's map hiding, Curse of the Maze's room swaps
-  (Level::ChangeRoom 58d95d: on every change between two valid rooms the
-  original draws RandomInt(10) on the shared MT, then RandomInt(5) when the
-  first is nonzero, and a zero takes the swap at 58dc90 or 58dbf0; the port
-  draws neither, so the shared MT drifts at a Maze floor's first room change,
-  as in hard EK3SH68W's Dip fight),
+  of the Lost's four rooms. Curse of the Maze runs in Level::ChangeRoom
+  (`maze.rs`): after Room.Save, RandomInt(10) on the shared MT takes the
+  teleport (58dc90: shared-MT shuffle of the rooms within two doors, minimap
+  shake and SFX 22) on a zero, then RandomInt(5) takes the room swap (58dbf0:
+  glibc `rand()` shuffles, `libc_rand.rs`, exchanging two visited rooms of one
+  type, shape and door mask while the doors stay in place). It does not
+  implement Curse of Darkness's lighting, Curse of the Lost's map hiding,
   Curse of the Blind's hidden items or Curse of the Cursed's doors, nor
-  586594's curse handling past the roll.
+  586594's curse handling past the roll. The Maze draws and its first room
+  change are graded by EK3SH68W below; no live case yet takes the teleport
+  or the swap.
 - **Completion marks** (5c9240's Boss Rush and stage 6/8+ branches: 5c9ca9,
   5ca5a2, 5cb09c, 5cb222, 5cb724, 5cb7c2, 5cb84d): a per-character
   Persistent counter at 1 is raised to 2 at hard; 5ca5a2 also unlocks a
@@ -185,7 +188,11 @@ EHL7N0AV (a chest) and 31T4YVZ3 (a bomb) spawn the award at the room centre
 and G6MD4K0A (roll 2) spawn the heart at the same seed and position in both
 games, and WPTB6SQK (roll 58) clears with no award in either game. The
 Dip room at slot 2 of 0JLB1WMP's hard Labyrinth floor matches in every
-graded field as well.
+graded field as well, and so does the Dip room at slot 0 of EK3SH68W's hard
+Maze floor, whose first room change takes the two Maze draws. The curse
+line's paper scroll is compared at gameplay-start: WPTB6SQK's full-frame
+diagnostic drops from 16,212 changed pixels to 12, 0JLB1WMP's from 16,344
+to 72.
 
 The `stage-exit` suite's boss fixtures carry the boss callback's drops as a
 diagnostic (each game fights with its own keys, so which drops are left

@@ -293,6 +293,33 @@ fn creep_mask_catalog(path: &Path) -> String {
     output
 }
 
+fn costume_clip_catalog(path: &Path) -> String {
+    let actors: Value = serde_json::from_str(
+        &fs::read_to_string(path)
+            .expect("read imported costume animations; run npm run assets:items"),
+    )
+    .expect("parse imported costume animations");
+    let mut output = String::from(
+        "/// (clip name, frame count, loops) for each clip of one costume actor.\n\
+         pub type CostumeClipRow = (&'static str, i32, bool);\n\
+         pub static COSTUME_CLIPS: &[(&str, &[CostumeClipRow])] = &[\n",
+    );
+    for (actor, value) in actors.as_object().expect("costume actor map") {
+        output.push_str(&format!("({actor:?}, &["));
+        for clip in value["Animations"].as_array().expect("costume clips") {
+            output.push_str(&format!(
+                "({:?}, {}, {}),",
+                clip["Name"].as_str().expect("clip name"),
+                clip["FrameNum"].as_i64().expect("clip frames"),
+                clip["Loop"].as_bool().expect("clip loop"),
+            ));
+        }
+        output.push_str("]),\n");
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     let actors: Value = serde_json::from_str(
         &fs::read_to_string(path).expect("read authored Familiar/effect animations"),
@@ -1309,6 +1336,16 @@ fn main() {
         "collectible catalogue rejected: {}",
         String::from_utf8_lossy(&items.stderr)
     );
+    let costumes = manifest
+        .parent()
+        .unwrap()
+        .join("web/generated/item-assets/costume-data.json");
+    println!("cargo:rerun-if-changed={}", costumes.display());
+    fs::write(
+        output.join("costume_clips.rs"),
+        costume_clip_catalog(&costumes),
+    )
+    .expect("write imported costume clips");
     let creep_masks = manifest.parent().unwrap().join("web/creep-mask-data.json");
     println!("cargo:rerun-if-changed={}", creep_masks.display());
     fs::write(

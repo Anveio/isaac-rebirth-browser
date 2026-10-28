@@ -1302,11 +1302,10 @@ pub(crate) fn read_fire_delay_block(
     //512777: Entity+14 variant. The co-op variant reads the first Player.
     match entity.variant {
         1 => return None,
-        0 if source.challenge_id != 0 => {
-            //515428: Config+9B min fire rate. Not above 60 stores 60.
-            if source.fire_delay_minimum? && !(delay > 60.0) {
-                return Some(60);
-            }
+        //515428: Config+9B min fire rate. Not above 60 (NaN included) stores 60.
+        #[allow(clippy::neg_cmp_op_on_partial_ord)]
+        0 if source.challenge_id != 0 && source.fire_delay_minimum? && !(delay > 60.0) => {
+            return Some(60);
         }
         _ => {}
     }
@@ -1334,7 +1333,7 @@ pub(crate) fn read_damage_block(
     //5134B7 clears C88 before the additive terms.
     let mut damage = 0.0_f32;
     if queries.temporary_present(34)? {
-        damage = 2.0_f32 + damage;
+        damage += 2.0_f32;
     }
     for id in [7, 90, 216] {
         if queries.have(id)? {
@@ -1343,7 +1342,7 @@ pub(crate) fn read_damage_block(
     }
     //514A98: Have109 adds coins BD8 * 0.04.
     if queries.have(109)? {
-        damage = f(source.coins?) * 0.04_f32 + damage;
+        damage += f(source.coins?) * 0.04_f32;
     }
     //513580: the co-op variant reads 30E8 first.
     if entity.variant == 1 {
@@ -1352,7 +1351,7 @@ pub(crate) fn read_damage_block(
     //51358A: a TEMP122 record adds count^2 * 1.5.
     if queries.temporary_present(122)? {
         let records = temp(122)?;
-        damage = f(records.wrapping_mul(records)) * 1.5_f32 + damage;
+        damage += f(records.wrapping_mul(records)) * 1.5_f32;
     }
     let prior = damage;
     //5135CC..513622: one signed integer sum.
@@ -1387,7 +1386,7 @@ pub(crate) fn read_damage_block(
         damage -= 0.4_f32;
     }
     if queries.temporary_present(83)? {
-        damage = 0.7_f32 + damage;
+        damage += 0.7_f32;
     }
     //5137A9/513816: kind2 TEMP records 58 and 40. The port creates none,
     //so a known absence is the only answer the query returns.
@@ -1395,7 +1394,7 @@ pub(crate) fn read_damage_block(
         return None;
     }
     if queries.temporary_present(126)? {
-        damage = f(temp(126)?) * 1.2_f32 + damage;
+        damage += f(temp(126)?) * 1.2_f32;
     }
     //513846..513884: f32 linear, f64 sqrt * 3.5, f32 store.
     let linear = maxss(1.2_f32 * damage + 1.0_f32, 0.0);
@@ -1419,7 +1418,7 @@ pub(crate) fn read_damage_block(
         return None;
     }
     //5138EA: signed D30 + damage, then `!(x < 0.5) ? x : 0.5`.
-    damage = f(inputs.owner.damage_inputs?.source_d30) + damage;
+    damage += f(inputs.owner.damage_inputs?.source_d30);
     if damage < 0.5 {
         damage = 0.5;
     }
@@ -1427,7 +1426,7 @@ pub(crate) fn read_damage_block(
         damage += 2.0_f32;
     }
     if queries.have(69)? && queries.have(330)? {
-        damage = 5.0_f32 + damage;
+        damage += 5.0_f32;
     }
     if queries.have(261)? || queries.temporary_present(261)? {
         damage += damage;
@@ -1447,7 +1446,7 @@ pub(crate) fn read_damage_block(
         damage *= 0.5_f32;
     }
     if queries.have(149)? && matches!(c08, 7 | 1 | 5 | 6) {
-        damage = 40.0_f32 + damage;
+        damage += 40.0_f32;
     }
     //513A28 Have4, 515000 TEMP34 with Have7, Have12, TEMP12: one *1.5.
     if queries.have(4)?

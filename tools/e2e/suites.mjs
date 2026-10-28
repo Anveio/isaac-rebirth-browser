@@ -98,6 +98,12 @@ export const SUITES = [
   suite('bedroom-doors', statePair, ['--scenario-helper', helper('bedroom-door-scenarios.py'),
     '--helper-arg', '--count', '--helper-arg', '1', '--comparator', 'tools/foundation/bedroom-door-state-pair.mjs'],
     'Cracked bedroom doorway: one bomb damages it and scatters wood particles'),
+  // Off-centre, diagonal and wall-sliding walks into a doorway and back,
+  // graded every frame (door-approach-scenarios.py).
+  suite('door-approach', statePair, ['--scenario-helper', helper('door-approach-scenarios.py'),
+    '--helper-arg', '--count', '--helper-arg', '1', '--comparator', 'tools/foundation/door-approach-state-pair.mjs',
+    '--state-observer', helper('paired-room-observe.py'), '--native-frame-timeout', '120'],
+    'Off-centre, diagonal and wall-sliding doorway entry and exit, every frame'),
   suite('key-doors', traversal, ['--scenario-helper', helper('key-door-scenarios.py'),
     '--state-observer', helper('key-door-observe.py'), '--count', '1'], 'Key collection, library unlock and revisit'),
   suite('large-rooms', traversal, ['--scenario-helper', helper('large-room-scenarios.py'), '--count', '2'],
@@ -200,7 +206,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'continue-run', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
-  rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
+  rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'door-approach', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
   stage: ['stage-exit', 'monstro'],
   // The three-floor Caves II descent runs about 45 minutes per case (README).
   'stage-long': ['stage-descent'],

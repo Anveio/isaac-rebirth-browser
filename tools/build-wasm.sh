@@ -3,9 +3,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 tools/foundation/decode-rooms.py --prepare-private-caves
 python3 tools/foundation/prepare-unlock-notifications.py
+python3 tools/foundation/import-item-assets.py
 if ! command -v cargo >/dev/null; then source "$HOME/.cargo/env"; fi
 target_directory="$(cargo metadata --manifest-path engine/Cargo.toml --locked --no-deps --format-version 1 \
   | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).target_directory')"
-cargo rustc --manifest-path engine/Cargo.toml --locked --release --target wasm32-unknown-unknown --lib --crate-type cdylib
+# DEBUG_SANDBOX=1 (npm run dev:sandbox only) adds the port-only debug floor.
+features=()
+if [ "${DEBUG_SANDBOX:-}" = 1 ]; then features=(--features debug-sandbox); fi
+cargo rustc --manifest-path engine/Cargo.toml --locked --release --target wasm32-unknown-unknown --lib --crate-type cdylib "${features[@]}"
 mkdir -p web/generated
 cp "$target_directory/wasm32-unknown-unknown/release/rebirth_cleanroom.wasm" web/generated/engine.wasm

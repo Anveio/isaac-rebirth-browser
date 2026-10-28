@@ -293,6 +293,44 @@ impl DescriptorSeeds {
         Ok(())
     }
 
+    /// Level 588490 (Curse of the Maze) exchanges two descriptors' saved grid
+    /// records, except the `kept` door cells, which stay with their rooms.
+    pub fn swap_rooms(
+        &mut self,
+        first: usize,
+        second: usize,
+        kept: &std::collections::BTreeSet<usize>,
+    ) -> Result<(), String> {
+        let last = first.max(second);
+        Self::key(last, 0)?;
+        let mut derived = self.origin.clone();
+        let mut initial = BTreeMap::new();
+        for room in 0..=last {
+            for cell in 0..PADDED_GRID_CELLS {
+                let pair = [derived.replay_u32(), derived.replay_u32()];
+                if room == first || room == second {
+                    initial.insert((room, cell), pair);
+                }
+            }
+        }
+        for cell in (0..PADDED_GRID_CELLS).filter(|cell| !kept.contains(cell)) {
+            let (a, b) = (Self::key(first, cell)?, Self::key(second, cell)?);
+            let pair_a = self
+                .mutations
+                .get(&a)
+                .copied()
+                .unwrap_or(initial[&(first, cell)]);
+            let pair_b = self
+                .mutations
+                .get(&b)
+                .copied()
+                .unwrap_or(initial[&(second, cell)]);
+            self.mutations.insert(a, pair_b);
+            self.mutations.insert(b, pair_a);
+        }
+        Ok(())
+    }
+
     /// Level.Save 58cd90 copies every row except its special -3 sentinel.
     /// Ordinary unused -1 rows are copied too. Full table copies preserve the
     /// real origin/mutations compactly after the destination's actual Clear.

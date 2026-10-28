@@ -6,6 +6,7 @@ live suites its change touches before merging. Rules: [AGENTS.md](AGENTS.md).
 
 ```sh
 bash cloud/install.sh && bash cloud/start.sh  # http://localhost:5173
+npm run dev:sandbox                           # debug sandbox floor (never in release)
 npm run check                                 # build + every live suite
 npm run test:e2e -- --list                    # registered live suites
 npm run test:e2e:paired -- --replay-cases PATH
