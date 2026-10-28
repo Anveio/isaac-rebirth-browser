@@ -62,6 +62,7 @@
     { "items": [114, 118, 329], "status": "mismatch", "case": "item-composition", "note": "Knife-first route; failing public-WASM comparison retained." },
     { "items": [152, 169], "status": "untested", "note": "Joint Technology 2 + Polyphemus has no qualified run." },
     { "items": [7, 12, 101, 120, 189], "status": "mismatch", "case": "pickup-interactions `stat-items-mixed-*`", "note": "All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port." },
+    { "items": [1, 4], "status": "mismatch", "case": "`npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated)", "note": "Every EvaluateItems field, luck, flight and the Familiar roster match; the enemy fight diverges: in the fixed run the original's Gaper dies and drops a coin while the port's becomes type 11 and lives; in the random run Isaac's and the enemy's positions drift." },
     { "items": [286, 63], "status": "untested", "case": "pickup-interactions `sandbox-*`", "note": "Active + passive pair; graded per interaction, not as a synergy." }
   ]
 }

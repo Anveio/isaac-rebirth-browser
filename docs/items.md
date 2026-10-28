@@ -25,7 +25,7 @@ composition is [item synergies](item-synergies.md).
 | trinket | 60 | 0 | 0 | 60 | 26 |
 | **all** | 403 | 7 | 50 | 346 | 128 |
 
-Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 3 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 4 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -68,6 +68,7 @@ passing live comparison.
 | 114 Mom's Knife + 118 Brimstone + 329 The Ludovico Technique | mismatch | item-composition |  | Knife-first route; failing public-WASM comparison retained. |
 | 152 Technology 2 + 169 Polyphemus | untested |  |  | Joint Technology 2 + Polyphemus has no qualified run. |
 | 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | mismatch | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port. |
+| 1 The Sad Onion + 4 Cricket's Head | mismatch | `npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated) |  | Every EvaluateItems field, luck, flight and the Familiar roster match; the enemy fight diverges: in the fixed run the original's Gaper dies and drops a coin while the port's becomes type 11 and lives; in the random run Isaac's and the enemy's positions drift. |
 | 286 Blank Card + 63 The Battery | untested | pickup-interactions `sandbox-*` |  | Active + passive pair; graded per interaction, not as a synergy. |
 
 ## Passive collectibles
