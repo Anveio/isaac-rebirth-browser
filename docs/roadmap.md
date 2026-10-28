@@ -724,7 +724,6 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
-| #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
 
 ## Audio
 
@@ -839,7 +838,6 @@ Bugs in a test route or tool rather than in the game.
 | #196 | P3 | blood-start contrived route never reaches the boss in the original; regenerate it | e2e blood-start |
 | #220 | P3 | health-damage black-heart route never acquires the Black Heart in the original; regenerate it | e2e health-damage |
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
-| #941 | P3 | Sandbox item-set runs: the port lacks the original's achievements-disabled HUD icon; the sandbox grant must set the same run flag | playtest 2026-10-28 `playtest/dddd23a/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 | #941 | P3 | Sandbox item-set runs: the port lacks the original's achievements-disabled HUD icon; the sandbox grant must set the same run flag | playtest 2026-10-28 `playtest/dddd23a/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 
 ## Recently fixed
