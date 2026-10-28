@@ -55,9 +55,16 @@ pub(crate) fn emit(state: &mut State, death: Death) -> Result<(), String> {
         x: 0.0,
         y: death.render_offset_y,
     };
-    let _init_rotation = state.boot_lifecycle.shared.bounded(4) as f32 * 90.0;
+    let init_rotation = state.boot_lifecycle.shared.bounded(4) as f32 * 90.0;
+    state
+        .sprite_effects
+        .iter_mut()
+        .find(|effect| effect.id == poof)
+        .ok_or("tear poof was not admitted")?
+        .rotation_814 = init_rotation;
     // 543940: except for the small 0x4f/0x50 poofs, sprite scale is 0.8 *
-    // tear scale and sprite rotation 0x2cc is a second Random(4) * 90.
+    // tear scale and sprite rotation 0x2cc is a second Random(4) * 90, which
+    // the first Update's 45abe3 overwrites with -814.
     // SetColor copies the default white tear color.
     if variant == 12 || variant == 13 {
         let rotation = state.boot_lifecycle.shared.bounded(4) as f32 * 90.0;

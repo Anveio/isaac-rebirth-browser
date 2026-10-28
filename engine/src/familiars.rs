@@ -243,6 +243,11 @@ pub struct SpriteEffect {
     pub time_to_live: i32,
     pub raw_7f4: i32,
     pub raw_7f8: f32,
+    /// Effect+814: Init 458b9c draws Random(4) * 90 into it for 12/13/0x4f/0x50
+    /// (zero otherwise). The 45abe3 leaf copies it into sprite rotation every
+    /// Update, negated unless FlipX.
+    #[serde(default)]
+    pub rotation_814: f32,
     pub raw_7d8: bool,
     pub sprite: Sprite,
     pub full_updates: u32,
@@ -280,6 +285,18 @@ impl SpriteEffect {
             .ok_or("effect full callback count exhausted")?;
         self.sprite
             .advance(definition(1000, self.variant).ok_or("effect config absent")?)?;
+        // 45abe3 (variants 3, 11-16, 20, 34, 38, 40, 48, 49, 0x4f, 0x50):
+        // rotation is +814, negated unless FlipX.
+        if matches!(
+            self.variant,
+            3 | 11..=16 | 20 | 34 | 38 | 40 | 48 | 49 | 79 | 80
+        ) {
+            self.sprite.rotation = if self.sprite.flip_x {
+                self.rotation_814
+            } else {
+                -self.rotation_814
+            };
+        }
         self.velocity = self.velocity * self.current_friction;
         self.position = self.position + self.velocity;
         self.presented_position = self.position;
@@ -438,6 +455,7 @@ impl NpcEffectAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            rotation_814: 0.0,
             raw_7d8: false,
             sprite,
             full_updates: 0,
@@ -850,6 +868,19 @@ pub fn advance_blood_initial(state: &mut State, id: u32) -> Result<(), String> {
     .advance_blood_initial(id, &mut state.boot_lifecycle.shared)
 }
 
+/// The first update of a Blood7 whose spawner wrote its Effect+818 size
+/// before Update: the stain class still follows the incoming sprite scale,
+/// and the drawn scale becomes `size`.
+pub fn advance_blood_initial_sized(state: &mut State, id: u32, size: f32) -> Result<(), String> {
+    NpcEffectAdmission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
+    }
+    .advance_blood_initial_sized(id, &mut state.boot_lifecycle.shared, size)
+}
+
 impl NpcEffectAdmission<'_> {
     pub(crate) fn admit_blood(
         &mut self,
@@ -899,6 +930,7 @@ impl NpcEffectAdmission<'_> {
             time_to_live: -1,
             raw_7f4: 1,
             raw_7f8: 0.0,
+            rotation_814: 0.0,
             raw_7d8: true,
             sprite,
             full_updates: 0,
@@ -969,6 +1001,16 @@ impl NpcEffectAdmission<'_> {
         id: u32,
         random: &mut crate::mt::Mt19937,
     ) -> Result<(), String> {
+        // Init 458b3b defaults Effect+818 to 1.
+        self.advance_blood_initial_sized(id, random, 1.0)
+    }
+
+    pub(crate) fn advance_blood_initial_sized(
+        &mut self,
+        id: u32,
+        random: &mut crate::mt::Mt19937,
+        size: f32,
+    ) -> Result<(), String> {
         let Some(effect) = self.effects.iter_mut().find(|e| e.id == id) else {
             return Err("Blood initial callback requires admitted effect".into());
         };
@@ -1001,7 +1043,9 @@ impl NpcEffectAdmission<'_> {
             .iter()
             .find(|c| c.name == name)
             .expect("authored stain size");
-        effect.sprite.scale = WorldVector { x: 1.0, y: 1.0 };
+        // 45f49f..45f4d9: the class above reads the incoming Sprite scale
+        // (+2c4); the scale is then replaced by (Effect+818, Effect+818).
+        effect.sprite.scale = WorldVector { x: size, y: size };
         effect.sprite.animation = name.into();
         effect.sprite.frame = random.bounded(clip.frames) as f32;
         effect.sprite.playing = false;

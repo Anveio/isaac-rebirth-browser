@@ -91,6 +91,7 @@ fn base(state: &mut State, variant: u32, seed: u32, position: WorldVector) -> Re
         time_to_live: -1,
         raw_7f4: 1,
         raw_7f8: 0.0,
+        rotation_814: 0.0,
         raw_7d8: false,
         sprite: Sprite::new(config),
         full_updates: 0,

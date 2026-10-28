@@ -131,6 +131,7 @@ fn admit(
         time_to_live: ttl,
         raw_7f4: ttl,
         raw_7f8: 0.0,
+        rotation_814: 0.0,
         raw_7d8: false,
         sprite,
         full_updates: 0,

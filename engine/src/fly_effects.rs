@@ -94,6 +94,7 @@ pub(crate) fn base(
         time_to_live: -1,
         raw_7f4: 1,
         raw_7f8: 0.0,
+        rotation_814: 0.0,
         raw_7d8: false,
         sprite: Sprite::new(definition),
         full_updates: 0,

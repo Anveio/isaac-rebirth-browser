@@ -130,6 +130,9 @@ export class Renderer {
   private readonly slideOld: GLSurface;
   private readonly slideNew: GLSurface;
   private slideKey: string | null = null;
+  /** 547890's f32 phases (+8 += +4 once per drawn presentation), carried
+   * forward between frames rather than re-summed from the load phase. */
+  private rayPhases: { key: string; calls: number; phases: number[] } | null = null;
   private slideNewReady = false;
   private slideRecord: { npcs: Renderer["drawnNpcs"]; grid: Renderer["drawnGrid"]; order: Renderer["drawnOrder"] } = { npcs: [], grid: [], order: [] };
   // Sprite scale of every NPC the latest frame drew, for live render contracts.
@@ -614,11 +617,13 @@ export class Renderer {
    * shading). The camera scroll (Room+15B8) moves the rays' anchor C; the
    * player's offset from the room centre P sets parallax and fades them. Each
    * ray draws its whole texture twice on one additive quad: alpha a*s, then
-   * mirrored with a*(1-s), s = (sin(phase)+1)/2. Phase advances by
-   * animationSpeed per render call; two calls per game update is assumed. */
+   * mirrored with a*(1-s), s = (sin(phase)+1)/2. Each 547890 call adds
+   * animationSpeed to the f32 phase; the engine counts the calls (every
+   * presented run frame, including a transition's fade-out, plus the new
+   * room's load-frame snapshot, none while the transition slides in). */
   private drawFxRays(state: State): void {
-    const group = state.room.appearance.fxRays, init = state.room.initializationGameUpdate;
-    if (!group || !group.rays.length || init === null) return;
+    const group = state.room.appearance.fxRays;
+    if (!group || !group.rays.length || state.room.initializationGameUpdate === null) return;
     const grid = state.room.grid; if (!grid) return;
     const scroll = state.camera?.scroll ?? { x: 0, y: 0 }, shake = state.gameShake?.offsetCea00 ?? { x: 0, y: 0 };
     const centre = { x: (40 + 40 * (grid.width - 1) / 2) * 0.65 + 32, y: (120 + 40 * (grid.height - 1) / 2) * 0.65 - 46 };
@@ -627,10 +632,16 @@ export class Renderer {
     const topY = scroll.y + shake.y, n = group.rays.length;
     const W = (group.xMax - group.xMin - (n - 1) * group.raySpacing) / n, h = W / 2;
     const fade = Math.max(1 - Math.abs(P.x) / C.x, 0) * Math.max(1 - Math.abs(P.y) / C.y, 0);
-    const calls = 2 * Math.max(0, state.gameUpdateCount - init);
+    const calls = group.calls;
     const gl = this.graphics, ctx = gl.asCanvasContext();
     const backend = ctx as unknown as { drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: readonly (readonly [number, number])[]) => void };
     if (!backend.drawTintedImageQuad) return;
+    const key = `${state.room.descriptor?.index}:${group.rays.map(ray => ray.phase).join()}`;
+    let cache = this.rayPhases;
+    if (!cache || cache.key !== key || cache.calls > calls) cache = { key, calls: 0, phases: group.rays.map(ray => Math.fround(ray.phase)) };
+    for (; cache.calls < calls; cache.calls++) cache.phases = cache.phases.map((phase, i) => Math.fround(phase + Math.fround(group.rays[i]!.animationSpeed)));
+    this.rayPhases = cache;
+    const phases = cache.phases;
     gl.blendFactors("srcAlpha", "one");
     for (const [i, ray] of group.rays.entries()) {
       const x = (W + group.raySpacing) * i + group.xMin, xc = x + h;
@@ -638,7 +649,7 @@ export class Renderer {
       const bottomY = P.y * group.bottomParallax + group.rayLength;
       const bottomLeft = [group.perspective * xc + C.x - h + group.bottomParallax * P.x, bottomY] as const;
       const bottomRight = [group.perspective * xc + C.x + h + group.bottomParallax * P.x, bottomY] as const;
-      const a = fade * ray.opacity, s = (Math.sin(ray.phase + ray.animationSpeed * calls) + 1) * 0.5;
+      const a = fade * ray.opacity, s = (Math.sin(phases[i]!) + 1) * 0.5;
       const image = this.assets.image(ray.texture), crop = [0, 0, image.width, image.height] as const;
       backend.drawTintedImageQuad(image, [1, 1, 1, a * s], [0, 0, 0], crop, [topLeft, topRight, bottomLeft, bottomRight]);
       backend.drawTintedImageQuad(image, [1, 1, 1, a * (1 - s)], [0, 0, 0], crop, [topRight, topLeft, bottomRight, bottomLeft]);
