@@ -918,40 +918,57 @@ export class Renderer {
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
     if (!state.player.visible) return;
+    // 5098D0 hurt blink: with hurt immunity (BF8) left, Player Render skips
+    // the frames where BF8 % 6 <= 2, unless an extra animation (BF4, set by
+    // 50A5C0: Pickup, UseItem) is playing.
+    const extraAnimation = !!state.playerAnimation.current || !!state.playerItems?.pickupAnimationGuard;
+    if (state.damageCooldown > 0 && state.damageCooldown % 6 <= 2 && !extraAnimation) return;
     this.drawnOrder.push([1, null]);
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    // Player+2C4 scales the Player's own sprite in every pose (5098D0's
+    // extra-animation path draws only that sprite, without costumes).
+    const wardrobe = state.playerItems?.wardrobe ?? null;
+    const scale = wardrobe?.spriteScale[0] ?? 1;
     if (state.playerAnimation.current) {
       this.assets.draw(ctx, PLAYER, state.playerAnimation.current, x, y, state.playerAnimation.frame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       if (state.playerAnimation.current === "UseItem") this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
     if (state.playerItems?.pickupAnimationGuard) {
       this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
-    this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
-      { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    const costume = state.playerItems?.costume229, head = costume?.slots[4];
-    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
-      && head?.layer === 0 && !head.bodyGroup) {
-      //The actual selected head pose owns its clip/frame. Normal Isaac and
-      //this costume both retain skin-1, so50F206 keeps the authored sheet.
-      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
-        costume.sprite.clip, x, y, costume.sprite.frame,
-        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
-    } else {
-      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
-      //A registered Ouija Board (costumes2 115) adds its one head layer over
-      //Isaac's head, playing the same Head clip and frame.
-      if (state.playerItems?.costumeRegistrations?.configurationIds.includes(115))
-        this.assets.draw(ctx, "gfx/characters/115_ouija board.anm2", `Head${directionName(player.facing)}`, x, y,
-          player.headFrame, { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    // Player render 509C49: glow (5096A0), body slots 1..3 (509700), head
+    // slots 4..10 (5097D0) and top0 (509870). Each slot draws its costume
+    // entry's layer, else the Player's own layer (wardrobe.rs).
+    const playerSheets = wardrobe ? this.assets.skinSheets(PLAYER, wardrobe.playerSkin) : undefined;
+    const tint = { RedTint, GreenTint, BlueTint };
+    for (let slot = 0; slot <= 11; slot++) {
+      const body = (slot >= 1 && slot <= 3) || slot === 11;
+      const layerScale = wardrobe?.layerScales[slot] ?? [1, 1] as [number, number];
+      const assigned = wardrobe?.slots[slot];
+      const entry = assigned && assigned.entry >= 0 ? wardrobe!.entries[assigned.entry] : undefined;
+      if (!entry) {
+        const [clip, frame] = body ? [`Walk${directionName(player.bodyFacing)}`, player.walkFrame]
+          : [`Head${directionName(player.facing)}`, player.headFrame];
+        this.assets.draw(ctx, PLAYER, clip, x, y, frame, { layers: [slot], overrides: { [slot]: tint }, scale,
+          layerScales: { [slot]: layerScale }, ...(playerSheets ? { spritesheets: playerSheets } : {}) });
+        continue;
+      }
+      // 509764: while flying, a body slot shows only a flying costume.
+      if (body && slot !== 11 && player.flying && !entry.isFlying) continue;
+      const layer = assigned!.layer;
+      const sheets = entry.hasSkinAlt ? this.assets.skinSheets(entry.actor, entry.sheetSkin) : undefined;
+      for (const sprite of [entry.sprite, entry.overlay]) {
+        if (!sprite?.clip) continue;
+        this.assets.draw(ctx, entry.actor, sprite.clip, x, y, sprite.frame, { layers: [layer], overrides: { [layer]: tint }, scale,
+          layerScales: { [layer]: layerScale }, ...(sheets ? { spritesheets: sheets } : {}) });
+      }
     }
   }
   private hearts(ctx: CanvasRenderingContext2D, state: State): void {
