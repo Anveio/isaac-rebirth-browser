@@ -512,6 +512,25 @@ fn tile_floor(rng: &mut DecorationRng, backdrop: Backdrop, width: u8, height: u8
     quads
 }
 
+/// fxlayers.xml roomsize group of one shape: its file prefix, the authored
+/// order of its five replacements and their natural size. Depths and Womb
+/// author taller 2x2 overlays than the other chapters.
+fn overlay_shape(
+    folder: &str,
+    width: u8,
+    height: u8,
+) -> Result<(&'static str, [u8; 5], (f64, f64)), String> {
+    const AUTHORED: [u8; 5] = [1, 2, 3, 4, 5];
+    Ok(match (width, height) {
+        (13, 7) => ("1x1", [2, 3, 4, 5, 1], (663.0, 429.0)),
+        (13, 14) => ("1x2", AUTHORED, (663.0, 702.0)),
+        (26, 7) => ("2x1", AUTHORED, (1170.0, 429.0)),
+        (26, 14) if matches!(folder, "depths" | "womb") => ("2x2", AUTHORED, (976.0, 702.0)),
+        (26, 14) => ("2x2", AUTHORED, (976.0, 578.0)),
+        _ => return Err(format!("no fxlayers overlay for a {width}x{height} room")),
+    })
+}
+
 fn rect(x: f64, y: f64, width: f64, height: f64) -> Rect {
     Rect {
         x,
@@ -1165,14 +1184,15 @@ impl Room {
         let wall_quads = tile_walls(&mut rng, walls.in_set(set), None, width, height);
         // fxlayers.xml (parsed per room load, 5489b0) seeds a fresh RNG per
         // fx entry from the decoration seed, shift index 35 (5494df): it does
-        // not continue the backdrop/wall stream. RandomInt(5) picks the 1x1
-        // overlay in authored order [2, 3, 4, 5, 1] (54972d); two
-        // RandomFloat draws (5498f8, 549926; RandomFloat 5c2db0 is next *
-        // 2.3283064e-10 in f32) give the layer's x and y offsets as
-        // min + RandomFloat * (max - min). The overlay group follows the
-        // Level's chapter (fxlayers `stage`): Basement fx2 spans 0..100,
-        // Caves fx5 and Depths fx6 -10..10; all three author their 1x1
-        // overlays as [2, 3, 4, 5, 1].
+        // not continue the backdrop/wall stream. The layer keeps only the
+        // <gfx> replacements whose roomsize equals the room's shape
+        // (548e8d..548e93 against RoomData+3C), and RandomInt(5) picks one
+        // in authored order (54972d): [2, 3, 4, 5, 1] for 1x1, [1, 2, 3, 4,
+        // 5] for 1x2, 2x1 and 2x2. Two RandomFloat draws (5498f8, 549926;
+        // RandomFloat 5c2db0 is next * 2.3283064e-10 in f32) give the
+        // layer's x and y offsets as min + RandomFloat * (max - min). The
+        // overlay group follows the Level's chapter (fxlayers `stage`):
+        // Basement fx2 spans 0..100, Caves fx5 and Depths fx6 -10..10.
         let crate::levels::Overlay {
             folder: overlay_folder,
             low,
@@ -1180,13 +1200,19 @@ impl Room {
         } = crate::levels::stage_chapter(stage)
             .and_then(|chapter| chapter.overlay)
             .unwrap_or(crate::levels::BASEMENT_OVERLAY);
+        let (overlay_shape, overlay_order, overlay_size) =
+            overlay_shape(overlay_folder, width, height)?;
         let mut fx = DecorationRng::new(decoration_seed);
-        let overlay_variant = [2, 3, 4, 5, 1][(fx.next() % 5) as usize];
+        let overlay_variant = overlay_order[(fx.next() % 5) as usize];
         let mut offset = || f64::from(fx.next() as f32 * 2.328_306_4e-10_f32 * (high - low) + low);
+        // FxLayer Render 5473d0 centres the overlay on the Room's centre
+        // ((Room+1C + Room+24) / 2 through WorldToScreen 42eb00, which is
+        // (240, 135) for a 1x1 room and moves by half the extra tiles,
+        // 26 px each, for larger shapes) and then on CEA00 + Room+15B8, so
+        // the viewport samples from half the natural size minus that centre.
         let overlay_origin = RoomOrigin {
-            // Natural overlay size is 663×429; viewport-centered sampling starts here.
-            x: (663.0 - 480.0) * 0.5 + offset(),
-            y: (429.0 - 270.0) * 0.5 + offset(),
+            x: overlay_size.0 * 0.5 - (240.0 + f64::from(width - 13) * 13.0) + offset(),
+            y: overlay_size.1 * 0.5 - (135.0 + f64::from(height - 7) * 13.0) + offset(),
         };
 
         let origin = RoomOrigin { x: 19.0, y: -8.0 };
@@ -1283,7 +1309,9 @@ impl Room {
                     (26, 14) => "gfx/backdrop/shading_2x2.png",
                     _ => "gfx/backdrop/shading.png",
                 }.into(),
-                overlay: format!("gfx/overlays/{overlay_folder}/1x1_overlay_{overlay_variant}.png"),
+                overlay: format!(
+                    "gfx/overlays/{overlay_folder}/{overlay_shape}_overlay_{overlay_variant}.png"
+                ),
                 overlay_origin,
                 // Absolute sprite render anchor, not initial-spawn displacement
                 // or the physical ground position used by the radial light.

@@ -49,7 +49,7 @@ fn room_type(state: &State, index: usize) -> u32 {
 
 /// 587070: the slot of the door a room is entered through at `cell` from
 /// direction `dir`, falling back through the authored door mask.
-fn entry_slot(descriptor: &Descriptor, cell: usize, dir: u8) -> u8 {
+pub(crate) fn entry_slot(descriptor: &Descriptor, cell: usize, dir: u8) -> u8 {
     let offset = cell as i32 - descriptor.grid_index as i32;
     let second = match dir {
         1 | 3 => offset % COLUMNS as i32 > 0,

@@ -544,9 +544,12 @@ export class Renderer {
       return;
     }
     // Entity render 442300: the sprite sits at position + PositionOffset (+458).
+    // The bomb explosion (1000.1) lands on the same screen row as its bomb,
+    // which draws one pixel above the -46 projection (#939).
+    const lift = effect.variant === 1 ? 1 : 0;
     this.drawEffect(ctx, effect.variant, effect.sprite,
       (effect.presentedPosition.x + effect.renderOffset.x + effect.sprite.offset.x) * 0.65 + 32,
-      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46);
+      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46 - lift);
   }
 
   /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
@@ -1214,7 +1217,11 @@ export class Renderer {
     // A multi-cell current room shifts the view back half a cell, (3.5, 3).
     const currentShape = minimapShape(descriptors[state.currentRoom]!.template);
     const originX = 396 - (currentShape & 2 ? 3.5 : 0), originY = 12 - (currentShape & 1 ? 3 : 0);
-    const cells: { index: number; flags: number; origin: boolean; frame: number; x: number; y: number }[] = [];
+    // A half-pixel position lands on the pixel below it (the rasteriser's
+    // left-edge rule): in a 2x2 Start Room the original draws the 392.5
+    // column at 392.
+    const pixel = (value: number) => Math.ceil(value - 0.5);
+    const cells:{ index: number; flags: number; origin: boolean; frame: number; x: number; y: number }[] = [];
     for (let row = 0; row < 7; row++) for (let column = 0; column < 7; column++) {
       const cell = (top + row) * 13 + left + column;
       const index = state.floor.grid[cell] ?? -1;
@@ -1226,13 +1233,13 @@ export class Renderer {
       const frame = shape === 1 ? down + 1 : shape === 2 ? across + 3 : shape === 3 ? across + 2 * down + 5 : 0;
       cells.push({ index, flags, origin: offset === 0, frame, x: originX + 8 * column, y: originY + 7 * row });
     }
-    for (const cell of cells) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "RoomOutline", Math.round(cell.x), cell.y);
+    for (const cell of cells) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", "RoomOutline", pixel(cell.x), cell.y);
     for (const cell of cells) {
       const type = descriptors[cell.index]!.template.type;
       const animation = cell.index === state.currentRoom ? "RoomCurrent"
         : state.visitedRooms.includes(cell.index) ? "RoomVisited"
         : cell.flags & 1 && type !== 7 && type !== 8 ? "RoomUnvisited" : null;
-      if (animation) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, Math.round(cell.x), cell.y, cell.frame);
+      if (animation) this.assets.draw(ctx, "gfx/ui/minimap1.anm2", animation, pixel(cell.x), cell.y, cell.frame);
     }
     for (const cell of cells) {
       if (!cell.origin) continue;
@@ -1248,7 +1255,7 @@ export class Renderer {
       // Multi-cell rooms shift the icon half a cell (3.5, 3) towards the room's centre.
       const shape = minimapShape(room.template);
       const x = cell.x + (shape & 2 ? 3.5 : 0), y = cell.y + (shape & 1 ? 3 : 0);
-      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? pickup ?? "IconLockedRoom", Math.round(x), y);
+      this.assets.draw(ctx, "gfx/ui/minimap1.anm2", icon ?? pickup ?? "IconLockedRoom", pixel(x), y);
     }
   }
 }
