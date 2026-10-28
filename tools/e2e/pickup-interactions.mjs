@@ -56,8 +56,9 @@ function nativeObservation(observation) {
       mainAnimation: { clip: player.animation, ...player.mainAnimation, guard: player.animationGuard },
       ownedAll: player.ownedAll ?? null },
     // EvaluateItems outputs; graded only for item-stat interactions.
-    stats: player.cachedStats ? { ...player.cachedStats, cacheFlags: player.cacheFlags, primaryWeapon: player.primaryWeapon,
-      tearFlags: player.tearFlags } : null,
+    stats: player.cachedStats ? { ...player.cachedStats, luck: player.luck, flying: player.flying, cacheFlags: player.cacheFlags,
+      primaryWeapon: player.primaryWeapon, tearFlags: player.tearFlags } : null,
+    familiars: live.filter(entity => entity.type === 3).map(entity => entity.variant).sort((a, b) => a - b),
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
     pocketBirths: live.filter(entity => entity.type === 5 && [70, 300].includes(entity.variant))
@@ -104,8 +105,10 @@ function portObservation() {
     stats: { maxFireDelay: state.maxFireDelay, shotSpeed: state.playerStats.shotSpeed, damage: state.playerStats.damage,
       tearHeight: state.playerStats.tearHeight, tearFallingSpeed: state.playerStats.tearFallingSpeed,
       tearFallingAcceleration: state.playerStats.tearFallingAcceleration, moveSpeed: state.playerStats.moveSpeed,
+      luck: state.playerStats.luck, flying: state.player.flying,
       cacheFlags: items?.unevaluatedCacheFlags ?? null, primaryWeapon: state.weaponCache.primary,
       tearFlags: state.weaponCache.flagsC98 },
+    familiars: state.familiars.filter(familiar => !familiar.removed).map(familiar => familiar.variant).sort((a, b) => a - b),
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
@@ -184,11 +187,12 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
   same('grid.poops', native.gridPoops, port.gridPoops);
   // EvaluateItems outputs field by field: f32 stats compared as binary32.
   if (stats) {
-    for (const field of ['maxFireDelay', 'shotSpeed', 'damage', 'tearHeight', 'tearFallingSpeed', 'tearFallingAcceleration', 'moveSpeed'])
+    for (const field of ['maxFireDelay', 'shotSpeed', 'damage', 'tearHeight', 'tearFallingSpeed', 'tearFallingAcceleration', 'moveSpeed', 'luck'])
       row(`stats.${field}`, native.stats?.[field] ?? null, port.stats?.[field] ?? null,
         native.stats != null && Math.fround(native.stats[field]) === Math.fround(port.stats?.[field] ?? NaN));
-    for (const field of ['cacheFlags', 'primaryWeapon', 'tearFlags'])
+    for (const field of ['flying', 'cacheFlags', 'primaryWeapon', 'tearFlags'])
       same(`stats.${field}`, native.stats?.[field] ?? null, port.stats?.[field] ?? null);
+    same('familiars', native.familiars ?? null, port.familiars ?? null);
   }
   // Player tears, only where a case's interaction is about them.
   if (tears) {
@@ -315,6 +319,12 @@ export const INTERACTIONS = {
   // A granted item set: every EvaluateItems output, then tears fired with it.
   'item-stats': { stats: true, tears: true, owned: true, labels: ['settle', 'shoot-right', 'after-shots'],
     covered: obs => obs['settle'].stats != null && obs['shoot-right'].tears.length > 0 },
+  // A generated item set (--items [--trinket] [--enemy]): every EvaluateItems
+  // output, the Familiars, then tears in each direction and the enemy's HP.
+  'item-set': { stats: true, tears: true, owned: true,
+    labels: ['settle', 'shoot-right', 'shoot-up', 'shoot-left', 'shoot-down', 'after-shots'],
+    covered: obs => obs['settle'].stats != null
+      && ['shoot-right', 'shoot-up', 'shoot-left', 'shoot-down'].some(label => obs[label].tears.length > 0) },
   'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
 };
 
@@ -403,7 +413,8 @@ try {
   let bankPath = flag('--scenarios');
   if (!bankPath) {
     const generated = join(output, 'declared-inputs');
-    const only = process.argv.flatMap((arg, index) => arg === '--only' ? ['--only', process.argv[index + 1]] : []);
+    const only = process.argv.flatMap((arg, index) => ['--only', '--items', '--trinket', '--enemy'].includes(arg)
+      ? [arg, process.argv[index + 1]] : []);
     const exit = await child('python3', [join(ROOT, 'tools/original/pickup-interaction-scenarios.py'), '--output', generated,
       '--count', flag('--count', '1'), ...only], join(output, 'declaration.log'));
     assert.equal(exit, 0, 'Case declaration failed; see declaration.log');
