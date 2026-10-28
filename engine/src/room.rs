@@ -63,6 +63,12 @@ pub struct Room {
     /// Game update on which combat played the doors' Close animation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub combat_shut_update: Option<u32>,
+    /// Game update on which a room clear opened these combat-shut doors and
+    /// they started the Open clip (5659f0 state2 then 563b70 Play "Open").
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub combat_open_update: Option<u32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub combat_open_door_slots: Vec<u8>,
     /// Frame of the Close clip that cracked bedroom doors (variant3) play
     /// from every Door::Init (563b70) until its last frame.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1220,6 +1226,8 @@ impl Room {
             combat_clear_countdown: 0,
             combat_shut_door_slots: Vec::new(),
             combat_shut_update: None,
+            combat_open_update: None,
+            combat_open_door_slots: Vec::new(),
             cracked_close_frame: None,
             startup_close_pending: false,
             spawns: None,

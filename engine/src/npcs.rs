@@ -758,6 +758,7 @@ pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
 
 fn change_doors(state: &mut State, open: bool) {
     let mut changed = Vec::new();
+    let mut opened = Vec::new();
     let source_type = state.floor.descriptors[state.current_room]
         .template
         .room_type;
@@ -804,14 +805,29 @@ fn change_doors(state: &mut State, open: bool) {
             entity.state = 2;
             if door.state == "Closed" && state.room.combat_shut_door_slots.contains(&door.slot) {
                 door.state = "Opened".into();
+                opened.push(door.slot);
             }
         }
     }
     if open {
         state.room.combat_shut_door_slots.clear();
         state.room.combat_shut_update = None;
+        //563b70 plays state2's "Open" from frame0, except that a door whose
+        //grid Init (+28) is within 29 frames of the Game frame (+ce9f4) skips
+        //to its last frame: a room cleared that soon after loading shows the
+        //doors already open.
+        let settled = state
+            .room
+            .initialization_game_update
+            .is_none_or(|init| state.game_update_count.wrapping_sub(init) > 29);
+        if !opened.is_empty() && settled {
+            state.room.combat_open_door_slots = opened;
+            state.room.combat_open_update = Some(state.game_update_count);
+        }
     } else if !changed.is_empty() {
         state.room.combat_shut_update = Some(state.game_update_count);
+        state.room.combat_open_door_slots.clear();
+        state.room.combat_open_update = None;
     }
     if let Some(grid) = &mut state.room.grid {
         for position in changed {

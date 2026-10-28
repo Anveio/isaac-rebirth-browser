@@ -863,6 +863,15 @@ export class Renderer {
         const age = state.gameUpdateCount - shut;
         if (age < 10) { clip = "Close"; frame = Math.max(0, age + 1); }
       }
+      // A room clear plays the Open clip (5659f0 state2, 563b70) from frame 0
+      // on the clear update, one frame per full update: the panels stay shut
+      // through frame 6 and slide apart on 7..9.
+      const opened = state.room.combatOpenUpdate;
+      if (clip === "Opened" && opened !== undefined && opened !== null
+        && (state.room.combatOpenDoorSlots ?? []).includes(connection.slot)) {
+        const age = state.gameUpdateCount - opened;
+        if (age < 11) { clip = "Open"; frame = Math.max(0, age); }
+      }
       this.assets.draw(ctx, connection.asset, clip, 0, 0, frame,
         connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {});
       // Door.LoadGraphics5629c0 overlays door_17_bardoor on barred variant4;

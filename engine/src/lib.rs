@@ -2723,6 +2723,8 @@ impl Game {
         room.combat_shut_door_slots.clear();
         room.combat_shut_update = None;
         room.combat_clear_countdown = 0;
+        room.combat_open_door_slots.clear();
+        room.combat_open_update = None;
         self.state.room = room;
         ambience::reset_room(&mut self.state);
         room::load_fx_rays(
