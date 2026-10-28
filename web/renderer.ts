@@ -439,7 +439,16 @@ export class Renderer {
     const effectsUnderPlayer = playerSlot < 0 ? [] : state.spriteEffects
       .filter(effect => !effect.creepEffect && effectSlot(effect) >= 0 && effectSlot(effect) < playerSlot)
       .sort((a, b) => effectSlot(a) - effectSlot(b));
-    for (const effect of effectsUnderPlayer) this.drawSpriteEffect(ctx, effect);
+    // Bombs share the array too (Entity+44c y key): one lying above Isaac's
+    // feet sits ahead of him and draws under his sprite.
+    const bombSlot = (bomb: State["bombs"][number]) =>
+      order.findIndex(actor => actor.kind === "bomb" && actor.id === bomb.id);
+    const bombsUnderPlayer = playerSlot < 0 ? [] : state.bombs
+      .filter(bomb => bomb.motion.lifetime !== "removed" && bombSlot(bomb) >= 0 && bombSlot(bomb) < playerSlot)
+      .sort((a, b) => bombSlot(a) - bombSlot(b));
+    const drawUnder = [...bombsUnderPlayer.map(bomb => ({ slot: bombSlot(bomb), draw: () => this.drawBomb(ctx, bomb) })),
+      ...effectsUnderPlayer.map(effect => ({ slot: effectSlot(effect), draw: () => this.drawSpriteEffect(ctx, effect) }))];
+    for (const entry of drawUnder.sort((a, b) => a.slot - b.slot)) entry.draw();
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
     for (const npc of overPlayer) this.drawNpc(ctx, npc);
@@ -457,23 +466,34 @@ export class Renderer {
           BlueOffset: color.offsets[2]! * 255,
         } } });
     }
-    for (const bomb of state.bombs)
-      if (bomb.motion.lifetime === "alive")
-        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+    // The remaining bombs keep their array place among the effects: an
+    // exploding bomb sits after the Effect1 born at its own key and draws
+    // over the blast.
+    const bombsOver = state.bombs.filter(bomb => bomb.motion.lifetime !== "removed" && !bombsUnderPlayer.includes(bomb));
+    const unsorted = bombsOver.filter(bomb => bombSlot(bomb) < 0);
+    const pending = bombsOver.filter(bomb => bombSlot(bomb) >= 0).sort((a, b) => bombSlot(a) - bombSlot(b));
+    for (const bomb of unsorted) if (bomb.motion.lifetime === "alive") this.drawBomb(ctx, bomb);
     for (const explosion of state.explosions) {
       // Owned rows only project the real Effect1 frame/light. Draw it once
       // through spriteEffects; old serialized adapter rows remain explicit.
       if (explosion.sourceEffect !== undefined) continue;
       this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     }
-    for (const bomb of state.bombs)
-      if (bomb.motion.lifetime === "exploding")
-        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-    for (const effect of state.spriteEffects)
-      if (!effectsUnderPlayer.includes(effect)) this.drawSpriteEffect(ctx, effect);
+    for (const bomb of unsorted) if (bomb.motion.lifetime === "exploding") this.drawBomb(ctx, bomb);
+    for (const effect of state.spriteEffects) {
+      if (effectsUnderPlayer.includes(effect)) continue;
+      const at = effectSlot(effect);
+      while (at >= 0 && pending.length > 0 && bombSlot(pending[0]!) < at) this.drawBomb(ctx, pending.shift()!);
+      this.drawSpriteEffect(ctx, effect);
+    }
+    for (const bomb of pending) this.drawBomb(ctx, bomb);
     ctx.restore();
     this.stage.foreground(state.stageEffects);
     this.drawFxRays(state);
+  }
+
+  private drawBomb(ctx: CanvasRenderingContext2D, bomb: State["bombs"][number]): void {
+    this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
   }
 
   private drawSpriteEffect(ctx: CanvasRenderingContext2D, effect: State["spriteEffects"][number]): void {
@@ -863,6 +883,15 @@ export class Renderer {
         const age = state.gameUpdateCount - shut;
         if (age < 10) { clip = "Close"; frame = Math.max(0, age + 1); }
       }
+      // A room clear plays the Open clip (5659f0 state2, 563b70) from frame 0
+      // on the clear update, one frame per full update: the panels stay shut
+      // through frame 6 and slide apart on 7..9.
+      const opened = state.room.combatOpenUpdate;
+      if (clip === "Opened" && opened !== undefined && opened !== null
+        && (state.room.combatOpenDoorSlots ?? []).includes(connection.slot)) {
+        const age = state.gameUpdateCount - opened;
+        if (age < 11) { clip = "Open"; frame = Math.max(0, age); }
+      }
       this.assets.draw(ctx, connection.asset, clip, 0, 0, frame,
         connection.spritesheet ? { spritesheets: { 0: connection.spritesheet } } : {});
       // Door.LoadGraphics5629c0 overlays door_17_bardoor on barred variant4;
@@ -889,54 +918,73 @@ export class Renderer {
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
     if (!state.player.visible) return;
+    // 5098D0 hurt blink: with hurt immunity (BF8) left, Player Render skips
+    // the frames where BF8 % 6 <= 2, unless an extra animation (BF4, set by
+    // 50A5C0: Pickup, UseItem) is playing.
+    const extraAnimation = !!state.playerAnimation.current || !!state.playerItems?.pickupAnimationGuard;
+    if (state.damageCooldown > 0 && state.damageCooldown % 6 <= 2 && !extraAnimation) return;
     this.drawnOrder.push([1, null]);
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    // Player+2C4 scales the Player's own sprite in every pose (5098D0's
+    // extra-animation path draws only that sprite, without costumes).
+    const wardrobe = state.playerItems?.wardrobe ?? null;
+    const scale = wardrobe?.spriteScale[0] ?? 1;
     if (state.playerAnimation.current) {
       this.assets.draw(ctx, PLAYER, state.playerAnimation.current, x, y, state.playerAnimation.frame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       if (state.playerAnimation.current === "UseItem") this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
     if (state.playerItems?.pickupAnimationGuard) {
       this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
-    this.assets.draw(ctx, PLAYER, `Walk${directionName(player.bodyFacing)}`, x, y, player.walkFrame,
-      { layers: [1], overrides: { 1: { RedTint, GreenTint, BlueTint } } });
-    const costume = state.playerItems?.costume229, head = costume?.slots[4];
-    if (costume && costume.historyFrontier === null && !costume.mainClipFrontier
-      && head?.layer === 0 && !head.bodyGroup) {
-      //The actual selected head pose owns its clip/frame. Normal Isaac and
-      //this costume both retain skin-1, so50F206 keeps the authored sheet.
-      this.assets.draw(ctx, "gfx/characters/229_monstros lung.anm2",
-        costume.sprite.clip, x, y, costume.sprite.frame,
-        { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
-    } else {
-      this.assets.draw(ctx, PLAYER, `Head${directionName(player.facing)}`, x, y, player.headFrame,
-        { layers: [4], overrides: { 4: { RedTint, GreenTint, BlueTint } } });
-      //A registered Ouija Board (costumes2 115) adds its one head layer over
-      //Isaac's head, playing the same Head clip and frame.
-      if (state.playerItems?.costumeRegistrations?.configurationIds.includes(115))
-        this.assets.draw(ctx, "gfx/characters/115_ouija board.anm2", `Head${directionName(player.facing)}`, x, y,
-          player.headFrame, { layers: [0], overrides: { 0: { RedTint, GreenTint, BlueTint } } });
+    // Player render 509C49: glow (5096A0), body slots 1..3 (509700), head
+    // slots 4..10 (5097D0) and top0 (509870). Each slot draws its costume
+    // entry's layer, else the Player's own layer (wardrobe.rs).
+    const playerSheets = wardrobe ? this.assets.skinSheets(PLAYER, wardrobe.playerSkin) : undefined;
+    const tint = { RedTint, GreenTint, BlueTint };
+    for (let slot = 0; slot <= 11; slot++) {
+      const body = (slot >= 1 && slot <= 3) || slot === 11;
+      const layerScale = wardrobe?.layerScales[slot] ?? [1, 1] as [number, number];
+      const assigned = wardrobe?.slots[slot];
+      const entry = assigned && assigned.entry >= 0 ? wardrobe!.entries[assigned.entry] : undefined;
+      if (!entry) {
+        const [clip, frame] = body ? [`Walk${directionName(player.bodyFacing)}`, player.walkFrame]
+          : [`Head${directionName(player.facing)}`, player.headFrame];
+        this.assets.draw(ctx, PLAYER, clip, x, y, frame, { layers: [slot], overrides: { [slot]: tint }, scale,
+          layerScales: { [slot]: layerScale }, ...(playerSheets ? { spritesheets: playerSheets } : {}) });
+        continue;
+      }
+      // 509764: while flying, a body slot shows only a flying costume.
+      if (body && slot !== 11 && player.flying && !entry.isFlying) continue;
+      const layer = assigned!.layer;
+      const sheets = entry.hasSkinAlt ? this.assets.skinSheets(entry.actor, entry.sheetSkin) : undefined;
+      for (const sprite of [entry.sprite, entry.overlay]) {
+        if (!sprite?.clip) continue;
+        this.assets.draw(ctx, entry.actor, sprite.clip, x, y, sprite.frame, { layers: [layer], overrides: { [layer]: tint }, scale,
+          layerScales: { [layer]: layerScale }, ...(sheets ? { spritesheets: sheets } : {}) });
+      }
     }
   }
   private hearts(ctx: CanvasRenderingContext2D, state: State): void {
-    for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
-      const remaining = state.player.hp - heart * 2;
+    // HUD::Render draws the slots HUD::Update copied before this update ran.
+    const hearts = state.hudHearts ?? state.player;
+    for (let heart = 0; heart < Math.ceil(hearts.maxHp / 2); heart++) {
+      const remaining = hearts.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
     }
-    const redSlots = Math.ceil(state.player.maxHp / 2);
-    for (let heart = 0; heart < Math.ceil(state.player.soulHp / 2); heart++) {
-      const color = state.player.blackHeartMask & (1 << heart) ? "Black" : "Blue";
-      const amount = state.player.soulHp - heart * 2 >= 2 ? "Full" : "Half";
+    const redSlots = Math.ceil(hearts.maxHp / 2);
+    for (let heart = 0; heart < Math.ceil(hearts.soulHp / 2); heart++) {
+      const color = hearts.blackHeartMask & (1 << heart) ? "Black" : "Blue";
+      const amount = hearts.soulHp - heart * 2 >= 2 ? "Full" : "Half";
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", `${color}Heart${amount}`, 68 + (redSlots + heart) * 12, 24);
     }
-    if (state.player.eternalHearts > 0) {
+    if (hearts.eternalHearts > 0) {
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
   }

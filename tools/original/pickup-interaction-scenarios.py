@@ -31,7 +31,7 @@ START_ROOM = 80  # 00.special rooms.stb: type1 variant2 'Start Room', 13x7
 
 # Collectibles and cards by base Rebirth id (items.xml / pocketitems.xml).
 BATTERY, OUIJA, BLANK_CARD = 63, 115, 286
-THE_POOP, TAMMY, COOKBOOK, D20, D10, D4 = 36, 38, 65, 166, 285, 284
+THE_POOP, TAMMY, COOKBOOK, D20, D10, D4, D100 = 36, 38, 65, 166, 285, 284, 283
 SAD_ONION, CRICKETS_HEAD, NUMBER_ONE = 1, 4, 6
 JERA, TWO_OF_CLUBS, TWO_OF_DIAMONDS = 29, 23, 24
 
@@ -165,6 +165,15 @@ CASES = {
                 + [act(f'book-finish-{index}', [], 2) for index in range(1, 9)]
                 + [act('book-resumed', [], 40)],
         interactions=['d4-reroll'], fixed_only=True, fixed_epoch=(2173746742, 1)),
+    # The D100 nests the D4, the D6 and the D20: the passives, a free
+    # pedestal and the loose pickups all reroll; the D100 stays held. It
+    # pins the D4 case's epoch for the same reason.
+    'd100': dict(
+        about='The D100 (Space) rerolls Isaac\'s collectibles, a pedestal and the room pickups',
+        items=[D100, SAD_ONION, CRICKETS_HEAD, NUMBER_ONE], card=0,
+        spawns=CORNER_PICKUPS + [pickup(6, 1, 100, 3), pickup(3, 3, 10, 1), pickup(9, 3, 10, 2)],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        interactions=['d100-reroll'], fixed_only=True, fixed_epoch=(2173746742, 1)),
     # The Poop leaves a poop under Isaac and farts; he walks off and back.
     'the-poop': dict(
         about='The Poop (Space) spawns a poop grid entity under Isaac',

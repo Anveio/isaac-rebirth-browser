@@ -324,6 +324,16 @@ export class Assets {
       ctx.restore();
     }
   }
+  /** The actor's spritesheets in a skin colour (50F65C: 0 _white, 1 _black,
+   * 2 _blue, 3 _red, 4 _green); undefined for no colour or a sheet with no
+   * coloured copy. */
+  skinSheets(path: string, skin: number): Record<number, string> | undefined {
+    const suffix = ["_white", "_black", "_blue", "_red", "_green"][skin];
+    const actor = (sceneData as unknown as Record<string, Actor>)[normalize(path)];
+    if (!suffix || !actor) return undefined;
+    const sheets = actor.Spritesheets.map(sheet => [sheet.Id, normalize(`${actor.BaseSpritesheetPath}/${sheet.Path}`).replace(/\.png$/, `${suffix}.png`)] as const);
+    return sheets.every(([, sheet]) => this.images.has(sheet)) ? Object.fromEntries(sheets) : undefined;
+  }
   /** Texture::Render of a whole image's source rect with its top-left at (x, y). */
   drawImage(ctx: CanvasRenderingContext2D, path: string, x: number, y: number, color: SpriteColor = { tint: [1, 1, 1, 1], offsets: [0, 0, 0] }): void {
     const image = this.image(path), [r, g, b, a] = color.tint as [number, number, number, number];

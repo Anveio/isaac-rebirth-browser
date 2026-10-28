@@ -87,6 +87,31 @@ pub struct CostumeClip {
     pub looping: bool,
 }
 
+/// One costumes2.xml row with its actor's (layer id, name) pairs.
+#[derive(Debug)]
+pub struct CostumeConfig {
+    pub id: u32,
+    pub kind: &'static str,
+    pub actor: &'static str,
+    pub priority: i32,
+    pub skin_color: i32,
+    pub is_flying: bool,
+    pub overwrite_color: bool,
+    pub has_skin_alt: bool,
+    pub has_overlay: bool,
+    pub layers: &'static [(i32, &'static str)],
+}
+include!(concat!(env!("OUT_DIR"), "/costume_configs.rs"));
+
+/// The costume record a collectible's ItemConfig carries: the costumes2.xml
+/// passive, active or familiar row with its id (the row's type need not match
+/// the item's own kind, e.g. 130 and 181).
+pub fn collectible_costume(id: u32) -> Option<&'static CostumeConfig> {
+    COSTUME_CONFIGS
+        .iter()
+        .find(|config| config.id == id && matches!(config.kind, "passive" | "active" | "familiar"))
+}
+
 pub fn costume_clip(actor: &str, name: &str) -> Option<CostumeClip> {
     let (_, clips) = COSTUME_CLIPS.iter().find(|(path, _)| *path == actor)?;
     clips

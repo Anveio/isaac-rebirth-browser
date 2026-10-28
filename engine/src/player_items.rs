@@ -269,6 +269,10 @@ pub struct PlayerItems {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub costume_registrations:
         Option<crate::player_costume_registration::CostumeRegistrationHistory>,
+    ///The Player's costumes and sprite scales (wardrobe.rs). None is a
+    ///restored Player whose costume history is unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wardrobe: Option<crate::wardrobe::Wardrobe>,
     ///Actual fresh68 registration owns LeftEye. Old restore/other wardrobe
     ///history never receives an inventory-derived positive null owner.
     #[serde(default)]
@@ -418,6 +422,7 @@ impl PlayerItems {
                 crate::player_costume_registration::CostumeRegistrationHistory::fresh(),
             ),
             technology_eye_registered: Some(false),
+            wardrobe: Some(crate::wardrobe::Wardrobe::fresh()),
             owned_counts: vec![0; 347],
             temporary_collectibles: Vec::new(),
             query_history: Some(crate::item_queries::ItemQueryHistory::FRESH),
@@ -1597,6 +1602,7 @@ pub(crate) fn add_collectible(
     crate::player_costume118::on_collectible_added(state, id);
     crate::player_costume_registration::on_collectible_added(state, id);
     crate::player_costume229::on_collectible_added(state, id);
+    crate::wardrobe::on_collectible_added(state, id);
     crate::technology::on_collectible_added(state, id);
     if config.kind != 3 || !touched {
         if let Some(proof) = treatment {
@@ -1604,6 +1610,12 @@ pub(crate) fn add_collectible(
         } else {
             authored_grants(state, config);
         }
+    }
+    //52DC62 Abaddon: BB8 red and BB4 max hearts to 0, then 508440(12).
+    if id == 230 {
+        state.player.hp = 0;
+        state.player.max_hp = 0;
+        add_black_hearts(&mut state.player, 12);
     }
     //This is the actual reached default CFG effect, not an ID/loadout
     //whitelist. It never heals a prior missing producer history.

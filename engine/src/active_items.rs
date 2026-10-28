@@ -281,6 +281,10 @@ pub(crate) enum Leaf {
     /// then reroll every owned passive collectible through the item284 RNG
     /// and its pool, and Add the new ones (`reroll_owned`).
     D4,
+    /// 523453 (variant0) -> 5255BA: three nested Uses through 522250 with
+    /// no item animation (dl 0, [rsp+64] 1): the D4 284, the D6 105 and the
+    /// D20 166 (`nested_use`). Then UseItem.
+    D100,
 }
 
 /// A ported active: its 52A640 GiantBook5805C0 id (requested with delay3
@@ -428,6 +432,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         book: Some(17),
         leaf: Leaf::D4,
     },
+    ActiveUse {
+        id: 283,
+        book: Some(28),
+        leaf: Leaf::D100,
+    },
 ];
 
 pub(crate) fn ported(id: u32) -> Option<&'static ActiveUse> {
@@ -478,8 +487,8 @@ fn sound(state: &mut State, id: u32) {
 /// 50AC90: copy the item Sprite+7E0 and play its PlayerPickupSparkle, then
 /// 50A5C0 force-plays UseItem (or Pickup for Blank Card). 522385 clears the
 /// show flag for Player variants other than0.
-fn play_item_animation(state: &mut State, id: u32, variant0: bool, pickup_clip: bool) {
-    if !variant0 {
+fn play_item_animation(state: &mut State, id: u32, show: bool, pickup_clip: bool) {
+    if !show {
         return;
     }
     if let Some(owner) = state.player_items.as_mut() {
@@ -625,7 +634,7 @@ pub(crate) fn advance(
     if row.leaf == Leaf::D10 {
         return Ok(Some(RuntimeLeaf { id, variant0 }));
     }
-    use_leaf(state, row.leaf, id, variant0)?;
+    use_leaf(state, row.leaf, id, variant0, variant0)?;
     finish_use(state, id)?;
     Ok(None)
 }
@@ -637,9 +646,18 @@ pub(crate) fn finish_runtime_leaf(state: &mut State, leaf: RuntimeLeaf) -> Resul
     finish_use(state, leaf.id)
 }
 
-/// 5223C0: D6C |= the config cache flags, Evaluate511F10, the 3076 flag
-/// and 5295C0's discharge.
+/// 5223C0, then 52A640's 5295C0 discharge.
 fn finish_use(state: &mut State, id: u32) -> Result<(), String> {
+    use_tail(state, id)?;
+    let owner = state.player_items.as_ref().expect("checked owner");
+    if matches!(owner.active_state_d80, 0 | 6) {
+        discharge(state)?;
+    }
+    Ok(())
+}
+
+/// 5223C0: D6C |= the config cache flags, Evaluate511F10 and the 3076 flag.
+fn use_tail(state: &mut State, id: u32) -> Result<(), String> {
     let config = items::definition(id).ok_or("ported active ItemConfig absent")?;
     let owner = state.player_items.as_mut().expect("checked owner");
     owner.unevaluated_cache_flags |= config.cache_flags;
@@ -649,14 +667,33 @@ fn finish_use(state: &mut State, id: u32) -> Result<(), String> {
         //5223C8..DD: Evaluate511F10 runs for the nonzero D6C word.
         crate::player_stats::evaluate_cache(state)?;
     }
-    let owner = state.player_items.as_ref().expect("checked owner");
-    if matches!(owner.active_state_d80, 0 | 6) {
-        discharge(state)?;
-    }
     Ok(())
 }
 
-fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<(), String> {
+/// A nested 522250 Use (the D100's): 511060 costume registration (none
+/// for 284, 105 and 166), the 5E4140 TEMP record, the leaf with the show
+/// byte clear and the 5223C0 tail. 52A640's discharge does not run.
+fn nested_use(state: &mut State, id: u32, variant0: bool) -> Result<(), String> {
+    let leaf = ported(id).ok_or("nested Use without a ported leaf")?.leaf;
+    state
+        .player_items
+        .as_mut()
+        .expect("checked owner")
+        .add_temporary_collectible(id)?;
+    use_leaf(state, leaf, id, variant0, false)?;
+    use_tail(state, id)
+}
+
+/// `variant0` selects the leaf bodies (Entity+14); `show` is 522385's item
+/// animation byte (a direct Use shows it for Player variant0, a nested Use
+/// never does).
+fn use_leaf(
+    state: &mut State,
+    leaf: Leaf,
+    id: u32,
+    variant0: bool,
+    show: bool,
+) -> Result<(), String> {
     match leaf {
         Leaf::YumHeart => {
             //524084->52598b requests157 before508230 heals two native
@@ -665,11 +702,11 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 sound(state, 157);
                 player_items::add_red_hearts(&mut state.player, 2);
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Belial => {
             sound(state, 34);
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Bible => {
             sound(state, 8);
@@ -690,14 +727,14 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                     },
                 );
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Necronomicon => {
             if variant0 {
                 sound(state, 33);
                 crate::health_damage::damage_room_npcs(state, 40.0)?;
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Revelations => {
             if variant0 {
@@ -712,14 +749,14 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                     },
                 );
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::SatanicBible => {
             if variant0 {
                 player_items::add_black_hearts(&mut state.player, 2);
             }
         }
-        Leaf::BookOfShadows => play_item_animation(state, id, variant0, false),
+        Leaf::BookOfShadows => play_item_animation(state, id, show, false),
         Leaf::HowToJump => {
             if variant0 {
                 start_jump(state);
@@ -762,7 +799,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 }
                 _ => {}
             }
-            play_item_animation(state, id, variant0, true);
+            play_item_animation(state, id, show, true);
         }
         Leaf::GuppysPaw => {
             if variant0 && state.player.max_hp > 1 {
@@ -771,7 +808,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 player.max_hp -= 2;
                 player.hp = player.hp.min(player.max_hp);
                 player_items::add_soul_hearts(player, 6);
-                play_item_animation(state, id, variant0, false);
+                play_item_animation(state, id, show, false);
             }
         }
         Leaf::PrayerCard => {
@@ -782,7 +819,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 }
                 player_items::add_eternal_hearts(&mut state.player, 1);
             }
-            play_item_animation(state, id, variant0, true);
+            play_item_animation(state, id, show, true);
         }
         Leaf::DeckOfCards | Leaf::MomsBottleOfPills if variant0 => {
             let (modifier, card_by_default) = if leaf == Leaf::DeckOfCards {
@@ -841,51 +878,59 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
         }
         Leaf::MomsBra => {
             moms_bra(state, id)?;
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::MomsPad => {
             if variant0 {
                 moms_pad(state, id)?;
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::BookOfSin => {
             if variant0 {
                 book_of_sin(state, id)?;
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::CrystalBall => {
             if variant0 {
                 crystal_ball(state, id)?;
             }
-            play_item_animation(state, id, variant0, true);
+            play_item_animation(state, id, show, true);
         }
         Leaf::D6 => {
             if variant0 {
                 reroll_pedestals(state, id)?;
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::D20 => {
             if variant0 {
                 reroll_pickups(state, id)?;
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::D10 => return Err("the D10 leaf runs through the Runtime".into()),
         Leaf::D4 => {
             reroll_owned(state, id, variant0)?;
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
+        }
+        Leaf::D100 => {
+            if variant0 {
+                for nested in [284, 105, 166] {
+                    nested_use(state, nested, variant0)?;
+                }
+            }
+            play_item_animation(state, id, show, false);
         }
         Leaf::ThePoop => the_poop(state, id)?,
         Leaf::TammysHead => {
             tammys_head(state, id, variant0)?;
-            play_item_animation(state, id, variant0, true);
+            play_item_animation(state, id, show, true);
         }
         Leaf::AnarchistCookbook => {
             sound(state, 8);
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Flush => {
             //522A80 walks Room+1638, skipping Poop245 and Chub28 before
@@ -897,7 +942,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             if variant0 && candidate {
                 unowned_leaf(state, id, 0x522b42);
             }
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::Converter => {
             if variant0 && state.player.soul_hp > 3 {
@@ -918,7 +963,7 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
                 state.player.soul_hp -= 4;
                 player_items::add_max_hearts(&mut state.player, 2);
                 player_items::add_red_hearts(&mut state.player, 2);
-                play_item_animation(state, id, variant0, false);
+                play_item_animation(state, id, show, false);
             }
         }
     }
@@ -1757,7 +1802,7 @@ const D4_KEPT: [usize; 7] = [10, 81, 238, 239, 258, 327, 328];
 /// active slot) stays and an owned active (ItemConfig kind 3, the D4
 /// itself included) only has its costume registered again (524A90 to
 /// 511060); the native D4 case keeps the D4 held. The D100's nested Use
-/// (522250 with its own [rsp+64]) is not ported.
+/// passes [rsp+64] = 1 as well, so the D100 stays held the same way.
 /// Then for each other owned collectible 1..346 (except `D4_KEPT`), each
 /// count takes up to three
 /// item284 RNG seeds into GetCollectible581590 (pool of its first

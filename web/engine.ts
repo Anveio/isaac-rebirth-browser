@@ -25,6 +25,15 @@ export interface Costume229 {
   priority: number; historyFrontier: string | null; mainClipFrontier: boolean;
   lastShootMainClipBa8: string | null;
 }
+export interface CostumeSprite { clip: string; frame: number; playing: boolean; overrideActive: boolean }
+/** The Player's costumes (engine/src/wardrobe.rs): entries, the 13 layer slots and the sprite scales. */
+export interface Wardrobe {
+  entries: {item: number; actor: string; sprite: CostumeSprite; overlay: CostumeSprite | null; priority: number;
+    isFlying: boolean; hasOverlay: boolean; hasSkinAlt: boolean; skinColor: number; overwriteColor: boolean; sheetSkin: number}[];
+  slots: {entry: number; layer: number; priority: number}[];
+  headSkin: number; bodySkin: number; playerSkin: number;
+  spriteScale: [number, number]; layerScales: [number, number][];
+}
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
@@ -70,6 +79,7 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
+export interface HudHearts { hp: number; maxHp: number; soulHp: number; blackHeartMask: number; eternalHearts: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "slot" | "npc" | "projectile" | "effect"; id: number; }
 /** Entity_Slot (type 6): an idle machine or beggar (engine/src/slots.rs). */
 export interface Slot {
@@ -325,7 +335,7 @@ export interface Room {
   managerCounts: { countablePending: number; countableCurrent: number; bossPending: number; bossCurrent: number };
   ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
-  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number;
+  combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number; combatOpenDoorSlots?: number[]; combatOpenUpdate?: number;
   grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number; tnt?: {countdown: number; sprite: {animation: "Idle" | "IdleMedium" | "ReadyToExplode" | "Blown"; frame: number; playing: boolean}; rewardFrontier?: {nextTrinketPoolQuery: number}}}} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
@@ -407,6 +417,7 @@ export interface State {
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     costumeRegistrations?: {configurationIds: number[]} | null;
+    wardrobe?: Wardrobe | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedConfigKind?: 1 | 2 | 3 | 4 | null; queuedCharge: number; queuedTouched: boolean;
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;
@@ -480,6 +491,7 @@ export interface State {
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; bossBar: BossBar; chargeBarFlash: number; pauseMenu: PauseMenu;
+  hudHearts?: HudHearts;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }

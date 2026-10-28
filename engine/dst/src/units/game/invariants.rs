@@ -220,6 +220,9 @@ pub fn transition(before: &State, command: &Command, after: &State) {
         && after.player_death.game_over.is_none();
     let menu_start = before.screen != Screen::Playing && after.screen == Screen::Playing;
     let run_started = menu_start || restarted;
+    // Main's Continue enters through the same run start but resumes the saved
+    // room (54ECE0), so only a new run must stand in its floor's start room.
+    let continued = menu_start && before.run_start_request.resume_saved;
     match command {
         Command::Tick {
             count,
@@ -347,10 +350,6 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             if menu_start {
                 props::reachable!("game: a run starts through the public menus");
             }
-            // Continue (54ECE0) resumes a saved run in its saved room with its
-            // visited rooms (#896), not a new run in the starting room;
-            // `saves::continued` checks it against the saved record.
-            let continued = menu_start && before.run_start_request.resume_saved;
             if run_started && !continued {
                 let floor =
                     rebirth_cleanroom::stage_transition::curse_inputs(after).and_then(|curse| {

@@ -180,6 +180,13 @@ pub(crate) fn partial_charge(
     if current < 0 || maximum <= 0 || current > maximum {
         return Err("229 partial pose requires the actual nonnegative charging interval".into());
     }
+    crate::wardrobe::play_item(
+        state,
+        229,
+        false,
+        &format!("Head{direction}Charge"),
+        ((current as f32 / maximum as f32) * 18.0) as i32,
+    );
     let Some(costume) = selected(state) else {
         return Ok(false);
     };
@@ -198,6 +205,7 @@ pub(crate) fn partial_charge(
 ///helper50E730 returns without a color/audio or random draw.
 pub(crate) fn full_charge(state: &mut State, aim: WorldVector) -> Result<bool, String> {
     let direction = aim_direction(aim)?;
+    crate::wardrobe::play_item(state, 229, false, &format!("Head{direction}ChargeFull"), -1);
     let Some(costume) = selected(state) else {
         return Ok(false);
     };
@@ -213,6 +221,7 @@ pub(crate) fn full_charge(state: &mut State, aim: WorldVector) -> Result<bool, S
 ///DA0. 51BBD2 separately stores the selected Head* name into main BA8.
 pub(crate) fn shoot(state: &mut State, prior_cardinal_aim: WorldVector) -> Result<bool, String> {
     let direction = aim_direction(prior_cardinal_aim)?;
+    crate::wardrobe::play_item(state, 229, false, &format!("Head{direction}Shoot"), -1);
     let Some(costume) = selected(state) else {
         return Ok(false);
     };
@@ -234,6 +243,7 @@ pub(crate) fn begin_full(state: &mut State, phase: Phase) {
     {
         return;
     }
+    crate::wardrobe::release_finished(state);
     let Some(costume) = selected(state) else {
         return;
     };

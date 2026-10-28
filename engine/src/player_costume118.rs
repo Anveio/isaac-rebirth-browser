@@ -256,6 +256,17 @@ pub(crate) fn charge(
     if maximum <= 0 {
         return Err("118 charge requires positive C78".into());
     }
+    if prior < maximum {
+        crate::wardrobe::play_item(
+            state,
+            118,
+            false,
+            &format!("Head{direction}Charge"),
+            ((prior as f32 / maximum as f32) * 18.0) as i32,
+        );
+    } else {
+        crate::wardrobe::play_item(state, 118, false, &format!("Head{direction}ChargeFull"), -1);
+    }
     let Some(costume) = selected(state) else {
         return Ok(false);
     };
@@ -274,6 +285,7 @@ pub(crate) fn charge(
 }
 pub(crate) fn shoot(state: &mut State, aim: WorldVector) -> Result<bool, String> {
     let direction = aim_direction(aim)?;
+    crate::wardrobe::play_item(state, 118, false, &format!("Head{direction}Shoot"), -1);
     let Some(costume) = selected(state) else {
         return Ok(false);
     };
@@ -282,6 +294,7 @@ pub(crate) fn shoot(state: &mut State, aim: WorldVector) -> Result<bool, String>
     Ok(true)
 }
 pub(crate) fn hide(state: &mut State) -> bool {
+    crate::wardrobe::release(state);
     let Some(costume) = selected(state) else {
         return false;
     };

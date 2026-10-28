@@ -63,6 +63,7 @@ pub mod squirt;
 mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
+mod tear_getter;
 mod technology;
 mod technology2;
 pub use entities::{discovered_champion_color, implemented_npc_kinds, supports_npc_selector};
@@ -186,6 +187,7 @@ pub mod traversal;
 pub mod unlock_notifications;
 pub mod wall_creep;
 pub mod wall_hugger;
+pub mod wardrobe;
 mod weapon_plan;
 pub use bombs::{Bomb, Explosion};
 pub use effects::{Point, StageEffects};
@@ -535,6 +537,20 @@ impl RunIntroduction {
 }
 fn no_charge_bar_flash() -> i32 {
     -1
+}
+/// HUD::Update 572600 (572a90) reads Player+bb4/bb8/bbc/bc0 into the HUD
+/// heart slots at the start of each Game update (54F920), before any
+/// entity runs; HUD::Render 5742f0 draws those slots. Damage or healing
+/// during an update reaches the HUD one update later. The black mask and
+/// eternal hearts are taken at the same point.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HudHearts {
+    pub hp: u8,
+    pub max_hp: u8,
+    pub soul_hp: i32,
+    pub black_heart_mask: u32,
+    pub eternal_hearts: i32,
 }
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
@@ -947,6 +963,9 @@ pub struct State {
     ///HUD::Update572D35 counts it down to -1; BarFull draws when odd or -1.
     #[serde(default = "no_charge_bar_flash")]
     pub charge_bar_flash: i32,
+    /// The HUD heart slots (`HudHearts`); absent until the first update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hud_hearts: Option<HudHearts>,
     pub pause_menu: PauseMenu,
 }
 
@@ -1431,6 +1450,7 @@ impl Game {
                 run_introduction: RunIntroduction::stage(false),
                 boss_bar: BossBar::default(),
                 charge_bar_flash: -1,
+                hud_hearts: None,
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
@@ -2283,6 +2303,13 @@ impl Game {
         // initializes the authored Player's 40-point grid collision class to 5.
         self.state.player.flying = Some(false);
         self.state.player.grid_collision_class = Some(5);
+        // 519870 clears D6C, then 519A98 (reached on every variant path)
+        // requests every cache callback; 52E340's 511F10 consumes it.
+        self.state
+            .player_items
+            .as_mut()
+            .ok_or("fresh Player.Init needs its item owner")?
+            .unevaluated_cache_flags = u32::MAX;
         if let Some(definition) = &challenge {
             challenges::configure_player(&mut self.state, definition)?;
         }
@@ -2466,6 +2493,10 @@ impl Game {
         let mut player_items = player_items::PlayerItems::new(run_seeds.initialized_fields[12])?;
         run.player_items
             .restore_after_constructor(&mut player_items)?;
+        // A saved Player's costume entries are not restored.
+        if player_items.owned_counts.iter().any(|count| *count != 0) {
+            player_items.wardrobe = None;
+        }
         player_items.manager_rng = context
             .player_manager_rng
             .ok_or("saved manager RNG is unknown")?;
@@ -2715,6 +2746,8 @@ impl Game {
         room.combat_shut_door_slots.clear();
         room.combat_shut_update = None;
         room.combat_clear_countdown = 0;
+        room.combat_open_door_slots.clear();
+        room.combat_open_update = None;
         self.state.room = room;
         ambience::reset_room(&mut self.state);
         room::load_fx_rays(
@@ -4796,6 +4829,14 @@ impl Game {
         //54F920's shared HUD streak precedes54F938 and every later
         //GameFull popup/transition/pause guard. Fast has no HUD update.
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            let player = &self.state.player;
+            self.state.hud_hearts = Some(HudHearts {
+                hp: player.hp,
+                max_hp: player.max_hp,
+                soul_hp: player.soul_hp,
+                black_heart_mask: player.black_heart_mask,
+                eternal_hearts: player.eternal_hearts,
+            });
             self.state.run_introduction.advance_full();
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
@@ -6985,26 +7026,17 @@ impl Game {
                 } else {
                     origin
                 };
-                let source_variant = if plan.flags == self.state.weapon_cache.flags_c98 {
-                    self.state
-                        .player_items
-                        .as_ref()
-                        .and_then(|owner| item_pipeline::ItemInputs::new(owner).ok())
-                        .and_then(|inputs| {
-                            inputs.neutral_regular_tear_variant(
-                                self.state.weapon_admission.source_player_type,
-                                self.state.weapon_cache.primary,
-                                plan.flags,
-                                item_queries::AppearanceQueries::new(
-                                    self.state.player_items.as_ref()?,
-                                    self.state.weapon_cache.primary,
-                                    self.state.player.entity_source,
-                                    None,
-                                ),
-                            )
-                        })
+                //5177F0 calls 50D090(kind1) after the eye draw and before
+                //the spawn seed; an unresolved getter leaves the variant
+                //unknown and draws nothing.
+                let getter = if plan.flags == self.state.weapon_cache.flags_c98 {
+                    tear_getter::fire_tear_kind1(&mut self.state)
                 } else {
                     None
+                };
+                let (plan, source_variant) = match getter {
+                    Some(properties) => (plan.with_getter(&properties)?, Some(properties.variant)),
+                    None => (plan, None),
                 };
                 tear_factory::fire(&mut self.state, plan, source_variant, origin, velocity)?;
                 self.state.fire_cooldown = plan.fire_delay;
@@ -7038,6 +7070,10 @@ impl Game {
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);
+        wardrobe::sync_head(&mut self.state);
+        if phase == phase::Phase::Update {
+            wardrobe::advance_full(&mut self.state);
+        }
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }

@@ -20,12 +20,12 @@ composition is [item synergies](item-synergies.md).
 | Kind | Total | Complete | Partial | Missing | Missing but engine refs |
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
-| active | 75 | 7 | 20 | 48 | 7 |
+| active | 75 | 7 | 21 | 47 | 7 |
 | familiar | 55 | 0 | 1 | 54 | 1 |
 | trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 7 | 50 | 346 | 128 |
+| **all** | 403 | 7 | 51 | 345 | 128 |
 
-Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 4 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 10 match, 9 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -50,9 +50,9 @@ item ids the original's code for that mechanism queries
 | `tear-color` | Tear color | 511F10 block 0x40 at 513355 | 19 | partial |  |  |  |
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
-| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090's regular variant resolves when its whole readset is absent; any item it reads leaves the variant unknown. |
+| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090 is ported whole (tear_getter.rs): variant, color, flags, damage, scale and height for every item it reads, on FireTear kind 1. FireTear's own 69/154/182/309 preludes are not yet ported, so those items leave the tear unknown. |
 | `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
-| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  | Every costume actor in costumes2.xml (223 rows) is imported at build time by `npm run assets:items` into ignored web/generated/item-assets, with its sheets in the sprite pack; registration (52CC90) and drawing are not ported. |
+| `costumes` | Costumes | 52CF00/511060 registration, 50EDC0 slot assignment, 52FAED/532090 sync, 509C49 render |  | partial |  | #928 | One path for every collectible (wardrobe.rs): the costumes2.xml row of the same id (passive, active or familiar) registers, 50EDC0 assigns the 13 Player layer slots by layer name and priority with skin colours (hasSkinAlt sheets), head and body entries follow the Player clips, and Brimstone and Monstro's Lung drive theirs through 508820. Magic Mushroom (Player+2C4 x1.25) and Odd Mushroom (head layers x1.1/x0.9) scale the sprite. Footage of sets 1+4+12, 120, 14+32+74, 8+46+101 and 3+70+121 against a Gaper shows matching costumes and size; the rest of each case (the Gaper's settle position) still mismatches. Not ported: costume removal, null and transformation costumes, the flight body-group swap beyond isFlying, co-op. |
 | `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
 | `death-callbacks` | Enemy death item callbacks | 47FD22 and peers |  | partial | dips |  | Gimpy and Infestation 2 on Dips. |
 | `trinket-effects` | Trinket effects | Held trinket queries |  | missing | trinket-start |  |  |
@@ -67,9 +67,24 @@ passing live comparison.
 | 118 Brimstone + 114 Mom's Knife + 329 The Ludovico Technique | mismatch | item-composition-history |  | Ordered grant history; child cleanup and actor parity fail. |
 | 114 Mom's Knife + 118 Brimstone + 329 The Ludovico Technique | mismatch | item-composition |  | Knife-first route; failing public-WASM comparison retained. |
 | 152 Technology 2 + 169 Polyphemus | untested |  |  | Joint Technology 2 + Polyphemus has no qualified run. |
-| 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | mismatch | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port. |
+| 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | match | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields and the tear variant (50D090 blood tear from 7) match. |
+| 1 The Sad Onion + 4 Cricket's Head + 12 Magic Mushroom | mismatch | `npm run sandbox:case -- --items 1,4,12 --enemy 10.0` (generated) | #928 | Stats match, and footage shows the Sad Onion and Cricket's Head costumes and the Magic Mushroom scale matching. The Gaper's settle position differs (353.15,339.86 vs 351.85,341.79, also at 3e51749), so the fight and the final position and hearts diverge. |
+| 120 Odd Mushroom | mismatch | `npm run sandbox:case -- --items 120 --enemy 10.0` (generated) | #929 | Stats match, and per-tick footage of the hits (frames 140-175) matches, the hurt blink included. The Gaper's settle position differs as in [1, 4, 12]. |
+| 14 Roid Rage + 32 Wire Coat Hanger + 74 A Quarter | mismatch | `npm run sandbox:case -- --items 14,32,74 --enemy 10.0` (generated) |  | Random costume check: the Roid Rage and Wire Coat Hanger costumes match in footage; only the Gaper's position and hp differ. |
+| 8 Brother Bobby + 46 Lucky Foot + 101 The Halo | mismatch | `npm run sandbox:case -- --items 8,46,101 --enemy 10.0` (generated) |  | Random costume check: The Halo costume matches in footage; Brother Bobby is not ported (familiars, cache flags) and the Gaper diverges. |
+| 3 Spoon Bender + 70 Growth Hormones + 121 Odd Mushroom | mismatch | `npm run sandbox:case -- --items 3,70,121 --enemy 10.0` (generated) |  | Random costume check: the Spoon Bender and Growth Hormones costumes and the Odd Mushroom (large) head scale match in footage; the Gaper and its drops diverge. |
 | 1 The Sad Onion + 4 Cricket's Head | mismatch | `npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated) |  | Every EvaluateItems field, luck, flight and the Familiar roster match; the enemy fight diverges: in the fixed run the original's Gaper dies and drops a coin while the port's becomes type 11 and lives; in the random run Isaac's and the enemy's positions drift. |
 | 286 Blank Card + 63 The Battery | untested | pickup-interactions `sandbox-*` |  | Active + passive pair; graded per interaction, not as a synergy. |
+| 89 Spider Bite + 103 The Common Cold | match | `npm run sandbox:case -- --items 89,103` (generated) |  | Getter rolls and tear flags for Spider Bite and Common Cold match. |
+| 228 Mom's Perfume | match | `npm run sandbox:case -- --items 228` (generated) |  | Mom's Perfume fear roll matches. |
+| 7 Blood of the Martyr + 48 Cupid's Arrow | match | `npm run sandbox:case -- --items 7,48` (generated) |  | Blood tear variant and Cupid's Arrow piercing match. |
+| 150 Tough Love | match | `npm run sandbox:case -- --items 150` (generated) |  | Tough Love tooth roll (bound 10-luck, damage x3.2, variant 2) matches. |
+| 257 Fire Mind | match | `npm run sandbox:case -- --items 257` (generated) |  | Fire Mind variant 5 and flag match. |
+| 259 Dark Matter | match | `npm run sandbox:case -- --items 259` (generated) |  | Dark Matter variant 6 and fear roll match. |
+| 231 Ball of Tar + 200 Mom's Eyeshadow + 201 Iron Bar | match | `npm run sandbox:case -- --items 231,200,201` (generated) |  | Ball of Tar, Mom's Eyeshadow and Iron Bar rolls match. |
+| 221 Rubber Cement + 336 Dead Onion | mismatch | `npm run sandbox:case -- --items 221,336` (generated) |  | Stats and getter fields match; Rubber Cement's bounce (flag 0x80000) is not ported, so the original's bounced tear outlives the port's. |
+| 110 Mom's Contacts | match | `npm run sandbox:case -- --items 110` (generated) |  | Mom's Contacts range matches now that Player.Init requests every cache callback (519A98). |
+| 230 Abaddon | match | `npm run sandbox:case -- --items 230` (generated) |  | Abaddon empties red hearts and grants six black hearts (52DC62). |
 
 ## Passive collectibles
 
@@ -347,7 +362,7 @@ passing live comparison.
 | 186 | Blood Rights | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 192 | Telepathy For Dummies | missing |  |  | 2 (treasure, library) | yes | See [active inventory](active-items.md). |
 | 282 | How to Jump | complete | active-items `how-to-jump-282-fixed-phase1` |  | 2 (treasure, library) |  | See [active inventory](active-items.md). |
-| 283 | D100 | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
+| 283 | D100 | partial | `pickup-interactions`, `d100-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 284 | D4 | partial | `pickup-interactions`, `d4-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 285 | D10 | partial | `pickup-interactions`, `d10-fixed` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 286 | Blank Card | partial | active-items `blank-card-286-fixed-phase0` |  | 3 (treasure, shop, secret) |  | See [active inventory](active-items.md). |

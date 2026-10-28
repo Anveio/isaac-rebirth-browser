@@ -300,8 +300,9 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         .as_mut()
         .expect("checked Player cache owner")
         // 512286 clears all 32 D6C bits after the actual requested callbacks.
-        // Reserved bits have no independent callback at this admitted tail.
-        // Unimplemented callbacks or history retain their pending requests.
-        .unevaluated_cache_flags = if tail_admitted { 0 } else { pending };
+        // Reserved bits (above the 11 callbacks, 0x7FF) have no callback, so
+        // they never stay pending. Unimplemented callbacks or history retain
+        // their pending requests.
+        .unevaluated_cache_flags = if tail_admitted { 0 } else { pending & 0x7ff };
     Ok(())
 }
