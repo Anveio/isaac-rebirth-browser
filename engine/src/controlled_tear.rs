@@ -311,6 +311,7 @@ pub(crate) fn dispatch(
         source_variant: Some(params.variant),
         //The controlled owner below retains its separate actual cadence.
         persistent_contacts: None,
+        homing_target: None,
         collision_damage: damage,
         base_damage: damage,
         attack_flags: AttackFlags(params.flags.0 | CONTROLLED),

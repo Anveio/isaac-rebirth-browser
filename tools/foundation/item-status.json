@@ -3,7 +3,7 @@
   "collectibles": {
     "1": { "status": "partial", "case": "damage-fire-delay `passive-1-phase-*`", "note": "FireDelay tier ported; the stage only resolves for listed item readsets (see mechanism `cache-admission`)." },
     "2": { "status": "partial", "case": "item-composition", "docs": "item-composition-coverage.md", "note": "Triple-shot caller 519FC0 and shared fire-delay multiplier; readset-limited." },
-    "3": { "status": "partial", "case": "stat-cache", "note": "Move speed ported; homing tear flag is source-only." },
+    "3": { "status": "partial", "case": "stat-cache", "note": "Move speed ported. Homing (flag 4) ported for ordinary tears: Tear.Update 542675 target search and steering, including the factory's immediate update; sets 3 and 3+70+121 against a Gaper match. Homing on lasers, knives and bombs is not ported." },
     "4": { "status": "partial", "case": "damage-fire-delay `passive-4-phase-*`", "note": "Damage tier ported; readset-limited." },
     "6": { "status": "partial", "case": "item-composition", "note": "FireDelay tier, range and regular tear variant; readset-limited." },
     "14": { "status": "partial", "case": "stat-cache `passive-14-phase-*`", "issue": 191, "note": "Range and move speed ported; contrived cases still fail on tear cardinality." },
@@ -66,7 +66,7 @@
     { "items": [120], "status": "match", "case": "`npm run sandbox:case -- --items 120 --enemy 10.0` (generated)", "note": "Both cases match, the hurt blink and the whole Gaper fight included." },
     { "items": [14, 32, 74], "status": "match", "case": "`npm run sandbox:case -- --items 14,32,74 --enemy 10.0` (generated)", "note": "Both cases match: the Roid Rage and Wire Coat Hanger costumes and the whole Gaper fight." },
     { "items": [8, 46, 101], "status": "mismatch", "case": "`npm run sandbox:case -- --items 8,46,101 --enemy 10.0` (generated)", "note": "Random costume check: The Halo costume matches in footage; Brother Bobby is not ported (familiars, cache flags) and the Gaper diverges." },
-    { "items": [3, 70, 121], "status": "mismatch", "case": "`npm run sandbox:case -- --items 3,70,121 --enemy 10.0` (generated)", "note": "The random case matches. In the fixed case the costumes and the Odd Mushroom (large) head scale match, but at the kill the original's Gaper dies and drops a coin while the port's becomes a Gusher (11.0)." },
+    { "items": [3, 70, 121], "status": "match", "case": "`npm run sandbox:case -- --items 3,70,121 --enemy 10.0` (generated)", "note": "Both cases match: the costumes, the Odd Mushroom (large) head scale and the whole Gaper fight. The Gaper's death roll (4E9418) depended on Spoon Bender's homing draws on the shared stream." },
     { "items": [1, 4], "status": "match", "case": "`npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated)", "note": "Both cases match: every EvaluateItems field, luck, flight, the Familiar roster and the whole Gaper fight." },
     { "items": [286, 63], "status": "untested", "case": "pickup-interactions `sandbox-*`", "note": "Active + passive pair; graded per interaction, not as a synergy." },
     { "items": [89, 103], "status": "match", "case": "`npm run sandbox:case -- --items 89,103` (generated)", "note": "Getter rolls and tear flags for Spider Bite and Common Cold match." },

@@ -64,6 +64,7 @@ mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
 mod tear_getter;
+mod tear_homing;
 mod technology;
 mod technology2;
 pub use entities::{discovered_champion_color, implemented_npc_kinds, supports_npc_selector};
@@ -403,6 +404,9 @@ pub struct Tear {
     ///Old restore and untracked flag families retain unknown ownership.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub persistent_contacts: Option<polyphemus_contact::TearHitRegistry>,
+    /// Entity+4A8: a homing tear's NPC target (`tear_homing`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub homing_target: Option<u32>,
 }
 impl Tear {
     fn project(&mut self) {
@@ -5705,6 +5709,8 @@ impl Game {
                     return controlled_tear::advance(&mut self.state, phase, actor.id);
                 }
                 if phase == phase::Phase::Update && !newborn {
+                    // 542675 homing precedes 542710's spectral branch.
+                    tear_homing::update(&mut self.state, actor.id)?;
                     spectral_tear_update(&mut self.state, actor.id)?;
                 }
                 // 542F70..5430A5 consumes the prior Full grid contact and

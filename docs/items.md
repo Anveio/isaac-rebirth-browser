@@ -25,7 +25,7 @@ composition is [item synergies](item-synergies.md).
 | trinket | 60 | 0 | 0 | 60 | 26 |
 | **all** | 403 | 7 | 51 | 345 | 128 |
 
-Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 14 match, 5 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -72,7 +72,7 @@ passing live comparison.
 | 120 Odd Mushroom | match | `npm run sandbox:case -- --items 120 --enemy 10.0` (generated) |  | Both cases match, the hurt blink and the whole Gaper fight included. |
 | 14 Roid Rage + 32 Wire Coat Hanger + 74 A Quarter | match | `npm run sandbox:case -- --items 14,32,74 --enemy 10.0` (generated) |  | Both cases match: the Roid Rage and Wire Coat Hanger costumes and the whole Gaper fight. |
 | 8 Brother Bobby + 46 Lucky Foot + 101 The Halo | mismatch | `npm run sandbox:case -- --items 8,46,101 --enemy 10.0` (generated) |  | Random costume check: The Halo costume matches in footage; Brother Bobby is not ported (familiars, cache flags) and the Gaper diverges. |
-| 3 Spoon Bender + 70 Growth Hormones + 121 Odd Mushroom | mismatch | `npm run sandbox:case -- --items 3,70,121 --enemy 10.0` (generated) |  | The random case matches. In the fixed case the costumes and the Odd Mushroom (large) head scale match, but at the kill the original's Gaper dies and drops a coin while the port's becomes a Gusher (11.0). |
+| 3 Spoon Bender + 70 Growth Hormones + 121 Odd Mushroom | match | `npm run sandbox:case -- --items 3,70,121 --enemy 10.0` (generated) |  | Both cases match: the costumes, the Odd Mushroom (large) head scale and the whole Gaper fight. The Gaper's death roll (4E9418) depended on Spoon Bender's homing draws on the shared stream. |
 | 1 The Sad Onion + 4 Cricket's Head | match | `npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated) |  | Both cases match: every EvaluateItems field, luck, flight, the Familiar roster and the whole Gaper fight. |
 | 286 Blank Card + 63 The Battery | untested | pickup-interactions `sandbox-*` |  | Active + passive pair; graded per interaction, not as a synergy. |
 | 89 Spider Bite + 103 The Common Cold | match | `npm run sandbox:case -- --items 89,103` (generated) |  | Getter rolls and tear flags for Spider Bite and Common Cold match. |
@@ -92,7 +92,7 @@ passing live comparison.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | The Sad Onion | partial | damage-fire-delay `passive-1-phase-*` |  | 1 (treasure) | yes | FireDelay tier ported; the stage only resolves for listed item readsets (see mechanism `cache-admission`). |
 | 2 | The Inner Eye | partial | item-composition |  | 1 (treasure) | yes | Triple-shot caller 519FC0 and shared fire-delay multiplier; readset-limited. [Notes](item-composition-coverage.md). |
-| 3 | Spoon Bender | partial | stat-cache |  | 1 (treasure) | yes | Move speed ported; homing tear flag is source-only. |
+| 3 | Spoon Bender | partial | stat-cache |  | 1 (treasure) | yes | Move speed ported. Homing (flag 4) ported for ordinary tears: Tear.Update 542675 target search and steering, including the factory's immediate update; sets 3 and 3+70+121 against a Gaper match. Homing on lasers, knives and bombs is not ported. |
 | 4 | Cricket's Head | partial | damage-fire-delay `passive-4-phase-*` |  | 2 (treasure, goldenChest) | yes | Damage tier ported; readset-limited. |
 | 5 | My Reflection | missing |  |  | 1 (treasure) | yes |  |
 | 6 | Number One | partial | item-composition |  | 1 (treasure) | yes | FireDelay tier, range and regular tear variant; readset-limited. |
