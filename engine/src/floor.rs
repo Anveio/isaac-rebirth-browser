@@ -1115,38 +1115,82 @@ fn attempt(
         shop,
         &mut descriptors,
     );
-    let mut generated_to_descriptor = vec![None; fitting.rooms.len()];
+    // Level AddRoom 584bc0 writes the descriptor's index into every grid
+    // cell its RoomData covers (width / 13 by height / 7 cells from the
+    // generated origin), in descriptor order, so a later room overwrites an
+    // earlier footprint. Normal placement selects templates of the generated
+    // shape; a template larger than its generated room (an authored Start
+    // Room) keeps only the cells no later descriptor takes.
+    let footprint = |descriptor: &Descriptor| {
+        let mut room = fitting.rooms[descriptor.generated_index].clone();
+        room.width = i32::from(descriptor.template.width) / 13;
+        room.height = i32::from(descriptor.template.height) / 7;
+        room
+    };
+    let mut grid = vec![-1; GRID_CELLS];
     for descriptor in &descriptors {
-        generated_to_descriptor[descriptor.generated_index] = Some(descriptor.index);
-    }
-    for descriptor in &mut descriptors {
-        descriptor.door_mask = fitting.mask(descriptor.generated_index);
-        let room = &fitting.rooms[descriptor.generated_index];
-        for (slot, cell) in slots(room) {
-            if valid_slot(room, slot) {
-                descriptor.neighbors[slot as usize] = cell_index(cell)
-                    .and_then(|cell| usize::try_from(fitting.grid[cell]).ok())
-                    .and_then(|index| {
-                        if index == room.index {
-                            None
-                        } else {
-                            generated_to_descriptor[index]
-                        }
-                    });
+        let room = footprint(descriptor);
+        for row in 0..room.height {
+            for column in 0..room.width {
+                if let Some(cell) = cell_index(Cell {
+                    x: room.origin.x + column,
+                    y: room.origin.y + row,
+                }) {
+                    grid[cell] = descriptor.index as i32;
+                }
             }
         }
     }
-    let grid = fitting
-        .grid
+    // Level 587210 then walks the descriptors in order. Descriptor+18[slot]
+    // is the cell beyond each slot of the RoomData footprint; the door bit
+    // the generator gave (Descriptor+10) survives only when that cell holds
+    // a room whose own mask still has the door facing back (587190, the
+    // facing slot from 587070). A secret room (type 7) first opens a door
+    // its RoomData allows on both sides. A Start Room larger than its
+    // generated cell therefore keeps only the generated directions, each
+    // now leading to the cell beyond its footprint.
+    let beyond: Vec<[Option<usize>; 8]> = descriptors
         .iter()
-        .map(|index| {
-            if *index < 0 {
-                -1
-            } else {
-                generated_to_descriptor[*index as usize].expect("all source rooms assigned") as i32
+        .map(|descriptor| {
+            let mut cells = [None; 8];
+            for (slot, cell) in slots(&footprint(descriptor)) {
+                cells[slot as usize] = cell_index(cell);
             }
+            cells
         })
         .collect();
+    for descriptor in &mut descriptors {
+        descriptor.door_mask = fitting.mask(descriptor.generated_index);
+    }
+    for index in 0..descriptors.len() {
+        for slot in 0..8u8 {
+            let bit = 1u64 << slot;
+            let Some((cell, target)) = beyond[index][slot as usize]
+                .and_then(|cell| Some((cell, usize::try_from(grid[cell]).ok()?)))
+            else {
+                descriptors[index].door_mask &= !bit;
+                continue;
+            };
+            let back = crate::maze::entry_slot(&descriptors[target], cell, (slot + 2) & 3);
+            if descriptors[index].template.room_type == 7
+                && descriptors[index].template.door_mask & bit != 0
+                && descriptors[target].template.door_mask & (1 << back) != 0
+            {
+                descriptors[index].door_mask |= bit;
+                descriptors[target].door_mask |= 1 << back;
+            }
+            if descriptors[target].door_mask & (1 << back) == 0 {
+                descriptors[index].door_mask &= !bit;
+            }
+        }
+    }
+    for (descriptor, cells) in descriptors.iter_mut().zip(&beyond) {
+        for slot in 0..8 {
+            descriptor.neighbors[slot] = cells[slot]
+                .filter(|_| descriptor.door_mask & (1 << slot) != 0)
+                .and_then(|cell| usize::try_from(grid[cell]).ok());
+        }
+    }
     Ok(Some(Placed { descriptors, grid }))
 }
 

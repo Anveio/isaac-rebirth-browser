@@ -93,8 +93,14 @@ export function roomRows(rows, source, actual) {
   check(rows, 'room.grid', [source.room.gridWidth, source.room.gridHeight], actual.room.grid && [actual.room.grid.width, actual.room.grid.height]);
   check(rows, 'room.combatClear', source.room.combatClear, actual.room.combatClear);
   // The Basement overlay's per-room offsets (fxlayers.xml fx 2): the only
-  // layered fx entry; the port's origin adds the 663x429 centring offsets.
-  const overlay = actual.room.appearance?.fx?.overlayOrigin;
+  // layered fx entry. The port's origin adds the centring of the overlay's
+  // natural size on the Room centre (room.rs overlay_shape): half the size
+  // minus (240, 135), which moves 13 px per tile past a 13x7 room.
+  const fx = actual.room.appearance?.fx, overlay = fx?.overlayOrigin;
+  const overlaySize = { '1x1': [663, 429], '1x2': [663, 702], '2x1': [1170, 429],
+    '2x2': /\/(depths|womb)\//.test(fx?.overlay ?? '') ? [976, 702] : [976, 578] }[fx?.overlay?.match(/(\dx\d)_overlay_/)?.[1]];
+  const centring = overlaySize && [overlaySize[0] * 0.5 - (240 + (actual.room.appearance.columns - 17) * 13),
+    overlaySize[1] * 0.5 - (135 + (actual.room.appearance.rows - 11) * 13)];
   // FX+0x38 (54a5b6): the selected fxRays group, -1 when none.
   check(rows, 'stage.fxRayGroup', source.fxRayGroup, actual.room.appearance.fxRays?.index ?? -1);
   // Render 547890 adds animationSpeed (+4) to each ray's f32 phase (+8) on
@@ -110,7 +116,7 @@ export function roomRows(rows, source, actual) {
     }) ?? []);
   }
   check(rows, 'stage.overlayOffset', source.fxLayers?.flat().map(([x, y]) => [f32(x), f32(y)]),
-    overlay && [[f32(overlay.x - (663 - 480) * 0.5), f32(overlay.y - (429 - 270) * 0.5)]]);
+    overlay && centring && [[f32(overlay.x - centring[0]), f32(overlay.y - centring[1])]]);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
   // A 0/0 fill is NaN on both sides: native keeps its bits, JSON gives null.
   const nativeFill = source.bossBar && (source.bossBar.fill === null ? 'NaN' : f32(source.bossBar.fill));
