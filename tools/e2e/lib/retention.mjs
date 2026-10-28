@@ -7,7 +7,7 @@
 //     embedded in large browser evidence archives are kept beside them (the
 //     --affected map is rebuilt from them);
 //   - a failing suite keeps everything until its run falls out of the newest
-//     --keep-runs runs.
+//     --keep-runs runs, or at once when the disk runs low mid-run (run.mjs).
 // Only runner-created run directories under .cache/e2e are ever pruned.
 import { createReadStream, createWriteStream, existsSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

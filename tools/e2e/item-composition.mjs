@@ -44,7 +44,7 @@ if (pocketMode) assert.ok(['init', 'collection', 'all'].includes(pocketMode), 'U
 const recordedBankDirectory = trinketStartMode ? 'LOCAL_RECORDED_TRINKET_START_BANK' : pocketMode ? 'references/isaac/foundation/pockets/history'
   : 'references/isaac/foundation/item-composition/history';
 if (hasFlag('--help')) {
-  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items [--npc-freeze] [--npc-fear] | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--output DIR]');
+  console.log('item-composition [--pockets all|init|collection | --trinket-start] [--pill-use | --active-items [--npc-freeze] [--npc-fear] | --pocket-actions] [--count 2 | --scenarios BANK] [--production DIST | --wasm-node WASM --wasm-sha SHA [--reuse-original DIR]] [--prepare-only] [--sequential-captures] [--output DIR]');
   console.log('Fixed and recorded OS cases; exact --scenarios replay never draws entropy. Preparation runs neither game.');
   console.log(pillUseMode ? 'Replay with --scenarios PATH from the recorded Pill-use run'
     : `Recorded replay: --scenarios ${recordedBankDirectory}/scenarios.json`);
@@ -431,7 +431,12 @@ try {
     await save(join(output, 'report.json'), report);
     console.log(JSON.stringify({ case: declaration.name, status: 'started' }));
     const originalDirectory = reusedOriginal ? resolve(reusedOriginal) : join(directory, 'original');
-    try {
+    const portDirectory = join(directory,wasmNode?'wasm':'browser');
+    // The two captures share nothing: the original runs on the clock gate's
+    // virtual clock and the paused page only by explicit steps, so they run
+    // side by side (--sequential-captures restores one after the other).
+    // Comparisons wait for both.
+    const captureOriginal = async () => { try {
       if (reusedOriginal) {
         if (trinketStartMode || declaration.activeItems?.npcFreeze || declaration.activeItems?.npcFear) {
           const captureReport = JSON.parse(await readFile(join(dirname(dirname(originalDirectory)), 'report.json'), 'utf8'));
@@ -465,11 +470,9 @@ try {
         ...(trinketStartMode ? ['--trinket-start-events'] : []));
       result.original = await child('python3', args, join(directory, 'original.log'));
       }
-    } catch (error) { result.errors.push('Original: ' + String(error)); }
+    } catch (error) { result.errors.push('Original: ' + String(error)); } };
     // Every declared browser case is attempted even when its native capture fails.
-    if (!hasFlag('--prepare-only')) {
-      const portDirectory = join(directory,wasmNode?'wasm':'browser');
-      try {
+    const capturePort = async () => { try {
         if (wasmNode) {
           await mkdir(portDirectory);
           const node = await child(process.execPath,[join(ROOT,'tools/foundation/composition-wasm-public.mjs'),
@@ -477,7 +480,11 @@ try {
             join(directory,'wasm.log'));
           result.wasmCapture = node;
         } else result.browserCapture = await captureComposition(browser, server, declaration, portDirectory);
-      } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); }
+      } catch (error) { result.errors.push((wasmNode?'WASM: ':'Browser: ') + String(error)); } };
+    if (hasFlag('--prepare-only')) await captureOriginal();
+    else if (hasFlag('--sequential-captures')) { await captureOriginal(); await capturePort(); }
+    else await Promise.all([captureOriginal(), capturePort()]);
+    if (!hasFlag('--prepare-only')) {
       for (const [key, tool, args] of [
         ['captureReadback', 'composition-readback.py', ['--directory', directory, ...(wasmNode?['--wasm-node','--wasm-artifact',resolve(wasmNode),'--wasm-sha',wasmSha]:[]), ...(reusedOriginal?['--original-directory',originalDirectory]:[])]],
         ['comparison', pocketActionsMode ? 'pocket-actions-state-pair.py' : pillUseMode ? 'pill-range-use-state-pair.py' : activeItemsMode ? 'active-items-state-pair.py' : pocketMode ? 'pocket-state-pair.py' : 'composition-state-pair.py', ['--original', join(originalDirectory, 'manifest.json.gz'),

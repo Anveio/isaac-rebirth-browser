@@ -185,13 +185,13 @@ const reportPath = join(runDirectory, 'report.json');
 mkdirSync(runDirectory, { recursive: true });
 writeJson(reportPath, report);
 
+const LOW_DISK = 12 * 2 ** 30;
 // Retention (tools/e2e/lib/retention.mjs): older runs keep their reports,
 // scenarios, cases, logs and small files; killed suites' dist copies go.
 if (!keepEvidence) {
   for (const directory of sweepProductionSnapshots()) console.log(`swept stale production snapshot ${directory}`);
   // A full entities run alone writes several GB; below LOW_DISK free, every
   // older run is slimmed, not just those beyond --keep-runs.
-  const LOW_DISK = 12 * 2 ** 30;
   const low = freeBytes(ROOT) < LOW_DISK;
   if (low) console.log(`low disk (${Math.round(freeBytes(ROOT) / 2 ** 30)} GB free): slimming every older run`);
   for (const run of await pruneRuns(join(ROOT, '.cache/e2e'), low ? 1 : keepRuns, runDirectory))
@@ -271,8 +271,13 @@ function runSuiteInSlot(suite) {
         result.replayArgs = replayArgs(suite, directory);
         if (result.replayArgs) result.replay = `npm run test:e2e -- ${suite.id} ${mergeReplayArgs(suite.id, overrides, result.replayArgs).map(shellQuote).join(' ')}`;
       }
-      // A passing suite keeps what replay and triage need; a failing one keeps everything.
-      else if (!keepEvidence) result.retention = await slimSuite(directory);
+      // A passing suite keeps what replay and triage need; a failing one keeps
+      // everything, unless the disk runs low: thirty failing suites of a full
+      // run hold ~10 GB, and refusing the suites after them grades nothing.
+      if (!keepEvidence && (result.status === 'pass' || freeBytes(ROOT) < LOW_DISK)) {
+        result.retention = await slimSuite(directory);
+        if (result.status === 'fail') console.log(`low disk: slimmed failing ${suite.id} to its replay inputs and logs (--keep-evidence keeps all)`);
+      }
       report.suites.push(result);
       writeJson(reportPath, report);
       console.log(`${result.status === 'pass' ? '✔' : '✘'} ${suite.id} (${result.seconds}s)${result.status === 'fail' ? ` log: ${relative(ROOT, logPath)}` : ''}`);
