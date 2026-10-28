@@ -161,8 +161,8 @@ impl Wardrobe {
                 let group = body_group(slot);
                 // 50EF2E and 50EF46: a lower priority, or a non-flying
                 // costume's body layer while flying, only feeds the skin.
-                let assigned = self.slots[slot].priority <= priority
-                    && !(flying && !entry.is_flying && group);
+                let assigned =
+                    self.slots[slot].priority <= priority && !(flying && !entry.is_flying && group);
                 if assigned {
                     let split = current == base && count != 0 && slot != 0 && group != first_group;
                     let target = if split && group {
@@ -227,7 +227,11 @@ impl Wardrobe {
             let Ok(index) = usize::try_from(self.slots[slot].entry) else {
                 continue;
             };
-            let clip = if body_group(slot) { "WalkDown" } else { "HeadDown" };
+            let clip = if body_group(slot) {
+                "WalkDown"
+            } else {
+                "HeadDown"
+            };
             set_frame(&mut self.entries[index], clip, 0);
         }
     }
@@ -235,7 +239,9 @@ impl Wardrobe {
 
 fn set_frame(entry: &mut Entry, clip: &str, frame: i32) {
     if let Some(found) = content::costume_clip(&entry.actor, clip) {
-        entry.sprite.set_frame_with_frames(clip, frame, found.frames);
+        entry
+            .sprite
+            .set_frame_with_frames(clip, frame, found.frames);
     }
 }
 fn play(sprite: &mut CostumeSprite, actor: &str, clip: &str) -> bool {

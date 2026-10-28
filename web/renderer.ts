@@ -907,23 +907,25 @@ export class Renderer {
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
     const [RedTint, GreenTint, BlueTint] = state.stageEffects.actorTint;
+    // Player+2C4 scales the Player's own sprite in every pose (5098D0's
+    // extra-animation path draws only that sprite, without costumes).
+    const wardrobe = state.playerItems?.wardrobe ?? null;
+    const scale = wardrobe?.spriteScale[0] ?? 1;
     if (state.playerAnimation.current) {
       this.assets.draw(ctx, PLAYER, state.playerAnimation.current, x, y, state.playerAnimation.frame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       if (state.playerAnimation.current === "UseItem") this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
     if (state.playerItems?.pickupAnimationGuard) {
       this.assets.draw(ctx, PLAYER, "Pickup", x, y, state.playerItems.pickupAnimationFrame,
-        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])) });
+        { overrides: Object.fromEntries(Array.from({length: 5}, (_, layer) => [layer, {RedTint, GreenTint, BlueTint}])), scale });
       this.pickups.drawCarried(ctx, state, x, y);
       return;
     }
     // Player render 509C49: glow (5096A0), body slots 1..3 (509700), head
     // slots 4..10 (5097D0) and top0 (509870). Each slot draws its costume
     // entry's layer, else the Player's own layer (wardrobe.rs).
-    const wardrobe = state.playerItems?.wardrobe ?? null;
-    const scale = wardrobe?.spriteScale[0] ?? 1;
     const playerSheets = wardrobe ? this.assets.skinSheets(PLAYER, wardrobe.playerSkin) : undefined;
     const tint = { RedTint, GreenTint, BlueTint };
     for (let slot = 0; slot <= 11; slot++) {

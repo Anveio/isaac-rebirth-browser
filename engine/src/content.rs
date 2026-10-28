@@ -107,9 +107,9 @@ include!(concat!(env!("OUT_DIR"), "/costume_configs.rs"));
 /// passive, active or familiar row with its id (the row's type need not match
 /// the item's own kind, e.g. 130 and 181).
 pub fn collectible_costume(id: u32) -> Option<&'static CostumeConfig> {
-    COSTUME_CONFIGS.iter().find(|config| {
-        config.id == id && matches!(config.kind, "passive" | "active" | "familiar")
-    })
+    COSTUME_CONFIGS
+        .iter()
+        .find(|config| config.id == id && matches!(config.kind, "passive" | "active" | "familiar"))
 }
 
 pub fn costume_clip(actor: &str, name: &str) -> Option<CostumeClip> {
