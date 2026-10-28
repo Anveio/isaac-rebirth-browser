@@ -320,6 +320,53 @@ fn costume_clip_catalog(path: &Path) -> String {
     output
 }
 
+/// Every costumes2.xml row (catalogue.json) with its actor's layer names,
+/// the config 57C9C4 parses into each ItemConfig costume record.
+fn costume_config_catalog(catalogue: &Path, actors: &Path) -> String {
+    let catalogue: Value = serde_json::from_str(
+        &fs::read_to_string(catalogue)
+            .expect("read imported item catalogue; run npm run assets:items"),
+    )
+    .expect("parse imported item catalogue");
+    let actors: Value = serde_json::from_str(
+        &fs::read_to_string(actors)
+            .expect("read imported costume animations; run npm run assets:items"),
+    )
+    .expect("parse imported costume animations");
+    let mut output = String::from("pub static COSTUME_CONFIGS: &[CostumeConfig] = &[\n");
+    for row in catalogue["costumes"].as_array().expect("costume rows") {
+        let actor = row["actor"].as_str().expect("costume actor");
+        let layers = actors[actor]["Layers"]
+            .as_array()
+            .expect("costume actor layers")
+            .iter()
+            .map(|layer| {
+                format!(
+                    "({}, {:?})",
+                    layer["Id"].as_i64().expect("layer id"),
+                    layer["Name"].as_str().expect("layer name")
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+        let flag = |name: &str| row[name].as_bool().unwrap_or(false);
+        output.push_str(&format!(
+            "CostumeConfig {{ id: {}, kind: {:?}, actor: {actor:?}, priority: {}, skin_color: {}, \
+             is_flying: {}, overwrite_color: {}, has_skin_alt: {}, has_overlay: {}, layers: &[{layers}] }},\n",
+            row["id"].as_i64().expect("costume id"),
+            row["type"].as_str().expect("costume type"),
+            row["priority"].as_i64().unwrap_or(0),
+            row["skinColor"].as_i64().unwrap_or(-1),
+            flag("isFlying"),
+            flag("overwriteColor"),
+            flag("hasSkinAlt"),
+            flag("hasOverlay"),
+        ));
+    }
+    output.push_str("];\n");
+    output
+}
+
 fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     let actors: Value = serde_json::from_str(
         &fs::read_to_string(path).expect("read authored Familiar/effect animations"),
@@ -1346,6 +1393,16 @@ fn main() {
         costume_clip_catalog(&costumes),
     )
     .expect("write imported costume clips");
+    let catalogue = manifest
+        .parent()
+        .unwrap()
+        .join("web/generated/item-assets/catalogue.json");
+    println!("cargo:rerun-if-changed={}", catalogue.display());
+    fs::write(
+        output.join("costume_configs.rs"),
+        costume_config_catalog(&catalogue, &costumes),
+    )
+    .expect("write imported costume configs");
     let creep_masks = manifest.parent().unwrap().join("web/creep-mask-data.json");
     println!("cargo:rerun-if-changed={}", creep_masks.display());
     fs::write(

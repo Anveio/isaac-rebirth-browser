@@ -63,6 +63,15 @@ for (const file of catalogues) {
     }
   }
 }
+// A costume or the Player's own sheet reloads in a skin colour (50EDC0
+// 50F65C: _white, _black, _blue, _red, _green); pack every coloured copy.
+for (const path of [...sheets.keys()].filter(path => path.startsWith('gfx/characters/'))) {
+  for (const suffix of ['_white', '_black', '_blue', '_red', '_green']) {
+    const variant = path.replace(/\.png$/, `${suffix}.png`);
+    const source = onDisk.get(variant);
+    if (source) sheets.set(variant, source);
+  }
+}
 if (problems.length) {
   for (const problem of [...new Set(problems)].sort()) console.error(problem);
   console.error(`Sprite pack: ${problems.length} unresolved references`);

@@ -25,6 +25,15 @@ export interface Costume229 {
   priority: number; historyFrontier: string | null; mainClipFrontier: boolean;
   lastShootMainClipBa8: string | null;
 }
+export interface CostumeSprite { clip: string; frame: number; playing: boolean; overrideActive: boolean }
+/** The Player's costumes (engine/src/wardrobe.rs): entries, the 13 layer slots and the sprite scales. */
+export interface Wardrobe {
+  entries: {item: number; actor: string; sprite: CostumeSprite; overlay: CostumeSprite | null; priority: number;
+    isFlying: boolean; hasOverlay: boolean; hasSkinAlt: boolean; skinColor: number; overwriteColor: boolean; sheetSkin: number}[];
+  slots: {entry: number; layer: number; priority: number}[];
+  headSkin: number; bodySkin: number; playerSkin: number;
+  spriteScale: [number, number]; layerScales: [number, number][];
+}
 export interface Tear {
   id: number; x: number; y: number; vx: number; vy: number; age: number;
   spawnSeed: number; sourceVariant: number | null; collisionRadius: number; gridContact: boolean;
@@ -407,6 +416,7 @@ export interface State {
     technologyEyeRegistered: boolean | null;
     costume229?: Costume229 | null;
     costumeRegistrations?: {configurationIds: number[]} | null;
+    wardrobe?: Wardrobe | null;
     ownedCounts: number[]; temporaryCollectibles: {itemId: number; count: number; cooldown: number}[]; queuedId: number | null; queuedConfigKind?: 1 | 2 | 3 | 4 | null; queuedCharge: number; queuedTouched: boolean;
     queryHistory?: { permanentCounts: boolean; temporaryRecords: boolean; temporarySourceCache?: {maskCf8: number | null; pendingD18: boolean | null} | null; temporaryUnknownInputs?: { configKind: number; itemId: number }[]; trinketSlots: boolean; primaryC08: boolean; damageHealthKnown?: boolean; cachedCallbacks?: number; temporaryEvaluation?: { possibleCacheMask: number | null; writerPcs: number[] }; unresolvedEffects?: Record<string, string> };
     pickupAnimationFrame: number; pickupAnimationPlaying: boolean; pickupAnimationGuard: boolean;

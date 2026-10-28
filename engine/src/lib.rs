@@ -150,6 +150,7 @@ pub mod player_animation;
 pub mod player_costume118;
 pub mod player_costume229;
 mod player_costume_registration;
+pub mod wardrobe;
 pub mod player_death;
 mod player_footprints;
 pub mod player_items;
@@ -2474,6 +2475,10 @@ impl Game {
         let mut player_items = player_items::PlayerItems::new(run_seeds.initialized_fields[12])?;
         run.player_items
             .restore_after_constructor(&mut player_items)?;
+        // A saved Player's costume entries are not restored.
+        if player_items.owned_counts.iter().any(|count| *count != 0) {
+            player_items.wardrobe = None;
+        }
         player_items.manager_rng = context
             .player_manager_rng
             .ok_or("saved manager RNG is unknown")?;
@@ -7039,6 +7044,10 @@ impl Game {
         player_items::advance_item_sprite(&mut self.state, phase);
         player_costume118::advance_full(&mut self.state, phase);
         player_costume229::advance_full(&mut self.state, phase);
+        wardrobe::sync_head(&mut self.state);
+        if phase == phase::Phase::Update {
+            wardrobe::advance_full(&mut self.state);
+        }
         if self.state.player.input_cooldown > 0 {
             self.state.player.input_cooldown -= 1;
         }
