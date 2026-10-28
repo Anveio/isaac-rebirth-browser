@@ -1,4 +1,5 @@
-//! Base Settings+10 and MinimapManager5B0F60; no map state feeds gameplay RNG.
+//! Base Settings+10 and MinimapManager5B0F60. Only the Curse of the Maze
+//! teleport shake draws from the shared MT.
 use serde::{Deserialize, Serialize};
 
 /// Independently declared settings input, admitted before menu construction.
@@ -38,9 +39,40 @@ pub struct MapPresentation {
     pub held_frames: u32,
     pub small_alpha: f32,
     pub expanded_alpha: f32,
+    /// MinimapManager+209D0: Full updates left of the shake a Curse of the
+    /// Maze teleport starts (5aeb00).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub shake: i32,
+    /// MinimapManager+209D4, the shake's offset of the small map.
+    #[serde(default, skip_serializing_if = "is_origin")]
+    pub shake_offset: [f32; 2],
+}
+
+fn is_zero(value: &i32) -> bool {
+    *value == 0
+}
+
+fn is_origin(value: &[f32; 2]) -> bool {
+    *value == [0.0; 2]
 }
 
 impl MapPresentation {
+    /// 5B0FC1, after the held-map request: each Full of a running shake
+    /// takes one shared direction (42e8d0) and moves the offset to half its
+    /// value plus that direction scaled by the remaining count over 10.
+    pub fn advance_shake(&mut self, shared: &mut crate::mt::Mt19937) {
+        if self.shake <= 0 {
+            return;
+        }
+        self.shake -= 1;
+        let scale = self.shake as f32 / 10.0;
+        let direction = crate::boil::direction(shared);
+        self.shake_offset = [
+            self.shake_offset[0] * 0.5 + direction.x * scale,
+            self.shake_offset[1] * 0.5 + direction.y * scale,
+        ];
+    }
+
     /// Exactly one Game Full callback, after its transition/pause guards.
     /// The return value is5B1240's ten-held-Full request to585500.
     pub fn advance_full(&mut self, held: bool, opacity: f32) -> bool {
