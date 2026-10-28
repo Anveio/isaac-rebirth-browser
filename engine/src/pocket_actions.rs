@@ -79,9 +79,7 @@ fn refuse(state: &mut State, frontier: Frontier, possible_drop: bool) {
             crate::ordinary_placement::Frontier::PocketEffects,
         );
     }
-    if !state.controls_menu.unavailable_actions.contains(&11) {
-        state.controls_menu.unavailable_actions.push(11);
-    }
+    state.controls_menu.unavailable_actions.push(11);
 }
 
 ///Readsets for the admitted52EEC0 arm. Positive Trinkets (including53),
@@ -272,7 +270,22 @@ fn drop_pockets(state: &mut State, anchor: WorldVector) -> Result<(), String> {
 ///post-Base, pre-grid position; later movement in the port cannot relocate its
 ///source FindFreePosition anchor. No controls/cooldown/action10 gate exists
 ///inside52F000 itself, and phase interpolation does not halve this counter.
+///
+/// One Player callback's Ctrl handling. A tick that reaches several
+/// refusals (the swap and then the held drop) reports action 11 unavailable
+/// once, like the other global actions; a batched Tick reports it once per
+/// tick, as the same single Ticks do.
 pub(crate) fn advance(state: &mut State, anchor: WorldVector) -> Result<(), String> {
+    let start = state.controls_menu.unavailable_actions.len();
+    let result = advance_tick(state, anchor);
+    let mut tick = state.controls_menu.unavailable_actions.split_off(start);
+    let mut reported = false;
+    tick.retain(|action| *action != 11 || !std::mem::replace(&mut reported, true));
+    state.controls_menu.unavailable_actions.extend(tick);
+    result
+}
+
+fn advance_tick(state: &mut State, anchor: WorldVector) -> Result<(), String> {
     let held = state.public_actions.held[11];
     let triggered = state.public_actions.triggered[11];
     match state.player.entity_source {
