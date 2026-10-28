@@ -298,6 +298,13 @@ async function boot() {
     if (!response.ok) throw new Error(`Sandbox resources failed to load: ${response.status}`);
     game.reset(randomSeed(), { bootEpochSeed, resources: await response.json() as ResourceInputs });
   }
+  // Port-only debug sandbox floor: compiled out unless npm run dev:sandbox.
+  if (__DEBUG_SANDBOX__) {
+    const sandboxControls = engine.debugSandbox();
+    if (!sandboxControls) throw new Error("dev:sandbox page needs the debug-sandbox WASM build");
+    const { mountDebugSandbox } = await import("./debug-sandbox");
+    mountDebugSandbox(sandboxControls, () => currentState, () => { currentState = engine.snapshot(); draw(currentState); });
+  }
   draw(currentState);
   status.hidden = !saveFailureVisible;
   document.body.dataset.ready = 'true';

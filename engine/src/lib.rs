@@ -41,6 +41,8 @@ mod controlled_technology;
 mod creep_effects;
 pub mod critters;
 pub mod deaths_head;
+#[cfg(feature = "debug-sandbox")]
+pub mod debug_sandbox;
 pub mod difficulty;
 pub mod dingle;
 pub mod dips;
@@ -7058,6 +7060,59 @@ pub extern "C" fn set_boot_elapsed(milliseconds: u32, sub_millisecond_nanosecond
             1
         }
     }
+}
+/// Debug sandbox floor exports (cargo feature `debug-sandbox` only).
+#[cfg(feature = "debug-sandbox")]
+fn debug_sandbox(action: impl FnOnce(&mut State) -> Result<(), String>) -> u32 {
+    let result = GAME.with(|state| match state.borrow_mut().as_mut() {
+        Some(game) => action(&mut game.state),
+        None => Err(format!("{} requires a reset game", debug_sandbox::MARKER)),
+    });
+    match result {
+        Ok(()) => {
+            ERROR.with(|error| error.borrow_mut().clear());
+            0
+        }
+        Err(message) => {
+            ERROR.with(|error| *error.borrow_mut() = message.into_bytes());
+            1
+        }
+    }
+}
+#[cfg(feature = "debug-sandbox")]
+#[no_mangle]
+pub extern "C" fn debug_sandbox_slots() -> u32 {
+    GAME.with(|state| {
+        state
+            .borrow()
+            .as_ref()
+            .and_then(|game| debug_sandbox::slots(&game.state).ok())
+            .map_or(0, |slots| slots.len() as u32)
+    })
+}
+#[cfg(feature = "debug-sandbox")]
+#[no_mangle]
+pub extern "C" fn debug_sandbox_clear() -> u32 {
+    debug_sandbox(|state| {
+        debug_sandbox::clear(state);
+        Ok(())
+    })
+}
+#[cfg(feature = "debug-sandbox")]
+#[no_mangle]
+pub extern "C" fn debug_sandbox_place(subtype: u32, slot: u32) -> u32 {
+    debug_sandbox(|state| debug_sandbox::place(state, subtype, slot))
+}
+#[cfg(feature = "debug-sandbox")]
+#[no_mangle]
+pub extern "C" fn debug_sandbox_enemy(entity_type: u32, variant: u32) -> u32 {
+    debug_sandbox(|state| {
+        debug_sandbox::enemy(
+            state,
+            u16::try_from(entity_type).map_err(|_| "enemy type out of range")?,
+            u16::try_from(variant).map_err(|_| "enemy variant out of range")?,
+        )
+    })
 }
 #[no_mangle]
 pub extern "C" fn abi_version() -> u32 {

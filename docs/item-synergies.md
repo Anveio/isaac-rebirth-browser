@@ -218,20 +218,24 @@ acceptance gate stays the public-input sandbox cases above.
 ## Debug sandbox floor (port only, compiled out of release)
 
 Base Rebirth has no item room (Death Certificate is Repentance-only), so the
-port adds its own for playtests:
+port adds its own for playtests. `npm run dev:sandbox` serves it:
 
-- **Floor and enemy.** A debug-only floor lists every imported collectible and
-  trinket on pedestals, paged across rooms by pool. Isaac can pick up any
-  number of items. A selector spawns a chosen enemy or boss to fight.
-- **Recording.** A *record case* control exports the current item set, trinket
-  and enemy to the case generator above. The same set then runs in both
-  games through the sandbox Challenge and records side by side. The
-  playtester can generate one case per pass with
-  `npm run sandbox:case -- --items ... --enemy ...`.
-- **Compiled out.** The floor is behind a Rust cargo feature `debug-sandbox`
-  and a Vite define. The release build and `npm run playtest:bundle` build
-  without them. `check:build` scans the shipped bundle for the sandbox marker
-  strings, so a leaked debug floor fails the build.
+- **Pedestals and enemy.** A panel (`web/debug-sandbox.ts`) pages through
+  every imported collectible, filtered by pool. *Lay out this page* replaces
+  the current room's untaken pedestals with that page (up to 14 in a 1x1
+  room, away from Isaac). Isaac picks up any number of them normally. A
+  type.variant field spawns any ported enemy or boss in the room. Loose
+  trinket pickups are not ported, so a trinket is chosen for the recorded
+  case only, where the sandbox Challenge grants it.
+- **Recording.** *Record case* prints `npm run sandbox:case -- --items ...
+  [--trinket N] [--enemy T.V]` for the held collectibles. That command runs
+  the generated case in both games and grades it field by field.
+- **Compiled out.** The engine side (`engine/src/debug_sandbox.rs`) is behind
+  the cargo feature `debug-sandbox`. The page side is behind the Vite define
+  `__DEBUG_SANDBOX__`. Only `npm run dev:sandbox` sets them; `npm run build`
+  and `npm run playtest:bundle` do not. `check:build` ends with `npm run
+  bundle:check`, which fails if the sandbox marker, its exports or its module
+  appear anywhere in `dist/`.
 
 ## Order of work
 
@@ -246,12 +250,13 @@ port adds its own for playtests:
    - `passive_items` rows on top of `collectible_grants`;
    - per-block *ported/binary* columns in the tracker.
 3. The synergy pipeline:
-   - the item-set case generator;
-   - the per-field grader;
-   - the debug sandbox floor;
+   - the item-set case generator (done: `npm run sandbox:case`);
+   - the per-field grader (done: the `item-set` interaction);
+   - the debug sandbox floor (done: `npm run dev:sandbox`);
    - all pairs among already-ported items run and recorded.
 4. The one-time bulk import of every item, trinket and familiar (data and
-   assets).
+   assets). Done: `npm run assets:items` imports every costume and Familiar
+   actor and the collectible and trinket catalogue at build time.
 5. Behaviour, block by block and consumer by consumer, highest pool weight
    first. Each step is proven by generated live cases and updated in
    [items.md](items.md).
