@@ -25,7 +25,7 @@ composition is [item synergies](item-synergies.md).
 | trinket | 60 | 0 | 0 | 60 | 26 |
 | **all** | 403 | 7 | 51 | 345 | 128 |
 
-Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 4 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 10 match, 4 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -50,7 +50,7 @@ item ids the original's code for that mechanism queries
 | `tear-color` | Tear color | 511F10 block 0x40 at 513355 | 19 | partial |  |  |  |
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
-| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090's regular variant resolves when its whole readset is absent; any item it reads leaves the variant unknown. |
+| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090 is ported whole (tear_getter.rs): variant, color, flags, damage, scale and height for every item it reads, on FireTear kind 1. FireTear's own 69/154/182/309 preludes are not yet ported, so those items leave the tear unknown. |
 | `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
 | `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  | Every costume actor in costumes2.xml (223 rows) is imported at build time by `npm run assets:items` into ignored web/generated/item-assets, with its sheets in the sprite pack; registration (52CC90) and drawing are not ported. |
 | `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
@@ -67,9 +67,19 @@ passing live comparison.
 | 118 Brimstone + 114 Mom's Knife + 329 The Ludovico Technique | mismatch | item-composition-history |  | Ordered grant history; child cleanup and actor parity fail. |
 | 114 Mom's Knife + 118 Brimstone + 329 The Ludovico Technique | mismatch | item-composition |  | Knife-first route; failing public-WASM comparison retained. |
 | 152 Technology 2 + 169 Polyphemus | untested |  |  | Joint Technology 2 + Polyphemus has no qualified run. |
-| 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | mismatch | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port. |
+| 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | match | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields and the tear variant (50D090 blood tear from 7) match. |
 | 1 The Sad Onion + 4 Cricket's Head | mismatch | `npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated) |  | Every EvaluateItems field, luck, flight and the Familiar roster match; the enemy fight diverges: in the fixed run the original's Gaper dies and drops a coin while the port's becomes type 11 and lives; in the random run Isaac's and the enemy's positions drift. |
 | 286 Blank Card + 63 The Battery | untested | pickup-interactions `sandbox-*` |  | Active + passive pair; graded per interaction, not as a synergy. |
+| 89 Spider Bite + 103 The Common Cold | match | `npm run sandbox:case -- --items 89,103` (generated) |  | Getter rolls and tear flags for Spider Bite and Common Cold match. |
+| 228 Mom's Perfume | match | `npm run sandbox:case -- --items 228` (generated) |  | Mom's Perfume fear roll matches. |
+| 7 Blood of the Martyr + 48 Cupid's Arrow | match | `npm run sandbox:case -- --items 7,48` (generated) |  | Blood tear variant and Cupid's Arrow piercing match. |
+| 150 Tough Love | match | `npm run sandbox:case -- --items 150` (generated) |  | Tough Love tooth roll (bound 10-luck, damage x3.2, variant 2) matches. |
+| 257 Fire Mind | match | `npm run sandbox:case -- --items 257` (generated) |  | Fire Mind variant 5 and flag match. |
+| 259 Dark Matter | match | `npm run sandbox:case -- --items 259` (generated) |  | Dark Matter variant 6 and fear roll match. |
+| 231 Ball of Tar + 200 Mom's Eyeshadow + 201 Iron Bar | match | `npm run sandbox:case -- --items 231,200,201` (generated) |  | Ball of Tar, Mom's Eyeshadow and Iron Bar rolls match. |
+| 221 Rubber Cement + 336 Dead Onion | mismatch | `npm run sandbox:case -- --items 221,336` (generated) |  | Stats and getter fields match; Rubber Cement's bounce (flag 0x80000) is not ported, so the original's bounced tear outlives the port's. |
+| 110 Mom's Contacts | match | `npm run sandbox:case -- --items 110` (generated) |  | Mom's Contacts range matches now that Player.Init requests every cache callback (519A98). |
+| 230 Abaddon | match | `npm run sandbox:case -- --items 230` (generated) |  | Abaddon empties red hearts and grants six black hearts (52DC62). |
 
 ## Passive collectibles
 

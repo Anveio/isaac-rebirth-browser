@@ -63,6 +63,7 @@ pub mod squirt;
 mod surprise;
 pub mod tear_deaths;
 mod tear_factory;
+mod tear_getter;
 mod technology;
 mod technology2;
 pub use entities::{discovered_champion_color, implemented_npc_kinds, supports_npc_selector};
@@ -2283,6 +2284,13 @@ impl Game {
         // initializes the authored Player's 40-point grid collision class to 5.
         self.state.player.flying = Some(false);
         self.state.player.grid_collision_class = Some(5);
+        // 519870 clears D6C, then 519A98 (reached on every variant path)
+        // requests every cache callback; 52E340's 511F10 consumes it.
+        self.state
+            .player_items
+            .as_mut()
+            .ok_or("fresh Player.Init needs its item owner")?
+            .unevaluated_cache_flags = u32::MAX;
         if let Some(definition) = &challenge {
             challenges::configure_player(&mut self.state, definition)?;
         }
@@ -6985,26 +6993,17 @@ impl Game {
                 } else {
                     origin
                 };
-                let source_variant = if plan.flags == self.state.weapon_cache.flags_c98 {
-                    self.state
-                        .player_items
-                        .as_ref()
-                        .and_then(|owner| item_pipeline::ItemInputs::new(owner).ok())
-                        .and_then(|inputs| {
-                            inputs.neutral_regular_tear_variant(
-                                self.state.weapon_admission.source_player_type,
-                                self.state.weapon_cache.primary,
-                                plan.flags,
-                                item_queries::AppearanceQueries::new(
-                                    self.state.player_items.as_ref()?,
-                                    self.state.weapon_cache.primary,
-                                    self.state.player.entity_source,
-                                    None,
-                                ),
-                            )
-                        })
+                //5177F0 calls 50D090(kind1) after the eye draw and before
+                //the spawn seed; an unresolved getter leaves the variant
+                //unknown and draws nothing.
+                let getter = if plan.flags == self.state.weapon_cache.flags_c98 {
+                    tear_getter::fire_tear_kind1(&mut self.state)
                 } else {
                     None
+                };
+                let (plan, source_variant) = match getter {
+                    Some(properties) => (plan.with_getter(&properties)?, Some(properties.variant)),
+                    None => (plan, None),
                 };
                 tear_factory::fire(&mut self.state, plan, source_variant, origin, velocity)?;
                 self.state.fire_cooldown = plan.fire_delay;

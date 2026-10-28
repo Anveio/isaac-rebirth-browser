@@ -1275,6 +1275,25 @@ impl RegularTearPlan {
         Ok(self)
     }
 
+    /// FireTear's 50D090(kind1) result: damage (vtable+60), flags (541810),
+    /// size under 541FF0's .01 bound, color (vtable+58) and height (541790).
+    pub(crate) fn with_getter(
+        mut self,
+        properties: &crate::tear_getter::TearProperties,
+    ) -> Result<Self, String> {
+        self.damage = properties.damage;
+        self.flags = properties.flags;
+        self.color = properties.color;
+        self.scale = properties.scale.max(0.01_f32);
+        if !self.scale.is_finite() || !self.damage.is_finite() || !properties.height.is_finite() {
+            return Err("50D090 produced a nonfinite tear property".into());
+        }
+        self.animation_tier = projectiles::regular_animation_tier(self.scale)?;
+        self.collision_radius = projectiles::collision_radius(self.scale, 8.0)?;
+        self.parameters.height = properties.height;
+        Ok(self)
+    }
+
     pub(crate) fn resolve(
         stats: PlayerStats,
         max_fire_delay: i32,

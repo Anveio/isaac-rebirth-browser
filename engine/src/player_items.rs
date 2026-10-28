@@ -1605,6 +1605,12 @@ pub(crate) fn add_collectible(
             authored_grants(state, config);
         }
     }
+    //52DC62 Abaddon: BB8 red and BB4 max hearts to 0, then 508440(12).
+    if id == 230 {
+        state.player.hp = 0;
+        state.player.max_hp = 0;
+        add_black_hearts(&mut state.player, 12);
+    }
     //This is the actual reached default CFG effect, not an ID/loadout
     //whitelist. It never heals a prior missing producer history.
     //A plain active grant reaches the same 52CF87 default and 52D0D0 tail
