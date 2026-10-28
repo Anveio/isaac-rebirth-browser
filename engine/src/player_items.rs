@@ -509,16 +509,29 @@ impl PlayerItems {
     }
 
     /// Save518120→5180d0→5e3f80 erases real temporary records before the
-    /// Player stores. For35/45,517580 has only the costume-removal callback;
-    /// both pinned configs are costume-free and cache0. Other record kinds
-    /// retain their actual state until their removal effects are implemented.
+    /// Player stores. Each removal ORs config+24 and calls 517580. For an
+    /// active (kind3) record 517580 calls 510420(id, 1), whose costume removal
+    /// 5102f0 returns at once when config+60 (the costume ANM2) is empty, then
+    /// runs its own callback only for IDs 12, 66, 77, 93, 117, 282, 298 and
+    /// 299. A costume-free active outside that list (35, 45, 291, ...) is
+    /// therefore removed with no other effect. Costumed, listed or other
+    /// record kinds, and nonzero cache words, stay refused until their removal
+    /// effects are ported.
     pub(crate) fn clear_save_temporary_effects(&mut self) -> Result<u32, String> {
         let mut cache_flags = 0;
         for entry in &self.temporary_collectibles {
             let config = items::definition(entry.item_id)
                 .ok_or("saved temporary record requires its actual ItemConfig")?;
-            if !matches!(entry.item_id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
-                return Err("Player save requires an unmapped temporary removal callback".into());
+            const REMOVAL_CALLBACK_IDS: [u32; 8] = [12, 66, 77, 93, 117, 282, 298, 299];
+            if config.kind != 3
+                || config.cache_flags != 0
+                || REMOVAL_CALLBACK_IDS.contains(&entry.item_id)
+                || items::COSTUME_COLLECTIBLE_IDS.contains(&entry.item_id)
+            {
+                return Err(format!(
+                    "Player save requires an unmapped temporary removal callback (item {})",
+                    entry.item_id
+                ));
             }
             //5e3f80 ORs every removed record's config+24, independent of
             //its count/cooldown. No fitted use count controls this removal.
