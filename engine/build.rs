@@ -398,6 +398,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 22, "gfx/1000.022_creep (red).anm2"),
         (1000, 23, "gfx/1000.023_creep (green).anm2"),
         (1000, 24, "gfx/1000.024_creep (yellow).anm2"),
+        (1000, 32, "gfx/1000.032_lemon mishap.anm2"),
         (1000, 1, "gfx/1000.001_bomb explosion.anm2"),
         (1000, 30, "gfx/1000.030_dr. fetus target.anm2"),
         (1000, 31, "gfx/1000.031_dr. fetus rocket.anm2"),

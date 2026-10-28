@@ -299,6 +299,7 @@ export class Renderer {
     if (offset) ctx.translate(offset.x, offset.y);
     // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
     // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
+    // Lemon Mishap's 1000.32 shares the creep render words.
     for (const effect of state.spriteEffects) {
       if (!effect.creepEffect || !effect.visible || !effect.active) continue;
       const sprite = effect.sprite;
@@ -306,7 +307,8 @@ export class Renderer {
       ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
       ctx.scale(sprite.scale.x, sprite.scale.y);
       const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2"
-        : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2" : "gfx/1000.022_creep (red).anm2";
+        : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2"
+        : effect.variant === 32 ? "gfx/1000.032_lemon mishap.anm2" : "gfx/1000.022_creep (red).anm2";
       this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
         { color: { tint: sprite.tint, offsets: sprite.offsets } });
       ctx.restore();

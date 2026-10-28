@@ -20,10 +20,10 @@ composition is [item synergies](item-synergies.md).
 | Kind | Total | Complete | Partial | Missing | Missing but engine refs |
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
-| active | 75 | 7 | 21 | 47 | 7 |
+| active | 75 | 7 | 22 | 46 | 7 |
 | familiar | 55 | 0 | 1 | 54 | 1 |
 | trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 7 | 51 | 345 | 128 |
+| **all** | 403 | 7 | 52 | 344 | 128 |
 
 Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
 
@@ -323,7 +323,7 @@ passing live comparison.
 | 45 | Yum Heart | complete | `active-item-use` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 47 | Doctor's Remote | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 49 | Shoop da Whoop! | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
-| 56 | Lemon Mishap | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
+| 56 | Lemon Mishap | partial | `lemon-mishap-56-fixed-phase0`, `lemon-mishap-56-fixed-phase1` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
 | 58 | Book of Shadows | partial | active-items `shadows-58-fixed-phase1` |  | 2 (treasure, library) |  | See [active inventory](active-items.md). |
 | 65 | Anarchist Cookbook | partial | `anarchist-cookbook` |  | 2 (treasure, library) |  | See [active inventory](active-items.md). |
 | 66 | The Hourglass | missing |  |  | 1 (treasure) | yes | See [active inventory](active-items.md). |
