@@ -178,8 +178,10 @@ contracts see each command together with the host's answers:
   replayed tape's document is checked only when it loads, since it may
   predate a save format the engine now refuses);
 * Continue (54ECE0) resumes the saved record's character, difficulty,
-  challenge, seeds, stage and floor, whether this session saved the run or
-  a previous one.
+  challenge, seeds, stage and floor, and its visited rooms with the saved
+  room among them (#896), whether this session saved the run or a previous
+  one. A Continue is not a new run: the run-start contract (the starting
+  room of the seed's floor) covers new runs and GameOver restarts only.
 
 In a room it plays before it leaves:
 * It fights what is alive, lining up on one axis to fire along it. It keeps a

@@ -347,7 +347,11 @@ pub fn transition(before: &State, command: &Command, after: &State) {
             if menu_start {
                 props::reachable!("game: a run starts through the public menus");
             }
-            if run_started {
+            // Continue (54ECE0) resumes a saved run in its saved room with its
+            // visited rooms (#896), not a new run in the starting room;
+            // `saves::continued` checks it against the saved record.
+            let continued = menu_start && before.run_start_request.resume_saved;
+            if run_started && !continued {
                 let floor =
                     rebirth_cleanroom::stage_transition::curse_inputs(after).and_then(|curse| {
                         rebirth_cleanroom::floor::generate_normal_basement(

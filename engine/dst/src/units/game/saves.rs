@@ -353,14 +353,22 @@ fn continued(before: &Game, after: &Game, imported: Option<&Profiles>) {
                 && state.floor.stage == run.floor.stage
                 && state.floor.stage_seed == run.floor.stage_seed
                 && state.floor.grid == run.floor.grid
+                // The Level save keeps every descriptor's visited flag and
+                // the current room (#896). A long first Tick may carry the
+                // player on through a door, so later rooms may add to them.
+                && state.visited_rooms.is_superset(&context.visited_rooms)
+                && context.visited_rooms.contains(&run.current_room)
+                && state.visited_rooms.contains(&state.current_room)
         }),
-        "game: Continue resumes the saved run's character, seeds and floor",
+        "game: Continue resumes the saved run's character, seeds, floor and visited rooms",
         json!({
             "profile": before.state.profile,
             "saved": record.is_some(),
             "character": state.character,
             "seed": [&state.run_seed, record.map(|record| &record.run.run_seed)],
             "stage": [state.stage, state.stage_seed],
+            "room": [state.current_room, record.map(|record| record.run.current_room)],
+            "visited": [&state.visited_rooms, record.map(|record| &record.context.visited_rooms)],
         })
     );
     props::sometimes!(true, "game: a saved run is continued");
