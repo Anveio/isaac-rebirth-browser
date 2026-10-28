@@ -706,21 +706,28 @@ pub fn admit_room_combat(state: &mut State) {
 /// Fresh5cecc0 reads signed current16ac+pending16b0 after factories. A
 /// nonpositive total sets descriptor3d; a positive total preserves its flag.
 /// This is separate from the doorway's immediate update/countdown10 tail.
+/// It shuts no door. In the original the start room's doors Close on the
+/// first Room.Update (Game+ce9f4 = 1), so their SFX35 and its shared Random
+/// come two updates later (#862: two Boils kept the port 30 draws ahead).
+/// Which Room.Update call issues that Close is not identified, so only this
+/// start-room case is modelled.
 pub(crate) fn initialize_startup_clear(state: &mut State) {
     state.room.combat_clear_countdown = 0;
     if state.room.manager_counts.countable_total() <= 0 {
         state.room.combat_clear = true;
     }
-    if !state.room.combat_clear {
-        change_doors(state, false);
-    }
+    state.room.startup_close_pending = !state.room.combat_clear;
 }
 
 pub fn advance_room_clear(state: &mut State) -> Result<(), String> {
     // Room5d1487 checks signed dc+e0 after the full manager/contact pass.
     // It is independent of HP, visible actor count and current boss_count2490.
+    let startup_close = std::mem::take(&mut state.room.startup_close_pending);
     if state.room.manager_counts.countable_total() > 0 {
         state.room.combat_clear_countdown = 10;
+        if startup_close && !state.room.combat_clear {
+            change_doors(state, false);
+        }
     } else if state.room.combat_clear_countdown > 0 {
         state.room.combat_clear_countdown -= 1;
     } else {
