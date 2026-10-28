@@ -247,5 +247,20 @@
         "room:8"
       ]
     ]
+  },
+  {
+    "out": "coverage-boss-scene-key.json",
+    "final_extend": 30,
+    "steps": 400,
+    "cases": 32,
+    "stages": [
+      [
+        "room:5"
+      ],
+      [
+        "property:game: a key arrives during a boss scene",
+        "property:game: key presses during a boss scene are ignored"
+      ]
+    ]
   }
 ]

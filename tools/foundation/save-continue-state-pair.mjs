@@ -9,9 +9,12 @@ export function saveOwnerState(source,actual,gameplay,candidate) {
   const checks=[];
   const add=(field,expected,observed)=>checks.push({field,expected,actual:observed,status:expected!==undefined&&observed!==undefined&&JSON.stringify(expected)===JSON.stringify(observed)?'pass':'fail'});
   const required=(field,body)=>{try{body();}catch(error){checks.push({field,status:'fail',error:String(error)});}};
-  //Keep the unchanged canonical law and all its failures separately. Its
-  //one-way gameplay boundary does not understand returning to a menu.
-  required('canonical-paired-scope',()=>{checks.push(...scopedState(source,actual,gameplay,candidate));});
+  //The canonical runner's boundary is one-way (index >= gameplay-start), but
+  //Save & Quit returns both games to the main menu. Take each capture's scope
+  //from the original's own observation: a capture where the native gameplay
+  //owner is absent and its menu owner is initialized is graded by the menu law.
+  const nativeMenu=source.gameplay?.status==='skip'&&source.menu?.status==='pass'&&source.menu.menuInitialized===true;
+  required('canonical-paired-scope',()=>{checks.push(...scopedState(source,actual,gameplay&&!nativeMenu,candidate));});
   if(!candidate.label.startsWith('save-')&&candidate.label!=='gameplay-start')return checks;
   // Additive actual owners. Keep every historical canonical/Save row above
   // and below, including all failures; this law is identical for both legs.
