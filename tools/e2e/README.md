@@ -991,3 +991,10 @@ coverage remain failed reports. Gaper live fleeing, a nonzero-vector reset
 write, Horf angle-call attribution, complete MT, full pixels and PCM remain
 unqualified. Item41 remains Partial.
 [Route, exact captures and evidence limits](../../docs/npc-fear.md).
+
+The `continue-run` route owner validates the whole recorded bank before
+`--case` selection and retains the whole bank plus its selection metadata.
+Every actual Native NPC participates in required count/identity/respawn
+comparisons, including families absent from Browser output. NPC status,
+friction, color and complete shared MT remain unqualified. See
+[Save and Continue](../../docs/save-continue.md).

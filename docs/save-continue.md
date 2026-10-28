@@ -98,7 +98,11 @@ motion, controls, hearts, consumables, owned collectibles, visited set and
 clear flag. The room's pickups are compared as a multiset. NPCs are compared
 as exact type, variant, subtype, position and HP tuples at 60 frames after
 each Continue, and as identities afterwards, once their AI randomness
-diverges. NPC families the port never constructs stay diagnostics.
+diverges. Every actual Native NPC is required, including families absent
+from the Browser; missing actors fail the count and multiset comparisons.
+The complete declared bank is validated by the existing route owner before
+selection, and the full input bank and selected IDs are retained separately.
+NPC status, friction, color and complete shared MT remain unqualified.
 
 ## Current-room regular records at Save
 
