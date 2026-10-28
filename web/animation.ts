@@ -16,6 +16,7 @@ import bossSplashData from "./boss-splash-data.json";
 import pocketData from "./pocket-data.json";
 const sceneData = { ...minimapData, ...informationData, ...notificationInformationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...costume115Data, ...pocketData };
 import fontData from "./font-data.json";
+import spriteSheets from "./generated/sprite-pack";
 import completionUrl from "./assets/completion_widget.png?url";
 import postitOverlapUrl from "./assets/gamemenu_postitoverlap.png?url";
 import { sampleFrame, overrideFrame, frameQuad, type SampledFrame, type Quad } from "./animation-math";
@@ -190,6 +191,9 @@ export class Assets {
     const entries = Object.entries(urls).map(([path, url]) => [normalize(path.split("/resources/")[1]!), url] as const)
       .filter(([path]) => !/^gfx\/(monsters|bosses)\//.test(path) || referenced.has(path));
     entries.push(["gfx/ui/main menu/completion_widget.png", completionUrl], ["gfx/ui/main menu/gamemenu_postitoverlap.png", postitOverlapUrl]);
+    // Every sheet a packed animation references (tools/foundation/sprite-pack.mjs).
+    const globbed = new Set(entries.map(([path]) => path));
+    entries.push(...Object.entries(spriteSheets).filter(([path]) => !globbed.has(path)));
     const available = new Set(entries.map(([path]) => path));
     for (const path of bossSplashData.assets) {
       if (!available.has(normalize(path))) throw new Error(`Missing original boss presentation asset: ${path}`);
