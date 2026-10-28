@@ -898,6 +898,11 @@ export class Renderer {
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
     if (!state.player.visible) return;
+    // 5098D0 hurt blink: with hurt immunity (BF8) left, Player Render skips
+    // the frames where BF8 % 6 <= 2, unless an extra animation (BF4, set by
+    // 50A5C0: Pickup, UseItem) is playing.
+    const extraAnimation = !!state.playerAnimation.current || !!state.playerItems?.pickupAnimationGuard;
+    if (state.damageCooldown > 0 && state.damageCooldown % 6 <= 2 && !extraAnimation) return;
     this.drawnOrder.push([1, null]);
     const player = state.player, x = Math.round((player.x + player.renderOffset.x) * 2) / 2,
       y = Math.round((player.y + player.renderOffset.y) * 2) / 2;
