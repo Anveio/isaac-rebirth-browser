@@ -1275,7 +1275,16 @@ impl Game {
             special_room_assets.as_deref().map(Vec::as_slice),
         )?;
         let camera = Some(camera::Camera::new(&room, None));
-        let stage_effects = StageEffects::basement(&player, &room.appearance.fx, 0);
+        let stage_effects = StageEffects::basement(
+            &player,
+            &room.appearance.fx,
+            0,
+            camera
+                .as_ref()
+                .map_or(motion::WorldVector { x: 0.0, y: 0.0 }, |camera| {
+                    camera.scroll
+                }),
+        );
         //Settings5B9930 runs before MenuInit's first61 request. Apply to the
         //real owners while no samples are loaded, before Music initialization.
         let mut audio = audio::AudioState::default();
@@ -2063,8 +2072,28 @@ impl Game {
     }
 
     fn refresh_stage_effects(&mut self) {
-        self.state.stage_effects =
-            StageEffects::basement(&self.state.player, &self.state.room.appearance.fx, 0);
+        //Renderer worldOffset: the f32 sum of Room+15B8 and CEA00.
+        let scroll = self.state.camera.as_ref().map(|camera| camera.scroll);
+        let shake = self
+            .state
+            .game_shake
+            .as_ref()
+            .and_then(|shake| shake.offset_cea00);
+        let world_offset = match (scroll, shake) {
+            (Some(scroll), Some(shake)) => motion::WorldVector {
+                x: scroll.x + shake.x,
+                y: scroll.y + shake.y,
+            },
+            (offset, None) | (None, offset) => {
+                offset.unwrap_or(motion::WorldVector { x: 0.0, y: 0.0 })
+            }
+        };
+        self.state.stage_effects = StageEffects::basement(
+            &self.state.player,
+            &self.state.room.appearance.fx,
+            0,
+            world_offset,
+        );
         self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
         self.state
             .stage_effects

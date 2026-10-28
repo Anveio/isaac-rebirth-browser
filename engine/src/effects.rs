@@ -369,7 +369,14 @@ impl StageEffects {
 
     /// Light and sprite anchors remain separate in the current logical model.
     /// Observed raster geometry alone does not identify native physical units.
-    pub fn basement(player: &Player, fx: &RoomFx, run_tick: u32) -> Self {
+    /// `world_offset` is the world layer's CEA00 shake plus Room+15B8
+    /// scroll; the fx overlay is a world sprite that moves with both.
+    pub fn basement(
+        player: &Player,
+        fx: &RoomFx,
+        run_tick: u32,
+        world_offset: crate::motion::WorldVector,
+    ) -> Self {
         let offset = Point {
             x: (player.x + player.render_offset.x - fx.overlay_anchor.x) * fx.overlay_parallax.x,
             y: (player.y + player.render_offset.y - fx.overlay_anchor.y) * fx.overlay_parallax.y,
@@ -437,12 +444,13 @@ impl StageEffects {
             actor_tint: [255, 255, 255],
             overlay: Overlay {
                 asset: fx.overlay.clone(),
-                // Authored overlays are 663 × 429. Their natural logical
-                // texture size is preserved by cropping a viewport, not scaling
-                // the image to a room. The seed-dependent origin is provisional.
+                // The authored overlay keeps its natural logical texture
+                // size: the viewport crops it, never scales it to a room.
+                // 5473d0 places it at the Room centre plus CEA00 + Room+15B8,
+                // so the crop moves against the world offset.
                 source_crop: Rect {
-                    x: fx.overlay_origin.x + offset.x,
-                    y: fx.overlay_origin.y + offset.y,
+                    x: fx.overlay_origin.x + offset.x - f64::from(world_offset.x),
+                    y: fx.overlay_origin.y + offset.y - f64::from(world_offset.y),
                     width: 480.0,
                     height: 270.0,
                 },
