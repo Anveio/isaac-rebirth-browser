@@ -118,7 +118,7 @@ function portObservation() {
           ? [pickup.morphLinks.parent498, pickup.morphLinks.link4a0, pickup.morphLinks.link4a8].every(link => link === null) : null])
       .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]),
     npcs: state.room.npcs.filter(npc => !npc.removed && !npc.dead)
-      .map(npc => ({ type: npc.kind, variant: npc.variant, position: [npc.position.x, npc.position.y], hp: [npc.hp, npc.maxHp] })),
+      .map(npc => ({ type: npc.kind, variant: npc.variant, position: [npc.presentedPosition.x, npc.presentedPosition.y], hp: [npc.hp, npc.maxHp] })),
     tears: state.tears.filter(tear => tear.motion.lifetime === 'alive')
       .map(tear => ({ variant: tear.sourceVariant ?? null, position: [tear.motion.presentedPosition.x, tear.motion.presentedPosition.y] })),
     gridPoops: (state.room.grid?.cells ?? []).flatMap((cell, index) => cell.entity?.kind === 14
