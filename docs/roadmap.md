@@ -292,6 +292,7 @@ Next: complete supported-room reentry; devil/angel door after a boss.
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
 | #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
+| #930 | P2 | Room clear: the port opens the doors ~8 frames before the original (WPTB6SQK 1230-1237, EK3SH68W 1352-1359) | playtest 2026-10-28 `playtest/3e51749/curse-unknown-WPTB6SQK.mp4` |
 
 ## Stage progression
 
@@ -349,6 +350,7 @@ Next: transformations once their items exist.
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
+| #929 | P3 | Hurt blink out of phase for 3 frames after a Gaper hit (Odd Mushroom set) | playtest 2026-10-28 `playtest/3e51749/set-odd-mushroom.mp4` |
 
 ## Weapons and tears
 
@@ -609,6 +611,7 @@ pipeline, then the bulk import.
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
 | #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
+| #928 | P1 | Item costumes and Magic Mushroom size missing: set [1,4,12] matches every stat but draws plain Isaac (143/251 frames differ) | playtest 2026-10-28 `playtest/3e51749/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 
 ## Pocket items
 
