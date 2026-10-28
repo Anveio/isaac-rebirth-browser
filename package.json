@@ -38,9 +38,10 @@
     "affected:map": "node tools/e2e/affected.mjs --update-map",
     "case:keep": "node tools/e2e/keep-case.mjs",
     "assets:minimap": "python3 tools/foundation/prepare-minimap.py",
-    "predev": "npm run assets:minimap && npm run assets:unlock-notifications",
-    "pretypecheck": "npm run assets:minimap && npm run assets:unlock-notifications",
-    "prebuild": "npm run assets:minimap",
+    "assets:sprites": "node tools/foundation/sprite-pack.mjs --write",
+    "predev": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
+    "pretypecheck": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
+    "prebuild": "npm run assets:minimap && npm run assets:unlock-notifications && npm run assets:sprites",
     "assets:unlock-notifications": "python3 tools/foundation/prepare-unlock-notifications.py"
   },
   "devDependencies": {
