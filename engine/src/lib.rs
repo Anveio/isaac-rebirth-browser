@@ -112,10 +112,12 @@ pub mod layout;
 pub mod level2_flies;
 pub mod level_progress;
 pub mod levels;
+pub mod libc_rand;
 pub mod living_restart;
 pub mod long_legs;
 pub mod maggots;
 pub mod map_presentation;
+mod maze;
 pub mod mega_fatty;
 pub mod mega_maw;
 pub mod menu_lifecycle;
@@ -478,6 +480,11 @@ pub struct RunIntroduction {
     /// such as the miniboss VS text, which restarts the same streak clock.
     #[serde(default = "stage_streak")]
     pub stage: bool,
+    /// ShowItemText's last argument (Level::ShowName passes a non-empty curse
+    /// line): the streak's paper layer shows (5733ee) and the second line
+    /// takes TeamMeatFont10 in black at y 28 instead of PFTempesta at y 18.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub paper: bool,
 }
 fn stage_title() -> String {
     "BASEMENT I".into()
@@ -493,6 +500,7 @@ impl RunIntroduction {
             title: stage_title(),
             subtitle: String::new(),
             stage: true,
+            paper: false,
         }
     }
 
@@ -509,6 +517,7 @@ impl RunIntroduction {
             title: name.into(),
             subtitle: description.into(),
             stage: false,
+            paper: false,
         }
     }
 
@@ -847,6 +856,9 @@ pub struct State {
     pub stage_seed: u32,
     pub level_progress: level_progress::LevelProgress,
     pub nightmares: nightmares::Nightmares,
+    /// The process-global glibc rand (see libc_rand.rs).
+    #[serde(default)]
+    pub libc_rand: libc_rand::LibcRand,
     pub seeded_run: bool,
     pub achievement_eligibility: bool,
     pub profiles: Vec<Profile>,
@@ -1252,6 +1264,7 @@ impl Game {
         let music = preferences.map_or_else(music::MusicState::default, |values| {
             music::MusicState::with_volume(values.music_volume)
         });
+        let mut libc_rand = libc_rand::LibcRand::seeded();
         let mut game = Self {
             state: State {
                 schema: 1,
@@ -1346,7 +1359,8 @@ impl Game {
                 stage: 1,
                 stage_seed: seed::stage1_seed(initial_seed),
                 level_progress: level_progress::LevelProgress::default(),
-                nightmares: nightmares::Nightmares::new()?,
+                nightmares: nightmares::Nightmares::new(&mut libc_rand)?,
+                libc_rand,
                 seeded_run: false,
                 achievement_eligibility: true,
                 profiles: (1..=3)
@@ -1993,6 +2007,13 @@ impl Game {
             //5B1240 requests585500 on exactly the tenth held Game Full.
             self.state.run_introduction = stage_transition::show_name(&self.state.floor);
         }
+    }
+    /// The rest of MinimapManager 5B0F60's Full: 54fc17 runs it after the
+    /// transition's Update, so after a room change in that Update.
+    fn advance_minimap_shake(&mut self) {
+        self.state
+            .minimap_presentation
+            .advance_shake(&mut self.state.boot_lifecycle.shared);
     }
     fn refresh_minimap(&mut self) {
         // Level.UpdateVisibility586940 retains descriptor flags. Fresh Isaac
@@ -2852,6 +2873,28 @@ impl Game {
     /// ChangeRoom5509eb saves the room being left (5182c3 -> 58d921 ->
     /// Room.Save5ce2d0), then the next Room.Init loads its backdrop FX rays.
     /// Selector, door and wall constructors follow in fresh admission.
+    /// Level::ChangeRoom on the room being left, before the target loads:
+    /// the transition renders it (its light pass), Room.Save 5ce2d0 runs at
+    /// 58d91c, then the Curse of the Maze (58d95d) may redirect the change.
+    fn leave_room(
+        state: &mut State,
+        boot_level_grid: &mut mt::DescriptorSeeds,
+        transition: &mut traversal::RoomTransition,
+    ) -> Result<(), String> {
+        let left = state
+            .persisted_rooms
+            .get(&transition.from_room)
+            .ok_or("room change requires the persisted room it left")?;
+        room_lights::present_room(left, &mut state.boot_lifecycle.shared);
+        saved_game::save_grid_cells(
+            boot_level_grid,
+            &mut state.boot_lifecycle.shared,
+            left,
+            transition.from_room,
+        )?;
+        maze::change_room(state, boot_level_grid, transition)
+    }
+
     fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
         //ChangeRoom58d94d/957 moves Level8188 into818C and58da35 stores the
         //entered room's door slot back to the previous room in8198 (587070).
@@ -2881,19 +2924,8 @@ impl Game {
             }),
             _ => None,
         };
-        let left = self
-            .state
-            .persisted_rooms
-            .get(&room_before)
-            .ok_or("room change requires the persisted room it left")?;
-        // The transition first renders the room being left (its light pass).
-        room_lights::present_room(left, &mut self.state.boot_lifecycle.shared);
-        saved_game::save_grid_cells(
-            &mut self.boot_level_grid,
-            &mut self.state.boot_lifecycle.shared,
-            left,
-            room_before,
-        )?;
+        // The left room's light pass, Room.Save and the Curse of the Maze ran
+        // before the target loaded (`leave_room`).
         // Backdrop::pre_render_walls runs inside 5c5b30 before the FX rays.
         self.state.room.apply_boss_backdrop(self.state.stage)?;
         for (position, scale) in room::basement_boss_blood(&self.state.room, self.state.stage)? {
@@ -4852,11 +4884,20 @@ impl Game {
         {
             pickups::save_regular_records(&mut self.state)?;
         }
+        let mut entered_saved_room = None;
+        let boot_level_grid = &mut self.boot_level_grid;
         if traversal::advance_transition(
             &mut self.state,
             phase,
             self.special_room_assets.as_deref().map(Vec::as_slice),
+            |state, transition| {
+                Self::leave_room(state, boot_level_grid, transition)?;
+                entered_saved_room =
+                    Some(state.persisted_rooms.contains_key(&transition.target_room));
+                Ok(())
+            },
         )? {
+            let restoring = entered_saved_room.unwrap_or(restoring);
             if phase == phase::Phase::Update {
                 self.advance_minimap_full();
             }
@@ -5032,6 +5073,9 @@ impl Game {
                 self.state.player.controls_enabled = true;
                 self.advance_camera(phase);
             }
+            if phase == phase::Phase::Update {
+                self.advance_minimap_shake();
+            }
             return Ok(());
         }
         if phase == phase::Phase::Update {
@@ -5073,6 +5117,7 @@ impl Game {
 
         if phase == phase::Phase::Update {
             self.advance_minimap_full();
+            self.advance_minimap_shake();
             // Source54fa82 increments before PlayerManager/Room callbacks.
             self.state.game_update_count = self
                 .state
@@ -5689,6 +5734,7 @@ impl Game {
             title: format!("{player} VS {}", descriptor.template.name),
             subtitle: String::new(),
             stage: false,
+            paper: false,
         };
     }
 

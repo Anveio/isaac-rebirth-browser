@@ -16,38 +16,15 @@ pub fn definition(actor: &str) -> Option<&'static Definition> {
     }
 }
 
-/// The imported glibc rand algorithm with its default initial state, separate
-/// from run xorshift and shared MT. Direct game callers occur after System init;
-/// external library consumption before initialization still needs live readback.
-struct LibcRand {
-    words: [u32; 31],
-    front: usize,
-    rear: usize,
-}
-impl LibcRand {
-    fn new() -> Self {
-        let mut words = [0; 31];
-        words[0] = 1;
-        for index in 1..words.len() {
-            words[index] = ((u64::from(words[index - 1]) * 16_807) % 2_147_483_647) as u32;
-        }
-        let mut rng = Self {
-            words,
-            front: 3,
-            rear: 0,
-        };
-        for _ in 0..310 {
-            rng.next();
-        }
-        rng
+/// 5b83e0 shuffles the nightmare list with the process-global glibc rand
+/// only after the authored progress definition loads.
+pub(crate) fn shuffled_order(rng: &mut crate::libc_rand::LibcRand) -> (Vec<usize>, bool) {
+    let mut order: Vec<_> = (0..DEFINITIONS.len()).collect();
+    let progress_definition_loaded = definition(PROGRESS_ACTOR).is_some();
+    if progress_definition_loaded {
+        rng.shuffle(&mut order);
     }
-    fn next(&mut self) -> u32 {
-        let value = self.words[self.front].wrapping_add(self.words[self.rear]);
-        self.words[self.front] = value;
-        self.front = (self.front + 1) % self.words.len();
-        self.rear = (self.rear + 1) % self.words.len();
-        value >> 1
-    }
+    (order, progress_definition_loaded)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -75,19 +52,11 @@ pub struct Nightmares {
     pub progress_floors: u32,
 }
 impl Nightmares {
-    pub fn new() -> Result<Self, String> {
+    pub fn new(rng: &mut crate::libc_rand::LibcRand) -> Result<Self, String> {
         if DEFINITIONS.is_empty() {
             return Err("nightmare initialization requires authored definitions".into());
         }
-        let mut order: Vec<_> = (0..DEFINITIONS.len()).collect();
-        let mut rng = LibcRand::new();
-        // 5b83e0 shuffles only after the authored progress definition loads.
-        let progress_definition_loaded = definition(PROGRESS_ACTOR).is_some();
-        if progress_definition_loaded {
-            for index in 1..order.len() {
-                order.swap(index, rng.next() as usize % (index + 1));
-            }
-        }
+        let (order, progress_definition_loaded) = shuffled_order(rng);
         Ok(Self {
             order,
             path_index: 0,

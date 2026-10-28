@@ -137,7 +137,7 @@ fn world(player: &Player) -> WorldVector {
 /// The generated floor grid identifies the precise doorway cell along a
 /// rectangular room edge. Extended slots use the second cell on that edge;
 /// selecting only the first reciprocal direction loses those connections.
-fn slot_cell(descriptor: &crate::floor::Descriptor, slot: u8) -> (i32, i32) {
+pub(crate) fn slot_cell(descriptor: &crate::floor::Descriptor, slot: u8) -> (i32, i32) {
     let x = (descriptor.grid_index % 13) as i32;
     let y = (descriptor.grid_index / 13) as i32;
     let width = i32::from(descriptor.template.width / 13);
@@ -247,14 +247,32 @@ pub(crate) fn check_departure(
     }
 }
 
+fn refuse_status_readmission(state: &State, target: usize) -> Result<(), String> {
+    match state.persisted_rooms.get(&target).and_then(|room| {
+        room.npcs
+            .iter()
+            .find(|npc| !npc.dead && !npc.removed && npc.status.base_update_admitted)
+    }) {
+        Some(npc) => Err(format!(
+            "NPC {} status source frontier: Room.Save/Load status readmission",
+            npc.id
+        )),
+        None => Ok(()),
+    }
+}
+
 /// The next full Game update admits a normal style0 door (5ddf20/5de26f).
 /// The inbound state3 pre-counter then uses limit7 (5dde10).
 /// Native room admission clears velocity and puts the player one 40-unit cell
 /// inside the incoming authored doorway. Mutable Room state is restored once.
+/// `change_room` runs Level::ChangeRoom's work on the room being left (its
+/// light pass, Room.Save and the Curse of the Maze, which may redirect the
+/// transition) once that room is saved and before the target loads.
 pub(crate) fn advance_transition(
     state: &mut State,
     phase: Phase,
     special: Option<&[crate::room_assets::RoomAsset]>,
+    change_room: impl FnOnce(&mut State, &mut RoomTransition) -> Result<(), String>,
 ) -> Result<bool, String> {
     let Some(mut transition) = state.room_transition.take() else {
         return Ok(false);
@@ -306,19 +324,7 @@ pub(crate) fn advance_transition(
     // Room.Save/Load status packing is unclosed. Refuse only readmission
     // of a living reached Freeze/Fear actor, before changing either room or its
     // stored body. Ordinary exits and unrelated saved rooms keep their path.
-    if let Some(npc) = state
-        .persisted_rooms
-        .get(&transition.target_room)
-        .and_then(|room| {
-            room.npcs
-                .iter()
-                .find(|npc| !npc.dead && !npc.removed && npc.status.base_update_admitted)
-        })
-    {
-        let error = format!(
-            "NPC {} status source frontier: Room.Save/Load status readmission",
-            npc.id
-        );
+    if let Err(error) = refuse_status_readmission(state, transition.target_room) {
         state.room_transition = Some(transition);
         return Err(error);
     }
@@ -344,6 +350,14 @@ pub(crate) fn advance_transition(
     state
         .persisted_rooms
         .insert(state.current_room, state.room.clone());
+    let planned = transition.target_room;
+    change_room(state, &mut transition)?;
+    if transition.target_room != planned {
+        refuse_status_readmission(state, transition.target_room)?;
+        if !admits_with_special(&state.floor.descriptors[transition.target_room], special) {
+            return Err("maze teleport source frontier: unsupported target room".into());
+        }
+    }
     //453EC0 does not clear retained buckets; the unclosed pointer/room
     //transition must not reuse handle IDs as prior query membership.
     state.knife_query_partition = None;
