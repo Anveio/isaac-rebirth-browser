@@ -537,6 +537,20 @@ impl RunIntroduction {
 fn no_charge_bar_flash() -> i32 {
     -1
 }
+/// HUD::Update 572600 (572a90) reads Player+bb4/bb8/bbc/bc0 into the HUD
+/// heart slots at the start of each Game update (54F920), before any
+/// entity runs; HUD::Render 5742f0 draws those slots. Damage or healing
+/// during an update reaches the HUD one update later. The black mask and
+/// eternal hearts are taken at the same point.
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct HudHearts {
+    pub hp: u8,
+    pub max_hp: u8,
+    pub soul_hp: i32,
+    pub black_heart_mask: u32,
+    pub eternal_hearts: i32,
+}
 /// HUD boss bar: SetFill 5732a0 at HUD+61894 (-1 hidden) and its flash
 /// countdown at +61898; the manager's non-shrinking boss max HP is +ec.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -948,6 +962,9 @@ pub struct State {
     ///HUD::Update572D35 counts it down to -1; BarFull draws when odd or -1.
     #[serde(default = "no_charge_bar_flash")]
     pub charge_bar_flash: i32,
+    /// The HUD heart slots (`HudHearts`); absent until the first update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hud_hearts: Option<HudHearts>,
     pub pause_menu: PauseMenu,
 }
 
@@ -1432,6 +1449,7 @@ impl Game {
                 run_introduction: RunIntroduction::stage(false),
                 boss_bar: BossBar::default(),
                 charge_bar_flash: -1,
+                hud_hearts: None,
                 pause_menu: PauseMenu::hidden(),
             },
             saved_game,
@@ -4806,6 +4824,14 @@ impl Game {
         //54F920's shared HUD streak precedes54F938 and every later
         //GameFull popup/transition/pause guard. Fast has no HUD update.
         if phase == phase::Phase::Update && self.state.screen == Screen::Playing {
+            let player = &self.state.player;
+            self.state.hud_hearts = Some(HudHearts {
+                hp: player.hp,
+                max_hp: player.max_hp,
+                soul_hp: player.soul_hp,
+                black_heart_mask: player.black_heart_mask,
+                eternal_hearts: player.eternal_hearts,
+            });
             self.state.run_introduction.advance_full();
             if let Some(shake) = &mut self.state.game_shake {
                 shake.advance_full_clock();
