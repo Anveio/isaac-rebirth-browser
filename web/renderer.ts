@@ -439,7 +439,16 @@ export class Renderer {
     const effectsUnderPlayer = playerSlot < 0 ? [] : state.spriteEffects
       .filter(effect => !effect.creepEffect && effectSlot(effect) >= 0 && effectSlot(effect) < playerSlot)
       .sort((a, b) => effectSlot(a) - effectSlot(b));
-    for (const effect of effectsUnderPlayer) this.drawSpriteEffect(ctx, effect);
+    // Bombs share the array too (Entity+44c y key): one lying above Isaac's
+    // feet sits ahead of him and draws under his sprite.
+    const bombSlot = (bomb: State["bombs"][number]) =>
+      order.findIndex(actor => actor.kind === "bomb" && actor.id === bomb.id);
+    const bombsUnderPlayer = playerSlot < 0 ? [] : state.bombs
+      .filter(bomb => bomb.motion.lifetime !== "removed" && bombSlot(bomb) >= 0 && bombSlot(bomb) < playerSlot)
+      .sort((a, b) => bombSlot(a) - bombSlot(b));
+    const drawUnder = [...bombsUnderPlayer.map(bomb => ({ slot: bombSlot(bomb), draw: () => this.drawBomb(ctx, bomb) })),
+      ...effectsUnderPlayer.map(effect => ({ slot: effectSlot(effect), draw: () => this.drawSpriteEffect(ctx, effect) }))];
+    for (const entry of drawUnder.sort((a, b) => a.slot - b.slot)) entry.draw();
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
     for (const npc of overPlayer) this.drawNpc(ctx, npc);
@@ -457,23 +466,34 @@ export class Renderer {
           BlueOffset: color.offsets[2]! * 255,
         } } });
     }
-    for (const bomb of state.bombs)
-      if (bomb.motion.lifetime === "alive")
-        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
+    // The remaining bombs keep their array place among the effects: an
+    // exploding bomb sits after the Effect1 born at its own key and draws
+    // over the blast.
+    const bombsOver = state.bombs.filter(bomb => bomb.motion.lifetime !== "removed" && !bombsUnderPlayer.includes(bomb));
+    const unsorted = bombsOver.filter(bomb => bombSlot(bomb) < 0);
+    const pending = bombsOver.filter(bomb => bombSlot(bomb) >= 0).sort((a, b) => bombSlot(a) - bombSlot(b));
+    for (const bomb of unsorted) if (bomb.motion.lifetime === "alive") this.drawBomb(ctx, bomb);
     for (const explosion of state.explosions) {
       // Owned rows only project the real Effect1 frame/light. Draw it once
       // through spriteEffects; old serialized adapter rows remain explicit.
       if (explosion.sourceEffect !== undefined) continue;
       this.assets.draw(ctx, "gfx/1000.001_bomb explosion.anm2", "Explosion", explosion.x, explosion.y - 1, explosion.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
     }
-    for (const bomb of state.bombs)
-      if (bomb.motion.lifetime === "exploding")
-        this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
-    for (const effect of state.spriteEffects)
-      if (!effectsUnderPlayer.includes(effect)) this.drawSpriteEffect(ctx, effect);
+    for (const bomb of unsorted) if (bomb.motion.lifetime === "exploding") this.drawBomb(ctx, bomb);
+    for (const effect of state.spriteEffects) {
+      if (effectsUnderPlayer.includes(effect)) continue;
+      const at = effectSlot(effect);
+      while (at >= 0 && pending.length > 0 && bombSlot(pending[0]!) < at) this.drawBomb(ctx, pending.shift()!);
+      this.drawSpriteEffect(ctx, effect);
+    }
+    for (const bomb of pending) this.drawBomb(ctx, bomb);
     ctx.restore();
     this.stage.foreground(state.stageEffects);
     this.drawFxRays(state);
+  }
+
+  private drawBomb(ctx: CanvasRenderingContext2D, bomb: State["bombs"][number]): void {
+    this.assets.draw(ctx, bomb.variant === 3 ? "gfx/004.003_troll bomb.anm2" : bomb.variant === 4 ? "gfx/004.004_megatroll bomb.anm2" : "gfx/004.000_bomb.anm2", bomb.animation, bomb.x, bomb.y - 1, bomb.animationFrame, { pixelSnap: this.canvas.width / 480 / 2 });
   }
 
   private drawSpriteEffect(ctx: CanvasRenderingContext2D, effect: State["spriteEffects"][number]): void {
@@ -935,17 +955,19 @@ export class Renderer {
     }
   }
   private hearts(ctx: CanvasRenderingContext2D, state: State): void {
-    for (let heart = 0; heart < Math.ceil(state.player.maxHp / 2); heart++) {
-      const remaining = state.player.hp - heart * 2;
+    // HUD::Render draws the slots HUD::Update copied before this update ran.
+    const hearts = state.hudHearts ?? state.player;
+    for (let heart = 0; heart < Math.ceil(hearts.maxHp / 2); heart++) {
+      const remaining = hearts.hp - heart * 2;
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", remaining >= 2 ? "RedHeartFull" : remaining === 1 ? "RedHeartHalf" : "EmptyHeart", 68 + heart * 12, 24);
     }
-    const redSlots = Math.ceil(state.player.maxHp / 2);
-    for (let heart = 0; heart < Math.ceil(state.player.soulHp / 2); heart++) {
-      const color = state.player.blackHeartMask & (1 << heart) ? "Black" : "Blue";
-      const amount = state.player.soulHp - heart * 2 >= 2 ? "Full" : "Half";
+    const redSlots = Math.ceil(hearts.maxHp / 2);
+    for (let heart = 0; heart < Math.ceil(hearts.soulHp / 2); heart++) {
+      const color = hearts.blackHeartMask & (1 << heart) ? "Black" : "Blue";
+      const amount = hearts.soulHp - heart * 2 >= 2 ? "Full" : "Half";
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", `${color}Heart${amount}`, 68 + (redSlots + heart) * 12, 24);
     }
-    if (state.player.eternalHearts > 0) {
+    if (hearts.eternalHearts > 0) {
       this.assets.draw(ctx, "gfx/ui/ui_hearts.anm2", redSlots ? "WhiteHeartOverlay" : "WhiteHeartHalf", 68 + Math.max(0, redSlots - 1) * 12, 24);
     }
   }

@@ -70,6 +70,7 @@ export interface SpriteEffect {
   bloodEffect?: {kind: "poof04" | "bloodGush"};
   footprint?: boolean;
 }
+export interface HudHearts { hp: number; maxHp: number; soulHp: number; blackHeartMask: number; eternalHearts: number; }
 export interface ActorRef { kind: "player" | "familiar" | "tear" | "knife" | "laser" | "bomb" | "pickup" | "slot" | "npc" | "projectile" | "effect"; id: number; }
 /** Entity_Slot (type 6): an idle machine or beggar (engine/src/slots.rs). */
 export interface Slot {
@@ -480,6 +481,7 @@ export interface State {
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; bossBar: BossBar; chargeBarFlash: number; pauseMenu: PauseMenu;
+  hudHearts?: HudHearts;
   playerDeath: { lastDamageFlags: number; gameOver: { state: number; damageFlags: number; diaryFrame: number; diaryPlaying: boolean } | null; systemPending: "restart" | "exit" | null };
 }
 export interface InputConfigs { devices: {name: string; bindings: number[][]}[]; }
