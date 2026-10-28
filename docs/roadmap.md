@@ -190,9 +190,7 @@ remain open.
 Next: Native own-saved Keyboard process reload; broader Ctrl and R contexts,
 natural R reload and gamepad.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #915 | P1 | Short key taps (Escape, bombs, items) are lost when the browser runs below 60 ticks/s; self-playtest pause check fails at ~38 ticks/s | playtest 2026-10-28 self-playtest ea9b183 seed SGZL8K4G |
+No open bugs.
 
 ## Seeds, RNG and shared MT
 
@@ -513,6 +511,8 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
+| #940 | P2 | Ring Fly (222.0) is never admitted; blocks the last save-continue and continue-run rows | save-continue 2026-10-28 |
+| #966 | P2 | dips: poopEffects4 position/flip diverges at black-damage-21; a type-96 NPC is missing on entry for 6GFP B240 | e2e dips 2026-10-28 |
 
 ## Bosses
 
@@ -607,9 +607,7 @@ pipeline, then the bulk import.
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
-| #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
 | #948 | P2 | Item-set fights vs Gaper: a tear born touching the Gaper (set-120 update 84) resolves contact with different velocities, so later hits land one update early; tracked with #946 | playtest 2026-10-28 `playtest/f6043b7/set-sad-onion-crickets-head-magic-mushroom.mp4` |
-| #949 | P2 | D100: rerolled pickups stay at their spawn points in the port but scatter in the original; the chest draws a floor shadow (69/156 frames) | playtest 2026-10-28 `playtest/3cb8cef/d100.mp4` |
 
 ## Pocket items
 
@@ -724,6 +722,8 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #937 | P3 | Kamikaze!: from frame 413 the original draws Isaac charred and blinking after the blast; the port draws him plain | playtest 2026-10-28 kamikaze |
 | #939 | P3 | Explosion sprite drawn about one screen pixel right of and below the original (Anarchist Cookbook frames 280-285) | playtest 2026-10-28 `playtest/3cb8cef/anarchist-cookbook.mp4` |
+| #952 | P3 | Tear poofs spawn with different seeds and sub-pixel positions from the original in most entity cases | e2e entities 2026-10-28 |
+| #963 | P3 | D20 streak banner text bottom row 1px off (frames 41-50) and a 1px-offset speck (51-70) | playtest 2026-10-28 d20-fixed |
 
 ## Audio
 
