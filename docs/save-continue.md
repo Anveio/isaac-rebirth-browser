@@ -81,8 +81,17 @@ effect mode 0, alive and on any stage-1 room reached so far.
   the layout NPCs unless the room is cleared, and readmits the saved pickups,
   slots and ambient records.
 
-The initial-room domain is unchanged. Bombs that are live at Save are still
-refused.
+The initial-room caller retains its guards, but #908's visited-room fallback
+can bypass them. A public Browser probe on unchanged main (`3BMBMFTE`, E,
+Pause Quit, Main Continue) saves an actual own packet with listed Bomb count1,
+then resumes gameplay with zero Bombs. The packet was never edited. A stricter
+source-only repair's actual Browser replay keeps the Bomb and stored bytes,
+but its refusal currently marks the host runtime failed. Both failures remain
+preserved, and the narrow admission/host refusal repair is in progress.
+This is an actual Browser storage/admission contract observation; complete
+Native Bomb Save/Continue restoration remains unqualified. Persistent
+shopkeeper/fireplace records and broader saved actor/player ownership also
+remain open.
 
 The `continue-run` suite (`tools/original/continue-run-scenarios.py`) exits
 and continues in both games, with these cases:
