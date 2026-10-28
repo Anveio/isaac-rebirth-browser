@@ -5324,13 +5324,9 @@ impl Game {
             controlled_knife_homing::rebuild_partition(&mut self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
-            //4549D1 completes the NPC/Bomb partition's self-pairs before
-            //454A0A queries that partition against the actual Players.
-            npcs::nonplayer_contacts(&mut self.state)?;
-            bombs::bomb_contacts(&mut self.state)?;
-            bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
-            enemy_projectiles::player_contacts(&mut self.state)?;
+            // 4549C8: the Tear/Knife partition (+8) meets the NPC/Bomb
+            // partition (+10) before 4549D1's NPC/Bomb self-pairs and
+            // 454A0A's Player query, so a tear's push lands first.
             // Actual full manager contact pass uses typed ground coordinates.
             self.state.tear_partition = self
                 .state
@@ -5388,6 +5384,13 @@ impl Game {
                     }
                 }
             }
+            //4549D1 completes the NPC/Bomb partition's self-pairs before
+            //454A0A queries that partition against the actual Players.
+            npcs::nonplayer_contacts(&mut self.state)?;
+            bombs::bomb_contacts(&mut self.state)?;
+            bombs::player_contacts(&mut self.state)?;
+            npcs::player_contacts(&mut self.state)?;
+            enemy_projectiles::player_contacts(&mut self.state)?;
             for index in 0..self.state.room.pickups.len() {
                 if shop::player_contact(&mut self.state, index)? {
                     continue;
