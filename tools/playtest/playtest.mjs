@@ -154,6 +154,15 @@ async function hold(keys) {
 }
 const release = () => hold([]);
 async function tap(key, ms = 120) { await tab.keyboard.down(key); await tab.waitForTimeout(ms); await tab.keyboard.up(key); }
+// Wait `ms` of game time: at least that long, and until the simulation has run
+// the 60 Hz ticks it covers (up to ten times as long), so checks of timed
+// animations hold the same game-time budget when the browser runs slowly.
+const gameTick = () => tab.evaluate(() => window.game.snapshot().tick);
+async function waitGame(ms) {
+  const target = (await gameTick()) + Math.ceil(ms * 60 / 1000), deadline = Date.now() + ms * 10;
+  await tab.waitForTimeout(ms);
+  while (Date.now() < deadline && (await gameTick()) < target) await tab.waitForTimeout(100);
+}
 
 let exitCode = 0;
 const stats = { roomsEntered: new Set(), returnedToStart: false, leftStart: false, maxTears: 0, bombsPlaced: 0, explosionsSeen: 0,
@@ -285,7 +294,7 @@ try {
     // Pause roughly every 50s: open, wait, check it paused the run, close.
     if (now - lastPause > 50_000 && !state.transition) {
       lastPause = now; await release();
-      await tap('Escape'); await tab.waitForTimeout(800);
+      await tap('Escape'); await waitGame(800);
       const paused = await observe();
       // Escape can land as the player crosses a door; retry after the transition.
       if (!paused.paused && (paused.transition || paused.room !== state.room)) { lastPause = now - 45_000; previous = paused; lastAdvance = Date.now(); continue; }
@@ -294,9 +303,10 @@ try {
       await tab.keyboard.down('KeyD'); await tab.waitForTimeout(400); await tab.keyboard.up('KeyD');
       const still = await observe();
       if (paused.paused && Math.hypot(still.player.x - paused.player.x, still.player.y - paused.player.y) > 1) fail('Player moved while the game was paused');
-      await tap('Escape'); await tab.waitForTimeout(800);
-      const resumed = await observe();
-      if (resumed.paused) { await tap('Escape'); await tab.waitForTimeout(600); if ((await observe()).paused) fail('Pause menu does not close with Escape'); }
+      // One Escape must close it. A second blind tap after the 24-tick close
+      // animation outlasted a wall-clock wait reopened the menu (#915).
+      await tap('Escape'); await waitGame(800);
+      if ((await observe()).paused) fail('Pause menu does not close with Escape');
       previous = await observe(); lastAdvance = Date.now();
       continue;
     }
