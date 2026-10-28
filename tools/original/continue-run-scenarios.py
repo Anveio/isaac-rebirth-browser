@@ -34,6 +34,7 @@ import json
 from pathlib import Path
 import random
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -159,11 +160,8 @@ def case(code, kind, actions, randomized, provenance, extra=None):
     return result
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--count', type=int, default=1, help='OS-random seeds')
-    args = parser.parse_args()
-    cases = [
+def fixed_cases():
+    return [
         case('KRAYFRWA', 'uncleared', uncleared(0, 60), False, 'flies that moved before Exit', {'slot': 0}),
         case('3YSTBQPG', 'treasure-enter-then-quit', treasure_enter_then_quit(), False,
              'pedestal rolled before Exit, collected after Continue, second Exit in the start room',
@@ -171,6 +169,81 @@ def main():
         case('3YSTBQPG', 'treasure-quit-then-enter', treasure_quit_then_enter(), False,
              'Exit before the pedestal is rolled', {'pedestalGroup': '3YSTBQPG'}),
     ]
+
+
+def neighbour_case(code, slot, room_type, idle):
+    return case(code, 'neighbour', uncleared(slot, idle), True,
+                'recorded OS-random run seed, neighbour and idle',
+                {'slot': slot, 'roomType': room_type, 'idle': idle})
+
+
+def same_recipe(actual, expected):
+    # Python equality admits True == 1; public command/owner types are exact.
+    return json.dumps(actual, sort_keys=True, allow_nan=False) == json.dumps(expected, sort_keys=True, allow_nan=False)
+
+
+def validate(bank, allow_subset=False):
+    if type(bank.get('schema')) is not int or bank['schema'] != 1:
+        raise ValueError('Unknown Continue bank schema')
+    cases = bank.get('cases')
+    if not isinstance(cases, list) or not cases:
+        raise ValueError('Continue requires a nonempty declared bank')
+    filtered = bank.get('caseFilter')
+    if filtered is not None and (not isinstance(filtered, str) or not filtered):
+        raise ValueError('A filtered Continue replay declares its nonempty selection')
+    fixed_by_id = {data['scenario']['id']: data for data in fixed_cases()}
+    ids, fixed_ids, random_count = set(), set(), 0
+    for data in cases:
+        runner.validate_tape(data.get('tape'))
+        runner.validate_tape(data.get('pairedTape'))
+        scenario = data.get('scenario', {})
+        identifier = scenario.get('id')
+        if not isinstance(identifier, str) or identifier in ids:
+            raise ValueError('Each Continue case needs a unique public ID')
+        ids.add(identifier)
+        if scenario.get('randomized') is False:
+            if identifier not in fixed_by_id or not same_recipe(data, fixed_by_id[identifier]):
+                raise ValueError(f'Fixed Continue route changed: {identifier}')
+            fixed_ids.add(identifier)
+            continue
+        route = data.get('continueRun', {})
+        slot, room_type, idle = route.get('slot'), route.get('roomType'), route.get('idle')
+        if scenario.get('randomized') is not True or route.get('kind') != 'neighbour':
+            raise ValueError(f'Unknown Continue route: {identifier}')
+        if type(slot) is not int or slot not in ROUTES or type(idle) is not int or not 0 <= idle <= 120:
+            raise ValueError(f'Invalid recorded Continue neighbour/idle: {identifier}')
+        if type(room_type) is not int or room_type < 1 or room_type in UNREACHABLE:
+            raise ValueError(f'Invalid recorded Continue room type: {identifier}')
+        if not same_recipe(data, neighbour_case(data.get('seed'), slot, room_type, idle)):
+            raise ValueError(f'Recorded Continue public recipe changed: {identifier}')
+        random_count += 1
+    subset = allow_subset or filtered is not None
+    if not subset and (fixed_ids != set(fixed_by_id) or random_count < 1):
+        raise ValueError('A whole Continue bank requires all three fixed routes and recorded OS coverage')
+    return {'status': 'pass', 'scope': 'declared-subset' if subset else 'whole-bank',
+            'cases': len(cases), 'fixed': len(fixed_ids), 'recordedOS': random_count}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--count', type=int, default=1, help='OS-random seeds')
+    parser.add_argument('--validate-bank', type=Path)
+    parser.add_argument('--allow-subset', action='store_true')
+    args = parser.parse_args()
+    if args.validate_bank is not None:
+        if str(args.validate_bank) == '-':
+            payload = sys.stdin.read(4 * 1024 * 1024 + 1)
+        else:
+            if args.validate_bank.stat().st_size > 4 * 1024 * 1024:
+                raise ValueError('Continue input bank exceeds its bound')
+            payload = args.validate_bank.read_text()
+        if len(payload.encode('utf8')) > 4 * 1024 * 1024:
+            raise ValueError('Continue input bank exceeds its bound')
+        print(json.dumps(validate(json.loads(payload), args.allow_subset)))
+        return
+    if args.count < 1:
+        raise ValueError('Fresh Continue runs require recorded OS coverage')
+    cases = fixed_cases()
     entropy = random.SystemRandom()
     while len(cases) < 3 + args.count:
         vector = runner.codec.random_vector()
@@ -179,9 +252,7 @@ def main():
             continue
         slot, room_type = entropy.choice(slots)
         idle = entropy.randrange(0, 121)
-        cases.append(case(runner.codec.encode_seed(vector['seedValue']), 'neighbour', uncleared(slot, idle), True,
-                          'recorded OS-random run seed, neighbour and idle',
-                          {'slot': slot, 'roomType': room_type, 'idle': idle}))
+        cases.append(neighbour_case(runner.codec.encode_seed(vector['seedValue']), slot, room_type, idle))
     print(json.dumps({'schema': 1, 'failures': [], 'cases': cases}))
 
 

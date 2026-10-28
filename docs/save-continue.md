@@ -81,8 +81,17 @@ effect mode 0, alive and on any stage-1 room reached so far.
   the layout NPCs unless the room is cleared, and readmits the saved pickups,
   slots and ambient records.
 
-The initial-room domain is unchanged. Bombs that are live at Save are still
-refused.
+The initial-room caller retains its guards, but #908's visited-room fallback
+can bypass them. A public Browser probe on unchanged main (`3BMBMFTE`, E,
+Pause Quit, Main Continue) saves an actual own packet with listed Bomb count1,
+then resumes gameplay with zero Bombs. The packet was never edited. A stricter
+source-only repair's actual Browser replay keeps the Bomb and stored bytes,
+but its refusal currently marks the host runtime failed. Both failures remain
+preserved, and the narrow admission/host refusal repair is in progress.
+This is an actual Browser storage/admission contract observation; complete
+Native Bomb Save/Continue restoration remains unqualified. Persistent
+shopkeeper/fireplace records and broader saved actor/player ownership also
+remain open.
 
 The `continue-run` suite (`tools/original/continue-run-scenarios.py`) exits
 and continues in both games, with these cases:
@@ -98,7 +107,36 @@ motion, controls, hearts, consumables, owned collectibles, visited set and
 clear flag. The room's pickups are compared as a multiset. NPCs are compared
 as exact type, variant, subtype, position and HP tuples at 60 frames after
 each Continue, and as identities afterwards, once their AI randomness
-diverges. NPC families the port never constructs stay diagnostics.
+diverges. Every actual Native NPC is required, including families absent
+from the Browser; missing actors fail the count and multiset comparisons.
+The complete declared bank is validated by the existing route owner before
+selection, and the full input bank and selected IDs are retained separately.
+NPC status, friction, color and complete shared MT remain unqualified.
+
+## Required NPC audit after #908
+
+Fresh Original and actual Chromium on source `c6265d54`, with unchanged main
+runtime/WASM `5304d150`, run all four cases of the bank declared before either
+game (three fixed routes plus recorded OS neighbour `7JRW6L28`). All 71 paired
+checkpoints capture successfully. The required grade is **551 pass / 16 fail
+of 567 checks**. Both treasure routes and the recorded neighbour pass their
+selected contracts. The uncleared `KRAYFRWA` room has six actual Native NPCs
+and four Browser NPCs: two Ring Fly222.0 bodies are absent at eight captures,
+including the first post-Continue layout/health tuples. Their implementation
+remains a separate NPC import gap.
+
+Replaying the preceding comparator over those same immutable captures reports
+567/567, because it excludes both Native Ring Flies after learning families
+from Browser output. The correction preserves 551 rows exactly and makes the
+16 affected count/multiset rows required failures. This is a corrected test
+contract, with no runtime improvement. The old comparison and its diagnostic
+rows remain retained beside the corrected report. NPC status/friction/color,
+complete shared MT and full pixels are not qualified by these checks.
+
+Fresh main build and the seven runtime Browser checks pass. The grader's fresh
+build and affected preview pass and produce exactly the same WASM. These
+results do not qualify the pending Continue admission/record reconstruction
+repair or the missing saved pedestal and acquired-item owners.
 
 ## Current-room regular records at Save
 

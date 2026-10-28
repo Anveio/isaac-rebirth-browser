@@ -736,6 +736,16 @@ No open bugs.
 
 ## Saves and metagame
 
+The visited-room fallback also loses a live saved Bomb in a public Browser
+Pause Quit/Continue probe. Its admission and recoverable-host-refusal repair
+is in progress; saved Bomb reconstruction remains unqualified.
+
+The post-#908 Continue grader requires every actual Native NPC. Fresh unchanged
+main has 551 pass / 16 fail of 567 checks over three fixed routes plus recorded
+OS neighbour `7JRW6L28`; two missing Ring Fly222.0 bodies cause all 16 failures.
+Both treasure routes retain their selected scalar passes. Saved pedestal/item
+ownership and the admission repair remain open. [Audit and scope](save-continue.md#required-npc-audit-after-908).
+
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.
 
