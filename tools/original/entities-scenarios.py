@@ -121,7 +121,8 @@ def room_cases(room_specs, attempts):
 
 def routed_cases(spec, helper, attempts):
     args = ['python3', str(Path(__file__).with_name(helper)), '--type', str(spec['type']), '--variant', str(spec.get('variant', 0)),
-            '--count', str(spec['count']), '--attempts', str(attempts), *[arg for code in spec['contrived'] for arg in ('--contrived', code)]]
+            '--count', str(spec['count']), '--attempts', str(attempts), *[arg for code in spec['contrived'] for arg in ('--contrived', code)],
+            *(['--hard'] if spec['hard'] else [])]
     result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
     if result.returncode:
         return [], [{'spec': spec['name'], 'error': (result.stderr.strip().splitlines() or [f'{helper} discovery failed'])[-1]}], None
