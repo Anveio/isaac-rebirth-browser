@@ -56,6 +56,9 @@ pub(crate) struct NpcWorld<'a> {
     pub tear_probe: &'a [(WorldVector, f32)],
     /// Knife positions and radii in list order.
     pub knife_probe: &'a [(WorldVector, f32)],
+    /// Player 3068/306C transformation counters (511d90 forms 0 and 1);
+    /// None while their history is not owned.
+    pub transformation_counts: Option<[i32; 2]>,
 }
 
 /// The room NPC list around the updating actor, in list order. Peers read
@@ -408,6 +411,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::mega_fatty::FAMILY,
     &crate::mulligans::FAMILY,
     &crate::mom::FAMILY,
+    &crate::ring_flies::FAMILY,
 ];
 
 /// Every NPC type a registered family constructs, in registry order. Tools

@@ -167,6 +167,8 @@ pub struct Npc {
     pub gurdy: Option<crate::gurdy::GurdyState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mega_fatty: Option<crate::mega_fatty::MegaFattyState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ring_fly: Option<crate::ring_flies::RingFlyState>,
 }
 
 /// One overlay clip of an NPC sprite, advanced with the main clip.
@@ -537,12 +539,14 @@ pub fn nonplayer_contacts(state: &mut State) -> Result<(), String> {
             let first = &mut left[first];
             let second = &mut right[0];
             // 49b980: two Wall Huggers never collide; 49bbb4 vetoes every
-            // pair of worm segments (Larry Jr., 28, 89, 239) without charm.
+            // pair of worm segments (Larry Jr., 28, 89, 239) without charm,
+            // and 49c4c0 every pair of Ring Flies (222).
             if first.dead
                 || second.dead
                 || first.entity_collision_class != 4
                 || second.entity_collision_class != 4
                 || (first.kind == 218 && second.kind == 218)
+                || (first.kind == 222 && second.kind == 222)
                 || (WORM_SEGMENTS.contains(&first.kind) && WORM_SEGMENTS.contains(&second.kind))
             {
                 continue;
@@ -1063,6 +1067,7 @@ impl Npc {
             greed: None,
             gurdy: None,
             mega_fatty: None,
+            ring_fly: None,
         }
     }
 
