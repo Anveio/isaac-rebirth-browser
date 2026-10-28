@@ -134,7 +134,9 @@ CASES = {
     'd20': dict(
         about='The D20 (Space) rerolls the room pickups in place',
         items=[D20], card=0, spawns=CORNER_PICKUPS + [pickup(3, 3, 10, 1), pickup(9, 3, 10, 2), pickup(6, 1, 40, 1)],
-        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        # reroll-appear lands while the Morphed pickups still play Appear.
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('reroll-appear', [], 6),
+                 act('after-active', [], 54)],
         interactions=['d20-reroll'],
         # An OS epoch often rolls a trinket (350) or a troll bomb, whose
         # loose pickups the port does not own yet; the fixed epoch avoids both.
@@ -172,7 +174,8 @@ CASES = {
         about='The D100 (Space) rerolls Isaac\'s collectibles, a pedestal and the room pickups',
         items=[D100, SAD_ONION, CRICKETS_HEAD, NUMBER_ONE], card=0,
         spawns=CORNER_PICKUPS + [pickup(6, 1, 100, 3), pickup(3, 3, 10, 1), pickup(9, 3, 10, 2)],
-        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 60)],
+        actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('reroll-appear', [], 6),
+                 act('after-active', [], 54)],
         interactions=['d100-reroll'], fixed_only=True, fixed_epoch=(2173746742, 1)),
     # The Poop leaves a poop under Isaac and farts; he walks off and back.
     'the-poop': dict(

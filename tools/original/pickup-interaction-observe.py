@@ -103,6 +103,8 @@ def observe(pid, context):
                     # Entity+484 HitPoints and +488 MaxHitPoints.
                     result['hp'], result['maxHp'] = pair(0x484)
                 if result['type'] == 5:
+                    # The main Sprite's current clip (Entity+28, AnimationState+18).
+                    result['animation'] = clip_name(u64(address + 0x28 + 0x18))
                     more = read(address + 0xac0, 0x18)
                     result['pickupPrice'] = struct.unpack_from('<i', more, 0)[0]
                     result['spawnSeed'] = struct.unpack_from('<I', raw, 0x7d0)[0]
