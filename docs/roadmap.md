@@ -511,7 +511,6 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
-| #940 | P2 | Ring Fly (222.0) is never admitted; blocks the last save-continue and continue-run rows | save-continue 2026-10-28 |
 | #966 | P2 | dips: poopEffects4 position/flip diverges at black-damage-21; a type-96 NPC is missing on entry for 6GFP B240 | e2e dips 2026-10-28 |
 
 ## Bosses
@@ -745,6 +744,9 @@ is in progress; saved Bomb reconstruction remains unqualified.
 The post-#908 Continue grader requires every actual Native NPC. Fresh unchanged
 main has 551 pass / 16 fail of 567 checks over three fixed routes plus recorded
 OS neighbour `7JRW6L28`; two missing Ring Fly222.0 bodies cause all 16 failures.
+Ring Fly is now admitted (#940): `KRAYFRWA` passes 132/132 and the bank's only
+remaining failure is an Attack Fly sub-pixel row in recorded neighbour
+`SMT2LEZC`, the same on main (#975).
 Both treasure routes retain their selected scalar passes. Saved pedestal/item
 ownership and the admission repair remain open. [Audit and scope](save-continue.md#required-npc-audit-after-908).
 
