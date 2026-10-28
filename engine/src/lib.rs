@@ -2139,6 +2139,10 @@ impl Game {
         self.state.challenge_run_parameters = challenge
             .as_ref()
             .map(|_| challenges::RunParameters::CHALLENGE_MENU);
+        // Game+10ECD0 (the HUD's achievements-disabled icon, 5742C4): the
+        // Challenge start 54EFE0 stores 1, the New Run start 54EB20 stores the
+        // System request's r9 (a seeded run).
+        self.state.achievement_eligibility = challenge.is_none() && !self.state.seeded_run;
         if let Some(definition) = &challenge {
             definition.validate_initial_scope()?;
             self.state.character = "Isaac".into();
