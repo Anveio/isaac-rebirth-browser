@@ -45,7 +45,7 @@ let actors = 0;
 const problems = [];
 for (const file of catalogues) {
   if (!existsSync(file)) {
-    problems.push(`${relative(ROOT, file)} is imported by web/ but absent; run npm run assets:minimap and assets:unlock-notifications`);
+    problems.push(`${relative(ROOT, file)} is imported by web/ but absent; run npm run assets:minimap, assets:unlock-notifications and assets:items`);
     continue;
   }
   const data = JSON.parse(readFileSync(file, 'utf8'));
