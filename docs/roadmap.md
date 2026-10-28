@@ -292,7 +292,6 @@ Next: complete supported-room reentry; devil/angel door after a boss.
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
 | #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
-| #930 | P2 | Room clear: the port opens the doors ~8 frames before the original (WPTB6SQK 1230-1237, EK3SH68W 1352-1359) | playtest 2026-10-28 `playtest/3e51749/curse-unknown-WPTB6SQK.mp4` |
 
 ## Stage progression
 
@@ -724,6 +723,8 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
+| #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
+| #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
 
 ## Audio
 
@@ -838,6 +839,8 @@ Bugs in a test route or tool rather than in the game.
 | #196 | P3 | blood-start contrived route never reaches the boss in the original; regenerate it | e2e blood-start |
 | #220 | P3 | health-damage black-heart route never acquires the Black Heart in the original; regenerate it | e2e health-damage |
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
+| #941 | P3 | Sandbox item-set runs: the port lacks the original's achievements-disabled HUD icon; the sandbox grant must set the same run flag | playtest 2026-10-28 `playtest/dddd23a/set-sad-onion-crickets-head-magic-mushroom.mp4` |
+| #941 | P3 | Sandbox item-set runs: the port lacks the original's achievements-disabled HUD icon; the sandbox grant must set the same run flag | playtest 2026-10-28 `playtest/dddd23a/set-sad-onion-crickets-head-magic-mushroom.mp4` |
 
 ## Recently fixed
 
