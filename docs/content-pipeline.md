@@ -119,7 +119,7 @@ implemented.
 
 - **Basement:** Attack Fly ✅ 70, Horf 53, Frowning Gaper 52, Gaper 48,
   Pooter 41, Fatty 41, Dip ✅ 40, Round Worm ✅ 35, Hopper 34, Fly ✅ 24,
-  Gusher 24, Ring Fly 24, Skinny 21, Clotty 20, Wall Hugger 20, lvl2 Fly ✅ 18,
+  Gusher 24, Ring Fly ✅ 24, Skinny 21, Clotty 20, Wall Hugger 20, lvl2 Fly ✅ 18,
   Pacer 17, Mulligan 17, Squirt 13, lvl2 Spider 12, plus 22 rarer types.
 - **Cellar:** Spider 155, Trite 57, Frowning Gaper 41, Sack 37, Dip ✅ 35,
   Big Spider 33, Mulliboom 32, Ticking Spider 30, Gaper 29, Fatty 27,

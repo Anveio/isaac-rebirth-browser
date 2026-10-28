@@ -161,6 +161,7 @@ mod polyphemus_contact;
 pub mod poop_effects;
 pub mod projectiles;
 pub mod public_actions;
+pub mod ring_flies;
 pub mod rock_blast;
 mod room;
 pub mod room_assets;
@@ -6040,6 +6041,7 @@ impl Game {
                 peers: entities::Peers { before, after },
                 tear_probe: &tear_probe,
                 knife_probe: &knife_probe,
+                transformation_counts: self.state.player.transformation_counts,
             },
             &mut births,
         )?;
