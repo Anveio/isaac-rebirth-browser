@@ -544,9 +544,12 @@ export class Renderer {
       return;
     }
     // Entity render 442300: the sprite sits at position + PositionOffset (+458).
+    // The bomb explosion (1000.1) lands on the same screen row as its bomb,
+    // which draws one pixel above the -46 projection (#939).
+    const lift = effect.variant === 1 ? 1 : 0;
     this.drawEffect(ctx, effect.variant, effect.sprite,
       (effect.presentedPosition.x + effect.renderOffset.x + effect.sprite.offset.x) * 0.65 + 32,
-      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46);
+      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46 - lift);
   }
 
   /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
