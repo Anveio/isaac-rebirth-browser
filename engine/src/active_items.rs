@@ -878,7 +878,7 @@ fn use_leaf(
         }
         Leaf::MomsBra => {
             moms_bra(state, id)?;
-            play_item_animation(state, id, variant0, false);
+            play_item_animation(state, id, show, false);
         }
         Leaf::MomsPad => {
             if variant0 {
