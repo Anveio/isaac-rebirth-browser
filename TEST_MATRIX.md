@@ -361,7 +361,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `layout` | rectangular floor growth over every accepted seed, room count and shape mask | 11 | 2 | 1 |
 | `room_spawns` | authored spawn-group selection over every authored room and synthetic edge rooms | 11 | 4 | 0 |
 | `room_templates` | authored room-template picks and weight decay against a weight model | 8 | 5 | 0 |
-| `floor` | Basement generation structure, retries and per-descriptor room admission | 18 | 5 | 0 |
+| `floor` | Basement generation structure, retries and per-descriptor room admission | 19 | 5 | 0 |
 | `motion` | player motion steps and held-input runs against an along/across velocity model | 12 | 4 | 0 |
 | `tears` | tear velocity, eye origin, size and flight against f64 and lifecycle models | 29 | 8 | 0 |
 | `bombs` | planted bomb lives, the placement cooldown and Isaac's blast knockback | 18 | 8 | 0 |
@@ -478,6 +478,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | floor: every descriptor owns exactly its shape's footprint at its origin | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: neighbor links are reciprocal edge adjacencies | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: every descriptor is reachable from the starting room | [floor.rs](engine/dst/src/units/floor.rs) |
+| Always | floor: a floor carries at most one curse, none under Black Candle and the Labyrinth only on an odd stage | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: one boss, super secret, shop and treasure room, two bosses and treasure rooms under Curse of the Labyrinth | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: normal rooms stay within the stage's difficulty band | [floor.rs](engine/dst/src/units/floor.rs) |
 | Always | floor: an even floor's boss comes from the retained family without rewriting it | [floor.rs](engine/dst/src/units/floor.rs) |

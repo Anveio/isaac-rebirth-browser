@@ -284,6 +284,19 @@ fn structure(request: &NormalBasementRequest, floor: &Floor) {
         json!({ "request": details(), "reached": reached.len(), "descriptors": count })
     );
 
+    // Level::Init 58bffb..58c058 rolls at most one curse, choosing one of
+    // six; Black Candle skips the roll (58c02e), and the Labyrinth choice
+    // stands only on an odd stage up to 7. The room counts below follow
+    // this curse, so it is checked here rather than taken as given.
+    props::always!(
+        [0, 1, 2, 4, 8, 32, 64].contains(&floor.curses)
+            && (!request.curse.black_candle || floor.curses == 0)
+            && (floor.curses & floor::LABYRINTH == 0
+                || request.stage % 2 == 1 && request.stage <= 7),
+        "floor: a floor carries at most one curse, none under Black Candle and the Labyrinth only on an odd stage",
+        json!({ "request": details(), "curses": floor.curses })
+    );
+
     // 58c260 retries until boss, super secret, shop and treasure all fit;
     // Curse of the Labyrinth adds a second boss (589d5c) and treasure room
     // (58bae3).
