@@ -2063,11 +2063,8 @@ impl Game {
     }
 
     fn refresh_stage_effects(&mut self) {
-        self.state.stage_effects = StageEffects::basement(
-            &self.state.player,
-            &self.state.room.appearance.fx,
-            self.state.run_tick,
-        );
+        self.state.stage_effects =
+            StageEffects::basement(&self.state.player, &self.state.room.appearance.fx, 0);
         self.state.stage_effects.add_bomb_shadows(&self.state.bombs);
         self.state
             .stage_effects
@@ -2396,6 +2393,7 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.stage,
             0,
+            0,
         );
         // admit_room_pickups runs Room.Init's selector pass (grid objects and
         // actors together), the boundary, pit links and the critters.
@@ -2642,6 +2640,7 @@ impl Game {
                 &mut self.state.boot_lifecycle.shared,
                 self.state.stage,
                 0,
+                0,
             );
             grid_records::restore_records(
                 &mut self.state.room,
@@ -2758,6 +2757,7 @@ impl Game {
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
             self.state.stage,
+            0,
             0,
         );
         if !self.state.room.combat_clear {
@@ -2981,6 +2981,9 @@ impl Game {
             &mut self.state.boot_lifecycle.shared,
             self.state.stage,
             0,
+            // The new room renders once into the slide snapshot on its load
+            // frame, then not while the transition slides.
+            u32::from(self.state.room_transition.is_some()),
         );
         Ok(())
     }
@@ -4805,6 +4808,31 @@ impl Game {
         audio_counter: u32,
         bomb_triggered: bool,
     ) -> Result<(), String> {
+        let run_tick = self.state.run_tick;
+        self.tick_after_character_request_inner(phase, audio_counter, bomb_triggered)?;
+        // Render 547890 draws the room's FX rays on every presented run frame,
+        // advancing each phase once: the old room keeps drawing while a
+        // transition fades out, the new room draws only its load-frame
+        // snapshot while the transition slides in.
+        let drawn = self
+            .state
+            .room_transition
+            .as_ref()
+            .is_none_or(|transition| transition.phase == traversal::TransitionPhase::Out);
+        if self.state.run_tick != run_tick && drawn {
+            if let Some(group) = self.state.room.appearance.fx_rays.as_mut() {
+                group.calls = group.calls.saturating_add(1);
+            }
+        }
+        Ok(())
+    }
+
+    fn tick_after_character_request_inner(
+        &mut self,
+        phase: phase::Phase,
+        audio_counter: u32,
+        bomb_triggered: bool,
+    ) -> Result<(), String> {
         self.state.persistent_callback_pre_counter = Some(audio_counter);
         self.state.tick += 1;
         self.state.menu_animation_tick += 1;
@@ -5525,6 +5553,7 @@ impl Game {
             &mut self.state.room,
             &mut self.state.boot_lifecycle.shared,
             self.state.stage,
+            0,
             0,
         );
         grid_records::admit_fresh(

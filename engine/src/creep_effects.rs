@@ -134,6 +134,7 @@ impl NpcEffectAdmission<'_> {
             time_to_live,
             raw_7f4,
             raw_7f8: 0.0,
+            rotation_814: 0.0,
             raw_7d8: true,
             sprite,
             full_updates: 0,

@@ -84,6 +84,7 @@ def observe(pid, context):
                     'birthGameUpdate': struct.unpack_from('<I', raw, 0x42c)[0],
                     'spriteFlipX': bool(raw[0x2fc]), 'spriteFlipY': bool(raw[0x2fd]),
                     'spriteScale': pair(0x2c4),
+                    'spriteRotation': struct.unpack_from('<f', raw, 0x2cc)[0],
                     'spriteTint': list(struct.unpack_from('<ffff', raw, 0x2d0)),
                     # Whole sprite KColor +2d0: tint RGBA, colorize RGBA, offset RGB.
                     'spriteColor': list(struct.unpack_from('<11f', raw, 0x2d0)),
@@ -309,6 +310,15 @@ def observe(pid, context):
                 entries.append([list(struct.unpack_from('<ff', read(layer + 8, 8))) for layer in range(lbegin, lend, 0x14)])
             report['fxLayers'] = entries
             report['fxRayGroup'] = struct.unpack('<i', read(fx + 0x38, 4))[0]
+            # The selected group's rays (0x20 each, group at FX+0x20 + 0x40 *
+            # FX+0x38, rays at group+0x20/+0x28): render 547890 adds
+            # animationSpeed (+4) to phase (+8) on every call that draws.
+            report['fxRayPhases'] = []
+            if report['fxRayGroup'] >= 0:
+                group = u64(fx + 0x20) + 0x40 * report['fxRayGroup']
+                rbegin, rend = struct.unpack('<QQ', read(group + 0x20, 16))
+                if (rend - rbegin) % 0x20 or rend - rbegin > 0x20 * 32: raise ValueError('Unexpected fx rays')
+                report['fxRayPhases'] = [list(struct.unpack_from('<fff', read(ray, 12))) for ray in range(rbegin, rend, 0x20)]
             report['gridSelectors'] = list(struct.unpack('<' + 'I' * (width * height),
                 read(room + 0xe98, width * height * 4)))
             report['pathCosts'] = list(struct.unpack('<' + 'i' * 448,

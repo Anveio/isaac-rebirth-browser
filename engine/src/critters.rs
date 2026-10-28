@@ -390,6 +390,7 @@ fn admit(state: &mut State, admission: Admission) -> Result<u32, String> {
         time_to_live: -1,
         raw_7f4: 1,
         raw_7f8: 0.0,
+        rotation_814: 0.0,
         raw_7d8: variant == 68,
         sprite,
         full_updates: 0,
@@ -648,8 +649,10 @@ fn remove(effect: &mut SpriteEffect) {
     effect.removed = true;
 }
 
-/// A killed critter leaves a Blood7 splat in its own color (SetColor before
-/// the immediate Update), then removes itself.
+/// A killed critter leaves a Blood7 splat in its own color (SetColor, then
+/// Effect+818 = 0.3 before the immediate Update: Tiny Bug 45f11c, Wall Bug
+/// 46154e), then removes itself. The stain keeps the class of its full
+/// incoming scale and is drawn at 0.3.
 fn splat(state: &mut State, id: u32, scale: Option<f32>, flags: u32) -> Result<(), String> {
     let seed = state.boot_lifecycle.shared.next_u32();
     let effect = effect_mut(state, id)?;
@@ -659,7 +662,7 @@ fn splat(state: &mut State, id: u32, scale: Option<f32>, flags: u32) -> Result<(
         familiars::set_blood_scale(state, blood, scale)?;
     }
     effect_mut(state, blood)?.flags |= flags;
-    familiars::advance_blood_initial(state, blood)?;
+    familiars::advance_blood_initial_sized(state, blood, 0.3)?;
     remove(effect_mut(state, id)?);
     Ok(())
 }

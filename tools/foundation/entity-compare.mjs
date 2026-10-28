@@ -97,6 +97,18 @@ export function roomRows(rows, source, actual) {
   const overlay = actual.room.appearance?.fx?.overlayOrigin;
   // FX+0x38 (54a5b6): the selected fxRays group, -1 when none.
   check(rows, 'stage.fxRayGroup', source.fxRayGroup, actual.room.appearance.fxRays?.index ?? -1);
+  // Render 547890 adds animationSpeed (+4) to each ray's f32 phase (+8) on
+  // every call; the port counts its calls and the renderer carries its load
+  // phase forward the same way.
+  if (source.fxRayPhases) {
+    const group = actual.room.appearance.fxRays;
+    const calls = group?.calls ?? 0;
+    check(rows, 'stage.fxRayPhases', source.fxRayPhases.map(ray => ray.map(f32)), group?.rays.map(ray => {
+      let phase = f32(ray.phase);
+      for (let call = 0; call < calls; call++) phase = f32(phase + f32(ray.animationSpeed));
+      return [f32(ray.opacity), f32(ray.animationSpeed), phase];
+    }) ?? []);
+  }
   check(rows, 'stage.overlayOffset', source.fxLayers?.flat().map(([x, y]) => [f32(x), f32(y)]),
     overlay && [[f32(overlay.x - (663 - 480) * 0.5), f32(overlay.y - (429 - 270) * 0.5)]]);
   check(rows, 'room.combatClearCountdown', source.room.combatClearCountdown, actual.room.combatClearCountdown);
@@ -221,6 +233,15 @@ export function entityRows(rows, source, actual, spec, render) {
     // pixels; only positions take the 0.65 world projection.
     const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
     if (drawn) check(rows, `${name}.spriteScale`, vector(native.spriteScale), vector(drawn.scale));
+  }
+  // Tear poofs 1000.12/13 take sprite rotation +2cc from the 45abe3 leaf on
+  // every Update: Init's Random(4) * 90 (+814), negated unless FlipX.
+  for (const native of source.entities.filter(actor => actor.type === 1000 && [12, 13].includes(actor.variant) && !actor.removed && actor.spriteRotation !== undefined)) {
+    const effect = (actual.spriteEffects ?? []).find(candidate => candidate.variant === native.variant && candidate.spawnSeed === native.spawnSeed && !candidate.removed);
+    // A poof whose seed the port did not draw is a spawn-order divergence
+    // (#952), not graded here.
+    if (!effect) continue;
+    check(rows, `poof${native.spawnSeed}.spriteRotation`, f32(native.spriteRotation), f32(effect.sprite.rotation));
   }
   // Entity_Laser beams in room order, by spawn seed, with their source fields.
   const beams = source.entities.filter(actor => actor.type === 7 && !actor.removed);

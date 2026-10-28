@@ -132,6 +132,13 @@ pub struct FxRayGroup {
     pub ray_spacing: f32,
     pub perspective: f32,
     pub rays: Vec<FxRay>,
+    /// Render 547890 calls since this Room.Init loaded the rays: each adds
+    /// animationSpeed to every ray's f32 phase. It renders on every presented
+    /// run frame (a transition's fade-out included), once for the new room's
+    /// snapshot on the frame that loads it, and not while the transition
+    /// slides in.
+    #[serde(default)]
+    pub calls: u32,
 }
 
 /// One 0x20-byte ray: opacity +0, animationSpeed +4, phase +8, texture +0x10.
@@ -800,7 +807,13 @@ impl Room {
 /// stores FX+0x38 = RandomInt(matched groups) and, in an ordinary room
 /// (type 1), clears it when RandomInt(stage < 3 ? 3 : 2) != 0 unless the
 /// stage is 9 with a nonzero stage type.
-pub fn load_fx_rays(room: &mut Room, shared: &mut crate::mt::Mt19937, stage: u32, stage_type: u32) {
+pub fn load_fx_rays(
+    room: &mut Room,
+    shared: &mut crate::mt::Mt19937,
+    stage: u32,
+    stage_type: u32,
+    calls: u32,
+) {
     room.appearance.fx_rays = None;
     let Some(descriptor) = &room.descriptor else {
         return;
@@ -829,6 +842,7 @@ pub fn load_fx_rays(room: &mut Room, shared: &mut crate::mt::Mt19937, stage: u32
             ray_spacing: number("raySpacing"),
             perspective: number("perspective"),
             rays: Vec::new(),
+            calls,
         };
         let body = &group[..group.find("</rayGroup>").unwrap_or(group.len())];
         for ray in body.split("<fxRay ").skip(1) {
