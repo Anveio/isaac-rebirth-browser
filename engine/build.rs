@@ -299,8 +299,11 @@ fn costume_clip_catalog(path: &Path) -> String {
             .expect("read imported costume animations; run npm run assets:items"),
     )
     .expect("parse imported costume animations");
-    let mut output =
-        String::from("pub static COSTUME_CLIPS: &[(&str, &[(&str, i32, bool)])] = &[\n");
+    let mut output = String::from(
+        "/// (clip name, frame count, loops) for each clip of one costume actor.\n\
+         pub type CostumeClipRow = (&'static str, i32, bool);\n\
+         pub static COSTUME_CLIPS: &[(&str, &[CostumeClipRow])] = &[\n",
+    );
     for (actor, value) in actors.as_object().expect("costume actor map") {
         output.push_str(&format!("({actor:?}, &["));
         for clip in value["Animations"].as_array().expect("costume clips") {

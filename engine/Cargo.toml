@@ -6,6 +6,10 @@ edition = "2021"
 [lib]
 crate-type = ["rlib"]
 
+[features]
+# Port-only playtest floor (engine/src/debug_sandbox.rs); never in a release build.
+debug-sandbox = []
+
 [dependencies]
 # wasm32 std's own sinf/cosf implementation, used on every target so native
 # builds compute the shipped artifact's results (engine/src/fmath.rs).
