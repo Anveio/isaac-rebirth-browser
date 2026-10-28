@@ -83,7 +83,9 @@ def compare(case, generator, catalogs, hard=False):
     for name, expected, actual in [('descriptors', native_descriptors, generated_descriptors),
             ('grid', observed['grid'], predicted['grid']),
             ('startingDescriptor', observed['grid'][84], predicted['startingDescriptor']),
-            ('attempts', expected_attempts, predicted['attempts'])]:
+            ('attempts', expected_attempts, predicted['attempts']),
+            # Level+8 as Level::Init rolled it (58bfe8); the generator omits a zero mask.
+            ('curseMask', observed['curseMask'], predicted.get('curses', 0))]:
         if expected != actual:
             differences.append({'field': name, 'expected': expected, 'actual': actual})
     return {'seed': case['seed'], 'runSeed': public['seedValue'], 'stageSeed': public['stageSeed'], 'sourceCurseMask': observed['curseMask'],

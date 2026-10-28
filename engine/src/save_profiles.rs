@@ -68,6 +68,16 @@ pub struct ProfileRecord {
     pub saved: Option<RunRecord>,
 }
 
+///Which Continue load caller admits a saved run.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ContinueDomain {
+    ///The fresh starting room with neutral items and no saved actors.
+    InitialRoom,
+    ///Any other living normal Isaac save: the current room resumes as a
+    ///revisited Room with its saved persistent records.
+    VisitedRoom,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RunRecord {
@@ -373,6 +383,54 @@ impl RunRecord {
             return Err("saved run has incomplete Player owners".into());
         }
         Ok(())
+    }
+
+    ///Selects the load caller for Main Continue. The initial-room caller keeps
+    ///its narrow constructor-exact reconstruction; every other living normal
+    ///Isaac save resumes through the visited-room caller, which follows the
+    ///original Room.Init revisit: Room.Save5ce2d0 kept only the persistent
+    ///families (5c57c0: bombs, pickups, slots, shopkeepers, fireplaces and
+    ///listed effects), so an uncleared room rebuilds its NPCs from the layout.
+    pub fn admit_continue(&self) -> Result<ContinueDomain, String> {
+        if self.admit_initial_room().is_ok() {
+            return Ok(ContinueDomain::InitialRoom);
+        }
+        self.validate()?;
+        let run = &self.run;
+        let context = &self.context;
+        if context.character != "Isaac"
+            || context.challenge_id != 0
+            || context.player_type != Some(0)
+            || context.source_effect_mode != Some(0)
+            || run.player.dead
+            || (run.player.hp == 0 && run.player.soul_hp <= 0)
+            || run.player.golden_key.is_none()
+            || run.player.transformation_counts.is_none()
+        {
+            return Err("Continue has no owned load caller for this saved run yet".into());
+        }
+        if context
+            .player_manager_rng
+            .is_none_or(|rng| rng.state == 0 || [rng.right_a, rng.left, rng.right_b] != [5, 7, 22])
+        {
+            return Err(
+                "Continue requires actual saved Player constructor/manager RNG stores".into(),
+            );
+        }
+        let entry = context
+            .level_entry
+            .as_ref()
+            .ok_or("Continue has no owned saved Level entry stores")?;
+        if entry.slot >= 8 {
+            return Err("Continue entry door slot is outside the eight Level slots".into());
+        }
+        crate::critters::validate_saved_records(context.ambient_records.as_deref().ok_or(
+            "Continue requires owned saved ambient records; missing legacy data is unknown",
+        )?)?;
+        if !context.visited_rooms.contains(&run.current_room) {
+            return Err("Continue current room was never entered".into());
+        }
+        Ok(ContinueDomain::VisitedRoom)
     }
 
     ///This first load caller reconstructs the complete supported initial room.

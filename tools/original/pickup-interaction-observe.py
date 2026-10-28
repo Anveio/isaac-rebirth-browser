@@ -178,6 +178,20 @@ def observe(pid, context):
                     'mainAnimation': sprite_frame(player + 0x28),
                     'heldPockets': [{'id': struct.unpack_from('<i', held, slot * 8)[0], 'tag': held[slot * 8 + 4]}
                                     for slot in range(2)],
+                    # EvaluateItems 511F10 outputs (item-observer.py offsets) and the
+                    # pending request word D6C.
+                    'cachedStats': {'maxFireDelay': i32(player + 0xc78),
+                                    'shotSpeed': struct.unpack('<f', read(player + 0xc7c, 4))[0],
+                                    'damage': struct.unpack('<f', read(player + 0xc88, 4))[0],
+                                    'tearHeight': struct.unpack('<f', read(player + 0xc8c, 4))[0],
+                                    'tearFallingSpeed': struct.unpack('<f', read(player + 0xc90, 4))[0],
+                                    'tearFallingAcceleration': struct.unpack('<f', read(player + 0xc94, 4))[0],
+                                    'moveSpeed': struct.unpack('<f', read(player + 0xd60, 4))[0]},
+                    'cacheFlags': u32(player + 0xd6c), 'primaryWeapon': i32(player + 0xc08),
+                    'tearFlags': [u32(player + 0xc98), u32(player + 0xc9c)],
+                    # Luck block 0x400 (D64) and Flight block 0x80 (D68), composition-observe.py offsets.
+                    'luck': struct.unpack('<f', read(player + 0xd64, 4))[0],
+                    'flying': read(player + 0xd68, 1)[0] != 0,
                 })
                 players.append(item)
             report['players'] = players

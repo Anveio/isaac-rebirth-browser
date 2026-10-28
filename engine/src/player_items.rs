@@ -509,16 +509,29 @@ impl PlayerItems {
     }
 
     /// Save518120→5180d0→5e3f80 erases real temporary records before the
-    /// Player stores. For35/45,517580 has only the costume-removal callback;
-    /// both pinned configs are costume-free and cache0. Other record kinds
-    /// retain their actual state until their removal effects are implemented.
+    /// Player stores. Each removal ORs config+24 and calls 517580. For an
+    /// active (kind3) record 517580 calls 510420(id, 1), whose costume removal
+    /// 5102f0 returns at once when config+60 (the costume ANM2) is empty, then
+    /// runs its own callback only for IDs 12, 66, 77, 93, 117, 282, 298 and
+    /// 299. A costume-free active outside that list (35, 45, 291, ...) is
+    /// therefore removed with no other effect. Costumed, listed or other
+    /// record kinds, and nonzero cache words, stay refused until their removal
+    /// effects are ported.
     pub(crate) fn clear_save_temporary_effects(&mut self) -> Result<u32, String> {
         let mut cache_flags = 0;
         for entry in &self.temporary_collectibles {
             let config = items::definition(entry.item_id)
                 .ok_or("saved temporary record requires its actual ItemConfig")?;
-            if !matches!(entry.item_id, 35 | 45) || config.kind != 3 || config.cache_flags != 0 {
-                return Err("Player save requires an unmapped temporary removal callback".into());
+            const REMOVAL_CALLBACK_IDS: [u32; 8] = [12, 66, 77, 93, 117, 282, 298, 299];
+            if config.kind != 3
+                || config.cache_flags != 0
+                || REMOVAL_CALLBACK_IDS.contains(&entry.item_id)
+                || items::COSTUME_COLLECTIBLE_IDS.contains(&entry.item_id)
+            {
+                return Err(format!(
+                    "Player save requires an unmapped temporary removal callback (item {})",
+                    entry.item_id
+                ));
             }
             //5e3f80 ORs every removed record's config+24, independent of
             //its count/cooldown. No fitted use count controls this removal.
@@ -1368,7 +1381,11 @@ pub(crate) fn add_collectible(
     let query_stores_preserved = source_effect
         .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
         || plain_active_grant
-        || (normal_isaac && normal_entity && treatment.is_some());
+        || (normal_isaac && normal_entity && treatment.is_some())
+        //item-xrefs.json: no other Add path writes the counts or pill words.
+        || (normal_isaac
+            && normal_entity
+            && crate::collectible_grants::keeps(id, crate::collectible_grants::QUERY_STORES));
     //Use the reached Add descriptor, not query uncertainty or a second
     //ID exclusion list. These closed bodies do not write active words.
     let charge_words_preserved = keep_default_passive_inputs
@@ -1380,7 +1397,12 @@ pub(crate) fn add_collectible(
             )
         )
         || plain_active_grant
-        || (normal_isaac && normal_entity && treatment.is_some());
+        || (normal_isaac && normal_entity && treatment.is_some())
+        //52D19B: only a config kind 3 Add writes D74/D7C/D80/D8C.
+        || (normal_isaac
+            && normal_entity
+            && config.kind != 3
+            && crate::collectible_grants::keeps(id, crate::collectible_grants::ACTIVE_CHARGES));
     if !charge_words_preserved {
         crate::active_charges::invalidate_owner(
             owner,

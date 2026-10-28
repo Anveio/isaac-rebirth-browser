@@ -190,7 +190,9 @@ remain open.
 Next: Native own-saved Keyboard process reload; broader Ctrl and R contexts,
 natural R reload and gamepad.
 
-No open bugs.
+| Bug | Sev | Symptom | Source |
+| --- | --- | --- | --- |
+| #915 | P1 | Short key taps (Escape, bombs, items) are lost when the browser runs below 60 ticks/s; self-playtest pause check fails at ~38 ticks/s | playtest 2026-10-28 self-playtest ea9b183 seed SGZL8K4G |
 
 ## Seeds, RNG and shared MT
 
@@ -268,9 +270,7 @@ qualification does not cover every Hard floor or fight against the Original.
 Next: qualify Depths I and II and Mom against the Original; Cellar
 generation and unlock; remaining curse consumers and XL progression.
 
-| Bug | Sev | Symptom | Source |
-| --- | --- | --- | --- |
-| #863 | P2 | Hard run WPTB6SQK: next floor rolls no curse where the original shows Curse of the Unknown (hearts hidden) | playtest 2026-10-27 `playtest/bc70726/clear-award-none.mp4` |
+No open bugs.
 
 ## Rooms, doors and transitions
 
@@ -292,7 +292,6 @@ Next: complete supported-room reentry; devil/angel door after a boss.
 | #147 | P1 | Doors into unsupported room types render open but never transition | playtest |
 | #212 | P2 | Seed J8JF7M4M: start room has no top door and hides the bottom door | e2e |
 | #450 | P3 | Doors into boss rooms use the normal frame instead of the boss frame (render part under *Rendering*) | playtest 2026-10-16 `playtest/2045007/` |
-| #865 | P2 | Entering an enemy room, the port draws the entry and spiked doors open where the original shows them shut | playtest 2026-10-27 `playtest/bc70726/clear-award-heart.mp4` |
 
 ## Stage progression
 
@@ -472,8 +471,19 @@ common failures; older failed reports remain retained. Current target-free
 Bra/Pad controls pass 13,338 unchanged semantic checks per build; Browser focus/seed passes 2/2. Frozen death and living
 reached-status
 morph/reentry retain explicit frontiers; saved NPC restoration, boss/champion,
-linked/custom-base actors, negative/repeated application, Fear and complete
+linked/custom-base actors, negative/repeated application, other statuses and complete
 MT/PCM/pixels remain open. The earlier target-free Bra pass keeps its scope.
+
+[Bounded Horf Fear](npc-fear.md) adds independent418/800/shared420, purple
+color, continued AI/ANM with held shooter, two embedded vectors and source
+Full/Fast expiry for Mom's Pad. The Horf-only fixed0/1, first recorded OS and
+no-Space cohort passes 229,936 checks with actual Full/Fast application in
+both games. Corrected main A/B has 6,471 common failure recoveries and zero
+common pass losses; earlier comparer and gameplay failures remain retained.
+Separate target-free Bra/Pad and Freeze fixed1 controls pass 84,760/0.
+Gaper admission is source-only; moving-NPC fleeing, nonzero-vector reset,
+other families, repeated/mixed/boss/linked applications, Save/Continue and
+complete MT/audio/pixels remain open. Item41 remains Partial.
 
 [PR656](https://github.com/Anveio/isaac-rebirth-browser/pull/656) adds green
 champion creep. Its current-main666-based frozen `35edb299` passes a fresh
@@ -724,6 +734,16 @@ Shared-MT sound draws are tracked under *Seeds, RNG and shared MT*.
 No open bugs.
 
 ## Saves and metagame
+
+The visited-room fallback also loses a live saved Bomb in a public Browser
+Pause Quit/Continue probe. Its admission and recoverable-host-refusal repair
+is in progress; saved Bomb reconstruction remains unqualified.
+
+The post-#908 Continue grader requires every actual Native NPC. Fresh unchanged
+main has 551 pass / 16 fail of 567 checks over three fixed routes plus recorded
+OS neighbour `7JRW6L28`; two missing Ring Fly222.0 bodies cause all 16 failures.
+Both treasure routes retain their selected scalar passes. Saved pedestal/item
+ownership and the admission repair remain open. [Audit and scope](save-continue.md#required-npc-audit-after-908).
 
 Rebirth scope: save and continue, profiles, achievements (178), unlocks,
 completion marks, challenges (20), Eden tokens, win streaks.

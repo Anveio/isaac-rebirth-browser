@@ -304,7 +304,7 @@ pub(crate) fn advance_transition(
         return Ok(true);
     }
     // Room.Save/Load status packing is unclosed. Refuse only readmission
-    // of a living reached-freeze actor, before changing either room or its
+    // of a living reached Freeze/Fear actor, before changing either room or its
     // stored body. Ordinary exits and unrelated saved rooms keep their path.
     if let Some(npc) = state
         .persisted_rooms
@@ -316,7 +316,7 @@ pub(crate) fn advance_transition(
         })
     {
         let error = format!(
-            "NPC {} freeze source frontier: Room.Save/Load status readmission",
+            "NPC {} status source frontier: Room.Save/Load status readmission",
             npc.id
         );
         state.room_transition = Some(transition);
@@ -350,7 +350,7 @@ pub(crate) fn advance_transition(
     state.current_room = transition.target_room;
     state.room = match state.persisted_rooms.remove(&state.current_room) {
         Some(mut room) => {
-            // Even a never-frozen actor's prior Full470 proof must not cross
+            // Even an unreached actor's prior Full470 proof must not cross
             // the unclosed restore. A new mapped Full can establish it again.
             for npc in &mut room.npcs {
                 npc.status.current_friction = None;

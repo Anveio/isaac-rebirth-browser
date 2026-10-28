@@ -48,8 +48,9 @@ def dense(tape, frames, prefix, every=1):
         tape += [{'type': 'step', 'frames': every}, {'type': 'capture', 'label': f'{prefix}-{index}'}]
 
 
-def floor(run_seed):
-    result = subprocess.run([str(GENERATOR)], input=json.dumps({'stageSeed': codec.initial_stage_seed(run_seed), 'spawns': True}),
+def floor(run_seed, hard=False):
+    request = {'stageSeed': codec.initial_stage_seed(run_seed), 'spawns': True, 'difficulty': 'hard' if hard else 'normal'}
+    result = subprocess.run([str(GENERATOR)], input=json.dumps(request),
                             capture_output=True, text=True, timeout=20, check=True)
     return json.loads(result.stdout)
 
@@ -160,10 +161,11 @@ def original_route(result, directory):
     return route
 
 
-def arrival(code, route):
+def arrival(code, route, hard=False):
     """The paired case for `code` cut at gameplay-start plus the port-recorded
-    route into the boss room, ending at `boss-room-arrival`; or a rejection."""
-    result = paired.build('paired-bomb-moving-even', code)
+    route into the boss room, ending at `boss-room-arrival`; or a rejection.
+    At hard, Down on the seeded Character page selects the difficulty."""
+    result = paired.build('paired-bomb-moving-even', code, hard)
     for name in ('tape', 'pairedTape'):
         end = next(index for index, action in enumerate(result[name]) if action.get('label') == 'gameplay-start')
         result[name] = result[name][:end + 1]
@@ -175,8 +177,8 @@ def arrival(code, route):
     return result, recorded
 
 
-def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
-    result, recorded = arrival(code, route)
+def case(identifier, code, route, boss, provenance, randomized, mode='sweep', hard=False):
+    result, recorded = arrival(code, route, hard)
     if result is None:
         return None, recorded, None
     for name in ('tape', 'pairedTape'):
@@ -189,6 +191,8 @@ def case(identifier, code, route, boss, provenance, randomized, mode='sweep'):
                         'rooms': route['rooms'], 'routeFrames': recorded['frames'], 'selection': provenance}
     if mode == 'crossing':
         result['entity']['required'] = ['overPlayer', 'underPlayer']
+    if hard:
+        result['entity']['difficulty'] = 'hard'
     return result, None, recorded['checkpoints']
 
 
@@ -209,11 +213,11 @@ def validate(result, checkpoints, scratch):
     return None
 
 
-def build(identifier, code, boss, provenance, randomized, checked, scratch, mode='sweep'):
-    route, reason = plan(floor(codec.decode_seed(code)), boss)
+def build(identifier, code, boss, provenance, randomized, checked, scratch, mode='sweep', hard=False):
+    route, reason = plan(floor(codec.decode_seed(code), hard), boss)
     if route is None:
         return None, reason
-    result, reason, checkpoints = case(identifier, code, route, boss, provenance, randomized, mode)
+    result, reason, checkpoints = case(identifier, code, route, boss, provenance, randomized, mode, hard)
     if result is None or not checked:
         return result, reason
     reason = validate(result, checkpoints, scratch / code.replace(' ', ''))
@@ -227,6 +231,7 @@ def main():
     parser.add_argument('--contrived', action='append', default=[], metavar='CODE')
     parser.add_argument('--count', type=int, default=1, help='OS-random cases to discover (at least one when discovering)')
     parser.add_argument('--attempts', type=int, default=6000)
+    parser.add_argument('--hard', action='store_true', help='start every run at hard difficulty')
     parser.add_argument('--no-validate', action='store_true', help='skip the fresh-original arrival check (research only)')
     args = parser.parse_args()
     boss = (args.type, args.variant)
@@ -239,7 +244,7 @@ def main():
         # CODE or CODE:FIGHT, where FIGHT names a fight() mode.
         code, _, mode = item.partition(':')
         result, reason = build(f'contrived-{index}', code, boss, {'entropy': 'contrived spec seed', 'fight': mode or 'sweep'},
-                               False, checked, scratch, mode or 'sweep')
+                               False, checked, scratch, mode or 'sweep', args.hard)
         if result is None:
             raise ValueError(f'Contrived {code} does not reach boss {boss}: {reason}')
         cases.append(result)
@@ -252,7 +257,8 @@ def main():
             continue
         tried.add(vector['seedValue'])
         code = codec.encode_seed(vector['seedValue'])
-        result, reason = build(f'random-{found}', code, boss, {'entropy': 'OS random', 'discoveryAttempts': attempt}, True, checked, scratch)
+        result, reason = build(f'random-{found}', code, boss, {'entropy': 'OS random', 'discoveryAttempts': attempt}, True, checked, scratch,
+                               hard=args.hard)
         if result is None:
             counts[reason.split(':')[0].split(' ')[0]] += 1
             if reason not in ('other-boss', 'no-quiet-path'):

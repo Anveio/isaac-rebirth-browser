@@ -85,6 +85,10 @@ pub struct Npc {
     /// NPCAI_Pathfinder (+7d8) for families that walk the grid.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pathfinder: Option<crate::pathfinder::Pathfinder>,
+    /// Narrow embedded Pathfinder +8/+10 owner where the complete Port
+    /// pathfinder is unavailable. Never duplicates a full pathfinder owner.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pathfinder_vectors: Option<crate::pathfinder::PathVectors>,
     /// Sprite FlipX (+2fc) for families that face their target.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub flip_x: bool,
@@ -1004,6 +1008,7 @@ impl Npc {
             splat_color: crate::sprite_color::Color::WHITE,
             flip_x: false,
             pathfinder: None,
+            pathfinder_vectors: None,
             gluttony: None,
             sprite_events: SpriteEvents::default(),
             dingle: None,

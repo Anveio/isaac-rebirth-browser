@@ -11,6 +11,9 @@ use serde::{Deserialize, Serialize};
 pub struct Pathfinder {
     /// +8: chosen target; zero means none.
     pub target: WorldVector,
+    /// +10: cached random wander direction, independent of last_target +734.
+    #[serde(default = "zero")]
+    pub wander_direction_10: WorldVector,
     /// +18: last chosen direction index, or -1.
     pub direction: i32,
     /// +1c: stuck counter.
@@ -70,6 +73,7 @@ impl Pathfinder {
     pub(crate) fn new() -> Self {
         Self {
             target: ZERO,
+            wander_direction_10: ZERO,
             direction: -1,
             stuck: 0,
             last_update: 0,
@@ -97,6 +101,40 @@ impl Pathfinder {
             unmodelled_crawlspace_read: self.unmodelled_crawlspace_read,
             ..Self::new()
         };
+    }
+
+    /// ClearVectors 5B40A0 used by AddFear: preserve all other path state.
+    pub(crate) fn clear_vectors(&mut self) {
+        self.target = ZERO;
+        self.wander_direction_10 = ZERO;
+    }
+}
+
+/// The two embedded Pathfinder vectors for a family without Port ownership
+/// of the remaining pathfinder. Native 49E9F0 constructs these even for Horf;
+/// Npc.pathfinder == None does not establish their absence in Native.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PathVectors {
+    /// Embedded pathfinder +8, not Entity's ordinary target vector.
+    pub target: WorldVector,
+    /// Embedded pathfinder +10, not last_target +734.
+    pub wander_direction_10: WorldVector,
+}
+
+impl PathVectors {
+    /// Constructor 5B4140 and its Reset 5B4010 leave these vectors zero.
+    /// This does not claim ownership of the other constructor/reset fields.
+    pub(crate) fn new() -> Self {
+        Self {
+            target: ZERO,
+            wander_direction_10: ZERO,
+        }
+    }
+
+    pub(crate) fn clear_vectors(&mut self) {
+        self.target = ZERO;
+        self.wander_direction_10 = ZERO;
     }
 }
 

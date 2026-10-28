@@ -759,7 +759,10 @@ impl<'a> AppearanceQueries<'a> {
         self.owner.query_history.as_ref()
     }
 
-    // Insert in the existing AppearanceQueries impl. No new inventory or history.
+    ///Entity+14 of the queried Player.
+    pub(crate) fn entity_variant(self) -> Option<u32> {
+        self.entity.map(|entity| entity.variant)
+    }
 
     ///Actual signed E1C load, distinct from source Have(ID)'s positive test.
     pub(crate) fn raw_count(self, id: usize) -> Option<i32> {

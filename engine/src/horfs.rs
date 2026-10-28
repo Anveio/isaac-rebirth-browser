@@ -36,6 +36,7 @@ fn spawn(id: u32, selector: &SpawnSelector, _: &SpawnContext) -> Result<Option<N
         animation: "Shake".into(),
         actor: config.actor.into(),
         shooter: Some(ShooterTimers::default()),
+        pathfinder_vectors: Some(crate::pathfinder::PathVectors::new()),
         ..Npc::authored(id, config, selector)
     }))
 }

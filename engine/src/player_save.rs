@@ -160,10 +160,9 @@ impl SavedPlayerItems {
     ///and C08 stores are distinct from the copied saved count provenance.
     ///This method never restores an old live history or infers a costume list.
     pub(crate) fn restore_after_constructor(&self, owner: &mut PlayerItems) -> Result<(), String> {
-        if self
-            .costume_registrations
-            .as_ref()
-            .is_none_or(|history| !history.configuration_ids.is_empty())
+        //The saved costume history may hold the items' configurations; the
+        //destination constructor must still be the fresh empty Player.
+        if self.costume_registrations.is_none()
             || owner
                 .costume_registrations
                 .as_ref()

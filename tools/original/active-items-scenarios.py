@@ -51,9 +51,13 @@ def main():
     parser.add_argument('--count', type=int, default=1)
     parser.add_argument('--npc-freeze', action='store_true',
         help='Add target-bearing Mom\'s Bra fixed phases and the same first unfiltered OS draw')
+    parser.add_argument('--npc-fear', action='store_true',
+        help='Add bounded Horf Mom\'s Pad fixed phases and the first unfiltered OS draw')
     args = parser.parse_args()
     if not 0 <= args.count <= 64:
         parser.error('Fresh unfiltered OS count must be0..64')
+    if args.npc_fear and not args.count:
+        parser.error('Fear qualification requires the first unfiltered OS draw')
     codec = load('active_items_seed_codec', ROOT / 'tools/original/foundation-seeds.py')
     rooms_codec = load('active_items_room_codec', ROOT / 'tools/foundation/decode-rooms.py')
     if codec.encode_seed(RUN_SEED) != SEED_CODE or codec.decode_seed(SEED_CODE) != RUN_SEED:
@@ -96,12 +100,16 @@ def main():
     idle = [dict(label='released-initial-appear-idle', keys=[], presentations=96)]
     cases = []
 
-    def declare(name, pedestals, actions, epoch, phase, entropy, uses, npc_freeze=False, freeze_control=False):
+    def declare(name, pedestals, actions, epoch, phase, entropy, uses, npc_freeze=False, freeze_control=False,
+                npc_fear=False, fear_control=False):
         key = '-'.join('.'.join(str(value) for value in row[:-2]) for row in pedestals)
         npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
                       for x, y, kind in ((10, 5, 12), (1, 1, 18))] if npc_freeze else []
         if npc_freeze:
             key += '-npc-freeze12-18'
+        if npc_fear:
+            key += '-npc-fear12'
+            npc_groups = [dict(x=10, y=5, entries=[dict(type=12, variant=0, subtype=0, weight=1.0)])]
         authored = fixture(key, pedestals, npc_groups)
         cases.append(dict(name=name, publicMenuRoute='seeded-normal', publicRunSeed=RUN_SEED,
             publicSeedCode=SEED_CODE, bootEpochSeed=epoch, initialPhaseOffset=phase,
@@ -145,6 +153,25 @@ def main():
                     'SameActualLiveTargetsWithoutSpace', 'Held39Charge3', 'NoTEMP39OrDischarge',
                     'ZeroFreezeTimerAndFlag', 'OrdinaryBaseOwnerRetained',
                     'MovingTargetAndHorfShooterProgress']
+        if npc_fear:
+            cases[-1]['activeItems']['npcFear'] = dict(
+                schema='source-public-npc-fear-v1', routeVersion=1,
+                itemId=41, durationInput=220, cappedTimer=120, sourceEffectMode=0,
+                control=fear_control, targets=[dict(type=12, variant=0, subtype=0)],
+                required=['Held41Charge3AndPhysicalSpace', 'HorfShooterProgressBeforeUse',
+                    'LiveUnchampionedUnlinkedHorfPastAppear', 'ActualSourceEffectMode0',
+                    'UnchangedIdentityCountAndHp', 'PurplePriority255ColorStack',
+                    'ActualApplicationPhaseAndFirstFullFast', 'FullOnlyCountdownAndFastHold',
+                    'HeldShooterTimersWithContinuingAnmAndSharedRandom',
+                    'TwoEmbeddedVectorReadbacks', 'Timer1To0AndNextFullShooterResume'],
+                unknown=['GaperEvadeTargetLive', 'NonzeroVectorResetWrite',
+                    'HorfAngleDrawAttribution', 'CompleteSharedMt', 'NegativeDurationAndReapplication',
+                    'BossLockout', 'LinkedPropagation', 'MixedStatuses', 'MorphAndDamageDeath',
+                    'RoomOrContinueReadmission', 'SpecialSeedEffects', 'FullFramePixels'])
+            if fear_control:
+                cases[-1]['activeItems']['npcFear']['required'] = [
+                    'SameActualLiveHorfWithoutSpace', 'Held41Charge3', 'NoTEMP41OrDischarge',
+                    'ZeroFearTimerAndFlag', 'HorfShooterAnmAndSharedRandomProgress']
 
     single = lambda item: [(item, 6, 5)]
     fixed = 'Fixed declared public input'
@@ -191,6 +218,21 @@ def main():
             action['keys'] = [key for key in action['keys'] if key != 'space']
         declare('moms-bra-39-npc-freeze-no-space-control-phase0', single(39), control_actions,
                 12713, 0, fixed, [], npc_freeze=True, freeze_control=True)
+    # Same corrected strict-radius22 acquisition as Bra; no outcome-dependent
+    # movement is chosen from either game. Horf is within strict shooting range.
+    fear_actions = idle + [
+        dict(label='fear-acquire-north-8', keys=['w'], presentations=8),
+        dict(label='fear-acquire-released-ceremony', keys=[], presentations=96),
+    ] + use('fear-use', [], 360)
+    if args.npc_fear:
+        for phase in (0, 1):
+            declare(f'moms-pad-41-npc-fear-fixed-phase{phase}', single(41), fear_actions,
+                    1700000000, phase, fixed, [41], npc_fear=True)
+        control_actions = copy.deepcopy(fear_actions)
+        for action in control_actions:
+            action['keys'] = [key for key in action['keys'] if key != 'space']
+        declare('moms-pad-41-npc-fear-no-space-control-phase0', single(41), control_actions,
+                1700000000, 0, fixed, [], npc_fear=True, fear_control=True)
     with (output / 'os-entropy.jsonl').open('x') as journal:
         for index in range(args.count):
             raw = os.urandom(4)
@@ -207,9 +249,15 @@ def main():
             if args.npc_freeze:
                 declare(f'moms-bra-39-npc-freeze-fresh-os-epoch{suffix}', single(39), freeze_actions,
                         epoch, choice['initialPhaseOffset'], choice, [39], npc_freeze=True)
+            if args.npc_fear and index == 0:
+                declare('moms-pad-41-npc-fear-fresh-os-epoch', single(41), fear_actions,
+                        epoch, choice['initialPhaseOffset'], choice, [41], npc_fear=True)
     result = dict(schema=1, suite='active-items', cases=cases,
         source='Declared free active pedestals in the base start room of public seeded run 12713/B91Y6ZEV, '
             'walked onto and used with public Space. Fresh OS epochs are journaled before either game runs.')
+    if args.npc_fear:
+        journal = output / 'os-entropy.jsonl'
+        result['npcFearEntropyJournal'] = dict(path=str(journal), sha256=hashlib.sha256(journal.read_bytes()).hexdigest())
     (output / 'scenarios.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(dict(status='declared-not-executed', cases=len(cases), output=str(output))))
 

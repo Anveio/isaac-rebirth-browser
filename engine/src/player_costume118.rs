@@ -2,37 +2,9 @@
 //! flying/base-sprite transforms and guarded main clips keep separate owners.
 use crate::{motion::WorldVector, phase::Phase, State};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, sync::OnceLock};
 
-#[derive(Deserialize)]
-struct Actor {
-    #[serde(rename = "Animations")]
-    animations: Vec<Animation>,
-}
-#[derive(Deserialize)]
-struct Animation {
-    #[serde(rename = "Name")]
-    name: String,
-    #[serde(rename = "FrameNum")]
-    frames: i32,
-    #[serde(rename = "Loop")]
-    looping: bool,
-}
-fn animation(name: &str) -> &'static Animation {
-    static ACTOR: OnceLock<Actor> = OnceLock::new();
-    let actor = ACTOR.get_or_init(|| {
-        let mut actors: BTreeMap<String, Actor> =
-            serde_json::from_str(include_str!("../../web/costume118-data.json"))
-                .expect("authored 118 animation data");
-        actors
-            .remove("gfx/characters/118_brimstone.anm2")
-            .expect("118 actor")
-    });
-    actor
-        .animations
-        .iter()
-        .find(|clip| clip.name == name)
-        .expect("118 clip")
+fn animation(name: &str) -> crate::content::CostumeClip {
+    crate::content::costume_clip("gfx/characters/118_brimstone.anm2", name).expect("118 clip")
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

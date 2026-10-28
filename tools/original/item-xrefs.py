@@ -23,6 +23,7 @@ import bisect
 import hashlib
 import json
 import re
+import struct
 import subprocess
 from collections import defaultdict
 from pathlib import Path
@@ -133,6 +134,108 @@ def walk(insns, addresses, entry, end, stops):
     return seen
 
 
+# AddCollectible 52CC90: r12d holds the id until 52E389 reuses it.
+ADD_COLLECTIBLE, ADD_ID_LIVE_END = 0x52CC90, 0x52E380
+# Persistent Player input words the stat blocks read beside the counts.
+INPUT_WORDS = {0xC70: 'C70 aim', 0xD28: 'D28 speed', 0xD2C: 'D2C fire delay', 0xD30: 'D30 damage',
+               0xD34: 'D34 range', 0xD38: 'D38 shot speed', 0xD3C: 'D3C luck', 0xD40: 'D40 luck',
+               0xD44: 'D44 speed', 0xD58: 'D58 luck', 0x13BC: '13BC speed', 0x13C0: '13C0 speed'}
+JCC = {'je', 'jne', 'jg', 'jge', 'jl', 'jle', 'ja', 'jae', 'jb', 'jbe'}
+
+
+class Image:
+    """Reads initialized bytes of the binary by virtual address (jump tables)."""
+
+    def __init__(self, binary):
+        self.data = binary.read_bytes()
+        headers = subprocess.run(['readelf', '-lW', str(binary)], check=True, capture_output=True, text=True).stdout
+        self.segments = [(int(fields[2], 16), int(fields[1], 16), int(fields[4], 16))
+                         for fields in (line.split() for line in headers.split('\n')) if fields[:1] == ['LOAD']]
+
+    def qwords(self, address, count):
+        for virtual, offset, size in self.segments:
+            if virtual <= address and address + 8 * count <= virtual + size:
+                start = offset + address - virtual
+                return struct.unpack(f'<{count}Q', self.data[start:start + 8 * count])
+        raise ValueError(f'unmapped table {address:#x}')
+
+
+def add_paths(insns, addresses, end, item, image):
+    """Instructions AddCollectible can reach for one id, resolving its id tests."""
+    seen, stack = set(), [ADD_COLLECTIBLE]
+    while stack:
+        index = bisect.bisect_left(addresses, stack.pop())
+        compared = None
+        while index < len(insns) and insns[index][0] < end:
+            address, mnemonic, operands = insns[index]
+            if address in seen:
+                break
+            seen.add(address)
+            if mnemonic.startswith('ret'):
+                break
+            if mnemonic == 'cmp' and operands.startswith('r12d,0x') and address < ADD_ID_LIVE_END:
+                compared = int(operands.split(',')[1], 16)
+            elif mnemonic in JCC or mnemonic == 'jmp':
+                table = re.fullmatch(r'QWORD PTR \[r([a-z0-9]+)\*8\+0x([0-9a-f]+)\]', operands)
+                if mnemonic == 'jmp' and table:
+                    # Bounded switch: the preceding `cmp reg,N; ja` gives N+1 entries.
+                    bound = next(int(insns[back][2].split(',')[1], 16) for back in range(index - 1, index - 6, -1)
+                                 if insns[back][1] == 'cmp' and insns[back][2].split(',')[1].startswith('0x'))
+                    stack.extend(image.qwords(int(table.group(2), 16), bound + 1))
+                    break
+                try:
+                    target = int(operands, 16)
+                except ValueError:
+                    break
+                if mnemonic == 'jmp':
+                    stack.append(target)
+                    break
+                if compared is not None:
+                    taken = {'je': item == compared, 'jne': item != compared, 'jg': item > compared,
+                             'jge': item >= compared, 'jl': item < compared, 'jle': item <= compared,
+                             'ja': item > compared, 'jae': item >= compared, 'jb': item < compared,
+                             'jbe': item <= compared}[mnemonic]
+                    if taken:
+                        stack.append(target)
+                        break
+                else:
+                    stack.append(target)
+            elif not (mnemonic.startswith('nop') or mnemonic in ('xchg', 'mov', 'lea', 'movss', 'movzx')):
+                compared = None
+            index += 1
+    return seen
+
+
+def add_dispatch(insns, addresses, starts, items, image):
+    end = starts[bisect.bisect_right(starts, ADD_COLLECTIBLE)]
+    per_item = {}
+    for item in items:
+        reach = add_paths(insns, addresses, end, item, image)
+        writes, calls = set(), set()
+        for address, mnemonic, operands in insns[bisect.bisect_left(addresses, ADD_COLLECTIBLE):
+                                                 bisect.bisect_left(addresses, end)]:
+            if address not in reach:
+                continue
+            match = re.match(r'(?:DWORD|QWORD|BYTE|WORD) PTR \[rbx\+0x([0-9a-f]+)\],', operands)
+            if match and not mnemonic.startswith(('cmp', 'test', 'ucom', 'comi')):
+                offset = int(match.group(1), 16)
+                writes.add(INPUT_WORDS.get(offset, f'{offset:X}'))
+            if mnemonic.startswith('call') and re.fullmatch(r'[0-9a-f]+', operands):
+                calls.add(int(operands, 16))
+        per_item[item] = (sorted(writes), calls)
+    common = set.intersection(*(calls for _, calls in per_item.values()))
+    shared = set.intersection(*(set(writes) for writes, _ in per_item.values()))
+    result = {}
+    for item, (writes, calls) in per_item.items():
+        specific = [write for write in writes if write not in shared]
+        if not specific and not calls - common:
+            continue
+        result[str(item)] = dict(inputWrites=[write for write in specific if write in INPUT_WORDS.values()],
+                                 otherPlayerWrites=[write for write in specific if write not in INPUT_WORDS.values()],
+                                 specificCalls=[f'{call:06X}' for call in sorted(calls - common)])
+    return dict(sharedPlayerWrites=sorted(shared), items=result)
+
+
 def summarize(entries):
     collectibles, trinkets, familiars = [], [], []
     for kind, value, _ in entries:
@@ -208,11 +311,19 @@ def main():
             if flag not in flags and item in blocks[block]['collectibles']:
                 read_undeclared.append(dict(item=item, flag=flag))
 
+    collectible_ids = sorted(int(match.group(2)) for match in
+                             re.finditer(r'<(passive|active|familiar) [^>]*?id="(\d+)"', xml))
+    dispatch = add_dispatch(insns, addresses, starts, collectible_ids, Image(binary))
+
     result = dict(
         schema=1, binarySha256=PINNED_SHA, tool='tools/original/item-xrefs.py',
         note='Derived call sites only. CountRead outside 511F10 assumes a Player base.',
         evaluateItems=dict(function=f'{EVALUATE:06X}', end=f'{evaluate_end:06X}', blocks=blocks),
         cacheCrossCheck=dict(declaredButNotReadByLiteral=declared_unread, readButNotDeclared=read_undeclared),
+        addCollectible=dict(function=f'{ADD_COLLECTIBLE:06X}', note='Ids whose reachable AddCollectible path writes '
+                            'Player fields that not every id writes, or calls functions no other id calls. The '
+                            'writes are split into persistent stat input words and other offsets; every other id '
+                            'writes only sharedPlayerWrites. Writes inside callees are not followed.', **dispatch),
         functions=report,
         collectibleReaders={str(item): sorted(functions) for item, functions in sorted(by_item['collectibles'].items())},
         trinketReaders={str(item): sorted(functions) for item, functions in sorted(by_item['trinkets'].items())},

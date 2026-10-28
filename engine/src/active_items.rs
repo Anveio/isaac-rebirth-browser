@@ -844,10 +844,8 @@ fn use_leaf(state: &mut State, leaf: Leaf, id: u32, variant0: bool) -> Result<()
             play_item_animation(state, id, variant0, false);
         }
         Leaf::MomsPad => {
-            // Fear4450d0 has its own AI/pathfinder effects. Its source
-            // leaf reads config39's220, not this item's cooldown180.
-            if variant0 && vulnerable_npc(state, &[]) {
-                unowned_leaf(state, id, 0x52414e);
+            if variant0 {
+                moms_pad(state, id)?;
             }
             play_item_animation(state, id, variant0, false);
         }
@@ -1180,6 +1178,66 @@ fn moms_bra(state: &mut State, id: u32) -> Result<(), String> {
     }
     for (index, flags) in targets {
         crate::npc_status::add_freeze(&mut state.room.npcs[index], flags, duration);
+    }
+    Ok(())
+}
+
+/// 5240D8's variant0 walk, in Room+1638 order. The leaf explicitly fetches
+/// ItemConfig39 at 524143: Pad41's own 180 cooldown is not the fear duration.
+/// Validate the whole eligible room list before applying to any target.
+fn moms_pad(state: &mut State, id: u32) -> Result<(), String> {
+    let duration = items::definition(39)
+        .ok_or("Mom's Pad duration ItemConfig39 absent")?
+        .cooldown;
+    // Base 4473C1 refreshes Fear for special Seeds+48 modes. Challenge0 does
+    // not establish mode0; require the independent source-owned seed operand.
+    let normal_source_context = state.character == "Isaac"
+        && state.difficulty == crate::difficulty::Difficulty::Normal
+        && state.challenge_id == 0
+        && state
+            .player
+            .entity_source
+            .is_some_and(|source| source.entity_type == 1 && source.variant == 0)
+        && state
+            .run_seeds
+            .as_ref()
+            .and_then(|seeds| seeds.source_effect_mode)
+            == Some(0);
+    let mut targets = Vec::new();
+    for (index, npc) in state.room.npcs.iter().enumerate() {
+        if npc.removed {
+            continue;
+        }
+        let flags = crate::entities::family(npc.kind).map(|_| npc.entity_flags());
+        let eligible = crate::target_eligibility::eligible_target(
+            crate::target_eligibility::TargetEligibility {
+                kind: npc.kind,
+                collision_class: npc.entity_collision_class,
+                raw_494: npc.raw_494,
+                dead: npc.dead,
+                entity_flags: flags,
+            },
+        );
+        match eligible {
+            Ok(false) => {}
+            Ok(true)
+                if crate::npc_status::can_add_fear(
+                    npc,
+                    flags.expect("eligible target has its flag owner"),
+                    duration,
+                    normal_source_context,
+                ) =>
+            {
+                targets.push((index, flags.expect("checked flag owner")));
+            }
+            Ok(true) | Err(_) => {
+                unowned_leaf(state, id, 0x52414e);
+                return Ok(());
+            }
+        }
+    }
+    for (index, flags) in targets {
+        crate::npc_status::add_fear(&mut state.room.npcs[index], flags, duration);
     }
     Ok(())
 }

@@ -78,6 +78,22 @@ pub struct Keyframe {
 }
 
 include!(concat!(env!("OUT_DIR"), "/clip_catalog.rs"));
+include!(concat!(env!("OUT_DIR"), "/costume_clips.rs"));
+
+/// One clip of an imported costume actor (web/generated/item-assets).
+#[derive(Clone, Copy, Debug)]
+pub struct CostumeClip {
+    pub frames: i32,
+    pub looping: bool,
+}
+
+pub fn costume_clip(actor: &str, name: &str) -> Option<CostumeClip> {
+    let (_, clips) = COSTUME_CLIPS.iter().find(|(path, _)| *path == actor)?;
+    clips
+        .iter()
+        .find(|(clip, _, _)| *clip == name)
+        .map(|&(_, frames, looping)| CostumeClip { frames, looping })
+}
 
 pub fn clip(actor: &str, name: &str) -> Option<&'static Clip> {
     CLIPS

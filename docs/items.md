@@ -19,13 +19,13 @@ composition is [item synergies](item-synergies.md).
 
 | Kind | Total | Complete | Partial | Missing | Missing but engine refs |
 | --- | --- | --- | --- | --- | --- |
-| passive | 213 | 0 | 27 | 186 | 98 |
+| passive | 213 | 0 | 29 | 184 | 94 |
 | active | 75 | 7 | 20 | 48 | 7 |
 | familiar | 55 | 0 | 1 | 54 | 1 |
-| trinket | 60 | 0 | 0 | 60 | 25 |
-| **all** | 403 | 7 | 48 | 348 | 131 |
+| trinket | 60 | 0 | 0 | 60 | 26 |
+| **all** | 403 | 7 | 50 | 346 | 128 |
 
-Synergy mechanisms: 0 complete, 14 partial, 4 missing. Tested item sets: 0 match, 2 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 15 partial, 3 missing. Tested item sets: 0 match, 4 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -39,9 +39,9 @@ item ids the original's code for that mechanism queries
 | Mechanism | Name | Original | Original reads | Status | Live case | Issue | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `cache-dispatch` | Cache dispatch order | 511F10: Weapon 0x100, FireDelay 2, ShotSpeed 4, Damage 1, Range 8, Speed 0x10, TearFlags 0x20, Color 0x40, Flight 0x80, Familiars 0x200, Luck 0x400 |  | partial | stat-cache, damage-fire-delay |  | Order ported (item_pipeline CacheStage::ORDER). |
-| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate |  | missing |  | #895 | Port stages resolve only for listed item sets; an unlisted item leaves the requested bits pending and resolve_live_weapon refuses regular tears (Odd Mushroom 120). See item-synergies.md. |
-| `stat-damage` | Damage stage | 511F10 block 0x1 at 5134B0 | 44 + 1 trinket | partial | damage-fire-delay |  | Reads many items; readset-limited. |
-| `stat-fire-delay` | Fire delay stage | 511F10 block 0x2 at 5122D3 | 29 + 2 trinkets | partial | damage-fire-delay |  | Operators for 1, 6, 2/169, 222, 330 only. |
+| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate |  | partial | pickup-interactions `item-stats` | #895 | FireDelay, Damage, ShotSpeed, Range and Speed resolve for any inventory (#895). Flight, Familiar, Luck and the selected tail still use listed readsets. |
+| `stat-damage` | Damage stage | 511F10 block 0x1 at 5134B0 | 44 + 1 trinket | partial | damage-fire-delay, pickup-interactions `item-stats` |  | Every id the block reads is a port term. Frontiers: Bloody Lust (157) BEC, Eden (BFC 9) D4C, co-op variant. |
+| `stat-fire-delay` | Fire delay stage | 511F10 block 0x2 at 5122D3 | 29 + 2 trinkets | partial | damage-fire-delay, pickup-interactions `item-stats` |  | Every id the block reads is a port term. Frontiers: Eden (BFC 9) D48, co-op variant. |
 | `stat-shot-speed` | Shot speed stage | 511F10 block 0x4 at 511F68 | 15 + 1 trinket | partial | stat-cache |  | Full item formula; trinket 27 frontier. |
 | `stat-range` | Range stage | 511F10 block 0x8 at 5127C8 | 23 + 1 trinket | partial | stat-cache, pill-range-use |  |  |
 | `stat-speed` | Move speed stage | 511F10 block 0x10 at 512C48 | 29 + 1 trinket | partial | stat-cache |  |  |
@@ -50,9 +50,9 @@ item ids the original's code for that mechanism queries
 | `tear-color` | Tear color | 511F10 block 0x40 at 513355 | 19 | partial |  |  |  |
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
-| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  |  |
-| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. |
-| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  |  |
+| `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090's regular variant resolves when its whole readset is absent; any item it reads leaves the variant unknown. |
+| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
+| `costumes` | Costumes | Add-collectible costume registration |  | missing |  |  | Every costume actor in costumes2.xml (223 rows) is imported at build time by `npm run assets:items` into ignored web/generated/item-assets, with its sheets in the sprite pack; registration (52CC90) and drawing are not ported. |
 | `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
 | `death-callbacks` | Enemy death item callbacks | 47FD22 and peers |  | partial | dips |  | Gimpy and Infestation 2 on Dips. |
 | `trinket-effects` | Trinket effects | Held trinket queries |  | missing | trinket-start |  |  |
@@ -67,6 +67,8 @@ passing live comparison.
 | 118 Brimstone + 114 Mom's Knife + 329 The Ludovico Technique | mismatch | item-composition-history |  | Ordered grant history; child cleanup and actor parity fail. |
 | 114 Mom's Knife + 118 Brimstone + 329 The Ludovico Technique | mismatch | item-composition |  | Knife-first route; failing public-WASM comparison retained. |
 | 152 Technology 2 + 169 Polyphemus | untested |  |  | Joint Technology 2 + Polyphemus has no qualified run. |
+| 7 Blood of the Martyr + 12 Magic Mushroom + 101 The Halo + 120 Odd Mushroom + 189 SMB Super Fan | mismatch | pickup-interactions `stat-items-mixed-*` |  | All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port. |
+| 1 The Sad Onion + 4 Cricket's Head | mismatch | `npm run sandbox:case -- --items 1,4 --enemy 10.0` (generated) |  | Every EvaluateItems field, luck, flight and the Familiar roster match; the enemy fight diverges: in the fixed run the original's Gaper dies and drops a coin while the port's becomes type 11 and lives; in the random run Isaac's and the enemy's positions drift. |
 | 286 Blank Card + 63 The Battery | untested | pickup-interactions `sandbox-*` |  | Active + passive pair; graded per interaction, not as a synergy. |
 
 ## Passive collectibles
@@ -79,7 +81,7 @@ passing live comparison.
 | 4 | Cricket's Head | partial | damage-fire-delay `passive-4-phase-*` |  | 2 (treasure, goldenChest) | yes | Damage tier ported; readset-limited. |
 | 5 | My Reflection | missing |  |  | 1 (treasure) | yes |  |
 | 6 | Number One | partial | item-composition |  | 1 (treasure) | yes | FireDelay tier, range and regular tear variant; readset-limited. |
-| 7 | Blood of the Martyr | missing |  |  | 1 (treasure) |  |  |
+| 7 | Blood of the Martyr | missing |  |  | 1 (treasure) | yes |  |
 | 9 | Skatole | missing |  |  |  |  |  |
 | 12 | Magic Mushroom | missing |  |  | 2 (treasure, boss) | yes |  |
 | 13 | The Virus | missing |  |  | 2 (treasure, demonBeggar) | yes |  |
@@ -124,7 +126,7 @@ passing live comparison.
 | 75 | PHD | missing |  |  | 2 (treasure, shop) | yes |  |
 | 76 | X-Ray Vision | missing |  |  | 1 (treasure) |  |  |
 | 79 | The Mark | missing |  |  | 2 (devil, curse) | yes |  |
-| 80 | The Pact | missing |  |  | 2 (devil, curse) | yes |  |
+| 80 | The Pact | missing |  |  | 2 (devil, curse) |  |  |
 | 82 | Lord of the Pit | missing |  |  | 1 (devil) | yes |  |
 | 87 | Loki's Horns | missing |  |  | 1 (treasure) |  |  |
 | 89 | Spider Bite | missing |  |  | 1 (treasure) | yes |  |
@@ -144,8 +146,8 @@ passing live comparison.
 | 117 | Dead Bird | missing |  |  | 1 (treasure) | yes |  |
 | 118 | Brimstone | partial | item-composition |  | 1 (devil) | yes | Ordinary and controlled Brimstone; failing Original comparisons retained. [Notes](controlled-brimstone.md). |
 | 119 | Blood Bag | missing |  |  |  | yes |  |
-| 120 | Odd Mushroom | missing |  | #895 | 2 (treasure, secret) | yes | Pickup leaves the cache stages unresolved and breaks tears. |
-| 121 | Odd Mushroom | missing |  |  | 2 (treasure, secret) | yes |  |
+| 120 | Odd Mushroom | partial | pickup-interactions `odd-mushroom-thin-*` | #895 | 2 (treasure, secret) | yes | Every cached stat matches and tears fire (#895). The Player size change is not observed yet. |
+| 121 | Odd Mushroom | partial | pickup-interactions `odd-mushroom-large-*` |  | 2 (treasure, secret) | yes | Every cached stat and the hearts match. The Player size change is not observed yet. |
 | 122 | Whore of Babylon | missing |  |  | 1 (devil) | yes |  |
 | 125 | Bobby-Bomb | missing |  |  | 2 (treasure, bossrush) |  |  |
 | 129 | Bucket of Lard | missing |  |  | 1 (treasure) | yes |  |
@@ -191,7 +193,7 @@ passing live comparison.
 | 198 | Box | missing |  |  | 3 (boss, beggar, dungeon) |  |  |
 | 199 | Mom's Key | missing |  |  | 3 (shop, keyMaster, dungeon) | yes |  |
 | 200 | Mom's Eyeshadow | missing |  |  | 2 (treasure, dungeon) | yes |  |
-| 201 | Iron Bar | missing |  |  | 1 (treasure) | yes |  |
+| 201 | Iron Bar | missing |  |  | 1 (treasure) |  |  |
 | 202 | Midas' Touch | missing |  |  | 1 (treasure) |  |  |
 | 203 | Humbleing Bundle | missing |  |  | 1 (shop) |  |  |
 | 204 | Fanny Pack | missing |  |  | 2 (shop, beggar) |  |  |
@@ -244,7 +246,7 @@ passing live comparison.
 | 256 | Hot Bombs | missing |  |  | 1 (treasure) |  |  |
 | 257 | Fire Mind | missing |  |  | 1 (treasure) |  |  |
 | 258 | Missing No. | missing |  |  | 1 (secret) |  |  |
-| 259 | Dark Matter | missing |  |  | 1 (devil) | yes |  |
+| 259 | Dark Matter | missing |  |  | 1 (devil) |  |  |
 | 260 | Black Candle | missing |  |  | 2 (shop, curse) | yes |  |
 | 261 | Proptosis | missing |  |  | 1 (treasure) | yes |  |
 | 262 | Missing Page 2 | missing |  |  | 3 (devil, secret, demonBeggar) | yes |  |
@@ -299,7 +301,7 @@ passing live comparison.
 | 38 | Tammy's Head | partial | `tammys-head` |  | 1 (goldenChest) |  | See [active inventory](active-items.md). |
 | 39 | Mom's Bra | partial | active-items `moms-bra-39-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
 | 40 | Kamikaze! | partial | `kamikaze-40-fixed-phase0` |  | 1 (treasure) |  | See [active inventory](active-items.md). |
-| 41 | Mom's Pad | partial | `moms-pad-41-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
+| 41 | Mom's Pad | partial | active-items `moms-pad-41-fixed-phase1` |  | 2 (treasure, dungeon) |  | See [active inventory](active-items.md). |
 | 42 | Bob's Rotten Head | missing |  |  | 2 (treasure, goldenChest) |  | See [active inventory](active-items.md). |
 | 43 | Pills here! | missing |  |  |  |  | See [active inventory](active-items.md). |
 | 44 | Teleport! | missing |  |  | 1 (treasure) |  | See [active inventory](active-items.md). |
@@ -469,7 +471,7 @@ passing live comparison.
 | 36 | Rusted Key | missing |  |  |  |  |  |
 | 37 | Goat Hoof | missing |  |  |  | yes |  |
 | 38 | Mom's Pearl | missing |  |  |  |  |  |
-| 39 | Cancer | missing |  |  |  |  |  |
+| 39 | Cancer | missing |  |  |  | yes |  |
 | 40 | Red Patch | missing |  |  |  | yes |  |
 | 41 | Match Stick | missing | trinket-start |  |  |  | Give/Remove and held fields only; the fire bomb drop is not ported. |
 | 42 | Lucky Toe | missing |  |  |  | yes |  |

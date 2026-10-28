@@ -66,6 +66,7 @@ export async function floorE2e({ sourceReport, output = join(ROOT, ".cache/found
           "Live browser generated room identities, geometry, masks and all descriptor seeds must match the original");
         assert.deepEqual(starting.floor.grid, original.expected.grid, "Full floor topology must match the original");
         assert.equal(starting.floor.attempts, original.expected.attempts, "Retry count must match the actual native log");
+        assert.equal(starting.floor.curses ?? 0, original.sourceCurseMask, "The floor's curse (Level+8) must match the original's roll");
         assert.equal(starting.currentRoom, original.expected.startingDescriptor);
         assert.deepEqual(starting.visitedRooms, [starting.currentRoom]);
         const current = starting.floor.descriptors[starting.currentRoom];

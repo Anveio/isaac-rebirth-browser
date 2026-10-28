@@ -57,6 +57,13 @@ export const SUITES = [
     'Keyboard menu9/10,24x2 bindings, Back/save, duplicate refusal, Defaults, Escape and actual movement; four fixed plus unfiltered OS'),
   suite('save-continue', e2e('save-continue'), ['--count', '1'],
     'Living Quit/Continue and natural own-storage reload; fixed footprints plus unfiltered OS public seeds'),
+  // Exit mid-room and Continue: uncleared rooms rebuild their layout NPCs,
+  // pedestals keep their rolled item, the player resumes at the entry door
+  // (continue-run-scenarios.py).
+  suite('continue-run', statePair, ['--scenario-helper', helper('continue-run-scenarios.py'),
+    '--helper-arg', '--count', '--helper-arg', '1', '--comparator', 'tools/foundation/continue-run-state-pair.mjs',
+    '--state-observer', helper('paired-room-observe.py'), '--native-frame-timeout', '120'],
+    'Exit mid-run and Continue: saved room, NPC respawn, pedestals, items and entry door'),
   suite('ordinary-run', e2e('ordinary-run'), ['--ambient-grid', '--count', '4'],
     'No-dialog run admission, level descriptors, Game.Save stores, grid records and ambient Room costs'),
   suite('weapons', e2e('weapons'), ['--count', '4'], 'Tear cadence, direction and inherited motion'),
@@ -192,7 +199,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 // Logical areas, selected as `npm run test:e2e -- @<group>`. A suite may sit
 // in several; every runnable suite sits in at least one.
 export const GROUPS = {
-  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
+  boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'continue-run', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
   stage: ['stage-exit', 'monstro'],
   // The three-floor Caves II descent runs about 45 minutes per case (README).
