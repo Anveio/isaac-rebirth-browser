@@ -186,6 +186,23 @@ CASES = {
         actions=[act('settle', [], 30), act('use-active', ['space'], 4), act('after-active', [], 100),
                  act('walk-to-battery', ['w'], 60), act('after-battery', [], 30)],
         interactions=['blank-card-card', 'battery-recharge']),
+    # The Odd Mushroom (Thin) requests damage, fire delay and speed (#895).
+    'odd-mushroom-thin': dict(
+        about='Odd Mushroom (Thin) granted at the start: every cached stat, then tears fired right',
+        items=[120], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('shoot-right', ['Right'], 40), act('after-shots', [], 20)],
+        interactions=['item-stats']),
+    # Items outside every former stage readset, alone and together.
+    'odd-mushroom-large': dict(
+        about='Odd Mushroom (Large) granted at the start: every cached stat, then tears fired right',
+        items=[121], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('shoot-right', ['Right'], 40), act('after-shots', [], 20)],
+        interactions=['item-stats']),
+    'stat-items-mixed': dict(
+        about='Blood of the Martyr, Magic Mushroom, Halo, Odd Mushroom (Thin) and SMB Super Fan together',
+        items=[7, 12, 101, 120, 189], card=0, spawns=[],
+        actions=[act('settle', [], 30), act('shoot-right', ['Right'], 40), act('after-shots', [], 20)],
+        interactions=['item-stats']),
     'blank-card-pocket-conversion': dict(
         about='Little Baggy converts the held 2 of Clubs before a physical Blank Card use',
         items=[BLANK_CARD], card=TWO_OF_CLUBS, spawns=[pickup(6, 5, 100, 252)],

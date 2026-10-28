@@ -134,6 +134,14 @@ impl CacheStage {
     }
 }
 
+///Collectibles and trinkets the tear property getter 50D090 queries
+///(item-xrefs.json `functions`, 50D090).
+const TEAR_GETTER_COLLECTIBLES: &[u32] = &[
+    7, 34, 48, 80, 89, 90, 103, 110, 122, 125, 126, 138, 140, 150, 154, 183, 200, 201, 213, 221,
+    228, 229, 230, 231, 237, 254, 257, 259, 261, 305, 306, 309, 315, 317, 330, 336,
+];
+const TEAR_GETTER_TRINKETS: &[u32] = &[30, 31];
+
 #[derive(Clone, Copy)]
 pub(crate) struct ItemInputs<'a> {
     owner: &'a PlayerItems,
@@ -209,20 +217,20 @@ impl<'a> ItemInputs<'a> {
         {
             return Some(0);
         }
+        //Every other branch of 50D090 is a Have/TEMP/HasTrinket test on its
+        //readset. With all of them false (and the normal variant, which
+        //skips the 30E8 reads) no random draw or variant write is reached.
         (source_player_type == Some(0)
             && primary == PrimaryWeaponC08::RegularTears
             && flags.0 == 0
-            //50D176/1C7 query30 then31 before the kind1 tail. Only
-            //their actual negatives bypass both shared random branches.
-            && queries.has_trinket(30) == Some(false)
-            && queries.has_trinket(31) == Some(false)
-            && self.owner.temporary_collectibles.is_empty()
-            && self
-                .owner
-                .owned_counts
+            && queries.entity_variant() == Some(0)
+            && TEAR_GETTER_TRINKETS
                 .iter()
-                .enumerate()
-                .all(|(id, &count)| count == 0 || (count > 0 && [1, 4, 6].contains(&id))))
+                .all(|&id| queries.has_trinket(id) == Some(false))
+            && TEAR_GETTER_COLLECTIBLES.iter().all(|&id| {
+                queries.have(id as usize) == Some(false)
+                    && queries.temporary_present(id) == Some(false)
+            }))
         .then_some(0)
     }
 
@@ -874,6 +882,10 @@ pub(crate) struct CacheSourceInputs {
     pub(crate) challenge_id: u32,
     pub(crate) damage_maximum: Option<bool>,
     pub(crate) shot_speed_minimum: Option<bool>,
+    ///Config+9B on the current challenge (512787/515428).
+    pub(crate) fire_delay_minimum: Option<bool>,
+    ///Player+BD8 coins, read by Have109's Damage term (514A98).
+    pub(crate) coins: Option<i32>,
 }
 
 ///519FC0's selected normal Tear caller:152 owns the alternating-eye
@@ -914,31 +926,6 @@ impl Technology2SecondaryReadRole {
     }
 }
 
-///Source-local read roles for the literal FireDelay operator below. Full
-///511F10 closure proves152 neutral; no caller/cache/grant permission follows.
-///The shared multiplier owns permanent2/169, while153 and every TEMP record
-///remain outside this selected plan. Retained C08 stays an independent input.
-enum FireDelayReadRole {
-    Tier,
-    SharedMultiplier,
-    PostBoundReduction,
-    SoyMilk,
-    Neutral,
-}
-
-impl FireDelayReadRole {
-    fn of(id: usize) -> Option<Self> {
-        match id {
-            1 | 6 => Some(Self::Tier),
-            2 | 169 => Some(Self::SharedMultiplier),
-            222 => Some(Self::PostBoundReduction),
-            330 => Some(Self::SoyMilk),
-            4 | 152 => Some(Self::Neutral),
-            _ => None,
-        }
-    }
-}
-
 /// One callback's source ownership, beside its literal pure operator.
 /// Reads signed permanent/TEMP1/6, positive permanent2/222 and retained C08;
 /// writes integer C78 only. Source-local bounds and truncation precede Libra.
@@ -950,19 +937,6 @@ impl FireDelayStage {
     const REQUESTED: CacheMask = CacheMask(2);
     const EFFECT_ITEMS: &'static [u32] = &[1, 6, 222, 330];
     const NEUTRAL_ITEMS: &'static [u32] = &[4, 114, 118, 329];
-
-    fn admits(inputs: ItemInputs<'_>, source_player_type: Option<u32>) -> bool {
-        //Legacy neutral/coupled histories remain one whole capability. They
-        //cannot supply a new neutral role beside152/169 operators.
-        let legacy = inputs.owned_count(152) == 0
-            && inputs.owned_count(169) == 0
-            && inputs.admits_scalar_stage(CacheStage::FireDelay, Self::EFFECT_ITEMS);
-        let operator_reads = !inputs.positive_owned_count(153)
-            && inputs.admits_stage_owned_roles(|id| FireDelayReadRole::of(id).is_some());
-        source_player_type == Some(0)
-            && inputs.owner.fire_delay_inputs.is_some()
-            && (legacy || operator_reads)
-    }
 
     fn resolve(inputs: ItemInputs<'_>, primary: PrimaryWeaponC08) -> i32 {
         //512320/512323 add signed Number One counts before CVTSI2SS.
@@ -1161,163 +1135,347 @@ impl DamagePlan {
         Self { operators }
     }
 
-    // Add to the existing DamagePlan impl. Its original new()/partial formula
-    // remains literal; requested1 completes exclusively through this read method.
-    fn read_reached(
-        inputs: ItemInputs<'_>,
-        queries: crate::item_queries::AppearanceQueries<'_>,
-        source_bfc: Option<u32>,
-        source: CacheSourceInputs,
-    ) -> Option<Self> {
-        //The caller passes actual Player+BFC, not the Entity kind/variant.
-        if source_bfc != Some(0)
-            || !source
-                .entity
-                .is_some_and(|entity| entity.entity_type == 1 && entity.variant == 0)
-        {
-            return None;
-        }
-        //5134C9 starts the callback with this independent record-presence query.
-        //Its positive pre-tier operator is not implemented by this small cut.
-        if queries.temporary_present(34)? {
-            return None;
-        }
-        for id in [7, 90, 216, 109] {
-            if queries.have(id)? {
-                return None;
-            }
-        }
-        //Have109 false bypasses the coins operand. A present122 record has a
-        //separate squared-count operator; its absence is queried, not assumed.
-        if queries.temporary_present(122)? {
-            return None;
-        }
-
-        //Only actually loaded E1C raw terms constrain this callback. Unknown
-        //unqueried inventory and unrelated TEMP45 do not enter these guards.
-        for id in [50, 51, 70, 345, 79, 259] {
-            if queries.raw_count(id)? != 0 {
-                return None;
-            }
-        }
-        if queries.temporary_count(259)? != 0 {
-            return None;
-        }
-        if queries.raw_count(80)? != 0 {
-            return None;
-        }
-        let signed_four = queries.raw_count(4)?;
-        if queries.raw_count(197)? != 0 {
-            return None;
-        }
-        let signed_twelve = queries
-            .raw_count(12)?
-            .wrapping_add(queries.temporary_count(12)?);
-        for id in [101, 121] {
-            if queries.raw_count(id)? != 0 {
-                return None;
-            }
-        }
-        if queries.temporary_count(121)? != 0 {
-            return None;
-        }
-        for id in [138, 193, 189, 201] {
-            if queries.raw_count(id)? != 0 {
-                return None;
-            }
-        }
-        if queries.temporary_count(201)? != 0
-            || queries.raw_count(237)? != 0
-            || queries.temporary_count(237)? != 0
-        {
-            return None;
-        }
-        for id in [206, 230, 307, 208, 331, 165] {
-            if queries.raw_count(id)? != 0 {
-                return None;
-            }
-        }
-        if queries.have(120)? || queries.temporary_present(120)? {
-            return None;
-        }
-        if queries.temporary_present(83)? {
-            return None;
-        }
-        if queries.temporary_trinket_present(58)? {
-            return None;
-        }
-        if queries.temporary_present(126)? {
-            return None;
-        }
-        if queries.temporary_trinket_present(40)? {
-            return None;
-        }
-
-        //Positive169 alone reaches the2→153→TEMP2 short-circuit diversion.
-        let mode = if !queries.have(169)? {
-            PolyphemusDamageMode::Disabled
-        } else if queries.have(2)? || queries.have(153)? || queries.temporary_present(2)? {
-            PolyphemusDamageMode::AddFive
-        } else {
-            PolyphemusDamageMode::AddFourThenDouble
-        };
-        let source_d30 = inputs.owner.damage_inputs?.source_d30;
-        if queries.has_trinket(35)? {
-            return None;
-        }
-        if queries.have(69)? {
-            return None;
-        }
-        if queries.have(261)? || queries.temporary_present(261)? {
-            return None;
-        }
-        if queries.have(182)? {
-            return None;
-        }
-        let technology2 = queries.have(152)?;
-        //These false predicates skip their independent BEC and retainedC08 reads.
-        if queries.have(157)? || queries.have(149)? {
-            return None;
-        }
-        let shared_four_or_twelve =
-            queries.have(4)? || queries.have(12)? || queries.temporary_present(12)?;
-        //The earlier TEMP34 query was false and no records mutate in511F10.
-        if queries.have(310)? {
-            return None;
-        }
-        let soy_milk = queries.have(330)?;
-        if source.challenge_id != 0 && source.damage_maximum != Some(false) {
-            return None;
-        }
-        Some(Self {
-            operators: [
-                DamageOperator::BaseTier {
-                    signed_four,
-                    signed_twelve,
-                },
-                DamageOperator::Polyphemus { mode },
-                DamageOperator::PersistentAdditive {
-                    source_d30: Some(source_d30),
-                },
-                DamageOperator::MinimumBound,
-                DamageOperator::Technology2 {
-                    enabled: technology2,
-                },
-                DamageOperator::SharedFourOrTwelve {
-                    enabled: shared_four_or_twelve,
-                },
-                DamageOperator::SoyMilk { enabled: soy_milk },
-                DamageOperator::MinimumBound,
-            ],
-        })
-    }
-
     fn resolve(self) -> f32 {
         self.operators
             .into_iter()
             .fold(0.0, |damage, operator| operator.apply(damage))
     }
 }
+
+///CVTTSS2SI: INT_MIN for NaN and out-of-range values, unlike Rust's cast.
+fn cvttss2si(value: f32) -> i32 {
+    if value.is_finite() && (-2_147_483_648.0_f32..2_147_483_648.0_f32).contains(&value) {
+        value as i32
+    } else {
+        i32::MIN
+    }
+}
+
+///SSE MAXSS dst,src: dst when dst > src, else src (so src on NaN).
+fn maxss(dst: f32, src: f32) -> f32 {
+    if dst > src {
+        dst
+    } else {
+        src
+    }
+}
+
+///The source's CMPLTSS/AND/ANDN/OR select: `low < value ? value : low`.
+fn select_above(low: f32, value: f32) -> f32 {
+    if low < value {
+        value
+    } else {
+        low
+    }
+}
+
+///The FireDelay block of EvaluateItems (511F10 flag 2, 5122D3..5127BC), read
+///whole: every count, TEMP record, trinket, pill word and character term the
+///binary reads, in its instruction order. It does not depend on which items
+///the Player owns. None only for unknown history and for branches whose
+///inputs the port does not model yet: Eden's D48 (BFC 9) and the co-op
+///variant's first-player byte.
+pub(crate) fn read_fire_delay_block(
+    inputs: ItemInputs<'_>,
+    queries: crate::item_queries::AppearanceQueries<'_>,
+    source_bfc: Option<u32>,
+    primary: PrimaryWeaponC08,
+    source: CacheSourceInputs,
+) -> Option<i32> {
+    let entity = source.entity.filter(|entity| entity.entity_type == 1)?;
+    let bfc = source_bfc?;
+    let count = |id: usize| queries.raw_count(id);
+    let temp = |id: u32| queries.temporary_count(id);
+    let pill = |effect: usize| crate::pill_effect_history::callback_word(inputs.owner, effect);
+    let f = |value: i32| value as f32;
+    //5122DF/5122E9/512323: signed integer Number One count + TEMP6.
+    let number_one = count(6)?.wrapping_add(temp(6)?);
+    //5122EE..512383: one f32 chain in source order.
+    let mut sum = f(count(32)?) + f(pill(16)?) * 0.5_f32;
+    sum -= f(pill(15)?) * 0.4_f32;
+    sum += f(count(80)?);
+    sum += f(count(1)?);
+    sum += f(temp(1)?);
+    sum += f(count(120)?);
+    //51238D/5123A3: TEMP120 + chain, then 341, 342, 183, all *0.7.
+    let mut weighted = f(temp(120)?) + sum;
+    weighted += f(count(341)?);
+    weighted += f(count(342)?);
+    weighted += f(count(183)?);
+    weighted *= 0.7_f32;
+    let mut tier = f(number_one) * 1.5_f32 + weighted;
+    //5123E5..51242E: HasTrinket10 + 196 - 182, *0.5.
+    let trinket10 = i32::from(queries.has_trinket(10)?);
+    tier += f(trinket10
+        .wrapping_add(count(196)?)
+        .wrapping_sub(count(182)?))
+        * 0.5_f32;
+    //512418..51243E: 101 + 90 + 189, *0.2.
+    tier += f(count(101)?
+        .wrapping_add(count(90)?)
+        .wrapping_add(count(189)?))
+        * 0.2_f32;
+    //51240A/512448: 237 + TEMP237, *0.3 subtracted.
+    tier -= f(count(237)?.wrapping_add(temp(237)?)) * 0.3_f32;
+    tier += f(count(255)?) * 0.5_f32;
+    tier -= f(count(331)?) * 0.3_f32;
+    //512495: signed D2C *0.5.
+    tier += f(inputs.owner.fire_delay_inputs?.source_d2c) * 0.5_f32;
+    //5124AD Have120, else 514F78 TEMP120 presence: one +1.
+    if queries.have(120)? || queries.temporary_present(120)? {
+        tier += 1.0_f32;
+    }
+    //5124D2: character terms on BFC.
+    match bfc {
+        6 => tier -= 0.1_f32,
+        7 => tier += 0.5_f32,
+        9 => return None,
+        _ => {}
+    }
+    //5124F3..512545: 16 - 6*sqrt(max(1.3t+1, 0)); a non-positive tier
+    //also subtracts 6t.
+    let linear = 1.3_f32 * tier + 1.0_f32;
+    let root = (if 0.0 < linear { linear } else { 0.0 }).sqrt();
+    let mut delay = 16.0_f32 - 6.0_f32 * root;
+    delay -= if tier > 0.0 { 0.0 } else { 6.0_f32 * tier };
+    //512557..512578: `5 < delay ? delay : 5`.
+    delay = select_above(5.0, delay);
+    let c08 = primary.numeric();
+    //51257E Have69: regular tears without 330 take *2.5, else *0.8.
+    if queries.have(69)? {
+        if c08 == 1 && !queries.have(330)? {
+            delay *= 2.5_f32;
+        } else {
+            delay *= 0.8_f32;
+        }
+    }
+    //5125B0 Have2, 514D80 Have153, 514D95 Have169, 514DAA TEMP2.
+    if queries.have(2)?
+        || queries.have(153)?
+        || queries.have(169)?
+        || queries.temporary_present(2)?
+    {
+        delay *= 2.1_f32;
+        delay += 3.0_f32;
+    }
+    //5125E1 HasTrinket39.
+    if queries.has_trinket(39)? {
+        delay -= 2.0_f32;
+    }
+    //512606 Have149 and the retained C08 multipliers.
+    let ipecac = queries.have(149)?;
+    if ipecac && c08 == 1 {
+        delay += delay;
+        delay += 10.0_f32;
+    } else if c08 == 2 {
+        delay *= 3.0_f32;
+    } else if c08 == 5 {
+        delay *= 2.5_f32;
+    }
+    for (id, step) in [
+        (206, 1.0_f32),
+        (222, 2.0),
+        (224, 1.0),
+        (228, 1.0),
+        (307, 1.0),
+        (309, 1.0),
+    ] {
+        if queries.have(id)? {
+            delay -= step;
+        }
+    }
+    if queries.have(310)? {
+        delay += delay;
+    }
+    //512738: Monstro's Lung C08.
+    if c08 == 7 {
+        delay *= 4.3_f32;
+    }
+    //512749 Have330; 5157C8 Dr. Fetus with Ipecac sets 1.0.
+    if queries.have(330)? {
+        delay -= 6.0_f32;
+        delay *= 0.25_f32;
+        if c08 == 5 && ipecac {
+            delay = 1.0;
+        }
+    }
+    //512777: Entity+14 variant. The co-op variant reads the first Player.
+    match entity.variant {
+        1 => return None,
+        0 if source.challenge_id != 0 => {
+            //515428: Config+9B min fire rate. Not above 60 stores 60.
+            if source.fire_delay_minimum? && !(delay > 60.0) {
+                return Some(60);
+            }
+        }
+        _ => {}
+    }
+    //51279C..5127B0: CVTTSS2SI, then a non-positive result stores 1.
+    let integer = cvttss2si(delay);
+    Some(if integer <= 0 { 1 } else { integer })
+}
+
+///The Damage block of EvaluateItems (511F10 flag 1, 5134B0..513AC4), read
+///whole like the FireDelay block. None only for unknown history and for
+///inputs the port does not model yet: the co-op variant, Eden's D4C (BFC 9)
+///and Bloody Lust's (157) hit counter BEC.
+pub(crate) fn read_damage_block(
+    inputs: ItemInputs<'_>,
+    queries: crate::item_queries::AppearanceQueries<'_>,
+    source_bfc: Option<u32>,
+    primary: PrimaryWeaponC08,
+    source: CacheSourceInputs,
+) -> Option<f32> {
+    let entity = source.entity.filter(|entity| entity.entity_type == 1)?;
+    let bfc = source_bfc?;
+    let count = |id: usize| queries.raw_count(id);
+    let temp = |id: u32| queries.temporary_count(id);
+    let f = |value: i32| value as f32;
+    //5134B7 clears C88 before the additive terms.
+    let mut damage = 0.0_f32;
+    if queries.temporary_present(34)? {
+        damage = 2.0_f32 + damage;
+    }
+    for id in [7, 90, 216] {
+        if queries.have(id)? {
+            damage += 1.0_f32;
+        }
+    }
+    //514A98: Have109 adds coins BD8 * 0.04.
+    if queries.have(109)? {
+        damage = f(source.coins?) * 0.04_f32 + damage;
+    }
+    //513580: the co-op variant reads 30E8 first.
+    if entity.variant == 1 {
+        return None;
+    }
+    //51358A: a TEMP122 record adds count^2 * 1.5.
+    if queries.temporary_present(122)? {
+        let records = temp(122)?;
+        damage = f(records.wrapping_mul(records)) * 1.5_f32 + damage;
+    }
+    let prior = damage;
+    //5135CC..513622: one signed integer sum.
+    let mut additive = 0_i32;
+    for id in [50, 51, 70, 345, 79, 259] {
+        additive = additive.wrapping_add(count(id)?);
+    }
+    additive = additive.wrapping_add(temp(259)?);
+    let halves = count(80)?.wrapping_add(count(4)?).wrapping_add(count(197)?);
+    let mut sum = f(additive) + f(halves) * 0.5_f32;
+    //513639..5136B0: 12 + TEMP12 + 101 + 121 + TEMP121 + 138 + 193 + 189
+    //+ 201 + TEMP201, *0.3.
+    let mut tenths = count(12)?.wrapping_add(temp(12)?);
+    tenths = tenths.wrapping_add(count(101)?).wrapping_add(count(121)?);
+    tenths = tenths.wrapping_add(temp(121)?);
+    for id in [138, 193, 189, 201] {
+        tenths = tenths.wrapping_add(count(id)?);
+    }
+    tenths = tenths.wrapping_add(temp(201)?);
+    sum += f(tenths) * 0.3_f32;
+    sum += f(count(237)?.wrapping_add(temp(237)?)) * 1.5_f32;
+    sum += f(count(206)?);
+    sum += f(count(230)?) * 1.5_f32;
+    sum += f(count(307)?) * 0.5_f32;
+    sum += f(count(208)?);
+    sum += f(count(331)?) * 0.5_f32;
+    sum += f(count(165)?);
+    damage = sum + prior;
+    //513762 Have120, else 514C80 TEMP120 presence.
+    if queries.have(120)? || queries.temporary_present(120)? {
+        damage *= 0.9_f32;
+        damage -= 0.4_f32;
+    }
+    if queries.temporary_present(83)? {
+        damage = 0.7_f32 + damage;
+    }
+    //5137A9/513816: kind2 TEMP records 58 and 40. The port creates none,
+    //so a known absence is the only answer the query returns.
+    if queries.temporary_trinket_present(58)? || queries.temporary_trinket_present(40)? {
+        return None;
+    }
+    if queries.temporary_present(126)? {
+        damage = f(temp(126)?) * 1.2_f32 + damage;
+    }
+    //513846..513884: f32 linear, f64 sqrt * 3.5, f32 store.
+    let linear = maxss(1.2_f32 * damage + 1.0_f32, 0.0);
+    damage = (f64::from(linear).sqrt() * 3.5_f64) as f32;
+    //513892 Have169: 2/153/TEMP2 add 5; otherwise add 4 and double.
+    if queries.have(169)? {
+        if queries.have(2)? || queries.have(153)? || queries.temporary_present(2)? {
+            damage += 5.0_f32;
+        } else {
+            damage += 4.0_f32;
+            damage += damage;
+        }
+    }
+    //5138B0: character multiplier table 670960; Eve with TEMP122 skips it.
+    let skip_multiplier = bfc == 5 && queries.temporary_present(122)?;
+    if !skip_multiplier {
+        let factor = *CHARACTER_DAMAGE_670960.get(bfc as usize)?;
+        damage *= 1.0_f32 + factor;
+    }
+    if bfc == 9 {
+        return None;
+    }
+    //5138EA: signed D30 + damage, then `!(x < 0.5) ? x : 0.5`.
+    damage = f(inputs.owner.damage_inputs?.source_d30) + damage;
+    if damage < 0.5 {
+        damage = 0.5;
+    }
+    if queries.has_trinket(35)? {
+        damage += 2.0_f32;
+    }
+    if queries.have(69)? && queries.have(330)? {
+        damage = 5.0_f32 + damage;
+    }
+    if queries.have(261)? || queries.temporary_present(261)? {
+        damage += damage;
+    }
+    if queries.have(182)? {
+        damage = 2.3_f32 * damage + 1.0_f32;
+    }
+    if queries.have(152)? {
+        damage *= f32::from_bits(0x3f26_6666);
+    }
+    if queries.have(157)? {
+        return None;
+    }
+    let c08 = primary.numeric();
+    //5150F0: Azazel with Brimstone C08, no 118 and 329, halves.
+    if bfc == 7 && c08 == 2 && !queries.have(118)? && queries.have(329)? {
+        damage *= 0.5_f32;
+    }
+    if queries.have(149)? && matches!(c08, 7 | 1 | 5 | 6) {
+        damage = 40.0_f32 + damage;
+    }
+    //513A28 Have4, 515000 TEMP34 with Have7, Have12, TEMP12: one *1.5.
+    if queries.have(4)?
+        || (queries.temporary_present(34)? && queries.have(7)?)
+        || queries.have(12)?
+        || queries.temporary_present(12)?
+    {
+        damage *= 1.5_f32;
+    }
+    if queries.have(310)? {
+        damage += damage;
+    }
+    if queries.have(330)? {
+        damage *= 0.2_f32;
+    }
+    //513D60: Config+9A on a challenge raises damage to at least 100.
+    if entity.variant == 0 && source.challenge_id != 0 && source.damage_maximum? {
+        damage = select_above(100.0, damage);
+    }
+    //513AB8: final `0.5 > x ? 0.5 : x`.
+    Some(maxss(0.5, damage))
+}
+
+///Player type multipliers at 670960 (one f32 per BFC), read from the
+///pinned binary; the Damage block multiplies by 1 + entry.
+const CHARACTER_DAMAGE_670960: [f32; 13] = [
+    0.0, 0.0, 0.2, 0.35, 0.05, -0.25, 0.0, 0.5, 0.0, 0.0, 0.0, 0.2, 1.0,
+];
 
 ///Damage-only stage capability. Its source-ordered plan composes implemented
 ///operators; primary selection, other callbacks, grants and contacts stay local.
@@ -1740,8 +1898,13 @@ pub(crate) fn resolve_scalars(
         } else {
             None
         };
-        let damage_plan = if stage == CacheStage::Damage {
-            DamagePlan::read_reached(inputs, queries, source_player_type, source)
+        let damage_block = if stage == CacheStage::Damage {
+            read_damage_block(inputs, queries, source_player_type, primary, source)
+        } else {
+            None
+        };
+        let fire_delay_block = if stage == CacheStage::FireDelay {
+            read_fire_delay_block(inputs, queries, source_player_type, primary, source)
         } else {
             None
         };
@@ -1778,10 +1941,12 @@ pub(crate) fn resolve_scalars(
         };
         let move_speed_admitted = move_speed_plan.is_some();
         let shot_speed_admitted = shot_speed_plan.is_some();
-        let damage_admitted = damage_plan.is_some();
+        let damage_admitted = damage_block.is_some();
+        let fire_delay_admitted = fire_delay_block.is_some();
         let supported: &[u32] = match stage {
             CacheStage::FireDelay => {
-                values.max_fire_delay = FireDelayStage::resolve(inputs, primary);
+                values.max_fire_delay =
+                    fire_delay_block.unwrap_or_else(|| FireDelayStage::resolve(inputs, primary));
                 FireDelayStage::EFFECT_ITEMS
             }
             CacheStage::ShotSpeed => {
@@ -1806,8 +1971,7 @@ pub(crate) fn resolve_scalars(
                 &[4, 143]
             }
             CacheStage::Damage => {
-                values.stats.damage =
-                    damage_plan.map_or_else(|| DamageStage::resolve(inputs), DamagePlan::resolve);
+                values.stats.damage = damage_block.unwrap_or_else(|| DamageStage::resolve(inputs));
                 DamageStage::EFFECT_ITEMS
             }
             CacheStage::Range => {
@@ -1860,24 +2024,23 @@ pub(crate) fn resolve_scalars(
         };
         //FireDelay keeps its existing conservative producer qualification.
         //Range's exclusive plan owns each actually reached Have/TEMP query.
-        let unadmitted_number_one = matches!(stage, CacheStage::FireDelay)
-            && (inputs.owned_count(6) < 0 || inputs.number_one_record_present());
-        if !unadmitted_number_one
-            && match stage {
-                CacheStage::FireDelay => FireDelayStage::admits(inputs, source_player_type),
-                CacheStage::Damage => damage_admitted,
-                CacheStage::Range => range_admitted,
-                CacheStage::MoveSpeed => move_speed_admitted,
-                CacheStage::ShotSpeed => shot_speed_admitted,
-                _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
-            }
-        {
+        if match stage {
+            CacheStage::FireDelay => fire_delay_admitted,
+            CacheStage::Damage => damage_admitted,
+            CacheStage::Range => range_admitted,
+            CacheStage::MoveSpeed => move_speed_admitted,
+            CacheStage::ShotSpeed => shot_speed_admitted,
+            _ => source_player_type == Some(0) && inputs.admits_scalar_stage(stage, supported),
+        } {
             completed |= flag;
             if matches!(
                 stage,
-                CacheStage::ShotSpeed | CacheStage::Damage | CacheStage::Range
-            ) || (stage == CacheStage::MoveSpeed && move_speed_admitted)
-            {
+                CacheStage::FireDelay
+                    | CacheStage::ShotSpeed
+                    | CacheStage::Damage
+                    | CacheStage::Range
+                    | CacheStage::MoveSpeed
+            ) {
                 reached_completed |= flag;
             }
         }

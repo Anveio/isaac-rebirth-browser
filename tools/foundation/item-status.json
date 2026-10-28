@@ -29,7 +29,8 @@
     "304": { "status": "partial", "case": "", "note": "Libra scalar averaging (0x1b request expansion); no live case." },
     "329": { "status": "partial", "case": "item-composition", "note": "Controlled tear; compositions with 114/118 still fail." },
     "330": { "status": "partial", "case": "item-composition", "note": "FireDelay and damage operators, tear properties; readset-limited." },
-    "120": { "status": "missing", "issue": 895, "note": "Pickup leaves the cache stages unresolved and breaks tears." }
+    "120": { "status": "partial", "case": "pickup-interactions `odd-mushroom-thin-*`", "issue": 895, "note": "Every cached stat matches and tears fire (#895). The Player size change is not observed yet." },
+    "121": { "status": "partial", "case": "pickup-interactions `odd-mushroom-large-*`", "note": "Every cached stat and the hearts match. The Player size change is not observed yet." }
   },
   "trinkets": {
     "22": { "status": "missing", "note": "Several actives and Gimpy record a frontier while it is held." },
@@ -38,9 +39,9 @@
   },
   "mechanisms": [
     { "id": "cache-dispatch", "name": "Cache dispatch order", "original": "511F10: Weapon 0x100, FireDelay 2, ShotSpeed 4, Damage 1, Range 8, Speed 0x10, TearFlags 0x20, Color 0x40, Flight 0x80, Familiars 0x200, Luck 0x400", "status": "partial", "case": "stat-cache, damage-fire-delay", "note": "Order ported (item_pipeline CacheStage::ORDER)." },
-    { "id": "cache-admission", "name": "Stage admission for any inventory", "original": "Every stage runs for every owned item; no readset gate", "status": "missing", "issue": 895, "note": "Port stages resolve only for listed item sets; an unlisted item leaves the requested bits pending and resolve_live_weapon refuses regular tears (Odd Mushroom 120). See item-synergies.md." },
-    { "id": "stat-damage", "name": "Damage stage", "original": "511F10 block 0x1 at 5134B0", "status": "partial", "case": "damage-fire-delay", "note": "Reads many items; readset-limited.", "block": "damage 0x1" },
-    { "id": "stat-fire-delay", "name": "Fire delay stage", "original": "511F10 block 0x2 at 5122D3", "status": "partial", "case": "damage-fire-delay", "note": "Operators for 1, 6, 2/169, 222, 330 only.", "block": "firedelay 0x2" },
+    { "id": "cache-admission", "name": "Stage admission for any inventory", "original": "Every stage runs for every owned item; no readset gate", "status": "partial", "case": "pickup-interactions `item-stats`", "issue": 895, "note": "FireDelay, Damage, ShotSpeed, Range and Speed resolve for any inventory (#895). Flight, Familiar, Luck and the selected tail still use listed readsets." },
+    { "id": "stat-damage", "name": "Damage stage", "original": "511F10 block 0x1 at 5134B0", "status": "partial", "case": "damage-fire-delay, pickup-interactions `item-stats`", "note": "Every id the block reads is a port term. Frontiers: Bloody Lust (157) BEC, Eden (BFC 9) D4C, co-op variant.", "block": "damage 0x1" },
+    { "id": "stat-fire-delay", "name": "Fire delay stage", "original": "511F10 block 0x2 at 5122D3", "status": "partial", "case": "damage-fire-delay, pickup-interactions `item-stats`", "note": "Every id the block reads is a port term. Frontiers: Eden (BFC 9) D48, co-op variant.", "block": "firedelay 0x2" },
     { "id": "stat-shot-speed", "name": "Shot speed stage", "original": "511F10 block 0x4 at 511F68", "status": "partial", "case": "stat-cache", "note": "Full item formula; trinket 27 frontier.", "block": "shotspeed 0x4" },
     { "id": "stat-range", "name": "Range stage", "original": "511F10 block 0x8 at 5127C8", "status": "partial", "case": "stat-cache, pill-range-use", "block": "range 0x8" },
     { "id": "stat-speed", "name": "Move speed stage", "original": "511F10 block 0x10 at 512C48", "status": "partial", "case": "stat-cache", "block": "speed 0x10" },
@@ -49,7 +50,7 @@
     { "id": "tear-color", "name": "Tear color", "original": "511F10 block 0x40 at 513355", "status": "partial", "block": "tearcolor 0x40" },
     { "id": "flight", "name": "Flight", "original": "511F10 block 0x80 at 512166", "status": "partial", "note": "TEMP33 (The Bible) only.", "block": "flying 0x80" },
     { "id": "weapon-select", "name": "Weapon type selection and precedence", "original": "511F10 block 0x100 at 513AD0 writes C08", "status": "partial", "case": "item-composition, item-composition-history", "note": "Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail.", "block": "weapon 0x100" },
-    { "id": "tear-fire", "name": "Tear fire hooks", "original": "Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0", "status": "partial", "case": "weapons, tear-lifecycle", "functions": ["519FC0", "50D090", "52F370", "5177F0"]},
+    { "id": "tear-fire", "name": "Tear fire hooks", "original": "Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0", "status": "partial", "case": "weapons, tear-lifecycle", "note": "50D090's regular variant resolves when its whole readset is absent; any item it reads leaves the variant unknown.", "functions": ["519FC0", "50D090", "52F370", "5177F0"]},
     { "id": "familiar-cache", "name": "Familiar and orbital composition", "original": "511F10 block 0x200 at 513E80, CheckFamiliar 508D10", "status": "partial", "case": "familiars", "note": "Leech only; no orbitals.", "block": "familiars 0x200" },
     { "id": "costumes", "name": "Costumes", "original": "Add-collectible costume registration", "status": "missing" },
     { "id": "transformations", "name": "Transformations", "original": "52D0D0 transformation tail", "status": "missing" },
@@ -60,6 +61,7 @@
     { "items": [118, 114, 329], "status": "mismatch", "case": "item-composition-history", "note": "Ordered grant history; child cleanup and actor parity fail." },
     { "items": [114, 118, 329], "status": "mismatch", "case": "item-composition", "note": "Knife-first route; failing public-WASM comparison retained." },
     { "items": [152, 169], "status": "untested", "note": "Joint Technology 2 + Polyphemus has no qualified run." },
+    { "items": [7, 12, 101, 120, 189], "status": "mismatch", "case": "pickup-interactions `stat-items-mixed-*`", "note": "All ten cached stat fields match; the tear variant (blood tear from 7) needs the 50D090 getter port." },
     { "items": [286, 63], "status": "untested", "case": "pickup-interactions `sandbox-*`", "note": "Active + passive pair; graded per interaction, not as a synergy." }
   ]
 }

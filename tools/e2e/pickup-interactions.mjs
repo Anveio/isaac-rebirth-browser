@@ -55,6 +55,9 @@ function nativeObservation(observation) {
       owned: player.ownedItems, animationGuard: player.animationGuard,
       mainAnimation: { clip: player.animation, ...player.mainAnimation, guard: player.animationGuard },
       ownedAll: player.ownedAll ?? null },
+    // EvaluateItems outputs; graded only for item-stat interactions.
+    stats: player.cachedStats ? { ...player.cachedStats, cacheFlags: player.cacheFlags, primaryWeapon: player.primaryWeapon,
+      tearFlags: player.tearFlags } : null,
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position })),
     pocketBirths: live.filter(entity => entity.type === 5 && [70, 300].includes(entity.variant))
@@ -98,6 +101,11 @@ function portObservation() {
         playing: state.playerAnimation.playing, guard: state.playerAnimation.guard },
       owned: { 63: owned(63), 115: owned(115), 286: owned(286) },
       ownedAll: Object.fromEntries((items?.ownedCounts ?? []).flatMap((count, id) => count !== 0 ? [[String(id), count]] : [])) },
+    stats: { maxFireDelay: state.maxFireDelay, shotSpeed: state.playerStats.shotSpeed, damage: state.playerStats.damage,
+      tearHeight: state.playerStats.tearHeight, tearFallingSpeed: state.playerStats.tearFallingSpeed,
+      tearFallingAcceleration: state.playerStats.tearFallingAcceleration, moveSpeed: state.playerStats.moveSpeed,
+      cacheFlags: items?.unevaluatedCacheFlags ?? null, primaryWeapon: state.weaponCache.primary,
+      tearFlags: state.weaponCache.flagsC98 },
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y] })),
@@ -109,7 +117,7 @@ function portObservation() {
     npcs: state.room.npcs.filter(npc => !npc.removed && !npc.dead)
       .map(npc => ({ type: npc.kind, variant: npc.variant, position: [npc.position.x, npc.position.y], hp: [npc.hp, npc.maxHp] })),
     tears: state.tears.filter(tear => tear.motion.lifetime === 'alive')
-      .map(tear => ({ variant: tear.sourceVariant ?? 0, position: [tear.motion.presentedPosition.x, tear.motion.presentedPosition.y] })),
+      .map(tear => ({ variant: tear.sourceVariant ?? null, position: [tear.motion.presentedPosition.x, tear.motion.presentedPosition.y] })),
     gridPoops: (state.room.grid?.cells ?? []).flatMap((cell, index) => cell.entity?.kind === 14
       ? [[index, cell.entity.variant, cell.entity.collisionClass]] : []),
     sharedMt: [state.bootLifecycle.shared.index, ...[0, 311, 623].map(i => state.bootLifecycle.shared.words[i])],
@@ -142,7 +150,7 @@ function matchPositions(native, port, tolerance) {
 
 const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
 
-function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false } = {}) {
+function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false, stats = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
@@ -174,6 +182,14 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
   same('npcs.hp', health(native.npcs), health(port.npcs));
   // Poop grid entities by cell: [index, variant, collision class].
   same('grid.poops', native.gridPoops, port.gridPoops);
+  // EvaluateItems outputs field by field: f32 stats compared as binary32.
+  if (stats) {
+    for (const field of ['maxFireDelay', 'shotSpeed', 'damage', 'tearHeight', 'tearFallingSpeed', 'tearFallingAcceleration', 'moveSpeed'])
+      row(`stats.${field}`, native.stats?.[field] ?? null, port.stats?.[field] ?? null,
+        native.stats != null && Math.fround(native.stats[field]) === Math.fround(port.stats?.[field] ?? NaN));
+    for (const field of ['cacheFlags', 'primaryWeapon', 'tearFlags'])
+      same(`stats.${field}`, native.stats?.[field] ?? null, port.stats?.[field] ?? null);
+  }
   // Player tears, only where a case's interaction is about them.
   if (tears) {
     const misses = matchPositions(native.tears.map(tear => ({ ...tear, subtype: 0 })), port.tears.map(tear => ({ ...tear, subtype: 0 })), TOLERANCE.pickup);
@@ -296,6 +312,9 @@ export const INTERACTIONS = {
   // A ring of ten tears leaves Isaac at once.
   'tammys-head': { tears: true, labels: ['settle', 'use-active', 'after-active', 'tears-later'],
     covered: obs => obs['use-active'].tears.length >= 10 || obs['after-active'].tears.length >= 10 },
+  // A granted item set: every EvaluateItems output, then tears fired with it.
+  'item-stats': { stats: true, tears: true, owned: true, labels: ['settle', 'shoot-right', 'after-shots'],
+    covered: obs => obs['settle'].stats != null && obs['shoot-right'].tears.length > 0 },
   'battery-recharge': { labels: ['walk-to-battery', 'after-battery'], covered: obs => obs['after-battery'].player.activeCharge > 0 },
 };
 
@@ -457,6 +476,7 @@ try {
       if (!nativeLabel || !portLabel) rows.push({ label: action.label, field: 'observation', native: Boolean(nativeLabel), port: Boolean(portLabel), passed: false });
       else rows.push(...compareLabel(action.label, nativeLabel, portLabel, {
         tears: declaration.interactions.some(name => INTERACTIONS[name].tears),
+        stats: declaration.interactions.some(name => INTERACTIONS[name].stats),
         pocketModifier: declaration.interactions.includes('blank-card-pocket-conversion'),
         owned: declaration.interactions.some(name => INTERACTIONS[name].owned),
         d4Animation: declaration.interactions.includes('d4-reroll'),

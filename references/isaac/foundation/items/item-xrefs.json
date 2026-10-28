@@ -591,6 +591,473 @@
    }
   ]
  },
+ "addCollectible": {
+  "function": "52CC90",
+  "note": "Ids whose reachable AddCollectible path writes Player fields that not every id writes, or calls functions no other id calls. The writes are split into persistent stat input words and other offsets; every other id writes only sharedPlayerWrites. Writes inside callees are not followed.",
+  "sharedPlayerWrites": [
+   "3076",
+   "30D4",
+   "D6C",
+   "D74",
+   "D7C",
+   "D80",
+   "D8C"
+  ],
+  "items": {
+   "9": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "10": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C",
+     "E44"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "12": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "612A70",
+     "612C50"
+    ]
+   },
+   "21": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "585BC0"
+    ]
+   },
+   "54": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "585AA0"
+    ]
+   },
+   "57": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "71": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "612A70",
+     "612C50"
+    ]
+   },
+   "72": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "5823E0"
+    ]
+   },
+   "75": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "76": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "586940"
+    ]
+   },
+   "81": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068",
+     "BB4",
+     "BB8",
+     "BC0",
+     "F60"
+    ],
+    "specificCalls": [
+     "5082D0",
+     "511B90",
+     "511D90"
+    ]
+   },
+   "91": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "586940"
+    ]
+   },
+   "120": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "410860",
+     "612A70",
+     "612C50"
+    ]
+   },
+   "121": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "410860",
+     "612A70",
+     "612C50"
+    ]
+   },
+   "128": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "133": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "134": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "141": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "145": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "148": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "151": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "155": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "594530"
+    ]
+   },
+   "179": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "508640"
+    ]
+   },
+   "187": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "194": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5817A0",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "195": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "196": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "198": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "212": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "3068"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "230": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "BB4",
+     "BB8"
+    ],
+    "specificCalls": []
+   },
+   "232": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "508F10",
+     "5B31A0"
+    ]
+   },
+   "240": {
+    "inputWrites": [
+     "D28 speed",
+     "D2C fire delay",
+     "D30 damage",
+     "D34 range",
+     "D38 shot speed",
+     "D3C luck"
+    ],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "5C2DD0"
+    ]
+   },
+   "246": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "585B30"
+    ]
+   },
+   "248": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "251": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5817A0",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "252": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "581950",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "258": {
+    "inputWrites": [
+     "D28 speed",
+     "D2C fire delay",
+     "D30 damage",
+     "D34 range",
+     "D38 shot speed",
+     "D3C luck"
+    ],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "50A5C0",
+     "522250",
+     "5C2DD0"
+    ]
+   },
+   "260": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "585E10"
+    ]
+   },
+   "264": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "272": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "274": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "279": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "313": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "408060",
+     "4084A0",
+     "508820",
+     "5E42E0"
+    ]
+   },
+   "320": {
+    "inputWrites": [],
+    "otherPlayerWrites": [
+     "306C"
+    ],
+    "specificCalls": [
+     "511B90",
+     "511D90"
+    ]
+   },
+   "333": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "585AA0",
+     "585B30",
+     "585BC0"
+    ]
+   },
+   "340": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "50AE00",
+     "581950",
+     "5C2D70",
+     "612A70",
+     "612C50"
+    ]
+   },
+   "343": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   },
+   "344": {
+    "inputWrites": [],
+    "otherPlayerWrites": [],
+    "specificCalls": [
+     "550A40",
+     "5C2D70",
+     "5C7F30"
+    ]
+   }
+  }
+ },
  "functions": [
   {
    "function": "42CB10",

@@ -160,6 +160,8 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
             challenge_id: state.challenge_id,
             damage_maximum: state.source_damage_maximum,
             shot_speed_minimum: state.source_shot_speed_minimum,
+            fire_delay_minimum: state.source_fire_delay_minimum,
+            coins: i32::try_from(state.inventory.coins).ok(),
         },
     )?;
     state.player_stats = resolved.values.stats;

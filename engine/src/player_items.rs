@@ -1381,7 +1381,11 @@ pub(crate) fn add_collectible(
     let query_stores_preserved = source_effect
         .is_some_and(PassiveGrantSourceEffect::preserves_query_stores)
         || plain_active_grant
-        || (normal_isaac && normal_entity && treatment.is_some());
+        || (normal_isaac && normal_entity && treatment.is_some())
+        //item-xrefs.json: no other Add path writes the counts or pill words.
+        || (normal_isaac
+            && normal_entity
+            && crate::collectible_grants::keeps(id, crate::collectible_grants::QUERY_STORES));
     //Use the reached Add descriptor, not query uncertainty or a second
     //ID exclusion list. These closed bodies do not write active words.
     let charge_words_preserved = keep_default_passive_inputs
@@ -1393,7 +1397,12 @@ pub(crate) fn add_collectible(
             )
         )
         || plain_active_grant
-        || (normal_isaac && normal_entity && treatment.is_some());
+        || (normal_isaac && normal_entity && treatment.is_some())
+        //52D19B: only a config kind 3 Add writes D74/D7C/D80/D8C.
+        || (normal_isaac
+            && normal_entity
+            && config.kind != 3
+            && crate::collectible_grants::keeps(id, crate::collectible_grants::ACTIVE_CHARGES));
     if !charge_words_preserved {
         crate::active_charges::invalidate_owner(
             owner,

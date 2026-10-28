@@ -238,8 +238,11 @@ port adds its own for playtests:
 1. This design, merged alone.
 2. The framework:
    - `EvaluateItems` blocks as address-ordered terms over the whole count
-     array;
-   - readset admission removed (#895 closed with a live Odd Mushroom case);
+     array (done for FireDelay and Damage; ShotSpeed, Range and Speed were
+     already whole);
+   - readset admission removed (done for those five scalar blocks, with live
+     Odd Mushroom cases; #895 closed); Flight, Familiar, Luck and the tail
+     still to follow;
    - `passive_items` rows on top of `collectible_grants`;
    - per-block *ported/binary* columns in the tracker.
 3. The synergy pipeline:
