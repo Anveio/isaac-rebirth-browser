@@ -28,8 +28,8 @@ retain their achievement/counter arrays and acquire unknown collected-history
 entries; absent ownership does not become fresh false. Notification metadata is
 generated from the owner's local Base resources under ignored
 `web/generated/unlock-notifications/`; generated actors/catalogues and original
-assets remain private. Direct Cargo callers prepare the normal private Caves and
-notification inputs first. The ordinary npm build hooks prepare notifications.
+assets remain private. Direct Cargo callers prepare the normal private Caves,
+notification and item-asset inputs first. The ordinary npm build hooks prepare notifications.
 Current Save tools explicitly require version2 packets and347 history entries.
 Historical version1 captures remain bound to their archived producer. The migration
 capture below uses a real version1 writer, natural same-origin version2 document
@@ -38,6 +38,7 @@ load, public Quit/write and reload; its observed legacy arrays were all false/ze
 ```sh
 python3 tools/foundation/decode-rooms.py --prepare-private-caves
 python3 tools/foundation/prepare-unlock-notifications.py
+python3 tools/foundation/import-item-assets.py
 npm run check:build
 npm run test:browser -- tools/tests/runtime.spec.ts --grep 'living Restart'
 npm run test:e2e -- controls --living-restart --no-build --production-directory FROZEN

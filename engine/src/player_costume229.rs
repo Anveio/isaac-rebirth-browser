@@ -8,37 +8,9 @@ use crate::{
     State,
 };
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, sync::OnceLock};
 
-#[derive(Deserialize)]
-struct Actor {
-    #[serde(rename = "Animations")]
-    animations: Vec<Animation>,
-}
-#[derive(Deserialize)]
-struct Animation {
-    #[serde(rename = "Name")]
-    name: String,
-    #[serde(rename = "FrameNum")]
-    frames: i32,
-    #[serde(rename = "Loop")]
-    looping: bool,
-}
-fn animation(name: &str) -> &'static Animation {
-    static ACTOR: OnceLock<Actor> = OnceLock::new();
-    let actor = ACTOR.get_or_init(|| {
-        let mut actors: BTreeMap<String, Actor> =
-            serde_json::from_str(include_str!("../../web/costume229-data.json"))
-                .expect("authored 229 animation data");
-        actors
-            .remove("gfx/characters/229_monstros lung.anm2")
-            .expect("229 actor")
-    });
-    actor
-        .animations
-        .iter()
-        .find(|clip| clip.name == name)
-        .expect("229 clip")
+fn animation(name: &str) -> crate::content::CostumeClip {
+    crate::content::costume_clip("gfx/characters/229_monstros lung.anm2", name).expect("229 clip")
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]

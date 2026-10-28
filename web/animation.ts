@@ -10,11 +10,11 @@ import gameOverData from "./gameover-data.json";
 import stageData from "./stage-data.json";
 import attackData from "./attack-data.json";
 import bloodTearData from "./blood-tear-data.json";
-import costume229Data from "./costume229-data.json";
-import costume115Data from "./costume115-data.json";
+import costumeData from "./generated/item-assets/costume-data.json";
+import itemFamiliarData from "./generated/item-assets/familiar-data.json";
 import bossSplashData from "./boss-splash-data.json";
 import pocketData from "./pocket-data.json";
-const sceneData = { ...minimapData, ...informationData, ...notificationInformationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costume229Data, ...costume115Data, ...pocketData };
+const sceneData = { ...minimapData, ...informationData, ...notificationInformationData, ...baseSceneData, ...doorData, ...gridData, ...npcData, ...itemFamiliarData, ...familiarData, ...gameOverData, ...stageData, ...attackData, ...bloodTearData, ...costumeData, ...pocketData };
 import fontData from "./font-data.json";
 import spriteSheets from "./generated/sprite-pack";
 import completionUrl from "./assets/completion_widget.png?url";
@@ -63,8 +63,6 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/ui/effect_cursepaper.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/character_001_isaac.png",
   "../references/isaac/rebirth/resources/gfx/characters/costumes/ghost.png",
-  "../references/isaac/rebirth/resources/gfx/characters/costumes/costume_monstros lung.png",
-  "../references/isaac/rebirth/resources/gfx/characters/costumes/costume_051_ouijaboard.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/01_basement.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/03_caves.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/05_depths.png",
