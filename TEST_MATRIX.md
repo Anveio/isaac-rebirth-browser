@@ -810,7 +810,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Sometimes | game: a save write is stored | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a save write's storage fails | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a menu readmission loads the stored document | [saves.rs](engine/dst/src/units/game/saves.rs) |
-| Always | game: Continue resumes the saved run's character, seeds and floor | [saves.rs](engine/dst/src/units/game/saves.rs) |
+| Always | game: Continue resumes the saved run's character, seeds, floor and visited rooms | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: a saved run is continued | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Sometimes | game: Continue resumes a run a previous session saved | [saves.rs](engine/dst/src/units/game/saves.rs) |
 | Always | game: a stale or unrequested save acknowledgement is refused without change | [saves.rs](engine/dst/src/units/game/saves.rs) |
