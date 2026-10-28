@@ -349,7 +349,6 @@ Next: transformations once their items exist.
 | #245 | P2 | Seed PQE9YPQP diverges in player position, velocity and health from presentation 269 | e2e damage-fire-delay |
 | #195 | P2 | Round Worm seed T1PK6Y0W: port player stops at counter 156 while the original keeps moving (triage?) | e2e roundworm |
 | #451 | P3 | Death diary has an empty "killed by" picture and no Esc/Space hints (triage?) | playtest 2026-10-16 `playtest/2045007/` |
-| #929 | P3 | Hurt blink out of phase for 3 frames after a Gaper hit (Odd Mushroom set) | playtest 2026-10-28 `playtest/3e51749/set-odd-mushroom.mp4` |
 
 ## Weapons and tears
 
@@ -389,7 +388,6 @@ Bomb contact bugs are under *Collision and physics*.
 
 | Bug | Sev | Symptom | Source |
 | --- | --- | --- | --- |
-| #886 | P3 | Anarchist Cookbook: when the last Troll Bomb explodes on Isaac, the port drops his heart 6 frames early and draws the bomb over him (frames 279-285) | playtest 2026-10-27 `playtest/f6552ff/anarchist-cookbook.mp4` |
 
 ## Collision and physics
 
@@ -610,7 +608,8 @@ pipeline, then the bulk import.
 | --- | --- | --- | --- |
 | #295 | P0 | Killing a Dip with Gimpy or Infestation 2 froze the game. Error path removed by #329; confirm and close | DST |
 | #864 | P3 | D20: rerolled pickups' spawn animation differs for frames 31-74 before settling where the original's do | playtest 2026-10-27 `playtest/bc70726/d20.mp4` |
-| #928 | P1 | Item costumes and Magic Mushroom size missing: set [1,4,12] matches every stat but draws plain Isaac (143/251 frames differ) | playtest 2026-10-28 `playtest/3e51749/set-sad-onion-crickets-head-magic-mushroom.mp4` |
+| #948 | P2 | Magic Mushroom: the port draws the cap costume during the Hurt pose where the original shows the plain head (set [1,4,12] frames 155-208) | playtest 2026-10-28 `playtest/3cb8cef/set-sad-onion-crickets-head-magic-mushroom.mp4` |
+| #949 | P2 | D100: rerolled pickups stay at their spawn points in the port but scatter in the original; the chest draws a floor shadow (69/156 frames) | playtest 2026-10-28 `playtest/3cb8cef/d100.mp4` |
 
 ## Pocket items
 
@@ -724,6 +723,8 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #828 | P2 | 2x2 Start Room floor shows horizontal banding, no debris and no light glow around Isaac; challenge HUD icon and minimap neighbour room icon missing | playtest 2026-10-27 `playtest/92693cb/sandbox-blank-card-jera-battery.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #942 | P3 | EK3SH68W: light shafts and Isaac's face differ on frames 1109-1137; tear-impact splash and an extra port blood splat on 1336-1338 | playtest 2026-10-28 `playtest/dddd23a/curse-maze-EK3SH68W.mp4` |
+| #937 | P3 | Kamikaze!: from frame 413 the original draws Isaac charred and blinking after the blast; the port draws him plain | playtest 2026-10-28 kamikaze |
+| #939 | P3 | Explosion sprite drawn about one screen pixel right of and below the original (Anarchist Cookbook frames 280-285) | playtest 2026-10-28 `playtest/3cb8cef/anarchist-cookbook.mp4` |
 
 ## Audio
 
