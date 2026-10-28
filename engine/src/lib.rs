@@ -4997,10 +4997,10 @@ impl Game {
                         "ordinaryKnifeRoomAdmissionTail",
                     );
                 }
-                // Transition explicitly updates Player before loading; the
-                // GameChangeRoom5509f2 ->584200 ->Room.Update5d12a0 tail
-                // admits another update at unchanged Game counter.
-                combat::advance_player_immunity(&mut self.state);
+                // The GameChangeRoom5509f2 ->584200 ->Room.Update5d12a0 tail
+                // admits a Player update at unchanged Game counter. The
+                // transition's own Player update (5ddf87) counted earlier,
+                // only when an extra animation held bf4 (#947).
                 combat::advance_player_immunity(&mut self.state);
                 if restoring {
                     //Saved4/5/6 replay/retirement needs its own full owner.
