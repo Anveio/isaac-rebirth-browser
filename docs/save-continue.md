@@ -104,6 +104,31 @@ The complete declared bank is validated by the existing route owner before
 selection, and the full input bank and selected IDs are retained separately.
 NPC status, friction, color and complete shared MT remain unqualified.
 
+## Required NPC audit after #908
+
+Fresh Original and actual Chromium on source `c6265d54`, with unchanged main
+runtime/WASM `5304d150`, run all four cases of the bank declared before either
+game (three fixed routes plus recorded OS neighbour `7JRW6L28`). All 71 paired
+checkpoints capture successfully. The required grade is **551 pass / 16 fail
+of 567 checks**. Both treasure routes and the recorded neighbour pass their
+selected contracts. The uncleared `KRAYFRWA` room has six actual Native NPCs
+and four Browser NPCs: two Ring Fly222.0 bodies are absent at eight captures,
+including the first post-Continue layout/health tuples. Their implementation
+remains a separate NPC import gap.
+
+Replaying the preceding comparator over those same immutable captures reports
+567/567, because it excludes both Native Ring Flies after learning families
+from Browser output. The correction preserves 551 rows exactly and makes the
+16 affected count/multiset rows required failures. This is a corrected test
+contract, with no runtime improvement. The old comparison and its diagnostic
+rows remain retained beside the corrected report. NPC status/friction/color,
+complete shared MT and full pixels are not qualified by these checks.
+
+Fresh main build and the seven runtime Browser checks pass. The grader's fresh
+build and affected preview pass and produce exactly the same WASM. These
+results do not qualify the pending Continue admission/record reconstruction
+repair or the missing saved pedestal and acquired-item owners.
+
 ## Current-room regular records at Save
 
 Game.Save now captures the supported regular pickups in actual manager order at
