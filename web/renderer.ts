@@ -152,6 +152,8 @@ export class Renderer {
   // Room-transition snapshots of the old and new world layers.
   private readonly slideOld: GLSurface;
   private readonly slideNew: GLSurface;
+  // Game::Render's Pixelation Surface (8ECD20), screen sized.
+  private readonly pixelation: GLSurface;
   private slideKey: string | null = null;
   /** 547890's f32 phases (+8 += +4 once per drawn presentation), carried
    * forward between frames rather than re-summed from the load phase. */
@@ -179,6 +181,7 @@ export class Renderer {
     this.expandedMap = graphics.createTarget(230, 204);
     this.slideOld = graphics.createTarget(screen.width, screen.height);
     this.slideNew = graphics.createTarget(screen.width, screen.height);
+    this.pixelation = graphics.createTarget(screen.width, screen.height);
     this.walls = graphics.createTarget(1024, 512);
   }
   static async load(canvas: HTMLCanvasElement): Promise<Renderer> {
@@ -206,6 +209,13 @@ export class Renderer {
     }
     else if (state.screen !== "playing") this.menu.draw(ctx, state);
     else {
+      // StageTransition::GetFadeValue5e3c90: counter/50 in state 2, 1-counter/50
+      // in state 3, otherwise -1. With EnablePixelation (option default 1,
+      // 5B9DB3) a value >= 0 sends the frame through the Pixelation Surface.
+      const transition = state.stageTransition;
+      const fade = transition.state === 2 ? Math.fround(transition.counter / 50)
+        : transition.state === 3 ? Math.fround(1 - Math.fround(transition.counter / 50)) : -1;
+      if (fade >= 0) gl.beginPixelation(this.pixelation);
       this.drawWorldOrSlide(ctx, state);
       this.presentation.introduction(ctx, state);
       this.hud(ctx, state);
@@ -218,9 +228,7 @@ export class Renderer {
       if (bossScene && state.roomTransition?.phase === "bossScene")
         drawBossSplash(this.assets, ctx, state);
       // StageTransition::Render5e3bd0: black quad, alpha counter/50 then 1-counter/50.
-      const transition = state.stageTransition;
-      if (transition.state === 2 || transition.state === 3)
-        gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, transition.state === 2 ? transition.counter / 50 : 1 - transition.counter / 50]);
+      if (fade >= 0) gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, fade]);
       this.presentation.pause(ctx, state);
       if (state.playerDeath.gameOver) {
         gl.fillRectRGBA(0, 0, 480, 270, [0, 0, 0, 128 / 255]);
@@ -230,6 +238,13 @@ export class Renderer {
           this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", 256, 151, 66, { layers: [5] });
         this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Exit", 10, 215, 0);
         this.assets.draw(ctx, "gfx/ui/backselectwidget.anm2", "Restart", 400, 195, 0);
+      }
+      //GameRender5500EF draws the surface with PixelationAmount
+      //max(0.3*fade, .0001) at each vertex, before the fades below.
+      if (fade >= 0) {
+        const scaled = Math.fround(fade * Math.fround(0.3)), floor = Math.fround(0.0001);
+        gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+        gl.endPixelation(floor < scaled ? scaled : floor);
       }
       //GameRender550350 draws the outgoing black quad after Pause/HUD.
       if (state.runAdmission.initialFade <= 0 && state.runQuit.fadeAlpha > 0)
