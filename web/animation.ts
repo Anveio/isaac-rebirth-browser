@@ -32,7 +32,7 @@ interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimati
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
 /** Sprite color (tint RGBA, offset RGB in 0..1), combined with each keyframe as Color::operator*= 42f590 does. */
 export interface SpriteColor { tint: readonly number[]; offsets: readonly number[]; }
-export interface DrawOptions { color?: SpriteColor; scale?: number; layers?: number[]; hiddenLayers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; layerOffset?: { x: number; y: number }; }
+export interface DrawOptions { color?: SpriteColor; colorize?: readonly number[]; scale?: number; layers?: number[]; hiddenLayers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; layerOffset?: { x: number; y: number }; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 // Authored sheets are relative to the anm2's root path and may climb out of
@@ -103,6 +103,8 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_[123].png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_red_[123].png",
   "../references/isaac/rebirth/resources/gfx/grid/grid_poop_corn.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_poop_gold.png",
+  "../references/isaac/rebirth/resources/gfx/grid/grid_poop_rainbow.png",
   "../references/isaac/rebirth/resources/gfx/backdrop/fx_ray*.png",
   "../references/isaac/rebirth/resources/gfx/grid/props_01_basement.png",
   "../references/isaac/rebirth/resources/gfx/grid/props_03_caves.png",
@@ -288,7 +290,7 @@ export class Assets {
       }
       const color = options.color;
       if (color) {
-        // Tints multiply and offsets add; colorize is zero for every caller.
+        // Tints multiply and offsets add; a colorize goes in options.colorize.
         frame.RedTint = Math.fround(frame.RedTint * color.tint[0]!); frame.GreenTint = Math.fround(frame.GreenTint * color.tint[1]!);
         frame.BlueTint = Math.fround(frame.BlueTint * color.tint[2]!); frame.AlphaTint = Math.fround(frame.AlphaTint * color.tint[3]!);
         frame.RedOffset = Math.fround(frame.RedOffset + color.offsets[0]!); frame.GreenOffset = Math.fround(frame.GreenOffset + color.offsets[1]!);
@@ -307,7 +309,9 @@ export class Assets {
       const backend = ctx as unknown as {
         drawTintedImage?: (source: CanvasImageSource, tint: number[], offsets: number[], ...args: number[]) => void;
         drawTintedImageQuad?: (source: CanvasImageSource, tint: number[], offsets: number[], crop: readonly [number, number, number, number], points: Quad, pixelSize?: number) => void;
+        setColorize?: (colorize: readonly number[]) => void;
       };
+      if (options.colorize) backend.setColorize?.(options.colorize);
       const tint = [frame.RedTint, frame.GreenTint, frame.BlueTint, 1];
       const offsets = [frame.RedOffset, frame.GreenOffset, frame.BlueOffset];
       if (backend.drawTintedImageQuad) {
@@ -323,6 +327,7 @@ export class Assets {
         if (backend.drawTintedImage) backend.drawTintedImage(this.image(imagePath), tint, offsets, ...rectangle);
         else ctx.drawImage(this.colorImage(imagePath, tint.slice(0, 3).map(value => value * 255), offsets.map(value => value * 255)), ...rectangle as [number, number, number, number, number, number, number, number]);
       }
+      if (options.colorize) backend.setColorize?.([0, 0, 0, 0]);
       ctx.restore();
     }
   }

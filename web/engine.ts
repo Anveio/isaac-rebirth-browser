@@ -50,7 +50,7 @@ export interface ActorSprite {
   animation: string; frame: number; playing: boolean; speed: number; scale: {x: number; y: number};
   offset: {x: number; y: number}; flipX: boolean; flipY: boolean;
   rotation: number; layerFlips: Record<string, [boolean, boolean]>; layerOffsets?: Record<string, [number, number]>;
-  tint: [number, number, number, number]; offsets: [number, number, number];
+  tint: [number, number, number, number]; offsets: [number, number, number]; colorize?: [number, number, number, number];
 }
 export interface Familiar {
   id: number; variant: number; subtype: number; spawnSeed: number; owner: ActorRef; parent: ActorRef;

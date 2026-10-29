@@ -65,14 +65,16 @@ fn is_false(value: &bool) -> bool {
     !*value
 }
 
-/// Poop.Update569D50 (variants 0 to 2) in the full grid pass. A broken poop
-/// (state above 3) keeps class0; an intact one is class3 unless Poop+330 is
-/// set, the Player is on the ground (444860) and Length612790(cell - Player)
-/// is below 21: then class0 below 20, and from 20 up the flag clears. An
-/// intact red poop (variant 1, 569ee5) first runs the grid contact helper
-/// 561100: radius 38, one half heart with flags 0x200. Other variants keep
-/// their Init class. PORT GAP: the red poop's colour pulse (569f2e) and its
-/// +320 regrowth countdown are not run.
+/// Poop.Update569D50 in the full grid pass. A broken poop (state above 3)
+/// keeps class0; an intact one is class3. Then, with Poop+330 set, the
+/// Player on the ground (444860) and Length612790(cell - Player) below 21,
+/// it is class0 below 20, and from 20 up the flag clears. An intact red poop
+/// (variant 1, 569ee5) first runs the grid contact helper 561100: radius 38,
+/// one half heart with flags 0x200. Within 21 of any intact poop, 569fd8
+/// gives the Player's footprint colours the poop's colour (50bf60; the
+/// footprints here carry no colour); the rainbow poop's (56a110) is a
+/// shared RandomInt(6) table pick. PORT GAP: the red poop's colour pulse
+/// (569f2e) and its +320 regrowth countdown are not run.
 pub(crate) fn advance_poops(
     state: &mut crate::State,
     phase: crate::phase::Phase,
@@ -94,19 +96,27 @@ pub(crate) fn advance_poops(
         else {
             continue;
         };
-        if entity.kind != 14 || entity.variant > 2 {
+        if entity.kind != 14 || entity.variant > 4 {
             continue;
         }
-        if entity.state > 3 {
-            entity.collision_class = 0;
-            continue;
-        }
-        entity.collision_class = 3;
-        if entity.variant == 1 {
+        // A broken poop (569d85) still runs the proximity colour and flag.
+        let intact = entity.state <= 3;
+        entity.collision_class = if intact { 3 } else { 0 };
+        let variant = entity.variant;
+        if intact && variant == 1 {
             crate::grid_hazards::contact(state, index, 38.0, 1, 60, 0x200)?;
         }
         let player = crate::bombs::player_world(state);
         let player_class = state.player.grid_collision_class;
+        let center = grid.position(index).ok_or("poop cell has no centre")?;
+        let (dx, dy) = (center.x - player.x, center.y - player.y);
+        let distance = (dx * dx + dy * dy).sqrt();
+        if distance >= 21.0 {
+            continue;
+        }
+        if variant == 4 {
+            state.boot_lifecycle.shared.bounded(6);
+        }
         let Some(entity) = state
             .room
             .grid
@@ -119,12 +129,6 @@ pub(crate) fn advance_poops(
             continue;
         };
         if !owner.poop_player_inside {
-            continue;
-        }
-        let center = grid.position(index).ok_or("poop cell has no centre")?;
-        let (dx, dy) = (center.x - player.x, center.y - player.y);
-        let distance = (dx * dx + dy * dy).sqrt();
-        if distance >= 21.0 {
             continue;
         }
         let class = player_class.ok_or("Poop Update requires the Player grid collision class")?;
@@ -212,13 +216,14 @@ impl GridEntity {
                 costs.store(index, 1000)?;
             }
             1 => {} // Supported Decoration.Init has no direct path-cost store.
-            14 if self.variant <= 2 => {
+            14 if self.variant <= 4 => {
                 // Poop.Init569600: an ordinary unbroken poop blocks (class3)
                 // and stores path cost1500; a broken one (restored from its
                 // record) stores 0 and its Update keeps class0. A red poop
                 // (variant 1, 569978) comes back whole. Its local RNG5/9/7
-                // then draws the sheet (569ac0/569af0 RandomInt(3)+1; the
-                // corn poop's 569b20 has one sheet and no draw) and the
+                // then draws the sheet (jump table 673d10: 569ac0/569af0
+                // RandomInt(3)+1; the corn, golden and rainbow poops'
+                // 569b20/569b40/569aa0 have one sheet and no draw) and the
                 // sprite FlipX +314 (56994f RandomInt(2) == 0) whatever the
                 // state.
                 // An intact corn poop's Eternal Fly is `corn_fly`.

@@ -108,11 +108,13 @@ pub(crate) fn callback_at_index(
     }
 }
 
-/// Poop Hurt 56a390 for normal (0) and corn (2) poop. A hit may add one
-/// (normal poop: up to two) to the damage and advances the state toward 4;
-/// particles scatter on a 1/2 roll below state 4 and always when it breaks.
-/// Breaking spawns the 1000.43 explosion, clears the cell (cost 900, class
-/// 0) and rolls the drop on a fresh local RNG of the spawn seed.
+/// Poop Hurt 56a390 for normal (0), corn (2), golden (3) and rainbow (4)
+/// poop. A hit may add one (normal poop: up to two) to the damage; a golden
+/// poop then takes it only on a further 1/3 roll, two weaker (at least one).
+/// The state advances toward 4; particles scatter on a 1/2 roll below state
+/// 4 and always when it breaks. Breaking spawns the 1000.43 explosion,
+/// clears the cell (cost 900, class 0) and rolls the variant's reward on a
+/// fresh local RNG of the spawn seed.
 fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbackOutcome, String> {
     let grid = state
         .room
@@ -121,20 +123,27 @@ fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbac
         .ok_or("grid Hurt requires actual room admission")?;
     let width = usize::from(grid.width);
     let poop = grid.cells[index].entity.as_mut().expect("poop cell");
-    if !matches!(poop.variant, 0 | 2) {
-        // Red, golden and rainbow poop need their colored particles and
-        // respawn, coin and full-heart branches.
+    if poop.variant == 1 {
+        // The red poop needs its colored particles and respawn branches.
         return Ok(GridCallbackOutcome::UnadmittedKind(14));
     }
     if poop.state > 3 {
         return Ok(GridCallbackOutcome::Handled(false));
     }
+    let variant = poop.variant;
     let shared = &mut state.boot_lifecycle.shared;
     let mut strength = damage;
     if shared.bounded(3) == 0 {
         strength = (strength + 1).min(4);
     }
-    if poop.variant == 0 && shared.bounded(3) == 0 {
+    if variant == 3 {
+        // 56a4df: a golden poop ignores two hits in three.
+        if shared.bounded(3) != 0 {
+            return Ok(GridCallbackOutcome::Handled(false));
+        }
+        strength = (strength - 2).max(1);
+    }
+    if variant == 0 && shared.bounded(3) == 0 {
         strength = (strength + 1).min(4);
     }
     if strength <= 0 {
@@ -160,7 +169,21 @@ fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbac
     if state.challenge_id == 23 {
         count *= 3;
     }
-    particles(state, centre, count)?;
+    match variant {
+        // 56a591: grey tint with a gold offset (0.55, 0.45, 0).
+        3 => particles(
+            state,
+            centre,
+            count,
+            crate::sprite_color::Color {
+                tint: [0.5, 0.5, 0.5, 1.0],
+                colorize: [0.0; 4],
+                offset: [0.55, 0.45, 0.0],
+            },
+        )?,
+        4 => rainbow_particles(state, centre, count)?,
+        _ => particles(state, centre, count, crate::sprite_color::Color::WHITE)?,
+    }
     if !broken {
         return Ok(GridCallbackOutcome::Handled(true));
     }
@@ -181,7 +204,68 @@ fn hurt_poop(state: &mut State, index: usize, damage: i32) -> Result<GridCallbac
         .as_mut()
         .expect("poop cell")
         .collision_class = 0;
-    drop_roll(state, &mut local, centre)
+    match variant {
+        3 => golden_reward(state, &mut local, centre),
+        4 => rainbow_reward(state),
+        _ => drop_roll(state, &mut local, centre),
+    }
+}
+
+/// Golden poop break 56acc4: on a local 1/3 roll, the trinket 52 pickup
+/// while the pool still holds it; otherwise five to seven coins, each sent
+/// along the first of ten shared random directions whose 35-unit ray is
+/// clear (as a chest scatters its loot), with a local seed.
+fn golden_reward(
+    state: &mut State,
+    local: &mut crate::items::Rng,
+    centre: WorldVector,
+) -> Result<GridCallbackOutcome, String> {
+    let still = WorldVector { x: 0.0, y: 0.0 };
+    if local.bounded(3) == 0
+        && state
+            .item_pools
+            .as_mut()
+            .ok_or("golden poop needs the item pool")?
+            .remove_trinket(52)?
+    {
+        let seed = local.raw();
+        crate::rock_blast::admit_reward(state, 350, Some(52), seed, centre, still)?;
+        return Ok(GridCallbackOutcome::Handled(true));
+    }
+    let coins = local.bounded(3) + 5;
+    let descriptor = state
+        .room
+        .grid
+        .clone()
+        .ok_or("golden poop coins need the room grid")?;
+    let grid = Grid::new(descriptor)?;
+    for _ in 0..coins {
+        let velocity = crate::chests::scatter(centre, &grid, &mut state.boot_lifecycle.shared);
+        let seed = local.raw();
+        crate::rock_blast::admit_reward(state, 20, None, seed, centre, velocity)?;
+    }
+    Ok(GridCallbackOutcome::Handled(true))
+}
+
+/// Rainbow poop break 56ae48: the rainbow GiantBook (29), sound 270, and
+/// every Player's red hearts filled to their maximum (509350).
+fn rainbow_reward(state: &mut State) -> Result<GridCallbackOutcome, String> {
+    if !state.information_animation.request_authored(29, 0) {
+        return Err("rainbow poop GiantBook definition absent".into());
+    }
+    state.audio.admit(
+        &mut state.boot_lifecycle.shared,
+        state.system_clock.system_counter - 1,
+        crate::audio::SoundRequest {
+            id: 270,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    state.player.hp = state.player.max_hp;
+    Ok(GridCallbackOutcome::Handled(true))
 }
 
 fn admission(state: &mut State) -> crate::poop_effects::Admission<'_> {
@@ -194,10 +278,35 @@ fn admission(state: &mut State) -> crate::poop_effects::Admission<'_> {
 }
 
 /// Poop Hurt passes Game::SpawnParticles 5515b0 Effect 1000.58 a speed of
-/// one Float + 2.
-fn particles(state: &mut State, centre: WorldVector, count: u32) -> Result<(), String> {
+/// one Float + 2 and the variant's colour.
+fn particles(
+    state: &mut State,
+    centre: WorldVector,
+    count: u32,
+    color: crate::sprite_color::Color,
+) -> Result<(), String> {
     let speed = state.boot_lifecycle.shared.uniform() + 2.0;
-    crate::poop_effects::spawn_particles(state, 58, centre, count, speed)
+    crate::poop_effects::spawn_colored_particles(state, 58, centre, count, speed, color)
+}
+
+/// 56a7ea: a rainbow poop spawns each 1000.58 itself, colorized by a shared
+/// RandomInt(5) pick (red, green, light blue, magenta, yellow), then its
+/// seed, its own Float + 2 speed and the SpawnParticles direction.
+fn rainbow_particles(state: &mut State, centre: WorldVector, count: u32) -> Result<(), String> {
+    let mut color = crate::sprite_color::Color::WHITE;
+    for _ in 0..count {
+        color.colorize = match state.boot_lifecycle.shared.bounded(5) {
+            0 => [1.0, 0.0, 0.0, 1.0],
+            1 => [0.0, 1.0, 0.0, 1.0],
+            2 => [0.5, 0.5, 1.0, 1.0],
+            3 => [1.0, 0.0, 1.0, 1.0],
+            _ => [1.0, 1.0, 0.0, 1.0],
+        };
+        let seed = state.boot_lifecycle.shared.next_u32();
+        let speed = state.boot_lifecycle.shared.uniform() + 2.0;
+        crate::poop_effects::spawn_particle(state, 58, centre, seed, speed, color)?;
+    }
+    Ok(())
 }
 
 /// 56aa90: a 0.1 chance of a heart (1/4) or a coin, or the Petrified Poop

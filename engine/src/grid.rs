@@ -199,12 +199,8 @@ pub fn for_room(
                 // Raw1500 poop (5ceb58): its factory's local RNG35 Int(40)
                 // keeps the ordinary variant0 unless it draws 0; a second
                 // Int(40) then picks corn2 on 0, 3, 4 or 8.., golden3 on
-                // 1..2 and rainbow4 on 5..7. PORT GAP: golden and rainbow
-                // poop (their Hurt rewards) are not admitted.
-                1500 => match poop_variant(spawn.spawn_seed) {
-                    variant @ (0 | 2) => Some((14, variant, 0, 3)),
-                    _ => None,
-                },
+                // 1..2 and rainbow4 on 5..7.
+                1500 => Some((14, poop_variant(spawn.spawn_seed), 0, 3)),
                 // Factory5ceb21: raw1490 is the red poop, kind14 variant1,
                 // with no roll.
                 1490 => Some((14, 1, 0, 3)),
