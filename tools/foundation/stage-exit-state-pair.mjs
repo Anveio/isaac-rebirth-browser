@@ -109,21 +109,41 @@ for (const label of labels) {
 // (floor.rs): full health admits the Challenge and Sacrifice rooms, a half
 // heart without soul hearts the bedrooms, more than four coins an even
 // floor's Arcade. Each game fights with its own keys, so the raw values stay
-// diagnostics; the predicates the generator reads must agree. They are read
-// at the re-anchor, after the fight and before the pickup-free exit walk.
+// diagnostics; the predicates the generator reads must agree. They are graded
+// at the re-anchor, after each game's fight, and again at `next-stage`: the
+// stage transition changes neither health nor coins, so those are the values
+// generation read, after the shared exit walk, which could take a drop one
+// game's fight left (#1013). The first shared capture where the health
+// predicates part is a diagnostic.
 const generation = (red, maxRed, soul, coins) => ({ fullHealth: maxRed <= red + soul,
   lowHealth: (soul <= 0 && red <= 1) || (soul <= 2 && maxRed === 0), arcadeCoins: coins > 4 });
-{
-  const source = observations.get('re-anchor'), frame = frames.get('re-anchor');
+const inputs = label => {
+  const source = observations.get(label), actual = frames.get(label)?.state;
   const player = source?.gameplay?.players?.[0], coins = source?.carriedItems?.players?.[0]?.inventory?.coins;
-  const actual = frame?.state;
-  check('re-anchor', 'generation.inputs',
-    player && Number.isInteger(coins) ? generation(player.redHp, player.maxRedHp, player.soulHp, coins) : 'unobserved',
-    actual ? generation(actual.player.hp, actual.player.maxHp, actual.player.soulHp, actual.inventory.coins) : 'unobserved');
-  diagnostic('re-anchor', 'coins', coins ?? null, actual?.inventory.coins ?? null);
+  return {
+    original: player && Number.isInteger(coins) ? generation(player.redHp, player.maxRedHp, player.soulHp, coins) : 'unobserved',
+    port: actual ? generation(actual.player.hp, actual.player.maxHp, actual.player.soulHp, actual.inventory.coins) : 'unobserved',
+    coins: [coins ?? null, actual?.inventory.coins ?? null],
+    bombs: [source?.carriedItems?.players?.[0]?.inventory?.bombs ?? null, actual?.inventory.bombs ?? null],
+  };
+};
+{
+  const departure = inputs('next-stage');
+  check('next-stage', 'generation.inputs', departure.original, departure.port);
+  diagnostic('next-stage', 'coins', ...departure.coins);
+  const anchor = inputs('re-anchor');
+  check('re-anchor', 'generation.inputs', anchor.original, anchor.port);
+  diagnostic('re-anchor', 'coins', ...anchor.coins);
   // Neither generation nor the shared tail reads the bomb count: a health-matching
   // blast (--hurt, or the fixture's own keys) spends a bomb in one game only.
-  diagnostic('re-anchor', 'bombs', source?.carriedItems?.players?.[0]?.inventory?.bombs ?? null, actual?.inventory.bombs ?? null);
+  diagnostic('re-anchor', 'bombs', ...anchor.bombs);
+  const health = (red, maxRed, soul) => ({ fullHealth: maxRed <= red + soul, lowHealth: generation(red, maxRed, soul, 0).lowHealth });
+  const parted = labels.slice(labels.indexOf('re-anchor')).find(label => {
+    const player = observations.get(label)?.gameplay?.players?.[0], actual = frames.get(label)?.state;
+    return player && actual && JSON.stringify(health(player.redHp, player.maxRedHp, player.soulHp))
+      !== JSON.stringify(health(actual.player.hp, actual.player.maxHp, actual.player.soulHp));
+  });
+  diagnostic('next-stage', 'generation.healthPartedAt', null, parted ?? null);
 }
 // A `--continue` case must actually have exited and resumed the run in the
 // port: the Exit save advanced the save revision and Continue restarted the
