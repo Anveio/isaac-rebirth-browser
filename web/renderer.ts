@@ -401,7 +401,18 @@ export class Renderer {
     const machines = [...state.room.slots].sort((a, b) => machineSlot(a) - machineSlot(b));
     const machinesOverPlayer = playerSlot < 0 ? [] : machines.filter(machine => machineSlot(machine) > playerSlot);
     for (const machine of machines) if (!machinesOverPlayer.includes(machine)) this.drawSlot(ctx, machine);
-    for (const npc of npcs) if (!overPlayer.includes(npc)) this.drawNpc(ctx, npc);
+    // Familiars share the array too (441bd0 y key): Brother Bobby a little
+    // above a Gaper's feet draws under it, and one below Isaac's over him.
+    const familiarSlot = (familiar: State["familiars"][number]) =>
+      order.findIndex(actor => actor.kind === "familiar" && actor.id === familiar.id);
+    const familiars = state.familiars.filter(familiar => familiar.visible && familiar.active && !familiar.removed);
+    const familiarsOverPlayer = playerSlot < 0 ? [] : familiars.filter(familiar => familiarSlot(familiar) > playerSlot);
+    const arrayEntries = (npcList: typeof npcs, familiarList: typeof familiars) => [
+      ...npcList.map(npc => ({ slot: slot(npc), draw: () => this.drawNpc(ctx, npc) })),
+      ...familiarList.map(familiar => ({ slot: familiarSlot(familiar), draw: () => this.drawFamiliar(ctx, familiar) })),
+    ].sort((a, b) => a.slot - b.slot);
+    for (const entry of arrayEntries(npcs.filter(npc => !overPlayer.includes(npc)),
+      familiars.filter(familiar => familiarSlot(familiar) >= 0 && !familiarsOverPlayer.includes(familiar)))) entry.draw();
     for (const knife of state.knives) {
       if (!knife.visible) continue;
       const sprite = knife.sprite, color = knife.currentColor, flips = sprite.layerFlips?.[0] ?? [false, false];
@@ -419,17 +430,8 @@ export class Renderer {
         }}});
       ctx.restore();
     }
-    for (const familiar of state.familiars) {
-      if (!familiar.visible || !familiar.active || familiar.removed) continue;
-      ctx.save();
-      ctx.translate(...worldToScreen(familiar.presentedPosition.x,
-        familiar.presentedPosition.y));
-      ctx.rotate(familiar.sprite.rotation * Math.PI / 180);
-      ctx.scale((familiar.sprite.flipX ? -1 : 1) * familiar.sprite.scale.x, familiar.sprite.scale.y);
-      this.assets.draw(ctx, familiarActor(familiar.variant), familiar.sprite.animation,
-        familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
-      ctx.restore();
-    }
+    // A familiar outside the render array keeps the old familiar pass.
+    for (const familiar of familiars) if (familiarSlot(familiar) < 0) this.drawFamiliar(ctx, familiar);
     for (const laser of state.lasers) {
       if (laser.origin === "npcShootAngle") {
       if (!laser.active) continue;
@@ -488,7 +490,7 @@ export class Renderer {
     for (const entry of drawUnder.sort((a, b) => a.slot - b.slot)) entry.draw();
     if (!hidePlayer) this.drawPlayer(ctx, state);
     for (const machine of machinesOverPlayer) this.drawSlot(ctx, machine);
-    for (const npc of overPlayer) this.drawNpc(ctx, npc);
+    for (const entry of arrayEntries(overPlayer, familiarsOverPlayer)) entry.draw();
     for (const tear of state.tears) {
       const color = tear.sourceColor;
       //The selected Regular/Blood authored layer receives its birth-owned ColorMod.
@@ -590,6 +592,16 @@ export class Renderer {
       machine.presentedPosition.y + machine.positionOffset.y), machine.animationFrame);
   }
 
+  private drawFamiliar(ctx: CanvasRenderingContext2D, familiar: State["familiars"][number]): void {
+    ctx.save();
+    ctx.translate(...worldToScreen(familiar.presentedPosition.x,
+      familiar.presentedPosition.y));
+    ctx.rotate(familiar.sprite.rotation * Math.PI / 180);
+    ctx.scale((familiar.sprite.flipX ? -1 : 1) * familiar.sprite.scale.x, familiar.sprite.scale.y);
+    this.assets.draw(ctx, familiarActor(familiar.variant), familiar.sprite.animation,
+      familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
+    ctx.restore();
+  }
   private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {
     // Entity Render 442300 draws while active (+31e) and visible (+31d); a
     // killed NPC (+31f dead) keeps drawing until its base kill removes it.

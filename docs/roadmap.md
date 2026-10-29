@@ -713,7 +713,6 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
 | #670 | P3 | PR802 multiplies the appear poof's sprite colour into its keyframes; live confirmation of the reported smoke colour/opacity remains open | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
-| #929 | P3 | Isaac's hurt invincibility blink runs out of phase with the original after a contact hit | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-110.png` |
 | #1010 | P2 | Large room (corn-poop fight): from frame 1271 the camera scroll is 1px off vertically, then 4px by 1530; the fly cluster and a hit flash diverge in between | playtest 2026-10-29 `playtest/f5cde94/corn-poop-eternal-fly.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
