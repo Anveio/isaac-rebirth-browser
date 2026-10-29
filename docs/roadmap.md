@@ -512,7 +512,8 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
-| #966 | P2 | dips: poopEffects4 position/flip diverges at black-damage-21; a type-96 NPC is missing on entry for 6GFP B240 | e2e dips 2026-10-28 |
+| #981 | P2 | Corn-poop Eternal Fly turns into an Attack Fly that drifts from the original at shoot-down-32 | e2e dips 2026-10-29 |
+| #982 | P2 | Golden and rainbow poop not admitted; the corn-poop fly does not return on room revisit or after Continue | e2e dips 2026-10-29 |
 
 ## Bosses
 
@@ -719,7 +720,7 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #965 | P3 | 2x2 Start Room: camera starts following Isaac late when he walks from the centre (frames 33-64 offset, then identical) | playtest 2026-10-28 `playtest/7a1730b/sandbox-2x2-fixed.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
-| #937 | P3 | Kamikaze!: from frame 413 the original draws Isaac charred and blinking after the blast; the port draws him plain | playtest 2026-10-28 kamikaze |
+| #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
 | #952 | P3 | Tear poofs spawn with different seeds and sub-pixel positions from the original in most entity cases | e2e entities 2026-10-28 |
 | #963 | P3 | D20 streak banner text bottom row 1px off (frames 41-50) and a 1px-offset speck (51-70) | playtest 2026-10-28 d20-fixed |
 
