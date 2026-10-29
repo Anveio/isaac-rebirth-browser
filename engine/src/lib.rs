@@ -2565,7 +2565,9 @@ impl Game {
         // 54ed4d restores Game+10ECD8 from the save.
         self.state.difficulty = context.difficulty;
         self.state.challenge_id = context.challenge_id;
-        self.state.challenge_run_parameters = None;
+        //Challenge starts pass the Challenge menu's request parameters.
+        self.state.challenge_run_parameters =
+            (context.challenge_id != 0).then_some(challenges::RunParameters::CHALLENGE_MENU);
         self.state.source_shot_speed_minimum = Some(false);
         self.state.source_damage_maximum = Some(false);
         self.state.source_fire_delay_minimum = Some(false);
@@ -2890,14 +2892,15 @@ impl Game {
         pickups::readmit_regular_records(&mut self.state)?;
         slots::readmit_saved(&mut self.state);
         self.rebuild_room_actor_schedule()?;
-        critters::restore_saved_records(
-            &mut self.state,
-            record
-                .context
-                .ambient_records
-                .as_deref()
-                .ok_or("Continue saved ambient ownership is unknown")?,
-        )?;
+        //A record whose room held a persisted Effect family without a record
+        //owner yet (5C57C0's 39/63-65/69/74/76) saved no ambient list; its
+        //admitted critters are then not restored either.
+        if let Some(records) = record.context.ambient_records.as_deref() {
+            critters::restore_saved_records(&mut self.state, records)?;
+        }
+        if let Some(records) = record.context.bomb_records.as_deref() {
+            bombs::restore_saved_records(&mut self.state, records)?;
+        }
         crate::explosion_effects::replay_dynamic_craters(&mut self.state)?;
         self.state.room.complete_initialization();
         self.refresh_room_boss_count();
