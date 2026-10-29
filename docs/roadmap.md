@@ -715,8 +715,10 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
 | #670 | P3 | PR802 multiplies the appear poof's sprite colour into its keyframes; live confirmation of the reported smoke colour/opacity remains open | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
-| #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
+| #535 | P2 | Killed Gapers leave only blood decals; the original leaves its gib/bone pile (still seen 2026-10-29 in the Dry Baby and Cube of Meat item-set footage) | playtest 2026-10-29 `playtest/dd5892d/v59-drycrop-132.png` |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
+| #959 | P3 | Chests (Morph and room-clear award) draw their full floor shadow during Appear; the original's is faint or absent | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-200.png` |
+| #929 | P3 | Isaac's hurt invincibility blink runs out of phase with the original after a contact hit | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-110.png` |
 | #997 | P2 | Large room under fractional scroll: each sprite snaps to the pixel grid differently from the original (camera itself matches; the corn-poop fight now matches in positions, only 1px sprite offsets remain) | playtest 2026-10-29 `playtest/c47b8ab/corn-poop-eternal-fly.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
