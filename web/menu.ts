@@ -24,6 +24,11 @@ export class MenuRenderer {
     if (visible(viewX + 480, viewY + 810)) this.character(ctx, state, viewX + 480, viewY + 810);
     if (visible(viewX + 960, viewY + 810)) this.seed(ctx, state, viewX + 960, viewY + 810);
     if (visible(viewX, viewY + 270)) this.profile(ctx, state, viewX, viewY + 270);
+    //5A19A0 (MenuInit 59AC3A: board 0,1080), drawn after the main page and
+    //before Options. Its Background layer fills 576 x 320 of board colour.
+    if (viewX + 576 > 0 && viewX < 480 && viewY + 1400 > 0 && viewY + 1080 < 270) {
+      this.collection(ctx, state, viewX, viewY + 1080);
+    }
     if (visible(viewX + 480, viewY + 1080, 380)) this.options(ctx, state, viewX + 480, viewY + 1080);
     if (visible(viewX + 480, viewY + 1620)) this.controls(ctx, state, viewX + 480, viewY + 1620);
     if (visible(viewX + 480, viewY + 1890, 810)) this.keyboard(ctx, state, viewX + 480, viewY + 1890);
@@ -108,6 +113,34 @@ export class MenuRenderer {
     ctx.drawImage(widget, 96, 0, 112, 128, 384, 179 + select, 112, 128);
     this.assets.font(ctx, "teammeatfont12", "Esc", 20, 242 + back, { color: "#362f2d" });
     this.assets.font(ctx, "teammeatfont12", "Space", 423, 242 + select, { color: "#362f2d" });
+  }
+
+  /**5A19A0: CollectionMenu's Idle with its Item layer hidden (5A2020), then
+   * the page's 10 x 10 grid of 16-pixel cells. Ids 43, 59, 61, 235 and 263 do
+   * not exist and take no cell. A collected id (Persistent+260) draws its
+   * Death Screen "Diary" Items frame (layer 6, frame id - 1) at (210, 59) plus
+   * the cell; any other draws the Item layer's frame 2. 5A2020 resets the
+   * page (+4) to 0 and the cursor flag (+10) to false, and the port has no
+   * Collection page input that changes either. */
+  private collection(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
+    const path = `${MENU}collectionmenu.anm2`;
+    this.assets.draw(ctx, path, "Idle", x, y, 0, { hiddenLayers: [5] });
+    const collected = state.profiles[state.profile - 1]?.collectedHistory.values;
+    const page = 0;
+    let skipped = 0;
+    for (let index = page * 100; index < (page + 1) * 100 + skipped && index <= 345; index++) {
+      if (index === 42 || index === 58 || index === 60 || index === 234 || index === 262) {
+        skipped++;
+        continue;
+      }
+      const cell = index - skipped - page * 100;
+      const column = cell % 10, row = Math.trunc(cell / 10);
+      if (collected?.[index + 1] === true) {
+        this.assets.draw(ctx, "gfx/ui/death screen.anm2", "Diary", x + 210 + column * 16, y + 59 + row * 16, index, { layers: [6] });
+      } else {
+        this.assets.draw(ctx, path, "Idle", x + column * 16, y + row * 16, 2, { layers: [5] });
+      }
+    }
   }
 
   private options(ctx: CanvasRenderingContext2D, state: State, x: number, y: number): void {
