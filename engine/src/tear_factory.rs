@@ -46,6 +46,7 @@ pub(crate) fn fire(
         persistent_contacts: (plan.flags.0 == 0x200 && source_variant == Some(0))
             .then(crate::polyphemus_contact::TearHitRegistry::fresh),
         homing_target: None,
+        grid_previous_velocity: None,
         collision_damage: plan.damage,
         base_damage: plan.damage,
         attack_flags: plan.flags,

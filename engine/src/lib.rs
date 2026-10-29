@@ -62,6 +62,7 @@ pub mod spider_webs;
 pub mod sprite_color;
 pub mod squirt;
 mod surprise;
+mod tear_bounce;
 pub mod tear_deaths;
 mod tear_factory;
 mod tear_getter;
@@ -412,6 +413,10 @@ pub struct Tear {
     /// Entity+4A8: a homing tear's NPC target (`tear_homing`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub homing_target: Option<u32>,
+    /// Entity+350: the velocity before the last class 6 grid reflection
+    /// (`tear_bounce`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub grid_previous_velocity: Option<motion::WorldVector>,
 }
 impl Tear {
     fn project(&mut self) {
@@ -5528,6 +5533,17 @@ impl Game {
             npcs::post_contact_grid(&mut self.state)?;
             bombs::full_grid_contacts(&mut self.state)?;
             self.newborn_tear_grid_contacts()?;
+            if self.state.tears.iter().any(tear_bounce::bounces) {
+                let grid = self
+                    .state
+                    .room
+                    .grid
+                    .clone()
+                    .map(grid::Grid::new)
+                    .transpose()?
+                    .unwrap_or_else(|| traversal::doorway_grid(&self.state.room));
+                tear_bounce::full_grid_contacts(&mut self.state, &grid)?;
+            }
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -5810,6 +5826,7 @@ impl Game {
             .unwrap_or_else(|| traversal::doorway_grid(&self.state.room));
         for tear in &mut self.state.tears {
             if tear.controlled.is_none()
+                && !tear_bounce::bounces(tear)
                 && tear.age == 0
                 && tear.birth_game_update == Some(update)
                 && tear.motion.lifetime == projectiles::Lifetime::Alive
@@ -5854,7 +5871,18 @@ impl Game {
                 // calls Hurt before Base447190 integrates this tear. Poof
                 // and removal remain at the next Full dead-entry callback.
                 let mut grid_death = false;
+                let mut bounced = false;
                 if phase == phase::Phase::Update && !newborn {
+                    let grid = self
+                        .state
+                        .room
+                        .grid
+                        .clone()
+                        .map(grid::Grid::new)
+                        .transpose()?;
+                    bounced = tear_bounce::update(&mut self.state, grid.as_ref(), actor.id)?;
+                }
+                if phase == phase::Phase::Update && !newborn && !bounced {
                     let hit = self
                         .state
                         .tears
@@ -5879,7 +5907,13 @@ impl Game {
                         grid_death = true;
                     }
                 }
-                let grid = if phase == phase::Phase::Update && !newborn {
+                let bounce_preview = phase == phase::Phase::Interpolate
+                    && self
+                        .state
+                        .tears
+                        .iter()
+                        .any(|tear| tear.id == actor.id && tear_bounce::bounces(tear));
+                let grid = if bounce_preview || (phase == phase::Phase::Update && !newborn) {
                     Some(
                         self.state
                             .room
@@ -5894,11 +5928,12 @@ impl Game {
                 };
                 let mut death = None;
                 if let Some(tear) = self.state.tears.iter_mut().find(|tear| tear.id == actor.id) {
+                    let bounce = tear_bounce::bounces(tear);
                     if newborn {
                         tear.motion.present_birth(phase)?;
                     } else {
                         let dying = tear.motion.lifetime == projectiles::Lifetime::Dying;
-                        let lifetime = tear.motion.advance(phase, tear.grid_contact)?;
+                        let lifetime = tear.motion.advance(phase, tear.grid_contact && !bounce)?;
                         if lifetime == projectiles::Lifetime::Removed && dying {
                             death = Some(tear_deaths::Death {
                                 position: tear.motion.position,
@@ -5911,11 +5946,17 @@ impl Game {
                         }
                         if phase == phase::Phase::Update {
                             tear.age = tear.age.checked_add(1).ok_or("tear age exhausted")?;
-                            tear.grid_contact = grid
-                                .as_ref()
-                                .expect("full tear grid query")
-                                .contacts_regular_tear(tear.motion.position);
+                            // Class 6 is resolved in the Full grid pass.
+                            if !bounce {
+                                tear.grid_contact = grid
+                                    .as_ref()
+                                    .expect("full tear grid query")
+                                    .contacts_regular_tear(tear.motion.position);
+                            }
                         }
+                    }
+                    if phase == phase::Phase::Interpolate && bounce {
+                        tear_bounce::preview(tear, grid.as_ref().expect("interpolate tear grid"))?;
                     }
                     tear.project();
                 }
@@ -7261,7 +7302,7 @@ impl Game {
                 let eye_uniform = self.state.boot_lifecycle.shared.uniform();
                 let origin = projectiles::eye_origin(
                     bombs::player_world(&self.state),
-                    velocity,
+                    projectiles::aim_velocity(aim, inherited)?,
                     self.state.player.eye,
                     eye_uniform,
                 )?;
