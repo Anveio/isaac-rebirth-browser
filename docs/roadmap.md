@@ -511,7 +511,6 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
-| #1000 | P2 | Bombs should share the NPC contact partition (the original visits bomb-NPC pairs in the same partition order as NPC pairs) | e2e dips 2026-10-29 |
 | #982 | P2 | Golden and rainbow poop are not admitted (corn-poop fly respawn fixed by #995) | e2e dips 2026-10-29 |
 
 ## Bosses
@@ -719,7 +718,7 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
 | #959 | P3 | Chests (Morph and room-clear award) draw their full floor shadow during Appear; the original's is faint or absent | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-200.png` |
 | #929 | P3 | Isaac's hurt invincibility blink runs out of phase with the original after a contact hit | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-110.png` |
-| #997 | P2 | Large room under fractional scroll: each sprite snaps to the pixel grid differently from the original (camera itself matches; the corn-poop fight now matches in positions, only 1px sprite offsets remain) | playtest 2026-10-29 `playtest/c47b8ab/corn-poop-eternal-fly.mp4` |
+| #1010 | P2 | Large room (corn-poop fight): from frame 1271 the camera scroll is 1px off vertically, then 4px by 1530; the fly cluster and a hit flash diverge in between | playtest 2026-10-29 `playtest/f5cde94/corn-poop-eternal-fly.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
 | #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
 | #952 | P3 | Tear poofs spawn with different seeds and sub-pixel positions from the original in most entity cases | e2e entities 2026-10-28 |
