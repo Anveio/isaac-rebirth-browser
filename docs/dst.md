@@ -519,7 +519,10 @@ differential no longer cover that death. The pinned room
 `coverage-mom-kill` (7WEVL3X9, Depths II room 0, template 5.1062) holds
 `npc:45`, `removed:45` and the stage-6 boss clear: it plays Mom's door
 removal, foot, door parts and death, then her clear's ending back to the
-menu. No
+menu. The Duke of Flies' death (`removed:67`) had no recipe, so each
+drift rebuild could drop it (#1005 did); the pinned room
+`coverage-duke-kill-pinned` (ZNM7M93P, Basement I room 0, template
+5.2011) holds `npc:67` and `removed:67`. No
 tape met the boss-scene key properties on main after #935 (the corpus
 reached boss rooms but pressed no key during a Scene), until the glibc
 sinf/cosf port moved `coverage-57bc69b90c89086c` into one by luck.
