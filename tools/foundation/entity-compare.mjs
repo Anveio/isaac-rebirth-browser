@@ -4,6 +4,7 @@
 // with Math.fround from shortest-decimal JSON, never compared with epsilons.
 import { manifestPath, readJsonEvidence } from './browser-evidence.mjs';
 
+const byJson = (a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : JSON.stringify(a) > JSON.stringify(b) ? 1 : 0);
 export const f32 = value => typeof value === 'number' && Number.isFinite(value) ? Math.fround(value) : undefined;
 export const vector = value => value ? [f32(value.x ?? value[0]), f32(value.y ?? value[1])] : undefined;
 
@@ -240,13 +241,18 @@ export function entityRows(rows, source, actual, spec, render) {
     const drawn = render?.npcs.find(candidate => candidate.kind === native.type && candidate.spawnSeed === native.spawnSeed);
     if (drawn) check(rows, `${name}.spriteScale`, vector(native.spriteScale), vector(drawn.scale));
   }
-  // Tear poofs 1000.12/13 take sprite rotation +2cc from the 45abe3 leaf on
-  // every Update: Init's Random(4) * 90 (+814), negated unless FlipX.
-  for (const native of source.entities.filter(actor => actor.type === 1000 && [12, 13].includes(actor.variant) && !actor.removed && actor.spriteRotation !== undefined)) {
-    const effect = (actual.spriteEffects ?? []).find(candidate => candidate.variant === native.variant && candidate.spawnSeed === native.spawnSeed && !candidate.removed);
-    // A poof whose seed the port did not draw is a spawn-order divergence
-    // (#952), not graded here.
-    if (!effect) continue;
+  // Tear poofs 1000.12/13 take their spawn seed from the shared MT at the
+  // Tear.Update 5438f0 death, so the live poofs' seeds grade the shared
+  // stream's position at every tear death. Each matched poof's sprite
+  // rotation +2cc comes from the 45abe3 leaf on every Update: Init's
+  // Random(4) * 90 (+814), negated unless FlipX.
+  const poofs = source.entities.filter(actor => actor.type === 1000 && [12, 13].includes(actor.variant) && !actor.removed);
+  const portPoofs = (actual.spriteEffects ?? []).filter(effect => [12, 13].includes(effect.variant) && !effect.removed);
+  check(rows, 'poof.seeds', poofs.map(actor => [actor.variant, actor.spawnSeed]).sort(byJson),
+    portPoofs.map(effect => [effect.variant, effect.spawnSeed]).sort(byJson));
+  for (const native of poofs.filter(actor => actor.spriteRotation !== undefined)) {
+    const effect = portPoofs.find(candidate => candidate.variant === native.variant && candidate.spawnSeed === native.spawnSeed);
+    if (!effect) continue; // poof.seeds already records the missing poof.
     check(rows, `poof${native.spawnSeed}.spriteRotation`, f32(native.spriteRotation), f32(effect.sprite.rotation));
   }
   // Entity_Laser beams in room order, by spawn seed, with their source fields.
