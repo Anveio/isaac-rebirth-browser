@@ -428,7 +428,7 @@ pub(crate) fn play(familiar: &mut Familiar, clip: &str) {
 /// Chase 469A00 (Cube of Meat L3/L4 46/47, Leech 56, Ball of Bandages
 /// L3/L4 71/72): 4688D0(13, 15 x damage + 65) picks a target; beyond 20
 /// units of it (80 of the Player without one) the pathfinder 5B41E0 walks
-/// there at 0.83 x (2.2, or 1.8 for 46). The Cube's L3/L4 leave a blood
+/// there at 0.83 x (2.2 for 47 and 56, 1.8 otherwise). The Cube's L3/L4 leave a blood
 /// splat on Random(4) = 0. Friction takes 0.85, then the walk clip by the
 /// dominant velocity axis (Leech: Move/Attack by target).
 pub(crate) fn chase(state: &mut State, index: usize) -> Result<(), String> {
@@ -445,7 +445,8 @@ pub(crate) fn chase(state: &mut State, index: usize) -> Result<(), String> {
     };
     let mut attacking = false;
     if squared(goal, familiar.position) > threshold {
-        let speed = if variant == 46 { 1.8_f32 } else { 2.2 } * 0.83_f32;
+        // 469AC1: only the Cube's L4 (47) and the Leech (56) take 2.2.
+        let speed = if matches!(variant, 47 | 56) { 2.2_f32 } else { 1.8 } * 0.83_f32;
         let grid = crate::grid::Grid::new(
             state
                 .room
