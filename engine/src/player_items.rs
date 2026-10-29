@@ -1617,6 +1617,29 @@ pub(crate) fn add_collectible(
         state.player.max_hp = 0;
         add_black_hearts(&mut state.player, 12);
     }
+    //52D5FA Halo of Flies: a second permanent count (+E44), so the roster's
+    //min(owned, 10) gives two flies.
+    if id == 10 {
+        let owner = state.player_items.as_mut().expect("checked Player item owner");
+        owner.owned_counts[10] += 1;
+    }
+    //52DE0D Dead Cat: eight more permanent counts (+F60), then unless the
+    //Player type (+BFC) is 10, BB4 = 0 and 508540(2); BB8 takes BB4.
+    if id == 81 {
+        let owner = state.player_items.as_mut().expect("checked Player item owner");
+        owner.owned_counts[81] += 8;
+        match state.weapon_admission.source_player_type {
+            Some(10) => {}
+            Some(4) | None => {
+                return Err("Dead Cat's ??? heart branch (52E163) is not ported".into());
+            }
+            Some(_) => {
+                state.player.max_hp = 0;
+                add_max_hearts(&mut state.player, 2);
+            }
+        }
+        state.player.hp = state.player.max_hp;
+    }
     //This is the actual reached default CFG effect, not an ID/loadout
     //whitelist. It never heals a prior missing producer history.
     //A plain active grant reaches the same 52CF87 default and 52D0D0 tail

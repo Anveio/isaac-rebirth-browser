@@ -34,6 +34,8 @@ pub(crate) enum UpdateCase {
     Bum,
     /// Dry Baby 471401: Follow, the Hit-finished Necronomicon proc.
     DryBaby,
+    /// Blue Fly 468AD0: target or orbit layer 1, steering.
+    BlueFly,
     /// Any other case with its own Update, by address; not ported yet.
     Unique(u32),
 }
@@ -61,7 +63,7 @@ pub(crate) fn update_case(variant: u32) -> UpdateCase {
         25 => Unique(0x470B97),
         28 => Unique(0x46DBC0),
         42 => Unique(0x4714FF),
-        43 => Unique(0x468AD0),
+        43 => BlueFly,
         48 => Unique(0x469700),
         50 => Unique(0x46C8B0),
         52 => Unique(0x4712F7),
@@ -205,9 +207,17 @@ pub(crate) struct FireParams {
     pub offsets: [i32; 3],
     /// Harlequin 10 fires two tears at ±0.2 of the perpendicular (467490).
     pub double: bool,
+    /// 467A81: Random(n) on the shared stream before the tear; 0 adds the
+    /// charm flag 0x2000. Zero means no roll.
+    pub charm_roll: u32,
+    /// Rainbow Baby's row 8: the roll is still drawn, but the tear is
+    /// always charmed (467A95 with R15 set).
+    pub charm_always: bool,
+    /// Rainbow Baby 11 (467622): Random(9) + 1 picks the row
+    /// (`rainbow_row`) before anything else is drawn.
+    pub rainbow: bool,
     /// Not ported here: Robo-Baby's laser 467010, Rotten Baby's flies
-    /// 46E6B0, Rainbow Baby's Random(9) effect, Ball of Bandages' Random(10)
-    /// charm roll and Mongo Baby's mimic.
+    /// 46E6B0, Rainbow Baby's Random(9) effect and Mongo Baby's mimic.
     pub ported: bool,
 }
 
@@ -221,6 +231,9 @@ const fn tear(tear_variant: u32, damage: f32, scale: f32) -> FireParams {
         tint: [1.0; 4],
         offsets: [0; 3],
         double: false,
+        charm_roll: 0,
+        charm_always: false,
+        rainbow: false,
         ported: true,
     }
 }
@@ -273,9 +286,11 @@ pub(crate) fn fire_params(variant: u32) -> FireParams {
         },
         // 467A4E: Cube of Meat L2, blood tear.
         45 => tear(1, 3.5, 0.8),
-        // 467A81: Ball of Bandages L2..L4 roll Random(10) for charm.
+        // 467A81: Ball of Bandages L2..L4 roll Random(10) for charm; L4 72
+        // also pierces (467B6B, 0x8000).
         70..=72 => FireParams {
-            ported: false,
+            charm_roll: 10,
+            flags: if variant == 72 { 0x8000 } else { 0 },
             tint: [1.0, 0.0, 1.0, 1.0],
             offsets: [50, 0, 0],
             ..tear(0, 3.5, 0.8)
@@ -285,12 +300,106 @@ pub(crate) fn fire_params(variant: u32) -> FireParams {
             tint: [0.9, 0.0, 0.0, 1.0],
             ..tear(0, 3.5, 0.8)
         },
-        // 4672C4: Rainbow Baby's Random(9) effect; 4703EA: Rotten Baby.
-        11 | 54 | 74 => FireParams {
+        // 4672C4: Rainbow Baby rolls its row in Fire.
+        11 => FireParams {
+            rainbow: true,
+            ..tear(0, 3.5, 0.8)
+        },
+        // 4703EA: Rotten Baby; Mongo Baby's mimic.
+        54 | 74 => FireParams {
             ported: false,
             ..tear(0, 3.5, 0.8)
         },
         // 46784E: Brother Bobby and every other shooter.
         _ => tear(0, 3.5, 0.8),
+    }
+}
+
+/// Rainbow Baby's rows by Random(9) + 1 (4672D6..467848, the variant
+/// tests failing for 11): 1 Ghost Baby's, 2 Harlequin's single tear, 3 a
+/// blood tear (falling 1.2, 3.0 at 0.64, 467317), 4 Robo-Baby's tear row,
+/// 5 Little Gish's, 6 Little Steven's, 7 ???'s Soul's, 8 the Ball of
+/// Bandages row always charmed, 9 the plain tear doubled (R14, 467490).
+pub(crate) fn rainbow_row(roll: u32) -> FireParams {
+    match roll {
+        1 => fire_params(9),
+        2 => FireParams {
+            double: false,
+            ..fire_params(10)
+        },
+        3 => FireParams {
+            falling_base: 1.2,
+            ..tear(1, 3.0, 0.64)
+        },
+        4 => FireParams {
+            ported: true,
+            ..fire_params(6)
+        },
+        5 => fire_params(4),
+        6 => fire_params(5),
+        7 => fire_params(13),
+        8 => FireParams {
+            charm_always: true,
+            ..fire_params(70)
+        },
+        _ => FireParams {
+            double: true,
+            ..tear(0, 3.5, 0.8)
+        },
+    }
+}
+
+/// One case of the Familiar room-clear callback 46DF10 (jump table
+/// 0x66C340 over variants 20..57): after F90 rises, n is F90, or
+/// trunc(F90 / divisor), optionally wrapped to signed n % 4; a pickup drops
+/// when n is positive and even.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum RoomClearCase {
+    None,
+    Drop {
+        divisor: Option<f32>,
+        wrap4: bool,
+        pickup: RoomClearPickup,
+        /// 46E1CB: Little C.H.A.D. plays a sound on every clear.
+        sound: Option<u32>,
+    },
+    /// 46E0F8: Juicy Sack's blue spiders; not ported.
+    Unported(u32),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum RoomClearPickup {
+    Fixed { variant: u32, subtype: u32 },
+    /// 46E07A: Random(4) picks heart, coin, key or bomb, and a second roll
+    /// its subtype (Random(6/4/3/2) + 1), both before the n test.
+    Mystery,
+}
+
+pub(crate) fn room_clear_case(variant: u32) -> RoomClearCase {
+    use RoomClearPickup::*;
+    let drop = |divisor, wrap4, variant, subtype, sound| RoomClearCase::Drop {
+        divisor,
+        wrap4,
+        pickup: Fixed { variant, subtype },
+        sound,
+    };
+    match variant {
+        // 46DF48: Bomb Bag, a bomb every second n (F90 / 1.1).
+        20 => drop(Some(1.1), false, 40, 0, None),
+        // 46E0B0: Sack of Pennies, a coin every second room.
+        21 => drop(None, false, 20, 0, None),
+        // 46E190: Little C.H.A.D., sound 219 then a half heart (F90 / 1.1).
+        22 => drop(Some(1.1), false, 10, 2, Some(219)),
+        // 46E0C0: The Relic, a soul heart when (F90 / 1.11) % 4 is 2.
+        23 => drop(Some(1.11), true, 10, 3, None),
+        52 => RoomClearCase::Unported(0x46E0F8),
+        // 46E050: Mystery Sack, (F90 / 1.11) % 4.
+        57 => RoomClearCase::Drop {
+            divisor: Some(1.11),
+            wrap4: true,
+            pickup: Mystery,
+            sound: None,
+        },
+        _ => RoomClearCase::None,
     }
 }

@@ -196,7 +196,7 @@ fn heart(state: &mut State, index: usize, rng: &mut Rng, daemons_tail: bool) -> 
 
 /// FindFreePosition 5c7f30(anchor, 0, EDX0) against the port's ordinary
 /// actors. None when the room has no grid or path costs.
-fn free_position(state: &mut State, anchor: WorldVector) -> Result<Option<WorldVector>, String> {
+pub(crate) fn free_position(state: &mut State, anchor: WorldVector) -> Result<Option<WorldVector>, String> {
     let (Some(grid), Some(costs)) = (state.room.grid.clone(), state.room.path_costs.clone()) else {
         return Ok(None);
     };

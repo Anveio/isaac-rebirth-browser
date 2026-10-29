@@ -169,20 +169,20 @@ pub(crate) fn orbit_half(state: &mut State, index: usize) {
 
 /// 467BA0 (Float*) and 4683B0 (FloatShoot*): direction 0 left (flipped
 /// FloatSide), 1 up, 2 right, 3 down. Play keeps a clip already playing.
+/// Robo-Baby 6 and Robo-Baby 2.0 53 (467BCC, 4683DC) face left with their
+/// own Side2 clips instead of a flipped Side.
 fn pose(familiar: &mut Familiar, direction: i32, shooting: bool) {
+    let robo = matches!(familiar.variant, 6 | 53);
     let side = match direction {
+        0 if robo => "Side2",
         0 | 2 => "Side",
         1 => "Up",
         3 => "Down",
         _ => return,
     };
-    familiar.sprite.flip_x = direction == 0;
+    familiar.sprite.flip_x = direction == 0 && !robo;
     let clip = format!("Float{}{side}", if shooting { "Shoot" } else { "" });
-    if familiar.sprite.animation != clip {
-        familiar.sprite.animation = clip;
-        familiar.sprite.frame = 0.0;
-        familiar.sprite.playing = true;
-    }
+    play(familiar, &clip);
 }
 
 /// 4702E0: F58 counts down. Without the Player's fire direction (+DA4) the
@@ -209,7 +209,19 @@ pub(crate) fn shoot(state: &mut State, index: usize) -> Result<(), String> {
     }
     if familiar.fire_cooldown <= 0 {
         let params = familiar_variants::fire_params(familiar.variant);
-        if !params.ported {
+        if familiar.variant == 54 {
+            if !rotten_fly(state, index)? {
+                let familiar = &mut state.familiars[index];
+                if familiar.shoot_hold > 8 {
+                    pose(familiar, direction, true);
+                    familiar.shoot_hold -= 1;
+                } else {
+                    pose(familiar, direction, false);
+                    familiar.shoot_hold = 8;
+                }
+                return Ok(());
+            }
+        } else if !params.ported {
             familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
         } else {
             fire(state, index, direction, params)?;
@@ -256,7 +268,19 @@ fn fire(state: &mut State, index: usize, direction: i32, params: FireParams) -> 
         velocity = crate::knives::normalized(velocity) * 10.0;
     }
     // 467265: BFFS! 247 doubles the damage.
+    let params = if params.rainbow {
+        familiar_variants::rainbow_row(state.boot_lifecycle.shared.bounded(9) + 1)
+    } else {
+        params
+    };
     let damage = params.damage * if held(state, 247) { 2.0 } else { 1.0 };
+    let mut params = params;
+    if params.charm_roll > 0 {
+        let roll = state.boot_lifecycle.shared.bounded(params.charm_roll);
+        if roll == 0 || params.charm_always {
+            params.flags |= 0x2000;
+        }
+    }
     let origin = state.familiars[index].position;
     if params.double {
         // 467490: two tears at velocity +/- 0.2 of its perpendicular.
@@ -319,7 +343,8 @@ fn vulnerable(npc: &crate::npcs::Npc) -> Result<bool, String> {
 
 /// 4688D0(interval, radius): a target (+4A8) that stopped being vulnerable
 /// (444810) is dropped; then, on the 444890(interval) frame and without a
-/// target, QueryRadius 4536F0 over the enemy partition (mask 8) offers each
+/// target, QueryRadius 4536F0 over the enemy partition (mask 8, from the
+/// last 4545D0 rebuild, which ran after the previous frame's actors) offers each
 /// enemy whose circle reaches the point, and the last vulnerable one nearer
 /// (squared) to the familiar or to the Player than the shrinking bound
 /// (radius squared, then the smaller of its two distances) is taken.
@@ -352,33 +377,13 @@ fn find_target(state: &mut State, index: usize, interval: u32, radius: f32) -> R
     }
     let position = familiar.position;
     let player = crate::bombs::player_world(state);
-    // PORT GAP: the native partition is the one 4545D0 rebuilt at the start
-    // of the frame; this one is rebuilt from the enemies' current circles.
-    let members: Vec<_> = state
-        .actor_scheduler
-        .full_phase()
-        .into_iter()
-        .filter(|actor| actor.kind == ActorKind::Npc)
-        .filter_map(|actor| {
-            let npc = state.room.npcs.iter().find(|npc| npc.id == actor.id)?;
-            (npc.entity_collision_class != 0 && (10..=999).contains(&npc.kind)).then_some((
-                actor,
-                crate::contact_candidates::Bounds {
-                    id: 0,
-                    position: npc.position,
-                    half_extents: WorldVector {
-                        x: npc.collision_radius,
-                        y: npc.collision_radius,
-                    },
-                },
-            ))
-        })
-        .collect();
-    let snapshot =
-        crate::contact_candidates::QuerySnapshot::rebuild(state.game_update_count, &members)?;
+    let candidates = match state.enemy_query_partition.as_ref() {
+        Some(snapshot) => snapshot.query(position, radius)?,
+        None => Vec::new(),
+    };
     let mut bound = radius * radius;
     let mut target = None;
-    for actor in snapshot.query(position, radius)? {
+    for actor in candidates {
         let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == actor.id) else {
             continue;
         };
@@ -397,13 +402,27 @@ fn find_target(state: &mut State, index: usize, interval: u32, radius: f32) -> R
     Ok(())
 }
 
-/// Sprite Play(name, false): a clip already set keeps running.
-pub(crate) fn play(familiar: &mut Familiar, clip: &str) {
-    if familiar.sprite.animation != clip {
-        familiar.sprite.animation = clip.into();
-        familiar.sprite.frame = 0.0;
-        familiar.sprite.playing = true;
+/// Whether the familiar's anm2 names `clip`.
+fn has_clip(familiar: &Familiar, clip: &str) -> bool {
+    crate::familiars::definition(3, familiar.variant)
+        .is_some_and(|config| config.clips.iter().any(|known| known.name == clip))
+}
+
+/// ANM2 Play 40FD80(name, force): a name the anm2 lacks changes nothing
+/// (Ball of Bandages L3/L4 have no Float* clips for the Shooter's poses);
+/// without force a clip already set keeps running.
+pub(crate) fn play_clip(familiar: &mut Familiar, clip: &str, force: bool) {
+    if !has_clip(familiar, clip) || (!force && familiar.sprite.animation == clip) {
+        return;
     }
+    familiar.sprite.animation = clip.into();
+    familiar.sprite.frame = 0.0;
+    familiar.sprite.playing = true;
+}
+
+/// Sprite Play(name, false).
+pub(crate) fn play(familiar: &mut Familiar, clip: &str) {
+    play_clip(familiar, clip, false);
 }
 
 /// Chase 469A00 (Cube of Meat L3/L4 46/47, Leech 56, Ball of Bandages
@@ -525,4 +544,213 @@ pub(crate) fn chase(state: &mut State, index: usize) -> Result<(), String> {
         play(familiar, clip);
     }
     Ok(())
+}
+
+/// 4545D0's mask-8 rebuild, after the full actor pass and before contacts:
+/// every NPC body with a collision class (45483C/444800), at its position
+/// then. PORT GAP: 454B53 also inserts bombs (type 4) into this partition;
+/// they never pass the target search's NPC filter, but they can change a
+/// bucket's order.
+pub(crate) fn rebuild_enemy_partition(state: &mut State) -> Result<(), String> {
+    let members: Vec<_> = state
+        .actor_scheduler
+        .full_phase()
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Npc)
+        .filter_map(|actor| {
+            let npc = state.room.npcs.iter().find(|npc| npc.id == actor.id)?;
+            (npc.entity_collision_class != 0 && (10..=999).contains(&npc.kind)).then_some((
+                actor,
+                crate::contact_candidates::Bounds {
+                    id: 0,
+                    position: npc.position,
+                    half_extents: WorldVector {
+                        x: npc.collision_radius,
+                        y: npc.collision_radius,
+                    },
+                },
+            ))
+        })
+        .collect();
+    state.enemy_query_partition = Some(crate::contact_candidates::QuerySnapshot::rebuild(
+        state.game_update_count,
+        &members,
+    )?);
+    Ok(())
+}
+
+/// 46DF10, for each familiar in manager order from Player 50A334: F90 rises,
+/// then the variant's RoomClearCase. A drop takes FindFreePosition
+/// 5C7F30(position, 0), a shared seed, Spawn 550A40(5, variant, subtype)
+/// with the familiar as spawner, and Play("Spawn", force). Hearts with
+/// Daemon's Tail (trinket 22) first need Random(5) == 0 (46E1D8).
+pub(crate) fn room_clear(state: &mut State, index: usize) -> Result<(), String> {
+    use crate::familiar_variants::{RoomClearCase, RoomClearPickup};
+    let familiar = &mut state.familiars[index];
+    familiar.rooms_cleared = familiar.rooms_cleared.wrapping_add(1);
+    let cleared = familiar.rooms_cleared;
+    let (divisor, wrap4, pickup, sound) = match familiar_variants::room_clear_case(familiar.variant) {
+        RoomClearCase::None => return Ok(()),
+        RoomClearCase::Unported(_) => {
+            familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
+            return Ok(());
+        }
+        RoomClearCase::Drop {
+            divisor,
+            wrap4,
+            pickup,
+            sound,
+        } => (divisor, wrap4, pickup, sound),
+    };
+    if let Some(id) = sound {
+        state.audio.admit(
+            &mut state.boot_lifecycle.shared,
+            state.system_clock.system_counter.wrapping_sub(1),
+            crate::audio::SoundRequest {
+                id,
+                volume: 1.0,
+                delay: 2,
+                looping: false,
+                pitch: 1.0,
+            },
+        );
+    }
+    let mut n = match divisor {
+        Some(divisor) => (cleared as f32 / divisor) as i32,
+        None => cleared,
+    };
+    if wrap4 {
+        n %= 4;
+    }
+    let (variant, subtype) = match pickup {
+        RoomClearPickup::Fixed { variant, subtype } => (variant, subtype),
+        RoomClearPickup::Mystery => {
+            let shared = &mut state.boot_lifecycle.shared;
+            match shared.bounded(4) {
+                0 => (10, shared.bounded(6) + 1),
+                1 => (20, shared.bounded(4) + 1),
+                2 => (30, shared.bounded(3) + 1),
+                _ => (40, shared.bounded(2) + 1),
+            }
+        }
+    };
+    if n <= 0 || n & 1 != 0 {
+        return Ok(());
+    }
+    if variant == 10 {
+        let owner = state
+            .player_items
+            .as_ref()
+            .ok_or("Familiar room clear requires the Player's items")?;
+        let daemons_tail = crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .has_trinket(22)
+        .ok_or("Familiar heart drop requires the Player's trinkets")?;
+        if daemons_tail && state.boot_lifecycle.shared.bounded(5) != 0 {
+            return Ok(());
+        }
+    }
+    let anchor = state.familiars[index].position;
+    let Some(position) = crate::boss_reward::free_position(state, anchor)? else {
+        return Err("Familiar room-clear drop requires the room grid and path costs".into());
+    };
+    let seed = state.boot_lifecycle.shared.next_u32();
+    let spawner = Some(crate::pickups::SourceSpawner {
+        entity_type: 3,
+        variant: state.familiars[index].variant,
+    });
+    crate::clear_award::admit(
+        state,
+        variant,
+        subtype,
+        seed,
+        position,
+        WorldVector { x: 0.0, y: 0.0 },
+        spawner,
+    )?;
+    play_clip(&mut state.familiars[index], "Spawn", true);
+    Ok(())
+}
+
+/// 470CEE: Follow, then once Spawn has finished, Play FloatDown (The Relic
+/// 23: Float, 4720F5) without force.
+pub(crate) fn spawner(state: &mut State, index: usize) -> Result<(), String> {
+    follow(state, index, false)?;
+    let familiar = &mut state.familiars[index];
+    if familiar.sprite.animation == "Spawn" && !familiar.sprite.playing {
+        let clip = if familiar.variant == 23 { "Float" } else { "FloatDown" };
+        play(familiar, clip);
+    }
+    Ok(())
+}
+
+/// Blue Fly 468AD0: with Random(3) == 0 the target search 4688D0(13, 200).
+/// With a target its position is the goal and the fly leaves orbit layer 1
+/// (F7C = -1, 466780(1, false)); without one it rejoins the layer when out
+/// of it and the goal is the orbit point around the Player. The velocity
+/// gains the goal offset scaled to min(0.15 x length, 2) (nothing below
+/// length 0.1) and the friction takes x0.8. PORT GAP: Hive Mind's x1.25 on
+/// Entity+2C4 (468BD9) is not applied.
+pub(crate) fn blue_fly(state: &mut State, index: usize) -> Result<(), String> {
+    if state.boot_lifecycle.shared.bounded(3) == 0 {
+        find_target(state, index, 13, 200.0)?;
+    }
+    let target = state.familiars[index]
+        .target
+        .and_then(|id| state.room.npcs.iter().find(|npc| npc.id == id && !npc.removed))
+        .map(|npc| npc.position);
+    if let Some(position) = target {
+        state.familiars[index].target_position = position;
+        state.familiars[index].orbit_layer = -1;
+        respace(state, 1, index, false);
+    } else {
+        if state.familiars[index].orbit_layer == -1 {
+            state.familiars[index].orbit_layer = 1;
+            respace(state, 1, index, false);
+        }
+        let center = crate::bombs::player_world(state);
+        let point = orbit_point(state, index, center, 0);
+        state.familiars[index].target_position = point;
+    }
+    let familiar = &mut state.familiars[index];
+    let offset = WorldVector {
+        x: familiar.target_position.x - familiar.position.x,
+        y: familiar.target_position.y - familiar.position.y,
+    };
+    let length = (offset.x * offset.x + offset.y * offset.y).sqrt();
+    let scale = if length >= 0.1 {
+        (length * 0.15_f32).min(2.0) / length
+    } else {
+        0.0
+    };
+    familiar.velocity = familiar.velocity + offset * scale;
+    familiar.current_friction *= 0.8;
+    Ok(())
+}
+
+/// Rotten Baby 54 in the Shooter (4703EF): while its last Blue Fly (FD0)
+/// lives it does not fire and keeps its cooldown; otherwise the target
+/// search 4688D0(1, 200), AddBlueFlies 508740(1, position, target) and
+/// FD0 takes the fly (470260). Returns whether the cooldown restarts.
+fn rotten_fly(state: &mut State, index: usize) -> Result<bool, String> {
+    if let Some(id) = state.familiars[index].spawned {
+        if state
+            .familiars
+            .iter()
+            .any(|familiar| familiar.id == id && !familiar.removed)
+        {
+            return Ok(false);
+        }
+        state.familiars[index].spawned = None;
+    }
+    find_target(state, index, 1, 200.0)?;
+    let position = state.familiars[index].position;
+    let target = state.familiars[index].target;
+    let fly = crate::familiars::add_blue_flies(state, 1, position, target)?;
+    state.familiars[index].spawned = fly;
+    Ok(true)
 }
