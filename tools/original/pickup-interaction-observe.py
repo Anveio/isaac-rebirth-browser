@@ -185,6 +185,8 @@ def observe(pid, context):
                     'item252RngWords': list(struct.unpack('<4I', read(player + 0x1424 + 252 * 16, 16))),
                     'controlsEnabled': read(player + 0x7d4, 1)[0] == 1, 'inputCooldown': i32(player + 0x7d8),
                     'animationGuard': read(player + 0xbf4, 1)[0] == 1,
+                    # Hurt immunity BF8 (health-damage-observe.py), the 5098D0 blink.
+                    'damageCountdown': i32(player + 0xbf8),
                     'animation': clip_name(u64(player + 0x28 + 0x18)),
                     'mainAnimation': sprite_frame(player + 0x28),
                     'heldPockets': [{'id': struct.unpack_from('<i', held, slot * 8)[0], 'tag': held[slot * 8 + 4]}

@@ -1283,7 +1283,9 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
     let scheduler = &state.actor_scheduler;
     let mut pending = Vec::new();
     for (index, effect) in state.sprite_effects.iter().enumerate() {
-        if !((matches!(effect.variant, 7 | 17 | 27 | 43 | 58)
+        // Blood Particle 1000.5 lands with flags8 (45d9b8), so its blood,
+        // bone, gut and eye gibs stay on the floor as painted stains.
+        if !((matches!(effect.variant, 5 | 7 | 17 | 27 | 43 | 58)
             || (effect.variant == 18 && effect.explosion_effect.is_some()))
             && effect.flags & 8 != 0
             && effect.active)
