@@ -1,5 +1,20 @@
 [
   {
+    "name": "coverage-duke-kill-pinned",
+    "code": "ZNM7M93P",
+    "stage": 1,
+    "room": 0,
+    "template": [
+      5,
+      2011
+    ],
+    "seed": 4215408805208780926,
+    "reaches": [
+      "npc:67",
+      "removed:67"
+    ]
+  },
+  {
     "name": "coverage-gemini-kill-pinned",
     "code": "DN379LBR",
     "stage": 1,
@@ -12,6 +27,22 @@
     "reaches": [
       "npc:79",
       "removed:79"
+    ]
+  },
+  {
+    "name": "coverage-mom-kill",
+    "code": "7WEVL3X9",
+    "stage": 6,
+    "room": 0,
+    "template": [
+      5,
+      1062
+    ],
+    "seed": 1220311709128585829,
+    "reaches": [
+      "npc:45",
+      "removed:45",
+      "cleared:5 on stage 6"
     ]
   },
   {
@@ -110,22 +141,6 @@
     "seed": 7176576809051470821,
     "reaches": [
       "champion:11 on stage 5"
-    ]
-  },
-  {
-    "name": "coverage-mom-kill",
-    "code": "7WEVL3X9",
-    "stage": 6,
-    "room": 0,
-    "template": [
-      5,
-      1062
-    ],
-    "seed": 1220311709128585829,
-    "reaches": [
-      "npc:45",
-      "removed:45",
-      "cleared:5 on stage 6"
     ]
   }
 ]
