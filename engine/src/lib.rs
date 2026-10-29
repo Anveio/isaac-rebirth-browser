@@ -5439,6 +5439,7 @@ impl Game {
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
             bombs::full_grid_contacts(&mut self.state)?;
+            self.newborn_tear_grid_contacts()?;
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -5695,6 +5696,39 @@ impl Game {
             phase,
         );
         camera.advance(&self.state.room, &self.state.player, aim, phase);
+    }
+    /// 454B10's Full grid pass walks the actors appended during this update
+    /// too, so a tear born this update has collidedWithGrid set before its
+    /// first own Update (542F70) consumes it. Older tears set theirs in
+    /// their own Update below.
+    fn newborn_tear_grid_contacts(&mut self) -> Result<(), String> {
+        let update = self.state.game_update_count;
+        if !self.state.tears.iter().any(|tear| {
+            tear.controlled.is_none()
+                && tear.age == 0
+                && tear.birth_game_update == Some(update)
+                && tear.motion.lifetime == projectiles::Lifetime::Alive
+        }) {
+            return Ok(());
+        }
+        let grid = self
+            .state
+            .room
+            .grid
+            .clone()
+            .map(grid::Grid::new)
+            .transpose()?
+            .unwrap_or_else(|| traversal::doorway_grid(&self.state.room));
+        for tear in &mut self.state.tears {
+            if tear.controlled.is_none()
+                && tear.age == 0
+                && tear.birth_game_update == Some(update)
+                && tear.motion.lifetime == projectiles::Lifetime::Alive
+            {
+                tear.grid_contact = grid.contacts_regular_tear(tear.motion.position);
+            }
+        }
+        Ok(())
     }
     fn advance_actor(
         &mut self,
