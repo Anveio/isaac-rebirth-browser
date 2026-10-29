@@ -220,6 +220,7 @@ Next: investigate the first divergent source consumer on each retained route
 | #417 | P2 | Large-room boundary constructs extra door GridBase objects (missing) | e2e |
 | #459 | P2 | ChangeRoom tail footprint uses the wrong player velocity; candidate awaits live rebaseline | e2e --mt-draws |
 | #592 | P2 | Pocket collection requests match but an OS case chooses a different sound sample | e2e pockets |
+| #980 | P2 | Shared MT drifts by 3 draws two updates after a Gaper's death effects (set 3,70,121); no graded field shows it yet | item sets 2026-10-29 |
 
 ## Floor generation
 
