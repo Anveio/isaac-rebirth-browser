@@ -20,6 +20,9 @@ pub struct WorldVector {
 }
 
 impl WorldVector {
+    pub const fn zero() -> Self {
+        Self { x: 0.0, y: 0.0 }
+    }
     pub fn is_finite(self) -> bool {
         self.x.is_finite() && self.y.is_finite()
     }
