@@ -22,6 +22,7 @@ python3 tools/foundation/decode-rooms.py --prepare-private-caves  # before raw c
 | Authored content pipeline | [docs/content-pipeline.md](docs/content-pipeline.md) |
 | Level framework (stage nodes, chapters) | [docs/levels.md](docs/levels.md) |
 | Difficulty framework (Normal/Hard rules) | [docs/difficulty.md](docs/difficulty.md) |
+| Save and Continue | [docs/save-system.md](docs/save-system.md) |
 | Antithesis DST harness (only unit exception) | [engine/dst](engine/dst), [antithesis](antithesis), [tools/dst](tools/dst), [docs/dst.md](docs/dst.md) |
 | Browser runtime, renderer, audio, WASM bridge | [web/main.ts](web/main.ts), [web/engine.ts](web/engine.ts) |
 | Live original/browser e2e suites | [tools/e2e/suites.mjs](tools/e2e/suites.mjs), [tools/e2e/README.md](tools/e2e/README.md) |
