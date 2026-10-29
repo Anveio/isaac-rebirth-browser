@@ -6472,6 +6472,29 @@ impl Game {
                 .admit_fly_explosion(seed, position, color.tint, color.offset)?;
                 Ok(())
             }
+            entities::Birth::BloodExplosion {
+                seed,
+                position,
+                subtype,
+                offset,
+                color,
+            } => {
+                familiars::NpcEffectAdmission {
+                    game_update_count: self.state.game_update_count,
+                    next_effect: &mut self.state.next_effect,
+                    effects: &mut self.state.sprite_effects,
+                    scheduler: &mut self.state.actor_scheduler,
+                }
+                .admit_npc_blood_explosion(
+                    seed,
+                    position,
+                    subtype,
+                    offset,
+                    color.tint,
+                    color.offset,
+                )?;
+                Ok(())
+            }
             entities::Birth::ExplosionEffect { seed, position } => {
                 explosion_effects::admit_explosion(
                     &mut self.state,

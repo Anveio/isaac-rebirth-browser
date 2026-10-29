@@ -551,6 +551,11 @@ fn champion_hooks(
 /// Pooter's last shot is spawned inside its AI, before the base kill. Types
 /// 94/85/215/250 (1000.38 at 4faa5a), the gib branch from 4fbf7b and the
 /// room-age-900 branch at 4fab00 remain unadmitted.
+///
+/// Any other type takes 4fbf7b: poop gibs (config +50 bit 0x20) would spawn
+/// Poop Explosion 1000.43 (4fc0a3, not admitted yet); otherwise, unless
+/// Entity+318 bit 0x10000, 4fbf9d draws a seed and spawns Blood Explosion
+/// 1000.2 at the actor's position.
 fn base_kill(npc: &Npc, random: &mut Mt19937, births: &mut Vec<Birth>) {
     if matches!(npc.kind, 13 | 14 | 18 | 214 | 222 | 249) {
         let seed = random.next_u32();
@@ -560,7 +565,39 @@ fn base_kill(npc: &Npc, random: &mut Mt19937, births: &mut Vec<Birth>) {
             position: npc.position + WorldVector { x, y },
             color: npc.splat_color,
         });
+        return;
     }
+    if matches!(npc.kind, 85 | 94 | 215 | 250)
+        || npc.config().gib_flags & 0x20 != 0
+        || npc.entity_flags() & 0x1_0000 != 0
+    {
+        return;
+    }
+    let seed = random.next_u32();
+    let [x, y] = content::main_layer_centre(&npc.actor, &npc.animation, npc.animation_frame);
+    births.push(Birth::BloodExplosion {
+        seed,
+        position: npc.position,
+        subtype: blood_explosion_subtype(npc),
+        offset: WorldVector { x, y },
+        color: npc.splat_color,
+    });
+}
+
+/// 4fbf9d..4fbffa: radius >= 13 is 2 (else 1); radius >= 18 or +30c > 30
+/// is 3; radius >= 40 or +30c > 50 is 4. +30c is the authored shadow size
+/// over 100.
+fn blood_explosion_subtype(npc: &Npc) -> u32 {
+    let radius = npc.collision_radius;
+    let shadow = npc.shadow_size / 100.0;
+    let mut subtype = if radius >= 13.0 { 2 } else { 1 };
+    if radius >= 18.0 || shadow > 30.0 {
+        subtype = 3;
+    }
+    if radius >= 40.0 || shadow > 50.0 {
+        subtype = 4;
+    }
+    subtype
 }
 
 /// is_frame444890: Game+ce9f4 plus the actor's manager sequence, modulo n.
