@@ -279,7 +279,10 @@ pub(crate) fn calls(owner: &PlayerItems) -> Vec<Call> {
         let count = row.count.count(owner);
         let award = match row.count {
             CountSource::Level { item: 73, level: 4 } if count > 0 => Some(0x90),
-            CountSource::Level { item: 207, level: 4 } if count > 0 => Some(0x13),
+            CountSource::Level {
+                item: 207,
+                level: 4,
+            } if count > 0 => Some(0x13),
             _ => None,
         };
         calls.push(Call {
