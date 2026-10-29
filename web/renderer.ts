@@ -11,6 +11,18 @@ import pickupCatalog from "./pickup-data.json";
 import {drawPlayerLaser} from "./lasers";
 import type { ActorSprite, Room, RoomAppearance, RoomQuad, Slot, State } from "./engine";
 
+/**
+ * Entity render 442300 anchor: WorldToScreen 42eb00 with its snap flag set.
+ * Each axis is (x - 60) * 0.65 + (480 - 338) / 2 and (270 - 182) / 2 +
+ * (y - 140) * 0.65 in f32, then floor(v * 2 + 0.5) / 2 puts the anchor on the
+ * half-logical-pixel grid. Every Entity (NPC, effect, familiar, projectile,
+ * slot, knife) draws its sprite there; the camera scroll is added afterwards.
+ */
+function worldToScreen(x: number, y: number): [number, number] {
+  const f = Math.fround, scale = f(0.65);
+  const screenX = f(f(f(x - 60) * scale) + 71), screenY = f(44 + f(f(y - 140) * scale));
+  return [Math.floor(screenX * 2 + 0.5) / 2, Math.floor(screenY * 2 + 0.5) / 2];
+}
 const PLAYER = "gfx/001.000_player.anm2";
 const TEAR = "gfx/002.000_tear.anm2";
 const PROGRESS = "gfx/ui/stage/progress.anm2";
@@ -311,7 +323,7 @@ export class Renderer {
       if (!effect.creepEffect || !effect.visible || !effect.active) continue;
       const sprite = effect.sprite;
       ctx.save();
-      ctx.translate(effect.presentedPosition.x * 0.65 + 32, effect.presentedPosition.y * 0.65 - 46);
+      ctx.translate(...worldToScreen(effect.presentedPosition.x, effect.presentedPosition.y));
       ctx.scale(sprite.scale.x, sprite.scale.y);
       const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2"
         : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2"
@@ -357,7 +369,13 @@ export class Renderer {
         const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
         const animation = age < 20 ? "Appear" : `State${Math.min(entity.state + 1, 5)}`;
         const frame = age < 20 ? age : entity.state === 0 ? 0 : 4;
-        this.assets.draw(ctx, "gfx/grid/grid_poop.anm2", animation, x, y, frame, { spritesheets: sheet });
+        // Poop.Init 56994f sets the grid sprite's FlipX (+314); the sprite
+        // mirrors about its anchor like an actor's.
+        ctx.save();
+        ctx.translate(x, y);
+        if (entity.sourceOwner.spriteFlipX) ctx.scale(-1, 1);
+        this.assets.draw(ctx, "gfx/grid/grid_poop.anm2", animation, 0, 0, frame, { spritesheets: sheet });
+        ctx.restore();
         this.drawnGrid.push({ index, kind: 14, animation, frame });
       } else if (entity.kind === 8 && entity.state === 0)
         this.assets.draw(ctx, "gfx/grid/grid_spikes.anm2", `Spikes${String(entity.variant).padStart(2, "0")}`, x, y);
@@ -387,8 +405,8 @@ export class Renderer {
       if (!knife.visible) continue;
       const sprite = knife.sprite, color = knife.currentColor, flips = sprite.layerFlips?.[0] ?? [false, false];
       ctx.save();
-      ctx.translate((knife.position.x + knife.renderOffset.x + sprite.offset.x) * 0.65 + 32,
-        (knife.position.y + knife.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+      ctx.translate(...worldToScreen(knife.position.x + knife.renderOffset.x + sprite.offset.x,
+        knife.position.y + knife.renderOffset.y + sprite.offset.y));
       ctx.rotate(sprite.rotation * Math.PI / 180);
       ctx.scale(flips[0] ? -1 : 1, flips[1] ? -1 : 1);
       this.assets.draw(ctx, "gfx/008.000_moms knife.anm2", sprite.animation, 0, 0, sprite.frame,
@@ -403,8 +421,8 @@ export class Renderer {
     for (const familiar of state.familiars) {
       if (!familiar.visible || !familiar.active || familiar.removed) continue;
       ctx.save();
-      ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
-        familiar.presentedPosition.y * 0.65 - 46);
+      ctx.translate(...worldToScreen(familiar.presentedPosition.x,
+        familiar.presentedPosition.y));
       ctx.rotate(familiar.sprite.rotation * Math.PI / 180);
       ctx.scale((familiar.sprite.flipX ? -1 : 1) * familiar.sprite.scale.x, familiar.sprite.scale.y);
       this.assets.draw(ctx, familiarActor(familiar.variant), familiar.sprite.animation,
@@ -418,7 +436,7 @@ export class Renderer {
       const impact = laser.impact;
       if (impact && !impact.removed) {
         ctx.save();
-        ctx.translate((impact.position.x + impact.positionOffset.x) * 0.65 + 32, (impact.position.y + impact.positionOffset.y) * 0.65 - 46);
+        ctx.translate(...worldToScreen(impact.position.x + impact.positionOffset.x, impact.position.y + impact.positionOffset.y));
         ctx.rotate(impact.rotation * Math.PI / 180);
         ctx.scale(impact.scale.x, impact.scale.y);
         this.assets.draw(ctx, impact.actor, impact.animation, 0, 0, impact.animationClock);
@@ -445,11 +463,11 @@ export class Renderer {
         this.assets.draw(ctx, projectile.variant === 3 ? "gfx/009.003_puke projectile.anm2"
           : projectile.variant === 2 ? "gfx/009.002_fire projectile.anm2"
           : projectile.variant === 1 ? "gfx/009.001_bone projectile.anm2" : "gfx/009.000_projectile.anm2", projectile.animation,
-          projectile.presentedPosition.x * 0.65 + 32, (projectile.presentedPosition.y + projectile.height) * 0.65 - 46, projectile.animationFrame, { scale: projectile.scale });
+          ...worldToScreen(projectile.presentedPosition.x, projectile.presentedPosition.y + projectile.height), projectile.animationFrame, { scale: projectile.scale });
     for (const particle of state.fireParticles)
       if (!particle.removed && particle.visible)
         this.assets.draw(ctx, "gfx/1000.066_ember particle.anm2", "Idle",
-          particle.presentedPosition.x * 0.65 + 32, particle.presentedPosition.y * 0.65 - 46, particle.animationClock);
+          ...worldToScreen(particle.presentedPosition.x, particle.presentedPosition.y), particle.animationClock);
     // Effects before the Player in the render array (an explosion born at
     // his own depth is inserted ahead of him) draw under his sprite.
     const effectSlot = (effect: State["spriteEffects"][number]) =>
@@ -524,8 +542,8 @@ export class Renderer {
         : controller && "particle5" in controller && typeof controller.particle5.particle === "object"
           ? controller.particle5.particle.flying.layerRotation : 0;
       ctx.save();
-      ctx.translate((effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x) * 0.65 + 32,
-        (effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y) * 0.65 - 46);
+      ctx.translate(...worldToScreen(effect.presentedPosition.x + effect.renderOffset.x + sprite.offset.x,
+        effect.presentedPosition.y + effect.renderOffset.y + sprite.offset.y));
       ctx.scale(sprite.flipX ? -1 : 1, sprite.flipY ? -1 : 1);
       this.assets.draw(ctx, PARTICLE_ACTORS[effect.variant],
         sprite.animation, 0, 0, sprite.frame, { layerScales: {0: layerScale(sprite)}, overrides: {0: {
@@ -548,8 +566,8 @@ export class Renderer {
       const layerScales = Object.fromEntries(Object.entries(sprite.layerFlips).map(([layer, flips]) =>
         [layer, [flips[0] ? -1 : 1, flips[1] ? -1 : 1] as const]));
       ctx.save();
-      ctx.translate((effect.presentedPosition.x + effect.renderOffset.x) * 0.65 + 32,
-        (effect.presentedPosition.y + effect.renderOffset.y) * 0.65 - 46);
+      ctx.translate(...worldToScreen(effect.presentedPosition.x + effect.renderOffset.x,
+        effect.presentedPosition.y + effect.renderOffset.y));
       ctx.rotate(sprite.rotation * Math.PI / 180);
       ctx.scale(sprite.scale.x * (sprite.flipX ? -1 : 1), sprite.scale.y * (sprite.flipY ? -1 : 1));
       this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame, {
@@ -559,19 +577,16 @@ export class Renderer {
       return;
     }
     // Entity render 442300: the sprite sits at position + PositionOffset (+458).
-    // The bomb explosion (1000.1) lands on the same screen row as its bomb,
-    // which draws one pixel above the -46 projection (#939).
-    const lift = effect.variant === 1 ? 1 : 0;
     this.drawEffect(ctx, effect.variant, effect.sprite,
-      (effect.presentedPosition.x + effect.renderOffset.x + effect.sprite.offset.x) * 0.65 + 32,
-      (effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y) * 0.65 - 46 - lift);
+      ...worldToScreen(effect.presentedPosition.x + effect.renderOffset.x + effect.sprite.offset.x,
+      effect.presentedPosition.y + effect.renderOffset.y + effect.sprite.offset.y));
   }
 
   /** Slot Render 5395b0 → base 442300: the sprite sits at position + PositionOffset (+458). */
   private drawSlot(ctx: CanvasRenderingContext2D, machine: Slot): void {
     this.assets.draw(ctx, machine.actor, machine.animation,
-      (machine.presentedPosition.x + machine.positionOffset.x) * 0.65 + 32,
-      (machine.presentedPosition.y + machine.positionOffset.y) * 0.65 - 46, machine.animationFrame);
+      ...worldToScreen(machine.presentedPosition.x + machine.positionOffset.x,
+      machine.presentedPosition.y + machine.positionOffset.y), machine.animationFrame);
   }
 
   private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {
@@ -586,7 +601,7 @@ export class Renderer {
     const keeper = npc.keeper;
     if (keeper) {
       this.assets.draw(ctx, npc.variant === 0 ? "gfx/017.001_shopkeeper.anm2" : "gfx/017.002_secret room keeper.anm2", keeper.animation,
-        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, keeper.animationClock,
+        ...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y), keeper.animationClock,
         { scale, overrides: { 0: {
           RedTint: keeper.tint[0]! * 255, GreenTint: keeper.tint[1]! * 255, BlueTint: keeper.tint[2]! * 255,
           AlphaTint: keeper.tint[3]! * 255, RedOffset: keeper.offsets[0]! * 255,
@@ -594,14 +609,14 @@ export class Renderer {
         } } });
     } else if (npc.monstro) {
       ctx.save();
-      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.translate(...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y));
       ctx.scale(npc.monstro.flipX ? -1 : 1, 1);
       this.assets.draw(ctx, "gfx/020.000_monstro.anm2", npc.animation,
         0, 0, npc.animationClock, { scale, color });
       ctx.restore();
     } else if (npc.dip) {
       ctx.save();
-      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.translate(...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y));
       ctx.scale(npc.dip.flipX ? -1 : 1, 1);
       // The sprite colour (+2d0); dip.tint/offsets are the splat colour 494ac8
       // writes for its blood and poop effects.
@@ -610,12 +625,12 @@ export class Renderer {
       ctx.restore();
     } else if (npc.fireplace) {
       this.assets.draw(ctx, "gfx/033.000_fireplace.anm2", npc.animation,
-        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationClock,
+        ...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y), npc.animationClock,
         { scale, layerScales: { 1: [npc.fireplace.flameScale, npc.fireplace.flameScale] } });
     } else if (npc.actor) {
       // Catalogue-driven families: the engine names the authored actor.
       ctx.save();
-      ctx.translate(npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46);
+      ctx.translate(...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y));
       // Wall Creep: sprite rotation +2cc onto its wall, and +2fd on a side wall.
       // Mom's door parts turn +2cc to face the room from their doorway.
       const rotation = npc.wallCreep?.rotation ?? npc.mom?.rotation ?? 0;
@@ -627,7 +642,7 @@ export class Renderer {
       ctx.restore();
     } else {
       this.assets.draw(ctx, npc.kind === 13 ? "gfx/013.000_fly.anm2" : npc.kind === 18 ? "gfx/018.000_attack fly.anm2" : npc.kind === 214 ? "gfx/213.000_level2fly.anm2" : "gfx/244.000_round worm.anm2", npc.animation,
-        npc.presentedPosition.x * 0.65 + 32, npc.presentedPosition.y * 0.65 - 46, npc.animationFrame, { scale, color });
+        ...worldToScreen(npc.presentedPosition.x, npc.presentedPosition.y), npc.animationFrame, { scale, color });
     }
   }
 

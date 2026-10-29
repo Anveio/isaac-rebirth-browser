@@ -61,6 +61,29 @@ function compare(source, actual, gameplay) {
       ['height', f32(poof.effectRaw7f8), f32(port.raw7f8)],
     ]) check(rows, `DipPoof${index}.${field}`, expected, observed);
   }
+  // Every NPC's appearance Poof 1000.15 (4fbeb7): 4fbee6 copies the NPC's
+  // +458 PositionOffset and 4fbef9 writes its y + 1 to +7f8. Rendered at
+  // position + PositionOffset (442300), so both are drawn geometry.
+  const npcPoofs = original.entities.filter(actor => actor.type === 1000 && actor.variant === 15
+    && actor.parentType >= 10 && actor.parentType < 1000);
+  const portNpcPoofs = actual.spriteEffects.filter(actor => actor.active && !actor.removed && actor.variant === 15
+    && actor.spawnerType >= 10 && actor.spawnerType < 1000);
+  check(rows, 'NpcPoof.births', npcPoofs.map(actor => [actor.parentType, actor.subtype, actor.spawnSeed]),
+    portNpcPoofs.map(actor => [actor.spawnerType, actor.subtype, actor.spawnSeed]));
+  for (const [index, poof] of npcPoofs.entries()) {
+    const port = portNpcPoofs.find(actor => actor.spawnSeed === poof.spawnSeed);
+    if (!port) continue;
+    for (const [field, expected, observed] of [
+      ['position', vector(poof.position), vector(phase === 0 ? port.presentedPosition : port.position)],
+      ['renderOffset', vector(poof.entityRenderOffset), vector(port.renderOffset)],
+      ['height', f32(poof.effectRaw7f8), f32(port.raw7f8)],
+      ['flip', [poof.spriteFlipX, poof.spriteFlipY], [port.sprite.flipX, port.sprite.flipY]],
+    ]) check(rows, `NpcPoof${index}.${field}`, expected, observed);
+  }
+  // Grid poop sprite FlipX (+314): Poop.Init 56994f RandomInt(2) == 0.
+  const poopCells = (original.grid ?? []).filter(cell => cell.type === 14);
+  check(rows, 'GridPoop.spriteFlipX', poopCells.map(cell => [cell.index, cell.spriteFlip?.[0]]),
+    poopCells.map(cell => [cell.index, actual.room.grid?.cells[cell.index]?.entity?.sourceOwner?.spriteFlipX ?? false]));
   for (const [index, npc] of dips.entries()) {
     const port = candidates.find(actor => actor.kind === 217 && actor.spawnSeed === npc.spawnSeed);
     check(rows, `Dip${index}.spawnSeed`, npc.spawnSeed, port?.spawnSeed);

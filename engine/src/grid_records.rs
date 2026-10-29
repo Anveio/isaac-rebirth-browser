@@ -19,6 +19,11 @@ pub struct GridOwner {
     /// the cell, which leaves the new poop passable until he walks off.
     #[serde(default, skip_serializing_if = "is_false")]
     pub poop_player_inside: bool,
+    /// Grid sprite FlipX (GridEntity+40 ANM2 +2d4, i.e. +314). Poop.Init
+    /// 56994f and Web.Init 571d35 set it to RandomInt(2) == 0; Render then
+    /// mirrors the whole sprite about its pivot.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub sprite_flip_x: bool,
     /// TNT.Init owns the signed fuse and its separately loaded Sprite.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tnt: Option<crate::tnt::Controller>,
@@ -174,6 +179,7 @@ impl GridEntity {
             local_rng: Rng::new(0xaa17_414f, [5, 9, 7]),
             poop_sheet: None,
             poop_player_inside: false,
+            sprite_flip_x: false,
             tnt: None,
         });
         Ok(())
@@ -213,7 +219,8 @@ impl GridEntity {
                 // (variant 1, 569978) comes back whole. Its local RNG5/9/7
                 // then draws the sheet (569ac0/569af0 RandomInt(3)+1; the
                 // corn poop's 569b20 has one sheet and no draw) and the
-                // cosmetic +314 (56994f RandomInt(2)) whatever the state.
+                // sprite FlipX +314 (56994f RandomInt(2) == 0) whatever the
+                // state.
                 // An intact corn poop's Eternal Fly is `corn_fly`.
                 if self.variant == 1 && self.state > 3 {
                     self.state = 0;
@@ -231,7 +238,7 @@ impl GridEntity {
                     .ok_or("Poop Init requires its constructor")?;
                 owner.local_rng = Rng::new(self.spawn_seed, [5, 9, 7]);
                 owner.poop_sheet = (self.variant <= 1).then(|| owner.local_rng.bounded(3) + 1);
-                owner.local_rng.bounded(2);
+                owner.sprite_flip_x = owner.local_rng.bounded(2) == 0;
             }
             // Web.Init571c70 keeps class0 and stores no path cost.
             10 => {}
