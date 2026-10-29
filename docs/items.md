@@ -393,7 +393,7 @@ passing live comparison.
 | 11 | 1up! | missing |  |  | 1 (secret) |  |  |
 | 57 | Distant Admiration | missing |  |  | 2 (treasure, keyMaster) |  |  |
 | 67 | Sister Maggy | complete | pickup-interactions `set-67-e10.0-*` |  | 2 (treasure, devil) |  | Sister Maggy: the shooter primitives with her tinted tear row. [Notes](familiars.md). |
-| 73 | Cube of Meat | partial | pickup-interactions `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*` |  |  |  | Cube of Meat level law: L1 orbital, L2 orbital shooter and L3/L4 chaser with blood splats match the original (L3 frame by frame). Two rows fail after the Gaper dies, where the shared MT diverges as in sets without familiars (a tear height in `set-73-73-73-e10.0-fixed`, the room-clear trinket in `set-73-73-73-73-e10.0-random-0`); Cube achievements are not read. [Notes](familiars.md). |
+| 73 | Cube of Meat | partial | pickup-interactions `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*` |  |  |  | Cube of Meat level law: L1 orbital, L2 orbital shooter and L3/L4 chaser with blood splats match the original (L3 frame by frame). One case fails after the Gaper dies: the room-clear trinket is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as in sets without familiars; Cube achievements are not read. [Notes](familiars.md). |
 | 81 | Dead Cat | missing |  |  | 3 (devil, redChest, curse) |  |  |
 | 88 | Little Chubby | missing |  |  | 1 (treasure) |  |  |
 | 94 | Sack of Pennies | missing |  |  | 2 (treasure, secret) |  |  |

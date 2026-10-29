@@ -454,7 +454,7 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 81 | Dead Cat | 40 | follower | `4708A9` | (owned+8)/9 | missing |  |
 | 117 (passive) | Dead Bird | 14 | unique | `46BE30` | temp present | missing |  |
 | 274 | Best Bud | 60 | orbital | `471759` | temp present | missing |  |
-| 73 | Cube of Meat L1..L4 | 44..47 | orbital, orbital-shooter, chaser | `471759`, `471178`, `471168` | level law | partial | `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*`, `trace-73x3-fixed`, `trace-73x3-kill`. Two rows fail after the Gaper dies, where the shared MT diverges as it does in sets without familiars (1+4+12): a tear's height in `set-73-73-73-e10.0-fixed` and the room-clear trinket in `set-73-73-73-73-e10.0-random-0`. The Cube itself matches (L3 frame by frame) |
+| 73 | Cube of Meat L1..L4 | 44..47 | orbital, orbital-shooter, chaser | `471759`, `471178`, `471168` | level law | partial | `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*`, `trace-73x3-fixed`, `trace-73x3-kill`. One case fails after the Gaper dies: the room-clear trinket (pickup 350.44) is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as it does in sets without familiars (1+4+12). The Cube itself matches (L3 frame by frame) |
 | 207 | Ball of Bandages L1..L4 | 69..72 | orbital, orbital-shooter, chaser-shooter | `471759`, `471178`, `470ADF` | level law | missing |  |
 | 107 (active) | Isaac's Body | 48 | unique | `469700` | temp count | missing |  |
 | 325 (active) | (no Rebirth row) | 78 | unique | `470A30` | temp count | missing |  |
