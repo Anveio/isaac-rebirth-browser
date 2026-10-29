@@ -66,6 +66,61 @@ enum TechnologyPropertySource {
     CurrentTechnology2Cache,
 }
 
+///A familiar's thin Laser (Robo-Baby 467010): ShootAngle 476120(variant 2,
+///position, timeout 3, offset, the familiar, angle) draws the seed and
+///spawns 7/2/0 with the familiar as spawner and Parent (447FC0, offset
+///+7D4 = position - Parent position); the caller then sets the damage
+///(+48C), the depth (+7E4) and runs one explicit Update.
+pub(crate) struct FamiliarTechnologyBirth {
+    pub(crate) familiar: u32,
+    pub(crate) familiar_variant: u32,
+    pub(crate) position: WorldVector,
+    pub(crate) angle: f32,
+    pub(crate) render_offset: WorldVector,
+    pub(crate) damage: f32,
+    pub(crate) depth: f32,
+}
+
+pub(crate) fn admit_familiar_technology(
+    state: &mut State,
+    birth: FamiliarTechnologyBirth,
+) -> Result<ActorRef, String> {
+    let parent = state
+        .familiars
+        .iter()
+        .find(|familiar| familiar.id == birth.familiar)
+        .ok_or("familiar Laser Parent is unresolved")?
+        .position;
+    let id = state.next_laser;
+    let next = id.checked_add(1).ok_or("Laser handle exhausted")?;
+    let seed = state.boot_lifecycle.shared.next_u32(); //476151.
+    let mut laser = Laser::initialize_technology(id, seed, state.game_update_count);
+    laser.origin = LaserOrigin::FamiliarTechnology;
+    laser.grid_collision_class = 3; //Laser Init; 476120 writes no class.
+    laser.position = birth.position;
+    laser.angle = birth.angle;
+    laser.remaining_updates = 3;
+    laser.render_offset = birth.render_offset;
+    laser.spawner_type = 3;
+    laser.spawner_variant = Some(birth.familiar_variant);
+    laser.parent = Some(ActorRef {
+        kind: ActorKind::Familiar,
+        id: birth.familiar,
+    });
+    laser.parent_offset = delta(birth.position, parent);
+    laser.line_flags = Some(laser.attack_flags);
+    laser.collision_damage = birth.damage;
+    laser.render_sort_offset = birth.depth;
+    let actor = ActorRef {
+        kind: ActorKind::Laser,
+        id,
+    };
+    state.lasers.push(laser);
+    state.next_laser = next;
+    state.actor_scheduler.admit(actor)?;
+    Ok(actor)
+}
+
 ///Literal50E1C0 selected mode0/r8true: own variant2/lifetime3 factory.
 ///No C18 write: the caller immediately invokes Full on the returned actor.
 pub(crate) fn admit_ordinary_technology(
@@ -210,14 +265,10 @@ pub(crate) fn advance_ordinary_technology_initial(
     actor: ActorRef,
 ) -> Result<(), String> {
     if actor.kind != ActorKind::Laser
-        || !state.lasers.iter().any(|laser| {
-            laser.id == actor.id
-                && matches!(
-                    laser.origin,
-                    LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
-                )
-                && laser.first_update
-        })
+        || !state
+            .lasers
+            .iter()
+            .any(|laser| laser.id == actor.id && laser.origin.is_technology() && laser.first_update)
     {
         return Err("Technology initial callback has an unresolved actor".into());
     }
@@ -334,8 +385,14 @@ fn initialize_first(state: &mut State, index: usize) -> Result<(), String> {
             } else {
                 7
             },
-            //4763FD actual666118=.6; variant1/476435 keeps its own.5.
-            volume: if state.lasers[index].variant == 2 {
+            //4763FD actual666118=.6; variant1/476435 keeps its own.5. A
+            //non-Player Parent takes 4762A3's 1.0.
+            volume: if state.lasers[index]
+                .parent
+                .is_some_and(|parent| parent != PLAYER)
+            {
+                1.0
+            } else if state.lasers[index].variant == 2 {
                 0.6
             } else {
                 0.5
@@ -438,10 +495,7 @@ fn spawn_initial_impact(state: &mut State, index: usize) -> Result<(), String> {
 ///Authored real Layer0 frame owner consumed by47842E..47F. The actor has two
 ///layers; its XPosition+Width is not an assumed zero displacement.
 fn root_extent(laser: &Laser) -> Result<f32, String> {
-    if matches!(
-        laser.origin,
-        LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
-    ) {
+    if laser.origin.is_technology() {
         if laser.variant != 2 || laser.sprite.animation != "RedLaser" || THIN_LASER_LAYER_COUNT != 1
         {
             return Err("Technology requires its actual one-layer RedLaser owner".into());
@@ -473,11 +527,28 @@ fn delta(a: WorldVector, b: WorldVector) -> WorldVector {
 
 fn body(state: &mut State, index: usize, grid: &Grid, dc4: WorldVector) -> Result<bool, String> {
     let player = crate::bombs::player_world(state);
+    let familiar_parent = match state.lasers[index].parent {
+        Some(ActorRef {
+            kind: ActorKind::Familiar,
+            id,
+        }) => state
+            .familiars
+            .iter()
+            .find(|familiar| familiar.id == id && !familiar.removed)
+            .map(|familiar| familiar.position),
+        _ => None,
+    };
     let extent = root_extent(&state.lasers[index])?;
     let age = state.game_update_count;
     let laser = &mut state.lasers[index];
-    if laser.parent == Some(PLAYER) {
-        laser.position = (player + laser.parent_offset) + dc4; //479180/197.
+    match laser.parent {
+        Some(PLAYER) => laser.position = (player + laser.parent_offset) + dc4, //479180/197.
+        //47835E: any other Parent, its position plus +7D4.
+        _ => {
+            if let Some(position) = familiar_parent {
+                laser.position = position + laser.parent_offset;
+            }
+        }
     }
     let radians = laser.angle * f32::from_bits(0x3c8e_fa35); //6124A0.
     let heading = WorldVector {
@@ -632,7 +703,12 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     if phase == Phase::Update && !state.lasers[index].active {
         return Ok(());
     }
-    let Some(dc4) = state.attack_runtime.player_dc4 else {
+    let dc4 = if state.lasers[index].origin == LaserOrigin::FamiliarTechnology {
+        Some(ZERO)
+    } else {
+        state.attack_runtime.player_dc4
+    };
+    let Some(dc4) = dc4 else {
         frontier(state, index, "ordinaryBrimstoneParentHistory");
         return Ok(());
     };
@@ -653,6 +729,9 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
             LaserOrigin::PlayerCharged => laser.variant != 1 || laser.grid_collision_class != 3,
             LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2 => {
                 laser.variant != 2 || laser.grid_collision_class != 5
+            }
+            LaserOrigin::FamiliarTechnology => {
+                laser.variant != 2 || laser.grid_collision_class != 3
             }
             LaserOrigin::NpcShootAngle | LaserOrigin::PlayerControlled => true,
         }

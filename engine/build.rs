@@ -413,6 +413,7 @@ fn familiar_catalog(
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
         (1000, 12, "gfx/1000.012_tear poofa.anm2"),
         (1000, 13, "gfx/1000.013_tear poofb.anm2"),
+        (1000, 11, "gfx/1000.011_bullet poof.anm2"),
         (1000, 79, "gfx/1000.012_tear poof_small.anm2"),
         (1000, 80, "gfx/1000.012_tear poof_verysmall.anm2"),
         (1000, 15, "gfx/1000.015_poof01.anm2"),

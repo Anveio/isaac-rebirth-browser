@@ -792,6 +792,7 @@ export class Renderer {
   private drawEffect(ctx: CanvasRenderingContext2D, variant: number, sprite: ActorSprite, x: number, y: number): void {
     const actors: Record<number, string> = { 1: "gfx/1000.001_bomb explosion.anm2",
       2: "gfx/1000.002_blood explosion.anm2", 7: "gfx/1000.007_blood splat.anm2",
+      11: "gfx/1000.011_bullet poof.anm2",
       12: "gfx/1000.012_tear poofa.anm2", 13: "gfx/1000.013_tear poofb.anm2", 15: "gfx/1000.015_poof01.anm2",
       17: "gfx/1000.017_poof04.anm2", 18: "gfx/1000.018_bomb crater.anm2",
       21: "gfx/1000.021_tiny bug.anm2", 30: "gfx/1000.030_dr. fetus target.anm2",

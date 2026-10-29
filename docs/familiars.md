@@ -389,7 +389,7 @@ or is unrun. **complete** means every paired case passes field by field.
 | Common tail (hit-set clear, BFFS scale) | `47064C` | partial | `set-172-*` | Hit-set interval and BFFS scale; Remove on +31F is not ported. |
 | Follow | `466B50` | complete | `trace-bobby-random-0` | Full and fast forms, frame by frame. |
 | Orbit, respace | `466DB0`, `466780` | partial | `set-172-73-*`, `set-73-*` | Two layers checked (Dagger and Cube L1 share layer 0). Big Fan and Guardian Angel speeds are unchecked. |
-| Shooter, fire | `4702E0`, `467170` | partial | `set-8-46-101`, `set-67`, `set-73-73`, `set-174`, `set-207-207`, `set-268` | The ordinary tear rows, Rainbow Baby's `Random(9)` row roll, the Bandages' `Random(10)` charm roll (L4 adds flag `0x8000`) and Rotten Baby's Blue Fly (`4703EF`: no shot while its last fly lives). Robo-Baby's laser (`467010`) is not ported. Robo-Baby faces left with its own `*Side2` clips. |
+| Shooter, fire | `4702E0`, `467170` | partial | `set-8-46-101`, `set-67`, `set-73-73`, `set-174`, `set-207-207`, `set-268` | The ordinary tear rows, Rainbow Baby's `Random(9)` row roll, the Bandages' `Random(10)` charm roll (L4 adds flag `0x8000`) and Rotten Baby's Blue Fly (`4703EF`: no shot while its last fly lives). Robo-Baby's laser (`467010` into ShootAngle `476120`): a FireTechLaser variant 2 parented to the familiar, damage 3.5 (x2 BFFS), timeout 3, its offset and depth by direction; its contacts damage enemies with the familiar as source. Robo-Baby faces left with its own `*Side2` clips. Laser contact with the Player and projectiles (item 213) is not ported. |
 | Chase | `469A00`, `4688D0` | partial | `trace-73x3-fixed`, `set-207-207-207`, `set-270` | Target search, FindGridPath walk (2.2 x 0.83 for 47 and 56, 1.8 x 0.83 otherwise) and Cube L3/L4 blood splats. |
 | Enemy partition | `4545D0` | complete | `set-*` | Rebuilt once per frame after the full actor pass and before contacts, as the original does; every familiar target search (`4688D0`) reads that frame's NPC/Bomb partition, the one the contact pass uses. |
 | Room clear | `50A334`, `46DF10` | partial | `set-94`, `set-96`, `set-98`, `set-131`, `set-271` | Player room clear walks the familiars in manager order: F90 counts rooms, and the bag spawners drop on their divisor law (`0x66C340`), with Daemon's Tail's heart roll. Juicy Sack's spiders are not ported. |
@@ -406,11 +406,11 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | Item | Name | Variant | Group | Update | Count | Status | Live case |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 8 | Brother Bobby | 1 | shooter | `4708E6` | owned+temp | complete | `set-8-46-101-e10.0-*`, `trace-bobby-random-0` |
-| 113 | Demon Baby | 2 | unique | `46E760` | owned+temp | missing |  |
+| 113 | Demon Baby | 2 | unique | `46E760` | owned+temp | complete | Every 10 frames: QueryRadius 150 (with the enemy's radius), the last vulnerable enemy with a clear CheckLine mode 3, a blood tear at speed 8 (3 x BFFS, scale 0.9, falling 1.2). Its blood tear dies in the 1000.11 Bullet Poof (`544FA1`). |
 | 88 | Little Chubby | 3 | unique | `46A050` | owned+temp | missing |  |
 | 99 | Little Gish | 4 | shooter | `4708E6` | owned+temp | partial | `set-99-e10.0-*`: the familiar and its tear row match; NPC positions and HP drift because the tear system does not yet slow NPCs (tear flag 8). |
 | 100 | Little Steven | 5 | shooter | `4708E6` | owned+temp | complete | `set-100-e10.0-*` |
-| 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | missing | Shooter poses (`*Side2`) ported; its laser `467010` (FireTechLaser variant 2 from the familiar) is not. |
+| 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | complete | Shooter poses (`*Side2`) and its laser `467010` (FireTechLaser variant 2 from the familiar). |
 | 67 | Sister Maggy | 7 | shooter | `4708E6` | owned+temp | complete | `set-67-e10.0-*` |
 | 188 | Abel | 8 | shooter-mirror | `470910` | owned+temp | missing |  |
 | 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | partial | `set-163-e10.0-*`: the familiar and its tears match; the split Gaper (11.1) walks elsewhere in the last row. |

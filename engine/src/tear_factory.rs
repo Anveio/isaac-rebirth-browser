@@ -101,7 +101,11 @@ pub(crate) fn fire_familiar(
             pitch: 1.0,
         },
     );
-    let falling_speed = state.boot_lifecycle.shared.uniform() * 0.2 + params.falling_base;
+    let falling_speed = if params.falling_roll {
+        state.boot_lifecycle.shared.uniform() * 0.2 + params.falling_base
+    } else {
+        params.falling_base
+    };
     let scale = scale.max(0.01_f32);
     let mut tear = Tear {
         id: state.next_tear,

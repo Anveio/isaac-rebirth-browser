@@ -919,6 +919,7 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         UpdateCase::DryBaby => familiar_ai::dry_baby(state, index)?,
         UpdateCase::Spawner => familiar_ai::spawner(state, index)?,
         UpdateCase::BlueFly => familiar_ai::blue_fly(state, index)?,
+        UpdateCase::DemonBaby => familiar_ai::demon_baby(state, index)?,
         UpdateCase::ShooterMirror
         | UpdateCase::ShooterFree
         | UpdateCase::Bum

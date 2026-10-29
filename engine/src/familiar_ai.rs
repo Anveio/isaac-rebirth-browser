@@ -221,6 +221,8 @@ pub(crate) fn shoot(state: &mut State, index: usize) -> Result<(), String> {
                 }
                 return Ok(());
             }
+        } else if familiar.variant == 6 {
+            robo_laser(state, index, direction)?;
         } else if !params.ported {
             familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
         } else {
@@ -299,6 +301,133 @@ fn fire(state: &mut State, index: usize, direction: i32, params: FireParams) -> 
         }
     } else {
         crate::tear_factory::fire_familiar(state, origin, velocity, damage, params)?;
+    }
+    Ok(())
+}
+
+/// Robo-Baby 467010(direction): the direction vector v (42E9E0), the
+/// offset (0, -23) + (2v.x - 9v.y, -8 - 2v.x), ShootAngle 476120(variant 2,
+/// the familiar's position, timeout 3, offset, the familiar, angle
+/// direction x 90 - 180); damage 3.5 (x2 with BFFS!), depth -10 when v.y
+/// or v.x is below -0.5 and 3000 otherwise, then the Laser's explicit
+/// Update.
+fn robo_laser(state: &mut State, index: usize, direction: i32) -> Result<(), String> {
+    let v = match direction {
+        0 => WorldVector { x: -1.0, y: 0.0 },
+        1 => WorldVector { x: 0.0, y: -1.0 },
+        2 => WorldVector { x: 1.0, y: 0.0 },
+        3 => WorldVector { x: 0.0, y: 1.0 },
+        _ => return Err("Robo-Baby fire direction outside 0..3".into()),
+    };
+    let twice = v.x + v.x;
+    let offset = WorldVector { x: 0.0, y: -23.0 }
+        + WorldVector {
+            x: -v.y * 9.0 + twice,
+            y: -8.0 - twice,
+        };
+    let angle = direction as f32 * 90.0 - 180.0;
+    let damage = if held(state, 247) { 2.0_f32 } else { 1.0 } * 3.5;
+    let depth = if -0.5 > v.y || -0.5 > v.x {
+        -10.0
+    } else {
+        3000.0
+    };
+    let familiar = &state.familiars[index];
+    let actor = crate::laser_player_runtime::admit_familiar_technology(
+        state,
+        crate::laser_player_runtime::FamiliarTechnologyBirth {
+            familiar: familiar.id,
+            familiar_variant: familiar.variant,
+            position: familiar.position,
+            angle,
+            render_offset: offset,
+            damage,
+            depth,
+        },
+    )?;
+    crate::laser_player_runtime::advance_ordinary_technology_initial(state, actor)
+}
+
+/// Demon Baby 46E760: Follow; on the 444890(10, 0) frame, QueryRadius
+/// 4536F0(150) over the enemy partition offers each enemy, and the last one
+/// vulnerable (444810) with a clear CheckLine 5C74A0(mode 3) from the
+/// familiar is the target. With one, F5C = 12, the FloatShoot pose toward
+/// its dominant axis (4683B0), and a blood tear at 8 along the direction
+/// (46E8E7). Then F5C counts down, and at 0 the idle pose 467BA0(3) shows.
+pub(crate) fn demon_baby(state: &mut State, index: usize) -> Result<(), String> {
+    follow(state, index, false)?;
+    let frame = crate::knives::source_game_counter(state.game_update_count);
+    if crate::familiar_contact::is_frame(frame, 10, 0) {
+        let position = state.familiars[index].position;
+        let candidates = match state.enemy_query_partition.as_ref() {
+            Some(snapshot) => snapshot.query(position, 150.0)?,
+            None => Vec::new(),
+        };
+        let grid = state
+            .room
+            .grid
+            .clone()
+            .map(crate::grid::Grid::new)
+            .transpose()?;
+        let mut target = None;
+        for actor in candidates
+            .into_iter()
+            .filter(|actor| actor.kind == ActorKind::Npc)
+        {
+            let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == actor.id) else {
+                continue;
+            };
+            // 4536F0 keeps an entity only inside (radius + its radius).
+            let reach = 150.0 + npc.collision_radius;
+            if squared(position, npc.position) >= reach * reach || !vulnerable(npc)? {
+                continue;
+            }
+            let clear = match (&grid, &state.room.path_costs) {
+                (Some(grid), Some(costs)) => {
+                    grid.projectile_line_clear(position, npc.position, costs)
+                }
+                _ => return Err("Demon Baby CheckLine requires the room grid".into()),
+            };
+            if clear {
+                target = Some(npc.position);
+            }
+        }
+        if let Some(goal) = target {
+            let offset = WorldVector {
+                x: goal.x - position.x,
+                y: goal.y - position.y,
+            };
+            let direction = if offset.x.abs() > offset.y.abs() {
+                if offset.x > 0.0 {
+                    2
+                } else {
+                    0
+                }
+            } else if offset.y > 0.0 {
+                3
+            } else {
+                1
+            };
+            let familiar = &mut state.familiars[index];
+            familiar.shoot_hold = 12;
+            pose(familiar, direction, true);
+            let velocity = crate::knives::normalized(offset) * 8.0;
+            let damage =
+                familiar_variants::DEMON_TEAR.damage * if held(state, 247) { 2.0 } else { 1.0 };
+            crate::tear_factory::fire_familiar(
+                state,
+                position,
+                velocity,
+                damage,
+                familiar_variants::DEMON_TEAR,
+            )?;
+        }
+    }
+    let familiar = &mut state.familiars[index];
+    if familiar.shoot_hold > 0 {
+        familiar.shoot_hold -= 1;
+    } else {
+        pose(familiar, 3, false);
     }
     Ok(())
 }
