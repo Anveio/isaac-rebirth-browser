@@ -107,6 +107,9 @@ pub struct RunContext {
     ///first load caller has no saved Bomb body reconstruction owner.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub listed_bomb_actor_count: Option<usize>,
+    ///Room.Save's live Bomb4 records. Legacy absence restores no bombs.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bomb_records: Option<Vec<crate::bombs::SavedBombRecord>>,
     pub visited_rooms: BTreeSet<usize>,
     pub room_display_flags: Vec<u32>,
     pub revealed_secret_connections: BTreeSet<[usize; 2]>,
@@ -160,6 +163,7 @@ impl RunContext {
             level_progress: state.level_progress.clone(),
             player_manager_rng: state.player_items.as_ref().map(|owner| owner.manager_rng),
             listed_bomb_actor_count: Some(state.bombs.len()),
+            bomb_records: Some(crate::bombs::capture_saved_records(state)),
             visited_rooms: state.visited_rooms.clone(),
             room_display_flags: state.room_display_flags.clone(),
             revealed_secret_connections: state.revealed_secret_connections.clone(),
@@ -385,12 +389,17 @@ impl RunRecord {
         Ok(())
     }
 
-    ///Selects the load caller for Main Continue. The initial-room caller keeps
-    ///its narrow constructor-exact reconstruction; every other living normal
-    ///Isaac save resumes through the visited-room caller, which follows the
+    ///Selects the load caller for Main Continue. Every record a living run
+    ///saved loads (docs/save-system.md): the initial-room caller keeps its
+    ///constructor-exact reconstruction of an untouched start room, and every
+    ///other save resumes through the visited-room caller, which follows the
     ///original Room.Init revisit: Room.Save5ce2d0 kept only the persistent
     ///families (5c57c0: bombs, pickups, slots, shopkeepers, fireplaces and
     ///listed effects), so an uncleared room rebuilds its NPCs from the layout.
+    ///Owners the live run itself tracked as unknown (costume registrations,
+    ///transformation counters, the golden key) are restored as unknown, the
+    ///state the run was in when it was saved. Only corrupt or inconsistent
+    ///records and lost runs are refused.
     pub fn admit_continue(&self) -> Result<ContinueDomain, String> {
         if self.admit_initial_room().is_ok() {
             return Ok(ContinueDomain::InitialRoom);
@@ -398,37 +407,33 @@ impl RunRecord {
         self.validate()?;
         let run = &self.run;
         let context = &self.context;
-        if context.character != "Isaac"
-            || context.challenge_id != 0
-            || context.player_type != Some(0)
-            || context.source_effect_mode != Some(0)
-            || run.player.dead
-            || (run.player.hp == 0 && run.player.soul_hp <= 0)
-            || run.player.golden_key.is_none()
-            || run.player.transformation_counts.is_none()
-        {
-            return Err("Continue has no owned load caller for this saved run yet".into());
+        if run.player.dead || (run.player.hp == 0 && run.player.soul_hp <= 0) {
+            return Err("a lost run has no Continue".into());
+        }
+        if context.character != "Isaac" || context.player_type.is_some_and(|kind| kind != 0) {
+            return Err("saved run names a character this build cannot construct".into());
         }
         if context
             .player_manager_rng
             .is_none_or(|rng| rng.state == 0 || [rng.right_a, rng.left, rng.right_b] != [5, 7, 22])
         {
-            return Err(
-                "Continue requires actual saved Player constructor/manager RNG stores".into(),
-            );
+            return Err("saved run is missing its Player manager RNG".into());
         }
         let entry = context
             .level_entry
             .as_ref()
-            .ok_or("Continue has no owned saved Level entry stores")?;
+            .ok_or("saved run is missing its Level entry")?;
         if entry.slot >= 8 {
-            return Err("Continue entry door slot is outside the eight Level slots".into());
+            return Err("saved Level entry door slot is outside the eight Level slots".into());
         }
-        crate::critters::validate_saved_records(context.ambient_records.as_deref().ok_or(
-            "Continue requires owned saved ambient records; missing legacy data is unknown",
-        )?)?;
+        if let Some(records) = &context.ambient_records {
+            crate::critters::validate_saved_records(records)?;
+        }
+        if let Some(records) = &context.bomb_records {
+            crate::bombs::validate_saved_records(records)?;
+        }
         if !context.visited_rooms.contains(&run.current_room) {
-            return Err("Continue current room was never entered".into());
+            return Err("saved current room was never entered".into());
         }
         Ok(ContinueDomain::VisitedRoom)
     }

@@ -75,10 +75,15 @@ pub(crate) fn capture_saved_records(state: &State) -> Option<Vec<SavedAmbientRec
         if actor.kind != ActorKind::Effect {
             continue;
         }
-        let effect = state
+        //An Effect removed this frame can stay scheduled until the
+        //scheduler compacts; it is no longer an entity Room.Save visits.
+        let Some(effect) = state
             .sprite_effects
             .iter()
-            .find(|effect| effect.id == actor.id)?;
+            .find(|effect| effect.id == actor.id)
+        else {
+            continue;
+        };
         if !listed.insert(effect.id) {
             return None;
         }

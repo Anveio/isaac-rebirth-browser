@@ -552,6 +552,84 @@ pub fn admit_conversion(
     Ok(())
 }
 
+/// Room.Save's (5CE2D0) EntitySaveState for a live Bomb4: Game.Spawn's
+/// type/variant/subtype/position/seed. 5C5860 respawns it through
+/// Game.Spawn, so Init gives it a fresh fuse and clocks.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SavedBombRecord {
+    pub variant: u32,
+    pub subtype: u32,
+    pub position: WorldVector,
+    pub spawn_seed: Option<u32>,
+}
+
+/// Live bombs in entity (scheduler) order. Exploding and removed bodies are
+/// dead entities, which Room.Save skips.
+pub(crate) fn capture_saved_records(state: &State) -> Vec<SavedBombRecord> {
+    state
+        .actor_scheduler
+        .full_phase()
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Bomb)
+        .filter_map(|actor| state.bombs.iter().find(|bomb| bomb.id == actor.id))
+        .filter(|bomb| bomb.motion.lifetime == BombLifetime::Alive)
+        .map(|bomb| SavedBombRecord {
+            variant: bomb.variant,
+            subtype: bomb.shot.as_ref().map_or(0, |shot| shot.subtype),
+            position: bomb.motion.position,
+            spawn_seed: bomb.spawn_seed,
+        })
+        .collect()
+}
+
+pub(crate) fn validate_saved_records(records: &[SavedBombRecord]) -> Result<(), String> {
+    if records.len() > 512 || records.iter().any(|record| !record.position.is_finite()) {
+        return Err("saved bomb record is outside the supported format".into());
+    }
+    Ok(())
+}
+
+/// 5C5860's Bomb4 case: Game.Spawn at the saved position with the saved
+/// seed and no parent, so the bomb starts a new fuse at rest, as a Pickup
+/// conversion's Game.Spawn does.
+pub(crate) fn restore_saved_records(
+    state: &mut State,
+    records: &[SavedBombRecord],
+) -> Result<(), String> {
+    validate_saved_records(records)?;
+    for record in records {
+        let next = state.next_bomb.checked_add(1).ok_or("bomb IDs exhausted")?;
+        let motion = BombMotion::spawn(record.position, WorldVector { x: 0.0, y: 0.0 })?;
+        state.actor_scheduler.admit(ActorRef {
+            kind: ActorKind::Bomb,
+            id: state.next_bomb,
+        })?;
+        state.bombs.push(Bomb {
+            id: state.next_bomb,
+            variant: record.variant,
+            spawn_seed: record.spawn_seed,
+            birth_game_update: state.game_update_count,
+            friction: 1.0,
+            animation: if matches!(record.variant, 3 | 4) {
+                "Appear"
+            } else {
+                "Pulse"
+            }
+            .into(),
+            animation_frame: 0,
+            animation_playing: true,
+            x: f64::from(record.position.x) * WORLD_SCALE + 32.0,
+            y: f64::from(record.position.y) * WORLD_SCALE - 46.0,
+            motion,
+            player_contact_countdown: 0,
+            shot: None,
+        });
+        state.next_bomb = next;
+    }
+    Ok(())
+}
+
 fn advance_animation(bomb: &mut Bomb, detonated: bool) {
     if detonated {
         bomb.animation = "Explode".into();

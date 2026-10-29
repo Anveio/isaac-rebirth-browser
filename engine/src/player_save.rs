@@ -160,13 +160,14 @@ impl SavedPlayerItems {
     ///and C08 stores are distinct from the copied saved count provenance.
     ///This method never restores an old live history or infers a costume list.
     pub(crate) fn restore_after_constructor(&self, owner: &mut PlayerItems) -> Result<(), String> {
-        //The saved costume history may hold the items' configurations; the
-        //destination constructor must still be the fresh empty Player.
-        if self.costume_registrations.is_none()
-            || owner
-                .costume_registrations
-                .as_ref()
-                .is_none_or(|history| !history.configuration_ids.is_empty())
+        //The destination constructor must be the fresh empty Player. The
+        //saved costume history is restored as saved: a list, or unknown when
+        //the live run had already lost track of it (the same state the run
+        //was in before Exit).
+        if owner
+            .costume_registrations
+            .as_ref()
+            .is_none_or(|history| !history.configuration_ids.is_empty())
             || !owner.temporary_collectibles.is_empty()
             || owner.owned_counts.iter().any(|count| *count != 0)
         {
@@ -187,8 +188,6 @@ impl SavedPlayerItems {
             history.primary_c08 = true;
             history.cached_callbacks = 0;
         }
-        //Only the positive saved-empty list plus constructor-empty vector
-        //admits this path. Nonempty511060 registration replay is separate.
         owner.costume_registrations = self.costume_registrations.clone();
         Ok(())
     }
