@@ -316,22 +316,6 @@ export class Renderer {
     this.stage.ground(state.stageEffects);
     ctx.save();
     if (offset) ctx.translate(offset.x, offset.y);
-    // Creep's render key (seq & 0x3ff) + 2100 sorts every pool under the
-    // y-sorted actors, in spawn order; colour multiplies the clip's pulse.
-    // Lemon Mishap's 1000.32 shares the creep render words.
-    for (const effect of state.spriteEffects) {
-      if (!effect.creepEffect || !effect.visible || !effect.active) continue;
-      const sprite = effect.sprite;
-      ctx.save();
-      ctx.translate(...worldToScreen(effect.presentedPosition.x, effect.presentedPosition.y));
-      ctx.scale(sprite.scale.x, sprite.scale.y);
-      const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2"
-        : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2"
-        : effect.variant === 32 ? "gfx/1000.032_lemon mishap.anm2" : "gfx/1000.022_creep (red).anm2";
-      this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
-        { color: { tint: sprite.tint, offsets: sprite.offsets } });
-      ctx.restore();
-    }
     const grid = state.room.grid;
     if (grid) for (const [index, cell] of grid.cells.entries()) {
       const entity = cell.entity;
@@ -901,6 +885,26 @@ export class Renderer {
       this.drawnGrid.push({ index, kind: 1, animation, frame: state.gameUpdateCount });
     }
   }
+  /** Creep (1000.22/23/24 and Lemon Mishap's 1000.32): its render key,
+   * (seq & 0x3ff) + 2100, is below the 5000 that Room::Render 5cc8a0 passes
+   * to its first entity pass (452850), so every pool draws right after the
+   * floor and the decorations, under the walls and the room's shading quad,
+   * in spawn order; colour multiplies the clip's pulse. */
+  private drawCreep(ctx: CanvasRenderingContext2D, state: State): void {
+    for (const effect of state.spriteEffects) {
+      if (!effect.creepEffect || !effect.visible || !effect.active) continue;
+      const sprite = effect.sprite;
+      ctx.save();
+      ctx.translate(...worldToScreen(effect.presentedPosition.x, effect.presentedPosition.y));
+      ctx.scale(sprite.scale.x, sprite.scale.y);
+      const actor = effect.variant === 23 ? "gfx/1000.023_creep (green).anm2"
+        : effect.variant === 24 ? "gfx/1000.024_creep (yellow).anm2"
+        : effect.variant === 32 ? "gfx/1000.032_lemon mishap.anm2" : "gfx/1000.022_creep (red).anm2";
+      this.assets.draw(ctx, actor, sprite.animation, 0, 0, sprite.frame,
+        { color: { tint: sprite.tint, offsets: sprite.offsets } });
+      ctx.restore();
+    }
+  }
   private drawRoom(appearance: RoomAppearance, grid: Room["grid"], state: State): void {
     const gl = this.graphics, ctx = gl.asCanvasContext(), size = appearance.tileSize, border = size * 2;
     const width = appearance.columns * size, height = appearance.rows * size, { x, y } = appearance.origin;
@@ -909,6 +913,12 @@ export class Renderer {
     gl.blendFactors("one", "zero");
     gl.drawSurface(this.floor, border, border, width - border * 2, height - border - size,
       x + border, y + border, width - border * 2, height - border - size);
+    gl.blendFactors("srcAlpha", "oneMinusSrcAlpha");
+    // Room::Render 5cc8a0 draws the decoration grid entities and the entities
+    // keyed below 5000 (creep) between the floor 427420 and the walls 427990.
+    this.drawDecorations(ctx, state);
+    this.drawCreep(ctx, state);
+    gl.blendFactors("one", "zero");
     gl.drawSurface(this.walls, 0, 0, border, height, x, y, border, height);
     gl.drawSurface(this.walls, width - border, 0, border, height, x + width - border, y, border, height);
     gl.drawSurface(this.walls, border, 0, width - border * 2, border, x + border, y, width - border * 2, border);
@@ -959,7 +969,6 @@ export class Renderer {
       }
       ctx.restore();
     }
-    this.drawDecorations(ctx, state);
     gl.drawImage(this.assets.image(appearance.fx.shading), x, y, width, height);
   }
   private drawPlayer(ctx: CanvasRenderingContext2D, state: State): void {
