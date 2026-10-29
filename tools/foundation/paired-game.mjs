@@ -258,7 +258,9 @@ export async function browserCapture(browser, server, caseData, directory, archi
   let initialPhysical, keyboardOwnReload;
   try {
     await page.goto(server.url + '/?manual=1');
-    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+    // Boot compiles the WASM and decodes the assets; on a loaded shared host
+    // that alone has taken over 40 s, past Playwright's 30 s default.
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready), null, { timeout: 180000 });
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
     await page.evaluate(({ initialSeed, bootEpochSeed, bootElapsed, mtDraws, startup }) => {
       window.game.pause(); window.game.reset(initialSeed, { bootEpochSeed, bootElapsed, trace: true, ...startup });
