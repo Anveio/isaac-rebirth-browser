@@ -100,7 +100,13 @@ fn projectile_contacts(state: &mut State) -> Result<(), String> {
         .enemy_projectiles
         .iter()
         .filter(|projectile| !projectile.dead && !projectile.removed)
-        .map(|projectile| bounds(projectile.id, projectile.position, projectile.collision_radius))
+        .map(|projectile| {
+            bounds(
+                projectile.id,
+                projectile.position,
+                projectile.collision_radius,
+            )
+        })
         .collect();
     if familiars.is_empty() || projectiles.is_empty() {
         return Ok(());
@@ -133,7 +139,8 @@ fn projectile_contacts(state: &mut State) -> Result<(), String> {
         }
         let variant = familiar.variant;
         // 470188: Smart Fly blocks only with Entity+18 = 0.
-        if !familiar_variants::blocks_projectiles(variant) || (variant == 50 && familiar.subtype != 0)
+        if !familiar_variants::blocks_projectiles(variant)
+            || (variant == 50 && familiar.subtype != 0)
         {
             continue;
         }
@@ -183,14 +190,15 @@ fn npc_contacts(state: &mut State, npcs: &[Bounds]) -> Result<(), String> {
         }
         // 46FAD0: 444810, then collision damage +48C above 0 (or Halo of
         // Flies 33).
-        let vulnerable =
-            crate::target_eligibility::eligible_target(crate::target_eligibility::TargetEligibility {
+        let vulnerable = crate::target_eligibility::eligible_target(
+            crate::target_eligibility::TargetEligibility {
                 kind: npc.kind,
                 collision_class: npc.entity_collision_class,
                 raw_494: npc.raw_494,
                 dead: npc.dead,
                 entity_flags: crate::entities::family(npc.kind).map(|_| npc.entity_flags()),
-            })?;
+            },
+        )?;
         if !vulnerable || !(familiar.collision_damage > 0.0 || familiar.variant == 33) {
             continue;
         }

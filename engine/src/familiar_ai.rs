@@ -11,9 +11,10 @@ use crate::{
 };
 
 fn held(state: &State, item: usize) -> bool {
-    state.player_items.as_ref().is_some_and(|owner| {
-        owner.owned_counts.get(item).copied().unwrap_or(0) > 0
-    })
+    state
+        .player_items
+        .as_ref()
+        .is_some_and(|owner| owner.owned_counts.get(item).copied().unwrap_or(0) > 0)
 }
 
 /// 466B50(fast): follow the first eligible familiar ahead (+498), or the
@@ -98,11 +99,7 @@ pub(crate) fn respace(state: &mut State, layer: usize, index: usize, include_sel
     if include_self {
         members.push(index);
     }
-    let factor = if held(state, 279) {
-        1.0_f32 / 3.0
-    } else {
-        1.0
-    };
+    let factor = if held(state, 279) { 1.0_f32 / 3.0 } else { 1.0 };
     let speeds = if held(state, 112) {
         familiar_variants::ORBIT_SPEED_FAST
     } else {
@@ -328,7 +325,12 @@ fn vulnerable(npc: &crate::npcs::Npc) -> Result<bool, String> {
 /// (radius squared, then the smaller of its two distances) is taken.
 fn find_target(state: &mut State, index: usize, interval: u32, radius: f32) -> Result<(), String> {
     if let Some(id) = state.familiars[index].target {
-        let keep = match state.room.npcs.iter().find(|npc| npc.id == id && !npc.removed) {
+        let keep = match state
+            .room
+            .npcs
+            .iter()
+            .find(|npc| npc.id == id && !npc.removed)
+        {
             Some(npc) => vulnerable(npc)?,
             None => false,
         };

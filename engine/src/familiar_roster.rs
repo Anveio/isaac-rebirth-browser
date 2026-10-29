@@ -149,10 +149,38 @@ pub(crate) const ROSTER: &[RosterRow] = &[
     row(45, CountSource::Level { item: 73, level: 2 }, 73),
     row(46, CountSource::Level { item: 73, level: 3 }, 73),
     row(47, CountSource::Level { item: 73, level: 4 }, 73),
-    row(69, CountSource::Level { item: 207, level: 1 }, 207),
-    row(70, CountSource::Level { item: 207, level: 2 }, 207),
-    row(71, CountSource::Level { item: 207, level: 3 }, 207),
-    row(72, CountSource::Level { item: 207, level: 4 }, 207),
+    row(
+        69,
+        CountSource::Level {
+            item: 207,
+            level: 1,
+        },
+        207,
+    ),
+    row(
+        70,
+        CountSource::Level {
+            item: 207,
+            level: 2,
+        },
+        207,
+    ),
+    row(
+        71,
+        CountSource::Level {
+            item: 207,
+            level: 3,
+        },
+        207,
+    ),
+    row(
+        72,
+        CountSource::Level {
+            item: 207,
+            level: 4,
+        },
+        207,
+    ),
     row(48, CountSource::TempCount(107), 107),
     row(78, CountSource::TempCount(325), 325),
     row(28, CountSource::KeyPieces, 238),

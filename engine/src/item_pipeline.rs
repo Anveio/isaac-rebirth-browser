@@ -435,7 +435,6 @@ impl<'a> ItemInputs<'a> {
             || self.admits_permanent_readset(2, INNER_EYE_PREFIX_CACHE_ITEMS)
     }
 
-
     ///Separate50D090(kind6) footprint used by Rocket31 at death. The consumer
     ///retains actualFIRSTPlayer/source0 and currentC88/C98/CA0 ownership;
     ///physicalParent and the Target's birth inventory are not this getter.
@@ -667,7 +666,6 @@ impl<'a> ItemInputs<'a> {
                     count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329, 304].contains(&id))
                 })
     }
-
 
     pub(crate) fn admits_complete_selected_tail(self) -> bool {
         self.admits_selected_auxiliary_callbacks()

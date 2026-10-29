@@ -196,7 +196,6 @@ fn no_orbit_layer() -> i32 {
     -1
 }
 
-
 impl Familiar {
     fn new(variant: u32, id: u32, seed: u32, position: WorldVector, game_count: u32) -> Self {
         let config = definition(3, variant).expect("authored Familiar config");
@@ -789,7 +788,8 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     if familiar.removed || phase == Phase::Skipped {
         return Ok(());
     }
-    let config = definition(3, familiar.variant).ok_or("Familiar variant has no authored config")?;
+    let config =
+        definition(3, familiar.variant).ok_or("Familiar variant has no authored config")?;
     if phase == Phase::Interpolate {
         // FastUpdate 46F850 by variant.
         match familiar_variants::interpolate_case(familiar.variant) {
@@ -839,7 +839,12 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
                     .clone()
                     .ok_or("Familiar update requires room grid")?,
             )?;
-            collider(familiar.variant)?.resolve_nonplayer_ground(&grid, &mut position, &mut velocity, true)?;
+            collider(familiar.variant)?.resolve_nonplayer_ground(
+                &grid,
+                &mut position,
+                &mut velocity,
+                true,
+            )?;
         }
         familiar.presented_position = position;
         return Ok(());

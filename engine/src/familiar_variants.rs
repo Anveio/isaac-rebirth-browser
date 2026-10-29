@@ -105,7 +105,21 @@ pub(crate) enum InterpolateCase {
 pub(crate) fn interpolate_case(variant: u32) -> InterpolateCase {
     use InterpolateCase::*;
     match variant {
-        1 | 2 | 4..=7 | 9..=12 | 20..=23 | 25..=27 | 40 | 41 | 51 | 52 | 54 | 55 | 57 | 61 | 62
+        1
+        | 2
+        | 4..=7
+        | 9..=12
+        | 20..=23
+        | 25..=27
+        | 40
+        | 41
+        | 51
+        | 52
+        | 54
+        | 55
+        | 57
+        | 61
+        | 62
         | 74 => Follow,
         3 | 59 => FollowIdle,
         28 => FollowFloat,
