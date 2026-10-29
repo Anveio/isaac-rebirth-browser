@@ -384,6 +384,28 @@ pub fn restore_records(
     Ok(())
 }
 
+/// The Eternal Flies a revisit's Room.Init respawns: record replay (5CEF9C)
+/// runs Poop.Init569600 again for every saved poop in ascending cell order,
+/// and each intact corn poop spawns a new fly with its own Random() seed.
+/// The caller owns the revisit's shared-draw frontier (Frontier::Restore):
+/// the replay's other constructor and Init draws are not modeled here.
+pub fn revisit_corn_flies(room: &Room, shared: &mut Mt19937) -> Vec<CornFly> {
+    let Some(grid) = room.grid.as_ref() else {
+        return Vec::new();
+    };
+    let width = usize::from(grid.width);
+    grid.cells
+        .iter()
+        .enumerate()
+        .filter_map(|(index, cell)| {
+            cell.entity
+                .as_ref()
+                .filter(|entity| entity.source_owner.is_some())
+                .and_then(|entity| entity.corn_fly(index, width, shared))
+        })
+        .collect()
+}
+
 /// Raw grid types whose Room.Init factory builds a GridBase object, so its
 /// constructor 560ff0 draws two raw words. Raw1400 Fire becomes an NPC.
 pub fn constructs_grid_object(entity_type: u16) -> bool {

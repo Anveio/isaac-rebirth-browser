@@ -2795,6 +2795,9 @@ impl Game {
             0,
             0,
         );
+        // Record replay (5CEF9C) precedes the layout: each intact corn poop's
+        // Poop.Init spawns its Eternal Fly whether or not the room is cleared.
+        let corn_flies = self.spawn_revisit_corn_flies()?.len();
         if !self.state.room.combat_clear {
             let selectors = self
                 .state
@@ -2808,8 +2811,13 @@ impl Game {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
-            let mut npcs = Vec::new();
-            let mut order = Vec::new();
+            let mut npcs = std::mem::take(&mut self.state.room.npcs);
+            let mut order: Vec<_> = self
+                .state
+                .room
+                .authored_actor_order
+                .drain(..corn_flies)
+                .collect();
             for selector in &selectors {
                 if selector.category != room_spawns::SpawnCategory::Entity {
                     continue;
@@ -2973,6 +2981,63 @@ impl Game {
             leaving,
         )?;
         maze::change_room(state, boot_level_grid, transition)
+    }
+
+    /// Room.Save5ce2d0 keeps no NPC record outside the5c57c0 families
+    /// (shopkeepers17 and fireplaces33). A cleared room's Room.Init revisit
+    /// (5ce6b0 ->5ce8e8, descriptor+3d set, seed effect mode not25/32)
+    /// rebuilds only its layout's42, 44 (variant nonzero), 202, 203, 218,
+    /// 235 and236 entities; the restored room stands in for those and any
+    /// other NPC it held is gone. Record replay (5CEF9C) runs before the
+    /// layout, so each intact corn poop's new Eternal Fly comes first.
+    fn readmit_revisited_npcs(&mut self) -> Result<Vec<u32>, String> {
+        let effect_mode = self
+            .state
+            .run_seeds
+            .as_ref()
+            .and_then(|seeds| seeds.source_effect_mode);
+        if self.state.room.combat_clear && effect_mode.is_some_and(|mode| !matches!(mode, 25 | 32))
+        {
+            for npc in &mut self.state.room.npcs {
+                let rebuilt = matches!(npc.kind, 17 | 33 | 42 | 202 | 203 | 218 | 235 | 236)
+                    || (npc.kind == 44 && npc.variant != 0);
+                if !rebuilt {
+                    npc.removed = true;
+                }
+            }
+        }
+        self.spawn_revisit_corn_flies()
+    }
+
+    /// Poop.Init's Eternal Flies on a revisit's record replay, ahead of the
+    /// room's other actors.
+    fn spawn_revisit_corn_flies(&mut self) -> Result<Vec<u32>, String> {
+        let flies = grid_records::revisit_corn_flies(
+            &self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+        );
+        let context = entities::SpawnContext {
+            stage: self.state.stage,
+            game_update_count: self.state.game_update_count,
+        };
+        let mut ids = Vec::with_capacity(flies.len());
+        for (offset, fly) in flies.iter().enumerate() {
+            let id =
+                u32::try_from(self.state.room.npcs.len()).map_err(|_| "NPC identity exhausted")?;
+            self.state
+                .room
+                .npcs
+                .push(eternal_fly::from_corn_poop(id, fly, &context)?);
+            self.state.room.authored_actor_order.insert(
+                offset,
+                actors::ActorRef {
+                    kind: actors::ActorKind::Npc,
+                    id,
+                },
+            );
+            ids.push(id);
+        }
+        Ok(ids)
     }
 
     fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
@@ -5062,6 +5127,7 @@ impl Game {
                         &mut self.state,
                         ordinary_placement::Frontier::Restore,
                     );
+                    let corn_flies = self.readmit_revisited_npcs()?;
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     let restored_slots = slots::readmit_saved(&mut self.state);
                     item_queries::note_room_placement(&mut self.state);
@@ -5073,6 +5139,10 @@ impl Game {
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
                     // families keep their existing reconstruction owners.
+                    // Record replay spawned the corn-poop flies first.
+                    for id in corn_flies {
+                        self.advance_npc(id, phase)?;
+                    }
                     for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
                     }
