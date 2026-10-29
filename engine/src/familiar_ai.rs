@@ -18,7 +18,8 @@ fn held(state: &State, item: usize) -> bool {
 
 /// 466B50(fast): follow the first eligible familiar ahead (+498), or the
 /// Player. Past 20 units the position moves (d - 20)/d * 0.1 of the gap
-/// (doubled when `fast`); friction +470 then takes the 0.8 factor.
+/// (halved when `fast`, the FastUpdate form); only the full form then
+/// multiplies friction +470 by 0.8.
 pub(crate) fn follow(state: &mut State, index: usize, fast: bool) -> Result<(), String> {
     let mut ahead = state.familiars[index].follow_parent;
     let mut target = None;
@@ -48,7 +49,24 @@ pub(crate) fn follow(state: &mut State, index: usize, fast: bool) -> Result<(), 
     if length > 20.0 {
         let step = (length - 20.0) / length * 0.1;
         let step = delta * step;
-        familiar.position = familiar.position + if fast { step * 2.0 } else { step };
+        // 466D17: the fast (FastUpdate) step is halved (612B30).
+        familiar.position = familiar.position
+            + if fast {
+                WorldVector {
+                    x: step.x / 2.0,
+                    y: step.y / 2.0,
+                }
+            } else {
+                step
+            };
+    }
+    if fast {
+        // 466BEE: the fast form leaves friction alone.
+        return if familiar.position.is_finite() {
+            Ok(())
+        } else {
+            Err("Familiar follow overflowed".into())
+        };
     }
     familiar.current_friction *= 0.8;
     if !familiar.position.is_finite() {
@@ -105,14 +123,24 @@ pub(crate) fn respace(state: &mut State, layer: usize, index: usize, include_sel
 /// fmod(-F78 * (frame + parity*0.5) * pi * 0.5 + F6C, 2pi) in double
 /// (x87 fprem), narrowed to f32, plus the layer offset 0x66CAA0. The
 /// Manager's 60 Hz parity is 0 in every full Update. Sacrificial Dagger
-/// 35 also takes the angle as its sprite rotation (466EF0).
-pub(crate) fn orbit_point(state: &mut State, index: usize, center: WorldVector) -> WorldVector {
+/// 35 also holds Rotation frame 6 and takes the angle as its rotation
+/// (466EF0).
+pub(crate) fn orbit_point(
+    state: &mut State,
+    index: usize,
+    center: WorldVector,
+    parity: i32,
+) -> WorldVector {
     let frame = crate::knives::source_game_counter(state.game_update_count) as i32 as f32;
     let familiar = &mut state.familiars[index];
-    let turn = -familiar.orbit_speed * (frame + 0.0 * 0.5);
+    let turn = -familiar.orbit_speed * (frame + parity as f32 * 0.5);
     let angle = ((turn as f64 * std::f64::consts::PI * 0.5 + familiar.orbit_phase as f64)
         % std::f64::consts::TAU) as f32;
     if familiar.variant == 35 {
+        // 466EF0: SetFrame("Rotation", 6) (paused), then layer 0's rotation.
+        familiar.sprite.animation = "Rotation".into();
+        familiar.sprite.frame = 6.0;
+        familiar.sprite.playing = false;
         familiar.sprite.rotation = ((angle * 180.0) as f64 / std::f64::consts::PI) as f32;
     }
     let layer = familiar.orbit_layer.max(0) as usize;
@@ -128,10 +156,18 @@ pub(crate) fn orbit_point(state: &mut State, index: usize, center: WorldVector) 
 /// around the Player and the velocity is zeroed.
 pub(crate) fn orbit(state: &mut State, index: usize) {
     let center = crate::bombs::player_world(state);
-    let point = orbit_point(state, index, center);
+    let point = orbit_point(state, index, center, 0);
     let familiar = &mut state.familiars[index];
     familiar.position = point;
     familiar.velocity = WorldVector { x: 0.0, y: 0.0 };
+}
+
+/// FastUpdate 46F900: the live position takes the orbit point at the
+/// Manager's odd 60 Hz parity; the velocity is left alone.
+pub(crate) fn orbit_half(state: &mut State, index: usize) {
+    let center = crate::bombs::player_world(state);
+    let point = orbit_point(state, index, center, 1);
+    state.familiars[index].position = point;
 }
 
 /// 467BA0 (Float*) and 4683B0 (FloatShoot*): direction 0 left (flipped
@@ -246,9 +282,9 @@ fn fire(state: &mut State, index: usize, direction: i32, params: FireParams) -> 
     Ok(())
 }
 
-/// Dry Baby 471401: when its Hit clip has finished, play Idle and use
-/// The Necronomicon (522250(35, false, true, false)); then Follow, and
-/// F58 counts down.
+/// Dry Baby 471401: when its Hit clip has finished, play Idle, use The
+/// Necronomicon (522250(35, false, true, false)) and request its GiantBook
+/// with no delay; then Follow, and F58 counts down.
 pub(crate) fn dry_baby(state: &mut State, index: usize) -> Result<(), String> {
     let familiar = &mut state.familiars[index];
     if familiar.sprite.animation == "Hit" && !familiar.sprite.playing {
@@ -256,6 +292,10 @@ pub(crate) fn dry_baby(state: &mut State, index: usize) -> Result<(), String> {
         familiar.sprite.frame = 0.0;
         familiar.sprite.playing = true;
         crate::active_items::nested_use_from(state, 35)?;
+        // 4714AC: then GiantBook 5805C0(1, 0), the Necronomicon page.
+        if !state.information_animation.request_authored(1, 0) {
+            return Err("Necronomicon GiantBook definition absent".into());
+        }
     }
     follow(state, index, false)?;
     let familiar = &mut state.familiars[index];
@@ -356,7 +396,7 @@ fn find_target(state: &mut State, index: usize, interval: u32, radius: f32) -> R
 }
 
 /// Sprite Play(name, false): a clip already set keeps running.
-fn play(familiar: &mut Familiar, clip: &str) {
+pub(crate) fn play(familiar: &mut Familiar, clip: &str) {
     if familiar.sprite.animation != clip {
         familiar.sprite.animation = clip.into();
         familiar.sprite.frame = 0.0;

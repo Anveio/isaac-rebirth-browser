@@ -83,6 +83,39 @@ pub(crate) fn update_case(variant: u32) -> UpdateCase {
     }
 }
 
+/// One case of the Familiar FastUpdate 46F850 (jump table 0x66C5B8 for
+/// variants up to 0x4B), run on the 60 Hz frames between full updates.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum InterpolateCase {
+    /// 4446A0: the Entity half step.
+    Base,
+    /// 46F8BC: Follow(fast).
+    Follow,
+    /// 46F8E8: Follow(fast) while F58 is 0 (Little Chubby, Bob's Brain).
+    FollowIdle,
+    /// 46F880: Follow(fast) while the Float clip plays (the Full Key).
+    FollowFloat,
+    /// 46F900: the position takes the half-frame orbit point.
+    Orbit,
+    /// 46F948 (Robo-Baby 2.0) and 46F8D0 (Samson's Chains): a second
+    /// update body; not ported.
+    Unique(u32),
+}
+
+pub(crate) fn interpolate_case(variant: u32) -> InterpolateCase {
+    use InterpolateCase::*;
+    match variant {
+        1 | 2 | 4..=7 | 9..=12 | 20..=23 | 25..=27 | 40 | 41 | 51 | 52 | 54 | 55 | 57 | 61 | 62
+        | 74 => Follow,
+        3 | 59 => FollowIdle,
+        28 => FollowFloat,
+        30..=33 | 35 | 44 | 45 | 60 | 65 | 69 | 70 => Orbit,
+        53 => Unique(0x46F948),
+        75 => Unique(0x46F8D0),
+        _ => Base,
+    }
+}
+
 /// 4666B0: the variants Init 46EFD7 links into the follower train.
 pub(crate) fn is_follower(variant: u32) -> bool {
     matches!(

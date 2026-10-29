@@ -61,7 +61,7 @@ function nativeObservation(observation) {
       primaryWeapon: player.primaryWeapon, tearFlags: player.tearFlags } : null,
     familiars: live.filter(entity => entity.type === 3).map(entity => entity.variant).sort((a, b) => a - b),
     familiarStates: live.filter(entity => entity.type === 3).map(entity => ({ variant: entity.variant, subtype: 0,
-      position: entity.position, animation: entity.animation, frame: entity.frame, fireCooldown: entity.f58,
+      position: entity.position, velocity: entity.velocity, animation: entity.animation, frame: entity.frame, fireCooldown: entity.f58,
       shootHold: entity.f5c, orbitLayer: entity.orbitLayer })),
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position,
@@ -116,7 +116,8 @@ function portObservation() {
       tearFlags: state.weaponCache.flagsC98 },
     familiars: state.familiars.filter(familiar => !familiar.removed).map(familiar => familiar.variant).sort((a, b) => a - b),
     familiarStates: state.familiars.filter(familiar => !familiar.removed).map(familiar => ({ variant: familiar.variant, subtype: 0,
-      position: [familiar.position.x, familiar.position.y], animation: familiar.sprite.animation, frame: familiar.sprite.frame,
+      position: [familiar.presentedPosition.x, familiar.presentedPosition.y], velocity: [familiar.velocity.x, familiar.velocity.y],
+      animation: familiar.sprite.animation, frame: familiar.sprite.frame,
       fireCooldown: familiar.fireCooldown, shootHold: familiar.shootHold, orbitLayer: familiar.orbitLayer })),
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
@@ -406,7 +407,8 @@ async function capturePort(browser, server, declaration, base, directory) {
   const observations = {};
   try {
     await page.goto(server.url + '/?manual=1');
-    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+    // A loaded host can take longer than the default 30 s to boot the build.
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready), null, { timeout: 180000 });
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
     await page.evaluate(input => { window.game.pause(); window.game.reset(1, input); },
       { bootEpochSeed: declaration.bootEpochSeed, resources, audioPreferences: { sfxVolume: 0, musicVolume: 0 },

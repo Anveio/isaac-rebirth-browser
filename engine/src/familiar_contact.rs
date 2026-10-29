@@ -70,11 +70,14 @@ fn overlap(a: WorldVector, ra: f32, b: WorldVector, rb: f32) -> bool {
     (delta.x * delta.x + delta.y * delta.y).sqrt() < radius
 }
 
-fn bffs(state: &State) -> f32 {
+/// 46FA64: the contact multiplier is 2 with BFFS! (247) held, or with Hive
+/// Mind (248) for Blue Flies 43 and Blue Spiders 73.
+fn multiplier(state: &State, variant: u32) -> f32 {
+    let item = if matches!(variant, 43 | 73) { 248 } else { 247 };
     let held = state
         .player_items
         .as_ref()
-        .is_some_and(|owner| owner.owned_counts.get(247).copied().unwrap_or(0) > 0);
+        .is_some_and(|owner| owner.owned_counts.get(item).copied().unwrap_or(0) > 0);
     if held {
         2.0
     } else {
@@ -139,9 +142,7 @@ fn projectile_contacts(state: &mut State) -> Result<(), String> {
             let roll = state.boot_lifecycle.shared.bounded(4);
             let familiar = &mut state.familiars[index];
             if roll == 0 && familiar.fire_cooldown <= 0 {
-                familiar.sprite.animation = "Hit".into();
-                familiar.sprite.frame = 0.0;
-                familiar.sprite.playing = true;
+                crate::familiar_ai::play(familiar, "Hit");
                 familiar.fire_cooldown = 150;
             }
         }
@@ -158,7 +159,6 @@ fn npc_contacts(state: &mut State, npcs: &[Bounds]) -> Result<(), String> {
     if familiars.is_empty() || npcs.is_empty() {
         return Ok(());
     }
-    let multiplier = bffs(state);
     for (familiar_id, npc_id) in contact_candidates::pairs(&familiars, npcs)? {
         let Some(index) = state.familiars.iter().position(|f| f.id == familiar_id) else {
             continue;
@@ -203,7 +203,7 @@ fn npc_contacts(state: &mut State, npcs: &[Bounds]) -> Result<(), String> {
         if familiar.hits.contains(&sequence) {
             continue;
         }
-        let amount = multiplier * familiar.collision_damage;
+        let amount = multiplier(state, familiar.variant) * familiar.collision_damage;
         state.familiars[index].hits.push(sequence);
         let npc = &mut state.room.npcs[target];
         let health = npc.health();

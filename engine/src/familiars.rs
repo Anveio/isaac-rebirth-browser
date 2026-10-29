@@ -5,7 +5,7 @@
 use crate::{
     actors::{ActorKind, ActorRef},
     familiar_ai, familiar_roster,
-    familiar_variants::{self, UpdateCase},
+    familiar_variants::{self, InterpolateCase, UpdateCase},
     grid::{Collider, CollisionGeometry, Grid},
     items,
     motion::WorldVector,
@@ -791,6 +791,43 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     }
     let config = definition(3, familiar.variant).ok_or("Familiar variant has no authored config")?;
     if phase == Phase::Interpolate {
+        // FastUpdate 46F850 by variant.
+        match familiar_variants::interpolate_case(familiar.variant) {
+            InterpolateCase::Base => {}
+            InterpolateCase::Follow => {
+                familiar_ai::follow(state, index, true)?;
+                let familiar = &mut state.familiars[index];
+                familiar.presented_position = familiar.position;
+                return Ok(());
+            }
+            InterpolateCase::FollowIdle | InterpolateCase::FollowFloat => {
+                let runs = if familiar_variants::interpolate_case(familiar.variant)
+                    == InterpolateCase::FollowIdle
+                {
+                    familiar.fire_cooldown == 0
+                } else {
+                    // 46F89D: IsPlaying("Float").
+                    familiar.sprite.animation == "Float" && familiar.sprite.playing
+                };
+                if runs {
+                    familiar_ai::follow(state, index, true)?;
+                }
+                let familiar = &mut state.familiars[index];
+                familiar.presented_position = familiar.position;
+                return Ok(());
+            }
+            InterpolateCase::Orbit => {
+                familiar_ai::orbit_half(state, index);
+                let familiar = &mut state.familiars[index];
+                familiar.presented_position = familiar.position;
+                return Ok(());
+            }
+            InterpolateCase::Unique(_) => {
+                familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
+                return Ok(());
+            }
+        }
+        let familiar = &mut state.familiars[index];
         let mut position =
             familiar.position + (familiar.velocity * familiar.current_friction) * 0.5;
         let mut velocity = familiar.velocity;
@@ -880,6 +917,8 @@ fn tail(state: &mut State, index: usize) {
         })
         .unwrap_or(0);
     let familiar = &mut state.familiars[index];
+    // The case moved the live position; the presented one follows it.
+    familiar.presented_position = familiar.position;
     if familiar.flags & 0x4000 == 0
         && crate::familiar_contact::is_frame(
             frame,
