@@ -1637,13 +1637,19 @@ pub(crate) fn add_collectible(
     //52D5FA Halo of Flies: a second permanent count (+E44), so the roster's
     //min(owned, 10) gives two flies.
     if id == 10 {
-        let owner = state.player_items.as_mut().expect("checked Player item owner");
+        let owner = state
+            .player_items
+            .as_mut()
+            .expect("checked Player item owner");
         owner.owned_counts[10] += 1;
     }
     //52DE0D Dead Cat: eight more permanent counts (+F60), then unless the
     //Player type (+BFC) is 10, BB4 = 0 and 508540(2); BB8 takes BB4.
     if id == 81 {
-        let owner = state.player_items.as_mut().expect("checked Player item owner");
+        let owner = state
+            .player_items
+            .as_mut()
+            .expect("checked Player item owner");
         owner.owned_counts[81] += 8;
         match state.weapon_admission.source_player_type {
             Some(10) => {}

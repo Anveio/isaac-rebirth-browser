@@ -383,7 +383,10 @@ fn find_target(state: &mut State, index: usize, interval: u32, radius: f32) -> R
     };
     let mut bound = radius * radius;
     let mut target = None;
-    for actor in candidates {
+    for actor in candidates
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Npc)
+    {
         let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == actor.id) else {
             continue;
         };
@@ -446,7 +449,11 @@ pub(crate) fn chase(state: &mut State, index: usize) -> Result<(), String> {
     let mut attacking = false;
     if squared(goal, familiar.position) > threshold {
         // 469AC1: only the Cube's L4 (47) and the Leech (56) take 2.2.
-        let speed = if matches!(variant, 47 | 56) { 2.2_f32 } else { 1.8 } * 0.83_f32;
+        let speed = if matches!(variant, 47 | 56) {
+            2.2_f32
+        } else {
+            1.8
+        } * 0.83_f32;
         let grid = crate::grid::Grid::new(
             state
                 .room
@@ -547,31 +554,16 @@ pub(crate) fn chase(state: &mut State, index: usize) -> Result<(), String> {
     Ok(())
 }
 
-/// 4545D0's mask-8 rebuild, after the full actor pass and before contacts:
-/// every NPC body with a collision class (45483C/444800), at its position
-/// then. PORT GAP: 454B53 also inserts bombs (type 4) into this partition;
-/// they never pass the target search's NPC filter, but they can change a
-/// bucket's order.
+/// 4545D0's NPC/Bomb partition (+10), built once per frame after the full
+/// actor pass and before contacts (`npcs::contact_partition`). The familiar
+/// target search 4688D0 reads this snapshot until the next rebuild.
 pub(crate) fn rebuild_enemy_partition(state: &mut State) -> Result<(), String> {
-    let members: Vec<_> = state
-        .actor_scheduler
-        .full_phase()
-        .into_iter()
-        .filter(|actor| actor.kind == ActorKind::Npc)
-        .filter_map(|actor| {
-            let npc = state.room.npcs.iter().find(|npc| npc.id == actor.id)?;
-            (npc.entity_collision_class != 0 && (10..=999).contains(&npc.kind)).then_some((
-                actor,
-                crate::contact_candidates::Bounds {
-                    id: 0,
-                    position: npc.position,
-                    half_extents: WorldVector {
-                        x: npc.collision_radius,
-                        y: npc.collision_radius,
-                    },
-                },
-            ))
-        })
+    let partition = crate::npcs::contact_partition(state);
+    let members: Vec<_> = partition
+        .members
+        .iter()
+        .copied()
+        .zip(partition.bounds.iter().copied())
         .collect();
     state.enemy_query_partition = Some(crate::contact_candidates::QuerySnapshot::rebuild(
         state.game_update_count,
@@ -590,7 +582,8 @@ pub(crate) fn room_clear(state: &mut State, index: usize) -> Result<(), String> 
     let familiar = &mut state.familiars[index];
     familiar.rooms_cleared = familiar.rooms_cleared.wrapping_add(1);
     let cleared = familiar.rooms_cleared;
-    let (divisor, wrap4, pickup, sound) = match familiar_variants::room_clear_case(familiar.variant) {
+    let (divisor, wrap4, pickup, sound) = match familiar_variants::room_clear_case(familiar.variant)
+    {
         RoomClearCase::None => return Ok(()),
         RoomClearCase::Unported(_) => {
             familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
@@ -683,7 +676,11 @@ pub(crate) fn spawner(state: &mut State, index: usize) -> Result<(), String> {
     follow(state, index, false)?;
     let familiar = &mut state.familiars[index];
     if familiar.sprite.animation == "Spawn" && !familiar.sprite.playing {
-        let clip = if familiar.variant == 23 { "Float" } else { "FloatDown" };
+        let clip = if familiar.variant == 23 {
+            "Float"
+        } else {
+            "FloatDown"
+        };
         play(familiar, clip);
     }
     Ok(())
@@ -702,7 +699,13 @@ pub(crate) fn blue_fly(state: &mut State, index: usize) -> Result<(), String> {
     }
     let target = state.familiars[index]
         .target
-        .and_then(|id| state.room.npcs.iter().find(|npc| npc.id == id && !npc.removed))
+        .and_then(|id| {
+            state
+                .room
+                .npcs
+                .iter()
+                .find(|npc| npc.id == id && !npc.removed)
+        })
         .map(|npc| npc.position);
     if let Some(position) = target {
         state.familiars[index].target_position = position;

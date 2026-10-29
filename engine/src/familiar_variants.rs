@@ -369,7 +369,10 @@ pub(crate) enum RoomClearCase {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum RoomClearPickup {
-    Fixed { variant: u32, subtype: u32 },
+    Fixed {
+        variant: u32,
+        subtype: u32,
+    },
     /// 46E07A: Random(4) picks heart, coin, key or bomb, and a second roll
     /// its subtype (Random(6/4/3/2) + 1), both before the n test.
     Mystery,

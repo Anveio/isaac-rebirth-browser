@@ -40,7 +40,10 @@ fn frontier(state: &mut State, channel: &str) {
 ///49B680's finite current velocity/animation predicate. Other NPC kinds
 ///return true directly. This is neither the incoming Player aim nor a queue
 ///drain; the direction-sensitive owners stay with the actual receiver.
-pub(crate) fn accepts_direction(npc: &crate::npcs::Npc, incoming: crate::motion::WorldVector) -> bool {
+pub(crate) fn accepts_direction(
+    npc: &crate::npcs::Npc,
+    incoming: crate::motion::WorldVector,
+) -> bool {
     let direction = match npc.kind {
         97 => {
             if npc.velocity.x.abs() > npc.velocity.y.abs() {
