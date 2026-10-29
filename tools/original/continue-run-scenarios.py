@@ -25,6 +25,10 @@ Contrived cases:
   * 3YSTBQPG (quit-then-enter): quit in the start room before ever entering
     the treasure room; Continue, then enter it. The pedestal matches the
     other case's.
+  * ASAJRG8P (corn-poop): the enemy-free room above the start holds a corn
+    poop (raw1500's second Int(40)) whose Poop.Init spawns an Eternal Fly.
+    Leave it, walk back in (an in-run revisit), then quit and Continue: each
+    Room.Init replays the poop record, and its Init spawns a new fly (#982).
 OS-random cases enter a random side neighbour (never a secret room), idle a
 random time and quit, Continue and walk back toward the door.
 """
@@ -147,6 +151,18 @@ def treasure_quit_then_enter():
     return tape.actions
 
 
+def corn_poop_revisit():
+    tape = Tape()
+    tape.step(60); tape.capture('run-ready')
+    tape.walk(1); tape.step(40); tape.capture('in-room')
+    # Back through the bottom door to the start room, then in again.
+    tape.hold('s', 20); tape.step(40); tape.capture('back-in-start')
+    tape.hold('w', 20); tape.step(40); tape.capture('revisit')
+    tape.step(60); tape.capture('revisit-later')
+    tape.quit_continue('')
+    return tape.actions
+
+
 def case(code, kind, actions, randomized, provenance, extra=None):
     result = paired.build('paired-bomb-moving-even', code)
     for name in ('tape', 'pairedTape'):
@@ -168,6 +184,8 @@ def fixed_cases():
              {'pedestalGroup': '3YSTBQPG'}),
         case('3YSTBQPG', 'treasure-quit-then-enter', treasure_quit_then_enter(), False,
              'Exit before the pedestal is rolled', {'pedestalGroup': '3YSTBQPG'}),
+        case('ASAJRG8P', 'corn-poop-revisit', corn_poop_revisit(), False,
+             'corn poop Eternal Fly respawned by an in-run revisit and by Continue', {'slot': 1}),
     ]
 
 
@@ -219,7 +237,7 @@ def validate(bank, allow_subset=False):
         random_count += 1
     subset = allow_subset or filtered is not None
     if not subset and (fixed_ids != set(fixed_by_id) or random_count < 1):
-        raise ValueError('A whole Continue bank requires all three fixed routes and recorded OS coverage')
+        raise ValueError('A whole Continue bank requires every fixed route and recorded OS coverage')
     return {'status': 'pass', 'scope': 'declared-subset' if subset else 'whole-bank',
             'cases': len(cases), 'fixed': len(fixed_ids), 'recordedOS': random_count}
 
@@ -245,7 +263,8 @@ def main():
         raise ValueError('Fresh Continue runs require recorded OS coverage')
     cases = fixed_cases()
     entropy = random.SystemRandom()
-    while len(cases) < 3 + args.count:
+    fixed = len(cases)
+    while len(cases) < fixed + args.count:
         vector = runner.codec.random_vector()
         slots = neighbors(vector['seedValue'])
         if not slots:
