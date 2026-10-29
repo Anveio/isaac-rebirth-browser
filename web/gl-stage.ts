@@ -31,6 +31,16 @@ export class StageComposer {
     this.factors(effects.groundShadowMaskBlend);
     gl.translate(scroll.x, scroll.y);
     for (const caster of effects.shadowCasters) {
+      const layer = caster.layer;
+      if (layer) {
+        // 441f50: the entity's own "shadow" layer, main clip then overlay.
+        const ctx = gl.asCanvasContext();
+        ctx.save(); ctx.translate(layer.x, layer.y); ctx.scale(layer.flipX ? -1 : 1, 1);
+        this.assets.draw(ctx, layer.actor, layer.animation, 0, 0, layer.frame, { shadowLayer: true, scale: layer.scale });
+        if (layer.overlay) this.assets.draw(ctx, layer.actor, layer.overlay.animation, 0, 0, layer.overlay.frame, { shadowLayer: true, scale: layer.scale });
+        ctx.restore();
+        continue;
+      }
       const rect = caster.destinationRect;
       gl.drawImage(this.assets.image(caster.asset), rect.x, rect.y, rect.width, rect.height);
     }

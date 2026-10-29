@@ -715,7 +715,6 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Killed Gapers leave only blood decals; the original leaves its gib/bone pile (still seen 2026-10-29 in the Dry Baby and Cube of Meat item-set footage) | playtest 2026-10-29 `playtest/dd5892d/v59-drycrop-132.png` |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
-| #959 | P3 | Chests (Morph and room-clear award) draw their full floor shadow during Appear; the original's is faint or absent | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-200.png` |
 | #929 | P3 | Isaac's hurt invincibility blink runs out of phase with the original after a contact hit | playtest 2026-10-29 `playtest/dd5892d/v59-cubecrop-110.png` |
 | #1010 | P2 | Large room (corn-poop fight): from frame 1271 the camera scroll is 1px off vertically, then 4px by 1530; the fly cluster and a hit flash diverge in between | playtest 2026-10-29 `playtest/f5cde94/corn-poop-eternal-fly.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |

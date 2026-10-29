@@ -32,7 +32,7 @@ interface Animation { Name: string; FrameNum: number; Loop: boolean; RootAnimati
 interface Actor { BaseSpritesheetPath: string; Spritesheets: { Id: number; Path: string }[]; Layers: { Id: number; SpritesheetId: number; Name: string }[]; Animations: Animation[]; }
 /** Sprite color (tint RGBA, offset RGB in 0..1), combined with each keyframe as Color::operator*= 42f590 does. */
 export interface SpriteColor { tint: readonly number[]; offsets: readonly number[]; }
-export interface DrawOptions { color?: SpriteColor; colorize?: readonly number[]; scale?: number; layers?: number[]; hiddenLayers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; layerOffset?: { x: number; y: number }; }
+export interface DrawOptions { shadowLayer?: boolean; color?: SpriteColor; colorize?: readonly number[]; scale?: number; layers?: number[]; hiddenLayers?: number[]; overrides?: Record<number, Partial<Frame>>; layerScales?: Record<number, readonly [number, number]>; spritesheets?: Record<number, string>; pixelSnap?: number; layerOffset?: { x: number; y: number }; }
 interface Glyph { x: number; y: number; width: number; height: number; xoffset: number; yoffset: number; xadvance: number; page: number; }
 interface Font { lineHeight: number; pages: string[]; chars: Record<string, Glyph>; kernings: { first: number; second: number; amount: number }[]; }
 // Authored sheets are relative to the anm2's root path and may climb out of
@@ -273,6 +273,9 @@ export class Assets {
     const root = sampleFrame(animation.RootAnimation, tick, animation.Loop); if (!root || !root.Visible || root.AlphaTint <= 0) return;
     for (const layer of animation.LayerAnimations) {
       if (!layer.Visible || options.layers && !options.layers.includes(layer.LayerId) || options.hiddenLayers?.includes(layer.LayerId)) continue;
+      // A layer named "shadow" draws only into the shadow surface (441f50
+      // enables its +0x64 byte for that call alone).
+      if ((actor.Layers.find(definition => definition.Id === layer.LayerId)?.Name === "shadow") !== !!options.shadowLayer) continue;
       const found = sampleFrame(layer.Frames, tick, animation.Loop); if (!found) continue;
       const frame = overrideFrame(found, options.overrides?.[layer.LayerId]);
       // LayerState+0x30 (40EEB2/612970) is added to the keyframe position.

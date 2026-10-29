@@ -352,7 +352,8 @@ export interface StageEffects {
   ambientColor: [number, number, number, number];
   lightGradient: { asset: string; crop: Rect };
   lights: { ownerId: number; x: number; y: number; radius: number; alpha: number; destinationRect: Rect }[];
-  shadowCasters: { ownerId: number; x: number; y: number; width: number; height: number; asset: string; authoredSizePercent: number; sourceSize: { width: number; height: number }; destinationRect: Rect }[];
+  shadowCasters: { ownerId: number; x: number; y: number; width: number; height: number; asset: string; authoredSizePercent: number; sourceSize: { width: number; height: number }; destinationRect: Rect;
+    layer?: { actor: string; animation: string; frame: number; overlay?: { animation: string; frame: number }; x: number; y: number; flipX: boolean; scale: number } }[];
   groundShadowMaskBlend: Blend; lightingMaskBlend: Blend; groundShadowCompositeBlend: Blend; lightingCompositeBlend: Blend;
   sampler: { filter: "nearest"; wrap: "clamp-to-edge" };
   groundShadowCompositeRGBA: [number, number, number, number];

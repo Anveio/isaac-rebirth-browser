@@ -1305,6 +1305,31 @@ fn main() {
     )
     .expect("write authored nightmare definitions");
 
+    // Entity +0x30 (441f50) finds the sprite layer named exactly "shadow"
+    // (case-sensitive) and draws it into the shadow surface instead of the
+    // shadow.png ellipse; the layer stays hidden in the ordinary render.
+    let mut shadow_layer_actors = Vec::new();
+    for catalogue in [
+        animations.clone(),
+        manifest.parent().unwrap().join("web/npc-data.json"),
+    ] {
+        let actors: Value = serde_json::from_str(
+            &fs::read_to_string(catalogue).expect("read authored actor catalogue"),
+        )
+        .expect("parse authored actor catalogue");
+        for (path, actor) in actors.as_object().expect("actor catalogue object") {
+            if actor["Layers"]
+                .as_array()
+                .is_some_and(|layers| layers.iter().any(|layer| layer["Name"] == "shadow"))
+            {
+                shadow_layer_actors.push(path.clone());
+            }
+        }
+    }
+    shadow_layer_actors.sort();
+    generated.push_str(&format!(
+        "pub static SHADOW_LAYER_ACTORS: &[&str] = &{shadow_layer_actors:?};\n"
+    ));
     fs::write(output.join("shadow_catalog.rs"), generated).expect("write shadow catalog");
     fs::write(output.join("entity_catalog.rs"), entity_catalog(&xml))
         .expect("write entity catalog");
