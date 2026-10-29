@@ -605,7 +605,7 @@ Status: **done** (merged, suites compared), **wip** (branch open),
 | 7 | Live bombs restored from Room.Save records | done | #PR | `RunContext.bomb_records` (variant, subtype, position, spawn seed); respawned with Appear/Pulse like 5C5860; fuse restarts (actor RNG +0x7c0 not yet stored) |
 | 8 | Floor 2+ Continue (floor start and mid-floor) | wip | #PR | engine fuzz: 924 same-process Quit/Continue rounds (120 seeds) plus 313 rounds (40 seeds) where half reload a fresh Game from the stored document, stages 1-5, no refusal; suite cases still floor 1 |
 | 9 | Items: active charge, pockets, trinkets, costumes | todo | | |
-| 10 | Familiars after Continue | todo | | derived by cache; unverified |
+| 10 | Familiars after Continue | wip | | engine fuzz after familiars core (#1002): 465 rounds, 110 with familiars, same variant/subtype set after Continue; positions not compared |
 | 11 | Hard difficulty, seeded runs | wip | | Hard covered by the engine fuzz; seeded runs untested |
 | 12 | Challenge runs | todo | | |
 | 13 | Other characters | todo | | blocked on character runtime (fresh runs are Isaac-only) |
