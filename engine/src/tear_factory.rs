@@ -45,6 +45,7 @@ pub(crate) fn fire(
         //independently tracked ballistic family exposes that owner here.
         persistent_contacts: (plan.flags.0 == 0x200 && source_variant == Some(0))
             .then(crate::polyphemus_contact::TearHitRegistry::fresh),
+        homing_target: None,
         collision_damage: plan.damage,
         base_damage: plan.damage,
         attack_flags: plan.flags,
@@ -59,12 +60,14 @@ pub(crate) fn fire(
     tear.project();
     let id = tear.id;
     state.tears.push(tear);
-    // The factory's immediate Full Update takes the spectral Random(4) too.
-    crate::spectral_tear_update(state, id)?;
+    // Room5C6940 assigns Entity+8 before the factory's immediate Full
+    // Update, which takes the homing (542675) and spectral Random draws too.
     state.actor_scheduler.admit(actors::ActorRef {
         kind: actors::ActorKind::Tear,
-        id: state.next_tear,
+        id,
     })?;
+    crate::tear_homing::update(state, id)?;
+    crate::spectral_tear_update(state, id)?;
     state.player.shots_fired = state.player.shots_fired.wrapping_add(1);
     state.next_tear = state.next_tear.checked_add(1).ok_or("tear IDs exhausted")?;
     Ok(index)

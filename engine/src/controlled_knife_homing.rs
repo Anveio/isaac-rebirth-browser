@@ -210,6 +210,7 @@ pub(crate) fn apply(knife: &mut Knife, step: Step) -> Result<(), String> {
 ///The canonical NPC purge is the existing448040 owner, as for Tear4A8.
 ///Do not clear on dead/Remove before actual registered-slot retirement.
 pub(crate) fn unlink_removed_targets(state: &mut State) {
+    crate::tear_homing::unlink_removed(state);
     let retired: Vec<_> = state
         .room
         .npcs
