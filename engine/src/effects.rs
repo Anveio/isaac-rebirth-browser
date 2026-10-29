@@ -38,6 +38,18 @@ pub struct LightGradient {
 
 /// Both native mask actors snap their projected anchor to half a logical
 /// pixel before authored extents and integer mask corner rounding.
+/// The NPC render anchor: the f32 world-to-screen mapping, then half-pixel
+/// snapping, as the ordinary NPC draw places its sprite.
+fn render_anchor(position: crate::motion::WorldVector) -> Point {
+    let x = (position.x - 60.0) * 0.65_f32 + 71.0;
+    let y = 44.0 + (position.y - 140.0) * 0.65_f32;
+    let snap = |value: f32| f64::from((value * 2.0 + 0.5).floor()) / 2.0;
+    Point {
+        x: snap(x),
+        y: snap(y),
+    }
+}
+
 fn sprite_anchor(x: f64, y: f64) -> Point {
     let snap = |value: f64| (value * 2.0).round() / 2.0;
     Point {
@@ -69,6 +81,42 @@ pub struct ShadowCaster {
     pub authored_size_percent: f64,
     pub source_size: Viewport,
     pub destination_rect: Rect,
+    /// The entity's own "shadow" sprite layer, drawn into the shadow surface
+    /// in place of the shadow.png ellipse (destination_rect is then unused).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layer: Option<ShadowLayer>,
+}
+
+/// Entity +0x30 441f50: RenderLayer of the sprite layer named "shadow" at the
+/// entity's render position, main clip and overlay alike, with the sprite's
+/// own scale and flip and the default colour (the sprite colour is swapped
+/// out around the call). The layer's +0x64 enable byte is set only for this
+/// call, so the ordinary render never draws it.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ShadowLayer {
+    pub actor: String,
+    pub animation: String,
+    pub frame: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub overlay: Option<ShadowLayerOverlay>,
+    pub x: f64,
+    pub y: f64,
+    pub flip_x: bool,
+    pub scale: f64,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ShadowLayerOverlay {
+    pub animation: String,
+    pub frame: f64,
+}
+
+/// Whether the actor has a layer named exactly "shadow" (410870 compares the
+/// whole name, case-sensitively).
+pub fn has_shadow_layer(actor: &str) -> bool {
+    content::SHADOW_LAYER_ACTORS.contains(&actor)
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -172,6 +220,30 @@ impl ShadowCaster {
                 width,
                 height,
             }),
+            layer: None,
+        }
+    }
+
+    pub fn sprite_layer(owner_id: u32, layer: ShadowLayer) -> Self {
+        Self {
+            owner_id,
+            x: layer.x,
+            y: layer.y,
+            width: 0.0,
+            height: 0.0,
+            asset: "gfx/shadow.png".into(),
+            authored_size_percent: 0.0,
+            source_size: Viewport {
+                width: content::SHADOW_SOURCE_WIDTH,
+                height: content::SHADOW_SOURCE_HEIGHT,
+            },
+            destination_rect: Rect {
+                x: layer.x,
+                y: layer.y,
+                width: 0.0,
+                height: 0.0,
+            },
+            layer: Some(layer),
         }
     }
 }
@@ -316,8 +388,31 @@ impl StageEffects {
     pub fn add_pickup_shadows(&mut self, pickups: &[crate::Pickup]) {
         for pickup in pickups
             .iter()
-            .filter(|pickup| !pickup.collected && !pickup.removed && pickup.shadow_size > 0.0)
+            .filter(|pickup| !pickup.collected && !pickup.removed)
         {
+            if has_shadow_layer(&pickup.actor) {
+                let anchor = sprite_anchor(pickup.x, pickup.y - 1.0);
+                self.shadow_casters.push(ShadowCaster::sprite_layer(
+                    pickup.id,
+                    ShadowLayer {
+                        actor: pickup.actor.clone(),
+                        animation: pickup.animation.clone(),
+                        frame: pickup.animation_frame,
+                        overlay: pickup.overlay.as_ref().map(|animation| ShadowLayerOverlay {
+                            animation: animation.clone(),
+                            frame: f64::from(pickup.overlay_frame),
+                        }),
+                        x: anchor.x,
+                        y: anchor.y,
+                        flip_x: false,
+                        scale: 1.0,
+                    },
+                ));
+                continue;
+            }
+            if pickup.shadow_size <= 0.0 {
+                continue;
+            }
             self.shadow_casters.push(ShadowCaster::authored(
                 pickup.id,
                 pickup.x,
@@ -352,6 +447,38 @@ impl StageEffects {
             .iter()
             .filter(|npc| npc.visible && !npc.dead && !npc.removed)
         {
+            let actor = if npc.monstro.is_some() {
+                "gfx/020.000_monstro.anm2"
+            } else {
+                npc.actor.as_str()
+            };
+            if has_shadow_layer(actor) {
+                let scale = npc
+                    .sprite_scale
+                    .or(npc.champion.as_ref().map(|champion| champion.scale))
+                    .unwrap_or(1.0);
+                let anchor = render_anchor(npc.presented_position);
+                self.shadow_casters.push(ShadowCaster::sprite_layer(
+                    npc.id,
+                    ShadowLayer {
+                        actor: actor.into(),
+                        animation: npc.animation.clone(),
+                        frame: f64::from(npc.animation_clock),
+                        overlay: npc.overlay.as_ref().map(|overlay| ShadowLayerOverlay {
+                            animation: overlay.animation.clone(),
+                            frame: f64::from(overlay.clock),
+                        }),
+                        x: anchor.x,
+                        y: anchor.y,
+                        flip_x: npc
+                            .monstro
+                            .as_ref()
+                            .map_or(npc.flip_x, |monstro| monstro.flip_x),
+                        scale: f64::from(scale),
+                    },
+                ));
+                continue;
+            }
             let scale = npc.champion.as_ref().map_or(1.0, |champion| champion.scale);
             let size = f64::from(npc.shadow_size * scale);
             if size / 100.0 < 0.001 {
