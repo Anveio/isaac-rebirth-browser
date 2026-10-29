@@ -7,8 +7,17 @@ const digest=value=>createHash('sha256').update(value).digest('hex');
 //The current producer explicitly qualifies its own V2 transport. Historical
 //V1 captures keep their archived producer and are never regraded as V2.
 export const OWN_PROFILE_SCHEMA=2;
+//Stored schema-3 documents wrap that V2 payload in a checked envelope
+//(docs/save-system.md, Storage); the engine verifies its checksum on load.
+export function unwrapOwnEnvelope(document) {
+  if(!Object.hasOwn(document,'magic'))return document;
+  assert.equal(document.magic,'ISAAC-RB-SAVE');assert.equal(document.schema,3);
+  assert.ok(Number.isInteger(document.checksum));assert.equal(document.runs?.length,3);
+  assert.deepEqual(document.runs,document.payload.profiles.map(record=>record.saved!==null&&record.saved!==undefined),'Envelope run flags must name the payload runs');
+  return document.payload;
+}
 export function readOwnProfilePacket(raw) {
-  const packet=JSON.parse(raw);assert.equal(packet.version,OWN_PROFILE_SCHEMA);assert.equal(packet.profiles?.length,3);
+  const packet=unwrapOwnEnvelope(JSON.parse(raw));assert.equal(packet.version,OWN_PROFILE_SCHEMA);assert.equal(packet.profiles?.length,3);
   for(const {profile} of packet.profiles) {
     const history=profile?.collectedHistory;
     assert.ok(history&&['sourceReset','ownVersion1Unknown'].includes(history.origin),'Actual V2 collected-history origin is mandatory');

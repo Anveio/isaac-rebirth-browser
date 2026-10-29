@@ -162,7 +162,7 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         return;
     }
     let again = next.export_save_data();
-    if fresh || own_version(document.as_bytes()) == Some(u64::from(save_profiles::VERSION)) {
+    if fresh || own_schema(document.as_bytes()) == Some(u64::from(save_profiles::ENVELOPE_SCHEMA)) {
         props::always!(
             enabled.is_ok() && imported.is_ok() && again.as_deref().ok() == Some(document.as_bytes()),
             "game: a document a previous session stored loads at the next session's Title unchanged",
@@ -172,7 +172,7 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
         let migrated = again.as_deref().ok();
         let owners = migrated
             .ok_or_else(|| "migration did not export a document".to_owned())
-            .and_then(|bytes| migrated_v1_owners(document.as_bytes(), bytes));
+            .and_then(|bytes| migrated_owners(document.as_bytes(), bytes));
         let stable = migrated.is_some_and(|bytes| {
             tape.boot().is_ok_and(|mut third| {
                 third.enable_save_io(1).is_ok()
@@ -184,10 +184,10 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
             enabled.is_ok()
                 && imported.is_ok()
                 && owners.is_ok()
-                && migrated.and_then(own_version) == Some(u64::from(save_profiles::VERSION))
+                && migrated.and_then(own_schema) == Some(u64::from(save_profiles::ENVELOPE_SCHEMA))
                 && stable,
             "game: a document in an older own format loads as the current format, which then reloads unchanged",
-            json!({ "enabled": enabled, "from": own_version(document.as_bytes()), "to": migrated.and_then(own_version), "stable": stable, "owners": owners })
+            json!({ "enabled": enabled, "from": own_schema(document.as_bytes()), "to": migrated.and_then(own_schema), "stable": stable, "owners": owners })
         );
         props::sometimes!(
             true,
@@ -206,12 +206,42 @@ pub fn reload(tape: &Tape, document: &str, fresh: bool) {
     );
 }
 
-/// The `version` an own profile document declares.
-fn own_version(bytes: &[u8]) -> Option<u64> {
-    serde_json::from_slice::<serde_json::Value>(bytes)
-        .ok()?
-        .get("version")?
-        .as_u64()
+/// The stored schema an own document declares: an envelope's `schema` (3),
+/// or a bare profile document's `version` (1 or 2).
+fn own_schema(bytes: &[u8]) -> Option<u64> {
+    let value = serde_json::from_slice::<serde_json::Value>(bytes).ok()?;
+    match value.get("magic") {
+        Some(_) => value.get("schema")?.as_u64(),
+        None => value.get("version")?.as_u64(),
+    }
+}
+
+/// A migrated document's payload: the envelope's V2 profile document.
+fn envelope_payload(exported: &[u8]) -> Result<serde_json::Value, String> {
+    let mut value: serde_json::Value =
+        serde_json::from_slice(exported).map_err(|error| error.to_string())?;
+    if value["magic"] != save_profiles::ENVELOPE_MAGIC {
+        return Err("migration must export a save envelope".into());
+    }
+    Ok(value["payload"].take())
+}
+
+/// A bare V2 document migrates into the envelope unchanged; V1 also gains
+/// its declared V2 metadata.
+fn migrated_owners(original: &[u8], exported: &[u8]) -> Result<(), String> {
+    let payload = envelope_payload(exported)?;
+    let payload = serde_json::to_vec(&payload).map_err(|error| error.to_string())?;
+    let source: serde_json::Value =
+        serde_json::from_slice(original).map_err(|error| error.to_string())?;
+    if source["version"] == 2 {
+        let actual: serde_json::Value =
+            serde_json::from_slice(&payload).map_err(|error| error.to_string())?;
+        return match crate::json_diff::first(&source, &actual) {
+            Some((path, _, _)) => Err(format!("own V2 migration changed an owner at {path}")),
+            None => Ok(()),
+        };
+    }
+    migrated_v1_owners(original, &payload)
 }
 
 /// Compare every original V1 owner, projecting only the declared V2 metadata.

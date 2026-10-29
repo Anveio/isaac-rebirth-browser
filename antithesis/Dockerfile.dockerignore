@@ -14,3 +14,9 @@ engine/dst/target
 !references/isaac/rebirth/resources
 !antithesis
 !.cache/private-base-assets/rooms/03.caves.stb
+!.cache/private-base-assets/rooms/05.depths.stb
+!web/generated/item-assets/catalogue.json
+!web/generated/item-assets/costume-data.json
+!web/generated/item-assets/familiar-data.json
+!web/generated/unlock-notifications/catalogue.json
+!web/generated/unlock-notifications/information-data.json

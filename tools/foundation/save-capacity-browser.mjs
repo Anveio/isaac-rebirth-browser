@@ -7,6 +7,7 @@ import {mkdir,readFile,readdir,stat,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {gzipSync} from 'node:zlib';
 import {captureSaveOwn} from './save-continue-browser.mjs';
+import {unwrapOwnEnvelope} from './save-continue-guards.mjs';
 import {installSaveAbiObserver,archiveAndGradeSaveAbi} from './save-capacity-observer.mjs';
 import {inspectBrowserGraphics} from './browser.mjs';
 import {acquireHostSlot} from '../e2e/lib/host-slots.mjs';
@@ -124,7 +125,7 @@ const checkpointUnder=async label=>{
       assert.equal(state.saveRevision,prior.state.saveRevision+1);assert.ok(own.store);
     });
     const writes=own.io.events.filter(event=>event.operation==='save'&&event.revision>prior.state.saveRevision);
-      const packet=JSON.parse(await readFile(own.store.path,'utf8')),record=packet.profiles[0].saved;
+      const packet=unwrapOwnEnvelope(JSON.parse(await readFile(own.store.path,'utf8'))),record=packet.profiles[0].saved;
       underStore=own.store;
       check('under:bounded-full-packet-and-every-stain',()=>{
         assert.equal(writes.length,1);assert.equal(writes[0].status,'pass');assert.ok(own.store.bytes<=MAX_BYTES);
@@ -196,7 +197,7 @@ const checkpointUnder=async label=>{
       assert.equal(writes.length,1);assert.equal(writes[0].revision,bootstrapRevision);assert.equal(writes[0].status,'pass');
       assert.equal(writes[0].packet.sha256,olderStore.sha256);assert.equal(writes[0].packet.bytes,olderStore.bytes);
       assert.equal(own.io.events.filter(event=>event.status==='fail').length,0);
-      const record=JSON.parse(readFileSync(olderStore.path,'utf8')).profiles[0].saved;
+      const record=unwrapOwnEnvelope(JSON.parse(readFileSync(olderStore.path,'utf8'))).profiles[0].saved;
       assert.equal(record.context.runSeedValue,bank.seedValue);assert.equal(record.context.runSeedValue,state.runSeedValue);
       assert.ok([bank.seed,bank.seed.slice(0,4)+' '+bank.seed.slice(4)].includes(record.run.runSeed));
       assert.equal(record.run.currentRoom,referenceRoom);assert.equal(record.run.stage,1);

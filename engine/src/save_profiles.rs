@@ -7,6 +7,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub const VERSION: u32 = 2;
 pub const MAX_BYTES: usize = 4 * 1024 * 1024;
+///Stored document schema (docs/save-system.md, Migrations): 1 and 2 are the
+///bare own `Profiles` documents, 3 wraps the version-2 payload in a checked
+///envelope. Load accepts all three; export writes schema 3 only.
+pub const ENVELOPE_SCHEMA: u32 = 3;
+pub const ENVELOPE_MAGIC: &str = "ISAAC-RB-SAVE";
+///Header bytes an envelope adds around its payload, reserved in the budget.
+const ENVELOPE_HEADER_BUDGET: usize = 256;
 ///The existing string-only save ABI reports this expected capacity refusal.
 ///Hosts acknowledge it as a failed write; other export errors stay errors.
 pub const CAPACITY_ERROR: &str = "saved profiles exceed the supported 4 MiB format";
@@ -188,10 +195,29 @@ impl Profiles {
         }
     }
 
+    ///Loads a stored document of any accepted schema: a schema-3 envelope
+    ///is checked (magic, schema, CRC-32 of the payload bytes, slot run flags)
+    ///before its payload is read; bare schema 1 and 2 documents migrate.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
         if bytes.len() > MAX_BYTES {
             return Err(CAPACITY_ERROR.into());
         }
+        if let Some(payload) = open_envelope(bytes)? {
+            let profiles = Self::from_document(payload.bytes)?;
+            let runs: Vec<bool> = profiles
+                .profiles
+                .iter()
+                .map(|record| record.saved.is_some())
+                .collect();
+            if runs != payload.runs {
+                return Err("save envelope run flags differ from its payload".into());
+            }
+            return Ok(profiles);
+        }
+        Self::from_document(bytes)
+    }
+
+    fn from_document(bytes: &[u8]) -> Result<Self, String> {
         let header: serde_json::Value =
             serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
         let version = header
@@ -236,12 +262,39 @@ impl Profiles {
     ///Capacity is an expected failed write, not an invalid simulation state.
     pub fn write_packet(&self) -> Result<SaveWritePacket, String> {
         self.validate()?;
-        let mut output = SavePacketWriter::default();
+        let mut output = SavePacketWriter {
+            limit: MAX_BYTES - ENVELOPE_HEADER_BUDGET,
+            ..Default::default()
+        };
         match serde_json::to_writer(&mut output, self) {
-            Ok(()) => Ok(SaveWritePacket::Ready(std::sync::Arc::new(output.bytes))),
+            Ok(()) => Ok(SaveWritePacket::Ready(std::sync::Arc::new(
+                self.envelope(&output.bytes),
+            ))),
             Err(_) if output.capacity_exceeded => Ok(SaveWritePacket::CapacityExceeded),
             Err(error) => Err(error.to_string()),
         }
+    }
+
+    ///The schema-3 stored document: a fixed header, then the payload bytes
+    ///exactly as serialized, so the checksum covers what is stored. `runs`
+    ///names the slots holding a run record; the host clears its recovery
+    ///generation when a save removes one (a lost run is never recoverable).
+    fn envelope(&self, payload: &[u8]) -> Vec<u8> {
+        let runs: Vec<String> = self
+            .profiles
+            .iter()
+            .map(|record| record.saved.is_some().to_string())
+            .collect();
+        let header = format!(
+            "{{\"magic\":\"{ENVELOPE_MAGIC}\",\"schema\":{ENVELOPE_SCHEMA},\"checksum\":{},\"runs\":[{}],\"payload\":",
+            crc32(payload),
+            runs.join(",")
+        );
+        let mut bytes = Vec::with_capacity(header.len() + payload.len() + 1);
+        bytes.extend_from_slice(header.as_bytes());
+        bytes.extend_from_slice(payload);
+        bytes.push(b'}');
+        bytes
     }
 
     ///Validate the complete retained document before changing the live Game.
@@ -587,18 +640,19 @@ impl SaveWritePacket {
 #[derive(Default)]
 struct SavePacketWriter {
     bytes: Vec<u8>,
+    limit: usize,
     capacity_exceeded: bool,
 }
 
 impl std::io::Write for SavePacketWriter {
     fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-        if bytes.len() > MAX_BYTES - self.bytes.len() {
+        if bytes.len() > self.limit - self.bytes.len() {
             self.capacity_exceeded = true;
             return Err(std::io::Error::other(CAPACITY_ERROR));
         }
         let required = self.bytes.len() + bytes.len();
         if required > self.bytes.capacity() {
-            let capacity = required.next_power_of_two().min(MAX_BYTES);
+            let capacity = required.next_power_of_two().min(self.limit);
             self.bytes.reserve_exact(capacity - self.bytes.len());
         }
         self.bytes.extend_from_slice(bytes);
@@ -618,4 +672,82 @@ pub struct SaveWriteRequest {
     pub revision: u64,
     pub packet: SaveWritePacket,
     pub remaining_ticks: Option<u32>,
+}
+
+///A checked envelope's payload bytes and its declared slot run flags.
+struct EnvelopePayload<'a> {
+    bytes: &'a [u8],
+    runs: Vec<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Envelope<'a> {
+    magic: String,
+    schema: u32,
+    checksum: u32,
+    runs: Vec<bool>,
+    #[serde(borrow)]
+    payload: &'a serde_json::value::RawValue,
+}
+
+///None for a bare schema-1/2 document (no `magic`); an error for an envelope
+///that fails any check, naming the failing field.
+fn open_envelope(bytes: &[u8]) -> Result<Option<EnvelopePayload<'_>>, String> {
+    #[derive(Deserialize)]
+    struct Probe {
+        magic: Option<serde::de::IgnoredAny>,
+    }
+    let probe: Probe = serde_json::from_slice(bytes).map_err(|error| error.to_string())?;
+    if probe.magic.is_none() {
+        return Ok(None);
+    }
+    let envelope: Envelope =
+        serde_json::from_slice(bytes).map_err(|error| format!("save envelope: {error}"))?;
+    if envelope.magic != ENVELOPE_MAGIC {
+        return Err("save envelope magic differs".into());
+    }
+    if envelope.schema > ENVELOPE_SCHEMA {
+        return Err("saved by a newer build; preserve original document".into());
+    }
+    if envelope.schema != ENVELOPE_SCHEMA {
+        return Err("unsupported save envelope schema".into());
+    }
+    let payload = envelope.payload.get().as_bytes();
+    if crc32(payload) != envelope.checksum {
+        return Err("save envelope checksum differs from its payload".into());
+    }
+    if envelope.runs.len() != 3 {
+        return Err("save envelope needs three slot run flags".into());
+    }
+    Ok(Some(EnvelopePayload {
+        bytes: payload,
+        runs: envelope.runs,
+    }))
+}
+
+///CRC-32 (IEEE 802.3, reflected, polynomial 0xEDB88320), as zlib's crc32.
+pub fn crc32(bytes: &[u8]) -> u32 {
+    const TABLE: [u32; 256] = {
+        let mut table = [0u32; 256];
+        let mut index = 0;
+        while index < 256 {
+            let mut value = index as u32;
+            let mut bit = 0;
+            while bit < 8 {
+                value = if value & 1 != 0 {
+                    0xEDB8_8320 ^ (value >> 1)
+                } else {
+                    value >> 1
+                };
+                bit += 1;
+            }
+            table[index] = value;
+            index += 1;
+        }
+        table
+    };
+    !bytes.iter().fold(!0u32, |crc, byte| {
+        TABLE[((crc ^ u32::from(*byte)) & 0xFF) as usize] ^ (crc >> 8)
+    })
 }

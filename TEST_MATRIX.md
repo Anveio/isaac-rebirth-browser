@@ -375,7 +375,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | `item_pools` | ItemPool selection, depletion, fallbacks, routing and continuation | 21 | 6 | 3 |
 | `game` | the whole engine through public commands: invariants, contracts, replay, ABI | 89 | 64 | 2 |
 | `rooms` | every room a floor its trapdoors reach admits, entered and played | 4 | 9 | 1 |
-| `abi` | the exported C ABI transport the browser bridge drives | 35 | 3 | 0 |
+| `abi` | the exported C ABI transport the browser bridge drives | 36 | 3 | 0 |
 
 <details><summary>Every declared DST property</summary>
 
@@ -854,6 +854,7 @@ The only checked-in unit-level verification is the [Antithesis DST harness](docs
 | Always | abi: set_boot_elapsed after a Tick fails with an error and keeps the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: save documents are bounded at 4 MiB | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
+| Always | abi: a save document whose payload differs from its checksum is refused, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: a fresh Title declares save IO and loads a save document | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: save IO and save documents are refused outside a fresh Title, keeping the game | [abi.rs](engine/dst/src/units/abi.rs) |
 | Always | abi: an input-configuration reset boots with the stored configuration | [abi.rs](engine/dst/src/units/abi.rs) |

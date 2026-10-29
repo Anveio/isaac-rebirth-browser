@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {evaluateJson} from '../e2e/lib/game.mjs';
 import {assertPublicRightMovement} from './save-continue-movement.mjs';
+import {unwrapOwnEnvelope} from './save-continue-guards.mjs';
 import {createHash} from 'node:crypto';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
@@ -50,7 +51,7 @@ export async function reloadOwnSavedWorld(page,directory,caseData) {
   try {
     const before=await checkpoint('before-natural-reload');
     assert.equal(before.own.storeError,null);assert.ok(before.own.store,'Actual own saved bytes required before reload');
-    const packet=JSON.parse(await readFile(before.own.store.path,'utf8'));
+    const packet=unwrapOwnEnvelope(JSON.parse(await readFile(before.own.store.path,'utf8')));
     const record=packet.profiles[0].saved;assert.ok(record,'Profile1 must actually retain its own saved run');
     const code=caseData.seed.replaceAll(' ','').toUpperCase();
     assert.match(code,/^[ABCDEFGHJKLMNPQRSTWXYZ01234V6789]{8}$/);

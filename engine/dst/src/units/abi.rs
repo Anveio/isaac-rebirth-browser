@@ -291,6 +291,29 @@ fn saves(e: &mut Entropy) {
         "abi: a save IO protocol other than 1 and a corrupt save document are refused, keeping the game",
         json!({ "protocol": protocol, "document": String::from_utf8_lossy(corrupt) })
     );
+    // One payload byte changed under an unchanged header: the envelope's
+    // CRC-32 refuses it before any owner is read.
+    let tampered = document
+        .windows(10)
+        .position(|window| window == b"\"payload\":")
+        .and_then(|start| {
+            let at = start + 10 + document[start + 10..].iter().position(u8::is_ascii_digit)?;
+            let mut bytes = document.clone();
+            bytes[at] = if bytes[at] == b'9' {
+                b'8'
+            } else {
+                bytes[at] + 1
+            };
+            Some(bytes)
+        });
+    let refused_tampered = tampered.as_deref().is_some_and(|bytes| {
+        load(bytes) == Some(1) && error().contains("checksum") && snapshot() == title
+    });
+    props::always!(
+        refused_tampered,
+        "abi: a save document whose payload differs from its checksum is refused, keeping the game",
+        json!({ "error": error() })
+    );
     props::always!(
         !document.is_empty()
             && abi::enable_saved_game_io(1) == 0
