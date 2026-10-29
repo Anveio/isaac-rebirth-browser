@@ -32,7 +32,11 @@ export class GLMenuContext {
   private readonly uvAttribute: number;
   private gammaProgram: {program: WebGLProgram; buffer: WebGLBuffer; position: number; uv: number;
     gamma: WebGLUniformLocation; image: WebGLUniformLocation} | null = null;
+  private pixelationProgram: {program: WebGLProgram; buffer: WebGLBuffer; position: number; uv: number;
+    amount: WebGLUniformLocation; screenSize: WebGLUniformLocation; image: WebGLUniformLocation} | null = null;
   private screenActive = false;
+  /** Game::Render 5503D0 binds the Pixelation Surface (8ECD20) in place of the screen. */
+  private screenRedirect: GLSurface | null = null;
   private currentTarget: GLSurface | null = null;
   private readonly drawLayers = new Map<GLSurface | null, number>();
 
@@ -170,7 +174,7 @@ export class GLMenuContext {
     gl.bindFramebuffer(gl.FRAMEBUFFER, previous); return { width: surface.width, height: surface.height, pixels };
   }
   beginTarget(surface: GLSurface | null, viewportWidth?: number, viewportHeight?: number): void {
-    surface ??= this.screenActive ? this.screen : null;
+    surface ??= this.screenActive ? this.screenRedirect ?? this.screen : null;
     this.currentTarget = surface;
     const gl = this.gl, width = viewportWidth ?? surface?.width ?? this.canvas.width, height = viewportHeight ?? surface?.height ?? this.canvas.height;
     gl.bindFramebuffer(gl.FRAMEBUFFER, surface?.framebuffer ?? null); gl.viewport(0, 0, width, height);
@@ -179,6 +183,93 @@ export class GLMenuContext {
     gl.clearColor(0, 0, 0, surface && surface !== this.screen ? 0 : 1);
   }
   screenSurface(): GLSurface { return this.screen; }
+  /** Game::Render 5503D0: the following screen draws go to `surface` until
+   * endPixelation submits it. */
+  beginPixelation(surface: GLSurface): void {
+    this.screenRedirect = surface;
+    this.beginTarget(null);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.drawLayers.set(surface, 0);
+  }
+  /** Game::Render 5500EF..550323 draws the Pixelation Surface over the screen
+   * as one quad whose vertices carry PixelationAmount and ScreenSize, through
+   * the shader at 666620/666770. ScreenSize is 480 x 270 (8EBBE4/8EBBE0) and
+   * its next powers of two (42F080), so TexCoord0 * zw/xy spans 0..1 across
+   * the logical screen. Samples the shader takes past the screen read the
+   * cleared padding of that power-of-two texture. */
+  endPixelation(amount: number): void {
+    const surface = this.screenRedirect;
+    if (!surface) throw new Error("Pixelation was not begun");
+    this.screenRedirect = null;
+    this.beginTarget(null);
+    const gl = this.gl;
+    if (!this.pixelationProgram) {
+      // textureUV is the screen fraction; TexCoord0 addresses the padded texture.
+      const vertex = this.shader(gl.VERTEX_SHADER, `attribute vec2 position; attribute vec2 textureUV;
+        uniform vec4 OutScreenSize; varying vec2 TexCoord0;
+        void main() { TexCoord0 = textureUV * OutScreenSize.xy / OutScreenSize.zw; gl_Position = vec4(position, 0.0, 1.0); }`);
+      // 666770, with the power-of-two padding read as cleared texels.
+      const fragment = this.shader(gl.FRAGMENT_SHADER, `precision highp float;
+        varying vec2 TexCoord0; uniform float OutPixelationAmount; uniform vec4 OutScreenSize;
+        uniform highp sampler2D Texture0; const int Samples = 4;
+        void main() {
+          vec2 screenRatio = OutScreenSize.zw / OutScreenSize.xy;
+          float pa = OutPixelationAmount * 0.5;
+          vec2 adjustedUVs = TexCoord0.st * screenRatio;
+          if (OutScreenSize.y < OutScreenSize.x) adjustedUVs.y *= OutScreenSize.y / OutScreenSize.x;
+          else adjustedUVs.x *= OutScreenSize.x / OutScreenSize.y;
+          vec2 snapCoord = vec2(adjustedUVs.s - mod(adjustedUVs.s - pa*0.5 - 0.5, pa), adjustedUVs.t - mod(adjustedUVs.t - pa*0.5 - 0.5, pa));
+          float samplesInv = pa / float(Samples);
+          float maxSamplesInv = 1.0 / float(Samples * Samples);
+          gl_FragColor = vec4(0.0);
+          for (int i = 0; i < Samples; i++) {
+            for (int j = 0; j < Samples; j++) {
+              float u = clamp(snapCoord.s + float(i) * samplesInv, 0.0, 1.0);
+              float v = clamp(snapCoord.t + float(j) * samplesInv, 0.0, 1.0);
+              if (OutScreenSize.y < OutScreenSize.x) v *= OutScreenSize.x / OutScreenSize.y;
+              else u *= OutScreenSize.y / OutScreenSize.x;
+              // u, v are screen fractions here. The original divides them by
+              // screenRatio to address its padded texture; this surface is unpadded.
+              if (u <= 1.0 && v <= 1.0) gl_FragColor += texture2D(Texture0, vec2(u, v)) * maxSamplesInv;
+            }
+          }
+        }`);
+      const program = gl.createProgram(), buffer = gl.createBuffer();
+      if (!program || !buffer) throw new Error("Pixelation program allocation failed");
+      gl.attachShader(program, vertex); gl.attachShader(program, fragment); gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        throw new Error(gl.getProgramInfoLog(program) ?? "Pixelation program link failed");
+      const position = gl.getAttribLocation(program, "position"), uv = gl.getAttribLocation(program, "textureUV");
+      const amountLocation = gl.getUniformLocation(program, "OutPixelationAmount");
+      const screenSize = gl.getUniformLocation(program, "OutScreenSize"), image = gl.getUniformLocation(program, "Texture0");
+      if (position < 0 || uv < 0 || !amountLocation || !screenSize || !image) throw new Error("Pixelation program owners missing");
+      // Logical texture row zero is screen row zero (beginTarget's projection).
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 0, 0, -1, 1, 0, 1, 1, -1, 1, 0,
+        1, -1, 1, 0, -1, 1, 0, 1, 1, 1, 1, 1,
+      ]), gl.STATIC_DRAW);
+      this.pixelationProgram = {program, buffer, position, uv, amount: amountLocation, screenSize, image};
+    }
+    const pass = this.pixelationProgram;
+    try {
+      gl.useProgram(pass.program); gl.bindBuffer(gl.ARRAY_BUFFER, pass.buffer);
+      gl.enableVertexAttribArray(pass.position); gl.vertexAttribPointer(pass.position, 2, gl.FLOAT, false, 16, 0);
+      gl.enableVertexAttribArray(pass.uv); gl.vertexAttribPointer(pass.uv, 2, gl.FLOAT, false, 16, 8);
+      gl.disable(gl.DEPTH_TEST);
+      gl.bindTexture(gl.TEXTURE_2D, surface.texture);
+      gl.uniform1i(pass.image, 0); gl.uniform1f(pass.amount, amount);
+      gl.uniform4f(pass.screenSize, 480, 270, 512, 512);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    } finally {
+      gl.enable(gl.DEPTH_TEST);
+      for (const index of [pass.position, pass.uv])
+        if (index !== this.positionAttribute && index !== this.uvAttribute) gl.disableVertexAttribArray(index);
+      gl.useProgram(this.program); gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
+      gl.enableVertexAttribArray(this.positionAttribute); gl.vertexAttribPointer(this.positionAttribute, 3, gl.FLOAT, false, 20, 0);
+      gl.enableVertexAttribArray(this.uvAttribute); gl.vertexAttribPointer(this.uvAttribute, 2, gl.FLOAT, false, 20, 12);
+    }
+  }
   beginScreen(): void {
     this.screenActive = true;
     this.beginTarget(null);
