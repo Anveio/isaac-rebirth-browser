@@ -287,6 +287,10 @@ def observe(pid, context):
                     'varData': struct.unpack_from('<I', raw, 0x14)[0], 'spawnSeed': struct.unpack_from('<I', raw, 0x18)[0],
                     'collisionClass': struct.unpack_from('<I', raw, 0x3c)[0],
                     'position': [40 + index % width * 40, 120 + index // width * 40]})
+                # GridEntity sprite (ANM2) at +40: FlipX +2d4 / FlipY +2d5
+                # (AnimationState render 40ed6f/40edb9), i.e. cell +314/+315.
+                flips = read(pointer + 0x314, 2)
+                cells[-1]['spriteFlip'] = [bool(flips[0]), bool(flips[1])]
                 if cells[-1]['type'] == 17:
                     # GridEntity_TrapDoor sprite at +40: definition +18, frame +120, playing +124.
                     definition = u64(pointer + 0x40 + 0x18)

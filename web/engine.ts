@@ -339,7 +339,7 @@ export interface Room {
   ordinaryPlacement?: {frontier: OrdinaryPlacementFrontier | null} | null;
   bossCount: number; bossPresentationIndex: number;
   combatClear: boolean; combatClearCountdown: number; combatShutDoorSlots: number[]; combatShutUpdate?: number; combatOpenDoorSlots?: number[]; combatOpenUpdate?: number;
-  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number; tnt?: {countdown: number; sprite: {animation: "Idle" | "IdleMedium" | "ReadyToExplode" | "Blown"; frame: number; playing: boolean}; rewardFrontier?: {nextTrinketPoolQuery: number}}}} | null}[] } | null;
+  grid: { width: number; height: number; cells: {selector: number; entity: {kind: number; variant: number; state: number; collisionClass: number; spawnSeed: number; sourceOwner?: {birthGameUpdate: number | null; poopSheet?: number; spriteFlipX?: boolean; tnt?: {countdown: number; sprite: {animation: "Idle" | "IdleMedium" | "ReadyToExplode" | "Blown"; frame: number; playing: boolean}; rewardFrontier?: {nextTrinketPoolQuery: number}}}} | null}[] } | null;
 }
 export interface Rect { x: number; y: number; width: number; height: number; }
 export interface RoomQuad { sourcePatchIndex: number; sourceRect: Rect; destRect: Rect; flipX: boolean; flipY: boolean; }
