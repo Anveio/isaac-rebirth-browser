@@ -452,7 +452,7 @@ export interface State {
   nightmares: {order: number[]; pathIndex: number; currentActor: string | null; requestPending: boolean; systemActive: boolean;
     active: boolean; definitionLoaded: boolean; progressDefinitionLoaded: boolean; stageResources: number[];
     counter: number; frame: number; playing: boolean; stageIndex: number; alternate: boolean; progressFloors: number};
-  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[]; counters: number[] }[];
+  profiles: { slot: number; unlockedCharacters: string[]; selectedCharacter: string; achievements: boolean[]; counters: number[]; collectedHistory: { origin: string; values: (boolean | null)[] } }[];
   characterCatalog: { name: string; animation: string }[];
   paused: boolean; pressed: string[];
   floor: Floor; currentRoom: number; visitedRooms: number[];

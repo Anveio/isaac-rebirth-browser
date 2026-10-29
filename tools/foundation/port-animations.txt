@@ -9,6 +9,7 @@ gfx/1000.012_tear poofa.anm2
 gfx/1000.013_tear poofb.anm2
 gfx/grid/door_01_normaldoor.anm2
 gfx/lightgradient.anm2
+gfx/ui/death screen.anm2
 gfx/ui/hudpickups.anm2
 gfx/ui/main menu/challengemenu.anm2
 gfx/ui/main menu/charactermenu.anm2
