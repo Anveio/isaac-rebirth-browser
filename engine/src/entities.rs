@@ -394,6 +394,7 @@ pub(crate) static FAMILIES: &[&Family] = &[
     &crate::fistula::FAMILY,
     &crate::squirt::FAMILY,
     &crate::wall_hugger::FAMILY,
+    &crate::eternal_fly::FAMILY,
     &crate::wall_creep::FAMILY,
     &crate::larry::FAMILY,
     &crate::maggots::FAMILY,
