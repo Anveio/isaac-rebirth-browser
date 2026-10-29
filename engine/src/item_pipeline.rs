@@ -31,7 +31,6 @@ const CONTROLLED_FETUS_CALLER_QUEUED_ITEMS: &[usize] = &[4];
 // Independent Monstro229 callback, Familiar, grant and kind1 footprints.
 // Equal sets do not transfer controller, getter or auxiliary ownership.
 const MONSTRO_CACHE_ITEMS: &[usize] = &[1, 4, 229];
-const MONSTRO_FAMILIAR_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_GRANT_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_KIND1_ITEMS: &[usize] = &[1, 4, 229];
 const MONSTRO_CALLER_ITEMS: &[usize] = &[1, 4, 229];
@@ -43,12 +42,10 @@ const MONSTRO_CALLER_QUEUED_ITEMS: &[usize] = &[4];
 // Independently closed cache, Familiar and actual grant footprints. Equal
 // sets do not transfer getter or controller admission.
 const EPIC_FETUS_CACHE_ITEMS: &[usize] = &[1, 2, 4, 168];
-const EPIC_FETUS_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4, 168];
 const EPIC_FETUS_GRANT_ITEMS: &[usize] = &[1, 2, 4, 168];
 // Real2-before168 grants have independent callback and auxiliary histories.
 // These prefixes admit no ordinary triple-tear emitter or Epic caller.
 const INNER_EYE_PREFIX_CACHE_ITEMS: &[usize] = &[1, 2, 4];
-const INNER_EYE_PREFIX_FAMILIAR_ITEMS: &[usize] = &[1, 2, 4];
 const INNER_EYE_PREFIX_GRANT_ITEMS: &[usize] = &[1, 2, 4];
 
 // Independently closed getter and live caller footprints. Cache/Familiar
@@ -362,11 +359,6 @@ impl<'a> ItemInputs<'a> {
         self.admits_monstro_readset(MONSTRO_CACHE_ITEMS)
     }
 
-    ///Independent strict511F10 path requests the same68 zero familiars.
-    pub(crate) fn admits_monstro_zero_familiar_requests(self) -> bool {
-        self.admits_monstro_readset(MONSTRO_FAMILIAR_ITEMS)
-    }
-
     ///Only actualAdd229 may preserve an existing auxiliary owner. Unknown
     ///restore histories remain None regardless of the current item counts.
     pub(crate) fn admits_monstro_grant_context(self) -> bool {
@@ -441,13 +433,6 @@ impl<'a> ItemInputs<'a> {
     pub(crate) fn admits_epic_fetus_cache_context(self) -> bool {
         self.admits_permanent_readset(168, EPIC_FETUS_CACHE_ITEMS)
             || self.admits_permanent_readset(2, INNER_EYE_PREFIX_CACHE_ITEMS)
-    }
-
-    ///Independent strict511F10 trace: all68 actual Familiar requests are0.
-    ///Cache completion alone never admits a Familiar request or RNG owner.
-    pub(crate) fn admits_epic_fetus_zero_familiar_requests(self) -> bool {
-        self.admits_permanent_readset(168, EPIC_FETUS_FAMILIAR_ITEMS)
-            || self.admits_permanent_readset(2, INNER_EYE_PREFIX_FAMILIAR_ITEMS)
     }
 
     ///Separate50D090(kind6) footprint used by Rocket31 at death. The consumer
@@ -680,18 +665,6 @@ impl<'a> ItemInputs<'a> {
                 .all(|(id, &count)| {
                     count == 0 || (count > 0 && [1, 4, 6, 114, 118, 329, 304].contains(&id))
                 })
-    }
-
-    /// An independent strict 511F10 trace proves 68 ordered requests for zero
-    /// familiars with these inputs. Actual manager queries remain required.
-    pub(crate) fn admits_selected_zero_familiar_requests(self) -> bool {
-        if self.owned_count(229) != 0 {
-            return self.admits_monstro_zero_familiar_requests();
-        }
-        if self.owned_count(168) != 0 || self.owned_count(2) != 0 {
-            return self.admits_epic_fetus_zero_familiar_requests();
-        }
-        self.admits_selected_auxiliary_callbacks()
     }
 
     pub(crate) fn admits_complete_selected_tail(self) -> bool {

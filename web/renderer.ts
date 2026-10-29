@@ -1,5 +1,6 @@
 import { Assets } from "./animation";
 import unlockCatalogue from "./generated/unlock-notifications/catalogue.json";
+import itemCatalogue from "./generated/item-assets/catalogue.json";
 import { drawBossSplash } from "./boss-splash";
 import { MenuRenderer } from "./menu";
 import { GLMenuContext, type GLSurface } from "./gl-menu";
@@ -117,6 +118,12 @@ function rockSprite(kind: number, variant: number): { animation: string; frame: 
   return kind === 2 && variant >= 1000 ? { animation: "big", frame: variant - 1000 } : { animation, frame: variant };
 }
 const directionName = (direction: string) => direction[0]!.toUpperCase() + direction.slice(1);
+
+// Every Familiar variant draws its entities2.xml actor (imported by `npm run
+// assets:items`); the authored Leech actor carries its slice's extra clips.
+const FAMILIAR_ACTORS = new Map(itemCatalogue.familiars.map(familiar => [familiar.variant, familiar.actor]));
+const familiarActor = (variant: number) => variant === 56 ? "gfx/003.056_leech.anm2"
+  : FAMILIAR_ACTORS.get(variant) ?? "gfx/003.056_leech.anm2";
 
 export class Renderer {
   private readonly context: CanvasRenderingContext2D;
@@ -398,8 +405,9 @@ export class Renderer {
       ctx.save();
       ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
         familiar.presentedPosition.y * 0.65 - 46);
-      ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
-      this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
+      ctx.rotate(familiar.sprite.rotation * Math.PI / 180);
+      ctx.scale((familiar.sprite.flipX ? -1 : 1) * familiar.sprite.scale.x, familiar.sprite.scale.y);
+      this.assets.draw(ctx, familiarActor(familiar.variant), familiar.sprite.animation,
         familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
       ctx.restore();
     }

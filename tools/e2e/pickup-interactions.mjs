@@ -60,6 +60,9 @@ function nativeObservation(observation) {
     stats: player.cachedStats ? { ...player.cachedStats, luck: player.luck, flying: player.flying, cacheFlags: player.cacheFlags,
       primaryWeapon: player.primaryWeapon, tearFlags: player.tearFlags } : null,
     familiars: live.filter(entity => entity.type === 3).map(entity => entity.variant).sort((a, b) => a - b),
+    familiarStates: live.filter(entity => entity.type === 3).map(entity => ({ variant: entity.variant, subtype: 0,
+      position: entity.position, velocity: entity.velocity, animation: entity.animation, frame: entity.frame, fireCooldown: entity.f58,
+      shootHold: entity.f5c, orbitLayer: entity.orbitLayer })),
     bombs: live.filter(entity => entity.type === 4).map(entity => ({ variant: entity.variant, position: entity.position })),
     pickups: live.filter(entity => entity.type === 5).map(entity => ({ variant: entity.variant, subtype: entity.subtype, position: entity.position,
       animation: entity.animation ?? null })),
@@ -112,6 +115,10 @@ function portObservation() {
       cacheFlags: items?.unevaluatedCacheFlags ?? null, primaryWeapon: state.weaponCache.primary,
       tearFlags: state.weaponCache.flagsC98 },
     familiars: state.familiars.filter(familiar => !familiar.removed).map(familiar => familiar.variant).sort((a, b) => a - b),
+    familiarStates: state.familiars.filter(familiar => !familiar.removed).map(familiar => ({ variant: familiar.variant, subtype: 0,
+      position: [familiar.presentedPosition.x, familiar.presentedPosition.y], velocity: [familiar.velocity.x, familiar.velocity.y],
+      animation: familiar.sprite.animation, frame: familiar.sprite.frame,
+      fireCooldown: familiar.fireCooldown, shootHold: familiar.shootHold, orbitLayer: familiar.orbitLayer })),
     bombs: state.bombs.filter(bomb => bomb.motion.lifetime === 'alive').map(bomb => ({ variant: bomb.variant, position: [bomb.motion.presentedPosition.x, bomb.motion.presentedPosition.y] })),
     pickups: state.room.pickups.filter(pickup => !pickup.removed && (!pickup.collected || pickup.variant === 100))
       .map(pickup => ({ variant: pickup.variant, subtype: pickup.subtype, position: [pickup.position.x, pickup.position.y],
@@ -207,6 +214,15 @@ function compareLabel(label, native, port, { tears = false, pocketModifier = fal
     for (const field of ['flying', 'cacheFlags', 'primaryWeapon', 'tearFlags'])
       same(`stats.${field}`, native.stats?.[field] ?? null, port.stats?.[field] ?? null);
     same('familiars', native.familiars ?? null, port.familiars ?? null);
+    // Each Familiar: position within the player tolerance, then its clip,
+    // F58, F5C and orbit layer exactly (sorted by variant and position).
+    const nativeFamiliars = native.familiarStates ?? [], portFamiliars = port.familiarStates ?? [];
+    const placed = matchPositions(nativeFamiliars, portFamiliars, TOLERANCE.player);
+    row('familiars.position', nativeFamiliars.map(f => [f.variant, f.position]), portFamiliars.map(f => [f.variant, f.position]),
+      placed.length === 0);
+    const detail = list => list.map(f => [f.variant, f.animation, f.fireCooldown, f.shootHold, f.orbitLayer])
+      .sort((a, b) => a[0] - b[0] || String(a[1]).localeCompare(String(b[1])) || a[2] - b[2] || a[3] - b[3]);
+    same('familiars.state', detail(nativeFamiliars), detail(portFamiliars));
   }
   // Player tears, only where a case's interaction is about them.
   if (tears) {
@@ -391,7 +407,8 @@ async function capturePort(browser, server, declaration, base, directory) {
   const observations = {};
   try {
     await page.goto(server.url + '/?manual=1');
-    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+    // A loaded host can take longer than the default 30 s to boot the build.
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready), null, { timeout: 180000 });
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
     await page.evaluate(input => { window.game.pause(); window.game.reset(1, input); },
       { bootEpochSeed: declaration.bootEpochSeed, resources, audioPreferences: { sfxVolume: 0, musicVolume: 0 },

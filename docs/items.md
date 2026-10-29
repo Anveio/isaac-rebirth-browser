@@ -21,9 +21,9 @@ composition is [item synergies](item-synergies.md).
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
 | active | 75 | 7 | 22 | 46 | 7 |
-| familiar | 55 | 0 | 1 | 54 | 1 |
+| familiar | 55 | 4 | 2 | 49 | 1 |
 | trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 7 | 52 | 344 | 128 |
+| **all** | 403 | 11 | 53 | 339 | 128 |
 
 Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
 
@@ -39,7 +39,7 @@ item ids the original's code for that mechanism queries
 | Mechanism | Name | Original | Original reads | Status | Live case | Issue | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `cache-dispatch` | Cache dispatch order | 511F10: Weapon 0x100, FireDelay 2, ShotSpeed 4, Damage 1, Range 8, Speed 0x10, TearFlags 0x20, Color 0x40, Flight 0x80, Familiars 0x200, Luck 0x400 |  | partial | stat-cache, damage-fire-delay |  | Order ported (item_pipeline CacheStage::ORDER). |
-| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate |  | partial | pickup-interactions `item-stats` | #895 | FireDelay, Damage, ShotSpeed, Range and Speed resolve for any inventory (#895). Flight, Familiar, Luck and the selected tail still use listed readsets. |
+| `cache-admission` | Stage admission for any inventory | Every stage runs for every owned item; no readset gate |  | partial | pickup-interactions `item-stats` | #895 | FireDelay, Damage, ShotSpeed, Range and Speed resolve for any inventory (#895). Flight, Luck and the selected tail still use listed readsets; Familiars resolve for any inventory. |
 | `stat-damage` | Damage stage | 511F10 block 0x1 at 5134B0 | 44 + 1 trinket | partial | damage-fire-delay, pickup-interactions `item-stats` |  | Every id the block reads is a port term. Frontiers: Bloody Lust (157) BEC, Eden (BFC 9) D4C, co-op variant. |
 | `stat-fire-delay` | Fire delay stage | 511F10 block 0x2 at 5122D3 | 29 + 2 trinkets | partial | damage-fire-delay, pickup-interactions `item-stats` |  | Every id the block reads is a port term. Frontiers: Eden (BFC 9) D48, co-op variant. |
 | `stat-shot-speed` | Shot speed stage | 511F10 block 0x4 at 511F68 | 15 + 1 trinket | partial | stat-cache |  | Full item formula; trinket 27 frontier. |
@@ -51,7 +51,7 @@ item ids the original's code for that mechanism queries
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
 | `tear-fire` | Tear fire hooks | Fire 519FC0, getter 50D090, C40 caller 52F370, FireTear 5177F0 | 127 + 2 trinkets | partial | weapons, tear-lifecycle |  | 50D090 is ported whole (tear_getter.rs): variant, color, flags, damage, scale and height for every item it reads, on FireTear kind 1. FireTear's own 69/154/182/309 preludes are not yet ported, so those items leave the tear unknown. |
-| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars |  | Leech only; no orbitals. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
+| `familiar-cache` | Familiar and orbital composition | 511F10 block 0x200 at 513E80, CheckFamiliar 508D10 | 58 + 2 trinkets | partial | familiars, pickup-interactions `set-*` |  | Every 513E80 call through the roster table and the generic 508D10 reconcile (docs/familiars.md). Ported groups: follower, shooter (ordinary tears), orbital, orbital shooter, chaser and Dry Baby; the other cases count unresolved updates. All 69 Familiar actors are imported at build time (`npm run assets:items`). |
 | `costumes` | Costumes | 52CF00/511060 registration, 50EDC0 slot assignment, 52FAED/532090 sync, 509C49 render |  | partial |  | #928 | One path for every collectible (wardrobe.rs): the costumes2.xml row of the same id (passive, active or familiar) registers, 50EDC0 assigns the 13 Player layer slots by layer name and priority with skin colours (hasSkinAlt sheets), head and body entries follow the Player clips, and Brimstone and Monstro's Lung drive theirs through 508820. Magic Mushroom (Player+2C4 x1.25) and Odd Mushroom (head layers x1.1/x0.9) scale the sprite. Footage of sets 1+4+12, 120, 14+32+74, 8+46+101 and 3+70+121 against a Gaper shows matching costumes and size; sets 1+4+12, 120 and 14+32+74 match whole. Not ported: costume removal, null and transformation costumes, the flight body-group swap beyond isFlying, co-op. |
 | `transformations` | Transformations | 52D0D0 transformation tail |  | missing |  |  |  |
 | `death-callbacks` | Enemy death item callbacks | 47FD22 and peers |  | partial | dips |  | Gimpy and Infestation 2 on Dips. |
@@ -388,12 +388,12 @@ passing live comparison.
 
 | Id | Name | Status | Live case | Issue | Pool weight | Engine refs | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 8 | Brother Bobby | missing |  |  | 2 (treasure, devil) |  |  |
+| 8 | Brother Bobby | complete | pickup-interactions `set-8-46-101-e10.0-*` |  | 2 (treasure, devil) |  | Brother Bobby: roster call, follower train, Follow (full and fast), Shooter and the ordinary Fire tear; matches the original frame by frame (`trace-bobby-random-0`). [Notes](familiars.md). |
 | 10 | Halo of Flies | missing |  |  | 2 (treasure, keyMaster) |  |  |
 | 11 | 1up! | missing |  |  | 1 (secret) |  |  |
 | 57 | Distant Admiration | missing |  |  | 2 (treasure, keyMaster) |  |  |
-| 67 | Sister Maggy | missing |  |  | 2 (treasure, devil) |  |  |
-| 73 | Cube of Meat | missing |  |  |  |  |  |
+| 67 | Sister Maggy | complete | pickup-interactions `set-67-e10.0-*` |  | 2 (treasure, devil) |  | Sister Maggy: the shooter primitives with her tinted tear row. [Notes](familiars.md). |
+| 73 | Cube of Meat | partial | pickup-interactions `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*` |  |  |  | Cube of Meat level law: L1 orbital, L2 orbital shooter and L3/L4 chaser with blood splats match the original (L3 frame by frame). One case fails after the Gaper dies: the room-clear trinket is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as in sets without familiars; Cube achievements are not read. [Notes](familiars.md). |
 | 81 | Dead Cat | missing |  |  | 3 (devil, redChest, curse) |  |  |
 | 88 | Little Chubby | missing |  |  | 1 (treasure) |  |  |
 | 94 | Sack of Pennies | missing |  |  | 2 (treasure, secret) |  |  |
@@ -411,7 +411,7 @@ passing live comparison.
 | 163 | Ghost Baby | missing |  |  | 2 (treasure, devil) |  |  |
 | 167 | Harlequin Baby | missing |  |  | 1 (treasure) |  |  |
 | 170 | Daddy Longlegs | missing |  |  | 1 (treasure) |  |  |
-| 172 | Sacrificial Dagger | missing |  |  | 2 (treasure, devil) |  |  |
+| 172 | Sacrificial Dagger | complete | pickup-interactions `set-172-e10.0-*`, `set-172-73-e10.0-*` |  | 2 (treasure, devil) |  | Sacrificial Dagger: orbit layer 0 at 1.5x radius, Rotation frame, contact damage with the hit-set and projectile blocking. [Notes](familiars.md). |
 | 174 | Rainbow Baby | missing |  |  | 1 (treasure) |  |  |
 | 178 | Holy Water | missing |  |  | 2 (treasure, angel) |  |  |
 | 187 | Guppy's Hairball | missing |  |  | 1 (devil) |  |  |
@@ -421,12 +421,12 @@ passing live comparison.
 | 238 | Key Piece 1 | missing |  |  |  |  |  |
 | 239 | Key Piece 2 | missing |  |  |  |  |  |
 | 264 | Smart Fly | missing |  |  | 2 (treasure, keyMaster) |  |  |
-| 265 | Dry Baby | missing |  |  | 1 (treasure) |  |  |
+| 265 | Dry Baby | complete | pickup-interactions `set-265-e14.0-*`, `necro-265-e14.0-fixed` |  | 1 (treasure) |  | Dry Baby: projectile blocking, the shared Random(4) Hit roll and the Necronomicon proc with its GiantBook pause. [Notes](familiars.md). |
 | 266 | Juicy Sack | missing |  |  | 1 (treasure) |  |  |
 | 267 | Robo-Baby 2.0 | missing |  |  | 1 (treasure) |  |  |
 | 268 | Rotten Baby | missing |  |  | 2 (treasure, devil) |  |  |
 | 269 | Headless Baby | missing |  |  | 2 (treasure, devil) |  |  |
-| 270 | Leech | partial | familiars |  | 1 (treasure) | yes | Spawn, Poof, following and healing; contact parity open. [Notes](familiars.md). |
+| 270 | Leech | partial | familiars |  | 1 (treasure) |  | Spawn, Poof, following and healing; the full Chase 469A00 (target search and path walk) is the Cube L3 primitive, but no Leech case against an enemy has run. [Notes](familiars.md). |
 | 271 | Mystery Sack | missing |  |  | 3 (treasure, secret, beggar) |  |  |
 | 272 | BBF | missing |  |  | 2 (treasure, keyMaster) |  |  |
 | 273 | Bob's Brain | missing |  |  | 2 (treasure, goldenChest) |  |  |

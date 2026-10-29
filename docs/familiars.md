@@ -347,8 +347,8 @@ paired cases pass field by field.
 ## Order of work
 
 1. This design, merged alone.
-2. Core, in one batch with Brother Bobby (branch `claude/brother-bobby`,
-   reused):
+2. Core, in one batch with Brother Bobby (branch `claude/familiars-core`,
+   with the `claude/brother-bobby` work folded in; merged with batch 1):
    - roster table and `check_familiar` for every row;
    - Init, follower train, Update shell and common tail;
    - the variant table;
@@ -380,20 +380,21 @@ or is unrun. **complete** means every paired case passes field by field.
 
 | Part | Original | Status | Live case | Notes |
 | --- | --- | --- | --- | --- |
-| Roster table, count laws | `513E80` | partial | familiars | Leech 56 only, through a hand list. |
-| CheckFamiliar reconcile | `508D10` | partial | familiars | Seed, direction, clamp and explicit first Update are ported for Leech. |
-| Init | `46EE90` | partial | familiars | Leech fields only. |
-| Follower train | `46ED90`, `4666B0` | missing |  | Done on the Brother Bobby branch, unmerged. |
-| Update shell, appearance | `4704A0` | partial | familiars | Leech appearance and Poof only. |
-| Common tail (hit-set clear, BFFS scale, remove) | `47064C` | missing |  |  |
-| Follow | `466B50` | missing |  | Done on the Brother Bobby branch, unmerged. |
-| Orbit, respace | `466DB0`, `466780` | missing |  |  |
-| Shooter, fire | `4702E0`, `467170` | missing |  | Done on the Brother Bobby branch, unmerged (Bobby only). |
-| Chase | `469A00` | partial | familiars | Leech empty-room deadband only. |
-| Collision callback | `46FA50` | missing |  |  |
-| Remove | `466AD0` | missing |  |  |
-| Definitions and rendering for all variants | build.rs, renderer | missing |  | Leech only. |
-| Trace rows in the item-set grader | pickup-interactions | missing |  |  |
+| Roster table, count laws | `513E80` | partial | pickup-interactions `set-*` | Every call in order (`familiar_roster.rs`), the key-piece and level laws included. Temporary trinket records (Eve's Bird Foot) are not modeled; Cube and Bandage achievements are not read. |
+| CheckFamiliar reconcile | `508D10` | partial | pickup-interactions `set-73-73-*` | Removal past the count, seed, shared direction, clamp and the explicit first Update for every variant; checked for single familiars and the Cube level swap. |
+| Init | `46EE90` | partial | pickup-interactions `set-*` | Follower link, orbit layer, respacing and radius (Dagger x1.5), grid class. |
+| Follower train | `46ED90`, `4666B0` | partial | `set-8-46-101`, `set-67` | Links and unlinks; trains of two or more are not yet compared. |
+| Update shell, appearance | `4704A0` | partial | `set-*` | Base update, appearance counter and Poof, the switch by `UpdateCase`; unported cases count `unresolvedAiUpdates`. |
+| FastUpdate | `46F850` | partial | `trace-bobby-random-0` | Base half step, Follow(fast), the half-frame orbit point. Robo-Baby 2.0 and Samson's Chains bodies are not ported. |
+| Common tail (hit-set clear, BFFS scale) | `47064C` | partial | `set-172-*` | Hit-set interval and BFFS scale; Remove on +31F is not ported. |
+| Follow | `466B50` | complete | `trace-bobby-random-0` | Full and fast forms, frame by frame. |
+| Orbit, respace | `466DB0`, `466780` | partial | `set-172-73-*`, `set-73-*` | Two layers checked (Dagger and Cube L1 share layer 0). Big Fan and Guardian Angel speeds are unchecked. |
+| Shooter, fire | `4702E0`, `467170` | partial | `set-8-46-101`, `set-67`, `set-73-73` | The ordinary tear rows (Bobby, Maggy, Cube L2). Robo-Baby's laser, Rotten Baby's flies, Rainbow's effect roll and Bandages' charm roll are not ported. |
+| Chase | `469A00`, `4688D0` | partial | `trace-73x3-fixed` | Target search, FindGridPath walk and Cube L3/L4 blood splats (Cube L3 frame by frame). The query partition is rebuilt at the call, not at the frame start. |
+| Collision callback | `46FA50` | partial | `set-172-*`, `necro-265-*` | Enemy contact damage with the hit-set, projectile blocking, Dry Baby's roll. Familiar-specific cases (Punching Bag, Holy Water, Guillotine...) are not ported. |
+| Remove | `466AD0` | partial | `set-73-73-*` | Respace and unlink on a count drop. |
+| Definitions and rendering for all variants | build.rs, renderer | complete |  | Every catalogue row and its actor. |
+| Trace rows in the item-set grader | pickup-interactions | complete |  | `familiars.position` (presented position, player tolerance) and `familiars.state` (clip, F58, F5C, orbit layer) per label. |
 
 ### Roster
 
@@ -401,13 +402,13 @@ Order is the `513E80` call order. *Group* is the Update case group.
 
 | Item | Name | Variant | Group | Update | Count | Status | Live case |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 8 | Brother Bobby | 1 | shooter | `4708E6` | owned+temp | missing | `--items 8,46,101` (mismatch) |
+| 8 | Brother Bobby | 1 | shooter | `4708E6` | owned+temp | complete | `set-8-46-101-e10.0-*`, `trace-bobby-random-0` |
 | 113 | Demon Baby | 2 | unique | `46E760` | owned+temp | missing |  |
 | 88 | Little Chubby | 3 | unique | `46A050` | owned+temp | missing |  |
 | 99 | Little Gish | 4 | shooter | `4708E6` | owned+temp | missing |  |
 | 100 | Little Steven | 5 | shooter | `4708E6` | owned+temp | missing |  |
 | 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | missing |  |
-| 67 | Sister Maggy | 7 | shooter | `4708E6` | owned+temp | missing |  |
+| 67 | Sister Maggy | 7 | shooter | `4708E6` | owned+temp | complete | `set-67-e10.0-*` |
 | 188 | Abel | 8 | shooter-mirror | `470910` | owned+temp | missing |  |
 | 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | missing |  |
 | 167 | Harlequin Baby | 10 | shooter | `4708E6` | owned+temp | missing |  |
@@ -425,17 +426,17 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 178 | Holy Water | 25 | unique | `470B97` | owned+temp | missing |  |
 | 11 | 1up! | 41 | follower | `4708A9` | owned+temp | missing |  |
 | 187 | Guppy's Hairball | 42 | unique | `4714FF` | owned+temp | missing |  |
-| 172 | Sacrificial Dagger | 35 | orbital | `471759` | owned+temp | missing |  |
+| 172 | Sacrificial Dagger | 35 | orbital | `471759` | owned+temp | complete | `set-172-e10.0-*`, `set-172-73-e10.0-*` |
 | 264 | Smart Fly | 50 | unique | `46C8B0` | owned+temp | missing |  |
 | 267 | Robo-Baby 2.0 | 53 | unique | `46A780` | owned+temp | missing |  |
 | 206 | Guillotine | 68 | unique | `470AF7` | owned+temp | missing |  |
-| 265 | Dry Baby | 51 | unique | `471401` | owned+temp | missing |  |
+| 265 | Dry Baby | 51 | unique | `471401` | owned+temp | complete | `set-265-e14.0-*`, `necro-265-e14.0-fixed` |
 | 266 | Juicy Sack | 52 | unique | `4712F7` | owned+temp | missing |  |
 | 268 | Rotten Baby | 54 | shooter | `4708E6` | owned+temp | missing |  |
 | 321 | Samson's Chains | 75 | unique | `46F4A0` | owned+temp | missing |  |
 | 271 | Mystery Sack | 57 | spawner | `470CEE` | owned+temp | missing |  |
 | 278 | Dark Bum | 64 | bum | `46B060` | owned+temp | missing |  |
-| 270 | Leech | 56 | chaser | `469A00` | owned+temp | partial | familiars |
+| 270 | Leech | 56 | chaser | `469A00` | owned+temp | partial | familiars (the full chase is shared with Cube L3; no Leech case against an enemy yet) |
 | 319 | Cain's Other Eye | 76 | shooter-free | `470E5B` | owned+temp | missing |  |
 | 320 | ???'s Only Friend | 77 | unique | `46ADD0` | owned+temp | missing |  |
 | 279 | Big Fan | 65 | unique | `470F4F` | owned+temp | missing |  |
@@ -453,7 +454,7 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 81 | Dead Cat | 40 | follower | `4708A9` | (owned+8)/9 | missing |  |
 | 117 (passive) | Dead Bird | 14 | unique | `46BE30` | temp present | missing |  |
 | 274 | Best Bud | 60 | orbital | `471759` | temp present | missing |  |
-| 73 | Cube of Meat L1..L4 | 44..47 | orbital, orbital-shooter, chaser | `471759`, `471178`, `471168` | level law | missing |  |
+| 73 | Cube of Meat L1..L4 | 44..47 | orbital, orbital-shooter, chaser | `471759`, `471178`, `471168` | level law | partial | `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*`, `trace-73x3-fixed`, `trace-73x3-kill`. One case fails after the Gaper dies: the room-clear trinket (pickup 350.44) is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as it does in sets without familiars (1+4+12). The Cube itself matches (L3 frame by frame) |
 | 207 | Ball of Bandages L1..L4 | 69..72 | orbital, orbital-shooter, chaser-shooter | `471759`, `471178`, `470ADF` | level law | missing |  |
 | 107 (active) | Isaac's Body | 48 | unique | `469700` | temp count | missing |  |
 | 325 (active) | (no Rebirth row) | 78 | unique | `470A30` | temp count | missing |  |
