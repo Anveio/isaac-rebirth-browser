@@ -782,6 +782,9 @@ pub enum DamageKind {
     Laser,
     /// Grub head HP sync 4f43d9: TakeDamage with flags 0.
     HealthSync,
+    /// Lemon Mishap's creep 1000.32 (45D099): DAMAGE_COUNTDOWN with
+    /// countdown 10.
+    LemonCreep,
 }
 
 impl DamageKind {
@@ -794,6 +797,15 @@ impl DamageKind {
             Self::Laser => 8,
             Self::RoomEffect => 0,
             Self::HealthSync => 0,
+            Self::LemonCreep => 0x40,
+        }
+    }
+
+    /// The countdown argument a DAMAGE_COUNTDOWN caller passes.
+    fn countdown(self) -> i32 {
+        match self {
+            Self::LemonCreep => 10,
+            _ => 0,
         }
     }
 }
@@ -868,6 +880,14 @@ pub struct DamageQueue {
     events: Vec<DamageEvent>,
     pending_damage: f32,
     pending_flags: u32,
+    /// Entity+3FC: a DAMAGE_COUNTDOWN hit refuses the next such hits until
+    /// BaseUpdate (447433) counts it down to zero.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    countdown_3fc: i32,
+}
+
+fn is_zero(value: &i32) -> bool {
+    *value == 0
 }
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq)]
@@ -924,6 +944,15 @@ impl DamageQueue {
         if !event.amount.is_finite() {
             return Err("damage amount must be finite".into());
         }
+        // Base TakeDamage 446D6A: a DAMAGE_COUNTDOWN hit is refused while
+        // +3FC is positive; otherwise it stores the caller's countdown before
+        // the amount and HP tests.
+        if event.kind.flags() & 0x40 != 0 {
+            if self.countdown_3fc > 0 {
+                return Ok(false);
+            }
+            self.countdown_3fc = event.kind.countdown();
+        }
         if event.amount <= 0.0 || health.max_hp <= 0.0 {
             return Ok(false);
         }
@@ -948,6 +977,10 @@ impl DamageQueue {
         health.validate()?;
         if !phase.updates_nonplayers() {
             return Ok(vec![]);
+        }
+        // 447433 counts +3FC down ahead of the status timers and the drain.
+        if self.countdown_3fc > 0 {
+            self.countdown_3fc -= 1;
         }
         let mut hp = health.hp;
         let mut applied = Vec::with_capacity(self.events.len());

@@ -2795,6 +2795,9 @@ impl Game {
             0,
             0,
         );
+        // Record replay (5CEF9C) precedes the layout: each intact corn poop's
+        // Poop.Init spawns its Eternal Fly whether or not the room is cleared.
+        let corn_flies = self.spawn_revisit_corn_flies()?.len();
         if !self.state.room.combat_clear {
             let selectors = self
                 .state
@@ -2808,8 +2811,13 @@ impl Game {
                 stage: self.state.stage,
                 game_update_count: self.state.game_update_count,
             };
-            let mut npcs = Vec::new();
-            let mut order = Vec::new();
+            let mut npcs = std::mem::take(&mut self.state.room.npcs);
+            let mut order: Vec<_> = self
+                .state
+                .room
+                .authored_actor_order
+                .drain(..corn_flies)
+                .collect();
             for selector in &selectors {
                 if selector.category != room_spawns::SpawnCategory::Entity {
                     continue;
@@ -2973,6 +2981,63 @@ impl Game {
             leaving,
         )?;
         maze::change_room(state, boot_level_grid, transition)
+    }
+
+    /// Room.Save5ce2d0 keeps no NPC record outside the5c57c0 families
+    /// (shopkeepers17 and fireplaces33). A cleared room's Room.Init revisit
+    /// (5ce6b0 ->5ce8e8, descriptor+3d set, seed effect mode not25/32)
+    /// rebuilds only its layout's42, 44 (variant nonzero), 202, 203, 218,
+    /// 235 and236 entities; the restored room stands in for those and any
+    /// other NPC it held is gone. Record replay (5CEF9C) runs before the
+    /// layout, so each intact corn poop's new Eternal Fly comes first.
+    fn readmit_revisited_npcs(&mut self) -> Result<Vec<u32>, String> {
+        let effect_mode = self
+            .state
+            .run_seeds
+            .as_ref()
+            .and_then(|seeds| seeds.source_effect_mode);
+        if self.state.room.combat_clear && effect_mode.is_some_and(|mode| !matches!(mode, 25 | 32))
+        {
+            for npc in &mut self.state.room.npcs {
+                let rebuilt = matches!(npc.kind, 17 | 33 | 42 | 202 | 203 | 218 | 235 | 236)
+                    || (npc.kind == 44 && npc.variant != 0);
+                if !rebuilt {
+                    npc.removed = true;
+                }
+            }
+        }
+        self.spawn_revisit_corn_flies()
+    }
+
+    /// Poop.Init's Eternal Flies on a revisit's record replay, ahead of the
+    /// room's other actors.
+    fn spawn_revisit_corn_flies(&mut self) -> Result<Vec<u32>, String> {
+        let flies = grid_records::revisit_corn_flies(
+            &self.state.room,
+            &mut self.state.boot_lifecycle.shared,
+        );
+        let context = entities::SpawnContext {
+            stage: self.state.stage,
+            game_update_count: self.state.game_update_count,
+        };
+        let mut ids = Vec::with_capacity(flies.len());
+        for (offset, fly) in flies.iter().enumerate() {
+            let id =
+                u32::try_from(self.state.room.npcs.len()).map_err(|_| "NPC identity exhausted")?;
+            self.state
+                .room
+                .npcs
+                .push(eternal_fly::from_corn_poop(id, fly, &context)?);
+            self.state.room.authored_actor_order.insert(
+                offset,
+                actors::ActorRef {
+                    kind: actors::ActorKind::Npc,
+                    id,
+                },
+            );
+            ids.push(id);
+        }
+        Ok(ids)
     }
 
     fn change_room_shared_draws(&mut self, room_before: usize) -> Result<(), String> {
@@ -5062,6 +5127,7 @@ impl Game {
                         &mut self.state,
                         ordinary_placement::Frontier::Restore,
                     );
+                    let corn_flies = self.readmit_revisited_npcs()?;
                     let restored_pickups = pickups::readmit_regular_records(&mut self.state)?;
                     let restored_slots = slots::readmit_saved(&mut self.state);
                     item_queries::note_room_placement(&mut self.state);
@@ -5073,6 +5139,10 @@ impl Game {
                     // The native Room.Update admission tail advances the new
                     // actors once at the unchanged Game clock. Other saved
                     // families keep their existing reconstruction owners.
+                    // Record replay spawned the corn-poop flies first.
+                    for id in corn_flies {
+                        self.advance_npc(id, phase)?;
+                    }
                     for id in restored_pickups.iter().copied() {
                         self.advance_pickup(id, phase)?;
                     }
@@ -5341,6 +5411,7 @@ impl Game {
                     || self.state.room.npcs.iter().any(|npc| npc.id == actor.id)
             });
             controlled_knife_homing::rebuild_partition(&mut self.state);
+            let npc_partition = npcs::contact_partition(&self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             // 4549C8: the Tear/Knife partition (+8) meets the NPC/Bomb
@@ -5405,10 +5476,10 @@ impl Game {
             }
             //4549D1 completes the NPC/Bomb partition's self-pairs before
             //454A0A queries that partition against the actual Players.
-            npcs::nonplayer_contacts(&mut self.state)?;
+            npcs::nonplayer_contacts(&mut self.state, &npc_partition)?;
             bombs::bomb_contacts(&mut self.state)?;
             bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
+            npcs::player_contacts(&mut self.state, &npc_partition)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             for index in 0..self.state.room.pickups.len() {
                 if shop::player_contact(&mut self.state, index)? {
@@ -5439,6 +5510,7 @@ impl Game {
             chests::full_grid_contacts(&mut self.state)?;
             npcs::post_contact_grid(&mut self.state)?;
             bombs::full_grid_contacts(&mut self.state)?;
+            self.newborn_tear_grid_contacts()?;
         }
         if phase == phase::Phase::Update {
             familiars::grid_contacts(&mut self.state)?;
@@ -5669,10 +5741,11 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if (self.state.run_introduction.active && self.state.run_introduction.stage)
-            || self.state.room_transition.is_some()
-            || self.state.information_animation.active()
-        {
+        // Camera42d780 is held only by Game550760 (fade, StageTransition,
+        // room transition and the other Game guards). The HUD+2b578 streak
+        // (Level::ShowName585500's stage name) is not among them, so the
+        // camera follows Isaac while the stage name is still showing.
+        if self.state.room_transition.is_some() || self.state.information_animation.active() {
             return;
         }
         let aim = motion::WorldVector {
@@ -5695,6 +5768,39 @@ impl Game {
             phase,
         );
         camera.advance(&self.state.room, &self.state.player, aim, phase);
+    }
+    /// 454B10's Full grid pass walks the actors appended during this update
+    /// too, so a tear born this update has collidedWithGrid set before its
+    /// first own Update (542F70) consumes it. Older tears set theirs in
+    /// their own Update below.
+    fn newborn_tear_grid_contacts(&mut self) -> Result<(), String> {
+        let update = self.state.game_update_count;
+        if !self.state.tears.iter().any(|tear| {
+            tear.controlled.is_none()
+                && tear.age == 0
+                && tear.birth_game_update == Some(update)
+                && tear.motion.lifetime == projectiles::Lifetime::Alive
+        }) {
+            return Ok(());
+        }
+        let grid = self
+            .state
+            .room
+            .grid
+            .clone()
+            .map(grid::Grid::new)
+            .transpose()?
+            .unwrap_or_else(|| traversal::doorway_grid(&self.state.room));
+        for tear in &mut self.state.tears {
+            if tear.controlled.is_none()
+                && tear.age == 0
+                && tear.birth_game_update == Some(update)
+                && tear.motion.lifetime == projectiles::Lifetime::Alive
+            {
+                tear.grid_contact = grid.contacts_regular_tear(tear.motion.position);
+            }
+        }
+        Ok(())
     }
     fn advance_actor(
         &mut self,
@@ -6435,6 +6541,29 @@ impl Game {
                     scheduler: &mut self.state.actor_scheduler,
                 }
                 .admit_fly_explosion(seed, position, color.tint, color.offset)?;
+                Ok(())
+            }
+            entities::Birth::BloodExplosion {
+                seed,
+                position,
+                subtype,
+                offset,
+                color,
+            } => {
+                familiars::NpcEffectAdmission {
+                    game_update_count: self.state.game_update_count,
+                    next_effect: &mut self.state.next_effect,
+                    effects: &mut self.state.sprite_effects,
+                    scheduler: &mut self.state.actor_scheduler,
+                }
+                .admit_npc_blood_explosion(
+                    seed,
+                    position,
+                    subtype,
+                    offset,
+                    color.tint,
+                    color.offset,
+                )?;
                 Ok(())
             }
             entities::Birth::ExplosionEffect { seed, position } => {

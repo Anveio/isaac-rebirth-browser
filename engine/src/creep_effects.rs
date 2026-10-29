@@ -16,6 +16,8 @@ use serde::{Deserialize, Serialize};
 include!(concat!(env!("OUT_DIR"), "/creep_masks.rs"));
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
+/// Lemon Mishap's creep variant.
+pub(crate) const LEMON: u32 = 32;
 /// Player Entity+474 collision radius.
 const PLAYER_RADIUS: f32 = 10.0;
 /// DAMAGE_ACID.
@@ -86,6 +88,14 @@ impl NpcEffectAdmission<'_> {
         spawner: (u32, u32),
     ) -> Result<u32, String> {
         self.admit_pool(23, seed, position, spawner, (1.0, 1.0), (30, 30))
+    }
+
+    /// Lemon Mishap 5242E7: Spawn550a40 of 1000.32 at the Player with zero
+    /// velocity, no spawner, subtype 0 and the shared seed. Init458a70 gives
+    /// it the creep words (+7D8 1, +460 2000, collision classes 0) with no
+    /// time to live (+7F0 -1), damage +48C 22 and size +818 1.
+    pub(crate) fn admit_lemon(&mut self, seed: u32, position: WorldVector) -> Result<u32, String> {
+        self.admit_pool(LEMON, seed, position, (0, 0), (1.0, 1.0), (-1, 1))
     }
 
     fn admit_pool(
@@ -315,6 +325,9 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         effect.presented_position = effect.position;
         return Ok(());
     }
+    if effect.variant == LEMON {
+        return advance_lemon(state, id);
+    }
     if step(
         effect,
         &mut state.boot_lifecycle.shared,
@@ -324,4 +337,136 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
         hurt_player(state)?;
     }
     Ok(())
+}
+
+/// Effect::Update 45aa70 for the Lemon Mishap creep 1000.32: BaseUpdate,
+/// then the 45CE80 case, then the shared time-to-live tail (+7F0 is -1).
+/// The pool grows over 15 updates, holds until update 225, shrinks to
+/// nothing by update 290 and is removed on the next one. Every update each
+/// vulnerable ground enemy inside its ellipse takes +48C with
+/// DAMAGE_COUNTDOWN and countdown 10.
+pub(crate) fn advance_lemon(state: &mut State, id: u32) -> Result<(), String> {
+    let index = state
+        .sprite_effects
+        .iter()
+        .position(|effect| effect.id == id && effect.variant == LEMON)
+        .ok_or("Lemon Mishap update requires its admitted actor")?;
+    let effect = &mut state.sprite_effects[index];
+    let config = definition(1000, LEMON).ok_or("Lemon Mishap config absent")?;
+    effect.full_updates = effect
+        .full_updates
+        .checked_add(1)
+        .ok_or("effect full count exhausted")?;
+    effect.sprite.advance(config)?;
+    effect.velocity = effect.velocity * effect.current_friction;
+    effect.position = effect.position + effect.velocity;
+    effect.presented_position = effect.position;
+    effect.current_friction = effect.configured_friction;
+    let controller = effect
+        .creep_effect
+        .as_mut()
+        .ok_or("Lemon Mishap controller absent")?;
+    let count = controller.counter;
+    // 45CE80/461938/45E488: the scale for this update's counter.
+    let scale = if count <= 14 {
+        count as f32 / 15.0
+    } else if count <= 225 {
+        1.0
+    } else if count <= 290 {
+        1.0 - (count as f32 - 225.0) / 65.0
+    } else {
+        effect.removed = true;
+        1.0
+    };
+    let size = controller.size;
+    effect.sprite.scale = WorldVector {
+        x: scale * size,
+        y: scale * size,
+    };
+    let center = effect.position;
+    let radius = effect.collision_radius;
+    let damage = effect.collision_damage;
+    let reach = radius * scale * size;
+    let source = crate::combat::DamageSource {
+        id: 0,
+        entity_type: 0,
+    };
+    let targets = lemon_targets(state, center, reach)?;
+    for npc_id in targets {
+        let npc = state
+            .room
+            .npcs
+            .iter_mut()
+            .find(|npc| npc.id == npc_id)
+            .ok_or("Lemon Mishap target left the room list")?;
+        // 45CF97..45D027: the ellipse stretches y by 1.75; the reach adds
+        // the target's own radius and the test is strict.
+        let dx = npc.position.x - center.x;
+        let dy = (npc.position.y - center.y) * 1.75;
+        let bound = radius * scale * size + npc.collision_radius;
+        if bound * bound <= dx * dx + dy * dy {
+            continue;
+        }
+        let health = npc.health();
+        npc.damage.enqueue(
+            health,
+            crate::combat::DamageEvent {
+                amount: damage,
+                kind: crate::combat::DamageKind::LemonCreep,
+                source,
+                copied_source: None,
+            },
+        )?;
+    }
+    let effect = &mut state.sprite_effects[index];
+    let controller = effect
+        .creep_effect
+        .as_mut()
+        .ok_or("Lemon Mishap controller absent")?;
+    controller.counter += 1;
+    if effect.removed {
+        // vtable+0x48 Remove441bb0 clears active and marks dead.
+        effect.active = false;
+    }
+    Ok(())
+}
+
+/// QueryRadius 4536f0 over the enemy partition (mask 8), then 444810 and
+/// not 444860 (a grid collision class 0..3 flies). The partition is the
+/// last 4545D0 rebuild; without one, every current member is a candidate.
+fn lemon_targets(state: &State, center: WorldVector, reach: f32) -> Result<Vec<u32>, String> {
+    let candidates: Vec<u32> = match state.knife_query_partition.as_ref() {
+        Some(snapshot) => snapshot
+            .query(center, reach)?
+            .into_iter()
+            .filter(|actor| actor.kind == ActorKind::Npc)
+            .map(|actor| actor.id)
+            .collect(),
+        None => state
+            .room
+            .npcs
+            .iter()
+            .filter(|npc| npc.entity_collision_class != 0 && (10..=999).contains(&npc.kind))
+            .map(|npc| npc.id)
+            .collect(),
+    };
+    let mut targets = Vec::new();
+    for id in candidates {
+        let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == id) else {
+            continue;
+        };
+        let vulnerable = crate::target_eligibility::eligible_target(
+            crate::target_eligibility::TargetEligibility {
+                kind: npc.kind,
+                collision_class: npc.entity_collision_class,
+                raw_494: npc.raw_494,
+                dead: npc.dead,
+                entity_flags: crate::entities::family(npc.kind).map(|_| npc.entity_flags()),
+            },
+        )?;
+        if vulnerable && npc.grid_collision_class > 3 {
+            targets.push(id);
+        }
+    }
+    Ok(targets)
 }

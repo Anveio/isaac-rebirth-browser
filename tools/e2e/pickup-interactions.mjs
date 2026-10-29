@@ -48,6 +48,7 @@ function nativeObservation(observation) {
     gameAge: observation.fullGameUpdates,
     informationAnimation: observation.informationAnimation,
     room: { gridWidth: observation.room.gridWidth, gridHeight: observation.room.gridHeight },
+    renderScroll: observation.room.renderScroll ?? null,
     player: { position: player.position, inventory: player.inventory, hearts: player.health.slice(0, 2),
       activeId: player.activeId, activeCharge: player.activeCharge, reserveCharge: player.reserveCharge,
       pockets: player.heldPockets.map(slot => slot.id), pocketTags: player.heldPockets.map(slot => slot.tag),
@@ -88,6 +89,7 @@ function portObservation() {
       frame: state.informationAnimation.frame, playing: state.informationAnimation.playing,
       definitionLoaded: state.informationAnimation.definitionLoaded },
     room: { gridWidth: state.room.grid?.width ?? null, gridHeight: state.room.grid?.height ?? null },
+    renderScroll: state.camera ? [Math.fround(state.camera.scroll.x), Math.fround(state.camera.scroll.y)] : null,
     player: { position: [(state.player.x - 32) / scale, (state.player.y + 46) / scale],
       inventory: { bombs: state.inventory.bombs, keys: state.inventory.keys, coins: state.inventory.coins },
       hearts: [state.player.maxHp, state.player.hp],
@@ -156,11 +158,13 @@ function matchPositions(native, port, tolerance) {
 const pathIdentity = value => value?.replaceAll('\\', '/').replace(/^resources\//i, '').toLowerCase() ?? null;
 
 function compareLabel(label, native, port, { tears = false, pocketModifier = false, owned = false, d4Animation = false, stats = false,
-  pickupAnimations = false } = {}) {
+  pickupAnimations = false, camera = false } = {}) {
   const rows = [];
   const row = (field, expected, actual, passed) => rows.push({ label, field, native: expected, port: actual, passed });
   const same = (field, expected, actual) => row(field, expected, actual, JSON.stringify(expected) === JSON.stringify(actual));
   same('room.grid', native.room, port.room);
+  // Room+15B8 render scroll against the port's CameraStyle1 scroll, binary32.
+  if (camera) same('camera.scroll', native.renderScroll, port.renderScroll);
   row('player.position', native.player.position, port.player.position, distance(native.player.position, port.player.position) <= TOLERANCE.player);
   same('player.inventory', native.player.inventory, port.player.inventory);
   same('player.hearts', native.player.hearts, port.player.hearts);
@@ -297,7 +301,11 @@ export const INTERACTIONS = {
       && obs['after-active'].player.activeCharge === 0
       && obs['after-active'].player.inventory.bombs === obs['after-conversion'].player.inventory.bombs,
     portContract: activeOwnershipContract },
-  'room-2x2': { labels: ['settle'], covered: obs => obs['settle'].room?.gridWidth === 28 },
+  // The 2x2 Start Room scrolls: the camera follows Isaac from his first steps
+  // while the stage name is still showing (#965).
+  'room-2x2': { camera: true, labels: ['settle', 'walk-up-start', 'walk-up-mid', 'walk-to-battery', 'after-battery', 'walk-back'],
+    covered: obs => obs['settle'].room?.gridWidth === 28
+      && obs['walk-up-mid'].renderScroll?.[1] !== obs['settle'].renderScroll?.[1] },
   // Every free pickup keeps its place and at least one changes kind.
   'd20-reroll': { pickupAnimations: true, labels: ['settle', 'use-active', 'reroll-appear', 'after-active'],
     covered: obs => obs['after-active'].player.activeCharge === 0
@@ -510,6 +518,7 @@ try {
         owned: declaration.interactions.some(name => INTERACTIONS[name].owned),
         d4Animation: declaration.interactions.includes('d4-reroll'),
         pickupAnimations: declaration.interactions.some(name => INTERACTIONS[name].pickupAnimations),
+        camera: declaration.interactions.some(name => INTERACTIONS[name].camera),
       }));
     }
     if (declaration.interactions.includes('d4-reroll'))

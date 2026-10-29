@@ -120,6 +120,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/bosses/**/*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_032_bloodstains.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_016_bloodpool.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_037_lemonmishap.png",
   "../references/isaac/rebirth/resources/gfx/effects/hangingguys.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_000_shopkeepers.png",
   "../references/isaac/rebirth/resources/gfx/familiar/familiar_270_leech.png",

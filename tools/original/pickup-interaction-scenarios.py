@@ -99,7 +99,9 @@ CASES = {
         room='2x2', items=[BLANK_CARD, BATTERY], card=JERA,
         spawns=[pickup(2, 2, 20, 1), pickup(23, 2, 30, 1), pickup(2, 11, 40, 1), pickup(23, 11, 20, 1),
                 pickup(12, 9, 10, 1), pickup(6, 2, 90, 0)],
-        actions=[act('settle', [], 30), act('walk-to-battery', ['w'], 50), act('after-battery', [], 30),
+        # One continuous 50-presentation walk up, with checkpoints at its start.
+        actions=[act('settle', [], 30), act('walk-up-start', ['w'], 8), act('walk-up-mid', ['w'], 12),
+                 act('walk-to-battery', ['w'], 30), act('after-battery', [], 30),
                  act('walk-back', ['s'], 30), act('settle-before-active', [], 20),
                  act('use-active', ['space'], 4), act('after-active', [], 120),
                  act('use-pocket', ['q'], 4), act('after-pocket', [], 60)],

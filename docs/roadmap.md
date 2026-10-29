@@ -511,7 +511,8 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
-| #966 | P2 | dips: poopEffects4 position/flip diverges at black-damage-21; a type-96 NPC is missing on entry for 6GFP B240 | e2e dips 2026-10-28 |
+| #1000 | P2 | Bombs should share the NPC contact partition (the original visits bomb-NPC pairs in the same partition order as NPC pairs) | e2e dips 2026-10-29 |
+| #982 | P2 | Golden and rainbow poop are not admitted (corn-poop fly respawn fixed by #995) | e2e dips 2026-10-29 |
 
 ## Bosses
 
@@ -716,9 +717,9 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
 | #535 | P2 | Historical Gaper gib/bone gap; #573 adds gib source, but the reported scene still needs confirmation | playtest 2026-10-16 `playtest/354e7e8/` gusher-contrived-2 |
 | #717 | P2 | Fatty death gibs fly far across the room and leave no bone or gut pile, where the original keeps them near the body | playtest 2026-10-18 `playtest/5669795/` fatty-random-2 |
-| #965 | P3 | 2x2 Start Room: camera starts following Isaac late when he walks from the centre (frames 33-64 offset, then identical) | playtest 2026-10-28 `playtest/7a1730b/sandbox-2x2-fixed.mp4` |
+| #997 | P2 | Large room under fractional scroll: each sprite snaps to the pixel grid differently from the original (camera itself matches; the corn-poop fight now matches in positions, only 1px sprite offsets remain) | playtest 2026-10-29 `playtest/c47b8ab/corn-poop-eternal-fly.mp4` |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
-| #937 | P3 | Kamikaze!: from frame 413 the original draws Isaac charred and blinking after the blast; the port draws him plain | playtest 2026-10-28 kamikaze |
+| #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
 | #952 | P3 | Tear poofs spawn with different seeds and sub-pixel positions from the original in most entity cases | e2e entities 2026-10-28 |
 | #963 | P3 | D20 streak banner text bottom row 1px off (frames 41-50) and a 1px-offset speck (51-70) | playtest 2026-10-28 d20-fixed |
 

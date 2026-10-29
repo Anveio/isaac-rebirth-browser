@@ -53,6 +53,8 @@ def main():
         help='Add target-bearing Mom\'s Bra fixed phases and the same first unfiltered OS draw')
     parser.add_argument('--npc-fear', action='store_true',
         help='Add bounded Horf Mom\'s Pad fixed phases and the first unfiltered OS draw')
+    parser.add_argument('--lemon-boils', action='store_true',
+        help='Add Lemon Mishap fixed phases with two Boils beside the creep')
     args = parser.parse_args()
     if not 0 <= args.count <= 64:
         parser.error('Fresh unfiltered OS count must be0..64')
@@ -101,10 +103,15 @@ def main():
     cases = []
 
     def declare(name, pedestals, actions, epoch, phase, entropy, uses, npc_freeze=False, freeze_control=False,
-                npc_fear=False, fear_control=False):
+                npc_fear=False, fear_control=False, npc_groups=()):
         key = '-'.join('.'.join(str(value) for value in row[:-2]) for row in pedestals)
-        npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
-                      for x, y, kind in ((10, 5, 12), (1, 1, 18))] if npc_freeze else []
+        if npc_groups:
+            key += '-npcs-' + '-'.join(f'{kind}.{x}.{y}' for kind, x, y in npc_groups)
+            npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
+                          for kind, x, y in npc_groups]
+        else:
+            npc_groups = [dict(x=x, y=y, entries=[dict(type=kind, variant=0, subtype=0, weight=1.0)])
+                          for x, y, kind in ((10, 5, 12), (1, 1, 18))] if npc_freeze else []
         if npc_freeze:
             key += '-npc-freeze12-18'
         if npc_fear:
@@ -200,6 +207,17 @@ def main():
     #A second active replaces the first and drops it back as a pedestal.
     declare('swap-45-282-phase1', [(45, 6, 5), (282, 5, 6)],
             idle + acquire('first') + acquire('second', 'a', 'west') + use('use', [], 24), 12713, 1, fixed, [282])
+    #Lemon Mishap's creep grows, holds, shrinks and is removed over 291
+    #updates (582 presentations). With --lemon-boils, the creep kills the
+    #Boil at (7,5) and spares the one at (6,7); a Boil's lobbed shot hits
+    #Isaac first, whose damage stays open (#972).
+    #A gameplay interval holds at most 400 presentations.
+    lemon = idle + acquire() + use('use', [], 300) + [dict(label='use-shrink', keys=[], presentations=300)]
+    for phase in (0, 1):
+        declare(f'lemon-mishap-56-fixed-phase{phase}', single(56), lemon, 12713, phase, fixed, [56])
+        if args.lemon_boils:
+            declare(f'lemon-mishap-56-boils-phase{phase}', single(56), lemon, 12713, phase, fixed, [56],
+                    npc_groups=[(30, 7, 5), (30, 6, 7)])
     # A w4 pulse settles22.343 world units from the pedestal, outside the
     # strict radius22 contact. Eight public input presentations cross it;
     # the existing released96 then admits the actual Pickup ceremony.

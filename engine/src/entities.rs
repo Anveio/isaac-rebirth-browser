@@ -208,6 +208,16 @@ pub(crate) enum Birth {
         position: WorldVector,
         color: crate::sprite_color::Color,
     },
+    /// Base kill 4fbf9d..4fc08c: Blood Explosion 1000.2 at the actor's
+    /// position, its subtype from size, the layer centre as sprite offset,
+    /// the actor's SplatColor and +7f8 10. No immediate Update.
+    BloodExplosion {
+        seed: u32,
+        position: WorldVector,
+        subtype: u32,
+        offset: WorldVector,
+        color: crate::sprite_color::Color,
+    },
     /// Kill47FC80 Have234 (Infestation 2): Player50c980 would spawn a
     /// BlueSpider familiar 3.73 at the dying NPC. Port gap: that familiar is
     /// unported, so nothing is spawned and the caller records the frontier.

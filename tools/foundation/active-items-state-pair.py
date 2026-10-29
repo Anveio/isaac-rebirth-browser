@@ -124,6 +124,11 @@ def native_rows():
             player, physical = items['players'][0], world['players'][0]
             pedestals = sorted(integer(actor['subtype']) for actor in world['entities']
                                if actor['type'] == 5 and actor['variant'] == 100 and not actor['removed'])
+            lemons = sorted([vector(actor['position']), vector(actor['spriteScale']), integer(actor['effectCounter']),
+                             bool(actor['removed'])] for actor in world['entities']
+                            if actor['type'] == 1000 and actor['variant'] == 32)
+            enemies = sorted([integer(actor['type']), integer(actor['variant']), f32(actor['hp']), bool(actor['removed'])]
+                             for actor in world['entities'] if 10 <= actor['type'] <= 999)
             row = dict(
                 activeId=integer(player['activeId']), activeCharge=integer(player['activeCharge']),
                 temporary=[[integer(row['itemId']), integer(row['count']), integer(row['cooldown'])]
@@ -136,7 +141,7 @@ def native_rows():
                 pockets=[[integer(slot['id']), bool(integer(slot['typeTagRaw'])) if slot['id'] else None]
                          for slot in player['heldPocketRecords']],
                 clip=player['mainSprite']['animation'], frame=f32(player['mainSprite']['animationFrame']),
-                controls=player['controlsEnabled'] is True, pedestals=pedestals)
+                controls=player['controlsEnabled'] is True, pedestals=pedestals, lemons=lemons, enemies=enemies)
             if freeze_contract is not None:
                 row['npcFreeze'] = native_freeze(observation)
             if fear_contract is not None:
@@ -172,6 +177,11 @@ def browser_rows():
                 clip, frame = 'Pickup', owner['pickupAnimationFrame']
             pedestals = sorted(integer(actor['subtype']) for actor in state['room']['pickups']
                                if actor['variant'] == 100 and not actor['removed'])
+            lemons = sorted([vector(effect['position']), [f32(effect['sprite']['scale']['x']), f32(effect['sprite']['scale']['y'])],
+                             integer(effect['creepEffect']['counter']), effect['removed'] is True]
+                            for effect in state.get('spriteEffects', []) if effect['variant'] == 32 and effect['active'])
+            enemies = sorted([integer(npc['kind']), integer(npc['variant']), f32(npc['hp']), npc['dead'] is True]
+                             for npc in state['room']['npcs'])
             row = dict(
                 activeId=integer(owner['activeId']), activeCharge=integer(owner['activeCharge']),
                 temporary=[[integer(row['itemId']), integer(row['count']), integer(row['cooldown'])]
@@ -186,7 +196,7 @@ def browser_rows():
                 pockets=[[integer(slot['id']), (slot['card'] is True) if slot['id'] else None]
                          for slot in owner['heldPockets']['slots']],
                 clip=clip, frame=frame,
-                controls=player['controlsEnabled'] is True, pedestals=pedestals)
+                controls=player['controlsEnabled'] is True, pedestals=pedestals, lemons=lemons, enemies=enemies)
             if freeze_contract is not None:
                 row['npcFreeze'] = browser_freeze(state, integer(value['gameplayPresentation']))
             if fear_contract is not None:
@@ -568,7 +578,8 @@ uses, held, landed = collections.Counter(), set(), 0
 for gp in paired:
     a, b = own[gp], native[gp]
     for field in ('activeId', 'activeCharge', 'temporary', 'health', 'position', 'velocity',
-                  'entityCollisionOff', 'controls', 'pedestals', 'eternal', 'pockets', 'immunity'):
+                  'entityCollisionOff', 'controls', 'pedestals', 'eternal', 'pockets', 'immunity',
+                  'lemons', 'enemies'):
         check(f'Player:{field}', a[field], b[field], gp)
     if b['clip'] in CLIPS or a['clip'] is not None:
         check('main sprite clip', a['clip'], b['clip'], gp)
@@ -639,7 +650,7 @@ result = dict(schema=1, status='fail' if failures else 'pass', case=case['name']
     checksPerField=dict(counts), failedPerField=dict(failures), examples=examples,
     unavailable=contract['unknown'] + (freeze_contract['unknown'] if freeze_contract else [])
         + (fear_contract['unknown'] if fear_contract else []), inputsBefore=before, inputsAfter=after,
-    scope='Per-presentation start-room active slot, charge, temporary records, health, damage countdown, Player body, '
+    scope='Per-presentation start-room active slot, charge, temporary records, health, damage countdown, Player body, Lemon Mishap creep, enemy HP, '
           'collision classes, named main-sprite clips and pedestals. No private order/render/backend claim.'
           + (' Additive independent bounded living NPC freeze state/motion/colour and actual phase-clock witnesses; '
              'the no-Space control retains ordinary NPC behavior. Frozen death, bosses, links and readmission remain open.' if freeze_contract else ''))
