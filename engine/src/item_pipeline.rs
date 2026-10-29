@@ -2112,7 +2112,7 @@ pub(crate) fn resolve_neutral_flight(
 ) -> Option<(bool, u32)> {
     (source_player_type == Some(0)
         && inputs.admits_selected_auxiliary_callbacks()
-        && transformation_counts == Some([0, 0]))
+        && transformation_counts.is_some_and(|counts| counts.iter().all(|count| *count < 3)))
     .then_some((false, 5))
 }
 

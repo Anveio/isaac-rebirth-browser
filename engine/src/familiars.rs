@@ -1363,6 +1363,32 @@ pub(crate) fn room_clear(state: &mut State) -> Result<(), String> {
     Ok(())
 }
 
+/// 50D090(out, Player, kind 1) as Familiar Init calls it, on the shared
+/// stream; `None` (nothing drawn) for any unknown fact.
+fn player_tear_properties(state: &mut State) -> Option<crate::tear_getter::TearProperties> {
+    let owner = state.player_items.as_ref()?;
+    let queries = crate::item_queries::AppearanceQueries::new(
+        owner,
+        state.weapon_cache.primary,
+        state.player.entity_source,
+        None,
+    );
+    let player = crate::tear_getter::PlayerFields {
+        damage_c88: state.player_stats.damage,
+        height_c8c: state.player_stats.tear_height,
+        flags_c98: state.weapon_cache.flags_c98,
+        color_ca0: state.weapon_cache.color_ca0,
+        luck_d64: state.player_stats.luck?,
+        eye_d70: match state.player.eye {
+            crate::projectiles::Eye::Negative => -1,
+            crate::projectiles::Eye::Positive => 1,
+        },
+        player_type_bfc: state.weapon_admission.source_player_type?,
+        primary_c08: state.weapon_cache.primary,
+    };
+    crate::tear_getter::evaluate(queries, player, 1, &mut state.boot_lifecycle.shared)
+}
+
 /// Player 508740 AddBlueFlies(count, position, target): per fly a shared
 /// seed, Spawn 550A40(3, 43) at the position with zero velocity and the
 /// Player as spawner (Init, no explicit Update), the target when it is not
@@ -1389,7 +1415,13 @@ pub(crate) fn add_blue_flies(
         });
         fly.flags &= !4;
         state.familiars.push(fly);
-        init(state, state.familiars.len() - 1);
+        let index = state.familiars.len() - 1;
+        init(state, index);
+        // 46F000: Init gives a Blue Fly twice the Player's 50D090(kind 1)
+        // damage as its collision damage +48C.
+        let properties = player_tear_properties(state)
+            .ok_or("Blue Fly Init needs the Player's tear properties (50D090)")?;
+        state.familiars[index].collision_damage = properties.damage + properties.damage;
         state.actor_scheduler.admit(ActorRef {
             kind: ActorKind::Familiar,
             id,

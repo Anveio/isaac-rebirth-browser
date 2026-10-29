@@ -1593,11 +1593,28 @@ pub(crate) fn add_collectible(
     }
     let transformation_tail_skipped = acquisition_variant.is_some_and(|variant| variant != 0)
         || previously_acquired == Some(true);
-    if [81, 133, 134, 145, 187, 212].contains(&id) && !transformation_tail_skipped {
-        //52D0D3..DE skips credit for nonzero variants or already-seen IDs.
-        //The first/unknown-acquisition counter/helper path remains unowned;
-        //a duplicate never restores an absent counter or repeats credit.
-        state.player.transformation_counts = None;
+    //52D0D3..DE skips credit for nonzero variants or already-seen IDs; an
+    //unknown acquisition leaves the counter unowned. Otherwise 52D110 adds
+    //one to Guppy (3068) or 52D150 to Beelzebub (306C), and 511D90 tests the
+    //counter against 3. PORT GAP: the transformations themselves (52D8C8,
+    //52D848) are not ported, so a third credit leaves the counters unowned.
+    let form = if [145, 187, 134, 133, 81, 212].contains(&id) {
+        Some(0)
+    } else if [10, 151, 57, 128, 320, 248, 9, 279, 272, 148, 264, 274].contains(&id) {
+        Some(1)
+    } else {
+        None
+    };
+    if let Some(form) = form.filter(|_| !transformation_tail_skipped) {
+        let counts = state
+            .player
+            .transformation_counts
+            .filter(|_| acquisition_variant.is_some() && previously_acquired.is_some())
+            .map(|mut counts| {
+                counts[form] = counts[form].wrapping_add(1);
+                counts
+            });
+        state.player.transformation_counts = counts.filter(|counts| counts[form] < 3);
     }
     crate::player_costume118::on_collectible_added(state, id);
     crate::player_costume_registration::on_collectible_added(state, id);

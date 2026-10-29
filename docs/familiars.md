@@ -380,7 +380,7 @@ or is unrun. **complete** means every paired case passes field by field.
 
 | Part | Original | Status | Live case | Notes |
 | --- | --- | --- | --- | --- |
-| Roster table, count laws | `513E80` | partial | pickup-interactions `set-*` | Every call in order (`familiar_roster.rs`), the key-piece and level laws included. Temporary trinket records (Eve's Bird Foot) are not modeled; Cube and Bandage achievements are not read. |
+| Roster table, count laws | `513E80` | partial | pickup-interactions `set-*` | Every call in order (`familiar_roster.rs`), the key-piece and level laws included, with the Cube (`0x90`), Bandage (`0x13`) and Full Key (`0x3A`) achievements (`5BD5E0`). Temporary trinket records (Eve's Bird Foot) are not modeled. |
 | CheckFamiliar reconcile | `508D10` | partial | pickup-interactions `set-73-73-*` | Removal past the count, seed, shared direction, clamp and the explicit first Update for every variant; checked for single familiars and the Cube level swap. |
 | Init | `46EE90` | partial | pickup-interactions `set-*` | Follower link, orbit layer, respacing and radius (Dagger x1.5), grid class. |
 | Follower train | `46ED90`, `4666B0` | partial | `set-8-46-101`, `set-67` | Links and unlinks; trains of two or more are not yet compared. |
@@ -389,9 +389,12 @@ or is unrun. **complete** means every paired case passes field by field.
 | Common tail (hit-set clear, BFFS scale) | `47064C` | partial | `set-172-*` | Hit-set interval and BFFS scale; Remove on +31F is not ported. |
 | Follow | `466B50` | complete | `trace-bobby-random-0` | Full and fast forms, frame by frame. |
 | Orbit, respace | `466DB0`, `466780` | partial | `set-172-73-*`, `set-73-*` | Two layers checked (Dagger and Cube L1 share layer 0). Big Fan and Guardian Angel speeds are unchecked. |
-| Shooter, fire | `4702E0`, `467170` | partial | `set-8-46-101`, `set-67`, `set-73-73` | The ordinary tear rows (Bobby, Maggy, Cube L2). Robo-Baby's laser, Rotten Baby's flies, Rainbow's effect roll and Bandages' charm roll are not ported. |
-| Chase | `469A00`, `4688D0` | partial | `trace-73x3-fixed` | Target search, FindGridPath walk and Cube L3/L4 blood splats (Cube L3 frame by frame). The query partition is rebuilt at the call, not at the frame start. |
-| Collision callback | `46FA50` | partial | `set-172-*`, `necro-265-*` | Enemy contact damage with the hit-set, projectile blocking, Dry Baby's roll. Familiar-specific cases (Punching Bag, Holy Water, Guillotine...) are not ported. |
+| Shooter, fire | `4702E0`, `467170` | partial | `set-8-46-101`, `set-67`, `set-73-73`, `set-174`, `set-207-207`, `set-268` | The ordinary tear rows, Rainbow Baby's `Random(9)` row roll, the Bandages' `Random(10)` charm roll (L4 adds flag `0x8000`) and Rotten Baby's Blue Fly (`4703EF`: no shot while its last fly lives). Robo-Baby's laser (`467010`) is not ported. Robo-Baby faces left with its own `*Side2` clips. |
+| Chase | `469A00`, `4688D0` | partial | `trace-73x3-fixed`, `set-207-207-207`, `set-270` | Target search, FindGridPath walk (2.2 x 0.83 for 47 and 56, 1.8 x 0.83 otherwise) and Cube L3/L4 blood splats. |
+| Enemy partition | `4545D0` | partial | `set-*` | Rebuilt once per frame after the full actor pass and before contacts, as the original does; every familiar target search (`4688D0`) reads that frame's partition. Bombs, which the original also inserts, are not. |
+| Room clear | `50A334`, `46DF10` | partial | `set-94`, `set-96`, `set-98`, `set-131`, `set-271` | Player room clear walks the familiars in manager order: F90 counts rooms, and the bag spawners drop on their divisor law (`0x66C340`), with Daemon's Tail's heart roll. Juicy Sack's spiders are not ported. |
+| Blue Flies | `508740`, `468AD0`, `46FA50` | partial | `set-268`, `set-10` | AddBlueFlies (seed, Spawn with the Player as spawner, target, flag), Init damage 2 x `50D090`, the target hunt and orbit, and the contact explosion behind the facing test `49B680`. The fly-kill rule (`46FEC0`: Kill instead of damage on fly kinds 13, 14, 18, 80, 222) and Hive Mind's 1.25 scale are not ported. |
+| Collision callback | `46FA50` | partial | `set-172-*`, `necro-265-*`, `set-268` | Enemy contact damage with the hit-set, projectile blocking, Dry Baby's roll, the Blue Fly explosion. Familiar-specific cases (Punching Bag, Holy Water, Guillotine...) and pickup contact (bums) are not ported. |
 | Remove | `466AD0` | partial | `set-73-73-*` | Respace and unlink on a count drop. |
 | Definitions and rendering for all variants | build.rs, renderer | complete |  | Every catalogue row and its actor. |
 | Trace rows in the item-set grader | pickup-interactions | complete |  | `familiars.position` (presented position, player tolerance) and `familiars.state` (clip, F58, F5C, orbit layer) per label. |
@@ -405,22 +408,22 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 8 | Brother Bobby | 1 | shooter | `4708E6` | owned+temp | complete | `set-8-46-101-e10.0-*`, `trace-bobby-random-0` |
 | 113 | Demon Baby | 2 | unique | `46E760` | owned+temp | missing |  |
 | 88 | Little Chubby | 3 | unique | `46A050` | owned+temp | missing |  |
-| 99 | Little Gish | 4 | shooter | `4708E6` | owned+temp | missing |  |
-| 100 | Little Steven | 5 | shooter | `4708E6` | owned+temp | missing |  |
-| 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | missing |  |
+| 99 | Little Gish | 4 | shooter | `4708E6` | owned+temp | partial | `set-99-e10.0-*`: the familiar and its tear row match; NPC positions and HP drift because the tear system does not yet slow NPCs (tear flag 8). |
+| 100 | Little Steven | 5 | shooter | `4708E6` | owned+temp | complete | `set-100-e10.0-*` |
+| 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | missing | Shooter poses (`*Side2`) ported; its laser `467010` (FireTechLaser variant 2 from the familiar) is not. |
 | 67 | Sister Maggy | 7 | shooter | `4708E6` | owned+temp | complete | `set-67-e10.0-*` |
 | 188 | Abel | 8 | shooter-mirror | `470910` | owned+temp | missing |  |
-| 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | missing |  |
-| 167 | Harlequin Baby | 10 | shooter | `4708E6` | owned+temp | missing |  |
-| 174 | Rainbow Baby | 11 | shooter | `4708E6` | owned+temp | missing |  |
-| 131 | Bomb Bag | 20 | spawner | `470CEE` | owned+temp | missing |  |
-| 94 | Sack of Pennies | 21 | spawner | `470CEE` | owned+temp | missing |  |
-| 96 | Little C.H.A.D. | 22 | spawner | `470CEE` | owned+temp | missing |  |
-| 98 | The Relic | 23 | spawner | `470CEE` | owned+temp | missing |  |
-| 144 | Bum Friend | 24 | bum | `46B060` | owned+temp | missing |  |
-| 128 | Forever alone | 30 | orbital | `471759` | owned+temp | missing |  |
-| 57 | Distant Admiration | 31 | orbital | `471759` | owned+temp | missing |  |
-| 112 | Guardian Angel | 32 | orbital | `471759` | owned+temp | missing |  |
+| 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | partial | `set-163-e10.0-*`: the familiar matches; one spectral tear's lifetime near the bottom wall and one NPC position differ (tear system). |
+| 167 | Harlequin Baby | 10 | shooter | `4708E6` | owned+temp | partial | `set-167-e10.0-random-0` passes; in `-fixed` the Gaper dies without its 11.1 split after a shared MT divergence outside the familiar. |
+| 174 | Rainbow Baby | 11 | shooter | `4708E6` | owned+temp | complete | `set-174-e10.0-*` |
+| 131 | Bomb Bag | 20 | spawner | `470CEE` | owned+temp | complete | `set-131-e10.0-*` |
+| 94 | Sack of Pennies | 21 | spawner | `470CEE` | owned+temp | complete | `set-94-e10.0-*` |
+| 96 | Little C.H.A.D. | 22 | spawner | `470CEE` | owned+temp | complete | `set-96-e10.0-*` |
+| 98 | The Relic | 23 | spawner | `470CEE` | owned+temp | complete | `set-98-e10.0-*` |
+| 144 | Bum Friend | 24 | bum | `46B060` | owned+temp | missing | Needs pickup x familiar contact (`504AE8`, `46DF00`). |
+| 128 | Forever alone | 30 | orbital | `471759` | owned+temp | complete | `set-128-e10.0-*` |
+| 57 | Distant Admiration | 31 | orbital | `471759` | owned+temp | complete | `set-57-e10.0-*` |
+| 112 | Guardian Angel | 32 | orbital | `471759` | owned+temp | complete | `set-112-e10.0-*` |
 | 155 | The Peeper | 17 | unique | `470DD0` | owned+temp | missing |  |
 | 170 | Daddy Longlegs | 16 | unique | `46C2F0` | owned+temp | missing |  |
 | 178 | Holy Water | 25 | unique | `470B97` | owned+temp | missing |  |
@@ -432,11 +435,11 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 206 | Guillotine | 68 | unique | `470AF7` | owned+temp | missing |  |
 | 265 | Dry Baby | 51 | unique | `471401` | owned+temp | complete | `set-265-e14.0-*`, `necro-265-e14.0-fixed` |
 | 266 | Juicy Sack | 52 | unique | `4712F7` | owned+temp | missing |  |
-| 268 | Rotten Baby | 54 | shooter | `4708E6` | owned+temp | missing |  |
+| 268 | Rotten Baby | 54 | shooter | `4708E6` | owned+temp | complete | `set-268-e10.0-*` |
 | 321 | Samson's Chains | 75 | unique | `46F4A0` | owned+temp | missing |  |
-| 271 | Mystery Sack | 57 | spawner | `470CEE` | owned+temp | missing |  |
-| 278 | Dark Bum | 64 | bum | `46B060` | owned+temp | missing |  |
-| 270 | Leech | 56 | chaser | `469A00` | owned+temp | partial | familiars (the full chase is shared with Cube L3; no Leech case against an enemy yet) |
+| 271 | Mystery Sack | 57 | spawner | `470CEE` | owned+temp | complete | `set-271-e10.0-*` |
+| 278 | Dark Bum | 64 | bum | `46B060` | owned+temp | missing | Needs pickup x familiar contact. |
+| 270 | Leech | 56 | chaser | `469A00` | owned+temp | complete | familiars, `set-270-e10.0-*` |
 | 319 | Cain's Other Eye | 76 | shooter-free | `470E5B` | owned+temp | missing |  |
 | 320 | ???'s Only Friend | 77 | unique | `46ADD0` | owned+temp | missing |  |
 | 279 | Big Fan | 65 | unique | `470F4F` | owned+temp | missing |  |
@@ -450,19 +453,19 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 318 | Gemini | 79 | unique | `46D790` | owned+temp | missing |  |
 | 277 | Lil' Haunt | 63 | unique | `46BE30` | owned+temp | missing |  |
 | 275 | Lil' Brimstone | 61 | unique | `46EA60` | owned+temp | missing |  |
-| 10 | Halo of Flies | 33 | orbital | `471759` | min(owned, 10) | missing |  |
-| 81 | Dead Cat | 40 | follower | `4708A9` | (owned+8)/9 | missing |  |
+| 10 | Halo of Flies | 33 | orbital | `471759` | min(owned, 10) | complete | `set-10-e10.0-*` (AddCollectible `52D5FA` adds a second count) |
+| 81 | Dead Cat | 40 | follower | `4708A9` | (owned+8)/9 | partial | `set-81-e10.0-*`: AddCollectible `52DE0D` (eight lives, one heart container) and the follower match; one Gusher (11.0) position differs late in `-fixed`. The respawn on death is not ported. |
 | 117 (passive) | Dead Bird | 14 | unique | `46BE30` | temp present | missing |  |
 | 274 | Best Bud | 60 | orbital | `471759` | temp present | missing |  |
 | 73 | Cube of Meat L1..L4 | 44..47 | orbital, orbital-shooter, chaser | `471759`, `471178`, `471168` | level law | partial | `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*`, `trace-73x3-fixed`, `trace-73x3-kill`. One case fails after the Gaper dies: the room-clear trinket (pickup 350.44) is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as it does in sets without familiars (1+4+12). The Cube itself matches (L3 frame by frame) |
-| 207 | Ball of Bandages L1..L4 | 69..72 | orbital, orbital-shooter, chaser-shooter | `471759`, `471178`, `470ADF` | level law | missing |  |
+| 207 | Ball of Bandages L1..L4 | 69..72 | orbital, orbital-shooter, chaser-shooter | `471759`, `471178`, `470ADF` | level law | partial | `set-207-*` for L1..L4 pass except `set-207-207-207-207-e10.0-random-0`: the familiar and the charm roll match, but a charmed tear's hit does not charm the Gaper in the port (NPC charm status is not ported), so the Gaper's path and the shared MT drift. |
 | 107 (active) | Isaac's Body | 48 | unique | `469700` | temp count | missing |  |
 | 325 (active) | (no Rebirth row) | 78 | unique | `470A30` | temp count | missing |  |
 | 238, 239 | Key Piece 1, 2, Full Key | 26, 27, 28 | follower, unique | `4708A9`, `46DBC0` | key law | missing |  |
 | trinket 54 | Isaac's Head | 12 | shooter | `4708E6` | trinket | missing |  |
 | trinket 57 | ???'s Soul | 13 | shooter-free | `470E5B` | trinket | missing |  |
 | trinket 60 | Eve's Bird Foot | 15 | unique | `46BE30` | temp trinket | missing |  |
-| (other spawners) | Blue fly | 43 | unique | `468AD0` | spawned | missing |  |
+| (other spawners) | Blue fly | 43 | unique | `468AD0` | spawned | partial | `set-268-e10.0-*`; the fly-kill rule on fly enemies is not ported. |
 | (other spawners) | Blue spider | 73 | unique | `468CB0` | spawned | missing |  |
 
 ## Leech evidence (existing slice)

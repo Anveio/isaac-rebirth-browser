@@ -288,7 +288,10 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     }
     let tail_admitted = state.weapon_admission.source_player_type == Some(0)
         && state.weapon_admission.pending_primary_cleanup.is_none()
-        && state.player.transformation_counts == Some([0, 0])
+        && state
+            .player
+            .transformation_counts
+            .is_some_and(|counts| counts.iter().all(|count| *count < 3))
         && state.source_cache_run_flags.is_some()
         && item_pipeline::ItemInputs::new(
             state.player_items.as_ref().expect("checked cache owner"),
