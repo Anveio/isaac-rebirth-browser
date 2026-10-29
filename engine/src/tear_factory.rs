@@ -72,3 +72,75 @@ pub(crate) fn fire(
     state.next_tear = state.next_tear.checked_add(1).ok_or("tear IDs exhausted")?;
     Ok(index)
 }
+
+/// Familiar fire 467170's ordinary kind: its own Random seed (42E8C0),
+/// Spawn550A40(2, 0) at the Familiar's position, whose Tear Init 5423D0
+/// draws its discarded falling speed and admits sound 153, then the caller's
+/// falling speed Random*0.2 (5417F0), damage (vtable+60), flags 0, scale
+/// (541FF0) and the default color. Init's height -23 stays, the falling
+/// acceleration stays 0 and no immediate Update runs.
+pub(crate) fn fire_familiar(
+    state: &mut State,
+    origin: WorldVector,
+    velocity: WorldVector,
+    damage: f32,
+    scale: f32,
+) -> Result<u32, String> {
+    let spawn_seed = state.boot_lifecycle.shared.next_u32();
+    let _initializer_falling_speed = (state.boot_lifecycle.shared.uniform() - 0.5) * 0.2;
+    state.audio.admit(
+        &mut state.boot_lifecycle.shared,
+        state.system_clock.system_counter - 1,
+        audio::SoundRequest {
+            id: 153,
+            volume: 1.0,
+            delay: 2,
+            looping: false,
+            pitch: 1.0,
+        },
+    );
+    let falling_speed = state.boot_lifecycle.shared.uniform() * 0.2 + 0.0;
+    let scale = scale.max(0.01_f32);
+    let mut tear = Tear {
+        id: state.next_tear,
+        x: 0.0,
+        y: 0.0,
+        vx: 0.0,
+        vy: 0.0,
+        age: 0,
+        spawn_seed,
+        birth_game_update: Some(state.game_update_count),
+        source_variant: Some(0),
+        shot_ordinal: None,
+        controlled: None,
+        persistent_contacts: None,
+        homing_target: None,
+        collision_damage: damage,
+        base_damage: damage,
+        attack_flags: crate::attack_flags::AttackFlags(0),
+        source_color: crate::attack_color::AttackColor::WHITE,
+        scale,
+        animation_tier: projectiles::regular_animation_tier(scale)?,
+        collision_radius: projectiles::collision_radius(scale, 8.0)?,
+        grid_contact: false,
+        grid_death: false,
+        motion: projectiles::TearMotion::unfired(
+            origin,
+            velocity,
+            projectiles::Parameters {
+                height: -23.0,
+                falling_speed,
+                falling_acceleration: 0.0,
+            },
+        )?,
+    };
+    tear.project();
+    let id = tear.id;
+    state.tears.push(tear);
+    state.actor_scheduler.admit(actors::ActorRef {
+        kind: actors::ActorKind::Tear,
+        id,
+    })?;
+    state.next_tear = state.next_tear.checked_add(1).ok_or("tear IDs exhausted")?;
+    Ok(id)
+}

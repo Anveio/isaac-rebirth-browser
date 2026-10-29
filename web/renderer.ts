@@ -397,7 +397,7 @@ export class Renderer {
       ctx.translate(familiar.presentedPosition.x * 0.65 + 32,
         familiar.presentedPosition.y * 0.65 - 46);
       ctx.scale(familiar.sprite.flipX ? -1 : 1, 1);
-      this.assets.draw(ctx, "gfx/003.056_leech.anm2", familiar.sprite.animation,
+      this.assets.draw(ctx, familiar.variant === 1 ? "gfx/003.001_brother bobby.anm2" : "gfx/003.056_leech.anm2", familiar.sprite.animation,
         familiar.sprite.offset.x * 0.65, familiar.sprite.offset.y * 0.65, familiar.sprite.frame);
       ctx.restore();
     }

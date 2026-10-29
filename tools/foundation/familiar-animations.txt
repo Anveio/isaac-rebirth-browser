@@ -26,3 +26,4 @@ gfx/1000.001_bomb explosion.anm2
 gfx/1000.030_dr. fetus target.anm2
 gfx/1000.031_dr. fetus rocket.anm2
 gfx/1000.018_bomb crater.anm2
+gfx/003.001_brother bobby.anm2

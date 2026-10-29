@@ -541,6 +541,9 @@ impl RunIntroduction {
         }
     }
 }
+fn no_fire_direction() -> i32 {
+    -1
+}
 fn no_charge_bar_flash() -> i32 {
     -1
 }
@@ -954,6 +957,10 @@ pub struct State {
     pub fire_cooldown: i32,
     pub max_fire_delay: i32,
     pub head_timer: i32,
+    /// Player+DA4: the full update's shooting direction (0 left, 1 up,
+    /// 2 right, 3 down), or -1 without shooting input. Familiars read it.
+    #[serde(default = "no_fire_direction")]
+    pub player_fire_direction: i32,
     pub actor_scheduler: actors::Scheduler,
     pub next_tear: u32,
     pub bombs: Vec<Bomb>,
@@ -1454,6 +1461,7 @@ impl Game {
                 fire_cooldown: -1,
                 max_fire_delay: 10,
                 head_timer: -1,
+                player_fire_direction: -1,
                 actor_scheduler: actors::Scheduler::default(),
                 next_tear: 1,
                 bombs: Vec::new(),
@@ -7075,6 +7083,16 @@ impl Game {
         };
         let shooting_locked = self.state.player.shooting_lock > 0;
         self.state.player.shooting = aim.is_some() && !shooting_locked;
+        if phase == phase::Phase::Update {
+            // 52F908 stores the aim's direction; 52F641 stores -1.
+            self.state.player_fire_direction = match aim {
+                Some(Direction::Left) => 0,
+                Some(Direction::Up) => 1,
+                Some(Direction::Right) => 2,
+                Some(Direction::Down) => 3,
+                None => -1,
+            };
+        }
         if phase == phase::Phase::Update && !shooting_locked {
             self.state.player.head_frame = if self.state.head_timer > 8 { 2 } else { 0 };
             if !source_weapon_clock && self.state.fire_cooldown >= 0 {

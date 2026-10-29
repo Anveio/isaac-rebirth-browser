@@ -374,6 +374,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
     .expect("parse authored Familiar/effect animations");
     let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
     for (entity_type, variant, actor) in [
+        (3, 1, "gfx/003.001_brother bobby.anm2"),
         (3, 56, "gfx/003.056_leech.anm2"),
         (1000, 2, "gfx/1000.002_blood explosion.anm2"),
         (1000, 3, "gfx/1000.003_fly explosion.anm2"),
