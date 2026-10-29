@@ -117,6 +117,7 @@ pub(crate) fn fire_familiar(
         controlled: None,
         persistent_contacts: None,
         homing_target: None,
+        grid_previous_velocity: None,
         collision_damage: damage,
         base_damage: damage,
         attack_flags: crate::attack_flags::AttackFlags(params.flags),
