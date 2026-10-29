@@ -2,7 +2,8 @@
 //! MoveRandomly5b4d40 picks a cardinal target up to eleven cells away from
 //! the signed Room+e98 path costs, then steers toward it each update.
 use crate::{
-    entities::NpcWorld, motion::WorldVector, mt::Mt19937, npcs::Npc, room_costs::RoomCosts,
+    entities::NpcWorld, grid::Grid, motion::WorldVector, mt::Mt19937, npcs::Npc,
+    room_costs::RoomCosts,
 };
 use serde::{Deserialize, Serialize};
 
@@ -399,12 +400,12 @@ fn choose(
 }
 
 /// GetGridIndex with the native -1 sentinel.
-fn cell_of(world: &NpcWorld, point: WorldVector) -> i32 {
+fn cell_of(world: &PathRoom, point: WorldVector) -> i32 {
     world.grid.index(point).map_or(-1, |index| index as i32)
 }
 
 /// A Room+e98 word by native index; -1 reads Room+e94 as `cost` does.
-fn cost_at(world: &NpcWorld, path: &mut Pathfinder, index: i32) -> Result<i32, String> {
+fn cost_at(world: &PathRoom, path: &mut Pathfinder, index: i32) -> Result<i32, String> {
     if index < 0 {
         let descriptor = world.grid.descriptor();
         if u32::from(descriptor.width) * u32::from(descriptor.height) > 200 {
@@ -420,7 +421,7 @@ fn cost_at(world: &NpcWorld, path: &mut Pathfinder, index: i32) -> Result<i32, S
 }
 
 /// GetGridPosition5c78b0 for a valid cell.
-fn centre(world: &NpcWorld, index: i32) -> Result<WorldVector, String> {
+fn centre(world: &PathRoom, index: i32) -> Result<WorldVector, String> {
     if index < 0 {
         return Err("FindGridPath centre left the room grid".into());
     }
@@ -498,7 +499,7 @@ fn pop_heap(heap: &mut Vec<(i32, i32)>) {
     heap.pop();
 }
 
-fn flood(path: &mut Pathfinder, world: &NpcWorld, start: i32) -> Result<(), String> {
+fn flood(path: &mut Pathfinder, world: &PathRoom, start: i32) -> Result<(), String> {
     let descriptor = world.grid.descriptor();
     let costs = world
         .path_costs
@@ -563,7 +564,7 @@ pub fn flood_costs(
 }
 
 /// 5b47f8: the visited neighbour nearest the target (first of L, U, R, D).
-fn step(path: &Pathfinder, world: &NpcWorld) -> Result<WorldVector, String> {
+fn step(path: &Pathfinder, world: &PathRoom) -> Result<WorldVector, String> {
     let descriptor = world.grid.descriptor();
     let (width, height) = (i32::from(descriptor.width), i32::from(descriptor.height));
     let mut best = path.cell;
@@ -583,10 +584,26 @@ fn step(path: &Pathfinder, world: &NpcWorld) -> Result<WorldVector, String> {
     centre(world, best)
 }
 
-/// NPCAI_Pathfinder::FindGridPath5b41e0: re-plan a flood path toward
-/// `target` every 10..19 calls (the only shared draw), walk cell centres or
-/// straight at a target in sight, and stamp `marker` into the owner's cell
-/// cost. Charm, confusion and fear are not admitted.
+/// The room a FindGridPath owner walks: the Game counter, the grid, the
+/// Room+e98 path costs and the room type.
+pub(crate) struct PathRoom<'a> {
+    pub game_counter: u32,
+    pub grid: &'a Grid,
+    pub path_costs: Option<&'a mut RoomCosts>,
+    pub room_type: u32,
+}
+
+/// The entity side of FindGridPath: any Entity owning an NPCAI_Pathfinder
+/// (an NPC's +7d8, a chasing Familiar's +7e0). `sight_frame` is its
+/// 444890(10, Entity+8) gate.
+pub(crate) struct PathOwner<'a> {
+    pub position: WorldVector,
+    pub velocity: &'a mut WorldVector,
+    pub grid_collision_class: u32,
+    pub sight_frame: bool,
+}
+
+/// NPCAI_Pathfinder::FindGridPath5b41e0 for an NPC.
 pub(crate) fn find_grid_path(
     npc: &mut Npc,
     random: &mut Mt19937,
@@ -600,22 +617,39 @@ pub(crate) fn find_grid_path(
         .pathfinder
         .take()
         .ok_or("pathfinding NPC requires its NPCAI_Pathfinder")?;
+    let sight_frame = crate::plain_npc::on_frame(npc, world, 10)?;
+    let mut room = PathRoom {
+        game_counter: world.game_counter,
+        grid: world.grid,
+        path_costs: world.path_costs.as_deref_mut(),
+        room_type: world.room_type,
+    };
+    let owner = PathOwner {
+        position: npc.position,
+        velocity: &mut npc.velocity,
+        grid_collision_class: npc.grid_collision_class,
+        sight_frame,
+    };
     let result = find_with(
-        npc, &mut path, random, world, target, speed, marker, friction,
+        owner, &mut path, random, &mut room, target, speed, marker, friction,
     );
     npc.pathfinder = Some(path);
     result
 }
 
+/// NPCAI_Pathfinder::FindGridPath5b41e0: re-plan a flood path toward
+/// `target` every 10..19 calls (the only shared draw), walk cell centres or
+/// straight at a target in sight, and stamp `marker` into the owner's cell
+/// cost. Charm, confusion and fear are not admitted.
 #[expect(
     clippy::too_many_arguments,
     reason = "FindGridPath5b41e0's owner, pathfinder, target, speed, marker and friction"
 )]
-fn find_with(
-    npc: &mut Npc,
+pub(crate) fn find_with(
+    npc: PathOwner,
     path: &mut Pathfinder,
     random: &mut Mt19937,
-    world: &mut NpcWorld,
+    world: &mut PathRoom,
     target: WorldVector,
     speed: f32,
     marker: i32,
@@ -642,7 +676,7 @@ fn find_with(
     }
     let mut slowdown = 1.0;
     if world.game_counter.wrapping_add(1).is_multiple_of(3) {
-        let probe = npc.position + normalized(npc.velocity) * 40.0;
+        let probe = npc.position + normalized(*npc.velocity) * 40.0;
         let ahead = cost_at(world, path, cell_of(world, probe))?;
         if (1..=949).contains(&ahead) {
             slowdown = 0.7;
@@ -658,7 +692,7 @@ fn find_with(
     if costs.get(path.cell as usize)? <= 949 {
         costs.store(path.cell as usize, marker)?;
     }
-    if crate::plain_npc::on_frame(npc, world, 10)? {
+    if npc.sight_frame {
         let sighted = centre(world, cell_of(world, target))?;
         let costs = world
             .path_costs
@@ -699,7 +733,7 @@ fn find_with(
                     x: (delta.x / length) * push,
                     y: (delta.y / length) * push,
                 };
-                npc.velocity = npc.velocity
+                *npc.velocity = *npc.velocity
                     + WorldVector {
                         x: accel.x / *friction,
                         y: accel.y / *friction,

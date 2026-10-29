@@ -693,6 +693,19 @@ fn nested_use(state: &mut State, id: u32, variant0: bool) -> Result<(), String> 
     use_tail(state, id)
 }
 
+/// 522250(id, false, true, false) called from outside a Player Use (Dry
+/// Baby's 4714A7 Necronomicon): the same nested form the D100 uses.
+pub(crate) fn nested_use_from(state: &mut State, id: u32) -> Result<(), String> {
+    if state.player_items.is_none() {
+        return Ok(());
+    }
+    let variant0 = state
+        .player
+        .entity_source
+        .is_none_or(|source| source.variant == 0);
+    nested_use(state, id, variant0)
+}
+
 /// `variant0` selects the leaf bodies (Entity+14); `show` is 522385's item
 /// animation byte (a direct Use shows it for Player variant0, a nested Use
 /// never does).

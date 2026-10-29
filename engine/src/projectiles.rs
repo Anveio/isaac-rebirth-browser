@@ -170,6 +170,30 @@ pub fn regular_animation_tier(scale: f32) -> Result<u8, String> {
 }
 
 impl TearMotion {
+    /// A Tear left at its Spawn550A40 position with no immediate Update,
+    /// as Familiar fire 467170 leaves it: 541790 stores the height and its
+    /// render offset; the first own Update integrates.
+    pub fn unfired(
+        position: WorldVector,
+        velocity: WorldVector,
+        parameters: Parameters,
+    ) -> Result<Self, String> {
+        let motion = Self {
+            position,
+            presented_position: position,
+            velocity,
+            height: parameters.height,
+            falling_speed: parameters.falling_speed,
+            falling_acceleration: parameters.falling_acceleration,
+            render_offset_y: height_offset(parameters.height, parameters.falling_acceleration),
+            lifetime: Lifetime::Alive,
+        };
+        if !motion.is_finite() {
+            return Err("tear spawn requires finite parameters".into());
+        }
+        Ok(motion)
+    }
+
     /// FireTear overrides initialized stats, calls Update immediately and
     /// subtracts stored velocity. Preserve the add/add/sub birth rounding.
     /// The caller routes eye, entity seed, discarded initializer randomness,

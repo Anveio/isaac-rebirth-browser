@@ -1,7 +1,11 @@
-//! Player cache511f10 -> Familiar reconciliation508d10, and Leech56 appearance.
-//! Actual navigation/target/contact consumers remain explicit pending work.
+//! The Familiar entity (type 3): the 513E80 roster's CheckFamiliar 508D10
+//! reconcile, Init 46EE90, the Update shell 4704A0 (appearance, the variant
+//! switch, the common tail) and Remove 466AD0. Variant data lives in
+//! familiar_variants.rs and the behaviour primitives in familiar_ai.rs.
 use crate::{
     actors::{ActorKind, ActorRef},
+    familiar_ai, familiar_roster,
+    familiar_variants::{self, UpdateCase},
     grid::{Collider, CollisionGeometry, Grid},
     items,
     motion::WorldVector,
@@ -9,7 +13,6 @@ use crate::{
     State,
 };
 use serde::{Deserialize, Serialize};
-use std::sync::OnceLock;
 
 const ZERO: WorldVector = WorldVector { x: 0.0, y: 0.0 };
 fn blood_variant() -> u32 {
@@ -151,18 +154,59 @@ pub struct Familiar {
     pub full_updates: u32,
     /// Calls requiring the still-unimplemented Leech path/target callbacks.
     pub unresolved_ai_updates: u32,
+    /// Familiar+F58: the shooter's fire cooldown, zeroed by Init 46EF04.
+    #[serde(default)]
+    pub fire_cooldown: i32,
+    /// Familiar+F5C: the shooter's pose hold, zeroed by Init 46EF0E.
+    #[serde(default)]
+    pub shoot_hold: i32,
+    /// Entity+498 (the follower ahead) and +4A0 (the follower behind),
+    /// linked by 46ED90 at Init; None follows the Player.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub follow_parent: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub follow_child: Option<u32>,
+    /// Familiar+F6C/F70/F78/F7C: orbit phase, radius vector, speed and
+    /// layer (-1 when not an orbital), set by Init and 466780.
+    #[serde(default)]
+    pub orbit_phase: f32,
+    #[serde(default = "zero_vector")]
+    pub orbit_radius: WorldVector,
+    #[serde(default)]
+    pub orbit_speed: f32,
+    #[serde(default = "no_orbit_layer")]
+    pub orbit_layer: i32,
+    /// Familiar+F98: the Entity+8 of every enemy contact damage reached
+    /// since the last 444890 clear.
+    #[serde(default)]
+    pub hits: Vec<u32>,
+    /// Entity+4A8: the chased enemy (an NPC id) from 4688D0.
+    #[serde(default)]
+    pub target: Option<u32>,
+    /// Familiar+7E0: the NPCAI_Pathfinder a chaser walks with (5B41E0).
+    #[serde(default = "crate::pathfinder::Pathfinder::new")]
+    pub pathfinder: crate::pathfinder::Pathfinder,
 }
 
+fn zero_vector() -> WorldVector {
+    ZERO
+}
+
+fn no_orbit_layer() -> i32 {
+    -1
+}
+
+
 impl Familiar {
-    fn leech(id: u32, seed: u32, position: WorldVector, game_count: u32) -> Self {
-        let config = definition(3, 56).expect("authored Leech config");
+    fn new(variant: u32, id: u32, seed: u32, position: WorldVector, game_count: u32) -> Self {
+        let config = definition(3, variant).expect("authored Familiar config");
         let player = ActorRef {
             kind: ActorKind::Player,
             id: 0,
         };
         Self {
             id,
-            variant: 56,
+            variant,
             subtype: 0,
             spawn_seed: seed,
             owner: player,
@@ -182,7 +226,7 @@ impl Familiar {
             hp: config.base_hp,
             max_hp: config.base_hp,
             shadow_size: config.shadow_size,
-            grid_collision_class: 5,
+            grid_collision_class: familiar_variants::grid_class(variant),
             entity_collision_class: 4,
             flags: 0x20_0004,
             visible: true,
@@ -193,6 +237,17 @@ impl Familiar {
             sprite: Sprite::new(config),
             full_updates: 0,
             unresolved_ai_updates: 0,
+            fire_cooldown: 0,
+            shoot_hold: 0,
+            follow_parent: None,
+            follow_child: None,
+            orbit_phase: 0.0,
+            orbit_radius: ZERO,
+            orbit_speed: 0.0,
+            orbit_layer: -1,
+            hits: Vec::new(),
+            target: None,
+            pathfinder: crate::pathfinder::Pathfinder::new(),
         }
     }
 }
@@ -562,40 +617,6 @@ pub fn advance_effect(state: &mut State, phase: Phase, id: u32) -> Result<(), St
     Ok(())
 }
 
-fn reconcile_selected_zero_requests(state: &State) -> Result<bool, String> {
-    const VARIANTS: [u32; 68] = [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 21, 22, 23, 24, 30, 31, 32, 17, 16, 25, 41, 42, 35,
-        50, 53, 68, 51, 52, 54, 75, 57, 64, 56, 76, 77, 65, 55, 58, 59, 66, 67, 74, 62, 79, 63, 61,
-        33, 40, 14, 60, 44, 45, 46, 47, 69, 70, 71, 72, 48, 78, 28, 26, 27, 12, 13, 15,
-    ];
-    let mut empty_queries = true;
-    for variant in VARIANTS {
-        // 508D10 queries 455680 even when the requested count is zero. Retain
-        // inactive and dead records until Uninit. An unowned lookup is an
-        // error; nonempty excess-removal paths remain requested here.
-        let query = state
-            .actor_scheduler
-            .full_phase()
-            .into_iter()
-            .filter(|actor| actor.kind == ActorKind::Familiar)
-            .map(|actor| {
-                state
-                    .familiars
-                    .iter()
-                    .find(|familiar| familiar.id == actor.id)
-                    .ok_or("Familiar manager query contains an unowned actor")
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        if query
-            .into_iter()
-            .any(|familiar| familiar.variant == variant)
-        {
-            empty_queries = false;
-        }
-    }
-    Ok(empty_queries)
-}
-
 pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     let Some(owner) = state.player_items.as_ref() else {
         return Ok(());
@@ -603,21 +624,31 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     if owner.unevaluated_cache_flags & 0x200 == 0 {
         return Ok(());
     }
-    if state.weapon_admission.source_player_type == Some(0)
-        && crate::item_pipeline::ItemInputs::new(owner)?.admits_selected_zero_familiar_requests()
-    {
-        if reconcile_selected_zero_requests(state)? {
-            state
-                .player_items
-                .as_mut()
-                .expect("checked Player owner")
-                .unevaluated_cache_flags &= !0x200;
-        }
+    // 513E80: every 508D10 call in order. Unported variant AI is local to
+    // each familiar, so the whole 0x200 request completes.
+    let calls = familiar_roster::calls(state.player_items.as_ref().expect("checked Player owner"));
+    for call in calls {
+        check_familiar(state, call)?;
+    }
+    state
+        .player_items
+        .as_mut()
+        .expect("checked Player owner")
+        .unevaluated_cache_flags &= !0x200;
+    Ok(())
+}
+
+/// 508D10(variant, count, rng): the live familiars of the variant, in
+/// manager order; those past the count are removed (vtable+48, Remove
+/// 466AD0); each missing one takes a seed from the RNG (5C2D70), a shared
+/// direction at 20 units from the Player (42E8D0), the room clamp
+/// (5C7E50), Spawn 550A40 and one explicit Update (vtable+18).
+fn check_familiar(state: &mut State, call: familiar_roster::Call) -> Result<(), String> {
+    let requested = call.count.max(0) as usize;
+    if requested > 0 && definition(3, call.variant).is_none() {
+        // 78 (Scissors) names no base-Rebirth entity row: Spawn makes nothing.
         return Ok(());
     }
-    let requested = owner.owned_counts[270]
-        .wrapping_add(owner.temporary_count(270))
-        .max(0) as usize;
     let existing: Vec<_> = state
         .actor_scheduler
         .full_phase()
@@ -625,21 +656,22 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         .filter(|actor| actor.kind == ActorKind::Familiar)
         .filter_map(|actor| {
             state.familiars.iter().position(|familiar| {
-                familiar.id == actor.id && familiar.variant == 56 && !familiar.removed
+                familiar.id == actor.id && familiar.variant == call.variant && !familiar.removed
             })
         })
         .collect();
     for &index in existing.iter().skip(requested) {
-        state.familiars[index].active = false;
-        state.familiars[index].removed = true;
+        remove(state, index);
     }
     for _ in existing.len()..requested {
-        let seed = state
-            .player_items
-            .as_mut()
-            .expect("checked Player owner")
-            .item_rngs[270]
-            .raw();
+        let owner = state.player_items.as_mut().expect("checked Player owner");
+        let rng = if call.trinket_rng {
+            owner.trinket_rngs.get_mut(call.rng as usize)
+        } else {
+            owner.item_rngs.get_mut(call.rng as usize)
+        }
+        .ok_or("Familiar RNG owner out of range")?;
+        let seed = rng.raw();
         let angle =
             (f64::from(state.boot_lifecycle.shared.uniform()) * std::f64::consts::PI * 2.0) as f32;
         let (sin, cos) = (crate::fmath::sin(angle), crate::fmath::cos(angle));
@@ -654,9 +686,14 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         let position = grid.clamp_room(position, 20.0);
         let id = state.next_familiar;
         state.next_familiar = id.checked_add(1).ok_or("Familiar handle exhausted")?;
-        state
-            .familiars
-            .push(Familiar::leech(id, seed, position, state.game_update_count));
+        state.familiars.push(Familiar::new(
+            call.variant,
+            id,
+            seed,
+            position,
+            state.game_update_count,
+        ));
+        init(state, state.familiars.len() - 1);
         state.actor_scheduler.admit(ActorRef {
             kind: ActorKind::Familiar,
             id,
@@ -665,18 +702,79 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
         // deficit. The manager's captured old tail does not advance it twice.
         advance_actor(state, Phase::Update, id)?;
     }
-    let owner = state.player_items.as_mut().expect("checked Player owner");
-    // unevaluatedCacheFlags is a port diagnostic, not native d6c. Source clears
-    // all bits only after all selected callbacks; unsupported flags stay here.
-    let unsupported_familiar = owner.owned_counts.iter().enumerate().any(|(id, &count)| {
-        id != 270
-            && (count != 0 || owner.temporary_count(id as u32) != 0)
-            && items::definition(id as u32).is_some_and(|config| config.kind == 4)
-    });
-    if !unsupported_familiar {
-        owner.unevaluated_cache_flags &= !0x200;
-    }
     Ok(())
+}
+
+/// Init 46EE90's variant tail: the follower train (4666B0 -> 46ED90), or
+/// the orbit layer (0x66C470), its respacing 466780(layer, true) and the
+/// layer radius 0x8ECB00 (x1.5 for Sacrificial Dagger, 46F308).
+fn init(state: &mut State, index: usize) {
+    let variant = state.familiars[index].variant;
+    if familiar_variants::is_follower(variant) {
+        let id = state.familiars[index].id;
+        add_to_followers(state, id);
+        return;
+    }
+    if let Some(layer) = familiar_variants::orbit_layer(variant) {
+        state.familiars[index].orbit_layer = layer as i32;
+        familiar_ai::respace(state, layer, index, true);
+        let [x, y] = familiar_variants::ORBIT_RADIUS[layer];
+        let radius = WorldVector { x, y };
+        state.familiars[index].orbit_radius = if variant == 35 { radius * 1.5 } else { radius };
+    }
+}
+
+/// Remove 466AD0: the entity leaves the manager, its orbit layer is
+/// respaced without it (466780(layer, false)) and follower links drop.
+fn remove(state: &mut State, index: usize) {
+    state.familiars[index].active = false;
+    state.familiars[index].removed = true;
+    let layer = state.familiars[index].orbit_layer;
+    if layer >= 0 {
+        familiar_ai::respace(state, layer as usize, index, false);
+    }
+    unlink_follower(state, state.familiars[index].id);
+}
+
+/// 46ED90: every follower of the same Player with no +4A0 takes the new
+/// Familiar as its child (447F40), and the new one takes it as +498
+/// (447FC0), in manager order.
+fn add_to_followers(state: &mut State, id: u32) {
+    let tails: Vec<u32> = state
+        .actor_scheduler
+        .full_phase()
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Familiar && actor.id != id)
+        .filter(|actor| {
+            state.familiars.iter().any(|familiar| {
+                familiar.id == actor.id
+                    && familiar_variants::is_follower(familiar.variant)
+                    && familiar.follow_child.is_none()
+            })
+        })
+        .map(|actor| actor.id)
+        .collect();
+    for tail in tails {
+        if let Some(familiar) = state.familiars.iter_mut().find(|f| f.id == tail) {
+            familiar.follow_child = Some(id);
+        }
+        if let Some(familiar) = state.familiars.iter_mut().find(|f| f.id == id) {
+            familiar.follow_parent = Some(tail);
+        }
+    }
+}
+
+/// A removed Familiar's EntityRef registrations (4481E0) drop the links
+/// that name it.
+fn unlink_follower(state: &mut State, id: u32) {
+    for familiar in &mut state.familiars {
+        if familiar.follow_parent == Some(id) {
+            familiar.follow_parent = None;
+        }
+        if familiar.follow_child == Some(id) {
+            familiar.follow_child = None;
+        }
+    }
 }
 
 pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), String> {
@@ -691,19 +789,21 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
     if familiar.removed || phase == Phase::Skipped {
         return Ok(());
     }
-    let grid = Grid::new(
-        state
-            .room
-            .grid
-            .clone()
-            .ok_or("Familiar update requires room grid")?,
-    )?;
-    let collider = collider();
+    let config = definition(3, familiar.variant).ok_or("Familiar variant has no authored config")?;
     if phase == Phase::Interpolate {
         let mut position =
             familiar.position + (familiar.velocity * familiar.current_friction) * 0.5;
         let mut velocity = familiar.velocity;
-        collider.resolve_nonplayer_ground(&grid, &mut position, &mut velocity, true)?;
+        if familiar.grid_collision_class != 0 {
+            let grid = Grid::new(
+                state
+                    .room
+                    .grid
+                    .clone()
+                    .ok_or("Familiar update requires room grid")?,
+            )?;
+            collider(familiar.variant)?.resolve_nonplayer_ground(&grid, &mut position, &mut velocity, true)?;
+        }
         familiar.presented_position = position;
         return Ok(());
     }
@@ -711,9 +811,7 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         .full_updates
         .checked_add(1)
         .ok_or("Familiar full callback count exhausted")?;
-    familiar
-        .sprite
-        .advance(definition(3, 56).expect("authored Leech clips"))?;
+    familiar.sprite.advance(config)?;
     familiar.velocity = familiar.velocity * familiar.current_friction;
     familiar.position = familiar.position + familiar.velocity;
     familiar.presented_position = familiar.position;
@@ -732,42 +830,78 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
         }
         return Ok(());
     }
-    // Source469a00's empty-room owner deadband requires no path request or draw.
-    // Other target/path consumers stay observable instead of a fitted vector.
-    let player = crate::bombs::player_world(state);
-    let familiar = &mut state.familiars[index];
-    let delta = WorldVector {
-        x: player.x - familiar.position.x,
-        y: player.y - familiar.position.y,
-    };
-    if state.room.npcs.iter().any(|npc| !npc.removed)
-        || delta.x * delta.x + delta.y * delta.y > 6400.0
-    {
-        familiar.unresolved_ai_updates = familiar
-            .unresolved_ai_updates
-            .checked_add(1)
-            .ok_or("unresolved Familiar callback count exhausted")?;
+    // 47075A: the variant switch.
+    match familiar_variants::update_case(familiar.variant) {
+        UpdateCase::None => {}
+        UpdateCase::Follower => familiar_ai::follow(state, index, false)?,
+        UpdateCase::Shooter | UpdateCase::ShooterMimic => {
+            familiar_ai::follow(state, index, false)?;
+            familiar_ai::shoot(state, index)?;
+        }
+        UpdateCase::Orbital => familiar_ai::orbit(state, index),
+        UpdateCase::OrbitalShooter => {
+            familiar_ai::orbit(state, index);
+            familiar_ai::shoot(state, index)?;
+        }
+        UpdateCase::Chaser => familiar_ai::chase(state, index)?,
+        UpdateCase::ChaserShooter => {
+            familiar_ai::chase(state, index)?;
+            familiar_ai::shoot(state, index)?;
+        }
+        UpdateCase::DryBaby => familiar_ai::dry_baby(state, index)?,
+        UpdateCase::ShooterMirror
+        | UpdateCase::ShooterFree
+        | UpdateCase::Spawner
+        | UpdateCase::Bum
+        | UpdateCase::Unique(_) => {
+            // Not ported: the familiar stays admitted and visible; the
+            // missing case is counted on it, never on the cache.
+            let familiar = &mut state.familiars[index];
+            familiar.unresolved_ai_updates = familiar.unresolved_ai_updates.saturating_add(1);
+        }
     }
-    familiar.current_friction *= 0.85;
-    if (familiar.velocity.x * familiar.velocity.x + familiar.velocity.y * familiar.velocity.y)
-        .sqrt()
-        < 2.0
-    {
-        familiar.sprite.frame = 0.0;
-    }
+    tail(state, index);
     Ok(())
 }
 
-fn collider() -> &'static Collider {
-    static COLLIDER: OnceLock<Collider> = OnceLock::new();
-    COLLIDER.get_or_init(|| {
-        let config = definition(3, 56).expect("authored Leech collider");
-        Collider::new(CollisionGeometry {
-            radius: config.collision_radius,
-            scale: WorldVector { x: 1.0, y: 1.0 },
-            points: config.grid_points,
+/// Update tail 47064C: 444890(interval) clears the contact hit-set, and
+/// BFFS! (247) scales the sprite by 1.25 (4706E7).
+fn tail(state: &mut State, index: usize) {
+    let frame = crate::knives::source_game_counter(state.game_update_count);
+    let bffs = state
+        .player_items
+        .as_ref()
+        .is_some_and(|owner| owner.owned_counts.get(247).copied().unwrap_or(0) > 0);
+    let sequence = state
+        .actor_scheduler
+        .sequence_id(ActorRef {
+            kind: ActorKind::Familiar,
+            id: state.familiars[index].id,
         })
-        .expect("authored Leech geometry")
+        .unwrap_or(0);
+    let familiar = &mut state.familiars[index];
+    if familiar.flags & 0x4000 == 0
+        && crate::familiar_contact::is_frame(
+            frame,
+            familiar_variants::hit_interval(familiar.variant),
+            sequence,
+        )
+    {
+        familiar.hits.clear();
+    }
+    if bffs && familiar_variants::bffs_scaled(familiar.variant) {
+        familiar.sprite.scale = familiar.sprite.scale * 1.25;
+    }
+}
+
+/// Each variant's grid collider from its entities2.xml row (radius and
+/// grid points), for the Familiars with a grid collision class.
+fn collider(variant: u32) -> Result<Collider, String> {
+    let config = definition(3, variant).ok_or("Familiar variant has no authored config")?;
+    Collider::new(CollisionGeometry {
+        radius: config.collision_radius,
+        scale: WorldVector { x: 1.0, y: 1.0 },
+        points: config.grid_points,
     })
 }
 
@@ -788,9 +922,9 @@ pub(crate) fn grid_contacts(state: &mut State) -> Result<(), String> {
         if let Some(familiar) = state
             .familiars
             .iter_mut()
-            .find(|familiar| familiar.id == actor.id)
+            .find(|familiar| familiar.id == actor.id && familiar.grid_collision_class != 0)
         {
-            collider().resolve_nonplayer_ground(
+            collider(familiar.variant)?.resolve_nonplayer_ground(
                 &grid,
                 &mut familiar.position,
                 &mut familiar.velocity,

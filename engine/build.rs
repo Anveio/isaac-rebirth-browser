@@ -367,14 +367,47 @@ fn costume_config_catalog(catalogue: &Path, actors: &Path) -> String {
     output
 }
 
-fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
-    let actors: Value = serde_json::from_str(
+/// Every type-3 row of entities2.xml takes its actor from the imported
+/// Familiar catalogue (`npm run assets:items`); the authored effect actors
+/// (and the authored Leech with its Poof/Heart clips) come from
+/// web/familiar-data.json.
+fn familiar_catalog(
+    path: &Path,
+    imported_actors: &Path,
+    imported_catalogue: &Path,
+    entities_xml: &str,
+) -> String {
+    let mut actors: Value = serde_json::from_str(
         &fs::read_to_string(path).expect("read authored Familiar/effect animations"),
     )
     .expect("parse authored Familiar/effect animations");
+    let imported: Value = serde_json::from_str(
+        &fs::read_to_string(imported_actors).expect("read imported Familiar actors"),
+    )
+    .expect("parse imported Familiar actors");
+    let catalogue: Value = serde_json::from_str(
+        &fs::read_to_string(imported_catalogue).expect("read imported item catalogue"),
+    )
+    .expect("parse imported item catalogue");
+    let mut rows: Vec<(u32, u32, String)> = Vec::new();
+    for familiar in catalogue["familiars"]
+        .as_array()
+        .expect("imported Familiar rows")
+    {
+        let variant = familiar["variant"].as_u64().expect("Familiar variant") as u32;
+        let actor = familiar["actor"].as_str().expect("Familiar actor");
+        // The authored Leech actor carries the effect clips its slice uses.
+        if variant == 56 {
+            rows.push((3, 56, "gfx/003.056_leech.anm2".into()));
+            continue;
+        }
+        if actors.get(actor).is_none() {
+            actors[actor] = imported[actor].clone();
+        }
+        rows.push((3, variant, actor.into()));
+    }
     let mut output = String::from("pub static DEFINITIONS: &[Definition] = &[\n");
-    for (entity_type, variant, actor) in [
-        (3, 56, "gfx/003.056_leech.anm2"),
+    for (entity_type, variant, actor) in rows.iter().map(|(t, v, a)| (*t, *v, a.as_str())).chain([
         (1000, 2, "gfx/1000.002_blood explosion.anm2"),
         (1000, 3, "gfx/1000.003_fly explosion.anm2"),
         (1000, 7, "gfx/1000.007_blood splat.anm2"),
@@ -403,7 +436,7 @@ fn familiar_catalog(path: &Path, entities_xml: &str) -> String {
         (1000, 30, "gfx/1000.030_dr. fetus target.anm2"),
         (1000, 31, "gfx/1000.031_dr. fetus rocket.anm2"),
         (1000, 18, "gfx/1000.018_bomb crater.anm2"),
-    ] {
+    ]) {
         let catalogue = &actors[actor];
         let default = catalogue["DefaultAnimation"]
             .as_str()
@@ -1413,9 +1446,25 @@ fn main() {
     .expect("write creep masks");
     let familiar_path = manifest.parent().unwrap().join("web/familiar-data.json");
     println!("cargo:rerun-if-changed={}", familiar_path.display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        manifest
+            .parent()
+            .unwrap()
+            .join("web/generated/item-assets/familiar-data.json")
+            .display()
+    );
     fs::write(
         output.join("familiar_catalog.rs"),
-        familiar_catalog(&familiar_path, &xml),
+        familiar_catalog(
+            &familiar_path,
+            &manifest
+                .parent()
+                .unwrap()
+                .join("web/generated/item-assets/familiar-data.json"),
+            &catalogue,
+            &xml,
+        ),
     )
     .expect("write authored Familiar/effect catalogue");
     let attack_path = manifest.parent().unwrap().join("web/attack-data.json");

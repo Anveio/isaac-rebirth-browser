@@ -102,6 +102,13 @@ def observe(pid, context):
                 if 10 <= result['type'] < 1000:
                     # Entity+484 HitPoints and +488 MaxHitPoints.
                     result['hp'], result['maxHp'] = pair(0x484)
+                if result['type'] == 3:
+                    # Familiar: the main clip and frame, F58 (fire cooldown /
+                    # proc timer) and F5C (shoot pose hold), F7C orbit layer.
+                    result['animation'] = clip_name(u64(address + 0x28 + 0x18))
+                    result.update(sprite_frame(address + 0x28))
+                    result['f58'], result['f5c'] = struct.unpack('<ii', read(address + 0xf58, 8))
+                    result['orbitLayer'] = i32(address + 0xf7c)
                 if result['type'] == 5:
                     # The main Sprite's current clip (Entity+28, AnimationState+18).
                     result['animation'] = clip_name(u64(address + 0x28 + 0x18))

@@ -60,6 +60,9 @@ export interface Familiar {
   collisionDamage: number; hp: number; maxHp: number; shadowSize: number; gridCollisionClass: number; entityCollisionClass: number;
   flags: number; visible: boolean; active: boolean; removed: boolean; followerIndex: number; appearanceCounter: number;
   sprite: ActorSprite; fullUpdates: number; unresolvedAiUpdates: number;
+  fireCooldown: number; shootHold: number; followParent?: number; followChild?: number;
+  orbitPhase: number; orbitRadius: {x: number; y: number}; orbitSpeed: number; orbitLayer: number; hits: number[];
+  target: number | null; pathfinder: unknown;
 }
 type ParticleFlight = "initializing" | {flying: {height: number; verticalVelocity: number; gravity: number; layerRotation: number}};
 export type PoopEffect = { particle58: ParticleFlight } | { particle27: ParticleFlight } | { explosion43: {frameTarget: number} }
@@ -487,7 +490,7 @@ export interface State {
     lifetimeDivisor: number; timeToLive: number; fullUpdates: number; animationClock: number; animationPlaying: boolean;
     dead: boolean; removed: boolean}[];
   familiars: Familiar[]; nextFamiliar: number; spriteEffects: SpriteEffect[]; nextEffect: number;
-  maxFireDelay: number; headTimer: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number; render: ActorRef[] };
+  maxFireDelay: number; headTimer: number; playerFireDirection: number; actorScheduler: { actors: ActorRef[]; identities: {actor: ActorRef; sequenceId: number}[]; roomNextSequence: number; render: ActorRef[] };
   bombs: Bomb[]; explosions: Explosion[]; nextBomb: number; damageCooldown: number;
   bombPlacementCooldown: { remainingUpdates: number }; bombActionWasDown: boolean;
   runIntroduction: RunIntroduction; bossBar: BossBar; chargeBarFlash: number; pauseMenu: PauseMenu;

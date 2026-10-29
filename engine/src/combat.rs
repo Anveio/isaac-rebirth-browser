@@ -785,6 +785,9 @@ pub enum DamageKind {
     /// Lemon Mishap's creep 1000.32 (45D099): DAMAGE_COUNTDOWN with
     /// countdown 10.
     LemonCreep,
+    /// Familiar collision callback 46FCE6: TakeDamage with flags 0 and
+    /// countdown 30.
+    Familiar,
 }
 
 impl DamageKind {
@@ -798,6 +801,7 @@ impl DamageKind {
             Self::RoomEffect => 0,
             Self::HealthSync => 0,
             Self::LemonCreep => 0x40,
+            Self::Familiar => 0,
         }
     }
 
@@ -805,6 +809,7 @@ impl DamageKind {
     fn countdown(self) -> i32 {
         match self {
             Self::LemonCreep => 10,
+            Self::Familiar => 30,
             _ => 0,
         }
     }
