@@ -86,7 +86,10 @@ fn multiplier(state: &State, variant: u32) -> f32 {
 }
 
 /// The Familiar side of the contact pass, at 454938/454949.
-pub(crate) fn contacts(state: &mut State, npc_partition: &[Bounds]) -> Result<(), String> {
+pub(crate) fn contacts(
+    state: &mut State,
+    npc_partition: &crate::npcs::ContactPartition,
+) -> Result<(), String> {
     if state.familiars.is_empty() {
         return Ok(());
     }
@@ -161,12 +164,24 @@ fn projectile_contacts(state: &mut State) -> Result<(), String> {
 
 /// Against the NPC/Bomb partition (+10) as 4545D0 built it for this pass
 /// (`npcs::contact_partition`); 4453A0 skips a dead NPC.
-fn npc_contacts(state: &mut State, npcs: &[Bounds]) -> Result<(), String> {
+/// The Familiar partition against the NPC/Bomb partition: only its NPC
+/// members take a familiar's contact.
+fn npc_contacts(
+    state: &mut State,
+    partition: &crate::npcs::ContactPartition,
+) -> Result<(), String> {
     let familiars = familiar_bounds(state);
-    if familiars.is_empty() || npcs.is_empty() {
+    if familiars.is_empty() || partition.bounds.is_empty() {
         return Ok(());
     }
-    for (familiar_id, npc_id) in contact_candidates::pairs(&familiars, npcs)? {
+    for (familiar_id, member) in contact_candidates::pairs(&familiars, &partition.bounds)? {
+        let Some(crate::actors::ActorRef {
+            kind: crate::actors::ActorKind::Npc,
+            id: npc_id,
+        }) = partition.members.get(member as usize).copied()
+        else {
+            continue;
+        };
         let Some(index) = state.familiars.iter().position(|f| f.id == familiar_id) else {
             continue;
         };

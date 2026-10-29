@@ -5489,11 +5489,10 @@ impl Game {
                     }
                 }
             }
-            //4549D1 completes the NPC/Bomb partition's self-pairs before
+            //4549D1 completes the NPC/Bomb partition's self-pairs (NPC/NPC,
+            //NPC/Bomb and Bomb/Bomb, interleaved in bucket order) before
             //454A0A queries that partition against the actual Players.
             npcs::nonplayer_contacts(&mut self.state, &npc_partition)?;
-            bombs::bomb_contacts(&mut self.state)?;
-            bombs::player_contacts(&mut self.state)?;
             npcs::player_contacts(&mut self.state, &npc_partition)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             for index in 0..self.state.room.pickups.len() {
