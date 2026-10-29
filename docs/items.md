@@ -21,9 +21,9 @@ composition is [item synergies](item-synergies.md).
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
 | active | 75 | 7 | 22 | 46 | 7 |
-| familiar | 55 | 4 | 2 | 49 | 1 |
-| trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 11 | 53 | 339 | 128 |
+| familiar | 55 | 16 | 7 | 32 | 0 |
+| trinket | 60 | 0 | 0 | 60 | 27 |
+| **all** | 403 | 23 | 58 | 322 | 128 |
 
 Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
 
@@ -389,45 +389,45 @@ passing live comparison.
 | Id | Name | Status | Live case | Issue | Pool weight | Engine refs | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 8 | Brother Bobby | complete | pickup-interactions `set-8-46-101-e10.0-*` |  | 2 (treasure, devil) |  | Brother Bobby: roster call, follower train, Follow (full and fast), Shooter and the ordinary Fire tear; matches the original frame by frame (`trace-bobby-random-0`). [Notes](familiars.md). |
-| 10 | Halo of Flies | missing |  |  | 2 (treasure, keyMaster) |  |  |
+| 10 | Halo of Flies | complete | pickup-interactions `set-10-e10.0-*` |  | 2 (treasure, keyMaster) | yes | Halo of Flies: AddCollectible 52D5FA adds a second count, so the roster's min(owned, 10) spawns two layer-0 orbitals. [Notes](familiars.md). |
 | 11 | 1up! | missing |  |  | 1 (secret) |  |  |
-| 57 | Distant Admiration | missing |  |  | 2 (treasure, keyMaster) |  |  |
+| 57 | Distant Admiration | complete | pickup-interactions `set-57-e10.0-*` |  | 2 (treasure, keyMaster) |  | Distant Admiration: layer-2 orbital with contact damage. [Notes](familiars.md). |
 | 67 | Sister Maggy | complete | pickup-interactions `set-67-e10.0-*` |  | 2 (treasure, devil) |  | Sister Maggy: the shooter primitives with her tinted tear row. [Notes](familiars.md). |
-| 73 | Cube of Meat | partial | pickup-interactions `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*` |  |  |  | Cube of Meat level law: L1 orbital, L2 orbital shooter and L3/L4 chaser with blood splats match the original (L3 frame by frame). One case fails after the Gaper dies: the room-clear trinket is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as in sets without familiars; Cube achievements are not read. [Notes](familiars.md). |
-| 81 | Dead Cat | missing |  |  | 3 (devil, redChest, curse) |  |  |
+| 73 | Cube of Meat | partial | pickup-interactions `set-73-e10.0-*`, `set-73-73-e10.0-*`, `set-73-73-73-e10.0-*`, `set-73-73-73-73-e10.0-*` |  |  |  | Cube of Meat level law: L1 orbital, L2 orbital shooter and L3/L4 chaser with blood splats match the original (L3 frame by frame). One case fails after the Gaper dies: the room-clear trinket is missing in `set-73-73-73-73-e10.0-random-0`, where the shared MT diverges as in sets without familiars; achievement 0x90 is awarded. [Notes](familiars.md). |
+| 81 | Dead Cat | partial | pickup-interactions `set-81-e10.0-*` |  | 3 (devil, redChest, curse) | yes | Dead Cat: AddCollectible 52DE0D (eight more counts, one heart container, full red health) and the follower match. One Gusher position differs late in `-fixed`; the respawn on death is not ported. [Notes](familiars.md). |
 | 88 | Little Chubby | missing |  |  | 1 (treasure) |  |  |
-| 94 | Sack of Pennies | missing |  |  | 2 (treasure, secret) |  |  |
+| 94 | Sack of Pennies | complete | pickup-interactions `set-94-e10.0-*` |  | 2 (treasure, secret) |  | Sack of Pennies: the room-clear spawner law (46DF10) drops a coin every second room. [Notes](familiars.md). |
 | 95 | Robo-Baby | missing |  |  | 1 (treasure) |  |  |
-| 96 | Little C.H.A.D. | missing |  |  | 1 (treasure) |  |  |
-| 98 | The Relic | missing |  |  | 2 (treasure, angel) |  |  |
-| 99 | Little Gish | missing |  |  | 1 (treasure) |  |  |
-| 100 | Little Steven | missing |  |  | 2 (treasure, boss) | yes |  |
-| 112 | Guardian Angel | missing |  |  | 1 (angel) |  |  |
+| 96 | Little C.H.A.D. | complete | pickup-interactions `set-96-e10.0-*` |  | 1 (treasure) |  | Little C.H.A.D.: room-clear sound and half-heart law. [Notes](familiars.md). |
+| 98 | The Relic | complete | pickup-interactions `set-98-e10.0-*` |  | 2 (treasure, angel) |  | The Relic: room-clear soul-heart law. [Notes](familiars.md). |
+| 99 | Little Gish | partial | pickup-interactions `set-99-e10.0-*` |  | 1 (treasure) |  | Little Gish: shooter with its slowing tear row; NPCs drift because the tear system does not slow NPCs yet. [Notes](familiars.md). |
+| 100 | Little Steven | complete | pickup-interactions `set-100-e10.0-*` |  | 2 (treasure, boss) | yes | Little Steven: shooter with its homing tear row. [Notes](familiars.md). |
+| 112 | Guardian Angel | complete | pickup-interactions `set-112-e10.0-*` |  | 1 (angel) |  | Guardian Angel: layer-0 orbital, projectile blocking and the faster orbit speeds. [Notes](familiars.md). |
 | 113 | Demon Baby | missing |  |  | 2 (treasure, devil) |  |  |
-| 128 | Forever alone | missing |  |  | 2 (treasure, keyMaster) |  |  |
-| 131 | Bomb Bag | missing |  |  | 3 (treasure, secret, bossrush) |  |  |
+| 128 | Forever alone | complete | pickup-interactions `set-128-e10.0-*` |  | 2 (treasure, keyMaster) |  | Forever Alone: layer-3 orbital. [Notes](familiars.md). |
+| 131 | Bomb Bag | complete | pickup-interactions `set-131-e10.0-*` |  | 3 (treasure, secret, bossrush) |  | Bomb Bag: the room-clear spawner law drops a bomb. [Notes](familiars.md). |
 | 144 | Bum Friend | missing |  |  | 1 (treasure) |  |  |
 | 155 | The Peeper | missing |  |  | 1 (treasure) |  |  |
-| 163 | Ghost Baby | missing |  |  | 2 (treasure, devil) |  |  |
-| 167 | Harlequin Baby | missing |  |  | 1 (treasure) |  |  |
+| 163 | Ghost Baby | partial | pickup-interactions `set-163-e10.0-*` |  | 2 (treasure, devil) |  | Ghost Baby: shooter with its spectral tear row; the split Gaper walks elsewhere in the last row. [Notes](familiars.md). |
+| 167 | Harlequin Baby | partial | pickup-interactions `set-167-e10.0-*` |  | 1 (treasure) |  | Harlequin Baby: the doubled blood tear; `random-0` passes, `fixed` loses the Gaper's split after a shared MT divergence outside the familiar. [Notes](familiars.md). |
 | 170 | Daddy Longlegs | missing |  |  | 1 (treasure) |  |  |
 | 172 | Sacrificial Dagger | complete | pickup-interactions `set-172-e10.0-*`, `set-172-73-e10.0-*` |  | 2 (treasure, devil) |  | Sacrificial Dagger: orbit layer 0 at 1.5x radius, Rotation frame, contact damage with the hit-set and projectile blocking. [Notes](familiars.md). |
-| 174 | Rainbow Baby | missing |  |  | 1 (treasure) |  |  |
+| 174 | Rainbow Baby | partial | pickup-interactions `set-174-e10.0-*` |  | 1 (treasure) |  | Rainbow Baby: the Random(9) row roll; the familiar matches, but NPCs do not take the slow or charm statuses of its rows yet. [Notes](familiars.md). |
 | 178 | Holy Water | missing |  |  | 2 (treasure, angel) |  |  |
 | 187 | Guppy's Hairball | missing |  |  | 1 (devil) |  |  |
 | 188 | Abel | missing |  |  | 2 (treasure, goldenChest) |  |  |
 | 206 | Guillotine | missing |  |  | 1 (treasure) |  |  |
-| 207 | Ball of Bandages | missing |  |  |  |  |  |
+| 207 | Ball of Bandages | partial | pickup-interactions `set-207-e10.0-*`, `set-207-207-e10.0-*`, `set-207-207-207-e10.0-*`, `set-207-207-207-207-e10.0-*` |  |  |  | Ball of Bandages level law: L1 orbital, L2 orbital shooter, L3/L4 chaser shooters with the Random(10) charm roll and achievement 0x13 match; in `set-207-207-207-207-e10.0-random-0` a charmed tear does not charm the Gaper (NPC charm is not ported). [Notes](familiars.md). |
 | 238 | Key Piece 1 | missing |  |  |  |  |  |
 | 239 | Key Piece 2 | missing |  |  |  |  |  |
 | 264 | Smart Fly | missing |  |  | 2 (treasure, keyMaster) |  |  |
 | 265 | Dry Baby | complete | pickup-interactions `set-265-e14.0-*`, `necro-265-e14.0-fixed` |  | 1 (treasure) |  | Dry Baby: projectile blocking, the shared Random(4) Hit roll and the Necronomicon proc with its GiantBook pause. [Notes](familiars.md). |
 | 266 | Juicy Sack | missing |  |  | 1 (treasure) |  |  |
 | 267 | Robo-Baby 2.0 | missing |  |  | 1 (treasure) |  |  |
-| 268 | Rotten Baby | missing |  |  | 2 (treasure, devil) |  |  |
+| 268 | Rotten Baby | complete | pickup-interactions `set-268-e10.0-*` |  | 2 (treasure, devil) |  | Rotten Baby: a Blue Fly per shot while its last fly is gone; the fly hunts, orbits and explodes on contact. [Notes](familiars.md). |
 | 269 | Headless Baby | missing |  |  | 2 (treasure, devil) |  |  |
-| 270 | Leech | partial | familiars |  | 1 (treasure) |  | Spawn, Poof, following and healing; the full Chase 469A00 (target search and path walk) is the Cube L3 primitive, but no Leech case against an enemy has run. [Notes](familiars.md). |
-| 271 | Mystery Sack | missing |  |  | 3 (treasure, secret, beggar) |  |  |
+| 270 | Leech | complete | familiars, pickup-interactions `set-270-e10.0-*` |  | 1 (treasure) |  | Leech: spawn, Poof, the full Chase 469A00 against an enemy, and healing. [Notes](familiars.md). |
+| 271 | Mystery Sack | complete | pickup-interactions `set-271-e10.0-*` |  | 3 (treasure, secret, beggar) |  | Mystery Sack: the room-clear spawner law with its random pickup kind. [Notes](familiars.md). |
 | 272 | BBF | missing |  |  | 2 (treasure, keyMaster) |  |  |
 | 273 | Bob's Brain | missing |  |  | 2 (treasure, goldenChest) |  |  |
 | 274 | Best Bud | missing |  |  | 1 (treasure) |  |  |
@@ -493,7 +493,7 @@ passing live comparison.
 | 43 | Cursed Skull | missing |  |  |  |  |  |
 | 44 | Safety Cap | missing |  |  |  |  |  |
 | 45 | Ace of Spades | missing |  |  |  |  |  |
-| 46 | Isaac's Fork | missing |  |  |  |  |  |
+| 46 | Isaac's Fork | missing |  |  |  | yes |  |
 | 48 | A Missing Page | missing |  |  |  | yes |  |
 | 49 | Bloody Penny | missing |  |  |  |  |  |
 | 50 | Burnt Penny | missing |  |  |  |  |  |
