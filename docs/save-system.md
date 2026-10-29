@@ -596,7 +596,7 @@ Status: **done** (merged, suites compared), **wip** (branch open),
 
 | # | Area | Status | PR | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Design (this document) | wip | — | |
+| 1 | Design (this document) | done | #990 | |
 | 2 | Envelope, checksum, schema 3, 2→3 migration | todo | | |
 | 3 | IndexedDB heads, atomic commit, fallback, lock, persist | todo | | |
 | 4 | localStorage fallback backend and legacy migration | todo | | |
