@@ -511,7 +511,6 @@ Next: the rest of the Basement/Cellar spawn table.
 | #693 | P2 | Hoppers and Trites jump at different times and land in different places than the original | playtest 2026-10-18 `playtest/dc38bee/` hopper/trite side-by-sides |
 | #705 | P2 | Mulligan and Mulligoon fights drift from the original within seconds (Mulligoon evade path, an extra half heart lost) | playtest 2026-10-18 `playtest/8b70d62/` mulligan/mulligoon side-by-sides |
 | #724 | P2 | Skinny plays a squashed frame where the original stays upright after a hit, then the fight drifts and Isaac loses an extra half heart | playtest 2026-10-19 `playtest/9191351/` skinny-contrived-0 |
-| #982 | P2 | Golden and rainbow poop are not admitted (corn-poop fly respawn fixed by #995) | e2e dips 2026-10-29 |
 
 ## Bosses
 
@@ -840,6 +839,7 @@ Bugs in a test route or tool rather than in the game.
 | #196 | P3 | blood-start contrived route never reaches the boss in the original; regenerate it | e2e blood-start |
 | #220 | P3 | health-damage black-heart route never acquires the Black Heart in the original; regenerate it | e2e health-damage |
 | #603 | P3 | Complete backend snapshots repeatedly serialize large room/stain state and approach evidence budgets | e2e stage-exit |
+| #1013 | P3 | stage-exit/stage-continue route: health diverges on the walk to the trapdoor (boss drop), so Basement II generates a Curse room in the original and a Miniboss in the port; grade the generator inputs before the trapdoor | playtest 2026-10-29 `playtest/d12ddd8/floor2-continue-monstro.mp4` |
 
 ## Recently fixed
 
