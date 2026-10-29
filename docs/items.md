@@ -21,9 +21,9 @@ composition is [item synergies](item-synergies.md).
 | --- | --- | --- | --- | --- | --- |
 | passive | 213 | 0 | 29 | 184 | 94 |
 | active | 75 | 7 | 22 | 46 | 7 |
-| familiar | 55 | 16 | 7 | 32 | 0 |
+| familiar | 55 | 18 | 7 | 30 | 0 |
 | trinket | 60 | 0 | 0 | 60 | 27 |
-| **all** | 403 | 23 | 58 | 322 | 128 |
+| **all** | 403 | 25 | 58 | 320 | 128 |
 
 Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
 
@@ -397,13 +397,13 @@ passing live comparison.
 | 81 | Dead Cat | partial | pickup-interactions `set-81-e10.0-*` |  | 3 (devil, redChest, curse) | yes | Dead Cat: AddCollectible 52DE0D (eight more counts, one heart container, full red health) and the follower match. One Gusher position differs late in `-fixed`; the respawn on death is not ported. [Notes](familiars.md). |
 | 88 | Little Chubby | missing |  |  | 1 (treasure) |  |  |
 | 94 | Sack of Pennies | complete | pickup-interactions `set-94-e10.0-*` |  | 2 (treasure, secret) |  | Sack of Pennies: the room-clear spawner law (46DF10) drops a coin every second room. [Notes](familiars.md). |
-| 95 | Robo-Baby | missing |  |  | 1 (treasure) |  |  |
+| 95 | Robo-Baby | complete | pickup-interactions `set-95-e10.0-*` |  | 1 (treasure) |  | Robo-Baby: the Shooter with its *Side2 poses fires a technology laser parented to the familiar (467010). [Notes](familiars.md). |
 | 96 | Little C.H.A.D. | complete | pickup-interactions `set-96-e10.0-*` |  | 1 (treasure) |  | Little C.H.A.D.: room-clear sound and half-heart law. [Notes](familiars.md). |
 | 98 | The Relic | complete | pickup-interactions `set-98-e10.0-*` |  | 2 (treasure, angel) |  | The Relic: room-clear soul-heart law. [Notes](familiars.md). |
 | 99 | Little Gish | partial | pickup-interactions `set-99-e10.0-*` |  | 1 (treasure) |  | Little Gish: shooter with its slowing tear row; NPCs drift because the tear system does not slow NPCs yet. [Notes](familiars.md). |
 | 100 | Little Steven | complete | pickup-interactions `set-100-e10.0-*` |  | 2 (treasure, boss) | yes | Little Steven: shooter with its homing tear row. [Notes](familiars.md). |
 | 112 | Guardian Angel | complete | pickup-interactions `set-112-e10.0-*` |  | 1 (angel) |  | Guardian Angel: layer-0 orbital, projectile blocking and the faster orbit speeds. [Notes](familiars.md). |
-| 113 | Demon Baby | missing |  |  | 2 (treasure, devil) |  |  |
+| 113 | Demon Baby | complete | pickup-interactions `set-113-e10.0-*` |  | 2 (treasure, devil) |  | Demon Baby: every 10 frames a blood tear at the last visible enemy within 150 (46E760). [Notes](familiars.md). |
 | 128 | Forever alone | complete | pickup-interactions `set-128-e10.0-*` |  | 2 (treasure, keyMaster) |  | Forever Alone: layer-3 orbital. [Notes](familiars.md). |
 | 131 | Bomb Bag | complete | pickup-interactions `set-131-e10.0-*` |  | 3 (treasure, secret, bossrush) |  | Bomb Bag: the room-clear spawner law drops a bomb. [Notes](familiars.md). |
 | 144 | Bum Friend | missing |  |  | 1 (treasure) |  |  |

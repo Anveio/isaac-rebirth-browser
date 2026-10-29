@@ -137,6 +137,7 @@ const urls = import.meta.glob([
   "../references/isaac/rebirth/resources/gfx/enemybullets.png",
   "../references/isaac/rebirth/resources/gfx/puke_bullets.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_015_tearpoof*.png",
+  "../references/isaac/rebirth/resources/gfx/effects/effect_003_bloodtear.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_002_bloodpoof*.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_021_tiny bug.png",
   "../references/isaac/rebirth/resources/gfx/effects/effect_000_target.png",

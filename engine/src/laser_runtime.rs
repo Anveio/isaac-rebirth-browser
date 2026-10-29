@@ -118,7 +118,68 @@ fn ordered_targets(state: &State) -> Result<TargetQuery, String> {
     })
 }
 
+/// 476D84 with a spawner other than the Player (type 3, a familiar's
+/// Laser): no Player status resolver. Each hit calls TakeDamage(+48C, flags
+/// 8, the Parent's DamageInfo, 30) (476A60). PORT GAP: this path also
+/// collects the Player (476F4C) and, with 213, projectiles; neither is
+/// offered to a familiar Laser here.
+fn familiar_contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
+    let query = ordered_targets(state)?;
+    let contacts = state.lasers[index].contacts(&query.targets)?;
+    for contact in contacts {
+        match contact {
+            LaserContact::MarkEffectDead { .. } => {
+                record_frontier(state, index, LaserFrontier::EffectTargetFields);
+            }
+            LaserContact::Damage {
+                target,
+                source,
+                amount,
+            } => {
+                if target.kind != ActorKind::Npc || source.kind != ActorKind::Familiar {
+                    return Err("familiar Laser damage requires its NPC/Parent owners".into());
+                }
+                let Some(parent) = state.familiars.iter().find(|f| f.id == source.id) else {
+                    continue;
+                };
+                let copied_source = crate::combat::CopiedDamageSource {
+                    entity_type: 3,
+                    variant: parent.variant,
+                    spawner_type: 1,
+                    spawner_variant: 0,
+                    position: parent.position,
+                    velocity: parent.velocity,
+                    actor_at_copy: Some(source),
+                };
+                let npc = state
+                    .room
+                    .npcs
+                    .iter_mut()
+                    .find(|npc| npc.id == target.id)
+                    .ok_or("Laser contact target disappeared before its callback")?;
+                let health = npc.health();
+                npc.damage.enqueue(
+                    health,
+                    crate::combat::DamageEvent {
+                        amount,
+                        kind: crate::combat::DamageKind::Laser,
+                        source: crate::combat::DamageSource {
+                            id: source.id,
+                            entity_type: 3,
+                        },
+                        copied_source: Some(copied_source),
+                    },
+                )?;
+            }
+        }
+    }
+    Ok(())
+}
+
 fn contact_callbacks(state: &mut State, index: usize) -> Result<(), String> {
+    if state.lasers[index].origin == crate::lasers::LaserOrigin::FamiliarTechnology {
+        return familiar_contact_callbacks(state, index);
+    }
     //Validate actual numeric geometry and each reached NPC health owner before
     //a valid-unmapped history/status diagnostic can short-circuit callbacks.
     //This preflight does not mutate registry, health, queues, RNG or properties.
@@ -312,7 +373,8 @@ pub fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<(), Str
         }
         crate::lasers::LaserOrigin::PlayerCharged
         | crate::lasers::LaserOrigin::PlayerTechnology
-        | crate::lasers::LaserOrigin::PlayerTechnology2 => {
+        | crate::lasers::LaserOrigin::PlayerTechnology2
+        | crate::lasers::LaserOrigin::FamiliarTechnology => {
             crate::laser_player_runtime::advance_actor(state, phase, id)
         }
         crate::lasers::LaserOrigin::PlayerControlled => {

@@ -90,8 +90,13 @@ pub enum LaserOrigin {
     PlayerTechnology,
     ///Actual50E1C0 mode1 port provenance; not a native actor class or identity.
     PlayerTechnology2,
+    ///A familiar's ShootAngle 476120(variant 2) (Robo-Baby 467010): Parent and
+    ///spawner are the familiar.
+    FamiliarTechnology,
 }
 impl LaserOrigin {
+    ///Whether the ordinary Laser runtime (laser_player_runtime, its Uninit
+    ///and retirement) owns the actor; every origin but the NPC adapter.
     pub(crate) fn is_player(self) -> bool {
         matches!(
             self,
@@ -99,6 +104,15 @@ impl LaserOrigin {
                 | Self::PlayerControlled
                 | Self::PlayerTechnology
                 | Self::PlayerTechnology2
+                | Self::FamiliarTechnology
+        )
+    }
+
+    ///A thin 7/2 Laser with the Technology clip.
+    pub(crate) fn is_technology(self) -> bool {
+        matches!(
+            self,
+            Self::PlayerTechnology | Self::PlayerTechnology2 | Self::FamiliarTechnology
         )
     }
 }
@@ -499,7 +513,7 @@ impl Laser {
     pub(crate) fn contacts(&self, targets: &[LaserTarget]) -> Result<Vec<LaserContact>, String> {
         self.validate_contact_geometry()?;
         if !self.has_supported_neutral_body_flags()
-            || !self.has_first_player_parent()
+            || !(self.has_first_player_parent() || self.origin == LaserOrigin::FamiliarTechnology)
             || !self.line_enabled
             || self.line.points.len() < 2
         {
@@ -552,10 +566,8 @@ impl Laser {
 
     pub(crate) fn finish_full(&mut self) -> Result<(), String> {
         self.sprite.advance(
-            if matches!(
-                self.origin,
-                LaserOrigin::PlayerTechnology | LaserOrigin::PlayerTechnology2
-            ) || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
+            if self.origin.is_technology()
+                || (self.origin == LaserOrigin::PlayerControlled && self.variant == 2)
             {
                 technology_definition()
             } else {

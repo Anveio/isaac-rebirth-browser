@@ -5914,6 +5914,7 @@ impl Game {
                                 height: tear.motion.height,
                                 scale: tear.scale,
                                 render_offset_y: tear.motion.render_offset_y,
+                                variant: tear.source_variant,
                             });
                         } else if !dying && lifetime == projectiles::Lifetime::Dying {
                             tear.grid_death = grid_death;

@@ -36,6 +36,8 @@ pub(crate) enum UpdateCase {
     DryBaby,
     /// Blue Fly 468AD0: target or orbit layer 1, steering.
     BlueFly,
+    /// Demon Baby 46E760: Follow, then a blood tear at an enemy in sight.
+    DemonBaby,
     /// Any other case with its own Update, by address; not ported yet.
     Unique(u32),
 }
@@ -55,7 +57,7 @@ pub(crate) fn update_case(variant: u32) -> UpdateCase {
         20 | 21 | 22 | 23 | 57 => Spawner,
         24 | 64 => Bum,
         51 => DryBaby,
-        2 => Unique(0x46E760),
+        2 => DemonBaby,
         3 | 59 => Unique(0x46A050),
         14 | 15 | 63 => Unique(0x46BE30),
         16 => Unique(0x46C2F0),
@@ -203,6 +205,9 @@ pub(crate) struct FireParams {
     pub scale: f32,
     pub flags: u64,
     pub falling_base: f32,
+    /// Whether 5417F0 takes Random*0.2 + `falling_base` (467170) or
+    /// `falling_base` alone (Demon Baby 46E965).
+    pub falling_roll: bool,
     pub tint: [f32; 4],
     pub offsets: [i32; 3],
     /// Harlequin 10 fires two tears at ±0.2 of the perpendicular (467490).
@@ -228,6 +233,7 @@ const fn tear(tear_variant: u32, damage: f32, scale: f32) -> FireParams {
         scale,
         flags: 0,
         falling_base: 0.0,
+        falling_roll: true,
         tint: [1.0; 4],
         offsets: [0; 3],
         double: false,
@@ -257,11 +263,9 @@ pub(crate) fn fire_params(variant: u32) -> FireParams {
             double: true,
             ..tear(1, 4.0, 0.72)
         },
-        // 4678B8: Robo-Baby's tear row (its Shooter fires 467010 instead).
-        6 => FireParams {
-            ported: false,
-            ..tear(1, 5.0, 0.848)
-        },
+        // 4678B8: Robo-Baby's tear row (Rainbow Baby's row 4; Robo-Baby's own
+        // Shooter fires the laser 467010 instead).
+        6 => tear(1, 5.0, 0.848),
         // 4678F0: Little Gish, slowing (0x100000008), tinted.
         4 => FireParams {
             flags: 0x1_0000_0008,
@@ -315,6 +319,14 @@ pub(crate) fn fire_params(variant: u32) -> FireParams {
     }
 }
 
+/// Demon Baby's tear (46E8E7..46E9C1): Spawn(2, 1), falling speed 1.2 with
+/// no roll, damage 3 (times BFFS!) and scale 0.9; no flags or color.
+pub(crate) const DEMON_TEAR: FireParams = FireParams {
+    falling_base: 1.2,
+    falling_roll: false,
+    ..tear(1, 3.0, 0.9)
+};
+
 /// Rainbow Baby's rows by Random(9) + 1 (4672D6..467848, the variant
 /// tests failing for 11): 1 Ghost Baby's, 2 Harlequin's single tear, 3 a
 /// blood tear (falling 1.2, 3.0 at 0.64, 467317), 4 Robo-Baby's tear row,
@@ -331,10 +343,7 @@ pub(crate) fn rainbow_row(roll: u32) -> FireParams {
             falling_base: 1.2,
             ..tear(1, 3.0, 0.64)
         },
-        4 => FireParams {
-            ported: true,
-            ..fire_params(6)
-        },
+        4 => fire_params(6),
         5 => fire_params(4),
         6 => fire_params(5),
         7 => fire_params(13),
