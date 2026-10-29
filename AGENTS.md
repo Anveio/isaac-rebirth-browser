@@ -1,8 +1,6 @@
 # Base Rebirth browser port
 
-Work from base Rebirth; keep Afterbirth and Afterbirth+ overlays separate. This
-repository is public; the owner's original resources and captures stay local
-and private. Never add original resource payloads or private captures to commits.
+Work from base Rebirth; keep Afterbirth and Afterbirth+ overlays separate.
 The shipped runtime is reconstructed Rust/WASM; native binaries are reference
 material.
 
