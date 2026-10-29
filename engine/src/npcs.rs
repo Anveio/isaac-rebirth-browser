@@ -417,45 +417,112 @@ fn tear_hit_receiver(
 /// callback's dead31F guard) into the NPC/Bomb partition (+10) in manager
 /// order, at their positions when the contact pass begins. Its self-pairs
 /// (453340) and the Player query (452EE0) both read these buckets.
-pub(crate) fn contact_partition(state: &State) -> Vec<crate::contact_candidates::Bounds> {
-    let mut members = Vec::new();
+/// 4545D0's NPC/Bomb partition (+10), built when the contact pass begins:
+/// every NPC with a nonzero collision class and every live Bomb, in manager
+/// order. A member's bucket id is its index in `members`.
+pub(crate) struct ContactPartition {
+    pub(crate) bounds: Vec<crate::contact_candidates::Bounds>,
+    pub(crate) members: Vec<crate::actors::ActorRef>,
+}
+
+pub(crate) fn contact_partition(state: &State) -> ContactPartition {
+    let mut partition = ContactPartition {
+        bounds: Vec::new(),
+        members: Vec::new(),
+    };
     let mut index = 0;
     while let Some(actor) = state.actor_scheduler.get(index) {
         index += 1;
-        if actor.kind != crate::actors::ActorKind::Npc {
-            continue;
-        }
-        if let Some(npc) = state.room.npcs.iter().find(|npc| npc.id == actor.id) {
-            if !npc.removed && npc.entity_collision_class != 0 {
-                members.push(crate::contact_candidates::Bounds {
-                    id: npc.id,
-                    position: npc.position,
-                    half_extents: WorldVector {
-                        x: npc.collision_radius,
-                        y: npc.collision_radius,
-                    },
-                });
+        let (position, radius) = match actor.kind {
+            crate::actors::ActorKind::Npc => {
+                match state.room.npcs.iter().find(|npc| npc.id == actor.id) {
+                    Some(npc) if !npc.removed && npc.entity_collision_class != 0 => {
+                        (npc.position, npc.collision_radius)
+                    }
+                    _ => continue,
+                }
             }
-        }
+            crate::actors::ActorKind::Bomb => {
+                match state.bombs.iter().find(|bomb| bomb.id == actor.id) {
+                    Some(bomb) if bomb.motion.lifetime == bombs::BombLifetime::Alive => {
+                        (bomb.motion.position, 16.0)
+                    }
+                    _ => continue,
+                }
+            }
+            _ => continue,
+        };
+        partition.bounds.push(crate::contact_candidates::Bounds {
+            id: partition.members.len() as u32,
+            position,
+            half_extents: WorldVector {
+                x: radius,
+                y: radius,
+            },
+        });
+        partition.members.push(actor);
     }
-    members
+    partition
 }
 
 pub(crate) fn player_contacts(
     state: &mut State,
-    partition: &[crate::contact_candidates::Bounds],
+    partition: &ContactPartition,
 ) -> Result<(), String> {
     //Entity+344 class0 (How to Jump in the air) has no pair collision.
-    if state.room.npcs.is_empty() || state.player.entity_collision_off {
+    if partition.members.is_empty() || state.player.entity_collision_off {
         return Ok(());
     }
-    let grid = Grid::new(
-        state
-            .room
-            .grid
-            .clone()
-            .ok_or("NPC contact requires admitted room grid")?,
+    // 452EE0 visits the partition's members around the Player in bucket
+    // order, NPCs and Bombs alike; the Player's id never names a member.
+    let order = crate::contact_candidates::query(
+        &partition.bounds,
+        crate::contact_candidates::Bounds {
+            id: u32::MAX,
+            position: bombs::player_world(state),
+            half_extents: WorldVector { x: 10.0, y: 10.0 },
+        },
     )?;
+    let (mut npc_grid, mut bomb_grid) = (None, None);
+    for member in order {
+        //4453a0 rejects either actual dead31f before the next callback.
+        //The contact entered alive still completes its physical response.
+        if state.player.dead {
+            break;
+        }
+        let actor = partition.members[member as usize];
+        match actor.kind {
+            crate::actors::ActorKind::Npc => {
+                let Some(index) = state.room.npcs.iter().position(|npc| npc.id == actor.id) else {
+                    continue;
+                };
+                if npc_grid.is_none() {
+                    npc_grid = Some(Grid::new(
+                        state
+                            .room
+                            .grid
+                            .clone()
+                            .ok_or("NPC contact requires admitted room grid")?,
+                    )?);
+                }
+                player_npc_contact(state, index, npc_grid.as_ref().expect("grid built above"))?;
+            }
+            crate::actors::ActorKind::Bomb => {
+                let Some(index) = state.bombs.iter().position(|bomb| bomb.id == actor.id) else {
+                    continue;
+                };
+                if bomb_grid.is_none() {
+                    bomb_grid = Some(bombs::player_contact_grid(state)?);
+                }
+                bombs::player_contact(state, index, bomb_grid.as_ref().expect("grid built above"))?;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn player_npc_contact(state: &mut State, index: usize, grid: &Grid) -> Result<(), String> {
     static COLLIDER: OnceLock<crate::grid::Collider> = OnceLock::new();
     let collider = COLLIDER.get_or_init(|| {
         crate::grid::Collider::new(crate::grid::CollisionGeometry {
@@ -465,83 +532,63 @@ pub(crate) fn player_contacts(
         })
         .expect("authored Isaac geometry is valid")
     });
-    // 452EE0 visits the partition's members around the Player in bucket
-    // order; the Player's id never names an NPC in it.
-    let order = crate::contact_candidates::query(
-        partition,
-        crate::contact_candidates::Bounds {
-            id: u32::MAX,
-            position: bombs::player_world(state),
-            half_extents: WorldVector { x: 10.0, y: 10.0 },
-        },
-    )?;
-    for id in order {
-        let Some(index) = state.room.npcs.iter().position(|npc| npc.id == id) else {
-            continue;
-        };
-        //4453a0 rejects either actual dead31f before the next callback.
-        //The contact entered alive still completes its physical response.
-        if state.player.dead {
-            break;
-        }
-        let npc = &state.room.npcs[index];
-        if npc.dead || npc.removed || npc.entity_collision_class == 0 {
-            continue;
-        }
-        let mut player_body = combat::ContactBody {
-            id: 0,
-            entity_type: 1,
-            position: bombs::player_world(state),
-            velocity: bombs::player_velocity(state),
-            radius: 10.0,
-            mass: 5.0,
-        };
-        let mut npc_body = combat::ContactBody {
-            id: npc.id,
-            entity_type: npc.kind,
-            position: npc.position,
-            velocity: npc.velocity,
-            radius: npc.collision_radius,
-            mass: npc.collision_mass,
-        };
-        if !combat::player_npc_overlap(&player_body, &npc_body)? {
-            continue;
-        }
-        // Callback49c2ec: a Wall Hugger still showing "No-Spikes" pushes the
-        // player without hurting it.
-        let contact_damage = if npc.kind == 218 && npc.animation == "No-Spikes" {
-            0.0
-        } else {
-            npc.collision_damage
-        };
-        if contact_damage > 0.0 {
-            //49C060 supplies collision damage to52B080. Its normal branch
-            //stores BF8 as rounded incoming damage *60 (52BED6). Owned NPC
-            //config/champion amounts are integers0/1/2, so the existing
-            //health-unit conversion is also that rounded incoming amount.
-            let health_units = contact_damage as u8;
-            let immunity_presentations = u32::from(health_units) * 60;
-            combat::try_damage_player_from(
-                state,
-                health_units,
-                immunity_presentations,
-                0,
-                Some(npc.kind),
-            )?;
-        }
-        let original_position = player_body.position;
-        combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {
-            collider.blocks_player_shift(&grid, original_position, shift)
-        })?;
-        state.player.x = f64::from(player_body.position.x) * 0.65 + 32.0;
-        state.player.y = f64::from(player_body.position.y) * 0.65 - 46.0;
-        state.player.vx = f64::from(player_body.velocity.x) * 0.65;
-        state.player.vy = f64::from(player_body.velocity.y) * 0.65;
-        let npc = &mut state.room.npcs[index];
-        npc.position = npc_body.position;
-        npc.presented_position = npc_body.position;
-        npc.velocity = npc_body.velocity;
+    let npc = &state.room.npcs[index];
+    if npc.dead || npc.removed || npc.entity_collision_class == 0 {
+        return Ok(());
     }
+    let mut player_body = combat::ContactBody {
+        id: 0,
+        entity_type: 1,
+        position: bombs::player_world(state),
+        velocity: bombs::player_velocity(state),
+        radius: 10.0,
+        mass: 5.0,
+    };
+    let mut npc_body = combat::ContactBody {
+        id: npc.id,
+        entity_type: npc.kind,
+        position: npc.position,
+        velocity: npc.velocity,
+        radius: npc.collision_radius,
+        mass: npc.collision_mass,
+    };
+    if !combat::player_npc_overlap(&player_body, &npc_body)? {
+        return Ok(());
+    }
+    // Callback49c2ec: a Wall Hugger still showing "No-Spikes" pushes the
+    // player without hurting it.
+    let contact_damage = if npc.kind == 218 && npc.animation == "No-Spikes" {
+        0.0
+    } else {
+        npc.collision_damage
+    };
+    if contact_damage > 0.0 {
+        //49C060 supplies collision damage to52B080. Its normal branch
+        //stores BF8 as rounded incoming damage *60 (52BED6). Owned NPC
+        //config/champion amounts are integers0/1/2, so the existing
+        //health-unit conversion is also that rounded incoming amount.
+        let health_units = contact_damage as u8;
+        let immunity_presentations = u32::from(health_units) * 60;
+        combat::try_damage_player_from(
+            state,
+            health_units,
+            immunity_presentations,
+            0,
+            Some(npc.kind),
+        )?;
+    }
+    let original_position = player_body.position;
+    combat::resolve_player_npc_contact(&mut player_body, &mut npc_body, |shift| {
+        collider.blocks_player_shift(grid, original_position, shift)
+    })?;
+    state.player.x = f64::from(player_body.position.x) * 0.65 + 32.0;
+    state.player.y = f64::from(player_body.position.y) * 0.65 - 46.0;
+    state.player.vx = f64::from(player_body.velocity.x) * 0.65;
+    state.player.vy = f64::from(player_body.velocity.y) * 0.65;
+    let npc = &mut state.room.npcs[index];
+    npc.position = npc_body.position;
+    npc.presented_position = npc_body.position;
+    npc.velocity = npc_body.velocity;
     Ok(())
 }
 
@@ -573,161 +620,188 @@ pub(crate) fn unlink_removed(npcs: &mut [Npc]) {
 
 pub(crate) fn nonplayer_contacts(
     state: &mut State,
-    partition: &[crate::contact_candidates::Bounds],
+    partition: &ContactPartition,
 ) -> Result<(), String> {
-    let body = |npc: &Npc| combat::ContactBody {
+    use crate::actors::ActorKind::{Bomb, Npc};
+    // 453340 visits the NPC/Bomb partition's self-pairs in bucket order;
+    // 445BE0 then runs the pair's callbacks for whatever the two members are.
+    for (first, second) in crate::contact_candidates::self_pairs(&partition.bounds)? {
+        let (first, second) = (
+            partition.members[first as usize],
+            partition.members[second as usize],
+        );
+        match (first.kind, second.kind) {
+            (Npc, Npc) => npc_pair(state, first.id, second.id)?,
+            (Bomb, Npc) => bomb_npc_pair(state, first.id, second.id)?,
+            (Npc, Bomb) => bomb_npc_pair(state, second.id, first.id)?,
+            (Bomb, Bomb) => bombs::bomb_pair(state, first.id, second.id)?,
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn contact_body(npc: &Npc) -> combat::ContactBody {
+    combat::ContactBody {
         id: npc.id,
         entity_type: npc.kind,
         position: npc.position,
         velocity: npc.velocity,
         radius: npc.collision_radius,
         mass: npc.collision_mass,
-    };
-    // 453340 visits the partition's self-pairs in bucket order.
-    for (first_id, second_id) in crate::contact_candidates::self_pairs(partition)? {
-        let (Some(first_index), Some(second_index)) = (
-            state.room.npcs.iter().position(|npc| npc.id == first_id),
-            state.room.npcs.iter().position(|npc| npc.id == second_id),
-        ) else {
-            continue;
-        };
-        let (first, second) = if first_index < second_index {
-            let (left, right) = state.room.npcs.split_at_mut(second_index);
-            (&mut left[first_index], &mut right[0])
-        } else {
-            let (left, right) = state.room.npcs.split_at_mut(first_index);
-            (&mut right[0], &mut left[second_index])
-        };
-        // 49b980: two Wall Huggers never collide; 49bbb4 vetoes every
-        // pair of worm segments (Larry Jr., 28, 89, 239) without charm,
-        // and 49c4c0 every pair of Ring Flies (222).
-        if first.dead
-            || second.dead
-            || first.entity_collision_class != 4
-            || second.entity_collision_class != 4
-            || (first.kind == 218 && second.kind == 218)
-            || (first.kind == 222 && second.kind == 222)
-            || (WORM_SEGMENTS.contains(&first.kind) && WORM_SEGMENTS.contains(&second.kind))
-        {
-            continue;
-        }
-        let mut a = body(first);
-        let mut b = body(second);
-        if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
-            // 49bdf8: a charging Chub head bites a Charger or Spider.
-            for flipped in [false, true] {
-                let (chub, other) = if flipped {
-                    (&*second, &mut *first)
-                } else {
-                    (&*first, &mut *second)
-                };
-                if !crate::chub::bites(chub, other) {
-                    continue;
-                }
-                let source = combat::DamageSource {
-                    id: chub.id,
-                    entity_type: 0,
-                };
-                let health = other.health();
-                other.damage.enqueue(
-                    health,
-                    combat::DamageEvent {
-                        amount: 20.0,
-                        kind: combat::DamageKind::RoomEffect,
-                        source,
-                        copied_source: None,
-                    },
-                )?;
-                state.audio.admit(
-                    &mut state.boot_lifecycle.shared,
-                    state.system_clock.system_counter.wrapping_sub(1),
-                    crate::audio::SoundRequest {
-                        id: 142,
-                        volume: 1.0,
-                        delay: 2,
-                        looping: false,
-                        pitch: 1.0,
-                    },
-                );
-            }
-            // Fire49c249 first checks OTHER with the numeric NPC predicate
-            // 444800. Player, Tear and Bomb are excluded from this callback.
-            if first.kind == 33 {
-                let health = second.health();
-                second.damage.enqueue(
-                    health,
-                    combat::DamageEvent {
-                        amount: 16.0,
-                        kind: combat::DamageKind::FireContact,
-                        source: combat::DamageSource {
-                            id: first.id,
-                            entity_type: 33,
-                        },
-                        copied_source: None,
-                    },
-                )?;
-            }
-            if second.kind == 33 {
-                let health = first.health();
-                first.damage.enqueue(
-                    health,
-                    combat::DamageEvent {
-                        amount: 16.0,
-                        kind: combat::DamageKind::FireContact,
-                        source: combat::DamageSource {
-                            id: second.id,
-                            entity_type: 33,
-                        },
-                        copied_source: None,
-                    },
-                )?;
-            }
-            first.position = a.position;
-            first.presented_position = a.position;
-            first.velocity = a.velocity;
-            second.position = b.position;
-            second.presented_position = b.position;
-            second.velocity = b.velocity;
-        }
     }
-    for bomb in &mut state.bombs {
-        if bomb.motion.lifetime != bombs::BombLifetime::Alive {
-            continue;
-        }
-        for npc in &mut state.room.npcs {
-            if npc.dead || npc.entity_collision_class != 4 {
+}
+
+fn npc_pair(state: &mut State, first_id: u32, second_id: u32) -> Result<(), String> {
+    let body = contact_body;
+    let (Some(first_index), Some(second_index)) = (
+        state.room.npcs.iter().position(|npc| npc.id == first_id),
+        state.room.npcs.iter().position(|npc| npc.id == second_id),
+    ) else {
+        return Ok(());
+    };
+    let (first, second) = if first_index < second_index {
+        let (left, right) = state.room.npcs.split_at_mut(second_index);
+        (&mut left[first_index], &mut right[0])
+    } else {
+        let (left, right) = state.room.npcs.split_at_mut(first_index);
+        (&mut right[0], &mut left[second_index])
+    };
+    // 49b980: two Wall Huggers never collide; 49bbb4 vetoes every
+    // pair of worm segments (Larry Jr., 28, 89, 239) without charm,
+    // and 49c4c0 every pair of Ring Flies (222).
+    if first.dead
+        || second.dead
+        || first.entity_collision_class != 4
+        || second.entity_collision_class != 4
+        || (first.kind == 218 && second.kind == 218)
+        || (first.kind == 222 && second.kind == 222)
+        || (WORM_SEGMENTS.contains(&first.kind) && WORM_SEGMENTS.contains(&second.kind))
+    {
+        return Ok(());
+    }
+    let mut a = body(first);
+    let mut b = body(second);
+    if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
+        // 49bdf8: a charging Chub head bites a Charger or Spider.
+        for flipped in [false, true] {
+            let (chub, other) = if flipped {
+                (&*second, &mut *first)
+            } else {
+                (&*first, &mut *second)
+            };
+            if !crate::chub::bites(chub, other) {
                 continue;
             }
-            let mut a = combat::ContactBody {
-                id: bomb.id,
-                entity_type: 4,
-                position: bomb.motion.position,
-                velocity: bomb.motion.velocity,
-                radius: 16.0,
-                mass: 6.0,
+            let source = combat::DamageSource {
+                id: chub.id,
+                entity_type: 0,
             };
-            let mut b = body(npc);
-            if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
-                // 49bd60: a charging Chub head eats the bomb; no response.
-                // PORT GAP: bombs carry no tear flags yet, so none pass on.
-                let damage = bomb
-                    .shot
-                    .as_ref()
-                    .map_or(60.0, |shot| shot.explosion_damage);
-                if crate::chub::swallow(npc, damage, 0) {
-                    bomb.motion.lifetime = bombs::BombLifetime::Removed;
-                    break;
-                }
-                bomb.motion.position = a.position;
-                bomb.motion.presented_position = a.position;
-                bomb.motion.velocity = a.velocity;
-                bomb.x = f64::from(a.position.x) * 0.65 + 32.0;
-                bomb.y = f64::from(a.position.y) * 0.65 - 46.0;
-                npc.position = b.position;
-                npc.presented_position = b.position;
-                npc.velocity = b.velocity;
-            }
+            let health = other.health();
+            other.damage.enqueue(
+                health,
+                combat::DamageEvent {
+                    amount: 20.0,
+                    kind: combat::DamageKind::RoomEffect,
+                    source,
+                    copied_source: None,
+                },
+            )?;
+            state.audio.admit(
+                &mut state.boot_lifecycle.shared,
+                state.system_clock.system_counter.wrapping_sub(1),
+                crate::audio::SoundRequest {
+                    id: 142,
+                    volume: 1.0,
+                    delay: 2,
+                    looping: false,
+                    pitch: 1.0,
+                },
+            );
         }
+        // Fire49c249 first checks OTHER with the numeric NPC predicate
+        // 444800. Player, Tear and Bomb are excluded from this callback.
+        if first.kind == 33 {
+            let health = second.health();
+            second.damage.enqueue(
+                health,
+                combat::DamageEvent {
+                    amount: 16.0,
+                    kind: combat::DamageKind::FireContact,
+                    source: combat::DamageSource {
+                        id: first.id,
+                        entity_type: 33,
+                    },
+                    copied_source: None,
+                },
+            )?;
+        }
+        if second.kind == 33 {
+            let health = first.health();
+            first.damage.enqueue(
+                health,
+                combat::DamageEvent {
+                    amount: 16.0,
+                    kind: combat::DamageKind::FireContact,
+                    source: combat::DamageSource {
+                        id: second.id,
+                        entity_type: 33,
+                    },
+                    copied_source: None,
+                },
+            )?;
+        }
+        first.position = a.position;
+        first.presented_position = a.position;
+        first.velocity = a.velocity;
+        second.position = b.position;
+        second.presented_position = b.position;
+        second.velocity = b.velocity;
+    }
+    Ok(())
+}
+
+fn bomb_npc_pair(state: &mut State, bomb_id: u32, npc_id: u32) -> Result<(), String> {
+    let (Some(bomb), Some(npc)) = (
+        state.bombs.iter_mut().find(|bomb| bomb.id == bomb_id),
+        state.room.npcs.iter_mut().find(|npc| npc.id == npc_id),
+    ) else {
+        return Ok(());
+    };
+    if bomb.motion.lifetime != bombs::BombLifetime::Alive
+        || npc.dead
+        || npc.entity_collision_class != 4
+    {
+        return Ok(());
+    }
+    let mut a = combat::ContactBody {
+        id: bomb.id,
+        entity_type: 4,
+        position: bomb.motion.position,
+        velocity: bomb.motion.velocity,
+        radius: 16.0,
+        mass: 6.0,
+    };
+    let mut b = contact_body(npc);
+    if combat::resolve_npc_or_bomb_pair(&mut a, &mut b)?.colliding {
+        // 49bd60: a charging Chub head eats the bomb; no response.
+        // PORT GAP: bombs carry no tear flags yet, so none pass on.
+        let damage = bomb
+            .shot
+            .as_ref()
+            .map_or(60.0, |shot| shot.explosion_damage);
+        if crate::chub::swallow(npc, damage, 0) {
+            bomb.motion.lifetime = bombs::BombLifetime::Removed;
+            return Ok(());
+        }
+        bomb.motion.position = a.position;
+        bomb.motion.presented_position = a.position;
+        bomb.motion.velocity = a.velocity;
+        bomb.x = f64::from(a.position.x) * 0.65 + 32.0;
+        bomb.y = f64::from(a.position.y) * 0.65 - 46.0;
+        npc.position = b.position;
+        npc.presented_position = b.position;
+        npc.velocity = b.velocity;
     }
     Ok(())
 }

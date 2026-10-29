@@ -905,18 +905,14 @@ pub(crate) fn full_grid_contacts(state: &mut State) -> Result<(), String> {
 ///positive Bomb+7DC countdown resets to 4 and vetoes the mass response, so
 ///Isaac does not push the bomb he stands on; at zero the bomb takes
 ///PlayerV*.4 and the mass response pushes it (pickup-interactions suite).
-pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
-    //Entity+344 class0 (How to Jump in the air) has no pair collision.
-    if state.player.dead
-        || state.player.entity_collision_off
-        || !state
-            .bombs
-            .iter()
-            .any(|bomb| bomb.motion.lifetime == BombLifetime::Alive)
-    {
+pub(crate) fn player_contact(
+    state: &mut State,
+    index: usize,
+    grid: &crate::grid::Grid,
+) -> Result<(), String> {
+    if state.bombs[index].motion.lifetime != BombLifetime::Alive {
         return Ok(());
     }
-    let grid = room_grid(state)?;
     static COLLIDER: std::sync::OnceLock<crate::grid::Collider> = std::sync::OnceLock::new();
     let collider = COLLIDER.get_or_init(|| {
         crate::grid::Collider::new(crate::grid::CollisionGeometry {
@@ -926,41 +922,41 @@ pub(crate) fn player_contacts(state: &mut State) -> Result<(), String> {
         })
         .expect("authored Isaac geometry is valid")
     });
-    for index in 0..state.bombs.len() {
-        if state.bombs[index].motion.lifetime != BombLifetime::Alive {
-            continue;
+    let mut player = crate::combat::ContactBody {
+        id: 0,
+        entity_type: 1,
+        position: player_world(state),
+        velocity: player_velocity(state),
+        radius: 10.0,
+        mass: 5.0,
+    };
+    let original = player.position;
+    let player_before = player;
+    let mut body = contact_body(&state.bombs[index]);
+    let bomb = &mut state.bombs[index];
+    let countdown = match &mut bomb.shot {
+        Some(shot) => {
+            shot.validate()?;
+            &mut shot.player_contact_countdown
         }
-        let mut player = crate::combat::ContactBody {
-            id: 0,
-            entity_type: 1,
-            position: player_world(state),
-            velocity: player_velocity(state),
-            radius: 10.0,
-            mass: 5.0,
-        };
-        let original = player.position;
-        let player_before = player;
-        let mut body = contact_body(&state.bombs[index]);
-        let bomb = &mut state.bombs[index];
-        let countdown = match &mut bomb.shot {
-            Some(shot) => {
-                shot.validate()?;
-                &mut shot.player_contact_countdown
-            }
-            None => &mut bomb.player_contact_countdown,
-        };
-        crate::combat::resolve_player_bomb_contact(&mut player, &mut body, countdown, |shift| {
-            collider.blocks_player_shift(&grid, original, shift)
-        })?;
-        if player != player_before {
-            state.player.x = f64::from(player.position.x) * WORLD_SCALE + 32.0;
-            state.player.y = f64::from(player.position.y) * WORLD_SCALE - 46.0;
-            state.player.vx = f64::from(player.velocity.x) * WORLD_SCALE;
-            state.player.vy = f64::from(player.velocity.y) * WORLD_SCALE;
-        }
-        commit_contact(&mut state.bombs[index], body);
+        None => &mut bomb.player_contact_countdown,
+    };
+    crate::combat::resolve_player_bomb_contact(&mut player, &mut body, countdown, |shift| {
+        collider.blocks_player_shift(grid, original, shift)
+    })?;
+    if player != player_before {
+        state.player.x = f64::from(player.position.x) * WORLD_SCALE + 32.0;
+        state.player.y = f64::from(player.position.y) * WORLD_SCALE - 46.0;
+        state.player.vx = f64::from(player.velocity.x) * WORLD_SCALE;
+        state.player.vy = f64::from(player.velocity.y) * WORLD_SCALE;
     }
+    commit_contact(&mut state.bombs[index], body);
     Ok(())
+}
+
+/// The grid a Player/Bomb contact checks its shift against.
+pub(crate) fn player_contact_grid(state: &State) -> Result<crate::grid::Grid, String> {
+    room_grid(state)
 }
 
 /// One plain (flagless) regular tear against the live planted/converted
@@ -1019,37 +1015,44 @@ pub(crate) fn tear_hit(
     Ok(false)
 }
 
-///Same-type ties retain Bomb admission order. Both callbacks run; the first
-///actual shot marker vetoes mass response. Legacy no-shot pairs stay untouched.
-pub(crate) fn bomb_contacts(state: &mut State) -> Result<(), String> {
-    for first in 0..state.bombs.len() {
-        for second in first + 1..state.bombs.len() {
-            let (left, right) = state.bombs.split_at_mut(second);
-            let first = &mut left[first];
-            let second = &mut right[0];
-            if (first.shot.is_none() && second.shot.is_none())
-                || first.motion.lifetime != BombLifetime::Alive
-                || second.motion.lifetime != BombLifetime::Alive
-            {
-                continue;
-            }
-            if let Some(shot) = &first.shot {
-                shot.validate()?;
-            }
-            if let Some(shot) = &second.shot {
-                shot.validate()?;
-            }
-            let mut a = contact_body(first);
-            let mut b = contact_body(second);
-            crate::combat::resolve_bomb_pair(
-                &mut a,
-                &mut b,
-                first.shot.as_ref().is_some_and(|shot| shot.shot_marker),
-            )?;
-            commit_contact(first, a);
-            commit_contact(second, b);
-        }
+///Bomb/Bomb self-pair of the shared NPC/Bomb partition (453340, bucket
+///order). Both callbacks run; the first actual shot marker vetoes mass
+///response. Legacy no-shot pairs stay untouched.
+pub(crate) fn bomb_pair(state: &mut State, first_id: u32, second_id: u32) -> Result<(), String> {
+    let (Some(first), Some(second)) = (
+        state.bombs.iter().position(|bomb| bomb.id == first_id),
+        state.bombs.iter().position(|bomb| bomb.id == second_id),
+    ) else {
+        return Ok(());
+    };
+    let (first, second) = if first < second {
+        let (left, right) = state.bombs.split_at_mut(second);
+        (&mut left[first], &mut right[0])
+    } else {
+        let (left, right) = state.bombs.split_at_mut(first);
+        (&mut right[0], &mut left[second])
+    };
+    if (first.shot.is_none() && second.shot.is_none())
+        || first.motion.lifetime != BombLifetime::Alive
+        || second.motion.lifetime != BombLifetime::Alive
+    {
+        return Ok(());
     }
+    if let Some(shot) = &first.shot {
+        shot.validate()?;
+    }
+    if let Some(shot) = &second.shot {
+        shot.validate()?;
+    }
+    let mut a = contact_body(first);
+    let mut b = contact_body(second);
+    crate::combat::resolve_bomb_pair(
+        &mut a,
+        &mut b,
+        first.shot.as_ref().is_some_and(|shot| shot.shot_marker),
+    )?;
+    commit_contact(first, a);
+    commit_contact(second, b);
     Ok(())
 }
 
