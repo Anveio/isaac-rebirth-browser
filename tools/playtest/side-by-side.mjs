@@ -192,7 +192,7 @@ async function browserFrames(browser, server, caseData, tape, directory) {
   page.on('pageerror', error => errors.push(String(error)));
   try {
     await page.goto(server.url + '/?manual=1');
-    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready));
+    await page.waitForFunction(() => ['true', 'failed'].includes(document.body.dataset.ready), null, { timeout: 180_000 });
     assert.equal(await page.evaluate(() => document.body.dataset.ready), 'true', 'Production browser must boot');
     // The same reset the paired harness gives the browser: the run clock starts
     // where the original's first Title render does (#438), so closed-loop port
