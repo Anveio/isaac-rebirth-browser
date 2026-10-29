@@ -25,7 +25,7 @@ export function installSaveAbiObserver() {
       return new Uint8Array(ex.memory.buffer,ptr,len).slice();
     };
     const errorRef=()=>bytesRef(copy(ex.error_ptr(),ex.error_len()));
-    const store=()=>observe(()=>({bytes:textRef(localStorage.getItem('isaac-rebirth.savegames.v1')),error:null}),{bytes:null,error:'observer-storage-read-failed'});
+    const store=()=>observe(()=>({bytes:textRef(localStorage.getItem((()=>{const head=localStorage.getItem('isaac-rebirth.save.head.v3');return head?'isaac-rebirth.save.record.v3.'+JSON.parse(head).current.generation:'isaac-rebirth.savegames.v1';})())),error:null}),{bytes:null,error:'observer-storage-read-failed'});
     const state=()=>observe(()=>{
       const ptr=ex.snapshot_ptr();const s=JSON.parse(new TextDecoder().decode(copy(ptr,ex.snapshot_len())));
       return {screen:s.screen,tick:s.tick,systemClock:s.systemClock,gameUpdateCount:s.gameUpdateCount,currentRoom:s.currentRoom,stage:s.stage,

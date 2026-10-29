@@ -270,6 +270,10 @@ SaveEnvelope {
 }
 ```
 
+Schema 3 (Storage) builds the first step of this: one checked envelope for
+the whole three-slot document. Per-slot, per-kind envelopes are a later
+schema.
+
 The engine builds, serializes, checksums and validates envelopes; the host
 never interprets payloads. Payloads stay JSON (bounded at 4 MiB per record)
 so a stored record can be inspected and diffed in tests.
@@ -369,67 +373,65 @@ visited room whose entry door is unset.
 
 ### Storage
 
-**Backend.** IndexedDB database `isaac-rebirth`, schema version 1, with two
-object stores:
-
-- `records`, keyed `[slot, kind, generation]`, value
-  `{bytes: Uint8Array}` (the envelope, as exported by the engine);
-- `heads`, keyed `slot`, value:
+**As built (schema 3).** One envelope holds the whole three-slot profile
+document (the version-2 `Profiles` payload, each slot's run record inside
+it):
 
 ```text
-SlotHead {
-  slot,
-  profile: {generation, checksum},
-  run: {generation, checksum} | null,          // the bound run record
-  runPrevious: {generation, checksum} | null,  // last good run, for recovery
-}
+{"magic":"ISAAC-RB-SAVE","schema":3,"checksum":<CRC-32 of payload bytes>,
+ "runs":[<slot 1 has a run>,<slot 2>,<slot 3>],"payload":<Profiles v2>}
 ```
 
-The head is the analogue of the profile's bound checksum: a run record is
-loadable only if the head names it.
+The engine writes the header and then the payload bytes exactly as
+serialized, so the checksum covers the stored bytes; on load it checks
+magic, schema (a newer schema is refused untouched), checksum and that
+`runs` names the payload's run records, before reading the payload
+(`save_profiles::open_envelope`). Bare schema-1/2 documents still load
+(migration below).
 
-**Atomic commit.** A save is one `readwrite` transaction over both stores:
-put the new profile/run records, put the new head (new run becomes `run`,
-old `run` becomes `runPrevious`), delete records the new head no longer
-names. IndexedDB commits the transaction atomically or not at all, so a
-crash leaves either the old head with its records or the new head with its
-records. The host reports success only after `oncomplete`, then the engine's
-pending write is acknowledged; a failed or aborted transaction is
-acknowledged as failed and the older head stays in force.
+**Commit protocol.** The host (`web/save-games.ts`) keeps generations under
+a head in localStorage:
 
-**Integrity and fallback.** On load the host reads the head and the
-records it names and passes them to the engine. The engine checks each
-envelope's magic, slot, kind, schema range and checksum, and that the
-checksum equals the head's. If `run` fails, the engine tries `runPrevious`
-and, if that passes, Continue offers it and the menu reports the recovery.
-If both fail, Continue is unavailable for the slot; the records are kept
-(quarantined, not deleted) and the menu reports the corrupt save. Profile
-records follow the same rule with no previous generation: a profile that
-fails validation is never replaced by a fresh one silently; the existing
-"preserve rejected own-profile bytes" behaviour stays.
+- `isaac-rebirth.save.record.v3.<generation>`: one envelope;
+- `isaac-rebirth.save.head.v3`: `{schema: 3, current: {generation,
+  checksum}, previous: {generation, checksum} | null}`.
 
-**Single writer.** The game takes an exclusive Web Lock
-(`navigator.locks.request('isaac-rebirth-save', …)`) for the tab's lifetime.
-A second tab that cannot get it runs with saving disabled and Continue
-greyed out, so two tabs never interleave generations.
+A save writes the new generation's record, then swaps the head to name it
+(one atomic `setItem`, the commit point), reads both back, then removes
+records the head no longer names and the legacy document. The old
+`current` becomes `previous`, except when the save removes a slot's run
+record (death, run end, Exit while dead, Exit without save): then
+`previous` is cleared, so recovery can never bring back a lost run. A crash
+before the head swap leaves the old head and its records in force. A quota
+failure removes unreferenced records and retries once; any failure is
+acknowledged to the engine as a failed write and the old head stays.
 
-**Durability.** At first successful save the host calls
-`navigator.storage.persist()` so the origin's data is exempt from
-best-effort eviction where the browser grants it. The result is logged, not
-required.
+**Load and recovery.** Load reads the head; the record it names must match
+the head's checksum and its own payload checksum (checked by the host, then
+again by the engine). If `current` fails or the engine rejects it, load
+tries `previous`; the IO event names the rejected generations. With no head
+the legacy document `isaac-rebirth.savegames.v1` loads. With nothing
+loadable the engine keeps its rejection and refuses to overwrite the stored
+bytes. Menu readmission (Continue) reads the same best candidate.
 
-**localStorage.** Kept for two reasons only:
+**Single writer.** The page takes the Web Lock `isaac-rebirth-save` for its
+lifetime. A tab that cannot take it refuses writes (acknowledged as failed)
+until it gets the lock, so two tabs never interleave generations.
 
-1. **Migration source.** The existing document under
-   `isaac-rebirth.savegames.v1` (schema 1 or 2) is read once when IndexedDB
-   has no heads, migrated, committed to IndexedDB, read back and verified,
-   and only then removed.
-2. **Fallback backend** when `indexedDB.open` fails (storage disabled,
-   some embedded or privacy modes). It stores the same envelopes and heads
-   under `isaac-rebirth.v3.record.<slot>.<kind>.<generation>` and
-   `isaac-rebirth.v3.head.<slot>`. Records are written first and the head
-   last; each `setItem` is atomic, so the head swap is the commit point, and
-   unreferenced records are removed after it.
+**Durability.** After the first successful save the host calls
+`navigator.storage.persist()`; the result is reported in the save snapshot,
+not required.
+
+**Why localStorage and not IndexedDB.** The engine's save protocol is
+synchronous: a public command that reaches a save point suspends the rest
+of its System interval until the host acknowledges the write, and the
+paired suites and the deterministic replay host (`save_host.rs`) step the
+game through that acknowledgement within the same command. IndexedDB only
+commits asynchronously, which would move the acknowledgement to a later
+frame. The head swap above gives the same all-or-nothing commit with
+synchronous `setItem`. IndexedDB remains tracker row 3: a capacity mirror
+behind the same head protocol, once the host can await a write without
+changing the frame on which the engine resumes.
 
 ### Migrations
 
@@ -438,8 +440,8 @@ Each payload schema has a frozen DTO and a pure migration to the next:
 | Schema | Shape | Migration |
 | --- | --- | --- |
 | 1 | own V1 `Profiles` document (no collected history) | → 2: existing `LegacyProfiles` conversion |
-| 2 | own V2 `Profiles` document with embedded `RunRecord` | → 3: split into per-slot profile and run envelopes; compute checksums; generation 1 |
-| 3 | envelopes, owner-organized run payload | current |
+| 2 | own V2 `Profiles` document with embedded `RunRecord` | → 3: wrapped unchanged in the envelope at the next real save (generation 1) |
+| 3 | envelope (magic, schema, CRC-32, slot run flags) around the V2 payload | current |
 
 Rules, as in the original's version window:
 
@@ -597,9 +599,9 @@ Status: **done** (merged, suites compared), **wip** (branch open),
 | # | Area | Status | PR | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | Design (this document) | done | #990 | |
-| 2 | Envelope, checksum, schema 3, 2→3 migration | todo | | |
-| 3 | IndexedDB heads, atomic commit, fallback, lock, persist | todo | | |
-| 4 | localStorage fallback backend and legacy migration | todo | | |
+| 2 | Envelope, checksum, schema 3, 2→3 migration | done | this PR | `save_profiles::open_envelope`, CRC-32; schema 1/2 load and are re-written as 3 by the next real save |
+| 3 | IndexedDB heads, atomic commit, fallback, lock, persist | wip | this PR | head swap, `previous` fallback, Web Lock and `persist()` built on localStorage (Storage: why); IndexedDB mirror still todo |
+| 4 | localStorage fallback backend and legacy migration | done | this PR | localStorage is the commit backend; the legacy `isaac-rebirth.savegames.v1` document loads with no head and is removed by the first schema-3 commit |
 | 5 | Single Continue pipeline (initial room folded in) | todo | | today: `InitialRoom` + `VisitedRoom` callers |
 | 6 | Refusals removed: challenge, seed effects, legacy owners | done | #1006 | `admit_continue` refuses only dead runs, non-Isaac, bad manager RNG, bad slot/records, unvisited room; unknown costume history and stale scheduled Effect ids no longer refuse |
 | 7 | Live bombs restored from Room.Save records | done | #1006 | `RunContext.bomb_records` (variant, subtype, position, spawn seed); respawned with Appear/Pulse like 5C5860; fuse restarts (actor RNG +0x7c0 not yet stored) |
@@ -613,7 +615,7 @@ Status: **done** (merged, suites compared), **wip** (branch open),
 | 15 | Record parity reader (layer A) | todo | | |
 | 16 | Room-transition and pagehide clone saves | todo | | |
 | 17 | Game counters/flags, Ambush, nightmare owners | todo | | |
-| 18 | Storage robustness checks (layer D) | todo | | |
+| 18 | Storage robustness checks (layer D) | wip | this PR | DST: tampered payload refused; browser: tampered current record falls back to `previous` (manual check); a suite for corruption, quota and two tabs still todo |
 
 ## References
 

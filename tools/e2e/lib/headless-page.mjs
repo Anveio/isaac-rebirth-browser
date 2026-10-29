@@ -18,6 +18,8 @@ class MemoryStorage {
   getItem(key) { return this.#items.has(key) ? this.#items.get(key) : null; }
   setItem(key, value) { this.#items.set(key, String(value)); }
   removeItem(key) { this.#items.delete(key); }
+  get length() { return this.#items.size; }
+  key(index) { return [...this.#items.keys()][index] ?? null; }
   entries() { return [...this.#items]; }
   replace(entries) { this.#items = new Map(entries); }
 }
