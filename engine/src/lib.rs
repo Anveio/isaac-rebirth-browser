@@ -5670,10 +5670,11 @@ impl Game {
         Ok(())
     }
     fn advance_camera(&mut self, phase: phase::Phase) {
-        if (self.state.run_introduction.active && self.state.run_introduction.stage)
-            || self.state.room_transition.is_some()
-            || self.state.information_animation.active()
-        {
+        // Camera42d780 is held only by Game550760 (fade, StageTransition,
+        // room transition and the other Game guards). The HUD+2b578 streak
+        // (Level::ShowName585500's stage name) is not among them, so the
+        // camera follows Isaac while the stage name is still showing.
+        if self.state.room_transition.is_some() || self.state.information_animation.active() {
             return;
         }
         let aim = motion::WorldVector {

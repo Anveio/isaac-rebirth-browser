@@ -134,7 +134,9 @@ def observe(pid, context):
             width, height = struct.unpack_from('<II', raw, 0x14)
             if not 1 <= width <= 28 or not 1 <= height <= 16:
                 raise ValueError('Unexpected room grid shape')
-            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height}
+            report['room'] = {'type': struct.unpack_from('<I', raw, 0x10)[0], 'gridWidth': width, 'gridHeight': height,
+                              # Room+15B8: the camera's render scroll (42d1f5 stores Camera+A0 there).
+                              'renderScroll': list(struct.unpack('<ff', read(room + 0x15b8, 8)))}
             # Room+30 GridEntity* by grid index: poop (type +8 == 14) cells
             # with their variant (+C) and collision class (+3C).
             cells = struct.unpack('<' + 'Q' * (width * height), read(room + 0x30, 8 * width * height))

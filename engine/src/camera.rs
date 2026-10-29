@@ -72,10 +72,13 @@ fn player_position(player: &Player) -> WorldVector {
         y: ((player.y + 46.0) / 0.65) as f32,
     }
 }
+/// World to screen 42eb00 (no pixel snap): each axis subtracts its world
+/// offset (60, 140), scales by 0.65, then adds half of the screen size less
+/// (338, 182). The same sum regrouped would round differently in f32.
 fn projected(point: WorldVector) -> WorldVector {
     WorldVector {
-        x: (point.x - 320.0) * 0.65 + 240.0,
-        y: (point.y - 280.0) * 0.65 + 135.0,
+        x: (point.x - 60.0) * 0.65 + (480.0 - 338.0) * 0.5,
+        y: (270.0 - 182.0) * 0.5 + (point.y - 140.0) * 0.65,
     }
 }
 fn minimum_scroll(room: &Room) -> WorldVector {
