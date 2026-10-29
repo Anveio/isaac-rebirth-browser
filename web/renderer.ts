@@ -591,8 +591,9 @@ export class Renderer {
   }
 
   private drawNpc(ctx: CanvasRenderingContext2D, npc: State["room"]["npcs"][number]): void {
-    // A dying boss (state 16) keeps drawing its death clip.
-    if (npc.removed || (npc.dead && !npc.monstro && !npc.dip && npc.state !== 16) || (!npc.keeper && !npc.visible)) return;
+    // Entity Render 442300 draws while active (+31e) and visible (+31d); a
+    // killed NPC (+31f dead) keeps drawing until its base kill removes it.
+    if (npc.removed || (!npc.keeper && !npc.visible)) return;
     // Sprite Scale (+2c4): 1.15 for champions, otherwise the fresh 1.
     const scale = npc.spriteScale ?? npc.champion?.scale ?? 1;
     // Sprite Color (+2d0): champion table colour or a timed hit flash.
@@ -864,7 +865,7 @@ export class Renderer {
       // sample yet; painting them with zero offsets would draw black marks.
       if (stain.footprint) continue;
       const sprite = stain.sprite;
-      if (stain.variant === 58 || stain.variant === 43 || stain.variant === 27) {
+      if (stain.variant === 58 || stain.variant === 43 || stain.variant === 27 || stain.variant === 5) {
         ctx.save();
         ctx.translate((stain.position.x + stain.renderOffset.x + sprite.offset.x) * 0.65 + 32 - appearance.origin.x,
           (stain.position.y + stain.renderOffset.y + sprite.offset.y) * 0.65 - 46 - appearance.origin.y);

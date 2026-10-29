@@ -45,6 +45,9 @@ const every = Number(flag('--every', '2'));
 const extra = Number(flag('--extra', '0'));
 const startLabel = flag('--from');
 const keepFrames = args.includes('--keep-frames');
+// --port-state also writes the port's snapshot at every frame (port/sbs-N.json)
+// for reading a divergence the footage shows against the native observations.
+const portState = args.includes('--port-state');
 assert.ok(Number.isInteger(every) && every >= 1 && every <= 60, '--every must be 1..60 presentations');
 mkdirSync(out, { recursive: true });
 
@@ -209,6 +212,7 @@ async function browserFrames(browser, server, caseData, tape, directory) {
       else if (action.label.startsWith('sbs-')) {
         const png = await page.evaluate(() => window.game.capture().png);
         writeFileSync(join(directory, action.label + '.png'), Buffer.from(png, 'base64'));
+        if (portState) writeFileSync(join(directory, action.label + '.json'), await page.evaluate(() => window.game.snapshotJson()));
       }
     }
     return { status: errors.length ? 'fail' : 'pass', errors };
@@ -284,11 +288,11 @@ if (reelInput) {
         nativeFrames(caseData, plan.native, join(directory, 'original')),
         browserFrames(browser, server, caseData, plan.browser, join(directory, 'port')),
       ]);
-      const counted = side => existsSync(side) ? readdirSync(side).filter(name => name.startsWith('sbs-')).length : 0;
+      const counted = side => existsSync(side) ? readdirSync(side).filter(name => name.startsWith('sbs-') && name.endsWith('.png')).length : 0;
       const result = { id, seed: caseData.seed ?? caseData.publicSeedCode, frames: plan.frames, native, port,
         nativeFrames: counted(join(directory, 'original', 'frames')), portFrames: counted(join(directory, 'port')) };
       if (result.nativeFrames && result.portFrames) result.video = await compose(caseData, directory, plan.frames, flag('--title', id));
-      if (!keepFrames) {
+      if (!keepFrames && !portState) {
         rmSync(join(directory, 'port'), { recursive: true, force: true });
         rmSync(join(directory, 'original', 'frames'), { recursive: true, force: true });
       }
