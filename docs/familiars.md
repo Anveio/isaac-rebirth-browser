@@ -413,9 +413,9 @@ Order is the `513E80` call order. *Group* is the Update case group.
 | 95 | Robo-Baby | 6 | shooter | `4708E6` | owned+temp | missing | Shooter poses (`*Side2`) ported; its laser `467010` (FireTechLaser variant 2 from the familiar) is not. |
 | 67 | Sister Maggy | 7 | shooter | `4708E6` | owned+temp | complete | `set-67-e10.0-*` |
 | 188 | Abel | 8 | shooter-mirror | `470910` | owned+temp | missing |  |
-| 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | partial | `set-163-e10.0-*`: the familiar matches; one spectral tear's lifetime near the bottom wall and one NPC position differ (tear system). |
+| 163 | Ghost Baby | 9 | shooter | `4708E6` | owned+temp | partial | `set-163-e10.0-*`: the familiar and its tears match; the split Gaper (11.1) walks elsewhere in the last row. |
 | 167 | Harlequin Baby | 10 | shooter | `4708E6` | owned+temp | partial | `set-167-e10.0-random-0` passes; in `-fixed` the Gaper dies without its 11.1 split after a shared MT divergence outside the familiar. |
-| 174 | Rainbow Baby | 11 | shooter | `4708E6` | owned+temp | complete | `set-174-e10.0-*` |
+| 174 | Rainbow Baby | 11 | shooter | `4708E6` | owned+temp | partial | `set-174-e10.0-random-0` passes; in `-fixed` the familiar and its rows match but the Gaper's path drifts after a tear row with an NPC status (slow or charm), which NPCs do not take in the port yet. |
 | 131 | Bomb Bag | 20 | spawner | `470CEE` | owned+temp | complete | `set-131-e10.0-*` |
 | 94 | Sack of Pennies | 21 | spawner | `470CEE` | owned+temp | complete | `set-94-e10.0-*` |
 | 96 | Little C.H.A.D. | 22 | spawner | `470CEE` | owned+temp | complete | `set-96-e10.0-*` |
