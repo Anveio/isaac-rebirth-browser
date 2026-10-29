@@ -5411,6 +5411,7 @@ impl Game {
                     || self.state.room.npcs.iter().any(|npc| npc.id == actor.id)
             });
             controlled_knife_homing::rebuild_partition(&mut self.state);
+            let npc_partition = npcs::contact_partition(&self.state);
             attack_runtime::contacts(&mut self.state)?;
             let pickup_contacts = pickups::contact_candidates(&self.state)?;
             // 4549C8: the Tear/Knife partition (+8) meets the NPC/Bomb
@@ -5475,10 +5476,10 @@ impl Game {
             }
             //4549D1 completes the NPC/Bomb partition's self-pairs before
             //454A0A queries that partition against the actual Players.
-            npcs::nonplayer_contacts(&mut self.state)?;
+            npcs::nonplayer_contacts(&mut self.state, &npc_partition)?;
             bombs::bomb_contacts(&mut self.state)?;
             bombs::player_contacts(&mut self.state)?;
-            npcs::player_contacts(&mut self.state)?;
+            npcs::player_contacts(&mut self.state, &npc_partition)?;
             enemy_projectiles::player_contacts(&mut self.state)?;
             for index in 0..self.state.room.pickups.len() {
                 if shop::player_contact(&mut self.state, index)? {

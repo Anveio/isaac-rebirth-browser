@@ -87,6 +87,73 @@ pub(crate) fn pairs(left: &[Bounds], right: &[Bounds]) -> Result<Vec<(u32, u32)>
     Ok(result)
 }
 
+///453340 pairs the members of ONE partition (the NPC self-pairs of4545D0):
+///ascending buckets, then each bucket's entries i<j in insertion order. An
+///entry never pairs with itself, and a pair already met in an earlier
+///bucket is skipped (its Entity+C bitset). The callback receives the pair
+///in bucket order and must recheck current geometry after earlier pairs.
+pub(crate) fn self_pairs(members: &[Bounds]) -> Result<Vec<(u32, u32)>, String> {
+    let mut buckets = vec![Vec::new(); 135];
+    for &body in members {
+        insert(&mut buckets, body)?;
+    }
+    let mut seen = BTreeSet::new();
+    let mut result = Vec::new();
+    for bucket in &buckets {
+        for (at, &a) in bucket.iter().enumerate() {
+            for &b in &bucket[at + 1..] {
+                if a != b && seen.insert((a.min(b), a.max(b))) {
+                    result.push((a, b));
+                }
+            }
+        }
+    }
+    Ok(result)
+}
+
+///452EE0 queries one partition with a single actor (the NPC/Bomb partition
+///against each Player): the actor's current AABB, rows then columns, each
+///bucket's entries in insertion order, every member once and never the actor
+///itself. A flattened index outside the buckets is skipped, not clamped.
+pub(crate) fn query(members: &[Bounds], probe: Bounds) -> Result<Vec<u32>, String> {
+    let mut buckets = vec![Vec::new(); 135];
+    for &body in members {
+        insert(&mut buckets, body)?;
+    }
+    if !probe.position.is_finite() || !probe.half_extents.is_finite() {
+        return Err("contact query requires finite actual source bounds".into());
+    }
+    let cell = |value: f32| (value / 80.0_f32) as i32;
+    let (min_y, max_y) = (
+        cell(probe.position.y - probe.half_extents.y),
+        cell(probe.position.y + probe.half_extents.y),
+    );
+    let (min_x, max_x) = (
+        cell(probe.position.x - probe.half_extents.x),
+        cell(probe.position.x + probe.half_extents.x),
+    );
+    let mut seen = BTreeSet::new();
+    let mut result = Vec::new();
+    for row in min_y..=max_y {
+        for column in min_x..=max_x {
+            let Some(bucket) = row
+                .checked_mul(15)
+                .and_then(|base| base.checked_add(column))
+                .and_then(|index| usize::try_from(index).ok())
+                .and_then(|index| buckets.get(index))
+            else {
+                continue;
+            };
+            for &id in bucket {
+                if id != probe.id && seen.insert(id) {
+                    result.push(id);
+                }
+            }
+        }
+    }
+    Ok(result)
+}
+
 /// Membership of the last actual4545D0 mask8 partition rebuild. The local
 /// indices are a bijection of source Entity+C dedup keys, never actor roles
 /// or cross-game identities. Query reads current geometry separately.
