@@ -85,6 +85,15 @@ export const SUITES = [
     '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
     '--native-frame-timeout', '120', '--gl-trace', '--concurrent-captures'],
     'Boss-room clear award trapdoor and pedestal, stage transition and Basement II and Caves I arrivals'),
+  // Stage-exit's Monstro and Larry Jr. exits, then Exit and Continue in
+  // Basement II's start room: the restored floor-2 run is graded after Continue.
+  suite('stage-continue', statePair, ['--scenario-helper', helper('stage-exit-scenarios.py'),
+    '--helper-arg', '--contrived', '--helper-arg', 'E1T36YXW-monstro',
+    '--helper-arg', '--contrived', '--helper-arg', 'SXREBPLT-larry',
+    '--helper-arg', '--count', '--helper-arg', '0', '--helper-arg', '--continue',
+    '--comparator', 'tools/foundation/stage-exit-state-pair.mjs', '--state-observer', helper('stage-exit-observe.py'),
+    '--native-frame-timeout', '120'],
+    'Basement I boss exit into Basement II, then Exit and Continue on floor 2'),
   // The three-floor descent (Basement I, II and Caves I's Mega Fatty, each with
   // each game's own keys) runs about three times stage-exit's per-case frames,
   // so it is its own suite; it grades the shared exit into Caves II.
@@ -207,7 +216,7 @@ export const suiteById = new Map(SUITES.map(item => [item.id, item]));
 export const GROUPS = {
   boot: ['paired', 'regressions', 'boot-mt', 'controls', 'save-continue', 'continue-run', 'ordinary-run', 'run-admission', 'floor', 'options-audio', 'options-map', 'options-gamma'],
   rooms: ['traversal', 'doors', 'secrets', 'keepers', 'key-doors', 'large-rooms', 'bedroom-doors', 'door-approach', 'chest-opening', 'floor', 'footprint-admission', 'options-map'],
-  stage: ['stage-exit', 'monstro'],
+  stage: ['stage-exit', 'stage-continue', 'monstro'],
   // The three-floor Caves II descent runs about 45 minutes per case (README).
   'stage-long': ['stage-descent'],
   pickups: ['pickups', 'keys', 'bomb-pickups', 'hearts', 'troll-bombs', 'chest-opening', 'pickup-interactions'],

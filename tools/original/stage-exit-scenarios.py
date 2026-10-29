@@ -19,6 +19,11 @@ with its own keys (the original's are the fixture's fixed `originalFight`).
 The shared tail then re-anchors in the last boss room and grades its exit
 into the floor after it.
 
+With --continue, each case then exits the run from the next floor's start
+room and Continues it (Game.Save at Exit, 54F5D0; StartFromSavedState,
+54ECE0): the pause menu's Exit, then Main's Continue, the same public keys in
+both games. The captures after Continue grade the restored floor.
+
 Contrived cases walk straight to the trapdoor. OS-random cases draw an idle
 wait and a waypoint for the approach; every recorded case replays exactly.
 """
@@ -54,6 +59,11 @@ ANCHOR_IDLE = 120
 ROUTE_ROOM_FRAMES = 2400
 # Dense capture labels and floor names after the shared exit, by arrival stage.
 ARRIVALS = {2: ('basement-ii', 'Basement II'), 3: ('caves-i', 'Caves I'), 4: ('caves-ii', 'Caves II')}
+# Frames both games stand in the next floor's start room before pausing to
+# exit, once the stage transition has handed back the controls.
+CONTINUE_SETTLE = 90
+# Set by --continue: every case then exits and Continues on the next floor.
+CONTINUE = False
 # Cells the approach waypoint avoids: the trapdoor/pedestal column neighbours
 # and the parked corner.
 AWARD_CELLS = {22, 36, 37, 38, 52, 82, 96, 97, 98, 112, 106}
@@ -255,6 +265,25 @@ def fought(fixture, production_directory=None):
     return result, fights
 
 
+def continue_on_arrival(actions):
+    """Pause, select Exit, then Main's Continue (selected by default once a
+    saved run exists), as continue-run's quit_continue. No capture while a
+    menu owns the screen."""
+    def press(name, held, settle):
+        actions.extend([{'type': 'key', 'key': name, 'down': True}, {'type': 'step', 'frames': held},
+                        {'type': 'key', 'key': name, 'down': False}, {'type': 'step', 'frames': settle}])
+    actions.extend([{'type': 'step', 'frames': CONTINUE_SETTLE}, {'type': 'capture', 'label': 'continue-pre-pause'}])
+    press('Escape', 1, 29)
+    press('Down', 1, 3)
+    actions.append({'type': 'capture', 'label': 'continue-before-quit'})
+    press('Return', 3, 80)
+    press('Return', 3, 57)
+    actions.append({'type': 'capture', 'label': 'continue-60'})
+    for index in range(4, 121, 4):
+        actions.extend([{'type': 'step', 'frames': 4}, {'type': 'capture', 'label': f'continue-60-{index}'}])
+    actions.extend([{'type': 'step', 'frames': 120}, {'type': 'capture', 'label': 'continue-300'}])
+
+
 def padding(total):
     """The window's remainder in steps of at most PADDING_STEP frames. The
     original runner bounds each step's host wall time (--native-frame-timeout),
@@ -311,6 +340,9 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     arrived = 1 + len(fixture.get('descent', [None]))
     label, floor = ARRIVALS[arrived]
     routes.dense(actions, 120, label, 4)
+    if CONTINUE:
+        continue_on_arrival(actions)
+        identifier += '-continue'
     for name in ('tape', 'pairedTape'):
         result[name] = result[name] + actions
     routes.runner.validate_tape(result['tape'])
@@ -324,6 +356,11 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
     # The port's fight keys are closed-loop against this production build; a
     # replay on another build feeds them to a different game (state-pair warns).
     result['portRecordedBuild'] = tail.get('build')
+    if CONTINUE:
+        # The paired runner reads the run seed back from gameplay-start: Main's
+        # reconstruction clears the seed dialog before Continue resumes the run.
+        result['continueRun'] = {'kind': 'stage-arrival', 'provenance': 'stage-exit --continue',
+                                 'arrivedStage': arrived}
     result['stageExit'] = {'fixture': fixture['name'], 'rooms': rooms, 'arrivedStage': arrived, 'window': window(fixture),
                            'idle': idle, 'via': via,
                            'fightFrames': {name: frames(fight) for name, fight in fights.items()},
@@ -337,16 +374,19 @@ def case(fixture, base, fights, identifier, randomized, idle, via, production_di
 
 
 def main():
-    global RECORDINGS
+    global RECORDINGS, CONTINUE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contrived', action='append', default=[], metavar='FIXTURE', help='fixture name under references/.../stage-exit')
     parser.add_argument('--count', type=int, default=1, help='OS-random approach cases per fixture')
     parser.add_argument('--approach', action='append', default=[], metavar='FIXTURE:IDLE[:X,Y]',
                         help="one approach case with this idle and exit waypoint, as a failed OS-random case's reason prints it")
     parser.add_argument('--production-directory', help='Existing immutable production artifact for both public-input recordings')
+    parser.add_argument('--continue', dest='continue_run', action='store_true',
+                        help="Exit and Continue in the next floor's start room after arriving")
     parser.add_argument('--recordings-output', type=Path, default=RECORDINGS, help='Private recorder attempt archive, retained on every failure')
     args = parser.parse_args()
     RECORDINGS = args.recordings_output.resolve()
+    CONTINUE = args.continue_run
     entropy = random.SystemRandom()
     cases, failures, fixtures = [], [], {}
     def load(name):

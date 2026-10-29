@@ -63,8 +63,10 @@ for (const label of labels) {
   check(label, 'player.controls', player.controlsEnabled, state.player.controlsEnabled);
   // Each fight leaves its own corner position; the shared tail's trapdoor
   // entry frame (and so the StageTransition counter) follows from it.
-  diagnostic(label, 'player.position', [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46],
-    [state.player.x, state.player.y]);
+  // After `--continue`'s Exit and Continue both games restore the saved
+  // floor and place the player by the saved entry: graded.
+  (label.startsWith('continue-') ? check : diagnostic)(label, 'player.position',
+    [player.position[0] * 0.65 + 32, player.position[1] * 0.65 - 46], [state.player.x, state.player.y]);
   // Each fight also leaves its own health, which the next floor's generation
   // reads (a Challenge room needs full health).
   diagnostic(label, 'player.health', [player.redHp, player.maxRedHp, player.soulHp],
@@ -122,6 +124,16 @@ const generation = (red, maxRed, soul, coins) => ({ fullHealth: maxRed <= red + 
   // Neither generation nor the shared tail reads the bomb count: a health-matching
   // blast (--hurt, or the fixture's own keys) spends a bomb in one game only.
   diagnostic('re-anchor', 'bombs', source?.carriedItems?.players?.[0]?.inventory?.bombs ?? null, actual?.inventory.bombs ?? null);
+}
+// A `--continue` case must actually have exited and resumed the run in the
+// port: the Exit save advanced the save revision and Continue restarted the
+// run clock on the arrived floor.
+if (replay.continueRun) {
+  const before = frames.get('continue-before-quit')?.state, after = frames.get('continue-60')?.state;
+  assert.ok(before && after, 'A Continue case requires its continue-before-quit and continue-60 checkpoints');
+  check('continue-60', 'continue.saveRevisionAdvanced', true, after.saveRevision > before.saveRevision);
+  check('continue-60', 'continue.runClockRestarted', true, after.runTick < before.runTick);
+  check('continue-60', 'continue.stage', replay.continueRun.arrivedStage, after.stage);
 }
 // A case predating `arrivedStage` is a Basement I exit.
 check('next-stage', 'arrivedStage', replay.stageExit?.arrivedStage ?? 2, finalStage);

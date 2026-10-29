@@ -603,7 +603,7 @@ Status: **done** (merged, suites compared), **wip** (branch open),
 | 5 | Single Continue pipeline (initial room folded in) | todo | | today: `InitialRoom` + `VisitedRoom` callers |
 | 6 | Refusals removed: challenge, seed effects, legacy owners | done | #1006 | `admit_continue` refuses only dead runs, non-Isaac, bad manager RNG, bad slot/records, unvisited room; unknown costume history and stale scheduled Effect ids no longer refuse |
 | 7 | Live bombs restored from Room.Save records | done | #1006 | `RunContext.bomb_records` (variant, subtype, position, spawn seed); respawned with Appear/Pulse like 5C5860; fuse restarts (actor RNG +0x7c0 not yet stored) |
-| 8 | Floor 2+ Continue (floor start and mid-floor) | wip | #1006 | engine fuzz: 924 same-process Quit/Continue rounds (120 seeds) plus 313 rounds (40 seeds) where half reload a fresh Game from the stored document, stages 1-5, no refusal; suite cases still floor 1 |
+| 8 | Floor 2+ Continue (floor start and mid-floor) | wip | #1006, this PR | floor start: `stage-continue` suite (Monstro and Larry Jr. exits into Basement II, Exit and Continue in its start room, graded against the original: stage, room, entry position, controls; 2908 checks each, pass). Mid-floor and Caves still engine fuzz only (#1006) |
 | 9 | Items: active charge, pockets, trinkets, costumes | todo | | |
 | 10 | Familiars after Continue | wip | | engine fuzz after familiars core (#1002): 465 rounds, 110 with familiars, same variant/subtype set after Continue; positions not compared |
 | 11 | Hard difficulty, seeded runs | wip | | Hard covered by the engine fuzz; seeded runs untested |
