@@ -146,7 +146,6 @@ See [source and live scopes](system-map.md#source-implementation-and-live-scope)
 | --- | --- | --- | --- |
 | #168 | P2 | Escape during a room transition pauses in the port; the original refuses | e2e paired-random-run |
 | #647 | P2 | PR803 adds Filter and Pop-ups value rendering; live confirmation remains open (Map Opacity and Gamma fixed by #661/#666) | playtest 2026-10-18 `playtest/6606044/options-tour-side-by-side.mp4` |
-| #663 | P3 | Board pan to and from Options leaves out the Stats page and a sticky note | playtest 2026-10-18 `playtest/431cb74/options-tour-side-by-side.mp4` |
 
 ## Input
 
@@ -319,7 +318,6 @@ Next: coordinate later-stage admission with the level workstream (#413).
 | --- | --- | --- | --- |
 | #413 | P1 | Source descent reaches Depths I (#780) and Depths II, whose live layout/arrival comparisons remain open; Mom's live comparison, Womb and later steps, Double Trouble and selected-wall catalogue qualification remain open | issue; stage-exit-evidence.md |
 | #600 | P3 | Run-start "BASEMENT I" streak sits about 3 px lower than the original | playtest 2026-10-17 `playtest/7b74719/` menus-tour |
-| #681 | P2 | A new floor's start room appears instantly; the original fades it in from a pixel mosaic over about 80 frames | playtest 2026-10-18 `playtest/540197a/caves-descent-side-by-side.mp4` |
 | #735 | P2 | PR805 adds the nightmare floor progress bar; live confirmation of the reported transition remains open | playtest 2026-10-19 `playtest/07aca74/` caves-ii-descent |
 
 ## Player
@@ -713,9 +711,9 @@ parity is a diagnostic only. Source admission does not close retained visual bug
 | #268 | P3 | Tracking: where the full-frame pixel error comes from | e2e |
 | #670 | P3 | PR802 multiplies the appear poof's sprite colour into its keyframes; live confirmation of the reported smoke colour/opacity remains open | playtest 2026-10-18 `playtest/6606044/gaper-contrived-1-side-by-side.mp4` |
 | #450 | P3 | Boss/nightmare appearance still needs live closure; boss blood and wall source have landed (#458/#483) | playtest 2026-10-16 `playtest/9ff507f/` |
-| #1010 | P2 | Large room (corn-poop fight): from frame 1271 the camera scroll is 1px off vertically, then 4px by 1530; the fly cluster and a hit flash diverge in between | playtest 2026-10-29 `playtest/f5cde94/corn-poop-eternal-fly.mp4` |
+| #1010 | P2 | Corn-poop fight: camera now matches (#1026); from frame 1514 the Eternal Fly's orbiting Attack Flies sit 4-8 px off with a different orbit phase, and Isaac's head frame differs | playtest 2026-10-29 `playtest/29e13ce/corn-poop-eternal-fly.mp4` |
+| #1022 | P3 | Isaac drawn about 1px off with slightly different tint shading during the 8-update Hit clip | playtest 2026-10-29 bugs agent |
 | #876 | P3 | Kamikaze!: explosion cloud shows a different animation frame on frames 399-400 (spectral bomb case fixed by #882) | playtest 2026-10-27 `playtest/f6552ff/kamikaze.mp4` |
-| #987 | P3 | Lemon Mishap creep drawn brighter yellow with a different outline (frames 421-880) | playtest 2026-10-29 `playtest/fcd78ed/lemon-mishap-56.mp4` |
 | #952 | P3 | Tear poofs spawn with different seeds and sub-pixel positions from the original in most entity cases | e2e entities 2026-10-28 |
 | #963 | P3 | D20 streak banner text bottom row 1px off (frames 41-50) and a 1px-offset speck (51-70) | playtest 2026-10-28 d20-fixed |
 
