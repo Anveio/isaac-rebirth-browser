@@ -269,6 +269,12 @@ pub struct Player {
     pub head_frame: u8,
     pub shooting: bool,
     pub shooting_lock: u32,
+    /// Player+DA8, the fire input 52F370 stores at 52F729 whenever its +7DC
+    /// lock is clear: zero while controls (+7D4), input cooldown (+7D8) or
+    /// the +BF4 animation guard suppress shooting input. CameraStyle1 42CB4E
+    /// reads it (times 35), not the raw held keys.
+    #[serde(default = "motion::WorldVector::zero")]
+    pub aim_input: motion::WorldVector,
     /// Actual Player+7d4 input gate, distinct from Entity+31d visibility.
     pub controls_enabled: bool,
     /// Actual signed counters at 3068/306C. Unadmitted history remains absent.
@@ -355,6 +361,8 @@ impl Player {
             head_frame: 0,
             shooting: false,
             shooting_lock: 0,
+            // Player ctor 50EB14 zeroes +DA8.
+            aim_input: motion::WorldVector::zero(),
             controls_enabled: true,
             transformation_counts: None,
             flying: None,
@@ -5781,10 +5789,7 @@ impl Game {
         if self.state.room_transition.is_some() || self.state.information_animation.active() {
             return;
         }
-        let aim = motion::WorldVector {
-            x: f32::from(u8::from(self.held(5))) - f32::from(u8::from(self.held(4))),
-            y: f32::from(u8::from(self.held(7))) - f32::from(u8::from(self.held(6))),
-        };
+        let aim = self.state.player.aim_input;
         let known_constructor = self.state.camera.is_some();
         let camera = self
             .state
@@ -7261,6 +7266,18 @@ impl Game {
             None
         };
         let shooting_locked = self.state.player.shooting_lock > 0;
+        if !shooting_locked {
+            // 52F3E0..52F729: the input vector stays zero unless 530388 reads
+            // the four fire actions (right - left, down - up).
+            self.state.player.aim_input = if !controls_enabled || animation_guard {
+                motion::WorldVector::zero()
+            } else {
+                motion::WorldVector {
+                    x: f32::from(u8::from(self.held(5))) - f32::from(u8::from(self.held(4))),
+                    y: f32::from(u8::from(self.held(7))) - f32::from(u8::from(self.held(6))),
+                }
+            };
+        }
         self.state.player.shooting = aim.is_some() && !shooting_locked;
         if phase == phase::Phase::Update {
             // 52F908 stores the aim's direction; 52F641 stores -1.
