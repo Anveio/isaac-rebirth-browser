@@ -948,6 +948,10 @@ pub struct State {
     ///stays unknown until its actual rebuild, never a default empty query.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(crate) knife_query_partition: Option<contact_candidates::QuerySnapshot>,
+    /// The same 4545D0 mask-8 rebuild over every enemy body, read by the
+    /// Familiar target search 4688D0 in the next actor pass.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) enemy_query_partition: Option<contact_candidates::QuerySnapshot>,
     #[serde(default)]
     pub lasers: Vec<lasers::Laser>,
     #[serde(default)]
@@ -1456,6 +1460,7 @@ impl Game {
                 sprite_effects: Vec::new(),
                 tear_partition: Vec::new(),
                 knife_query_partition: Some(contact_candidates::QuerySnapshot::empty()),
+                enemy_query_partition: Some(contact_candidates::QuerySnapshot::empty()),
                 lasers: Vec::new(),
                 knives: Vec::new(),
                 attack_runtime: attack_runtime::AttackRuntime::default(),
@@ -2399,6 +2404,7 @@ impl Game {
         };
         //Neither fresh Level nor a reused manager owns empty query buckets.
         self.state.knife_query_partition = None;
+        self.state.enemy_query_partition = Some(contact_candidates::QuerySnapshot::empty());
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.saved_room_entry = Some(save_profiles::RoomEntry::initial(
             self.state.floor.descriptors[self.state.current_room].grid_index,
@@ -2646,6 +2652,7 @@ impl Game {
         self.state.room_transition = None;
         self.state.departure_position = None;
         self.state.knife_query_partition = None;
+        self.state.enemy_query_partition = Some(contact_candidates::QuerySnapshot::empty());
         self.state.stage = run.stage;
         self.state.stage_seed = context.stage_seed;
         self.state.floor = run.floor.clone();
@@ -5426,6 +5433,7 @@ impl Game {
                     || self.state.room.npcs.iter().any(|npc| npc.id == actor.id)
             });
             controlled_knife_homing::rebuild_partition(&mut self.state);
+            familiar_ai::rebuild_enemy_partition(&mut self.state)?;
             let npc_partition = npcs::contact_partition(&self.state);
             // 454938/454949: the Familiar partition meets projectiles, then
             // NPCs, before 4549C8's tear and knife pairs.
@@ -5675,6 +5683,7 @@ impl Game {
         self.state.stage_seed = request.stage_seed;
         //Neither fresh Level nor a reused manager owns empty query buckets.
         self.state.knife_query_partition = None;
+        self.state.enemy_query_partition = Some(contact_candidates::QuerySnapshot::empty());
         self.state.current_room = self.state.floor.starting_descriptor;
         self.state.saved_room_entry = Some(save_profiles::RoomEntry::initial(
             self.state.floor.descriptors[self.state.current_room].grid_index,

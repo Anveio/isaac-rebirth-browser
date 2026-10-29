@@ -186,6 +186,16 @@ pub struct Familiar {
     /// Familiar+7E0: the NPCAI_Pathfinder a chaser walks with (5B41E0).
     #[serde(default = "crate::pathfinder::Pathfinder::new")]
     pub pathfinder: crate::pathfinder::Pathfinder,
+    /// Familiar+F90: rooms cleared while alive, raised by 46DF10.
+    #[serde(default)]
+    pub rooms_cleared: i32,
+    /// Entity+440: the point a Blue Fly steers to (its target or orbit).
+    #[serde(default = "zero_vector")]
+    pub target_position: WorldVector,
+    /// Familiar+FD0: Rotten Baby's last Blue Fly (an EntityPtr, null once
+    /// that fly is gone).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spawned: Option<u32>,
 }
 
 fn zero_vector() -> WorldVector {
@@ -247,6 +257,9 @@ impl Familiar {
             hits: Vec::new(),
             target: None,
             pathfinder: crate::pathfinder::Pathfinder::new(),
+            rooms_cleared: 0,
+            target_position: ZERO,
+            spawned: None,
         }
     }
 }
@@ -628,6 +641,9 @@ pub(crate) fn evaluate_cache(state: &mut State) -> Result<(), String> {
     let calls = familiar_roster::calls(state.player_items.as_ref().expect("checked Player owner"));
     for call in calls {
         check_familiar(state, call)?;
+        if let Some(id) = call.award {
+            crate::persistent_effects::award(state, id)?;
+        }
     }
     state
         .player_items
@@ -725,7 +741,7 @@ fn init(state: &mut State, index: usize) {
 
 /// Remove 466AD0: the entity leaves the manager, its orbit layer is
 /// respaced without it (466780(layer, false)) and follower links drop.
-fn remove(state: &mut State, index: usize) {
+pub(crate) fn remove(state: &mut State, index: usize) {
     state.familiars[index].active = false;
     state.familiars[index].removed = true;
     let layer = state.familiars[index].orbit_layer;
@@ -891,9 +907,10 @@ pub(crate) fn advance_actor(state: &mut State, phase: Phase, id: u32) -> Result<
             familiar_ai::shoot(state, index)?;
         }
         UpdateCase::DryBaby => familiar_ai::dry_baby(state, index)?,
+        UpdateCase::Spawner => familiar_ai::spawner(state, index)?,
+        UpdateCase::BlueFly => familiar_ai::blue_fly(state, index)?,
         UpdateCase::ShooterMirror
         | UpdateCase::ShooterFree
-        | UpdateCase::Spawner
         | UpdateCase::Bum
         | UpdateCase::Unique(_) => {
             // Not ported: the familiar stays admitted and visible; the
@@ -1322,4 +1339,62 @@ pub fn paint_background_effects(state: &mut State) -> Result<(), String> {
         effect.removed = true;
     }
     Ok(())
+}
+
+/// Player 50A334: FindByType(3) in manager order, then 46DF10 on each.
+pub(crate) fn room_clear(state: &mut State) -> Result<(), String> {
+    let order: Vec<u32> = state
+        .actor_scheduler
+        .full_phase()
+        .into_iter()
+        .filter(|actor| actor.kind == ActorKind::Familiar)
+        .map(|actor| actor.id)
+        .collect();
+    for id in order {
+        let Some(index) = state
+            .familiars
+            .iter()
+            .position(|familiar| familiar.id == id && !familiar.removed)
+        else {
+            continue;
+        };
+        familiar_ai::room_clear(state, index)?;
+    }
+    Ok(())
+}
+
+/// Player 508740 AddBlueFlies(count, position, target): per fly a shared
+/// seed, Spawn 550A40(3, 43) at the position with zero velocity and the
+/// Player as spawner (Init, no explicit Update), the target when it is not
+/// dead (447110), and Entity+318 bit 4 cleared. Returns the last fly.
+/// PORT GAP: Player+BDC, the live Blue Fly count, is not kept.
+pub(crate) fn add_blue_flies(
+    state: &mut State,
+    count: i32,
+    position: WorldVector,
+    target: Option<u32>,
+) -> Result<Option<u32>, String> {
+    let mut last = None;
+    for _ in 0..count.max(0) {
+        let seed = state.boot_lifecycle.shared.next_u32();
+        let id = state.next_familiar;
+        state.next_familiar = id.checked_add(1).ok_or("Familiar handle exhausted")?;
+        let mut fly = Familiar::new(43, id, seed, position, state.game_update_count);
+        fly.target = target.filter(|id| {
+            state
+                .room
+                .npcs
+                .iter()
+                .any(|npc| npc.id == *id && !npc.dead && !npc.removed)
+        });
+        fly.flags &= !4;
+        state.familiars.push(fly);
+        init(state, state.familiars.len() - 1);
+        state.actor_scheduler.admit(ActorRef {
+            kind: ActorKind::Familiar,
+            id,
+        })?;
+        last = Some(id);
+    }
+    Ok(last)
 }

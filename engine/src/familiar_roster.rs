@@ -243,6 +243,10 @@ pub(crate) struct Call {
     pub count: i32,
     pub rng: u32,
     pub trinket_rng: bool,
+    /// Persistent::Award 5BD5E0 right after this call: Cube of Meat L4 with
+    /// a count (514809, 0x90), Ball of Bandages L4 (5148CE, 0x13) and the
+    /// Full Key (5154BA, 0x3A).
+    pub award: Option<u32>,
 }
 
 /// Every 508D10 call 513E80 makes for this inventory, in order.
@@ -256,11 +260,15 @@ pub(crate) fn calls(owner: &PlayerItems) -> Vec<Call> {
                 count,
                 rng,
                 trinket_rng: false,
+                award: None,
             };
             if held(238) && held(239) {
                 calls.push(key(26, 0, 238));
                 calls.push(key(27, 0, 239));
-                calls.push(key(28, 1, 238));
+                calls.push(Call {
+                    award: Some(0x3A),
+                    ..key(28, 1, 238)
+                });
             } else {
                 calls.push(key(28, 0, 238));
                 calls.push(key(26, total(owner, 238), 238));
@@ -268,11 +276,18 @@ pub(crate) fn calls(owner: &PlayerItems) -> Vec<Call> {
             }
             continue;
         }
+        let count = row.count.count(owner);
+        let award = match row.count {
+            CountSource::Level { item: 73, level: 4 } if count > 0 => Some(0x90),
+            CountSource::Level { item: 207, level: 4 } if count > 0 => Some(0x13),
+            _ => None,
+        };
         calls.push(Call {
             variant: row.variant,
-            count: row.count.count(owner),
+            count,
             rng: row.rng,
             trinket_rng: row.trinket_rng,
+            award,
         });
     }
     calls

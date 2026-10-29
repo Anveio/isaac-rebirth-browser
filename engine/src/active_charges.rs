@@ -473,13 +473,36 @@ pub(crate) fn room_clear(state: &mut State) -> Result<(), String> {
     //is unavailable. Do not let an early partial-prefix return certify its
     //unimplemented healing/familiar producer footprint as absent.
     room_clear_charge(state)?;
-    crate::active_charges::note_effect(
-        state,
-        crate::active_charges::EffectFrontier::RoomClearTail {
-            source_pc: 0x50a2f9,
-        },
-    );
-    Ok(())
+    // 50A2F1: trinket 46 heals half a heart when Random(max(1, 10 -
+    // trunc(0.5 x luck))) is 0; then 50A334, the familiars' 46DF10.
+    let child_heart = state.player_items.as_ref().and_then(|owner| {
+        crate::item_queries::AppearanceQueries::new(
+            owner,
+            state.weapon_cache.primary,
+            state.player.entity_source,
+            None,
+        )
+        .has_trinket(46)
+    });
+    match (child_heart, state.player_stats.luck) {
+        (Some(false), _) => {}
+        (Some(true), Some(luck)) => {
+            let bound = (10 - (0.5_f32 * luck) as i32).max(1);
+            if state.boot_lifecycle.shared.bounded(bound as u32) == 0 {
+                crate::player_items::add_red_hearts(&mut state.player, 1);
+            }
+        }
+        _ => {
+            crate::active_charges::note_effect(
+                state,
+                crate::active_charges::EffectFrontier::RoomClearTail {
+                    source_pc: 0x50a2f9,
+                },
+            );
+            return Ok(());
+        }
+    }
+    crate::familiars::room_clear(state)
 }
 
 fn room_clear_charge(state: &mut State) -> Result<(), String> {

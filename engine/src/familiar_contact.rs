@@ -226,22 +226,43 @@ fn npc_contacts(
         if familiar.hits.contains(&sequence) {
             continue;
         }
-        let amount = multiplier(state, familiar.variant) * familiar.collision_damage;
+        let variant = familiar.variant;
+        let amount = multiplier(state, variant) * familiar.collision_damage;
+        // 46FF00: a Blue Fly's hit passes 49B680, the enemy's facing test,
+        // against the fly's velocity.
+        let strikes = !matches!(variant, 43 | 73)
+            || crate::polyphemus_contact::accepts_direction(npc, familiar.velocity);
         state.familiars[index].hits.push(sequence);
-        let npc = &mut state.room.npcs[target];
-        let health = npc.health();
-        npc.damage.enqueue(
-            health,
-            combat::DamageEvent {
-                amount,
-                kind: combat::DamageKind::Familiar,
-                source: combat::DamageSource {
-                    id: familiar_id,
-                    entity_type: 3,
+        if strikes {
+            let npc = &mut state.room.npcs[target];
+            let health = npc.health();
+            npc.damage.enqueue(
+                health,
+                combat::DamageEvent {
+                    amount,
+                    kind: combat::DamageKind::Familiar,
+                    source: combat::DamageSource {
+                        id: familiar_id,
+                        entity_type: 3,
+                    },
+                    copied_source: None,
                 },
-                copied_source: None,
-            },
-        )?;
+            )?;
+        }
+        if variant == 43 {
+            // 470020: a shared seed, the explosion 1000.3 at the fly with no
+            // update, then Remove.
+            let seed = state.boot_lifecycle.shared.next_u32();
+            let position = state.familiars[index].position;
+            crate::familiars::NpcEffectAdmission {
+                game_update_count: state.game_update_count,
+                next_effect: &mut state.next_effect,
+                effects: &mut state.sprite_effects,
+                scheduler: &mut state.actor_scheduler,
+            }
+            .admit_fly_explosion(seed, position, [1.0; 4], [0.0; 3])?;
+            crate::familiars::remove(state, index);
+        }
     }
     Ok(())
 }
