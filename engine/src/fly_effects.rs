@@ -36,6 +36,9 @@ pub enum Controller {
         /// +7d4 frame on which the floor stamp is taken.
         stamp_frame: u32,
     },
+    /// A base-kill Blood Explosion 1000.2 before its first Update, which
+    /// (45ac60) draws both flips and the stamp frame.
+    PendingBloodExplosion,
     /// Fly Explosion 1000.3 (case 45abe3): a dead fly's base-kill puff.
     FlyExplosion,
 }
@@ -223,6 +226,41 @@ impl NpcEffectAdmission<'_> {
         effect.sprite.tint = tint;
         effect.sprite.offsets = offsets;
         effect.fly_effect = Some(Controller::FlyExplosion);
+        self.admit_actor(effect)
+    }
+
+    /// A dead NPC's base-kill 1000.2 (4fbf9d): no immediate Update.
+    pub(crate) fn admit_npc_blood_explosion(
+        &mut self,
+        seed: u32,
+        position: WorldVector,
+        subtype: u32,
+        offset: WorldVector,
+        tint: [f32; 4],
+        offsets: [f32; 3],
+    ) -> Result<u32, String> {
+        let id = self.next_id()?;
+        let mut effect = base(id, 2, seed, position, self.game_update_count);
+        effect.subtype = subtype;
+        // Effect Init 459010: subtypes 1..4 play Poof_Small, Poof,
+        // Poof_Large1 and Poof_Large2.
+        let clip = match subtype {
+            1 => "Poof_Small",
+            2 => "Poof",
+            3 => "Poof_Large1",
+            4 => "Poof_Large2",
+            _ => return Err("base-kill Blood Explosion subtype outside 1..4".into()),
+        };
+        if effect.sprite.animation != clip {
+            effect.sprite.animation = clip.into();
+            effect.sprite.frame = 0.0;
+            effect.sprite.playing = true;
+        }
+        effect.sprite.offset = offset;
+        effect.sprite.tint = tint;
+        effect.sprite.offsets = offsets;
+        effect.raw_7f8 = 10.0;
+        effect.fly_effect = Some(Controller::PendingBloodExplosion);
         self.admit_actor(effect)
     }
 
@@ -461,6 +499,24 @@ pub(crate) fn advance(state: &mut State, phase: Phase, id: u32) -> Result<(), St
             // puff), then removal once the clip finishes. No draws.
             let effect = &mut state.sprite_effects[index];
             base_update(effect)?;
+            if !effect.sprite.playing {
+                effect.removed = true;
+                effect.active = false;
+            }
+            Ok(())
+        }
+        Some(Controller::PendingBloodExplosion) => {
+            let shared = &mut state.boot_lifecycle.shared;
+            let effect = &mut state.sprite_effects[index];
+            base_update(effect)?;
+            let flip_x = shared.bounded(2) == 0;
+            let flip_y = shared.bounded(2) == 0;
+            for layer in 0..4 {
+                effect.sprite.layer_flips.insert(layer, [flip_x, flip_y]);
+            }
+            effect.fly_effect = Some(Controller::BloodExplosion {
+                stamp_frame: shared.bounded(3) + 6,
+            });
             if !effect.sprite.playing {
                 effect.removed = true;
                 effect.active = false;
