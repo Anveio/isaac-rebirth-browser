@@ -21,6 +21,8 @@ export class GLMenuContext {
   private readonly vertices: WebGLBuffer;
   private readonly color: WebGLUniformLocation;
   private readonly offsets: WebGLUniformLocation;
+  private readonly colorizeLocation: WebGLUniformLocation;
+  private colorizeValue: readonly number[] = [0, 0, 0, 0];
   private readonly alphaFunction: WebGLUniformLocation;
   private readonly alphaReference: WebGLUniformLocation;
   private readonly projection: WebGLUniformLocation;
@@ -41,8 +43,11 @@ export class GLMenuContext {
     const vertex = this.shader(gl.VERTEX_SHADER, `attribute vec3 position; attribute vec2 textureUV; varying vec2 uv; uniform mat4 projection;
       void main() { uv = textureUV; gl_Position = projection * vec4(position, 1.0); }`);
     const fragment = this.shader(gl.FRAGMENT_SHADER, `precision highp float; varying vec2 uv; uniform highp sampler2D image; uniform vec4 tint; uniform vec3 offsets;
-      uniform int alphaFunction; uniform float alphaReference;
-      void main() { vec4 sample = texture2D(image, uv); vec4 color = vec4(sample.rgb * tint.rgb + offsets, sample.a * tint.a);
+      uniform vec4 colorize; uniform int alphaFunction; uniform float alphaReference;
+      void main() { vec4 sample = texture2D(image, uv); vec3 tinted = sample.rgb * tint.rgb;
+        // The original sprite shader's ColorMod colorize: a luminance tint mixed in by its alpha.
+        tinted = mix(tinted, dot(tinted, vec3(0.212671, 0.715160, 0.072169)) * colorize.rgb, colorize.a);
+        vec4 color = vec4(tinted + offsets, sample.a * tint.a);
         bool accepted = alphaFunction == 0 || alphaFunction == 8 ||
           (alphaFunction == 2 && color.a < alphaReference) || (alphaFunction == 3 && color.a == alphaReference) ||
           (alphaFunction == 4 && color.a <= alphaReference) || (alphaFunction == 5 && color.a > alphaReference) ||
@@ -55,6 +60,7 @@ export class GLMenuContext {
     this.setProjection(width, height, -1);
     gl.uniform1i(gl.getUniformLocation(this.program, "image"), 0); this.color = gl.getUniformLocation(this.program, "tint")!;
     this.offsets = gl.getUniformLocation(this.program, "offsets")!;
+    this.colorizeLocation = gl.getUniformLocation(this.program, "colorize")!;
     this.alphaFunction = gl.getUniformLocation(this.program, "alphaFunction")!; this.alphaReference = gl.getUniformLocation(this.program, "alphaReference")!;
     this.alphaTest("greater", 0);
     this.vertices = gl.createBuffer()!; gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices); gl.bufferData(gl.ARRAY_BUFFER, 30 * 4, gl.DYNAMIC_DRAW);
@@ -247,6 +253,8 @@ export class GLMenuContext {
     this.quad({ handle: surface.texture, width: surface.width, height: surface.height, textureWidth: surface.width, textureHeight: surface.height },
       sx, sy, sw, sh, dx, dy, dw, dh, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha]);
   }
+  /** ColorMod colorize (RGBA) for the following draws; zero alpha leaves them unchanged. */
+  setColorize(colorize: readonly number[]): void { this.colorizeValue = colorize; }
   drawTintedImage(source: CanvasImageSource, rgbaTint: readonly number[], offsets: readonly number[], ...arguments_: number[]): void {
     this.drawTexture(this.texture(source), arguments_, [rgbaTint[0]!, rgbaTint[1]!, rgbaTint[2]!, rgbaTint[3]! * this.state.alpha], offsets);
   }
@@ -359,7 +367,7 @@ export class GLMenuContext {
     const gl = this.gl; gl.bindTexture(gl.TEXTURE_2D, texture.handle);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.state.smoothing ? gl.LINEAR : gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.state.smoothing ? gl.LINEAR : gl.NEAREST);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices); gl.bufferSubData(gl.ARRAY_BUFFER, 0, buffer); gl.uniform4fv(this.color, tint); gl.uniform3fv(this.offsets, offsets); gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices); gl.bufferSubData(gl.ARRAY_BUFFER, 0, buffer); gl.uniform4fv(this.color, tint); gl.uniform3fv(this.offsets, offsets); gl.uniform4fv(this.colorizeLocation, this.colorizeValue); gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
   asCanvasContext(): CanvasRenderingContext2D { return this as unknown as CanvasRenderingContext2D; }
   finish(): void { this.gl.finish(); }

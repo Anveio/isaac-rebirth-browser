@@ -75,6 +75,15 @@ pub struct Sprite {
     pub tint: [f32; 4],
     #[serde(default)]
     pub offsets: [f32; 3],
+    /// ColorMod colorize RGBA (+0x10); the sprite shader mixes in the texel
+    /// luminance times its RGB by its alpha. Zero for every colour but a
+    /// rainbow poop's particles (56a820..56a9b3).
+    #[serde(default, skip_serializing_if = "is_zero4")]
+    pub colorize: [f32; 4],
+}
+
+fn is_zero4(value: &[f32; 4]) -> bool {
+    *value == [0.0; 4]
 }
 
 impl Sprite {
@@ -93,6 +102,7 @@ impl Sprite {
             flip_y: false,
             tint: white(),
             offsets: [0.0; 3],
+            colorize: [0.0; 4],
         }
     }
     pub(crate) fn advance(&mut self, config: &Definition) -> Result<(), String> {

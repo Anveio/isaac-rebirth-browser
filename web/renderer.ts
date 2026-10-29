@@ -358,12 +358,13 @@ export class Renderer {
         const crop = { Idle: [0, 0], IdleMedium: [32, 0], ReadyToExplode: [0, 32], Blown: [32, 32] }[sprite.animation]!;
         ctx.drawImage(this.assets.image("gfx/grid/grid_tnt.png"), crop[0]!, crop[1]!, 32, 32, x - 16, y - 16, 32, 32);
         this.drawnGrid.push({ index, kind: 12, animation: sprite.animation, frame: sprite.frame });
-      } else if (entity.kind === 14 && entity.sourceOwner && (entity.variant === 2 || entity.sourceOwner.poopSheet)) {
+      } else if (entity.kind === 14 && entity.sourceOwner && (entity.variant >= 2 || entity.sourceOwner.poopSheet)) {
         // Poop.Init569600 picks grid_poop_{1..3} (a red poop's
-        // grid_poop_red_{1..3}, a corn poop's single grid_poop_corn) and
-        // plays State{state+1} (State5 once broken); a spawn into a loaded
-        // room plays Appear first.
-        const name = entity.variant === 2 ? "corn" : `${entity.variant === 1 ? "red_" : ""}${entity.sourceOwner.poopSheet}`;
+        // grid_poop_red_{1..3}; the corn, golden and rainbow poops' single
+        // sheet) and plays State{state+1} (State5 once broken); a spawn into
+        // a loaded room plays Appear first.
+        const single = ({ 2: "corn", 3: "gold", 4: "rainbow" } as Record<number, string>)[entity.variant];
+        const name = single ?? `${entity.variant === 1 ? "red_" : ""}${entity.sourceOwner.poopSheet}`;
         const sheet = { 0: `gfx/grid/grid_poop_${name}.png`, 1: "gfx/effects/effect_poopspawn.png" };
         const birth = entity.sourceOwner.birthGameUpdate, init = state.room.initializationGameUpdate;
         const age = birth !== null && init !== null && birth > init ? state.gameUpdateCount - birth : Infinity;
@@ -550,7 +551,7 @@ export class Renderer {
           Rotation: rotation, RedTint: sprite.tint[0] * 255, GreenTint: sprite.tint[1] * 255,
           BlueTint: sprite.tint[2] * 255, AlphaTint: sprite.tint[3] * 255,
           RedOffset: sprite.offsets[0] * 255, GreenOffset: sprite.offsets[1] * 255, BlueOffset: sprite.offsets[2] * 255,
-        }} });
+        }}, ...sprite.colorize ? { colorize: sprite.colorize } : {} });
       ctx.restore();
       return;
     }

@@ -9,6 +9,7 @@ use crate::{
     items,
     motion::WorldVector,
     mt::Mt19937,
+    sprite_color::Color,
 };
 use serde::{Deserialize, Serialize};
 
@@ -420,38 +421,75 @@ pub(crate) fn spawn_particles(
     count: u32,
     speed: f32,
 ) -> Result<(), String> {
+    spawn_colored_particles(state, variant, centre, count, speed, Color::WHITE)
+}
+
+/// SpawnParticles 5515b0 with the caller's ColorMod.
+pub(crate) fn spawn_colored_particles(
+    state: &mut crate::State,
+    variant: u32,
+    centre: WorldVector,
+    count: u32,
+    speed: f32,
+    color: Color,
+) -> Result<(), String> {
     for _ in 0..count {
         let seed = state.boot_lifecycle.shared.next_u32();
-        let direction = crate::npcs::direction(&mut state.boot_lifecycle.shared);
-        let velocity = WorldVector {
-            x: direction.x,
-            y: direction.y * 0.5,
-        } * speed;
-        let mut admission = Admission {
-            game_update_count: state.game_update_count,
-            next_effect: &mut state.next_effect,
-            effects: &mut state.sprite_effects,
-            scheduler: &mut state.actor_scheduler,
-        };
-        let birth = ParticleBirth {
-            seed,
-            position: centre,
-            velocity,
-            spawner: None,
-        };
-        let id = match variant {
-            58 => admission.admit_particle(birth)?,
-            27 => admission.admit_wood_particle(birth)?,
-            35 => admission.admit_tooth_particle(birth)?,
-            _ => {
-                return Err(format!(
-                    "SpawnParticles Effect 1000.{variant} is not admitted"
-                ))
-            }
-        };
-        admission.advance_particle_initial(id, &mut state.boot_lifecycle.shared)?;
+        spawn_particle(state, variant, centre, seed, speed, color)?;
     }
     Ok(())
+}
+
+/// One SpawnParticles particle after its seed: the shared direction with
+/// its y halved, times `speed`; the spawn, SetColor (virtual58: duration -1,
+/// so the permanent colour) and the immediate Update (virtual18).
+pub(crate) fn spawn_particle(
+    state: &mut crate::State,
+    variant: u32,
+    centre: WorldVector,
+    seed: u32,
+    speed: f32,
+    color: Color,
+) -> Result<(), String> {
+    let direction = crate::npcs::direction(&mut state.boot_lifecycle.shared);
+    let velocity = WorldVector {
+        x: direction.x,
+        y: direction.y * 0.5,
+    } * speed;
+    let mut admission = Admission {
+        game_update_count: state.game_update_count,
+        next_effect: &mut state.next_effect,
+        effects: &mut state.sprite_effects,
+        scheduler: &mut state.actor_scheduler,
+    };
+    let birth = ParticleBirth {
+        seed,
+        position: centre,
+        velocity,
+        spawner: None,
+    };
+    let id = match variant {
+        58 => admission.admit_particle(birth)?,
+        27 => admission.admit_wood_particle(birth)?,
+        35 => admission.admit_tooth_particle(birth)?,
+        _ => {
+            return Err(format!(
+                "SpawnParticles Effect 1000.{variant} is not admitted"
+            ))
+        }
+    };
+    if color != Color::WHITE {
+        let effect = admission
+            .effects
+            .iter_mut()
+            .rev()
+            .find(|effect| effect.id == id)
+            .ok_or("spawned particle absent")?;
+        effect.sprite.tint = color.tint;
+        effect.sprite.colorize = color.colorize;
+        effect.sprite.offsets = color.offset;
+    }
+    admission.advance_particle_initial(id, &mut state.boot_lifecycle.shared)
 }
 
 fn base_update(effect: &mut SpriteEffect) -> Result<(), String> {

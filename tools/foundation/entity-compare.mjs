@@ -214,12 +214,13 @@ export function entityRows(rows, source, actual, spec, render) {
   check(rows, 'render.decorations', source.room.type === 16 ? []
     : source.grid.filter(cell => cell.type === 1).map(cell => cell.index),
     render?.grid.filter(drawn => drawn.kind === 1).map(drawn => drawn.index));
-  // Poop.Init569600 gives every ordinary poop (variant0) a grid_poop sprite;
-  // an undrawn one is an invisible wall. This is a render contract against
-  // the port's own grid: poop admission and placement parity with the
-  // original belong to the grid rows, and clip choice is not claimed here.
+  // Poop.Init569600 gives every admitted poop a sprite (grid_poop_{1..3} for
+  // an ordinary poop, the single corn, golden or rainbow sheet through jump
+  // table 673d10); an undrawn one is an invisible wall. This is a render
+  // contract against the port's own grid: poop admission and placement parity
+  // with the original belong to the grid rows, and clip choice is not claimed.
   check(rows, 'render.poops', (actual.room.grid?.cells ?? []).flatMap((cell, index) =>
-    cell.entity?.kind === 14 && cell.entity.variant === 0 ? [index] : []),
+    cell.entity?.kind === 14 ? [index] : []),
     render?.grid.filter(drawn => drawn.kind === 14).map(drawn => drawn.index));
   check(rows, 'render.pits', source.grid.filter(cell => cell.type === 7).map(cell => [cell.index, 'pit', cell.variant]),
     render?.grid.filter(drawn => drawn.kind === 7).map(drawn => [drawn.index, drawn.animation, drawn.frame]));
