@@ -242,6 +242,10 @@ pub(crate) enum Leaf {
     /// DamageFlags4, damage40 and radius60, then Spawn1000.1 with the shared
     /// seed and its immediate Update. It returns to 5223C0 with no UseItem.
     Kamikaze,
+    /// 5242BF (every variant): sound 51, then Spawn1000.32 at the Player
+    /// with the shared seed and no spawner, and its immediate Update; then
+    /// the Pickup clip.
+    LemonMishap,
     /// 523B90: every 444810 enemy gets AddFreeze444970 for the ItemConfig39
     /// +48 duration; then UseItem.
     MomsBra,
@@ -381,6 +385,11 @@ pub(crate) const USES: &[ActiveUse] = &[
         id: 40,
         book: None,
         leaf: Leaf::Kamikaze,
+    },
+    ActiveUse {
+        id: 56,
+        book: None,
+        leaf: Leaf::LemonMishap,
     },
     ActiveUse {
         id: 39,
@@ -875,6 +884,20 @@ fn use_leaf(
                 )?;
                 crate::explosion_effects::advance(state, crate::phase::Phase::Update, effect)?;
             }
+        }
+        Leaf::LemonMishap => {
+            sound(state, 51);
+            let seed = state.boot_lifecycle.shared.next_u32();
+            let position = crate::bombs::player_world(state);
+            let effect = crate::familiars::NpcEffectAdmission {
+                game_update_count: state.game_update_count,
+                next_effect: &mut state.next_effect,
+                effects: &mut state.sprite_effects,
+                scheduler: &mut state.actor_scheduler,
+            }
+            .admit_lemon(seed, position)?;
+            crate::creep_effects::advance_lemon(state, effect)?;
+            play_item_animation(state, id, show, true);
         }
         Leaf::MomsBra => {
             moms_bra(state, id)?;

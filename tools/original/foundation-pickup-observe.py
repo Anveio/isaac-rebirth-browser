@@ -126,6 +126,10 @@ def observe(pid, context):
                     result['animationPlaying'] = bool(read(actor + 0x124, 1)[0])
                     result['overlay'] = clip_name(u64(actor + 0x138))
                     result['overlayFrame'] = struct.unpack('<f', read(actor + 0x240, 4))[0]
+                if result['type'] == 1000 and result['variant'] == 32 and context.get('activeItems') is True:
+                    # Lemon Mishap's creep: sprite scale +2C4 and counter +7D4.
+                    result['spriteScale'] = pair(0x2c4)
+                    result['effectCounter'] = struct.unpack('<i', read(address + 0x7d4, 4))[0]
                 if result['type'] == 4:
                     more = read(address + 0x7d4, 0x14)
                     result['bombFuseUpdatesRemaining'] = struct.unpack_from('<i', more, 0)[0]
