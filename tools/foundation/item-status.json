@@ -24,6 +24,7 @@
     "152": { "status": "partial", "case": "item-composition", "note": "Thin beam C40 and alternating eye; joint 152+169 unaccepted." },
     "168": { "status": "partial", "case": "item-composition", "note": "Target and rocket; readset-limited." },
     "169": { "status": "partial", "case": "item-composition", "note": "Damage multiplier, tear registry; readset-limited." },
+    "221": { "status": "partial", "case": "`npm run sandbox:case -- --items 221,336` (generated)", "note": "Bounce (flag 0x80000, tear_bounce.rs) ported for ordinary tears: grid class 6 reflection in the Full grid pass and 543480's grid hurt and speed keep. The getter's luck roll comes from 50D3C1. Bounces on lasers, knives and bombs are not ported." },
     "222": { "status": "partial", "case": "active-item-use (OS outcome)", "note": "Flags32 and post-bound fire delay; the OS case fails (held tears)." },
     "225": { "status": "partial", "case": "dips", "note": "Dip death half-heart callback only." },
     "229": { "status": "partial", "case": "item-composition", "note": "Monstro's Lung charge-and-burst; readset-limited." },
@@ -51,7 +52,7 @@
     { "id": "stat-range", "name": "Range stage", "original": "511F10 block 0x8 at 5127C8", "status": "partial", "case": "stat-cache, pill-range-use", "block": "range 0x8" },
     { "id": "stat-speed", "name": "Move speed stage", "original": "511F10 block 0x10 at 512C48", "status": "partial", "case": "stat-cache", "block": "speed 0x10" },
     { "id": "stat-luck", "name": "Luck stage", "original": "511F10 block 0x400 at 513C80", "status": "partial", "block": "luck 0x400" },
-    { "id": "tear-flags", "name": "Tear flag accumulation", "original": "511F10 block 0x20 at 5130CA", "status": "partial", "note": "Spectral, piercing and a few flags; homing source-only.", "block": "tearflag 0x20" },
+    { "id": "tear-flags", "name": "Tear flag accumulation", "original": "511F10 block 0x20 at 5130CA", "status": "partial", "note": "Spectral, piercing and a few flags; homing (3) and bounce (221) run on ordinary tears.", "block": "tearflag 0x20" },
     { "id": "tear-color", "name": "Tear color", "original": "511F10 block 0x40 at 513355", "status": "partial", "block": "tearcolor 0x40" },
     { "id": "flight", "name": "Flight", "original": "511F10 block 0x80 at 512166", "status": "partial", "note": "TEMP33 (The Bible) only.", "block": "flying 0x80" },
     { "id": "weapon-select", "name": "Weapon type selection and precedence", "original": "511F10 block 0x100 at 513AD0 writes C08", "status": "partial", "case": "item-composition, item-composition-history", "note": "Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail.", "block": "weapon 0x100" },
@@ -81,7 +82,7 @@
     { "items": [257], "status": "match", "case": "`npm run sandbox:case -- --items 257` (generated)", "note": "Fire Mind variant 5 and flag match." },
     { "items": [259], "status": "match", "case": "`npm run sandbox:case -- --items 259` (generated)", "note": "Dark Matter variant 6 and fear roll match." },
     { "items": [231, 200, 201], "status": "match", "case": "`npm run sandbox:case -- --items 231,200,201` (generated)", "note": "Ball of Tar, Mom's Eyeshadow and Iron Bar rolls match." },
-    { "items": [221, 336], "status": "mismatch", "case": "`npm run sandbox:case -- --items 221,336` (generated)", "note": "Stats and getter fields match; Rubber Cement's bounce (flag 0x80000) is not ported, so the original's bounced tear outlives the port's." },
+    { "items": [221, 336], "status": "match", "case": "`npm run sandbox:case -- --items 221,336` (generated)", "note": "Both cases match exactly: stats, getter fields and every tear position, including the downward tear that bounces off the bottom wall. Dead Onion's lower shot speed showed that the eye offset uses the aim velocity before shot speed (5206A3)." },
     { "items": [110], "status": "match", "case": "`npm run sandbox:case -- --items 110` (generated)", "note": "Mom's Contacts range matches now that Player.Init requests every cache callback (519A98)." },
     { "items": [230], "status": "match", "case": "`npm run sandbox:case -- --items 230` (generated)", "note": "Abaddon empties red hearts and grants six black hearts (52DC62)." }
   ]

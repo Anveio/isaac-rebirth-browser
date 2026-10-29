@@ -19,13 +19,13 @@ composition is [item synergies](item-synergies.md).
 
 | Kind | Total | Complete | Partial | Missing | Missing but engine refs |
 | --- | --- | --- | --- | --- | --- |
-| passive | 213 | 0 | 29 | 184 | 94 |
+| passive | 213 | 0 | 30 | 183 | 93 |
 | active | 75 | 7 | 22 | 46 | 7 |
 | familiar | 55 | 4 | 2 | 49 | 1 |
 | trinket | 60 | 0 | 0 | 60 | 26 |
-| **all** | 403 | 11 | 53 | 339 | 128 |
+| **all** | 403 | 11 | 54 | 338 | 127 |
 
-Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 15 match, 4 mismatch, 2 untested.
+Synergy mechanisms: 0 complete, 16 partial, 2 missing. Tested item sets: 16 match, 3 mismatch, 2 untested.
 
 ## Synergy mechanisms
 
@@ -46,7 +46,7 @@ item ids the original's code for that mechanism queries
 | `stat-range` | Range stage | 511F10 block 0x8 at 5127C8 | 23 + 1 trinket | partial | stat-cache, pill-range-use |  |  |
 | `stat-speed` | Move speed stage | 511F10 block 0x10 at 512C48 | 29 + 1 trinket | partial | stat-cache |  |  |
 | `stat-luck` | Luck stage | 511F10 block 0x400 at 513C80 | 3 + 1 trinket | partial |  |  |  |
-| `tear-flags` | Tear flag accumulation | 511F10 block 0x20 at 5130CA | 25 + 5 trinkets | partial |  |  | Spectral, piercing and a few flags; homing source-only. |
+| `tear-flags` | Tear flag accumulation | 511F10 block 0x20 at 5130CA | 25 + 5 trinkets | partial |  |  | Spectral, piercing and a few flags; homing (3) and bounce (221) run on ordinary tears. |
 | `tear-color` | Tear color | 511F10 block 0x40 at 513355 | 19 | partial |  |  |  |
 | `flight` | Flight | 511F10 block 0x80 at 512166 | 9 | partial |  |  | TEMP33 (The Bible) only. |
 | `weapon-select` | Weapon type selection and precedence | 511F10 block 0x100 at 513AD0 writes C08 | 8 | partial | item-composition, item-composition-history |  | Brimstone, Knife, (Epic) Fetus, Technology 1/2, Ludovico, Monstro's Lung; multi-weapon histories fail. |
@@ -82,7 +82,7 @@ passing live comparison.
 | 257 Fire Mind | match | `npm run sandbox:case -- --items 257` (generated) |  | Fire Mind variant 5 and flag match. |
 | 259 Dark Matter | match | `npm run sandbox:case -- --items 259` (generated) |  | Dark Matter variant 6 and fear roll match. |
 | 231 Ball of Tar + 200 Mom's Eyeshadow + 201 Iron Bar | match | `npm run sandbox:case -- --items 231,200,201` (generated) |  | Ball of Tar, Mom's Eyeshadow and Iron Bar rolls match. |
-| 221 Rubber Cement + 336 Dead Onion | mismatch | `npm run sandbox:case -- --items 221,336` (generated) |  | Stats and getter fields match; Rubber Cement's bounce (flag 0x80000) is not ported, so the original's bounced tear outlives the port's. |
+| 221 Rubber Cement + 336 Dead Onion | match | `npm run sandbox:case -- --items 221,336` (generated) |  | Both cases match exactly: stats, getter fields and every tear position, including the downward tear that bounces off the bottom wall. Dead Onion's lower shot speed showed that the eye offset uses the aim velocity before shot speed (5206A3). |
 | 110 Mom's Contacts | match | `npm run sandbox:case -- --items 110` (generated) |  | Mom's Contacts range matches now that Player.Init requests every cache callback (519A98). |
 | 230 Abaddon | match | `npm run sandbox:case -- --items 230` (generated) |  | Abaddon empties red hearts and grants six black hearts (52DC62). |
 
@@ -226,7 +226,7 @@ passing live comparison.
 | 218 | Placenta | missing |  |  | 1 (boss) |  |  |
 | 219 | Old Bandage | missing |  |  | 1 (boss) |  |  |
 | 220 | Sad Bombs | missing |  |  | 2 (treasure, bossrush) |  |  |
-| 221 | Rubber Cement | missing |  |  | 1 (treasure) | yes |  |
+| 221 | Rubber Cement | partial | `npm run sandbox:case -- --items 221,336` (generated) |  | 1 (treasure) | yes | Bounce (flag 0x80000, tear_bounce.rs) ported for ordinary tears: grid class 6 reflection in the Full grid pass and 543480's grid hurt and speed keep. The getter's luck roll comes from 50D3C1. Bounces on lasers, knives and bombs are not ported. |
 | 222 | Anti-Gravity | partial | active-item-use (OS outcome) |  | 1 (treasure) | yes | Flags32 and post-bound fire delay; the OS case fails (held tears). |
 | 223 | Pyromaniac | missing |  |  | 1 (treasure) |  |  |
 | 224 | Cricket's Body | missing |  |  | 1 (treasure) | yes |  |
